@@ -5,12 +5,6 @@ namespace GlueRH
 {
 	Window* Window::m_pGlobalWindow = NULL;
 
-	LRESULT CALLBACK GlobalWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
-	{
-		assert( MainWindow() );
-		return MainWindow()->WndProc( hWnd, uMsg, wParam, lParam );
-	}
-
 	//////////////////////////////////////////////////////////////////////////
 	Window::Window( const std::wstring& name, int left, int top, int32 width, int32 height, bool fullscreen )
 		: mLeft(left), mTop(top), mWidth(width), mHeight(height),
@@ -33,7 +27,9 @@ namespace GlueRH
 		if (mHwnd != NULL)
 		{
 			DestroyWindow(mHwnd);
-			mHwnd = NULL;
+		}
+		if(m_pGlobalWindow)
+		{
 			m_pGlobalWindow = NULL;
 		}
 		
@@ -45,7 +41,7 @@ namespace GlueRH
 		WNDCLASSEX wc;
 		wc.cbSize			= sizeof(wc);
 		wc.style			= CS_HREDRAW | CS_VREDRAW;
-		wc.lpfnWndProc		= GlobalWndProc;
+		wc.lpfnWndProc		= Window::WndProcStatic;
 		wc.cbClsExtra		= 0;
 		wc.cbWndExtra		= 0;
 		wc.hInstance		= mHinst;
@@ -90,12 +86,17 @@ namespace GlueRH
 		return true;
 	}
 	
-	void Window::InitWindow()
+	void Window::LoadWindow()
 	{
 		MyRegisterClass();
-		InitInstance();
+		assert( InitInstance() );
 	}
 
+	void Window::CloseWindow()
+	{
+		DestroyWindow(mHwnd);
+		mHwnd = NULL;
+	}
 
 	void Window::OnUserResized()
 	{
@@ -169,14 +170,13 @@ namespace GlueRH
 		}
 	}
 
-	void Window::OnScreensaver( bool cancel )
+	void Window::OnScreensaver( bool* cancel )
 	{
 		if ( !Screensaver.empty() )
 		{
 			Screensaver(cancel);
 		}
 	}
-
 
 
 	Window::Size Window::GetCurrentSize() const
@@ -203,6 +203,14 @@ namespace GlueRH
 		}
 	}
 	
+
+	LRESULT CALLBACK Window::WndProcStatic( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
+	{
+		assert( m_pGlobalWindow );
+		return m_pGlobalWindow->WndProc( hWnd, uMsg, wParam, lParam );
+	}
+
+
 	LRESULT Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 	{
 		switch (uMsg)
@@ -319,7 +327,7 @@ namespace GlueRH
 			break;
 
 		case WM_DESTROY:
-			UnregisterClass( mName.c_str(), GetModuleHandle (0) );
+			UnregisterClass( mName.c_str(), mHinst );
 			PostQuitMessage(0);
 			break;
 	
@@ -330,7 +338,6 @@ namespace GlueRH
 
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
-
 	
 
 }

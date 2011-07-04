@@ -18,15 +18,17 @@
 
 namespace GlueRH
 {
-	typedef char int8;
-	typedef unsigned char uint8;
-	typedef short int16;
-	typedef unsigned int short uint16;
-	typedef int int32;
-	typedef unsigned int uint32;
+	typedef __int8 int8;
+	typedef unsigned __int8 uint8;
+	typedef __int16 int16;
+	typedef unsigned __int16 uint16;
+	typedef __int32 int32;
+	typedef unsigned __int32 uint32;
+	typedef __int64 int64;
+	typedef unsigned __int64 uint64;
 
 	typedef fastdelegate::FastDelegate0<void> EventHandler;
-	typedef typedef fastdelegate::FastDelegate1<bool, void> CancellableEventHandler;
+	typedef fastdelegate::FastDelegate1<bool*, void> CancellableEventHandler;
 
 	typedef fastdelegate::FastDelegate1<bool, void> ActiveEvent;
 	typedef fastdelegate::FastDelegate0<void> PaintEvent;

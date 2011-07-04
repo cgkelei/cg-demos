@@ -14,38 +14,6 @@ namespace GlueRH
 		explicit Window( const std::wstring& name, int left, int top, int32 width, int32 height, bool fullscreen = false);
 		~Window(void);
 
-		void InitWindow();
-		
-
-		
-
-		static Window* GetMainWindow() { return m_pGlobalWindow; }
-		
-		LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
-
-	private:
-		void MyRegisterClass();
-		bool InitInstance();
-
-		void UpdateMonitor();
-
-	protected:
-
-		virtual void OnUserResized();
-		virtual void OnSuspend();
-		virtual void OnMonitorChanged();
-		virtual void OnApplicationActivated();
-		virtual void OnApplicationDeactivated();
-		virtual void OnSystemSuspend();
-		virtual void OnSystemResume();
-		virtual void OnScreensaver(bool cancel);
-		virtual void OnResume();
-		virtual void OnPaint();
-
-	
-
-	public:
-
 		EventHandler& EventUserResized() { return UserResized; }
 		EventHandler& EventSuspend() { return Suspend; }
 		EventHandler& EventResume() { return Resume; }
@@ -60,11 +28,35 @@ namespace GlueRH
 		HWND GetWindowHandle() const { return mHwnd; } 
 		bool IsMinimized() const { return mIsMinimized; }
 		bool IsMaximized() const { return mIsMaximized; }
-
-		Size GetCurrentSize() const;
 		std::wstring GetWindowTitle() const  { return mName; }
+		Size GetCurrentSize() const;
 
-		void Close();
+		void LoadWindow();
+		void CloseWindow();
+
+		static LRESULT CALLBACK WndProcStatic(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+		LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
+
+
+	private:
+		void MyRegisterClass();
+		bool InitInstance();
+		void UpdateMonitor();
+
+	protected:
+
+		virtual void OnUserResized();
+		virtual void OnSuspend();
+		virtual void OnMonitorChanged();
+		virtual void OnApplicationActivated();
+		virtual void OnApplicationDeactivated();
+		virtual void OnSystemSuspend();
+		virtual void OnSystemResume();
+		virtual void OnScreensaver(bool* cancel);
+		virtual void OnResume();
+		virtual void OnPaint();
+
+	
 
 	private:
 		/// <summary>
@@ -146,11 +138,6 @@ namespace GlueRH
 
 
 	};
-
-	inline Window* MainWindow() 
-	{
-		return Window::GetMainWindow();
-	}
 
 }
 
