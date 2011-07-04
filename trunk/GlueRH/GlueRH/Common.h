@@ -41,9 +41,19 @@ namespace GlueRH
 	typedef DXGI_FORMAT PiexelFormat;
 	typedef DXGI_FORMAT DepthFormat;
 
+	class Window;
+	typedef std::shared_ptr<Window> WindowPtr;
+
 
 	class RenderDevice;
 	typedef std::shared_ptr<RenderDevice> RenderDevicePtr;
+
+	class GameClock;
+	typedef std::shared_ptr<GameClock> GameClockPtr;
+
+	class GameTimer;
+	typedef std::shared_ptr<GameTimer> GameTimerPtr;
+
 }
 
 

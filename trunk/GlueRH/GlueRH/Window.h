@@ -28,7 +28,9 @@ namespace GlueRH
 		HWND GetWindowHandle() const { return mHwnd; } 
 		bool IsMinimized() const { return mIsMinimized; }
 		bool IsMaximized() const { return mIsMaximized; }
+		bool IsFullscreen() const { return mFullscreen; }
 		std::wstring GetWindowTitle() const  { return mName; }
+		int32 GetMouseWheel() const { return mMouseWheel; }
 		Size GetCurrentSize() const;
 
 		void LoadWindow();
@@ -118,7 +120,6 @@ namespace GlueRH
 		int32 mHeight;
 		
 		bool mFullscreen;
-		bool mActive;
 
 		bool mIsMinimized;
 		bool mIsMaximized;

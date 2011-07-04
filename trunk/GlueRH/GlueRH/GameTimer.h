@@ -22,12 +22,15 @@ namespace GlueRH
 		/// <param name="elapsedRealTime">The elapsed real time.</param>
 		/// <param name="totalGameTime">The total game time.</param>
 		/// <param name="elapsedGameTime">The elapsed game time.</param>
-		GameTimer(float totalRealTime, float elapsedRealTime, float totalGameTime, float elapsedGameTime)
+		GameTimer(float totalRealTime, float elapsedRealTime, float totalGameTime, float elapsedGameTime,
+					float fps, bool runningSlowly)
 		{
 			mTotalRealTime = totalRealTime;
 			mElapsedRealTime = elapsedRealTime;
 			mTotalGameTime = totalGameTime;
 			mElapsedGameTime = elapsedGameTime;
+			mFramesPerSecond = fps;
+			mIsRunningSlowly = runningSlowly;
 		}
 		
 		~GameTimer(void);
@@ -65,6 +68,11 @@ namespace GlueRH
 		float GetTotalRealTime() const { return mTotalRealTime; }
 
 		/// <summary>
+		/// Gets fps
+		/// </summary>
+		float GetFps() const { return mFramesPerSecond; }
+
+		/// <summary>
 		/// Gets or sets a value indicating whether this instance is running slowly.
 		/// </summary>
 		/// <value>
@@ -72,7 +80,7 @@ namespace GlueRH
 		/// </value>
 		bool IsRunningSlowly() const { return mIsRunningSlowly; }
 
-
+		
 	private:
 	
 		float mFramesPerSecond;
@@ -80,9 +88,10 @@ namespace GlueRH
 		float mElapsedRealTime;
 		float mTotalGameTime;
 		float mTotalRealTime;
+		float mFramesPerSecond;
 
 		bool mIsRunningSlowly;
-	
+		
 		
 		
 	};

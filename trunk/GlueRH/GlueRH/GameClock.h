@@ -21,7 +21,7 @@ namespace GlueRH
 		float GetElapsedAdjustedTime() const { return mElapsedAdjustedTime; }
 		float GetCurrentTime() const { return mCurrentTimeBase + mCurrentTimeOffset; }
 
-		public void Reset()
+		void Reset()
 		{
 			mElapsedAdjustedTime = 0;
 			mSuspendStartTime = 0;
@@ -104,7 +104,7 @@ namespace GlueRH
 			return counter.QuadPart;
 		}
 
-		float GetFrequency()
+		uint64 GetFrequency()
 		{
 			LARGE_INTEGER freq;
 			assert( QueryPerformanceFrequency(&freq) ); 
@@ -115,7 +115,7 @@ namespace GlueRH
 		{
 			if (base > counter)
 				return false;
-			*result = (counter - base) / (float)m_frequency;
+			*result = (counter - base) / (float)mFrequency;
 			return true;
 		}
 
@@ -124,7 +124,7 @@ namespace GlueRH
 		uint64 mBaseRealTime;
 		uint64 mLastRealTime;
 		bool mLastRealTimeValid;
-		uint32 suspendCount;
+		uint32 mSuspendCount;
 		uint64 mSuspendStartTime;
 		uint64 mTimeLostToSuspension;
 		

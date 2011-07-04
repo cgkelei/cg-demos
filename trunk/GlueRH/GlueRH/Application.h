@@ -18,12 +18,41 @@ namespace GlueRH
 		virtual void OnDeviceLost() = 0;
 		virtual void OnDeviceReset() = 0;
 
-		virtual void Render(const GameTimer* const time) = 0;
-		virtual void Update(const GameTimer* const time) = 0;
+		virtual void Render( const GameTimer& time ) = 0;
+		virtual void Update( const GameTimer& time ) = 0;
 
+		/// <summary>
+		/// Performs one complete frame for the game.
+		/// </summary>
+		void Tick();
+
+		/// <summary>
+		/// Runs the game.
+		/// </summary>
 		void Run();
 		
+		/// <summary>
+		/// Exits the game.
+		/// </summary>
+		void Exit();
+
+
 		virtual void OnResize( int32 width, int32 height );
+		
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="Game"/> is exiting.
+		/// </summary>
+		/// <value><c>true</c> if exiting; otherwise, <c>false</c>.</value>
+		bool IsExiting() const { return mExiting; }
+
+		/// <summary>
+		/// Gets or sets a value indicating whether this <see cref="Game"/> is active.
+		/// </summary>
+		/// <value><c>true</c> if active; otherwise, <c>false</c>.</value>
+		bool IsActive() const { return mActive; }
+
+
+		
 		
 
 	private:
@@ -46,8 +75,7 @@ namespace GlueRH
 		void UnPause() { mActive = true; }
 
 		RenderDevicePtr GetRenderDevice() const { return mRenderDevice; }
-		bool IsActive() const { return mActive; }
-
+		
 		static Application* GetApplication() { return m_pGlobalApp; }
 		
 			
@@ -55,17 +83,55 @@ namespace GlueRH
 
 		virtual void InitMainWindow();
 		virtual void InitRenderDevice();
-		
+	
+	private:
 
-	protected:
+		void Window_ApplicationActivated();
+		void Window_ApplicationDeactivated();
+		void Window_Suspend();
+		void Window_Resume();
+		void Window_Paint();
+			
+		void DrawFrame( const GameTimer& time );
 
-		std::wstring mTitle; // Window title name
-		bool mActive;        // Is the application active?
-		
+	private:
+
+		GameClockPtr mGameClock; 
+		GameTimerPtr mGameTimer;
+
+		float mMaxElapsedTime;
+		float mTotalGameTime;
+		float mAccumulatedElapsedGameTime;
+		float mLastFrameElapsedGameTime;
+		float mLastFrameElapsedRealTime;
+		float mTargetElapsedTime;
+		float mInactiveSleepTime;
+		int32 mUpdatesSinceRunningSlowly1;
+		int32 mUpdatesSinceRunningSlowly2;
+		bool mForceElapsedTimeToZero;
+		bool mDrawRunningSlowly;
+		uint64 mLastUpdateFrame;
+		float mLastUpdateTime;
+		float mFramesPerSecond;
+
+		bool mExiting;
+		bool mActive;
+
+		std::wstring mTitle; 
+		WindowPtr mMainWindow;
 		RenderDevicePtr mRenderDevice;
 
-	
 		static Application*	m_pGlobalApp;
+		/// <summary>
+		/// Occurs when a drawing frame is about to start.
+		/// </summary>
+		CancellableEventHandler FrameStart;
+
+		/// <summary>
+		/// Occurs when a drawing frame ends.
+		/// </summary>
+		EventHandler FrameEnd;
+
 
 	};
 

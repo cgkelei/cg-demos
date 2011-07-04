@@ -5,6 +5,7 @@
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="RenderDevice.cpp" />
+    <ClCompile Include="GlueException.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h" />
@@ -15,5 +16,6 @@
     <ClInclude Include="Singleton.hpp" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="GameClock.h" />
+    <ClInclude Include="GlueException.h" />
   </ItemGroup>
 </Project>

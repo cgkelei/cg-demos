@@ -11,15 +11,12 @@ namespace GlueRH
 		  mName(name), mFullscreen(fullscreen),
 		  mHwnd(NULL)
 	{
-
+		mHinst = GetModuleHandle (0);
 		if( m_pGlobalWindow )
 		{
 			throw std::exception("Window object already instantiated!\n" );
 		}
-
-		mHinst = GetModuleHandle (0);
 		m_pGlobalWindow = this;
-		mActive = false;
 	}
 
 	Window::~Window(void)
@@ -89,7 +86,7 @@ namespace GlueRH
 	void Window::LoadWindow()
 	{
 		MyRegisterClass();
-		assert( InitInstance() );
+		assert( !InitInstance() );
 	}
 
 	void Window::CloseWindow()
