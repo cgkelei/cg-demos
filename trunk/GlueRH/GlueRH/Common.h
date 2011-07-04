@@ -12,7 +12,6 @@
 #include <D3D10.h>
 #include <D3DX10.h>
 
-
 #include "../3rdParty/FastDelegate/FastDelegate.h"
 #include "../3rdParty/FastDelegate/FastDelegateBind.h"
 
@@ -26,6 +25,8 @@ namespace GlueRH
 	typedef int int32;
 	typedef unsigned int uint32;
 
+	typedef fastdelegate::FastDelegate0<void> EventHandler;
+	typedef typedef fastdelegate::FastDelegate1<bool, void> CancellableEventHandler;
 
 	typedef fastdelegate::FastDelegate1<bool, void> ActiveEvent;
 	typedef fastdelegate::FastDelegate0<void> PaintEvent;

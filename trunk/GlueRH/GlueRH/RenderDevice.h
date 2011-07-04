@@ -25,7 +25,6 @@ namespace GlueRH
 
 		RECT	m_rcScreenRect;					// The dimensions of the screen
 
-		cGraphicsLayer(HWND hWnd);				// Constructor
 
 		ID3DX10Font*			mFont;		// The font used for rendering text
 		ID3DX10Sprite*			mFontSprite;	// Sprites used to hold font characters

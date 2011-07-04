@@ -23,6 +23,7 @@ namespace GlueRH
 			throw std::exception("Window object already instantiated!\n" );
 		}
 
+		mHinst = GetModuleHandle (0);
 		m_pGlobalWindow = this;
 		mActive = false;
 	}
@@ -47,7 +48,7 @@ namespace GlueRH
 		wc.lpfnWndProc		= GlobalWndProc;
 		wc.cbClsExtra		= 0;
 		wc.cbWndExtra		= 0;
-		wc.hInstance		= GetModuleHandle (0);;
+		wc.hInstance		= mHinst;
 		wc.hIcon			= NULL;
 		wc.hCursor			= LoadCursor(NULL, IDC_ARROW);
 		wc.hbrBackground	= static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
@@ -72,9 +73,9 @@ namespace GlueRH
 
 
 		// Create the application's window.
-		mHwnd = CreateWindow( mName.c_str(), mName.c_str(), style,
-			mLeft, mTop, rc.right - rc.left, rc.bottom - rc.top, 
-			NULL, NULL, AppInstance(), NULL );
+		mHwnd = ::CreateWindow( mName.c_str(), mName.c_str(), style,
+			mLeft, mTop, rc.right - rc.left, rc.bottom - rc.top,
+			NULL, NULL, mHinst, NULL );
 
 		if( !mHwnd )
 			return false;
@@ -95,71 +96,241 @@ namespace GlueRH
 		InitInstance();
 	}
 
-	LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
+
+	void Window::OnUserResized()
 	{
-		switch(uMsg)
+		if ( !UserResized.empty() )
 		{
-		case WM_ACTIVATE:
+			UserResized();
+		}
+	}
+
+	void Window::OnSuspend()
+	{
+		if ( !Suspend.empty() )
+		{
+			Suspend();
+		}
+	}
+
+	void Window::OnResume()
+	{
+		if ( !Resume.empty() )
+		{
+			Resume();
+		}
+	}
+
+	void Window::OnPaint()
+	{
+		if ( !Paint.empty() )
+		{
+			Paint();
+		}
+	}
+	
+	void Window::OnMonitorChanged()
+	{
+		if ( !MonitorChanged.empty() )
+		{
+			MonitorChanged();
+		}
+	}
+
+	void Window::OnApplicationActivated()
+	{
+		if ( !ApplicationActivated.empty() )
+		{
+			ApplicationActivated();
+		}
+	}
+
+	void Window::OnApplicationDeactivated()
+	{
+		if ( !ApplicationDeactivated.empty() )
+		{
+			ApplicationDeactivated();
+		}
+	}
+
+	void Window::OnSystemSuspend()
+	{
+		if ( !SystemSuspend.empty() )
+		{
+			SystemSuspend();
+		}
+	}
+
+	void Window::OnSystemResume()
+	{
+		if ( !SystemResume.empty() )
+		{
+			SystemResume();
+		}
+	}
+
+	void Window::OnScreensaver( bool cancel )
+	{
+		if ( !Screensaver.empty() )
+		{
+			Screensaver(cancel);
+		}
+	}
+
+
+
+	Window::Size Window::GetCurrentSize() const
+	{
+		RECT rect;
+		if (!GetClientRect(mHwnd, &rect))
+		{
+			rect.left = 0; rect.right = 0;
+			rect.bottom = 0;
+			rect.top = 0;
+		}
+		return std::make_pair(rect.right - rect.left, rect.bottom - rect.top);
+	}
+
+
+	void Window::UpdateMonitor()
+	{
+		HMONITOR windowMonitor = MonitorFromWindow(mHwnd, MONITOR_DEFAULTTOPRIMARY);
+		if ( !mCurrentMonitor || windowMonitor != mCurrentMonitor )
+		{
+			mCurrentMonitor = windowMonitor;
+			if (mCurrentMonitor)
+				OnMonitorChanged();
+		}
+	}
+	
+	LRESULT Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
+	{
+		switch (uMsg)
+		{
+		case WM_SIZE:
+			if (wParam == SIZE_MINIMIZED)
 			{
-				if (WA_INACTIVE == LOWORD(wParam))
+				mIsMinimized = true;
+				mIsMaximized = false;
+
+				OnSuspend();
+			}
+			else
+			{
+				RECT rect;
+				if (!GetClientRect(hWnd, &rect))
 				{
-					OnActive()(false);
+					rect.left = 0; rect.right = 0;
+					rect.bottom = 0;
+					rect.top = 0;
 				}
-				else
+
+				if (rect.bottom - rect.top == 0)
 				{
-					OnActive()(true);
+				}
+				else if (wParam == SIZE_MAXIMIZED)
+				{
+					mIsMinimized = false;
+					mIsMaximized = true;
+
+					OnUserResized();
+					UpdateMonitor();
+
+				}
+				else if (wParam == SIZE_RESTORED)
+				{
+					if (mIsMinimized)
+						OnResume();
+
+					mIsMinimized = false;
+					mIsMaximized = false;
+
+					Size newSize = GetCurrentSize();
+					if ( !mIsInSizeMove && mCachedSize != newSize)
+					{
+						OnUserResized();
+						UpdateMonitor();
+						mCachedSize = newSize;
+					}
 				}
 			}
-			break;
-		
-		case WM_ERASEBKGND:
-			return 1;
-		
-		case WM_PAINT:
-			OnPaint();
 			break;
 
 		case WM_MOVE:
 			break;
 
+		case WM_PAINT:
+			OnPaint();
+			break;
 
-		case WM_SIZE:
+		case WM_ACTIVATEAPP:
+			if (wParam)
 			{
-				// Check to see if we are losing or gaining our window.  Set the
-				// active flag to match
-				if ((SIZE_MAXHIDE == wParam) || (SIZE_MINIMIZED == wParam))
-					OnSize()(false);
-				else
-					OnSize()(true);
+				OnApplicationActivated();
+			}
+			else
+			{
+				OnApplicationDeactivated();
 			}
 			break;
 
+		case WM_POWERBROADCAST:
+			if (wParam == PBT_APMQUERYSUSPEND)
+			{
+				OnSystemSuspend();
+				return 1;
+			}
+			else if (wParam == PBT_APMRESUMESUSPEND)
+			{
+				OnSystemResume();
+				return 1;
+			}
+			break;
+
+		case WM_SYSCOMMAND:
+			{
+				long wp = wParam & 0xFFF0;
+				if (wp == SC_MONITORPOWER || wp == SC_SCREENSAVE)
+				{
+					bool cancel;
+					OnScreensaver(&cancel);
+					if (cancel)
+					{
+						return 0;
+					}
+				}
+				break;
+			}
+
 		case WM_ENTERSIZEMOVE:
-			// prevent rendering while moving / sizing
-			OnEnterSizeMove()();
+			mIsInSizeMove = true;
+			mCachedSize = GetCurrentSize();
+			OnSuspend();
 			break;
 
 		case WM_EXITSIZEMOVE:
-			OnExitSizeMove()();
+			// check for screen and size changes
+			OnUserResized();
+			UpdateMonitor();
+			mIsInSizeMove = false;
+
+			// resume application processing
+			OnResume();
 			break;
 
-		case WM_GETMINMAXINFO:
-			// Prevent the window from going smaller than some minimu size
-			reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.x = 100;
-			reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.y = 100;
+		case WM_DESTROY:
+			UnregisterClass( mName.c_str(), GetModuleHandle (0) );
+			PostQuitMessage(0);
 			break;
-
-		case WM_SETCURSOR:
-			OnSetCursor()();
+	
+		case WM_MOUSEWHEEL:
+			mMouseWheel += (int16) (wParam >> 0x10);
 			break;
-
-		case WM_CLOSE:
-			{
-				OnClose()();
-				::PostQuitMessage(0);
-				return 0;
-			}
 		}
+
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
+
+	
+
 }
