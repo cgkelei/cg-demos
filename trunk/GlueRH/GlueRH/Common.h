@@ -26,11 +26,13 @@ namespace GlueRH
 	typedef int int32;
 	typedef unsigned int uint32;
 
-	typedef fastdelegate::FastDelegate1<bool, void> ActiveEvent;
+
+	typedef fastdelegate::FastDelegate1<bool, void> ActiveEvent;
 	typedef fastdelegate::FastDelegate0<void> PaintEvent;
 	typedef fastdelegate::FastDelegate0<void> EnterSizeMoveEvent;
 	typedef fastdelegate::FastDelegate0<void> ExitSizeMoveEvent;
-	typedef fastdelegate::FastDelegate1<bool, void> SizeEvent;	typedef fastdelegate::FastDelegate0<void> SetCursorEvent;
+	typedef fastdelegate::FastDelegate1<bool, void> SizeEvent;
+	typedef fastdelegate::FastDelegate0<void> SetCursorEvent;
 	typedef fastdelegate::FastDelegate0<void> CloseEvent;
 
 	typedef DXGI_FORMAT PiexelFormat;

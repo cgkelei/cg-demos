@@ -11,7 +11,7 @@ namespace GlueRH
 		explicit Window( const std::wstring& name, int left, int top, int32 width, int32 height, bool fullscreen = false);
 		~Window(void);
 
-		void InitInstance();
+		void InitWindow();
 		
 		ActiveEvent& OnActive() { return mActiveEventHandler; }
 		PaintEvent& OnPaint() { return mPaintEventHandler; }
@@ -21,12 +21,16 @@ namespace GlueRH
 		SetCursorEvent& OnSetCursor() { return mSetCursorEventHandler; }
 		CloseEvent& OnClose() { return mCloseEventHandler; }
 
+		HWND GetWindowHandle() const { return mHwnd; } 
+		std::wstring GetWindowTitle() const  { return mName; }
+
 		static Window* GetMainWindow() { return m_pGlobalWindow; }
 		
 		LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 
 	private:
-		void RegisterClass();
+		void MyRegisterClass();
+		bool InitInstance();
 
 	private:
 		// Windows Event Handler
@@ -36,7 +40,8 @@ namespace GlueRH
 		ExitSizeMoveEvent mExitSizeMoveEventHandler;
 		SizeEvent mSizeEventHandler;
 		SetCursorEvent mSetCursorEventHandler;
-		CloseEvent mCloseEventHandler;
+		CloseEvent mCloseEventHandler;
+
 	protected:
 
 		int32 mLeft;
@@ -48,6 +53,7 @@ namespace GlueRH
 		bool mActive;
 
 		std::wstring mName;
+
 		HWND mHwnd;
 
 		static Window* m_pGlobalWindow;

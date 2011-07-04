@@ -17,6 +17,7 @@ namespace GlueRH
 		  mName(name), mFullscreen(fullscreen),
 		  mHwnd(NULL)
 	{
+
 		if( m_pGlobalWindow )
 		{
 			throw std::exception("Window object already instantiated!\n" );
@@ -37,7 +38,7 @@ namespace GlueRH
 		
 	}
 
-	void Window::RegisterClass()
+	void Window::MyRegisterClass()
 	{
 		// Register the window class.
 		WNDCLASSEX wc;
@@ -46,7 +47,7 @@ namespace GlueRH
 		wc.lpfnWndProc		= GlobalWndProc;
 		wc.cbClsExtra		= 0;
 		wc.cbWndExtra		= 0;
-		wc.hInstance		= AppInstance();
+		wc.hInstance		= GetModuleHandle (0);;
 		wc.hIcon			= NULL;
 		wc.hCursor			= LoadCursor(NULL, IDC_ARROW);
 		wc.hbrBackground	= static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
@@ -57,7 +58,7 @@ namespace GlueRH
 		RegisterClassEx(&wc);
 	}
 
-	void Window::InitInstance()
+	bool Window::InitInstance()
 	{
 		RECT rc = { 0, 0, mWidth, mHeight };
 
@@ -75,12 +76,23 @@ namespace GlueRH
 			mLeft, mTop, rc.right - rc.left, rc.bottom - rc.top, 
 			NULL, NULL, AppInstance(), NULL );
 
+		if( !mHwnd )
+			return false;
+
 		GetClientRect(mHwnd, &rc);
 		mWidth = rc.right - rc.left;
 		mHeight = rc.bottom - rc.top;
 
 		ShowWindow(mHwnd, SW_SHOWNORMAL);
 		UpdateWindow(mHwnd);
+
+		return true;
+	}
+	
+	void Window::InitWindow()
+	{
+		MyRegisterClass();
+		InitInstance();
 	}
 
 	LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
@@ -103,8 +115,10 @@ namespace GlueRH
 		case WM_ERASEBKGND:
 			return 1;
 		
-		case WM_PAINT:			OnPaint();
-			break;
+		case WM_PAINT:
+			OnPaint();
+			break;
+
 		case WM_MOVE:
 			break;
 
@@ -118,21 +132,27 @@ namespace GlueRH
 				else
 					OnSize()(true);
 			}
-			break;
+			break;
+
 		case WM_ENTERSIZEMOVE:
 			// prevent rendering while moving / sizing
 			OnEnterSizeMove()();
 			break;
 
-		case WM_EXITSIZEMOVE:			OnExitSizeMove()();
-			break;
+		case WM_EXITSIZEMOVE:
+			OnExitSizeMove()();
+			break;
+
 		case WM_GETMINMAXINFO:
 			// Prevent the window from going smaller than some minimu size
 			reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.x = 100;
 			reinterpret_cast<MINMAXINFO*>(lParam)->ptMinTrackSize.y = 100;
-			break;
-		case WM_SETCURSOR:			OnSetCursor()();
-			break;
+			break;
+
+		case WM_SETCURSOR:
+			OnSetCursor()();
+			break;
+
 		case WM_CLOSE:
 			{
 				OnClose()();

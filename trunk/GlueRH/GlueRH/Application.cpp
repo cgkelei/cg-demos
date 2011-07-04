@@ -7,15 +7,10 @@ namespace GlueRH
 	
 	HINSTANCE g_hInstance;
 	
-	HINSTANCE AppInstance()
-	{
-		return g_hInstance;
-	}
-
-	
 
 //////////////////////////////////////////////////////////////////////////
-	Application::Application(void)
+	Application::Application(const std::wstring&  name)
+		: mTitle(name)
 	{
 		if( m_pGlobalApp )
 		{
@@ -35,8 +30,6 @@ namespace GlueRH
 
 	void Application::Run()
 	{
-		static float lastTime = (float)timeGetTime(); 
-
 		bool gotMsg = false;
 		MSG msg;
 		ZeroMemory( &msg, sizeof( msg ) );
@@ -60,19 +53,16 @@ namespace GlueRH
 			}
 			else
 			{
-				float currTime = (float)timeGetTime();
-				float delta = (currTime - lastTime)/1000.f;
-
+				
 				if(mActive)
-				{
-					UpdateScene(delta);
-					DrawScene(delta);
+				{	
+
 				}else
-				{
-					DoIdle(delta);
+				{	
+
 				}
 
-				lastTime = currTime;
+				
 			}
 		}
 	}
@@ -80,7 +70,8 @@ namespace GlueRH
 	void Application::InitMainWindow()
 	{
 		new Window(mTitle, 0, 0, 640, 480);
-		MainWindow()->InitInstance();
+		MainWindow()->InitWindow();
+		MainWindow()->OnActive().bind(this, &Application::OnActived );
 	}
 
 	void Application::OnResize( int32 width, int32 height )
@@ -88,29 +79,13 @@ namespace GlueRH
 
 	}
 
-	void Application::UpdateScene( float timeDelta )
+	void Application::OnActived ( bool active )
 	{
-
+		mActive = active;
 	}
-
-	void Application::DrawScene( float timeDelta )
+	
+	void Application::OnPaint()
 	{
-
-	}
-
-	void Application::DoIdle( float timeDelta )
-	{
-
-	}
-
-	void Application::SceneInit()
-	{
-
-	}
-
-	void Application::SceneEnd()
-	{
-
 	}
 
 	void Application::InitRenderDevice()
@@ -118,12 +93,6 @@ namespace GlueRH
 
 	}
 
-	void Application::Init()
-	{
-
-	}
-
-	
 
 	
 

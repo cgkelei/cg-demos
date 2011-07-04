@@ -5,7 +5,7 @@
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="RenderDevice.cpp" />
-    <ClCompile Include="GameTime.cpp" />
+    <ClCompile Include="GameTimer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h" />
@@ -13,6 +13,7 @@
     <ClInclude Include="Window.h" />
     <ClInclude Include="RenderSettings.h" />
     <ClInclude Include="RenderDevice.h" />
-    <ClInclude Include="GameTime.h" />
+    <ClInclude Include="Singleton.hpp" />
+    <ClInclude Include="GameTimer.h" />
   </ItemGroup>
 </Project>

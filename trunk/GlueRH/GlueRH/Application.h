@@ -3,7 +3,7 @@
 
 #include "Common.h"
 #include "RenderSettings.h"
-#include "GameTime.h"
+#include "GameTimer.h"
 
 namespace GlueRH
 {
@@ -11,31 +11,33 @@ namespace GlueRH
 	{
 	public:
 
-		virtual void OnResize( int32 width, int32 height );
-
 		virtual void Initialize() = 0;
 		virtual void LoadContent() = 0;
 		virtual void UnloadContent() = 0;
+
 		virtual void OnDeviceLost() = 0;
 		virtual void OnDeviceReset() = 0;
-		virtual void Render(const GameTime* const time) = 0;
-		virtual void Update(const GameTime* const time) = 0;
+
+		virtual void Render(const GameTimer* const time) = 0;
+		virtual void Update(const GameTimer* const time) = 0;
+
 		void Run();
+		
+		virtual void OnResize( int32 width, int32 height );
+		
 
 	private:
 
-		void Window_ApplicationActivated();
-		void Window_ApplicationDeactivated();
-		void Window_Suspend();
-		void Window_Resume();
-		void Window_Paint();
+		void OnActived( bool active );
+		void OnPaint();
 
 	protected:
 		Application( const std::wstring&  name );
 		virtual ~Application(void);
 		virtual bool OnFrameStart();
 		virtual void OnFrameEnd();
-	public:
+
+	public:
 
 		virtual void Release();
 		virtual void Create();
@@ -75,7 +77,6 @@ namespace GlueRH
 		return Application::GetApplication();
 	}
 
-	HINSTANCE AppInstance();
 }
 
 #endif
