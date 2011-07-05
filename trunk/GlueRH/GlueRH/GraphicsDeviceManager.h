@@ -14,7 +14,16 @@ namespace GlueRH
 		GraphicsDeviceManager(void);
 		~GraphicsDeviceManager(void);
 
+		bool IsWindowed() const { return mCurrentSettings.Windowed; }
 
+		/**  Gets the width of the screen.
+		 */
+		int32 GetScreenWidth() const { return mCurrentSettings.BackBufferWidth; }
+
+		/**  Gets the height of the screen.
+		 */
+		int32 GetScreenHeight() const { return mCurrentSettings.BackBufferHeight; }
+	
 	private:
 
 		void Game_FrameStart(bool* cancel);
@@ -45,9 +54,12 @@ namespace GlueRH
 		uint64 mWindowedStyle;
 		//bool mSavedTopmost;
 	
-	
-	
-	
+		IDXGIFactory* mFactory;
+		DeviceSettings mCurrentSettings;
+
+		
+		ApplicationPtr mApplication;
+
 	
 	
 	

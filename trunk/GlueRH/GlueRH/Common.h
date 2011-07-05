@@ -44,6 +44,8 @@ namespace GlueRH
 	class Window;
 	typedef std::shared_ptr<Window> WindowPtr;
 
+	class Application;
+	typedef std::shared_ptr<Application> ApplicationPtr;
 
 	class RenderDevice;
 	typedef std::shared_ptr<RenderDevice> RenderDevicePtr;
