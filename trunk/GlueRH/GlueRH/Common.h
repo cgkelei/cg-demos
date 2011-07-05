@@ -11,6 +11,7 @@
 #include <cassert>
 #include <D3D10.h>
 #include <D3DX10.h>
+#include <DXGI.h>
 
 #include "../3rdParty/FastDelegate/FastDelegate.h"
 #include "../3rdParty/FastDelegate/FastDelegateBind.h"
@@ -38,8 +39,7 @@ namespace GlueRH
 	typedef fastdelegate::FastDelegate0<void> SetCursorEvent;
 	typedef fastdelegate::FastDelegate0<void> CloseEvent;
 
-	typedef DXGI_FORMAT PiexelFormat;
-	typedef DXGI_FORMAT DepthFormat;
+	typedef DXGI_FORMAT Format;
 
 	class Window;
 	typedef std::shared_ptr<Window> WindowPtr;

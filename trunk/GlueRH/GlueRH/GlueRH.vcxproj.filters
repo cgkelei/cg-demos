@@ -7,6 +7,8 @@
     <ClCompile Include="GlueException.cpp" />
     <ClCompile Include="GraphicsDeviceManager.cpp" />
     <ClCompile Include="WinMain.cpp" />
+    <ClCompile Include="DeviceSettings.cpp" />
+    <ClCompile Include="Enumeration.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h" />
@@ -19,5 +21,7 @@
     <ClInclude Include="GameClock.h" />
     <ClInclude Include="GlueException.h" />
     <ClInclude Include="GraphicsDeviceManager.h" />
+    <ClInclude Include="DeviceSettings.h" />
+    <ClInclude Include="Enumeration.h" />
   </ItemGroup>
 </Project>
