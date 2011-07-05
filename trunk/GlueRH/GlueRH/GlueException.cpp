@@ -1,11 +1,14 @@
 #include "GlueException.h"
 
-
-GlueException::GlueException(void)
+namespace GlueRH
+{
+	GlueException::GlueException(void)
 {
 }
 
 
 GlueException::~GlueException(void)
 {
+}
+
 }

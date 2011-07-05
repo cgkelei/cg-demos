@@ -14,14 +14,17 @@ namespace GlueRH
 	Application::Application(const std::wstring&  name)
 		: mTitle(name)
 	{
-		if( m_pGlobalApp )
-		{
-			throw std::exception("Application object already created!\n");
-		}
-		m_pGlobalApp = this;
+		mGameClock = std::make_shared<GameClock>();
 
-		mTitle = std::wstring(L"Default Window Name");
-		mActive = true;
+		mMainWindow = std::make_shared<Window>(mTitle, 0, 0, 640, 480);
+		mMainWindow->EventApplicationActivated().bind( this, &Application::Window_ApplicationActivated );
+		mMainWindow->EventApplicationDeactivated().bind( this, &Application::Window_ApplicationDeactivated );
+		mMainWindow->EventPaint().bind( this, &Application::Window_Paint );
+		mMainWindow->EventSuspend().bind( this, &Application::Window_Suspend );
+		mMainWindow->EventResume().bind( this, &Application::Window_Resume );
+
+
+
 	}
 
 
@@ -53,31 +56,6 @@ namespace GlueRH
 		// request the game to terminate
 		mMainWindow->CloseWindow();
 		mExiting = true;
-	}
-
-	void Application::InitMainWindow()
-	{
-		mMainWindow = std::make_shared<Window>(mTitle, 0, 0, 640, 480);
-		mMainWindow->LoadWindow();
-	}
-
-	void Application::OnResize( int32 width, int32 height )
-	{
-
-	}
-
-	void Application::OnActived ( bool active )
-	{
-		mActive = active;
-	}
-	
-	void Application::OnPaint()
-	{
-	}
-
-	void Application::InitRenderDevice()
-	{
-
 	}
 
 	void Application::Tick()
@@ -143,7 +121,8 @@ namespace GlueRH
 
 			GameTimer gt(mTargetElapsedTime, mTotalGameTime,
 				elapsedRealTime,totalRealTime, mFramesPerSecond, mDrawRunningSlowly);
-			Update(&gt);
+
+			Update(gt);
 			
 			mLastFrameElapsedGameTime += targetElapsedTime;
 			mTotalGameTime += targetElapsedTime;
@@ -172,6 +151,53 @@ namespace GlueRH
 	}
 
 	
+
+	bool Application::OnFrameStart()
+	{
+		bool result = false;
+		FrameStart( &result );
+		return result;
+	}
+
+	void Application::OnFrameEnd()
+	{
+		FrameEnd();
+	}
+
+	void Application::Create()
+	{
+		mMainWindow->LoadWindow();
+	}
+
+	void Application::Release()
+	{
+	}
+
+	void Application::Window_ApplicationActivated()
+	{
+		mActive = true;
+	}
+
+	void Application::Window_ApplicationDeactivated()
+	{
+		mActive = false;
+	}
+
+	void Application::Window_Suspend()
+	{
+		mGameClock->Suspend();
+	}
+
+	void Application::Window_Resume()
+	{
+		mGameClock->Resume();
+	}
+
+	void Application::Window_Paint()
+	{
+
+	}
+
 
 
 	

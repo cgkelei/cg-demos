@@ -15,11 +15,12 @@ namespace GlueRH
 		virtual void LoadContent() = 0;
 		virtual void UnloadContent() = 0;
 
+		virtual void Render( const GameTimer& time ) = 0;
+		virtual void Update( const GameTimer& time ) = 0;
+
 		virtual void OnDeviceLost() = 0;
 		virtual void OnDeviceReset() = 0;
 
-		virtual void Render( const GameTimer& time ) = 0;
-		virtual void Update( const GameTimer& time ) = 0;
 
 		/// <summary>
 		/// Performs one complete frame for the game.
@@ -35,9 +36,6 @@ namespace GlueRH
 		/// Exits the game.
 		/// </summary>
 		void Exit();
-
-
-		virtual void OnResize( int32 width, int32 height );
 		
 		/// <summary>
 		/// Gets a value indicating whether this <see cref="Game"/> is exiting.
@@ -51,18 +49,21 @@ namespace GlueRH
 		/// <value><c>true</c> if active; otherwise, <c>false</c>.</value>
 		bool IsActive() const { return mActive; }
 
-
-		
-		
-
 	private:
 
-		void OnActived( bool active );
-		void OnPaint();
+		void Window_ApplicationActivated();
+		void Window_ApplicationDeactivated();
+		void Window_Suspend();
+		void Window_Resume();
+		void Window_Paint();
+
+		void DrawFrame( const GameTimer& time );
+
 
 	protected:
 		Application( const std::wstring&  name );
 		virtual ~Application(void);
+
 		virtual bool OnFrameStart();
 		virtual void OnFrameEnd();
 
@@ -71,33 +72,18 @@ namespace GlueRH
 		virtual void Release();
 		virtual void Create();
 
+		CancellableEventHandler& EventFrameStart()  { return FrameStart; }
+		EventHandler& EventFrameEnd() { return FrameEnd; }
+
+
 		void Pause() { mActive = false; }
 		void UnPause() { mActive = true; }
 
 		RenderDevicePtr GetRenderDevice() const { return mRenderDevice; }
-		
-		static Application* GetApplication() { return m_pGlobalApp; }
-		
-			
-	protected:
-
-		virtual void InitMainWindow();
-		virtual void InitRenderDevice();
-	
-	private:
-
-		void Window_ApplicationActivated();
-		void Window_ApplicationDeactivated();
-		void Window_Suspend();
-		void Window_Resume();
-		void Window_Paint();
-			
-		void DrawFrame( const GameTimer& time );
-
+				
 	private:
 
 		GameClockPtr mGameClock; 
-		GameTimerPtr mGameTimer;
 
 		float mMaxElapsedTime;
 		float mTotalGameTime;
@@ -122,6 +108,7 @@ namespace GlueRH
 		RenderDevicePtr mRenderDevice;
 
 		static Application*	m_pGlobalApp;
+
 		/// <summary>
 		/// Occurs when a drawing frame is about to start.
 		/// </summary>
@@ -134,14 +121,6 @@ namespace GlueRH
 
 
 	};
-
-	/**
-	 * This function is used to get global application instance
-	 */
-	inline Application* ApplicationInstance() 
-	{
-		return Application::GetApplication();
-	}
 
 }
 

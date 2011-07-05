@@ -13,7 +13,7 @@ namespace GlueRH
 		/// <summary>
 		/// Initializes a new instance of the <see cref="GameTimer"/> class.
 		/// </summary>
-		GameTimer(void);
+		GameTimer(void) {};
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="GameTimer"/> class.
@@ -33,7 +33,7 @@ namespace GlueRH
 			mIsRunningSlowly = runningSlowly;
 		}
 		
-		~GameTimer(void);
+		~GameTimer(void) {};
 
 
 		/// <summary>
@@ -88,7 +88,6 @@ namespace GlueRH
 		float mElapsedRealTime;
 		float mTotalGameTime;
 		float mTotalRealTime;
-		float mFramesPerSecond;
 
 		bool mIsRunningSlowly;
 		
