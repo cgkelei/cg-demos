@@ -7,7 +7,6 @@
     <ClCompile Include="GlueException.cpp" />
     <ClCompile Include="GraphicsDeviceManager.cpp" />
     <ClCompile Include="WinMain.cpp" />
-    <ClCompile Include="DeviceSettings.cpp" />
     <ClCompile Include="Enumeration.cpp" />
   </ItemGroup>
   <ItemGroup>

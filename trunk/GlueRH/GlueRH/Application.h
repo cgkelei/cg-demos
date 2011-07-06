@@ -37,6 +37,9 @@ namespace GlueRH
 		/// </summary>
 		void Exit();
 		
+		virtual void Release();
+		virtual void Create();
+
 		/// <summary>
 		/// Gets a value indicating whether this <see cref="Game"/> is exiting.
 		/// </summary>
@@ -48,6 +51,17 @@ namespace GlueRH
 		/// </summary>
 		/// <value><c>true</c> if active; otherwise, <c>false</c>.</value>
 		bool IsActive() const { return mActive; }
+
+
+		CancellableEventHandler& EventFrameStart()  { return FrameStart; }
+		EventHandler& EventFrameEnd() { return FrameEnd; }
+
+
+		void Pause() { mActive = false; }
+		void UnPause() { mActive = true; }
+
+		RenderDevicePtr GetRenderDevice() const { return mRenderDevice; }
+		WindowPtr GetWindow() const { return mMainWindow; }
 
 	private:
 
@@ -65,21 +79,7 @@ namespace GlueRH
 		virtual ~Application(void);
 
 		virtual bool OnFrameStart();
-		virtual void OnFrameEnd();
-
-	public:
-
-		virtual void Release();
-		virtual void Create();
-
-		CancellableEventHandler& EventFrameStart()  { return FrameStart; }
-		EventHandler& EventFrameEnd() { return FrameEnd; }
-
-
-		void Pause() { mActive = false; }
-		void UnPause() { mActive = true; }
-
-		RenderDevicePtr GetRenderDevice() const { return mRenderDevice; }
+		virtual void OnFrameEnd();	
 				
 	private:
 

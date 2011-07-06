@@ -23,6 +23,7 @@ namespace GlueRH
 	{
 	private:
 		AdapterInfo( const AdapterInfo& );
+		AdapterInfo& operator= ( const AdapterInfo& );
 
 	public:
 		int AdapterOrdinal;
@@ -41,7 +42,7 @@ namespace GlueRH
 		OutputInfo& operator= ( const OutputInfo& );
 	
 	public:
-		int OutputOrdinal;
+		int OutputOrdinal; 
 		DXGI_OUTPUT_DESC OutputDescription;
 		std::vector<DXGI_MODE_DESC> DisplayModes;
 
@@ -81,6 +82,8 @@ namespace GlueRH
 		~Enumeration(void);
 
 	static DeviceSettings MinimumSettings;
+
+	static void Enumerate( IDXGIFactory* pFactory );
 
 	};
 

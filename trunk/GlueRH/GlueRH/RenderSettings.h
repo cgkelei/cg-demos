@@ -1,7 +1,7 @@
 #ifndef _RenderSettings__H
 #define _RenderSettings__H
 
-#include <DXGI.h>
+#include "Common.h"
 
 namespace GlueRH
 {
@@ -19,14 +19,14 @@ namespace GlueRH
 		}
 
 		bool	FullScreen;
-		int		Left;
-		int		Top;
-		int		Width;
-		int		Height;
-		PiexelFormat ColorFormat;
-		DepthFormat DepthStencilFormat;
-		int SampleCount;
-		int SampleQuality ;
+		int32		Left;
+		int32		Top;
+		int32		Width;
+		int32		Height;
+		DXGI_FORMAT ColorFormat;
+		DXGI_FORMAT DepthStencilFormat;
+		int32 SampleCount;
+		int32 SampleQuality ;
 		
 	};
 }

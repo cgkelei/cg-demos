@@ -3,7 +3,6 @@
 
 #include "Common.h"
 
-
 namespace GlueRH
 {
 
@@ -41,7 +40,7 @@ namespace GlueRH
          */
 		Format DepthStencilFormat;
 
-		public Direct3D10Settings() 
+		Direct3D10Settings() 
 			: DriverType( D3D10_DRIVER_TYPE_HARDWARE ),
 			  PresentFlags( 0 ),
 			  SyncInterval( 1 ),
@@ -73,11 +72,11 @@ namespace GlueRH
 
 		/** The height of the back buffer.
 		 */
-	    int32 BackBufferHeight
+	    int32 BackBufferHeight;
 		
 		/** The back buffer format.
 		 */
-	    Format BackBufferFormat;
+	    DXGI_FORMAT BackBufferFormat;
 
 		/** The back buffer count.
 		 */

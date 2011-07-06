@@ -76,7 +76,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
-    <ClCompile Include="DeviceSettings.cpp" />
     <ClCompile Include="Enumeration.cpp" />
     <ClCompile Include="GlueException.cpp" />
     <ClCompile Include="GraphicsDeviceManager.cpp" />
