@@ -16,9 +16,12 @@
 #include "../3rdParty/FastDelegate/FastDelegate.h"
 #include "../3rdParty/FastDelegate/FastDelegateBind.h"
 
+#pragma comment(lib,"dxerr.lib")
+
 
 namespace GlueRH
 {
+
 	typedef __int8 int8;
 	typedef unsigned __int8 uint8;
 	typedef __int16 int16;

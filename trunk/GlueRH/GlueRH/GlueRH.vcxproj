@@ -87,6 +87,7 @@
     <ClInclude Include="Application.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="DeviceSettings.h" />
+    <ClInclude Include="Direct3DUtil.h" />
     <ClInclude Include="Enumeration.h" />
     <ClInclude Include="GameClock.h" />
     <ClInclude Include="GlueException.h" />

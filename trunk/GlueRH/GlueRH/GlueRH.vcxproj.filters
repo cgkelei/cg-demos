@@ -22,5 +22,6 @@
     <ClInclude Include="GraphicsDeviceManager.h" />
     <ClInclude Include="DeviceSettings.h" />
     <ClInclude Include="Enumeration.h" />
+    <ClInclude Include="Direct3DUtil.h" />
   </ItemGroup>
 </Project>

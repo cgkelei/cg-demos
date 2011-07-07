@@ -38,7 +38,7 @@ namespace GlueRH
 
 		/** Get DXGI Factory
 		 */
-		static IDXGIFactory* GetFactory() { return mFactory; }
+		IDXGIFactory* GetFactory() { return mFactory; }
 		
 
 	private:
@@ -85,16 +85,7 @@ namespace GlueRH
 		DeviceSettings mCurrentSettings;
 
 		
-		ApplicationPtr mApplication;
-
-	
-	
-	
-	
-	
-	
-	
-	
+		ApplicationPtr mApplication;	
 	
 	};
 }

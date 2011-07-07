@@ -3,6 +3,8 @@
 
 #include "Common.h"
 #include "DeviceSettings.h"
+#include "Direct3DUtil.h"
+
 
 namespace GlueRH
 {
@@ -14,11 +16,49 @@ namespace GlueRH
 	 *  this as on adapter with two outputs attached.
 	 */
 
-	struct DeviceInfo;
-	struct OutputInfo;
-	struct SettingsCombo;
-
+	struct DeviceInfo
+	{
+		int32 AdapterOrdinal;
+		D3D10_DRIVER_TYPE DriverType ;
+	};
 	
+
+	struct OutputInfo
+	{
+	private:
+		OutputInfo( const OutputInfo& );
+		OutputInfo& operator= ( const OutputInfo& );
+
+	public:
+		int OutputOrdinal; 
+		DXGI_OUTPUT_DESC OutputDescription;
+		std::vector<DXGI_MODE_DESC> DisplayModes;
+
+		IDXGIOutput* Output;
+
+	public:
+		OutputInfo() : Output(0) {}
+		~OutputInfo() { SafeRelease(&Output); }
+	};
+	
+	typedef std::shared_ptr<OutputInfo> OutputInfoPtr;
+
+
+	struct SettingsCombo
+	{
+		int32 AdapterOrdinal;
+		int32 OutputOrdinal;
+		D3D10_DRIVER_TYPE DriverType;
+		Format BackBufferFormat;
+		bool IsWindowed;
+		std::vector<int32> MultisampleCounts;
+		std::vector<int32> MultisampleQualities;
+		OutputInfoPtr OutputInfo;
+	};
+
+	typedef std::shared_ptr<SettingsCombo> SettingsComboPtr;
+		
+
 	struct AdapterInfo
 	{
 	private:
@@ -30,60 +70,49 @@ namespace GlueRH
 		DXGI_ADAPTER_DESC  AdapterDescription;
 		std::string Description;
 		std::vector<DeviceInfo> Devices;
-		std::vector<OutputInfo> Outputs;
-		std::vector<SettingsCombo> SettingsCombos;
+		std::vector<OutputInfoPtr> Outputs;
+		std::vector<SettingsComboPtr> SettingsCombos;
 		IDXGIAdapter* Adapter;
-	};
 
-	struct OutputInfo
-	{
-	private:
-		OutputInfo( const OutputInfo& );
-		OutputInfo& operator= ( const OutputInfo& );
-	
 	public:
-		int OutputOrdinal; 
-		DXGI_OUTPUT_DESC OutputDescription;
-		std::vector<DXGI_MODE_DESC> DisplayModes;
-
-		IDXGIOutput* Output;
+		AdapterInfo() : Adapter( 0 ) {}
+		~AdapterInfo()  { SafeRelease(&Adapter); } 
 	};
 
-	struct DeviceInfo
-	{
-		int32 AdapterOrdinal;
-		D3D10_DRIVER_TYPE DriverType ;
-	};
+	
+	typedef std::shared_ptr<AdapterInfo> AdapterInfoPtr;
 
-
-	struct SettingsCombo
-	{
-		int32 AdapterOrdinal;
-
-		D3D10_DRIVER_TYPE DriverType;
-
-		Format BackBufferFormat;
-
-		bool IsWindowed;
-
-		int32 OutputOrdinal;
-
-		std::vector<int32> MultisampleCounts;
-
-		std::vector<int32> MultisampleQualities;
-
-		OutputInfo OutputInfo;
-	};
+	
 
 	class Enumeration
 	{
-	public:
+	private:
 		Enumeration(void);
 		~Enumeration(void);
 
-	static DeviceSettings MinimumSettings;
+	public:
 
-	static void Enumerate( IDXGIFactory* pFactory );
+		static OutputInfoPtr GetOutputInfo(int adapterOrdinal, int outputOrdinal);
+
+		static void EnumerateOutputs( AdapterInfoPtr& adapterInfo);
+
+		static void EnumerateDisplayModes( OutputInfoPtr& outputInfo);
+
+		static void EnumerateDevices( AdapterInfoPtr& adapterInfo);
+
+		static void EnumerateSettingsCombos( AdapterInfoPtr& adapterInfo);
+
+		static void Enumerate( IDXGIFactory* pFactory );
+
+		static void BuildMultisampleList(DXGI_FORMAT backBufferFormat, const SettingsComboPtr& combo);
+
+		static const std::vector<AdapterInfoPtr>&  GetAdapters() ;
+
+	private:
+		static std::vector<AdapterInfoPtr> Adapters;
+		static bool HasEnumerated;
+		static DeviceSettings MinimumSettings;
+
 
 	};
 
