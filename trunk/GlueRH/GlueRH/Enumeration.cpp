@@ -1,4 +1,5 @@
 #include "Enumeration.h"
+#include "Direct3DUtil.h"
 #include <string>
 
 namespace GlueRH
@@ -9,14 +10,31 @@ namespace GlueRH
 	static std::vector<AdapterInfoPtr> Adapters;
 	static DeviceSettings MinimumSettings;
 
-
 	Enumeration::Enumeration(void)
 	{
 	}
 
-
 	Enumeration::~Enumeration(void)
 	{
+	}
+
+	GlueRH::OutputInfoPtr Enumeration::GetOutputInfo( int32 adapterOrdinal, int32 outputOrdinal )
+	{
+		AdapterInfoPtr adapter;
+		for(auto iter = Adapters.begin(); iter != Adapters.end(); ++iter)
+		{ 
+			if (adapterOrdinal == (*iter)->AdapterOrdinal)
+			{
+				adapter = (*iter);
+				break;
+			}
+		}
+		if(adapter)
+		{
+			if( (int32)adapter->Outputs.size() > outputOrdinal )
+				return adapter->Outputs[outputOrdinal];
+		}
+		throw std::exception("No Such Output");
 	}
 
 	void Enumeration::EnumerateSettingsCombos(  AdapterInfoPtr& adapterInfo )
@@ -173,25 +191,6 @@ namespace GlueRH
 		}
 	}
 
-	GlueRH::OutputInfoPtr Enumeration::GetOutputInfo( int32 adapterOrdinal, int32 outputOrdinal )
-	{
-		AdapterInfoPtr adapter;
-		for(auto iter = Adapters.begin(); iter != Adapters.end(); ++iter)
-        { 
-			if (adapterOrdinal == (*iter)->AdapterOrdinal)
-            {
-				adapter = (*iter);
-				break;
-            }
-        }
-		if(adapter)
-		{
-			if( (int32)adapter->Outputs.size() > outputOrdinal )
-				return adapter->Outputs[outputOrdinal];
-		}
-        throw std::exception("No Such Output");
-	}
-
 	void GlueRH::Enumeration::Enumerate( IDXGIFactory* pFactory )
 	{
 		HasEnumerated = true;
@@ -251,6 +250,34 @@ namespace GlueRH
 		if (rational.Denominator != 0)
 			denom = static_cast<float>( rational.Denominator );
 		return rational.Numerator / denom;
+	}
+
+	void Enumeration::BuildMultisampleList( DXGI_FORMAT backBufferFormat, const SettingsComboPtr& combo )
+	{
+		IDXGIAdapter* pAdapter = NULL;
+		if (combo->DriverType == D3D10_DRIVER_TYPE_HARDWARE)
+		{
+			IDXGIFactory * pFactory;
+			HR( CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)(&pFactory) ) );
+			assert( DXGI_ERROR_NOT_FOUND != pFactory->EnumAdapters(combo->AdapterOrdinal, &pAdapter) );
+			
+			ID3D10Device* pDevice;
+			HR( D3D10CreateDevice( pAdapter, D3D10_DRIVER_TYPE_HARDWARE, 0, 0, D3D10_SDK_VERSION, &pDevice ) );
+
+			for(int i = 1; i < D3D10_MAX_MULTISAMPLE_SAMPLE_COUNT; i++)
+			{
+				UINT quality = 0;
+				HR(pDevice->CheckMultisampleQualityLevels(backBufferFormat, i, &quality));
+				if ( quality != 0 )
+				{
+					combo->MultisampleQualities.push_back(quality);
+				}
+			}
+
+			SafeRelease(&pDevice);
+			SafeRelease(&pFactory);
+			SafeRelease(&pAdapter);
+		}
 	}
 
 }
