@@ -68,7 +68,7 @@ namespace GlueRH
 	public:
 		int AdapterOrdinal;
 		DXGI_ADAPTER_DESC  AdapterDescription;
-		std::string Description;
+		std::wstring Description;
 		std::vector<DeviceInfo> Devices;
 		std::vector<OutputInfoPtr> Outputs;
 		std::vector<SettingsComboPtr> SettingsCombos;
@@ -92,7 +92,7 @@ namespace GlueRH
 
 	public:
 
-		static OutputInfoPtr GetOutputInfo(int adapterOrdinal, int outputOrdinal);
+		static OutputInfoPtr GetOutputInfo(int32 adapterOrdinal, int32 outputOrdinal);
 
 		static void EnumerateOutputs( AdapterInfoPtr& adapterInfo);
 
@@ -109,9 +109,20 @@ namespace GlueRH
 		static const std::vector<AdapterInfoPtr>&  GetAdapters() ;
 
 	private:
+
+		/** The DXGI_RATIONAL structure operates under the following rules:
+		 *  0/0 is legal and will be interpreted as 0/1. 
+		 *  0/anything is interpreted as zero. 
+		 *  If you are representing a whole number, the denominator should be 1.
+		 */
+		static float ToFloat(DXGI_RATIONAL rational);
+
+
+	private:
 		static std::vector<AdapterInfoPtr> Adapters;
 		static bool HasEnumerated;
 		static DeviceSettings MinimumSettings;
+		static bool HasMinimumSettings;
 
 
 	};
