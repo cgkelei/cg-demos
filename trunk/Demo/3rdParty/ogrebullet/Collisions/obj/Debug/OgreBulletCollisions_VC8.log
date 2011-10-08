@@ -1,0 +1,91 @@
+﻿生成启动时间为 2011/9/28 16:15:52。
+     1>项目“F:\3rdParty\ogrebullet\Collisions\scripts\VC8\OgreBulletCollisions_VC8.vcxproj”在节点 2 上(rebuild 个目标)。
+     1>_PrepareForClean:
+         正在删除文件“..\..\obj\Debug\OgreBulletCollisions.lastbuildstate”。
+       InitializeBuildStatus:
+         正在创建“..\..\obj\Debug\OgreBulletCollisions.unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+       ClCompile:
+         d:\Program Files\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\..\include /I"F:\3rdParty\bullet-2.79\src" /I"F:\3rdParty\bullet-2.79\Extras\ConvexDecomposition" /I"F:\ogre_src_v1-7-3\OgreMain\include" /I"F:\ogre_src_v1-7-3\Build\include" /Zi /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _PRECOMP /D _UNICODE /D UNICODE /Gm /EHsc /RTCc /RTC1 /MDd /GS /fp:fast /Zc:wchar_t /Zc:forScope /Yc"OgreBulletCollisions.h" /Fp"..\..\obj\Debug\OgreBulletCollisions.pch" /Fo"..\..\obj\Debug\\" /Fd"..\..\obj\Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\src\OgreBulletCollisionsPrecompiled.cpp -Zm1000 
+         OgreBulletCollisionsPrecompiled.cpp
+         d:\Program Files\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\..\include /I"F:\3rdParty\bullet-2.79\src" /I"F:\3rdParty\bullet-2.79\Extras\ConvexDecomposition" /I"F:\ogre_src_v1-7-3\OgreMain\include" /I"F:\ogre_src_v1-7-3\Build\include" /Zi /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _PRECOMP /D _UNICODE /D UNICODE /Gm /EHsc /RTCc /RTC1 /MDd /GS /fp:fast /Zc:wchar_t /Zc:forScope /Yu"OgreBulletCollisions.h" /Fp"..\..\obj\Debug\OgreBulletCollisions.pch" /Fo"..\..\obj\Debug\\" /Fd"..\..\obj\Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\src\OgreBulletCollisionsObject.cpp ..\..\src\OgreBulletCollisionsObjectState.cpp ..\..\src\OgreBulletCollisionsRay.cpp ..\..\src\OgreBulletCollisionsShape.cpp ..\..\src\OgreBulletCollisionsWorld.cpp ..\..\src\Shapes\OgreBulletCollisionsBoxShape.cpp ..\..\src\Shapes\OgreBulletCollisionsCapsuleShape.cpp ..\..\src\Shapes\OgreBulletCollisionsCompoundShape.cpp ..\..\src\Shapes\OgreBulletCollisionsConeShape.cpp ..\..\src\Shapes\OgreBulletCollisionsConvexHullShape.cpp ..\..\src\Shapes\OgreBulletCollisionsCylinderShape.cpp ..\..\src\Shapes\OgreBulletCollisionsGImpactShape.cpp ..\..\src\Shapes\OgreBulletCollisionsMinkowskiSumShape.cpp ..\..\src\Shapes\OgreBulletCollisionsMultiSphereShape.cpp ..\..\src\Shapes\OgreBulletCollisionsSphereShape.cpp ..\..\src\Shapes\OgreBulletCollisionsStaticPlaneShape.cpp ..\..\src\Shapes\OgreBulletCollisionsTriangleShape.cpp ..\..\src\Shapes\OgreBulletCollisionsTrimeshShape.cpp ..\..\src\Utils\OgreBulletCollisionsMeshToShapeConverter.cpp ..\..\src\Debug\OgreBulletCollisionsDebugContact.cpp ..\..\src\Debug\OgreBulletCollisionsDebugDrawer.cpp ..\..\src\Debug\OgreBulletCollisionsDebugLines.cpp ..\..\src\Debug\OgreBulletCollisionsDebugShape.cpp -Zm1000 
+         OgreBulletCollisionsDebugShape.cpp
+         OgreBulletCollisionsDebugLines.cpp
+         OgreBulletCollisionsDebugDrawer.cpp
+         OgreBulletCollisionsDebugContact.cpp
+     1>..\..\src\Debug\OgreBulletCollisionsDebugContact.cpp(357): warning C4244: “=”: 从“double”转换到“unsigned int”，可能丢失数据
+     1>..\..\src\Debug\OgreBulletCollisionsDebugContact.cpp(377): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
+     1>..\..\src\Debug\OgreBulletCollisionsDebugContact.cpp(391): warning C4244: “+=”: 从“double”转换到“Ogre::Real”，可能丢失数据
+     1>..\..\src\Debug\OgreBulletCollisionsDebugContact.cpp(399): warning C4244: “-=”: 从“double”转换到“float”，可能丢失数据
+     1>..\..\src\Debug\OgreBulletCollisionsDebugContact.cpp(454): warning C4244: “-=”: 从“double”转换到“float”，可能丢失数据
+     1>..\..\src\Debug\OgreBulletCollisionsDebugContact.cpp(475): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
+     1>..\..\src\Debug\OgreBulletCollisionsDebugContact.cpp(476): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
+     1>..\..\src\Debug\OgreBulletCollisionsDebugContact.cpp(516): warning C4244: “-=”: 从“double”转换到“float”，可能丢失数据
+     1>..\..\src\Debug\OgreBulletCollisionsDebugContact.cpp(517): warning C4244: “-=”: 从“double”转换到“float”，可能丢失数据
+     1>..\..\src\Debug\OgreBulletCollisionsDebugContact.cpp(534): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
+     1>..\..\src\Debug\OgreBulletCollisionsDebugContact.cpp(553): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
+         OgreBulletCollisionsMeshToShapeConverter.cpp
+     1>..\..\src\Utils\OgreBulletCollisionsMeshToShapeConverter.cpp(235): warning C4244: “=”: 从“double”转换到“Ogre::Real”，可能丢失数据
+     1>..\..\src\Utils\OgreBulletCollisionsMeshToShapeConverter.cpp(949): warning C4244: “参数”: 从“double”转换到“const Ogre::Real”，可能丢失数据
+     1>..\..\src\Utils\OgreBulletCollisionsMeshToShapeConverter.cpp(949): warning C4244: “参数”: 从“double”转换到“const Ogre::Real”，可能丢失数据
+     1>..\..\src\Utils\OgreBulletCollisionsMeshToShapeConverter.cpp(949): warning C4244: “参数”: 从“double”转换到“const Ogre::Real”，可能丢失数据
+     1>..\..\src\Utils\OgreBulletCollisionsMeshToShapeConverter.cpp(976): warning C4244: “初始化”: 从“double”转换到“const Ogre::Real”，可能丢失数据
+     1>..\..\src\Utils\OgreBulletCollisionsMeshToShapeConverter.cpp(1022): warning C4244: “参数”: 从“double”转换到“const Ogre::Real”，可能丢失数据
+     1>..\..\src\Utils\OgreBulletCollisionsMeshToShapeConverter.cpp(1023): warning C4244: “参数”: 从“double”转换到“const Ogre::Real”，可能丢失数据
+     1>..\..\src\Utils\OgreBulletCollisionsMeshToShapeConverter.cpp(1024): warning C4244: “参数”: 从“double”转换到“const Ogre::Real”，可能丢失数据
+         OgreBulletCollisionsTrimeshShape.cpp
+         OgreBulletCollisionsTriangleShape.cpp
+         OgreBulletCollisionsStaticPlaneShape.cpp
+         OgreBulletCollisionsSphereShape.cpp
+         OgreBulletCollisionsMultiSphereShape.cpp
+         OgreBulletCollisionsMinkowskiSumShape.cpp
+         OgreBulletCollisionsGImpactShape.cpp
+         OgreBulletCollisionsCylinderShape.cpp
+         OgreBulletCollisionsConvexHullShape.cpp
+         OgreBulletCollisionsConeShape.cpp
+         OgreBulletCollisionsCompoundShape.cpp
+         OgreBulletCollisionsCapsuleShape.cpp
+         OgreBulletCollisionsBoxShape.cpp
+         OgreBulletCollisionsWorld.cpp
+         OgreBulletCollisionsShape.cpp
+         正在生成代码...
+         正在编译...
+         OgreBulletCollisionsRay.cpp
+         OgreBulletCollisionsObjectState.cpp
+         OgreBulletCollisionsObject.cpp
+         正在生成代码...
+     1>C:\Program Files\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppBuild.targets(1151,5): warning MSB8012: TargetPath(F:\3rdParty\ogrebullet\Collisions\scripts\VC8\..\..\..\lib\Debug\OgreBulletCollisions.lib) 与 Library 的 OutputFile 属性值(F:\3rdParty\ogrebullet\lib\Debug\OgreBulletCollisions_d.lib)不匹配。这可能导致项目生成不正确。若要更正此问题，请确保 $(OutDir)、$(TargetName) 和 $(TargetExt) 属性值与 %(Lib.OutputFile) 中指定的值匹配。
+     1>C:\Program Files\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppBuild.targets(1153,5): warning MSB8012: TargetName(OgreBulletCollisions) 与 Library 的 OutputFile 属性值(OgreBulletCollisions_d)不匹配。这可能导致项目生成不正确。若要更正此问题，请确保 $(OutDir)、$(TargetName) 和 $(TargetExt) 属性值与 %(Lib.OutputFile) 中指定的值匹配。
+       Lib:
+         d:\Program Files\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"..\..\..\lib\Debug\OgreBulletCollisions_d.lib" /NOLOGO ..\..\obj\Debug\OgreBulletCollisionsObject.obj
+         ..\..\obj\Debug\OgreBulletCollisionsObjectState.obj
+         ..\..\obj\Debug\OgreBulletCollisionsPrecompiled.obj
+         ..\..\obj\Debug\OgreBulletCollisionsRay.obj
+         ..\..\obj\Debug\OgreBulletCollisionsShape.obj
+         ..\..\obj\Debug\OgreBulletCollisionsWorld.obj
+         ..\..\obj\Debug\OgreBulletCollisionsBoxShape.obj
+         ..\..\obj\Debug\OgreBulletCollisionsCapsuleShape.obj
+         ..\..\obj\Debug\OgreBulletCollisionsCompoundShape.obj
+         ..\..\obj\Debug\OgreBulletCollisionsConeShape.obj
+         ..\..\obj\Debug\OgreBulletCollisionsConvexHullShape.obj
+         ..\..\obj\Debug\OgreBulletCollisionsCylinderShape.obj
+         ..\..\obj\Debug\OgreBulletCollisionsGImpactShape.obj
+         ..\..\obj\Debug\OgreBulletCollisionsMinkowskiSumShape.obj
+         ..\..\obj\Debug\OgreBulletCollisionsMultiSphereShape.obj
+         ..\..\obj\Debug\OgreBulletCollisionsSphereShape.obj
+         ..\..\obj\Debug\OgreBulletCollisionsStaticPlaneShape.obj
+         ..\..\obj\Debug\OgreBulletCollisionsTriangleShape.obj
+         ..\..\obj\Debug\OgreBulletCollisionsTrimeshShape.obj
+         ..\..\obj\Debug\OgreBulletCollisionsMeshToShapeConverter.obj
+         ..\..\obj\Debug\OgreBulletCollisionsDebugContact.obj
+         ..\..\obj\Debug\OgreBulletCollisionsDebugDrawer.obj
+         ..\..\obj\Debug\OgreBulletCollisionsDebugLines.obj
+         ..\..\obj\Debug\OgreBulletCollisionsDebugShape.obj
+         OgreBulletCollisions_VC8.vcxproj -> F:\3rdParty\ogrebullet\Collisions\scripts\VC8\..\..\..\lib\Debug\OgreBulletCollisions.lib
+       FinalizeBuildStatus:
+         正在删除文件“..\..\obj\Debug\OgreBulletCollisions.unsuccessfulbuild”。
+         正在对“..\..\obj\Debug\OgreBulletCollisions.lastbuildstate”执行 Touch 任务。
+     1>已完成生成项目“F:\3rdParty\ogrebullet\Collisions\scripts\VC8\OgreBulletCollisions_VC8.vcxproj”(rebuild 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:07.99
