@@ -1,0 +1,72 @@
+// Example emitted emitters
+particle_system PartilceBomb
+{
+		    material Examples/Flare
+		    point_rendering            false
+		    particle_width             50
+		    particle_height            50
+		    quota                      1000
+		    emit_emitter_quota         1
+		    billboard_type             point 
+
+    
+    // Emitter that emits multiple Point emitters with name 'explosion'
+    emitter Point
+    {
+        name                    mainEmitter
+        emit_emitter            explosion
+        emission_rate           1
+				duration								0.3
+        time_to_live            2
+				repeat_delay 						2	
+        direction               0 1 0
+        velocity                10
+    }
+
+    // This Point emitter is emitted by the Box emitter and emits billboard particles itself
+    emitter Point
+    {
+        name                    explosion
+        angle                   180
+        emission_rate           1000
+				time_to_live_min				1
+        time_to_live_max        3       
+        velocity                80
+        duration                0.1
+        repeat_delay_min        2
+        repeat_delay_max        3
+    }
+		affector ColourFader
+		{
+				red											-0.3
+				green										-0.31
+				blue										-0.2	
+				alpha 									-0.1
+		}
+     // Give em some nice colours
+    affector ColourInterpolator
+    {
+        time0                   0
+        colour0                 0.98 0.99 0.61
+        time1                   0.2
+        colour1                 1 0.61 0.17
+        time2                   0.4
+        colour2                 0.91 0.47 0.04
+        time3                   0.6
+        colour3                 0.51 0.17 0
+        time4                   0.8
+        colour4                 0.32 0.11 0.01
+        time5                   1
+        colour5                 0.1 0.07 0.02
+    }
+    
+    affector Scaler
+    {
+	 			rate										-15	
+     }
+    affector Rotator
+    {
+    		rotation_range_start   180
+    		rotation_range_end 		 360
+    }
+}

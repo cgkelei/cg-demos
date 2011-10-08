@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<scene formatVersion="1.0.0" generator="Ogitor SceneBuilder 0.4.2">  
+    <environment>
+        <colourAmbient r="0.5" g="0.5" b="0.5" a="1" />
+        <skyDome active="true" material="Examples/CloudySky" curvature="5" tiling="8" distance="500" />
+</environment>
+
+  <!--- <nodes>
+        <node name="Shuttle01">
+            <position x="300" y="500.38" z="-0.951006" />
+            <scale x="1" y="1" z="1" />
+            <rotation qx="0.707107" qy="0" qz="0" qw="0.707107" />
+            <entity name="Shuttle01" castShadows="true" receiveShadows="true" meshFile="Shuttle01.mesh">
+                <subentities>
+                    <subentity index="0" materialName="VMtl01" />
+                </subentities>
+            </entity>
+    </node>
+    <node name="Shuttle02">
+            <position x="-300" y="500.89" z="-100" />
+            <scale x="1" y="1" z="1" />
+            <rotation qx="0" qy="0" qz="0" qw="1" />
+            <entity name="Shuttle02" castShadows="true" receiveShadows="true" meshFile="Shuttle02.mesh">
+                <subentities>
+                    <subentity index="0" materialName="VMtl01" />
+                </subentities>
+            </entity>
+    </node>
+    <node name="SpaceFighter01">
+            <position x="1000" y="500" z="300" />
+            <scale x="1" y="1" z="1" />
+            <rotation qx="0" qy="0" qz="0" qw="1" />
+            <entity name="SpaceFighter02" castShadows="true" receiveShadows="true" meshFile="SpaceFighter02.mesh">
+                <subentities>
+                    <subentity index="0" materialName="VMtl01" />
+                </subentities>
+            </entity>
+    </node>
+
+    <node name="Shuttle03">
+            <position x="2000" y="1500.38" z="-1500" />
+            <scale x="1" y="1" z="1" />
+            <rotation qx="0.707107" qy="0" qz="0" qw="0.707107" />
+            <entity name="Shuttle01" castShadows="true" receiveShadows="true" meshFile="Shuttle01.mesh">
+                <subentities>
+                    <subentity index="0" materialName="VMtl01" />
+                </subentities>
+            </entity>
+    </node>
+    <node name="Shuttle04">
+            <position x="-2000" y="2000.89" z="1500" />
+            <scale x="1" y="1" z="1" />
+            <rotation qx="0" qy="0" qz="0" qw="1" />
+            <entity name="Shuttle02" castShadows="true" receiveShadows="true" meshFile="Shuttle02.mesh">
+                <subentities>
+                    <subentity index="0" materialName="VMtl01" />
+                </subentities>
+            </entity>
+    </node>
+    <node name="SpaceFighter02">
+            <position x="-3000" y="3500" z="3300" />
+            <scale x="1" y="1" z="1" />
+            <rotation qx="0" qy="0" qz="0" qw="1" />
+            <entity name="SpaceFighter02" castShadows="true" receiveShadows="true" meshFile="SpaceFighter02.mesh">
+                <subentities>
+                    <subentity index="0" materialName="VMtl01" />
+                </subentities>
+            </entity>
+    </node> -->
+
+    <enemy name="enemy001">
+	    <position x="2000" y="1500.38" z="-1500" />
+	    <scale x="1" y="1" z="1" />
+	    <rotation qx="0" qy="0" qz="0" qw="1" />
+	    <entity name="SpaceFighter02" castShadows="true" receiveShadows="true" meshFile="SpaceFighter02.mesh" />
+    </enemy>
+
+    <enemy name="enemy002">
+	    <position x="2000" y="1500.38" z="-1500" />
+	    <scale x="1" y="1" z="1" />
+	    <rotation qx="0" qy="0" qz="0" qw="1" />
+	    <entity name="SpaceFighter02" castShadows="true" receiveShadows="true" meshFile="SpaceFighter02.mesh" />
+    </enemy>
+
+    <enemy name="enemy003">
+	    <position x="2000" y="1500.38" z="-1500" />
+	    <scale x="1" y="1" z="1" />
+	    <rotation qx="0" qy="0" qz="0" qw="1" />
+	    <entity name="SpaceFighter02" castShadows="true" receiveShadows="true" meshFile="SpaceFighter02.mesh" />
+    </enemy>
+
+    <enemy name="enemy004">
+	    <position x="2000" y="1500.38" z="-1500" />
+	    <scale x="1" y="1" z="1" />
+	    <rotation qx="0" qy="0" qz="0" qw="1" />
+	    <entity name="SpaceFighter02" castShadows="true" receiveShadows="true" meshFile="SpaceFighter02.mesh" />
+    </enemy>
+
+	 
+
+
+
+</scene>
+
