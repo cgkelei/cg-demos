@@ -1,0 +1,91 @@
+/* calendar config */
+
+#wp-calendar {
+	empty-cells: show;
+	width: 200px;
+	font-size: 12px;
+	color: #999999;
+	text-decoration: none;
+	text-align: center;
+	float: left;
+	padding: 0px;
+	margin: 0px;
+	font-weight: normal;
+}
+
+#wp-calendar a:link, #wp-calendar a:visited {
+	text-decoration: none;
+	color: #CCCC00;
+}
+#wp-calendar a:hover, #wp-calendar a:active {
+	text-decoration: none;
+	color: #999999;
+}
+#wp-calendar caption {
+	text-align: left;
+	width: 190px;
+	margin: 0px;
+	padding-top: 0px;
+	padding-right: 0px;
+	padding-bottom: 0px;
+	padding-left: 10px;
+	color: #7D7D7D;
+	font-size: 1.6em;
+	background-image: url(../Copy%20of%20chad/images/cats.gif);
+	background-repeat: no-repeat;
+	background-position: left;
+	height: 36px;
+	line-height: 36px;
+}
+
+#wp-calendar th {
+	margin: 0px;
+	padding: 0px;
+	text-align: center;
+}
+
+#next a:link, #next a:visited {
+	text-align: center;
+	color: #CCCCCC;
+	text-decoration: none;
+	font-weight: bold;
+	font-size: 12px;
+	float: right;
+}
+#next a:hover, #next a:active {
+	text-align: center;
+	color: #999900;
+	text-decoration: none;
+	font-weight: bold;
+	font-size: 12px;
+	float: right;
+}
+
+#prev a:link, #prev a:visited {
+	text-align: left;
+	color: #CCCC99;
+	text-decoration: none;
+	font-weight: bold;
+	font-size: 12px;
+	float: left;
+}
+#prev a:hover, #prev a:active {
+	text-align: left;
+	color: #999900;
+	text-decoration: none;
+	font-weight: bold;
+	font-size: 12px;
+	float: left;
+}
+#wp-calendar td {
+	margin: 0px;
+	padding: 0px;
+	text-align: center;
+}
+#wp-calendar tf {
+	margin: 0px;
+	padding: 0px;
+}
+.pad {
+	text-align: center;
+}
