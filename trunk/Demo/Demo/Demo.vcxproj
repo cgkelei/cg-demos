@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{79512FE2-CC66-4D97-9299-C6FBE4DBD0BE}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Demo</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>F:\ogre_src_v1-7-3\Build\sdk\include\OGRE;F:\ogre_src_v1-7-3\Build\sdk\include\OIS;F:\ogre_src_v1-7-3\Build\sdk\include\OGRE\Paging;F:\ogre_src_v1-7-3\Build\sdk\include\OGRE\Terrain;../3rdParty/ogrebullet/Collisions\include;../3rdParty/ogrebullet/Dynamics\include;../3rdParty/bullet-2.79/src;../3rdParty/rapidxml-1.13;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>F:\ogre_src_v1-7-3\Build\sdk\lib\debug;../3rdParty/ogrebullet/lib/Debug;../3rdParty/bullet-2.79/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OgreMain_d.lib;OIS_d.lib;OgreTerrain_d.lib;OgrePaging_d.lib;BulletCollision_debug.lib;BulletDynamics_debug.lib;LinearMath_debug.lib;OgreBulletCollisions_d.lib;OgreBulletDynamics_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>F:\ogre_src_v1-7-3\Build\sdk\include\OGRE;F:\ogre_src_v1-7-3\Build\sdk\include\OIS;F:\ogre_src_v1-7-3\Build\sdk\include\OGRE\Paging;F:\ogre_src_v1-7-3\Build\sdk\include\OGRE\Terrain;../3rdParty/ogrebullet/Collisions\include;../3rdParty/ogrebullet/Dynamics\include;../3rdParty/bullet-2.79/src;../3rdParty/rapidxml-1.13;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>F:\ogre_src_v1-7-3\Build\sdk\lib\release;../3rdParty/ogrebullet/lib/Release;../3rdParty/bullet-2.79/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OgreMain.lib;OIS.lib;OgreTerrain.lib;OgrePaging.lib;BulletCollision.lib;BulletDynamics.lib;LinearMath.lib;OgreBulletCollisions.lib;OgreBulletDynamics.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="BaseApplication.cpp" />
+    <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="ChaseCameraControler.cpp" />
+    <ClCompile Include="DotSceneLoader.cpp" />
+    <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="GameLevel.cpp" />
+    <ClCompile Include="GameState.cpp" />
+    <ClCompile Include="GameTerrain.cpp" />
+    <ClCompile Include="Missile.cpp" />
+    <ClCompile Include="ParticleManager.cpp" />
+    <ClCompile Include="PhysicsEngine.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="ShipGame.cpp" />
+    <ClCompile Include="ShipGameObject.cpp" />
+    <ClCompile Include="Weapon.cpp" />
+    <ClCompile Include="WeaponFactory.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BaseApplication.h" />
+    <ClInclude Include="Bullet.h" />
+    <ClInclude Include="BulletCommon.h" />
+    <ClInclude Include="ChaseCameraControler.h" />
+    <ClInclude Include="Common.h" />
+    <ClInclude Include="DotSceneLoader.h" />
+    <ClInclude Include="Enemy.h" />
+    <ClInclude Include="GameConstants.h" />
+    <ClInclude Include="GameLevel.h" />
+    <ClInclude Include="GameState.h" />
+    <ClInclude Include="GameTerrain.h" />
+    <ClInclude Include="Missile.h" />
+    <ClInclude Include="ParticleManager.h" />
+    <ClInclude Include="PhysicsEngine.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="ShipGame.h" />
+    <ClInclude Include="ShipGameObject.h" />
+    <ClInclude Include="Utilities.h" />
+    <ClInclude Include="Weapon.h" />
+    <ClInclude Include="WeaponFactory.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
