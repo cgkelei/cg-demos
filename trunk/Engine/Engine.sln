@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcproj", "{E3BB8805-F404-44F6-AAE0-58997F1BD39B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RenderSystyem_Direct3D9", "RenderSystyem_Direct3D9\RenderSystyem_Direct3D9.vcproj", "{4412D291-4A34-4432-BFE3-5475B631DBF8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E3BB8805-F404-44F6-AAE0-58997F1BD39B} = {E3BB8805-F404-44F6-AAE0-58997F1BD39B}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test\Test.vcproj", "{534BBA33-2C5F-4042-A346-425F0CC80E9A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E3BB8805-F404-44F6-AAE0-58997F1BD39B} = {E3BB8805-F404-44F6-AAE0-58997F1BD39B}
+		{4412D291-4A34-4432-BFE3-5475B631DBF8} = {4412D291-4A34-4432-BFE3-5475B631DBF8}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RenderSystem_OpenGL", "RenderSystem_OpenGL\RenderSystem_OpenGL.vcproj", "{F9005AE9-90BA-41F8-BC4E-C22C8845CA94}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MathTest", "MathTest\MathTest.vcproj", "{B9B7514E-72D4-4F7F-BE3C-0CEA55F97559}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E3BB8805-F404-44F6-AAE0-58997F1BD39B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E3BB8805-F404-44F6-AAE0-58997F1BD39B}.Debug|Win32.Build.0 = Debug|Win32
+		{E3BB8805-F404-44F6-AAE0-58997F1BD39B}.Release|Win32.ActiveCfg = Release|Win32
+		{E3BB8805-F404-44F6-AAE0-58997F1BD39B}.Release|Win32.Build.0 = Release|Win32
+		{4412D291-4A34-4432-BFE3-5475B631DBF8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4412D291-4A34-4432-BFE3-5475B631DBF8}.Debug|Win32.Build.0 = Debug|Win32
+		{4412D291-4A34-4432-BFE3-5475B631DBF8}.Release|Win32.ActiveCfg = Release|Win32
+		{4412D291-4A34-4432-BFE3-5475B631DBF8}.Release|Win32.Build.0 = Release|Win32
+		{534BBA33-2C5F-4042-A346-425F0CC80E9A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{534BBA33-2C5F-4042-A346-425F0CC80E9A}.Debug|Win32.Build.0 = Debug|Win32
+		{534BBA33-2C5F-4042-A346-425F0CC80E9A}.Release|Win32.ActiveCfg = Release|Win32
+		{534BBA33-2C5F-4042-A346-425F0CC80E9A}.Release|Win32.Build.0 = Release|Win32
+		{F9005AE9-90BA-41F8-BC4E-C22C8845CA94}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F9005AE9-90BA-41F8-BC4E-C22C8845CA94}.Release|Win32.ActiveCfg = Release|Win32
+		{F9005AE9-90BA-41F8-BC4E-C22C8845CA94}.Release|Win32.Build.0 = Release|Win32
+		{B9B7514E-72D4-4F7F-BE3C-0CEA55F97559}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B9B7514E-72D4-4F7F-BE3C-0CEA55F97559}.Debug|Win32.Build.0 = Debug|Win32
+		{B9B7514E-72D4-4F7F-BE3C-0CEA55F97559}.Release|Win32.ActiveCfg = Release|Win32
+		{B9B7514E-72D4-4F7F-BE3C-0CEA55F97559}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

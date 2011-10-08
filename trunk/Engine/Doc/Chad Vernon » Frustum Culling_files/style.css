@@ -1,0 +1,918 @@
+/*
+Theme Name: Chad2
+Theme URI: http://www.chadvernon.com
+Description: Second theme
+Author: Chad Vernon
+Designer: Chad Vernon
+Coder: Chad Vernon
+Author URI: http://www.chadvernon.com
+Version: 1.0
+
+Copyright 2008-2009 Chad Vernon
+
+*/
+
+body {
+	margin: 0px;
+	font-family: Tahoma, Verdana, Arial, Helvetica;
+	text-align: left;
+	font-size: 80%;
+	color: #ccc;
+	background-color: #000;
+	background-image: url(images/bg.jpg);
+	background-repeat: repeat;
+}
+
+#chad_wp {
+	width: 940px;
+	margin: 40px auto;
+	padding: 0px 10px 0px 10px;
+	border: 1px solid #333333;
+	background-color: #1a1a1a;
+}
+#chad_container {
+	/*float: left;*/
+	/*width: 940px;*/
+
+}
+
+#chad_header {
+	/*float: left;*/
+	height: 100px;
+	width: 938px;
+	margin: 0;
+
+	background-image: url(../chad2/images/logo.jpg);
+	background-repeat: no-repeat;
+	/*background-position: center center;
+	background-color: transparent;*/
+	border-bottom: 1px solid #333;
+}
+
+#logo {
+	width: 350px;
+	height: 100px;
+	display: inline;
+	float: left;
+}
+/*#header_anchor {
+	width: 400px;
+	height: 150px;
+	text-decoration: none;
+}*/
+#chad_navigator {
+	height: 75px;
+	padding: 4px 0 4px 0;
+	overflow:hidden;
+}
+#chad_navigator_list {
+	float: right;
+	padding: 0;
+	margin: 30px 0 0 0;
+	list-style: none;
+}
+#chad_navigator_list li {
+	float: left;
+	border-right: 1px solid #333333;
+	text-align: center;
+}
+
+#dynamic_sidebars {
+	position: absolute;
+	width: auto;
+	height: auto;
+	top: 0px;
+	right:0px;
+	background-color: #1A1A1A;
+	border: 1px solid #333333;
+	z-index: 10;
+}
+
+
+
+
+#sideBarTab {
+	float:left;
+	height:137px;
+	width:28px;
+	border: 0px;
+
+}
+
+#sideBarContents {
+	overflow:hidden !important;
+}
+
+#sideBarContentsInner {
+	width:200px;
+	padding: 10px;
+
+}
+
+#sideBarContentsInner li{
+	margin:0px 0px 0px -20px;
+	padding:2px;
+	list-style-type:none;
+	display:block;
+	width:177px;
+}
+
+#sideBarContentsInner li a{
+	width:100%;
+	color:#FFFFFF;
+}
+
+#sideBarContentsInner li a:link,
+#sideBarContentsInner li a:visited{
+	font-size:80%;
+	text-decoration:none;
+	display:block;
+	margin:0px 0px 0px 0px;
+	padding:0px;
+	width:100%;
+}
+
+#searchform {
+	margin:0;
+}
+.searchtext{
+	width: 200px;
+}
+.searchbutton{
+	background-color: #1a1a1a;
+	color: #ccc;
+	border: none;
+	margin-right: 7px;
+}
+.page_item a {
+	color: #ccc;
+	text-decoration: none;
+	
+	padding: 10px 15px 10px 15px;
+	display: block;
+	background-color: #1a1a1a;
+}
+
+
+.breadcrumb_navigator {
+	float: right;
+	padding: 4px 10px 0 0;
+	margin: 10px 0 0 0;
+}
+.breadcrumb_navigator a:link, .breadcrumb_navigator a:visited {
+	color: #9a9a9a;
+	text-decoration: none;
+}
+.breadcrumb_navigator a:hover{
+	color: #fff;
+	text-decoration: underline;
+}
+
+#chad_content {
+	padding-top: 15px;
+}
+#chad_footer {
+	width: 100%;
+	font-size: 11px;
+	text-align: center;
+	color: #efefef;
+	/*line-height: 16px;*/
+	padding-top: 50px;
+	padding-bottom: 10px;
+	background-color: #1a1a1a;
+	clear: both;
+}
+#chad_page {
+	/*width: 938px;
+	margin: 10px 0;*/
+}
+#chad_post {
+	padding-bottom: 25px;
+}
+.post_meta {
+	float: left;
+	padding: 10px;
+}
+.post_meta h1 {
+	margin: 0px;
+	/*float: left;*/
+	font-size: 1.8em;
+	color: #385d9b;
+	font-weight: normal;
+	text-align: left;
+}
+.post_meta h1 a:link, .post_meta h1 a:visited {
+	text-decoration: none;
+	color: #fff;
+}
+.post_meta h1 a:hover, .post_meta h1 a:active {
+	text-decoration: none;
+}
+
+.post_meta .date {
+	text-align: right;
+	padding-top: 5px;
+	color: #fff;
+	font-size: 14px;
+	float: right;
+}
+.div_line {
+	/*float: left;*/
+	width: 920px;
+	margin-top: 3px;
+	margin-left: -5px;
+	padding: 4px;
+	background-image: url(../chad2/images/post_bg.jpg);
+	background-repeat: no-repeat;
+	background-position: 0px 0px;
+	color: #666666;
+	font-size: 12px;
+}
+.div_line a:link, .div_line a:visited, .rss a:link, .rss a:visited, .coms a:link, .coms a:visited {
+	text-decoration: underline;
+	color: #385d9b;
+}
+.div_line a:hover, .div_line a:active, .rss a:hover, .rss a:active, .coms a:hover, .coms a:active {
+	text-decoration: underline;
+	color: #fff;
+}
+
+.post_content {
+	text-align: left;
+	padding-top: 20px;
+	padding-bottom: 5px;
+	line-height: 24px;
+	font-size: 12px;
+}
+
+.post_content h1 {
+	margin: 10px 0;
+}
+
+.post_content p {
+	text-align: left;
+	padding: 0px;
+	margin: 0 0 15px 0;
+}
+
+.post_comment_wrapper {
+	float: left;
+	padding: 0;
+	margin: 0;
+}
+
+.post_comment {
+	margin: 0;
+	width: 500px;
+}
+
+.post_comment a:link, .post_comment a:visited {
+	height: 18px;
+	width: 90px;
+	padding: 4px 0 4px 20px;
+	text-align: left;
+	text-decoration: none;
+	color: #ccc;
+	/*background-color: #555;*/
+
+}
+
+.clear_content {
+	float: left;
+	height: 20px;
+	/*width: 500px;*/
+}
+
+h2 {
+	margin: 0px;
+	font-size: 1.5em;
+	color: #409b62;
+	font-weight: normal;
+	font-family: Tahoma, Arial, "Baar Sophia", Verdana;
+}
+
+h2 a{
+	text-decoration: none;
+	color: #409b62;
+}
+
+.post_content a:link, .post_content a:visited {
+	color: #385d9b;
+	text-decoration: none;
+}
+.post_content a:hover, .post_content a:active {
+	color: #385d9b;
+	text-decoration: underline;
+}
+.post_content blockquote {
+	clear: both;
+	margin-top: 10px;
+	margin-right: 10px;
+	margin-bottom: 0px;
+	margin-left: 10px;
+	background-image: url(../chad2/images/block.png);
+	background-repeat: no-repeat;
+	background-position: left 2px;
+	padding-top: 15px;
+	padding-right: 0px;
+	padding-bottom: 0px;
+	padding-left: 33px;
+	color: #B9B9B9;
+}
+.post_content blockquote blockquote {
+	color: #999999;
+	margin: 0px;
+	padding-top: 3px;
+	padding-left: 35px;
+}
+
+.post_content img {
+	/*border: 1px solid #333333;*/
+	border: none;
+	margin: 0px;
+	/*margin-right: 8px;*/
+	padding: 0px;
+	
+}
+
+.post_box {
+	float: left;
+	width: 500px;
+	padding-left: 10px;
+	font-size: 18px;
+	color: #666666;
+}
+.post_box a:link, .post_box a:visited {
+	color: #999999;
+	text-decoration: none;
+}
+.post_box a:hover, .post_box a:active {
+	color: #CCCCCC;
+	text-decoration: underline;
+}
+
+
+.google_placement {
+	margin: 0 0 15px 0;
+	float: left;
+	width: 180px;
+	padding-left: 8px;
+	color: #9a9a9a;
+	text-decoration: none;
+	background-color: #1a1a1a;
+}
+
+.xsearch {
+	background-color: #E6E6E6;
+	width: 170px;
+	border: 1px solid #222222;
+	font-weight: bold;
+	color: #333333;
+	padding-top: 3px;
+	padding-right: 2px;
+	padding-bottom: 3px;
+	padding-left: 2px;
+}
+
+
+#comment_template {
+	float: left;
+	width: 500px;
+	padding-left: 10px;
+	font-size: 11px;
+}
+#chad_post h4 {
+	margin: 0px;
+	padding: 0px;
+	float: left;
+	width: 480px;
+	font-size: 2em;
+	font-weight: normal;
+	color: #999999;
+}
+
+
+.rss {
+	float: left;
+	width: 470px;
+	padding-left: 25px;
+	background-image: url(../chad2/images/rss.gif);
+	background-repeat: no-repeat;
+	background-position: left 2px;
+	height: 25px;
+	line-height: 25px;
+}
+.coms {
+	float: left;
+	/*width: 500px;*/
+	width: 864px;
+}
+.clear_coms {
+	margin: 0px;
+	padding: 0px;
+	float: left;
+	height: 30px;
+	width: 480px;
+}
+.top_coms {
+	background-image: url(../chad2/images/top_com.gif);
+	background-repeat: no-repeat;
+	background-position: top left;
+	float: left;
+	/*width: 500px;*/
+	width: 864px;
+	padding-right: 10px;
+	padding-left: 0;
+	height: 16px;
+}
+.rep_coms {
+	background-color: #333;
+	/*width: 480px;*/
+	width: 844px;
+	margin: 0px;
+	float: left;
+	color: #FFFFFF;
+	padding-right: 10px;
+	padding-left: 10px;
+	font-size: 11px;
+	line-height: 18px;
+}
+.bot_coms {
+	background-image: url(../chad2/images/bot_com.gif);
+	background-repeat: no-repeat;
+	background-position: top left;
+	float: left;
+	/*width: 500px;*/
+	width: 864px;
+	padding-right: 10px;
+	padding-left: 10px;
+	height: 35px;
+}
+.author_date {
+	float: left;
+	width: 424px;
+	padding-right: 10px;
+	padding-left: 10px;
+	height: 35px;
+	color: #FFFFFF;
+	font-size: 12px;
+}
+.rep_coms blockquote {
+	background-image: url(../chad2/images/block_com.gif);
+	background-repeat: no-repeat;
+	background-position: left 2px;
+	clear: both;
+	padding-top: 5px;
+	padding-left: 20px;
+	margin-top: 10px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	font-size: 11px;
+	color: #CCCCCC;
+	line-height: 18px;
+}
+.rep_coms code {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	display: block;
+	margin: 10px;
+	padding: 5px;
+	clear: both;
+	color: #FFFFFF;
+	background-color: #252829;
+	border: 1px dashed #52595C;
+}
+
+.coms p {
+	margin: 0px;
+	clear: both;
+	padding: 0px;
+}
+
+#chad_post h5 {
+	float: left;
+	width: 400px;
+	margin-top: 8px;
+	margin-right: 0px;
+	margin-bottom: 8px;
+	margin-left: 0px;
+	font-size: 1.7em;
+	font-weight: normal;
+}
+#tf {
+	float: left;
+	width: 400px;
+}
+#comment_template form {
+	margin: 0px;
+	padding: 0px;
+	float: left;
+	width: 400px;
+}
+#tf input {
+	width: 250px;
+	background-color: #FFFFFF;
+	border: 1px solid #232323;
+	color: #000000;
+	padding: 2px;
+}
+#tf p {
+	clear: both;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 5px;
+	margin-left: 0px;
+	font-size: 13px;
+	font-weight: bold;
+	color: #CCCCCC;
+}
+#tf input:hover {
+	width: 250px;
+	background-color: #eeeeee;
+	border: 1px solid #131414;
+	color: #333333;
+	padding: 2px;
+}
+#ta {
+
+	float: left;
+	width: 400px;
+}
+#ta textarea {
+	padding: 5px;
+	width: 490px;
+	background-color: #FFFFFF;
+	border: 1px solid #333333;
+	height: 150px;
+	margin: 0px;
+	color: #333333;
+}
+#ta p {
+	margin: 0px;
+	padding: 0px;
+	clear: both;
+}
+#ta textarea:hover {
+	background-color: #eeeeee;
+	border: 1px solid #141414;
+}
+
+#tsbm {
+
+
+	float: left;
+	width: 500px;
+}
+#tsbm p {
+	padding: 0px;
+	clear: both;
+	margin-top: 5px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+}
+#tsbm input {
+	float: right;
+	width: 150px;
+	background-color: #666666;
+	border: 2px solid #666666;
+	font-size: 13px;
+	font-weight: bold;
+	color: #FFFFFF;
+}
+#tsbm input:hover {
+	float: right;
+	width: 150px;
+	background-color: #385d9b;
+	border: 2px solid #666666;
+	font-size: 13px;
+	font-weight: bold;
+	color: #FFFFFF;
+}
+#chad_footer a:link, #chad_footer a:visited {
+	text-decoration: none;
+	color: #999999;
+}
+#chad_footer a:hover, #chad_footer a:active {
+	color: #869AA0;
+	text-decoration: underline;
+}
+.post_pre {
+	float: left;
+	width: 500px;
+}
+.post_pre a:link, .post_pre a:visited {
+	color: #CCCCCC;
+	text-decoration: none;
+}
+.post_pre a:hover, .post_pre a:active {
+	color: #869AA0;
+	text-decoration: none;
+}
+
+.lastpost {
+	float: left;
+	width: 250px;
+	background-image: url(../chad2/images/out.gif);
+	background-repeat: no-repeat;
+	background-position: left 2px;
+	padding-left: 15px;
+}
+.nextpost {
+	float: right;
+	width: 250px;
+	text-align: right;
+	padding-right: 15px;
+	background-image: url(../chad2/images/in.gif);
+	background-repeat: no-repeat;
+	background-position: right 2px;
+}
+.dark {
+	color: #999999;
+}
+.google_p500 {
+	float: left;
+	width: 480px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+#chad_post h6 {
+	float: left;
+	width: 400px;
+	margin-top: 8px;
+	margin-right: 0px;
+	margin-bottom: 8px;
+	margin-left: 0px;
+	font-size: 1.6em;
+	font-weight: normal;
+	color: #99CC00;
+}
+
+
+div.post_content a.toggler {
+    background-color: #333;
+	width: 690px;
+	margin: 0;
+	padding: 4px 4px 4px 10px;
+	display: block;
+	text-decoration: none;
+	color: #9a9a9a;
+	margin-bottom: 4px;
+}
+
+div.post_content a.tutorial_navigator {
+    background-color: #1d1d20;
+	width: 690px;
+	margin: 0;
+	padding: 4px 4px 4px 10px;
+	display: block;
+	text-decoration: none;
+	color: #9a9a9a;
+	margin-bottom: 4px;
+}
+a:hover.tutorial_navigator {
+	text-decoration: none;
+}
+
+div.post_content img.toggler {
+    background-color: #1d1d20;
+	padding: 4px 10px 4px 10px;
+	margin: 0;
+}
+
+div.post_content  a:hover.toggler {
+	text-decoration: none;
+}
+
+.code
+{
+    color: #000000;
+    font-family: monospace;
+    font-size: 11px;
+    line-height: 1.3em;
+}
+.codeBox
+{
+    color: #000000;
+    font-family: monospace;
+    font-size: 11px;
+	overflow: hidden;
+    line-height: 1.3em;
+	padding: 4px;
+    /*background: #fff url(images/codeBox_arrow.jpg) no-repeat bottom right;*/
+	background-color: #fff;
+	margin-bottom: 4px;
+}
+div.codeBox img {
+	border: none;
+	vertical-align: middle;
+}
+.keyword { color: #0000ff; }
+.comment { color: #008000; }
+.literal { color: #a31515; }
+.indent { margin-left: 2em; }
+
+.download {
+	background-color: #333;
+	padding: 4px;
+	margin: 4px;
+}
+
+ul.tabs li {
+	color: #000;
+}
+
+.togglee {
+	/*display: none;*/
+}
+
+img.icon {
+	border: none;
+	vertical-align: middle;
+	margin: 20px 20px 20px 10px;
+	width: 40px;
+	height: 40px;
+}
+.reel {
+	text-align:center; 
+	width: 938px; 
+	margin: 10px 0;
+}
+.reel a:link, .reel a:active, .reel a:visited {
+	border: none;
+	text-decoration: none;
+	color: #646464;
+}
+.reel a:hover {
+	border: none;
+	text-decoration: none;
+	color: #fff;
+}
+.slideshow {
+	display: block;
+	position: relative;
+	z-index: 0;
+	height: 200px;
+	margin: 10px auto 0 auto;
+	width: 900px;
+	border: 1px solid #333;
+}
+.slideshow-images {
+	display: block;
+	overflow: hidden;
+	position: relative;
+}		
+.slideshow-images img {
+	display: block;
+	position: absolute;
+	z-index: 1;
+}		
+
+/**
+HTML:
+	<div class="slideshow-images">
+		<img />
+		<img />
+	</div>
+	
+Notes:
+	The images div is where the slides are shown.
+	Customize the visible / prev / next classes to effect the slideshow transitions: fading, wiping, etc.
+*/
+
+.slideshow-images {
+	height: 200px;
+	width: 900px;
+}		
+.slideshow-images-visible { 
+	opacity: 1;
+}	
+.slideshow-images-prev { 
+	opacity: 0; 
+}
+.slideshow-images-next { 
+	opacity: 0; 
+}
+.slideshow-images img {
+	float: left;
+	left: 0;
+	top: 0;
+}	
+
+/**
+Notes:
+	These are examples of user-defined styles.
+	Customize these classes to your usage of Slideshow.
+*/
+
+.slideshow a img {
+	border: 0;
+}
+
+
+.slideshow-controller {
+	background: url(images/controller.png) no-repeat;
+	height: 42px;
+	left: 85%;
+	margin: -21px 0 0 -119px;
+	overflow: hidden;
+	position: absolute;
+	top: 85%;
+	width: 238px;
+	z-index: 10000;
+}
+.slideshow-controller * {
+	margin: 0;
+	padding: 0;
+}
+.slideshow-controller-hidden { 
+	opacity: 0;
+}
+.slideshow-controller-visible {
+	opacity: 1;
+}
+.slideshow-controller a {
+	cursor: pointer;
+	display: block;
+	height: 18px;
+	overflow: hidden;
+	position: absolute;
+	top: 12px;
+}
+.slideshow-controller a.active {
+	background-position: 0 18px;
+}
+.slideshow-controller li {
+	list-style: none;
+}
+.slideshow-controller li.first a {
+	background-image: url(images/controller-first.gif);
+	left: 33px;
+	width: 19px;
+}
+.slideshow-controller li.last a {
+	background-image: url(images/controller-last.gif);
+	left: 186px;
+	width: 19px;
+}
+.slideshow-controller li.next a {
+	background-image: url(images/controller-next.gif);
+	left: 145px;
+	width: 28px;
+}
+.slideshow-controller li.pause a {
+	background-image: url(images/controller-pause.gif);
+	left: 109px;
+	width: 20px;
+}
+.slideshow-controller li.play a {
+	background-position: 20px 0;
+}
+.slideshow-controller li.play a.active {
+	background-position: 20px 18px;
+}
+.slideshow-controller li.prev a {
+	background-image: url(images/controller-prev.gif);
+	left: 65px;
+	width: 28px;
+}
+
+.slideshow-loader {
+	height: 28px;
+	right: 0;
+	position: absolute;
+	top: 0;
+	width: 28px;
+	z-index: 10001;
+}
+.slideshow-loader-hidden {
+	opacity: 0;
+}
+.slideshow-loader-visible {
+	opacity: 1;
+}
+
+.work {
+	text-align: center;
+	margin-bottom: 20px;
+}
+.work a {
+	margin: 10px;
+}
+.work img {
+	border: 1px solid #333333;
+}
+
+
+/* SYNTAX HIGHLIGHTER*/
+.chad_cpp { 
+    border: 1px solid #000000;
+	background-color: #dbe5f1;
+}
+
+.chad_py { 
+    border: 1px solid #000000;
+	background-color: #fde9d9;
+}
+/* END SYNTAX HIGHLIGHTER*/
