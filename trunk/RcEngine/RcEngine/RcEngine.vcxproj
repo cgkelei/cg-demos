@@ -49,11 +49,15 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;RCENGINE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>./;../3rdParty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Program Files\NVIDIA Corporation\Cg\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -74,6 +78,72 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\DynLibManager.cpp" />
+    <ClCompile Include="Core\Context.cpp" />
+    <ClCompile Include="Core\Exception.cpp" />
+    <ClCompile Include="Core\Timer.cpp" />
+    <ClCompile Include="Core\Utility.cpp" />
+    <ClCompile Include="Graphics\Camera.cpp" />
+    <ClCompile Include="Graphics\FrameBuffer.cpp" />
+    <ClCompile Include="Graphics\GraphicBuffer.cpp" />
+    <ClCompile Include="Graphics\PixelFormat.cpp" />
+    <ClCompile Include="Graphics\RenderDevice.cpp" />
+    <ClCompile Include="Graphics\RenderEffect.cpp" />
+    <ClCompile Include="Graphics\RenderFactory.cpp" />
+    <ClCompile Include="Graphics\RenderOperation.cpp" />
+    <ClCompile Include="Graphics\RenderParameter.cpp" />
+    <ClCompile Include="Graphics\RenderView.cpp" />
+    <ClCompile Include="Graphics\RenderWindow.cpp" />
+    <ClCompile Include="Graphics\Texture.cpp" />
+    <ClCompile Include="Graphics\VertexDeclaration.cpp" />
+    <ClCompile Include="Graphics\VertexElement.cpp" />
+    <ClCompile Include="Graphics\Viewport.cpp" />
+    <ClCompile Include="MainApp\Application.cpp" />
+    <ClCompile Include="MainApp\Window.cpp" />
+    <ClCompile Include="Math\ColorRGBA.cpp" />
+    <ClCompile Include="Math\Matrix.cpp" />
+    <ClCompile Include="Math\VectorUtil.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Core\CompileConfig.h" />
+    <ClInclude Include="Core\DynLibManager.h" />
+    <ClInclude Include="Core\Context.h" />
+    <ClInclude Include="Core\Exception.h" />
+    <ClInclude Include="Core\Prerequisites.h" />
+    <ClInclude Include="Core\Singleton.h" />
+    <ClInclude Include="Core\Timer.h" />
+    <ClInclude Include="Core\Utility.h" />
+    <ClInclude Include="Graphics\Camera.h" />
+    <ClInclude Include="Graphics\FrameBuffer.h" />
+    <ClInclude Include="Graphics\GraphicBuffer.h" />
+    <ClInclude Include="Graphics\GraphicsCommon.h" />
+    <ClInclude Include="Graphics\PixelFormat.h" />
+    <ClInclude Include="Graphics\RenderDevice.h" />
+    <ClInclude Include="Graphics\RenderEffect.h" />
+    <ClInclude Include="Graphics\RenderFactory.h" />
+    <ClInclude Include="Graphics\RenderOperation.h" />
+    <ClInclude Include="Graphics\RenderPatameter.h" />
+    <ClInclude Include="Graphics\RenderSettings.h" />
+    <ClInclude Include="Graphics\RenderView.h" />
+    <ClInclude Include="Graphics\RenderWindow.h" />
+    <ClInclude Include="Graphics\Texture.h" />
+    <ClInclude Include="Graphics\VertexDeclaration.h" />
+    <ClInclude Include="Graphics\VertexElement.h" />
+    <ClInclude Include="Graphics\Viewport.h" />
+    <ClInclude Include="MainApp\Application.h" />
+    <ClInclude Include="MainApp\Window.h" />
+    <ClInclude Include="Math\ColorRGBA.h" />
+    <ClInclude Include="Math\MathUtil.h" />
+    <ClInclude Include="Math\Matrix.h" />
+    <ClInclude Include="Math\Plane.h" />
+    <ClInclude Include="Math\Vector.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Math\ColorRGBA.inl" />
+    <None Include="Math\MathUtil.inl" />
+    <None Include="Math\Matrix.inl" />
+    <None Include="Math\Plane.inl" />
+    <None Include="Math\Vector.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

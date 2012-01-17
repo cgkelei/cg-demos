@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RcEngine", "RcEngine\RcEngine.vcxproj", "{E2D69818-CCCE-4983-A7BE-F9EDB882246A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGLRenderSystem", "OpenGLRenderSystem\OpenGLRenderSystem.vcxproj", "{26E04EDA-8664-44F6-A633-4C71932EB86F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -13,6 +15,10 @@ Global
 		{E2D69818-CCCE-4983-A7BE-F9EDB882246A}.Debug|Win32.Build.0 = Debug|Win32
 		{E2D69818-CCCE-4983-A7BE-F9EDB882246A}.Release|Win32.ActiveCfg = Release|Win32
 		{E2D69818-CCCE-4983-A7BE-F9EDB882246A}.Release|Win32.Build.0 = Release|Win32
+		{26E04EDA-8664-44F6-A633-4C71932EB86F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{26E04EDA-8664-44F6-A633-4C71932EB86F}.Debug|Win32.Build.0 = Debug|Win32
+		{26E04EDA-8664-44F6-A633-4C71932EB86F}.Release|Win32.ActiveCfg = Release|Win32
+		{26E04EDA-8664-44F6-A633-4C71932EB86F}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
