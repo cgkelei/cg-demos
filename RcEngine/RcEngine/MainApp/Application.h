@@ -9,7 +9,7 @@ namespace RcEngine {
 
 class Window;
 
-class Application
+class _ApiExport Application
 {
 public:
 	Application(void);
@@ -27,7 +27,6 @@ public:
 
 	RenderSystem::Camera* GetCamera();
 	RenderSystem::RenderDevice* GetRenderDevice();
-	RenderSystem::RenderFactory* GetRenderFactory();
 
 protected:
 
@@ -60,6 +59,9 @@ protected:
 	virtual void Update(float deltaTime) = 0;
 
 protected:
+	void LoadAllModules();
+	void UnloadAllModules();
+
 	void CreateGameWindow();
 	void InitRenderDevice();
 
@@ -76,6 +78,7 @@ protected:
 
 	Window* mMainWindow;
 
+	bool mActice;
 	bool mAppPaused;
 	bool mMinimized;
 	bool mMaximized;
@@ -84,8 +87,10 @@ protected:
 	Timer mTimer;
 
 	RenderSystem::RenderSettings mSettings;
+
 	RenderSystem::RenderDevice* mRenderDevice;
-	RenderSystem::RenderFactory* mRenderFactory;
+
+
 	RenderSystem::Camera* mCamera;
 
 	// in case multiple threads are used
