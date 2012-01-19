@@ -1,9 +1,6 @@
 #ifndef _Singleton__H
 #define _Singleton__H
 
-#pragma warning( push )
-#pragma warning( disable: 4661)
-
 namespace RcEngine{
 
 template <typename T> 
@@ -59,6 +56,5 @@ public:
 
 } // Namespace RcEngine
 
-#pragma warning (pop)
 
 #endif

@@ -16,6 +16,7 @@ namespace RcEngine
 #  pragma warning(disable : 4786)
 #  pragma warning(disable : 4251)
 #  pragma warning(disable : 4100)
+#  pragma warning(disable : 4661)
 #endif
 }
 
