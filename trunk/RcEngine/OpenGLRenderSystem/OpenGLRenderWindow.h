@@ -14,6 +14,13 @@ namespace RcEngine
 			OpenGLRenderWindow(const RenderSettings& settings);
 			~OpenGLRenderWindow();
 
+			void ToggleFullscreen(bool fs);
+			bool IsFullscreen() const;
+
+		protected:
+			void DoBind();
+			void DoUnbind();
+
 		private:
 			HDC  mHdc;
 			HGLRC mHrc;

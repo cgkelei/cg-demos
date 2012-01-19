@@ -94,6 +94,26 @@ namespace RcEngine
 
 		}
 
+		void OpenGLRenderWindow::ToggleFullscreen( bool fs )
+		{
+
+		}
+
+		bool OpenGLRenderWindow::IsFullscreen() const
+		{
+			return false;
+		}
+
+		void OpenGLRenderWindow::DoBind()
+		{
+
+		}
+
+		void OpenGLRenderWindow::DoUnbind()
+		{
+
+		}
+
 
 	}
 }

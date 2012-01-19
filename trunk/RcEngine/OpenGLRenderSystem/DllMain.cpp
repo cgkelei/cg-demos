@@ -1,7 +1,6 @@
-#include "OpenGLGraphicCommon.h"
-#include "OpenGLRenderFactory.h"
+#include "OpenGLRenderModule.h"
 
-extern "C" void _OpenGLExport CreateRenderFactory(RcEngine::RenderSystem::RenderFactory*& factory) 
+extern "C" void _OpenGLExport dllStartPlugin(RcEngine::Core::IModule** pMoudle) 
 {
-	factory = new RcEngine::RenderSystem::OpenGLRenderFactory();
+	*pMoudle = new RcEngine::RenderSystem::OpenGLRenderModule();
 }

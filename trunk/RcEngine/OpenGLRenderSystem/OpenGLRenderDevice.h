@@ -12,14 +12,26 @@ namespace RcEngine
 		class _OpenGLExport OpenGLRenderDevice : public RenderDevice
 		{
 		public:
-			OpenGLRenderDevice(const RenderSettings& rs);
+			OpenGLRenderDevice(void);
 			~OpenGLRenderDevice(void);
+
+			void CreateRenderWindow(const RenderSettings& settings);
+
+		    void Create();
+			void Release();
+
+			void BeginFrame();
+			void EndFrame();
+
+			void ToggleFullscreen(bool fs);
+			bool IsFullscreen() const;
 
 			void AdjustProjectionMatrix(Math::Matrix4f& pOut);
 			void Draw(RenderEffect* effect, const RenderOperation& operation);
 
 			void BindVertexBuffer(const GraphicBuffer* buffer );
-			void BindIndexBuffer(const GraphicBuffer* indexBuffer);
+			void BindIndexBuffer(const GraphicBuffer*indexBuffer);
+
 
 		protected:
 			void BindVertexStream(const GraphicBuffer* buffer, const VertexDeclaration& vertexDec);
