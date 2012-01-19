@@ -16,27 +16,40 @@ namespace RenderSystem {
 class _ApiExport RenderDevice
 {
 public:
-	RenderDevice(const RenderSettings& rs);
+	RenderDevice(void);
 	virtual ~RenderDevice(void);
 
-	void CreateRenderWindow();
-
-	void Resize();
-
-	FrameBuffer* GetCurrentFrameBuffer();
+	RenderFactory* GetRenderFactory() const;
+	
 	void BindFrameBuffer(FrameBuffer* fb);
+	FrameBuffer* GetCurrentFrameBuffer();
 
-	virtual void BeginFrame();
-	virtual void EndFrame();
+	virtual void Create() = 0;
+	virtual void Release() = 0;
+
+	
+
+
+	virtual void BeginFrame() = 0;
+	virtual void EndFrame() = 0;
+
+	virtual void ToggleFullscreen(bool fs) = 0;
+	virtual bool IsFullscreen() const = 0;
+
+	virtual void CreateRenderWindow(const RenderSettings& settings) = 0;
+	virtual void BindVertexBuffer(const GraphicBuffer* vertexBuffer ) = 0;
+	virtual void BindIndexBuffer(const GraphicBuffer* indexBuffer) = 0;
+	virtual void Draw(RenderEffect* effect, const RenderOperation& operation) = 0;
+	virtual void AdjustProjectionMatrix(Math::Matrix4f& pOut) = 0;
+
+	void Resize(unsigned int width, unsigned int height);
+
+	
+
+	
 
 	virtual void SwapBuffers();
 
-	virtual void Draw(RenderEffect* effect, const RenderOperation& operation) = 0;
-
-	virtual void BindVertexBuffer(const GraphicBuffer* buffer ) = 0;
-	virtual void BindIndexBuffer(const GraphicBuffer* indexBuffer) = 0;
-
-	virtual void AdjustProjectionMatrix(Math::Matrix4f& pOut) = 0;
 
 protected:
 	virtual void BindVertexStream(const GraphicBuffer* buffer, const VertexDeclaration& vertexDec) = 0;
@@ -55,8 +68,11 @@ protected:
 	FrameBuffer* mCurrentFrameBuffer;
 	FrameBuffer* mDefaultFrameBuffer;
 
+	RenderSettings mRenderSettings;
+
 	Viewport mViewport;
 
+	RenderFactory* mRenderFactory;
 };
 
 }

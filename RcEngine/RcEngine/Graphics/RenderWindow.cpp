@@ -52,7 +52,7 @@ void RenderWindow::WindowMovedOrResized()
 
 	if ((newWidth != mWidth) || (newHeight != mHeight))
 	{
-		Core::Context::GetSingleton().GetRenderDevice().Resize();
+		Core::Context::GetSingleton().GetRenderDevice().Resize(newWidth, newHeight);
 	}
 }
 

@@ -14,6 +14,9 @@ public:
 	RenderWindow(const RenderSettings& setting);
 	virtual ~RenderWindow(void);
 
+	virtual void ToggleFullscreen(bool fs) = 0;
+	virtual bool IsFullscreen() const = 0;
+
 	void OnSize();
 
 protected:

@@ -15,6 +15,9 @@ public:
 	FrameBuffer(bool offscreen = false);
 	virtual ~FrameBuffer(void);
 
+	bool IsActice() const					{ return mActice; }
+	void SetActice(bool state)				{ mActice = state; }
+
 	unsigned int GetLeft() const			{ return mLeft; }
 	unsigned int GetTop() const				{ return mTop; }
 	unsigned int GetWidth() const			{ return mWidth; }
