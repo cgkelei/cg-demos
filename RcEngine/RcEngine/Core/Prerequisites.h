@@ -94,6 +94,7 @@ namespace RcEngine {
 	{
 		class Timer;
 		class Exception;
+		class IModule;
 	}
 
 	namespace RenderSystem
