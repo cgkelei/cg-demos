@@ -1,7 +1,10 @@
 #include "OpenGLRenderDevice.h"
+#include "OpenGLRenderFactory.h"
 #include "OpenGLGraphicBuffer.h"
 #include "OpenGLRenderEffect.h"
 #include "OpenGLFrameBuffer.h"
+#include "OpenGLRenderWindow.h"
+#include "OpenGLRenderView.h"
 #include "OpenGLTexture.h"
 #include "Graphics/Viewport.h"
 
@@ -12,15 +15,44 @@ namespace RcEngine
 	namespace RenderSystem
 	{
 
-		OpenGLRenderDevice::OpenGLRenderDevice( const RenderSettings& rs )
-			: RenderDevice(rs)
+		OpenGLRenderDevice::OpenGLRenderDevice()
 		{
-
+	
 		}
 
 
 		OpenGLRenderDevice::~OpenGLRenderDevice(void)
 		{
+		}
+
+		void OpenGLRenderDevice::Create()
+		{
+			mRenderFactory = new OpenGLRenderFactory();
+
+		}
+
+		void OpenGLRenderDevice::Release()
+		{
+			Safe_Delete(mRenderFactory);
+		}
+
+
+		void OpenGLRenderDevice::CreateRenderWindow( const RenderSettings& settings )
+		{
+			mRenderSettings = settings;
+
+			mDefaultFrameBuffer = new OpenGLRenderWindow(settings);
+			mDefaultFrameBuffer->Attach(ATT_Color0, 
+				new OpenGLScreenRenderTarget2DView(mDefaultFrameBuffer->GetWidth(), mDefaultFrameBuffer->GetHeight(), mDefaultFrameBuffer->GetColorFormat()));
+			
+			if(mDefaultFrameBuffer->IsDepthBuffered())
+			{
+				mDefaultFrameBuffer->Attach(ATT_DepthStencil,
+					new OpenGLScreenDepthStencilView(mDefaultFrameBuffer->GetWidth(), mDefaultFrameBuffer->GetHeight(), settings.DepthStencilFormat));
+			}
+		
+			this->BindFrameBuffer(mDefaultFrameBuffer);
+
 		}
 
 		void OpenGLRenderDevice::Draw( RenderEffect* effect, const RenderOperation& operation )
@@ -96,6 +128,28 @@ namespace RcEngine
 				glViewport(vp.mLeft, vp.mTop, vp.mWidth, vp.mHeight);
 			}
 		}
+
+		void OpenGLRenderDevice::BeginFrame()
+		{
+
+		}
+
+		void OpenGLRenderDevice::EndFrame()
+		{
+
+		}
+
+		void OpenGLRenderDevice::ToggleFullscreen( bool fs )
+		{
+
+		}
+
+		bool OpenGLRenderDevice::IsFullscreen() const
+		{
+			return false;
+		}
+
+		
 
 	}
 }

@@ -39,6 +39,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName)_d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -57,8 +58,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Program Files\NVIDIA Corporation\Cg\lib;F:\GoogleCode\RcEngine\3rdParty\nvImage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;cg.lib;cgGL.lib;nvImaged.lib;../Debug/RcEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files\NVIDIA Corporation\Cg\lib;F:\GoogleCode\RcEngine\3rdParty\nvImage\lib;F:\GoogleCode\RcEngine\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;cg.lib;cgGL.lib;nvImaged.lib;RcEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -87,6 +88,7 @@
     <ClCompile Include="OpenGLRenderDevice.cpp" />
     <ClCompile Include="OpenGLRenderEffect.cpp" />
     <ClCompile Include="OpenGLRenderFactory.cpp" />
+    <ClCompile Include="OpenGLRenderModule.cpp" />
     <ClCompile Include="OpenGLRenderParameter.cpp" />
     <ClCompile Include="OpenGLRenderTarget2DView.cpp" />
     <ClCompile Include="OpenGLRenderView.cpp" />
@@ -105,6 +107,7 @@
     <ClInclude Include="OpenGLRenderDevice.h" />
     <ClInclude Include="OpenGLRenderEffect.h" />
     <ClInclude Include="OpenGLRenderFactory.h" />
+    <ClInclude Include="OpenGLRenderModule.h" />
     <ClInclude Include="OpenGLRenderParameter.h" />
     <ClInclude Include="OpenGLRenderView.h" />
     <ClInclude Include="OpenGLRenderWindow.h" />
