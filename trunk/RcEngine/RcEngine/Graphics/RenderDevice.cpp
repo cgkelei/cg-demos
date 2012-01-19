@@ -5,7 +5,8 @@
 namespace RcEngine {
 	namespace RenderSystem {
 
-		RenderDevice::RenderDevice( const RenderSettings& rs )
+		RenderDevice::RenderDevice(void)
+			: mRenderFactory(0)
 		{
 
 		}
@@ -50,7 +51,7 @@ namespace RcEngine {
 		}
 
 
-		void RenderDevice::Resize()
+		void RenderDevice::Resize( unsigned int width, unsigned int height )
 		{
 
 		}
@@ -58,6 +59,11 @@ namespace RcEngine {
 		FrameBuffer* RenderDevice::GetCurrentFrameBuffer()
 		{
 			return mCurrentFrameBuffer;
+		}
+
+		RenderFactory* RenderDevice::GetRenderFactory() const
+		{
+			return mRenderFactory;
 		}
 
 
