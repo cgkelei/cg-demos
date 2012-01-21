@@ -20,9 +20,6 @@ namespace RcEngine
 		    void Create();
 			void Release();
 
-			void BeginFrame();
-			void EndFrame();
-
 			void ToggleFullscreen(bool fs);
 			bool Fullscreen() const;
 
@@ -34,9 +31,12 @@ namespace RcEngine
 
 
 		protected:
-			void BindVertexStream(const GraphicBuffer* buffer, const VertexDeclaration& vertexDec);
-			void DoBindFrame(FrameBuffer* fb);
+			void DoBindFrameBuffer(FrameBuffer* fb);
+			
+
+		private:
 			void InitGlew();
+			void BindVertexStream(const GraphicBuffer* buffer, const VertexDeclaration& vertexDec);
 
 		private:
 			
