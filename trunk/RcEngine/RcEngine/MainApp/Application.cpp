@@ -109,6 +109,7 @@ namespace RcEngine {
 
 	void Application::InitializeDevice()
 	{
+		mRenderDevice->Create();
 		mRenderDevice->CreateRenderWindow(mSettings);
 	}
 

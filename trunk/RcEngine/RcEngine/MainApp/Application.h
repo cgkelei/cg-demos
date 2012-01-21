@@ -5,6 +5,7 @@
 #include <Core/Timer.h>
 #include <Graphics/RenderSettings.h>
 #include <Graphics/GraphicsCommon.h>
+#include <Graphics/Camera.h>
 
 namespace RcEngine {
 
