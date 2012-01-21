@@ -96,6 +96,9 @@
     <ClCompile Include="Core\XMLDom.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\RenderJob.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainApp\Application.h">
@@ -202,6 +205,9 @@
     </ClInclude>
     <ClInclude Include="Core\XMLDom.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RenderJob.h">
+      <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
