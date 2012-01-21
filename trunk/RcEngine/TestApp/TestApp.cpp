@@ -88,7 +88,7 @@ void TestApp::UnloadContent()
 
 }
 
-using namespace RcEngine::RenderSystem;
+using namespace RcEngine::Render;
 
 void TestApp::Render()
 {
