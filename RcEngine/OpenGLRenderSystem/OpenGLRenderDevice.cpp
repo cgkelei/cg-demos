@@ -7,6 +7,7 @@
 #include "OpenGLRenderView.h"
 #include "OpenGLTexture.h"
 #include "Graphics/Viewport.h"
+#include "Core/Exception.h"
 
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
@@ -42,6 +43,10 @@ namespace RcEngine
 			mRenderSettings = settings;
 
 			mDefaultFrameBuffer = new OpenGLRenderWindow(settings);
+
+			// create a valid OpenGL rendering context and init glew
+			InitGlew();
+
 			mDefaultFrameBuffer->Attach(ATT_Color0, 
 				new OpenGLScreenRenderTarget2DView(mDefaultFrameBuffer->GetWidth(), mDefaultFrameBuffer->GetHeight(), mDefaultFrameBuffer->GetColorFormat()));
 			
@@ -52,7 +57,6 @@ namespace RcEngine
 			}
 		
 			this->BindFrameBuffer(mDefaultFrameBuffer);
-
 		}
 
 		void OpenGLRenderDevice::Draw( RenderEffect* effect, const RenderOperation& operation )
@@ -144,12 +148,19 @@ namespace RcEngine
 
 		}
 
-		bool OpenGLRenderDevice::IsFullscreen() const
+		bool OpenGLRenderDevice::Fullscreen() const
 		{
 			return false;
 		}
 
-		
-
+		void OpenGLRenderDevice::InitGlew()
+		{
+			GLenum err = glewInit();
+			if (GLEW_OK != err)
+			{
+				String errMsg = reinterpret_cast<char const *>(glewGetErrorString(err));
+				ENGINE_EXCEPT(Core::Exception::ERR_RENDERINGAPI_ERROR, errMsg, "OpenGLRenderDevice::InitGlew");
+			}
+		}
 	}
 }

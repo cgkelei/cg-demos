@@ -24,7 +24,7 @@ namespace RcEngine
 			void EndFrame();
 
 			void ToggleFullscreen(bool fs);
-			bool IsFullscreen() const;
+			bool Fullscreen() const;
 
 			void AdjustProjectionMatrix(Math::Matrix4f& pOut);
 			void Draw(RenderEffect* effect, const RenderOperation& operation);
@@ -36,6 +36,10 @@ namespace RcEngine
 		protected:
 			void BindVertexStream(const GraphicBuffer* buffer, const VertexDeclaration& vertexDec);
 			void DoBindFrame(FrameBuffer* fb);
+			void InitGlew();
+
+		private:
+			
 		};
 	}
 }

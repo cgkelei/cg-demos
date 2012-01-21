@@ -1,4 +1,5 @@
 #include "OpenGLRenderWindow.h"
+#include "OpenGLRenderDevice.h"
 #include "Core/Context.h"
 #include "Core/Utility.h"
 #include "MainApp/Application.h"
@@ -9,8 +10,19 @@ namespace RcEngine
 	namespace RenderSystem
 	{
 		OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
-			: RenderWindow(settings)
+			: OpenGLFrameBuffer(settings.Width, settings.Height, false)
 		{
+			mColorFormat = settings.ColorFormat;
+			mColorDepth = PixelFormatUtils::GetNumElemBits(settings.ColorFormat);
+			mFullscreen = settings.Fullscreen;
+			mIsDepthBuffered = PixelFormatUtils::IsDepthStencil(settings.DepthStencilFormat);
+			PixelFormatUtils::GetNumDepthStencilBits(settings.DepthStencilFormat, mDepthBits, mStencilBits);
+
+			Window* win = Core::Context::GetSingleton().GetApplication().GetMainWindow();
+
+			win->UserResizedEvent.bind(this, &OpenGLRenderWindow::OnSize);
+
+
 			mHwnd = Core::Context::GetSingleton().GetApplication().GetMainWindow()->GetHwnd();
 			mHdc = GetDC(mHwnd);
 
@@ -36,7 +48,6 @@ namespace RcEngine
 			}
 			else
 			{
-
 				mColorDepth = ::GetDeviceCaps(mHdc, BITSPIXEL);
 				mLeft = settings.Left;
 				mTop = settings.Top;
@@ -99,7 +110,7 @@ namespace RcEngine
 
 		}
 
-		bool OpenGLRenderWindow::IsFullscreen() const
+		bool OpenGLRenderWindow::Fullscreen() const
 		{
 			return false;
 		}
@@ -112,6 +123,38 @@ namespace RcEngine
 		void OpenGLRenderWindow::DoUnbind()
 		{
 
+		}
+
+		void OpenGLRenderWindow::OnSize()
+		{
+			std::cout << "OnSize";
+		}
+
+		void OpenGLRenderWindow::WindowMovedOrResized()
+		{
+			RECT rect;
+			::GetClientRect(mHwnd, &rect);
+
+			unsigned int newLeft = rect.left;
+			unsigned int newTop = rect.top;
+
+			if ((newLeft != mLeft) || (newTop != mTop))
+			{
+				Core::Context::GetSingleton().GetApplication().GetMainWindow()->Reposition(newLeft, newTop);
+			}
+
+			unsigned int newWidth = rect.right - rect.left;
+			unsigned int newHeight = rect.bottom - rect.top;
+
+			if ((newWidth != mWidth) || (newHeight != mHeight))
+			{
+				Core::Context::GetSingleton().GetRenderDevice().Resize(newWidth, newHeight);
+			}
+		}
+
+		void OpenGLRenderWindow::SwapBuffers()
+		{
+			::SwapBuffers(mHdc);
 		}
 
 

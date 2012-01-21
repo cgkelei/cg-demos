@@ -16,11 +16,10 @@ namespace RcEngine
 
 			const std::string& GetName() const ;
 			RenderDevice* GetRenderDevice();
-
-			void Install();
+	
 			void Initialise();
 			void Shutdown();
-			void Uninstall();
+		
 
 		private:
 			RenderDevice* mRenderDevice;

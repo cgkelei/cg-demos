@@ -22,31 +22,21 @@ namespace RcEngine
 			return ModuleName;
 		}
 
-		void OpenGLRenderModule::Install()
-		{
-			
-			mRenderDevice = new OpenGLRenderDevice();
-		}
 
 		void OpenGLRenderModule::Initialise()
 		{
-			
+			mRenderDevice = new OpenGLRenderDevice();
 		}
 
 		void OpenGLRenderModule::Shutdown()
-		{
-
-		}
-
-		void OpenGLRenderModule::Uninstall()
 		{
 			delete mRenderDevice;
 			mRenderDevice = 0;
 		}
 
+
 		RenderDevice* OpenGLRenderModule::GetRenderDevice()
 		{
-			std::cout << "called";
 			return mRenderDevice;
 		}
 

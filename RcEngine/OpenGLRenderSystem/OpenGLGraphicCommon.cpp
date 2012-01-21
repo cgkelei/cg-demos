@@ -259,21 +259,6 @@ namespace RcEngine
 			}
 		}
 
-		GLenum OpenGLMapping::Mapping( DepthFormat fmt )
-		{
-			switch(fmt)
-			{
-			case DF_Depth16:
-				return GL_DEPTH_COMPONENT16;
-			case DF_Depth24Stencil8:
-				return GL_DEPTH24_STENCIL8;
-			case DF_Depth32:
-				return GL_DEPTH_COMPONENT32;
-			default:
-				ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported Depth Format!", "OpenGLMapping::OpenGLMapping::Mapping( DepthFormat fmt )");
-			}
-		}
-
 		PixelFormat OpenGLMapping::UnMapping( GLint internalformat, GLenum format, GLenum type )
 		{
 			switch(internalformat)
