@@ -2,9 +2,10 @@
 #define FrameBuffer_h__
 
 #include "Core/Prerequisites.h"
-#include "PixelFormat.h"
-#include "GraphicsCommon.h"
-#include "Viewport.h"
+#include "Graphics/PixelFormat.h"
+#include "Graphics/GraphicsCommon.h"
+#include "Graphics/Viewport.h"
+#include "Math/ColorRGBA.h"
 
 namespace RcEngine {
 namespace RenderSystem {
@@ -12,7 +13,7 @@ namespace RenderSystem {
 class _ApiExport FrameBuffer
 {
 public:
-	FrameBuffer(bool offscreen = false);
+	FrameBuffer(unsigned int width, unsigned int height, bool offscreen = true);
 	virtual ~FrameBuffer(void);
 
 	bool IsActice() const					{ return mActice; }
@@ -32,6 +33,9 @@ public:
 
 	bool IsDepthBuffered() const			{ return mIsDepthBuffered; }
 	bool IsDirty() const					{ return mDirty; }
+
+	virtual void Clear(unsigned int flags, Math::ColorRGBA& clr, float depth, unsigned int stencil) = 0;
+	virtual void SwapBuffers() = 0;
 
 	RenderView* GetAttachedView(unsigned int att);
 	 

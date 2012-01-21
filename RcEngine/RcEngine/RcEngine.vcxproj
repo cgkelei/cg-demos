@@ -85,6 +85,7 @@
     <ClCompile Include="Core\IModule.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="Core\Utility.cpp" />
+    <ClCompile Include="Core\XMLDom.cpp" />
     <ClCompile Include="Graphics\Camera.cpp" />
     <ClCompile Include="Graphics\FrameBuffer.cpp" />
     <ClCompile Include="Graphics\GraphicBuffer.cpp" />
@@ -96,7 +97,6 @@
     <ClCompile Include="Graphics\RenderOperation.cpp" />
     <ClCompile Include="Graphics\RenderParameter.cpp" />
     <ClCompile Include="Graphics\RenderView.cpp" />
-    <ClCompile Include="Graphics\RenderWindow.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Graphics\VertexDeclaration.cpp" />
     <ClCompile Include="Graphics\VertexElement.cpp" />
@@ -104,7 +104,6 @@
     <ClCompile Include="MainApp\Application.cpp" />
     <ClCompile Include="MainApp\Window.cpp" />
     <ClCompile Include="Math\ColorRGBA.cpp" />
-    <ClCompile Include="Math\Matrix.cpp" />
     <ClCompile Include="Math\VectorUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -118,6 +117,7 @@
     <ClInclude Include="Core\Singleton.h" />
     <ClInclude Include="Core\Timer.h" />
     <ClInclude Include="Core\Utility.h" />
+    <ClInclude Include="Core\XMLDom.h" />
     <ClInclude Include="Graphics\Camera.h" />
     <ClInclude Include="Graphics\FrameBuffer.h" />
     <ClInclude Include="Graphics\GraphicBuffer.h" />
@@ -131,7 +131,6 @@
     <ClInclude Include="Graphics\RenderPatameter.h" />
     <ClInclude Include="Graphics\RenderSettings.h" />
     <ClInclude Include="Graphics\RenderView.h" />
-    <ClInclude Include="Graphics\RenderWindow.h" />
     <ClInclude Include="Graphics\Texture.h" />
     <ClInclude Include="Graphics\VertexDeclaration.h" />
     <ClInclude Include="Graphics\VertexElement.h" />

@@ -54,5 +54,15 @@ namespace RcEngine{
 				return *mApplication;
 			}
 
+			void Context::SetRenderDevice( RenderDevice* device )
+			{
+				mRenderDevice = device;
+			}
+
+			void Context::SetApplication( Application* app )
+			{
+				mApplication = app;
+			}
+
 	} // Namespace Core
 } // Namespace RcEngine

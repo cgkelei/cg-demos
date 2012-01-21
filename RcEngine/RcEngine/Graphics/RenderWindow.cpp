@@ -9,7 +9,7 @@ namespace RcEngine {
 namespace RenderSystem {
 
 RenderWindow::RenderWindow( const RenderSettings& settings )
-	: FrameBuffer(true)
+	: FrameBuffer()
 {
 	mWidth = settings.Width;
 	mHeight = settings.Height;

@@ -4,6 +4,7 @@
 #include <Core/Prerequisites.h>
 #include <Core/Timer.h>
 #include <Graphics/RenderSettings.h>
+#include <Graphics/GraphicsCommon.h>
 
 namespace RcEngine {
 
@@ -31,7 +32,6 @@ public:
 protected:
 
 	virtual void Initialize();
-	virtual void Finalize();	
 
 	/// <summary>
 	// Load Graphical Resources
@@ -58,12 +58,15 @@ protected:
 	/// <param name ="timer"> The time passed since the last update </param>
 	virtual void Update(float deltaTime) = 0;
 
-protected:
+private:
+	void Tick();
 	void LoadAllModules();
 	void UnloadAllModules();
 
+	void ReadConfiguration();
+
 	void CreateGameWindow();
-	void InitRenderDevice();
+	void InitializeDevice();
 
 	void Window_ApplicationActivated();
 	void Window_ApplicationDeactivated();

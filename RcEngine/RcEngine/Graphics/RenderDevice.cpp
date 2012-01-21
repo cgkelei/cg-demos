@@ -6,7 +6,7 @@ namespace RcEngine {
 	namespace RenderSystem {
 
 		RenderDevice::RenderDevice(void)
-			: mRenderFactory(0)
+			: mRenderFactory(0), mCurrentFrameBuffer(0), mDefaultFrameBuffer(0)
 		{
 
 		}
@@ -34,14 +34,12 @@ namespace RcEngine {
 		{
 			assert(fb != NULL);
 
-			if(fb != mCurrentFrameBuffer)
-			{
-				if(mCurrentFrameBuffer)
-				{
+			if( mCurrentFrameBuffer && (fb != mCurrentFrameBuffer) )
+			{	
 					mCurrentFrameBuffer->OnUnbind();
-					mCurrentFrameBuffer = fb;
-				}
 			}
+
+			mCurrentFrameBuffer = fb; 
 
 			if(mCurrentFrameBuffer->IsDirty())
 			{

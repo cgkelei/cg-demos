@@ -4,8 +4,8 @@
 namespace RcEngine {
 namespace RenderSystem {
 
-FrameBuffer::FrameBuffer( bool offscreen /*= false*/ )
-	: mDepthStencilView(0), mDirty(false), mOffscreen(offscreen)
+FrameBuffer::FrameBuffer(unsigned int width, unsigned int height,  bool offscreen /*= true*/ )
+	: mWidth(width), mHeight(height), mDepthStencilView(0), mDirty(false), mOffscreen(offscreen)
 {
 
 }

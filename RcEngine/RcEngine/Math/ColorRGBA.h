@@ -1,12 +1,12 @@
 #ifndef _ColorValue__H
 #define _ColorValue__H
 
-#include <cassert>
+#include "Core/Prerequisites.h"
 
 namespace RcEngine{
 namespace Math {
 
-class ColorRGBA
+class _ApiExport ColorRGBA
 {
 public:
 	ColorRGBA ();  // initial values (0,0,0,0)

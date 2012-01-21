@@ -103,7 +103,6 @@ namespace RcEngine {
 		class RenderDevice;
 		class RenderFactory;
 		class RenderView;
-		class RenderWindow;
 		class RenderEffect;
 		class RenderParameter;
 		class RenderPass;

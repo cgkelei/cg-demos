@@ -21,12 +21,15 @@ namespace RcEngine{
 
 			void Init(std::string configFile);
 
+			void SetRenderDevice(RenderDevice* device);
 			RenderDevice& GetRenderDevice();
 			RenderDevice* GetRenderDevicePtr();
+			
 
 			RenderFactory& GetRenderFactory();
 			RenderFactory* GetRenderFactoryPtr(); 
 
+			void SetApplication(Application* app);
 			Application* GetApplicationPtr();
 			Application& GetApplication();
 
