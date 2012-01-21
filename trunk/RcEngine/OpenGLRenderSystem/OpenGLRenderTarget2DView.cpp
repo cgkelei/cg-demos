@@ -109,7 +109,9 @@ namespace RcEngine
 		//////////////////////////////////////////////////////////////////////////
 		OpenGLScreenRenderTarget2DView::OpenGLScreenRenderTarget2DView( unsigned int width, unsigned int height, PixelFormat fmt )
 		{
-
+			mWidth = width;
+			mHeight = height;
+			mFormat = fmt;
 		}
 
 		OpenGLScreenRenderTarget2DView::~OpenGLScreenRenderTarget2DView()

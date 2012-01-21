@@ -12,8 +12,14 @@ namespace RcEngine
 		class _OpenGLExport OpenGLFrameBuffer : public FrameBuffer
 		{
 		public:
-			OpenGLFrameBuffer(bool offscreen);
+			OpenGLFrameBuffer(unsigned int width, unsigned int height, bool offscreen = true);
 			virtual ~OpenGLFrameBuffer();
+
+			virtual void DoBind();
+			virtual void DoUnbind();
+
+			virtual void Clear(unsigned int flags, Math::ColorRGBA& clr, float depth, unsigned int stencil);
+			virtual void SwapBuffers();
 
 			GLuint GetFrameBufferObject() const { return mFrameBufferObject; }
 

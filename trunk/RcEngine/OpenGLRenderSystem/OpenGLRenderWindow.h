@@ -2,28 +2,36 @@
 #define OpenGLRenderWindow_h__
 
 #include "OpenGLPrerequisites.h"
-#include "Graphics/RenderWindow.h"
+#include "OpenGLFrameBuffer.h"
 
 namespace RcEngine
 {
 	namespace RenderSystem
 	{
-		class _OpenGLExport OpenGLRenderWindow : public RenderWindow
+		class _OpenGLExport OpenGLRenderWindow : public OpenGLFrameBuffer
 		{
 		public:
 			OpenGLRenderWindow(const RenderSettings& settings);
 			~OpenGLRenderWindow();
 
 			void ToggleFullscreen(bool fs);
-			bool IsFullscreen() const;
+			bool Fullscreen() const;
+			void SwapBuffers();
 
 		protected:
 			void DoBind();
 			void DoUnbind();
 
+			void OnSize();
+			void WindowMovedOrResized();
+
 		private:
 			HDC  mHdc;
 			HGLRC mHrc;
+			HWND mHwnd;
+			bool mFullscreen;
+			std::string mDescription;
+			
 
 		};
 
