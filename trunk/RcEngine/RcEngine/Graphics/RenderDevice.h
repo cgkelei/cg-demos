@@ -23,12 +23,10 @@ namespace RcEngine {
 
 			void BindFrameBuffer(FrameBuffer* fb);
 			FrameBuffer* GetCurrentFrameBuffer();
+			FrameBuffer* GetDefaultFrameBuffer();
 
 			virtual void Create() = 0;
 			virtual void Release() = 0;
-
-			virtual void BeginFrame() = 0;
-			virtual void EndFrame() = 0;
 
 			virtual void ToggleFullscreen(bool fs) = 0;
 			virtual bool Fullscreen() const = 0;
@@ -37,15 +35,13 @@ namespace RcEngine {
 			virtual void BindVertexBuffer(const GraphicBuffer* vertexBuffer ) = 0;
 			virtual void BindIndexBuffer(const GraphicBuffer* indexBuffer) = 0;
 			virtual void Draw(RenderEffect* effect, const RenderOperation& operation) = 0;
-			virtual void AdjustProjectionMatrix(Math::Matrix4f& pOut) = 0;
 
 			void Resize(unsigned int width, unsigned int height);
 
-			virtual void SwapBuffers();
+			virtual void AdjustProjectionMatrix(Math::Matrix4f& pOut) = 0;
 
 		protected:
-			virtual void BindVertexStream(const GraphicBuffer* buffer, const VertexDeclaration& vertexDec) = 0;
-			virtual void DoBindFrame(FrameBuffer* fb) = 0;
+			virtual void DoBindFrameBuffer(FrameBuffer* fb) = 0;
 
 		protected:
 
