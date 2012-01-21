@@ -4,7 +4,7 @@
 #include "PixelFormat.h"
 
 namespace RcEngine {
-namespace RenderSystem {
+namespace Render {
 
 struct RenderSettings
 {

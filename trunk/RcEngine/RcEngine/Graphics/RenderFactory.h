@@ -7,7 +7,7 @@
 #include "Graphics/PixelFormat.h"
 
 namespace RcEngine {
-	namespace RenderSystem {
+	namespace Render {
 
 		class _ApiExport RenderFactory
 		{

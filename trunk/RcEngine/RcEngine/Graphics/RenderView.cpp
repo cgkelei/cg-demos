@@ -2,7 +2,7 @@
 #include "FrameBuffer.h"
 
 namespace RcEngine {
-namespace RenderSystem {
+namespace Render {
 
 RenderView::RenderView()
 	: mAttachedFrameBuffer(NULL)

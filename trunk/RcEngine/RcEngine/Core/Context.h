@@ -7,8 +7,8 @@
 namespace RcEngine{
 	namespace Core{
 
-		using RenderSystem::RenderDevice;
-		using RenderSystem::RenderFactory;
+		using Render::RenderDevice;
+		using Render::RenderFactory;
 
 		class _ApiExport Context : public Singleton<Context>
 		{

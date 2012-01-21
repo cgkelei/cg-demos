@@ -7,7 +7,7 @@
 #include "PixelFormat.h"
 
 namespace RcEngine {
-	namespace RenderSystem {
+	namespace Render {
 
 		class _ApiExport Texture
 		{

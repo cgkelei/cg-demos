@@ -1,7 +1,7 @@
 #include "Graphics/Viewport.h"
 
 namespace RcEngine {
-	namespace RenderSystem {
+	namespace Render {
 
 		Viewport::Viewport( )	
 		{

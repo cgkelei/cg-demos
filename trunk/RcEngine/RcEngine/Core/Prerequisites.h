@@ -97,7 +97,7 @@ namespace RcEngine {
 		class IModule;
 	}
 
-	namespace RenderSystem
+	namespace Render
 	{
 		struct RenderSettings;
 		class RenderDevice;

@@ -16,7 +16,7 @@ LRESULT CALLBACK Window::WndProcStatic( HWND hWnd, UINT message, WPARAM wParam, 
 }
 
 
-Window::Window( const std::string& title, const RenderSystem::RenderSettings& settings )
+Window::Window( const std::string& title, const Render::RenderSettings& settings )
 	: mName(title)
 {
 	msWindow = this;

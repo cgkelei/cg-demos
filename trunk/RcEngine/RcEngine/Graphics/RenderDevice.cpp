@@ -3,7 +3,7 @@
 #include "Graphics/RenderOperation.h"
 
 namespace RcEngine {
-	namespace RenderSystem {
+	namespace Render {
 
 		RenderDevice::RenderDevice(void)
 			: mRenderFactory(0), mCurrentFrameBuffer(0), mDefaultFrameBuffer(0)

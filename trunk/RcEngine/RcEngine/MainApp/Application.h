@@ -27,8 +27,8 @@ public:
 
 	Window* GetMainWindow() { return mMainWindow; }
 
-	RenderSystem::Camera* GetCamera();
-	RenderSystem::RenderDevice* GetRenderDevice();
+	Render::Camera* GetCamera();
+	Render::RenderDevice* GetRenderDevice();
 
 protected:
 
@@ -90,12 +90,12 @@ protected:
 
 	Timer mTimer;
 
-	RenderSystem::RenderSettings mSettings;
+	Render::RenderSettings mSettings;
 
-	RenderSystem::RenderDevice* mRenderDevice;
+	Render::RenderDevice* mRenderDevice;
 
 
-	RenderSystem::Camera* mCamera;
+	Render::Camera* mCamera;
 
 	// in case multiple threads are used
 	volatile bool mIsRunning;

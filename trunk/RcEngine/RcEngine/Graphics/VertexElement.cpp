@@ -2,7 +2,7 @@
 #include "Core/Exception.h"
 
 namespace RcEngine {
-namespace RenderSystem {
+namespace Render {
 
 using Core::Exception;
 

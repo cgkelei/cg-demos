@@ -6,7 +6,7 @@
 #include "Math/ColorRGBA.h"
 
 namespace RcEngine {
-	namespace RenderSystem {
+	namespace Render {
 
 		using namespace Math;
 

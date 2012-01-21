@@ -3,7 +3,7 @@
 #include "Graphics/RenderDevice.h"
 
 namespace RcEngine {
-namespace RenderSystem {
+namespace Render {
 
 Camera::Camera(void)
 {

@@ -3,7 +3,7 @@
 #include "Core/Prerequisites.h"
 
 namespace RcEngine {
-	namespace RenderSystem {
+	namespace Render {
 
 		//////////////////////////////////////////////////////////////////////////
 		class _ApiExport RenderEffect

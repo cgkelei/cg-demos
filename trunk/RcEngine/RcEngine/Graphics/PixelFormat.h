@@ -4,7 +4,7 @@
 #include <Core/Prerequisites.h>
 
 namespace RcEngine {
-namespace RenderSystem {
+namespace Render {
 
 enum PixelFormat
 {

@@ -2,7 +2,7 @@
 #include <core/Exception.h>
 
 namespace RcEngine {
-	namespace RenderSystem {
+	namespace Render {
 
 		//-----------------------------------------------------------------------
 		/**

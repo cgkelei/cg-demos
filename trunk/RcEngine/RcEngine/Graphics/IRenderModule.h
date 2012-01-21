@@ -5,7 +5,7 @@
 
 namespace RcEngine
 {
-	namespace RenderSystem
+	namespace Render
 	{
 		class _ApiExport IRenderModule : public Core::IModule
 		{

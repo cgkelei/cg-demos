@@ -2,7 +2,7 @@
 #include "RenderPatameter.h"
 
 namespace RcEngine {
-namespace RenderSystem {
+namespace Render {
 
 
 //////////////////////////////////////////////////////////////////////////
