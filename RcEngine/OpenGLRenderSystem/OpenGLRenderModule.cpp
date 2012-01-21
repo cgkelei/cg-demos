@@ -3,7 +3,7 @@
 
 namespace RcEngine
 {
-	namespace RenderSystem
+	namespace Render
 	{
 		const static std::string ModuleName = "GL RenderSystem";
 

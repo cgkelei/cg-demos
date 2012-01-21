@@ -8,7 +8,7 @@
 
 namespace RcEngine
 {
-	namespace RenderSystem
+	namespace Render
 	{
 		using Core::Exception;
 

@@ -7,7 +7,7 @@
 
 namespace RcEngine
 {
-	namespace RenderSystem
+	namespace Render
 	{
 		class _OpenGLExport OpenGLRenderDevice : public RenderDevice
 		{

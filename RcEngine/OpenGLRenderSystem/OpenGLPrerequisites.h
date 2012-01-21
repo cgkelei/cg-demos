@@ -32,7 +32,7 @@ typedef nv::Image Image;
 
 namespace RcEngine
 {
-	namespace RenderSystem
+	namespace Render
 	{
 		class OpenGLRenderDevice;
 		class OpenGLTexture;
