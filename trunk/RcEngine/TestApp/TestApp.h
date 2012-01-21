@@ -1,8 +1,11 @@
 #pragma once
 
 #include "MainApp/Application.h"
+#include "Graphics/VertexDeclaration.h"
 
 #pragma comment(lib, "RcEngine.lib")
+
+using namespace RcEngine::RenderSystem;
 
 class TestApp : public RcEngine::Application
 {
@@ -15,5 +18,13 @@ protected:
 	void UnloadContent();
 	void Render();
 	void Update(float deltaTime);
+
+private:
+	RenderEffect* mEffect;
+	RenderTechnique* mTechnique;
+	GraphicBuffer* mVertexBuffer;
+	GraphicBuffer* mIndexBuffer;
+	VertexDeclaration mVertexDecl;
+	Texture* mTexture;
 };
 
