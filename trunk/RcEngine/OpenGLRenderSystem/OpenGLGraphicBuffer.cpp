@@ -2,7 +2,7 @@
 
 namespace RcEngine
 {
-	namespace RenderSystem
+	namespace Render
 	{
 		OpenGLGraphicBuffer::OpenGLGraphicBuffer(BufferUsage usage, uint32 accessHint, GLenum target, ElementInitData* initData)
 			: GraphicBuffer(usage, accessHint), mTarget(target)

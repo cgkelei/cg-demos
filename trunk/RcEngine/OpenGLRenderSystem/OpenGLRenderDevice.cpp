@@ -13,7 +13,7 @@
 
 namespace RcEngine
 {
-	namespace RenderSystem
+	namespace Render
 	{
 
 		OpenGLRenderDevice::OpenGLRenderDevice()

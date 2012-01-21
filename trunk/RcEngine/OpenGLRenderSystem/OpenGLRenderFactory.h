@@ -8,7 +8,7 @@
 
 namespace RcEngine
 {
-	namespace RenderSystem
+	namespace Render
 	{
 
 		class _OpenGLExport OpenGLRenderFactory : public RenderFactory

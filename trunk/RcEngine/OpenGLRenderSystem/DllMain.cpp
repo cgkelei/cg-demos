@@ -2,5 +2,5 @@
 
 extern "C" void _OpenGLExport dllStartPlugin(RcEngine::Core::IModule** pMoudle) 
 {
-	*pMoudle = new RcEngine::RenderSystem::OpenGLRenderModule();
+	*pMoudle = new RcEngine::Render::OpenGLRenderModule();
 }

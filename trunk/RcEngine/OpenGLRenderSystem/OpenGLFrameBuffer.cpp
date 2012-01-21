@@ -4,7 +4,7 @@
 
 namespace RcEngine
 {
-	namespace RenderSystem
+	namespace Render
 	{
 		OpenGLFrameBuffer::OpenGLFrameBuffer( unsigned int width, unsigned int height, bool offscreen /*= true*/ )
 			: FrameBuffer(width, height, offscreen)
@@ -22,7 +22,7 @@ namespace RcEngine
 			}
 		}
 
-		RcEngine::RenderSystem::OpenGLFrameBuffer::~OpenGLFrameBuffer()
+		RcEngine::Render::OpenGLFrameBuffer::~OpenGLFrameBuffer()
 		{
 			if(mFrameBufferObject != 0)
 				glDeleteFramebuffersEXT(1, &mFrameBufferObject);

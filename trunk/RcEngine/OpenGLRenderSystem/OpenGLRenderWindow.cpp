@@ -7,7 +7,7 @@
 
 namespace RcEngine
 {
-	namespace RenderSystem
+	namespace Render
 	{
 		OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
 			: OpenGLFrameBuffer(settings.Width, settings.Height, false)

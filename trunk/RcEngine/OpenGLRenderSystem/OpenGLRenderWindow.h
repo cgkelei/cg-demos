@@ -6,7 +6,7 @@
 
 namespace RcEngine
 {
-	namespace RenderSystem
+	namespace Render
 	{
 		class _OpenGLExport OpenGLRenderWindow : public OpenGLFrameBuffer
 		{
