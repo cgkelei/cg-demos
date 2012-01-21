@@ -8,6 +8,7 @@
 #include "Graphics/IRenderModule.h"
 #include "Core/Exception.h"
 #include "Core/Context.h"
+#include "Core/XMLDom.h"
 #include "Core/ModuleManager.h"
 
 
@@ -23,100 +24,92 @@ namespace RcEngine {
 		msAppliation = this;
 		mConfigFile = "Config.xml";
 
+		Context::Initialize();
 		ModuleManager::Initialize();
+
+		Context::GetSingleton().SetApplication(this);
 	}
 
 	Application::~Application( void )
 	{
-		//Safe_Delete(mCamera);
+		Safe_Delete(mCamera);
 		ModuleManager::Finalize();
 	}
 
 	void Application::RunGame()
 	{
-		LoadAllModules();
-		Initialize();
-
 		mIsRunning = true;
+
+		Initialize();
 
 		LoadContent();
 
-		//// Reset Game Timer
+		// Reset Game Timer
 		mTimer.Reset();
 
-		while( mIsRunning )
-		{
-			mTimer.Tick();
-
-			/*if(!mAppPaused)
-			Update(mTimer.GetDeltaTime());
+		MSG msg;
+		ZeroMemory( &msg, sizeof( msg ) );
+		while( msg.message != WM_QUIT)
+		{                       
+			if( PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE ) )
+			{
+				TranslateMessage( &msg );
+				DispatchMessage( &msg );
+			}
 			else
-			::Sleep(50);
-
-			Render();
-
-			mIsRunning = !glfwGetKey( GLFW_KEY_ESC ) &&
-			glfwGetWindowParam( GLFW_OPENED );*/
+			{
+				Tick();
+			}
 		}
 
 		UnloadContent();
-
-		Finalize();
 	}
+
+
+	void Application::Tick()
+	{
+		mTimer.Tick();
+
+		if(!mAppPaused)
+			Update(mTimer.GetDeltaTime());
+		else
+			::Sleep(50);
+
+		Render();
+	}
+
 
 	void Application::Initialize()
 	{
+		// Read Configuration
+		ReadConfiguration();
+
 		// Read configuration
 		CreateGameWindow();
 
-		InitRenderDevice();
+		// Load Modules
+		LoadAllModules();
 
-		// Init Glew
-		//GLenum err = glewInit();
-		//if (GLEW_OK != err)
-		//{
-		//	char errMsg[1024];
-		//	sprintf_s(errMsg, "Error initializing Glew: %s", glewGetErrorString(err));
-		//	ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, errMsg, "Application::Initialize" );
-		//}
+		// Init Render Device
+		InitializeDevice();
 
-		//// Init Camera
-		//mCamera = new Camera();
-	}
-
-	void Application::Finalize()
-	{
-		//Safe_Delete(mCamera);
+		mCamera = new RenderSystem::Camera();
 	}
 
 	void Application::CreateGameWindow( )
 	{
-		/*XMLDocument configXML;
-		XMLNodePtr root = configXML.Parse(mConfigFile);
-		std::string windowTitle = root->Attribute("Title")->ValueString();
-
-		XMLNodePtr graphics = root->FirstNode("Graphics");
-		XMLNodePtr frame = graphics->FirstNode("Frame");
-
-
-		mSettings.Width = frame->Attribute("Width")->ValueUInt();
-		mSettings.Height = frame->Attribute("Height")->ValueUInt();
-		mSettings.Fullscreen = (frame->Attribute("FullScreen")->ValueInt() == 1);
-
-		std::string colorFmt = frame->Attribute("ColorForamt")->ValueString();
-		std::string depthStencilFmt = frame->Attribute("DepthStencilFormat")->ValueString();
-
-		mMainWindow = new Window(windowTitle, mSettings);
+		mMainWindow = new Window("RcEngine", mSettings);
 		mMainWindow->PaintEvent.bind(this, &Application::Window_Paint);
 		mMainWindow->SuspendEvent.bind(this, &Application::Window_Suspend);
 		mMainWindow->ResumeEvent.bind(this, &Application::Window_Resume);
 		mMainWindow->ApplicationActivatedEvent.bind(this, &Application::Window_ApplicationActivated);
-		mMainWindow->ApplicationDeactivatedEvent.bind(this, &Application::Window_ApplicationDeactivated);*/
+		mMainWindow->ApplicationDeactivatedEvent.bind(this, &Application::Window_ApplicationDeactivated);
 
 	}
 
-	void Application::InitRenderDevice()
+	void Application::InitializeDevice()
 	{
+		mRenderDevice->CreateRenderWindow(mSettings);
 	}
 
 	RenderSystem::Camera* Application::GetCamera()
@@ -135,13 +128,15 @@ namespace RcEngine {
 		ModuleManager::GetSingleton().Load(MT_Render_OpengGL);
 		RenderSystem::IRenderModule* renderModule = static_cast<RenderSystem::IRenderModule*>(
 			ModuleManager::GetSingleton().GetMoudleByType(MT_Render_OpengGL));
-		renderModule->Install();
+		renderModule->Initialise();
 		mRenderDevice = renderModule->GetRenderDevice();
+		Context::GetSingleton().SetRenderDevice(mRenderDevice);
+
 	}
 
 	void Application::UnloadAllModules()
 	{
-
+		ModuleManager::GetSingleton().GetMoudleByType(MT_Render_OpengGL)->Shutdown();
 	}
 
 
@@ -170,6 +165,30 @@ namespace RcEngine {
 	void Application::Window_Paint()
 	{
 
+	}
+
+	void Application::ReadConfiguration()
+	{
+		XMLDocument configXML;
+		XMLNodePtr root = configXML.Parse("F://Config.xml");
+		std::string windowTitle = root->Attribute("Title")->ValueString();
+
+		XMLNodePtr graphics = root->FirstNode("Graphics");
+		XMLNodePtr frame = graphics->FirstNode("Frame");
+
+
+		mSettings.Left = 100;
+		mSettings.Top = 100;
+		mSettings.Width = frame->Attribute("Width")->ValueUInt();
+		mSettings.Height = frame->Attribute("Height")->ValueUInt();
+		mSettings.Fullscreen = (frame->Attribute("FullScreen")->ValueInt() == 1);
+		mSettings.SampleCount = 0;
+		mSettings.SampleQuality = 0;
+
+		std::string colorFmt = frame->Attribute("ColorForamt")->ValueString();
+		std::string depthStencilFmt = frame->Attribute("DepthStencilFormat")->ValueString();
+		mSettings.ColorFormat = RenderSystem::PF_R8G8B8A8;
+		mSettings.DepthStencilFormat = RenderSystem::PF_Depth24Stencil8;
 	}
 
 } // Namespace RcEngine

@@ -216,14 +216,6 @@ enum PixelFormat
 	PF_Count = 40
 };
 
-enum DepthFormat
-{
-	DF_Unknown,
-	DF_Depth16,
-	DF_Depth24Stencil8,
-	DF_Depth32,
-};
-
 /**
 * Flags defining some on/off properties of pixel formats
 */

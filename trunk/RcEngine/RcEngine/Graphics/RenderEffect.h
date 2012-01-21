@@ -3,85 +3,85 @@
 #include "Core/Prerequisites.h"
 
 namespace RcEngine {
-namespace RenderSystem {
+	namespace RenderSystem {
 
-//////////////////////////////////////////////////////////////////////////
-class _ApiExport RenderEffect
-{
-public:
-	typedef std::vector<RenderTechnique*> TechniqueList;
-	typedef std::vector<RenderParameter*> ParameterList;
+		//////////////////////////////////////////////////////////////////////////
+		class _ApiExport RenderEffect
+		{
+		public:
+			typedef std::vector<RenderTechnique*> TechniqueList;
+			typedef std::vector<RenderParameter*> ParameterList;
 
-public:
-	RenderEffect(const std::string& effectFile, const std::string& effectName);
-	virtual ~RenderEffect(void);
+		public:
+			RenderEffect(const std::string& effectFile, const std::string& effectName);
+			virtual ~RenderEffect(void);
 
-	bool IsValid() const;
+			bool IsValid() const;
 
-	TechniqueList&	 GetTechniques();
-	RenderTechnique* GetTechniqueByName(const std::string& techName);
-	
-	ParameterList&	 GetParameters();
-	RenderParameter* GetParameterByName(const std::string& paraName);
-	RenderParameter* GetParameterBySemantic(const std::string& semanticName);
+			TechniqueList&	 GetTechniques();
+			RenderTechnique* GetTechniqueByName(const std::string& techName);
 
-	virtual bool LoadEffectFromFile(const std::string& effectFile) = 0;
+			ParameterList&	 GetParameters();
+			RenderParameter* GetParameterByName(const std::string& paraName);
+			RenderParameter* GetParameterBySemantic(const std::string& semanticName);
 
-protected:
-	virtual void Destroy() = 0;
+			virtual bool LoadEffectFromFile(const std::string& effectFile) = 0;
 
-protected:
+		protected:
+			virtual void Destroy() = 0;
 
-	TechniqueList   mTechniques;
-	ParameterList    mParameters;
+		protected:
 
-	bool            mIsValid;
-	std::string     mEffectName;
-	std::string     m_EffectFile;
-};
+			TechniqueList   mTechniques;
+			ParameterList    mParameters;
 
-
-
-class _ApiExport RenderTechnique
-{
-public:
-	typedef std::vector<RenderPass*> PassList;
-
-public:
-	RenderTechnique();
-	virtual ~RenderTechnique();
+			bool            mIsValid;
+			std::string     mEffectName;
+			std::string     m_EffectFile;
+		};
 
 
-	const std::string& GetTechniqueName() const;
-	bool IsValid() const;
-	PassList GetPasses();
-	RenderPass* GetPassByName( const std::string& passName);
 
-protected:
+		class _ApiExport RenderTechnique
+		{
+		public:
+			typedef std::vector<RenderPass*> PassList;
 
-	PassList			mPasses;
-	std::string			mTechniqueName;
-	bool                mIsValid;
-};
-
-class _ApiExport RenderPass
-{
-public:
-	RenderPass();
-	virtual ~RenderPass();
+		public:
+			RenderTechnique();
+			virtual ~RenderTechnique();
 
 
-	const std::string& GetPassName() const;
-	bool IsValid() const;
+			const std::string& GetTechniqueName() const;
+			bool IsValid() const;
+			PassList GetPasses();
+			RenderPass* GetPassByName( const std::string& passName);
 
-	virtual bool BeginPass() = 0;
-	virtual void EndPass() = 0;
-	
-protected:
-	std::string			mPassName;
-	bool                mIsValid;
-};
+		protected:
+
+			PassList			mPasses;
+			std::string			mTechniqueName;
+			bool                mIsValid;
+		};
+
+		class _ApiExport RenderPass
+		{
+		public:
+			RenderPass();
+			virtual ~RenderPass();
 
 
-} // RenderSystem
+			const std::string& GetPassName() const;
+			bool IsValid() const;
+
+			virtual bool BeginPass() = 0;
+			virtual void EndPass() = 0;
+
+		protected:
+			std::string			mPassName;
+			bool                mIsValid;
+		};
+
+
+	} // RenderSystem
 } // RcEngine

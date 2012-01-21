@@ -15,12 +15,9 @@ namespace RcEngine
 		public:
 			virtual ~IModule(void);
 
-			virtual const std::string& GetName() const = 0;
-
-			virtual void Install() = 0;
+			virtual const std::string& GetName() const = 0;	
 			virtual void Initialise() = 0;
 			virtual void Shutdown() = 0;
-			virtual void Uninstall() = 0;
 
 		};
 	}

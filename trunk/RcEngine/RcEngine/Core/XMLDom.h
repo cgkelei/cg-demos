@@ -6,6 +6,12 @@
 namespace RcEngine{
 namespace Core{
 
+class XMLNode;
+typedef std::shared_ptr<XMLNode> XMLNodePtr;
+
+class XMLAttribute;
+typedef std::shared_ptr<XMLAttribute> XMLAttributePtr;
+
 enum XMLNodeType
 {
 	// A document node. Name and value are empty.
@@ -37,7 +43,7 @@ enum XMLNodeType
 /* Class XMLDocument represents a root of the DOM hierarchy.                                                                     */
 /************************************************************************/
 
-class XMLDocument
+class _ApiExport XMLDocument
 {
 public:
 	XMLDocument();
@@ -59,7 +65,7 @@ private:
 	std::vector<char> mXMLSrc; // must read xml file in memory
 };
 
-class XMLNode
+class _ApiExport XMLNode
 {
 	friend class XMLDocument;
 
@@ -122,10 +128,10 @@ private:
 	std::vector<XMLAttributePtr> mAttributes;
 
 public:
-	static XMLNodePtr NullSharedPtr;
+	static XMLNodePtr NullObejct;
 };
 
-class XMLAttribute
+class _ApiExport XMLAttribute
 {
 	friend class XMLDocument;
 	friend class XMLNode;
@@ -152,7 +158,7 @@ private:
 	std::string mValue;
 	
 public:
-	static XMLAttributePtr NullSharedPtr;
+	static XMLAttributePtr NullObejct;
 
 };
 

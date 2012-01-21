@@ -7,32 +7,32 @@
 #include "VertexDeclaration.h"
 
 namespace RcEngine {
-namespace RenderSystem {
+	namespace RenderSystem {
 
-class RenderOperation
-{
-public:
+		class RenderOperation
+		{
+		public:
 
-public:
-	RenderOperation(void)
-		: mUseIndex(true), mPrimitiveType(PT_Triangle_List)
-	{
+		public:
+			RenderOperation(void)
+				: mUseIndex(true), mPrimitiveType(PT_Triangle_List)
+			{
 
-	}
-	
-	PrimitiveType mPrimitiveType;
-	GraphicBuffer* mVertexBuffer;
+			}
 
-	VertexDeclaration mVertexDecl;
+			PrimitiveType mPrimitiveType;
+			GraphicBuffer* mVertexBuffer;
 
-	bool mUseIndex;
-	GraphicBuffer* mIndexBuffer;
-	IndexBufferType mIndexType;
+			VertexDeclaration mVertexDecl;
 
-};
+			bool mUseIndex;
+			GraphicBuffer* mIndexBuffer;
+			IndexBufferType mIndexType;
+
+		};
 
 
-} // RenderSystem
+	} // RenderSystem
 } // RcEngine
 
 

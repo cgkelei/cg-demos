@@ -5,8 +5,8 @@
 namespace RcEngine{
 namespace Core{
 
-XMLNodePtr XMLNode::NullSharedPtr;
-XMLAttributePtr XMLAttribute::NullSharedPtr;
+XMLNodePtr XMLNode::NullObejct;
+XMLAttributePtr XMLAttribute::NullObejct;
 	
 rapidxml::node_type MapToRapidxml(XMLNodeType type)
 {
@@ -164,7 +164,7 @@ XMLAttributePtr XMLNode::FirstAttribute( const std::string& name  )
 	}
 	else
 	{
-		return XMLAttribute::NullSharedPtr;
+		return XMLAttribute::NullObejct;
 	}
 }
 
@@ -177,7 +177,7 @@ XMLAttributePtr XMLNode::FirstAttribute()
 	}
 	else
 	{
-		return XMLAttribute::NullSharedPtr;
+		return XMLAttribute::NullObejct;
 	}
 }
 
@@ -190,7 +190,7 @@ XMLAttributePtr XMLNode::LastAttribute( const std::string& name )
 	}
 	else
 	{
-		return XMLAttribute::NullSharedPtr;
+		return XMLAttribute::NullObejct;
 	}
 }
 
@@ -203,7 +203,7 @@ XMLAttributePtr XMLNode::LastAttribute()
 	}
 	else
 	{
-		return XMLAttribute::NullSharedPtr;
+		return XMLAttribute::NullObejct;
 	}
 }
 
@@ -243,7 +243,7 @@ XMLNodePtr XMLNode::FirstNode( const std::string& name )
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullSharedPtr;
+		return XMLNode::NullObejct;
 	}
 }
 
@@ -254,7 +254,7 @@ XMLNodePtr XMLNode::LastNode( const std::string& name )
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullSharedPtr;
+		return XMLNode::NullObejct;
 	}
 }
 
@@ -265,7 +265,7 @@ XMLNodePtr XMLNode::FirstNode()
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullSharedPtr;
+		return XMLNode::NullObejct;
 	}
 }
 
@@ -276,7 +276,7 @@ XMLNodePtr XMLNode::LastNode()
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullSharedPtr;
+		return XMLNode::NullObejct;
 	}
 }	
 
@@ -287,7 +287,7 @@ XMLNodePtr XMLNode::PrevSibling( const std::string& name )
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullSharedPtr;
+		return XMLNode::NullObejct;
 	}
 }
 
@@ -298,7 +298,7 @@ XMLNodePtr XMLNode::PrevSibling()
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullSharedPtr;
+		return XMLNode::NullObejct;
 	}
 }
 
@@ -309,7 +309,7 @@ XMLNodePtr XMLNode::NextSibling( const std::string& name )
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullSharedPtr;
+		return XMLNode::NullObejct;
 	}
 }
 
@@ -320,7 +320,7 @@ XMLNodePtr XMLNode::NextSibling()
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullSharedPtr;
+		return XMLNode::NullObejct;
 	}
 }
 
@@ -471,7 +471,7 @@ XMLNodePtr XMLNode::GetParent()
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullSharedPtr;
+		return XMLNode::NullObejct;
 	}
 }
 
@@ -505,7 +505,7 @@ XMLAttributePtr XMLAttribute::PrevAttribute( const std::string& name ) const
 		return std::make_shared<XMLAttribute>(attr);
 	}
 	else{
-		return XMLAttribute::NullSharedPtr;
+		return XMLAttribute::NullObejct;
 	}
 }
 
@@ -516,7 +516,7 @@ XMLAttributePtr XMLAttribute::PrevAttribute() const
 		return std::make_shared<XMLAttribute>(attr);
 	}
 	else{
-		return XMLAttribute::NullSharedPtr;
+		return XMLAttribute::NullObejct;
 	}
 }
 
@@ -527,7 +527,7 @@ XMLAttributePtr XMLAttribute::NextAttribute( const std::string& name ) const
 		return std::make_shared<XMLAttribute>(attr);
 	}
 	else{
-		return XMLAttribute::NullSharedPtr;
+		return XMLAttribute::NullObejct;
 	}
 }
 
@@ -538,7 +538,7 @@ XMLAttributePtr XMLAttribute::NextAttribute() const
 		return std::make_shared<XMLAttribute>(attr);
 	}
 	else{
-		return XMLAttribute::NullSharedPtr;
+		return XMLAttribute::NullObejct;
 	}
 }
 

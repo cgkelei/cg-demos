@@ -63,9 +63,6 @@
     <ClCompile Include="Math\ColorRGBA.cpp">
       <Filter>Math</Filter>
     </ClCompile>
-    <ClCompile Include="Math\Matrix.cpp">
-      <Filter>Math</Filter>
-    </ClCompile>
     <ClCompile Include="Math\VectorUtil.cpp">
       <Filter>Math</Filter>
     </ClCompile>
@@ -84,9 +81,6 @@
     <ClCompile Include="Graphics\Camera.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\RenderWindow.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="Core\IModule.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -97,6 +91,9 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\ModuleManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\XMLDom.cpp">
       <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
@@ -191,9 +188,6 @@
     <ClInclude Include="Graphics\Camera.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\RenderWindow.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Core\IModule.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -204,6 +198,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\ModuleManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\XMLDom.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

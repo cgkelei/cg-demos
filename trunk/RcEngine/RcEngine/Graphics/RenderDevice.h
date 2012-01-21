@@ -4,78 +4,70 @@
 #include "Core/Prerequisites.h"
 #include "Math/ColorRGBA.h"
 #include "Math/MathUtil.h"
-#include "GraphicsCommon.h"
-#include "VertexDeclaration.h"
-#include "RenderOperation.h"
-#include "FrameBuffer.h"
-#include "RenderSettings.h"
+#include "Graphics/GraphicsCommon.h"
+#include "Graphics/VertexDeclaration.h"
+#include "Graphics/RenderOperation.h"
+#include "Graphics/FrameBuffer.h"
+#include "Graphics/RenderSettings.h"
 
 namespace RcEngine {
-namespace RenderSystem {
+	namespace RenderSystem {
 
-class _ApiExport RenderDevice
-{
-public:
-	RenderDevice(void);
-	virtual ~RenderDevice(void);
+		class _ApiExport RenderDevice
+		{
+		public:
+			RenderDevice(void);
+			virtual ~RenderDevice(void);
 
-	RenderFactory* GetRenderFactory() const;
-	
-	void BindFrameBuffer(FrameBuffer* fb);
-	FrameBuffer* GetCurrentFrameBuffer();
+			RenderFactory* GetRenderFactory() const;
 
-	virtual void Create() = 0;
-	virtual void Release() = 0;
+			void BindFrameBuffer(FrameBuffer* fb);
+			FrameBuffer* GetCurrentFrameBuffer();
 
-	
+			virtual void Create() = 0;
+			virtual void Release() = 0;
 
+			virtual void BeginFrame() = 0;
+			virtual void EndFrame() = 0;
 
-	virtual void BeginFrame() = 0;
-	virtual void EndFrame() = 0;
+			virtual void ToggleFullscreen(bool fs) = 0;
+			virtual bool Fullscreen() const = 0;
 
-	virtual void ToggleFullscreen(bool fs) = 0;
-	virtual bool IsFullscreen() const = 0;
+			virtual void CreateRenderWindow(const RenderSettings& settings) = 0;
+			virtual void BindVertexBuffer(const GraphicBuffer* vertexBuffer ) = 0;
+			virtual void BindIndexBuffer(const GraphicBuffer* indexBuffer) = 0;
+			virtual void Draw(RenderEffect* effect, const RenderOperation& operation) = 0;
+			virtual void AdjustProjectionMatrix(Math::Matrix4f& pOut) = 0;
 
-	virtual void CreateRenderWindow(const RenderSettings& settings) = 0;
-	virtual void BindVertexBuffer(const GraphicBuffer* vertexBuffer ) = 0;
-	virtual void BindIndexBuffer(const GraphicBuffer* indexBuffer) = 0;
-	virtual void Draw(RenderEffect* effect, const RenderOperation& operation) = 0;
-	virtual void AdjustProjectionMatrix(Math::Matrix4f& pOut) = 0;
+			void Resize(unsigned int width, unsigned int height);
 
-	void Resize(unsigned int width, unsigned int height);
+			virtual void SwapBuffers();
 
-	
+		protected:
+			virtual void BindVertexStream(const GraphicBuffer* buffer, const VertexDeclaration& vertexDec) = 0;
+			virtual void DoBindFrame(FrameBuffer* fb) = 0;
 
-	
+		protected:
 
-	virtual void SwapBuffers();
+			unsigned int mWidth, mHeight;
 
+			PixelFormat mColorFormat;
+			unsigned int mColorBits;
 
-protected:
-	virtual void BindVertexStream(const GraphicBuffer* buffer, const VertexDeclaration& vertexDec) = 0;
-	virtual void DoBindFrame(FrameBuffer* fb) = 0;
-	
-protected:
+			unsigned int mDepthBits, mStencilBits;
+			bool mIsDepthBuffered;
 
-	unsigned int mWidth, mHeight;
+			FrameBuffer* mCurrentFrameBuffer;
+			FrameBuffer* mDefaultFrameBuffer;
 
-	PixelFormat mColorFormat;
-	unsigned int mColorBits;
+			RenderSettings mRenderSettings;
 
-	unsigned int mDepthBits, mStencilBits;
-	bool mIsDepthBuffered;
+			Viewport mViewport;
 
-	FrameBuffer* mCurrentFrameBuffer;
-	FrameBuffer* mDefaultFrameBuffer;
+			RenderFactory* mRenderFactory;
+		};
 
-	RenderSettings mRenderSettings;
-
-	Viewport mViewport;
-
-	RenderFactory* mRenderFactory;
-};
-
-}
+	}
 }
 
 #endif // RenderDevice_h__
