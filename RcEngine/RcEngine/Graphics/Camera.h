@@ -5,7 +5,7 @@
 #include "Math/MathUtil.h"
 
 namespace RcEngine {
-namespace RenderSystem {
+namespace Render {
 
 using namespace Math;
 

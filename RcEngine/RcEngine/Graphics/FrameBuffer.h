@@ -8,7 +8,7 @@
 #include "Math/ColorRGBA.h"
 
 namespace RcEngine {
-namespace RenderSystem {
+namespace Render {
 
 class _ApiExport FrameBuffer
 {

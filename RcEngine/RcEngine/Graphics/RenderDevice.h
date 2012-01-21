@@ -11,7 +11,7 @@
 #include "Graphics/RenderSettings.h"
 
 namespace RcEngine {
-	namespace RenderSystem {
+	namespace Render {
 
 		class _ApiExport RenderDevice
 		{

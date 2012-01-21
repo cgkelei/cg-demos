@@ -1,7 +1,7 @@
 #include "GraphicBuffer.h"
 
 namespace RcEngine {
-namespace RenderSystem {
+namespace Render {
 
 GraphicBuffer::GraphicBuffer(BufferUsage usage, uint32 accessHint)
 	: mBufferUsage(usage), mAccessHint(accessHint)

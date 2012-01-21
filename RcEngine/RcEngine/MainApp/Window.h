@@ -9,7 +9,7 @@ namespace RcEngine {
 class _ApiExport Window
 {
 public:
-	Window(const std::string& name, const RenderSystem::RenderSettings& settings);
+	Window(const std::string& name, const Render::RenderSettings& settings);
 	~Window(void);
 
 	HWND GetHwnd() const		{ return mhWnd; }

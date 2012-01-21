@@ -30,7 +30,7 @@
 //	mStreams.push_back(ss);
 //}
 namespace RcEngine {
-namespace RenderSystem {
+namespace Render {
 
 } // RenderSystem
 } // RcEngine

@@ -5,7 +5,7 @@
 #include "GraphicsCommon.h"
 
 namespace RcEngine {
-	namespace RenderSystem {
+	namespace Render {
 
 		class  _ApiExport VertexElement
 		{

@@ -1,7 +1,7 @@
 #include "VertexDeclaration.h"
 
 namespace RcEngine {
-namespace RenderSystem {
+namespace Render {
 
 VertexDeclaration::VertexDeclaration()
 {

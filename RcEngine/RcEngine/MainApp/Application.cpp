@@ -93,7 +93,7 @@ namespace RcEngine {
 		// Init Render Device
 		InitializeDevice();
 
-		mCamera = new RenderSystem::Camera();
+		mCamera = new Render::Camera();
 	}
 
 	void Application::CreateGameWindow( )
@@ -113,12 +113,12 @@ namespace RcEngine {
 		mRenderDevice->CreateRenderWindow(mSettings);
 	}
 
-	RenderSystem::Camera* Application::GetCamera()
+	Render::Camera* Application::GetCamera()
 	{
 		return mCamera;
 	}
 
-	RenderSystem::RenderDevice* Application::GetRenderDevice()
+	Render::RenderDevice* Application::GetRenderDevice()
 	{
 		return mRenderDevice;
 	}
@@ -127,7 +127,7 @@ namespace RcEngine {
 	void Application::LoadAllModules()
 	{
 		ModuleManager::GetSingleton().Load(MT_Render_OpengGL);
-		RenderSystem::IRenderModule* renderModule = static_cast<RenderSystem::IRenderModule*>(
+		Render::IRenderModule* renderModule = static_cast<Render::IRenderModule*>(
 			ModuleManager::GetSingleton().GetMoudleByType(MT_Render_OpengGL));
 		renderModule->Initialise();
 		mRenderDevice = renderModule->GetRenderDevice();
@@ -188,8 +188,8 @@ namespace RcEngine {
 
 		std::string colorFmt = frame->Attribute("ColorForamt")->ValueString();
 		std::string depthStencilFmt = frame->Attribute("DepthStencilFormat")->ValueString();
-		mSettings.ColorFormat = RenderSystem::PF_R8G8B8A8;
-		mSettings.DepthStencilFormat = RenderSystem::PF_Depth24Stencil8;
+		mSettings.ColorFormat = Render::PF_R8G8B8A8;
+		mSettings.DepthStencilFormat = Render::PF_Depth24Stencil8;
 	}
 
 } // Namespace RcEngine

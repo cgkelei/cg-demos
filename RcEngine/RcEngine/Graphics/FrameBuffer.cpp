@@ -2,7 +2,7 @@
 #include "RenderView.h"
 
 namespace RcEngine {
-	namespace RenderSystem {
+	namespace Render {
 
 		FrameBuffer::FrameBuffer(unsigned int width, unsigned int height,  bool offscreen /*= true*/ )
 			: mWidth(width), mHeight(height), mDepthStencilView(0), mDirty(false), mOffscreen(offscreen)

@@ -7,7 +7,7 @@
 #include "VertexElement.h"
 
 namespace RcEngine {
-	namespace RenderSystem {
+	namespace Render {
 
 #define Max_Vertex_Streams 8
 

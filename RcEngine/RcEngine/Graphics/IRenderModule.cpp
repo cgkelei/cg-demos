@@ -2,7 +2,7 @@
 
 namespace RcEngine
 {
-	namespace RenderSystem
+	namespace Render
 	{
 		IRenderModule::IRenderModule()
 		{

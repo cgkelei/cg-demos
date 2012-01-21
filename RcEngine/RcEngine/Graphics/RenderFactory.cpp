@@ -1,7 +1,7 @@
 #include "RenderFactory.h"
 
 namespace RcEngine {
-namespace RenderSystem {
+namespace Render {
 
 RenderFactory::RenderFactory(void)
 {
