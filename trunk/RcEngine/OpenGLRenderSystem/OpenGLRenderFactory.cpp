@@ -174,10 +174,6 @@ namespace RcEngine
 			return 0;
 		}
 
-		//TexturePtr OpenGLRenderFactory::CreateTextureArrayFromFiles( const std::vector<std::string>& texFileName, unsigned int accessHint )
-		//{
-		//
-		//}
 
 
 

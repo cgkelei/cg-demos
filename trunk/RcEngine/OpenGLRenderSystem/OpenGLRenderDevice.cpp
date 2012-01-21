@@ -63,17 +63,24 @@ namespace RcEngine
 		{
 			RenderTechnique* technique = effect->GetTechniques()[0];
 			RenderTechnique::PassList Passes = technique->GetPasses();
-			BindVertexStream(operation.mVertexBuffer, operation.mVertexDecl);
+			/*BindVertexStream(operation.mVertexBuffer, operation.mVertexDecl);
 			if(operation.mUseIndex)
 			{
 				BindIndexBuffer(operation.mIndexBuffer);
-			}
+			}*/
 	
 			for(RenderTechnique::PassList::iterator pass = Passes.begin(); pass != Passes.end(); ++pass)
 			{        
 				if ( (*pass)->BeginPass() )
 				{
-					glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, (void*)0);
+					glBegin(GL_QUADS);
+					glVertex3f(-1, 1, 0);
+					glVertex3f(-1, -1, 0);
+					glVertex3f(1, -1, 0);
+					glVertex3f(1, 1, 0);
+					glEnd();
+
+					//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, (void*)0);
 					(*pass)->EndPass();
 				}
 			}
@@ -119,7 +126,7 @@ namespace RcEngine
 			}
 		}
 
-		void OpenGLRenderDevice::DoBindFrame( FrameBuffer* fb )
+		void OpenGLRenderDevice::DoBindFrameBuffer( FrameBuffer* fb )
 		{
 			OpenGLFrameBuffer* oglFrameBuffer = static_cast<OpenGLFrameBuffer*>(fb);
 
@@ -131,16 +138,6 @@ namespace RcEngine
 				mViewport = vp;
 				glViewport(vp.mLeft, vp.mTop, vp.mWidth, vp.mHeight);
 			}
-		}
-
-		void OpenGLRenderDevice::BeginFrame()
-		{
-
-		}
-
-		void OpenGLRenderDevice::EndFrame()
-		{
-
 		}
 
 		void OpenGLRenderDevice::ToggleFullscreen( bool fs )

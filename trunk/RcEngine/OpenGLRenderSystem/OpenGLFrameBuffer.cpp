@@ -10,7 +10,7 @@ namespace RcEngine
 			: FrameBuffer(width, height, offscreen)
 		{
 			mLeft = 0;
-			mHeight = 0;
+			mTop = 0;
 
 			if (mOffscreen)
 			{
@@ -58,7 +58,7 @@ namespace RcEngine
 		void OpenGLFrameBuffer::Clear( unsigned int flags, Math::ColorRGBA& clr, float depth, unsigned int stencil )
 		{
 			RenderDevice* device = Core::Context::GetSingleton().GetRenderDevicePtr();
-			FrameBuffer* oldFrameBuffer = device->GetCurrentFrameBuffer();
+			//FrameBuffer* oldFrameBuffer = device->GetCurrentFrameBuffer();
 
 			device->BindFrameBuffer(this);
 
@@ -81,7 +81,7 @@ namespace RcEngine
 
 			glClear(ogl_flags);
 
-			device->BindFrameBuffer(oldFrameBuffer);
+			//device->BindFrameBuffer(oldFrameBuffer);
 		}
 
 		void OpenGLFrameBuffer::SwapBuffers()
