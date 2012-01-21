@@ -15,17 +15,7 @@ namespace RcEngine {
 		{
 		}
 
-		void RenderDevice::BeginFrame()
-		{
-
-		}
-
-		void RenderDevice::EndFrame()
-		{
-
-		}
-
-		void RenderDevice::SwapBuffers()
+		void RenderDevice::Resize( unsigned int width, unsigned int height )
 		{
 
 		}
@@ -36,7 +26,7 @@ namespace RcEngine {
 
 			if( mCurrentFrameBuffer && (fb != mCurrentFrameBuffer) )
 			{	
-					mCurrentFrameBuffer->OnUnbind();
+				mCurrentFrameBuffer->OnUnbind();
 			}
 
 			mCurrentFrameBuffer = fb; 
@@ -44,14 +34,8 @@ namespace RcEngine {
 			if(mCurrentFrameBuffer->IsDirty())
 			{
 				mCurrentFrameBuffer->OnBind();
-				DoBindFrame(mCurrentFrameBuffer);
+				DoBindFrameBuffer(mCurrentFrameBuffer);
 			}
-		}
-
-
-		void RenderDevice::Resize( unsigned int width, unsigned int height )
-		{
-
 		}
 
 		FrameBuffer* RenderDevice::GetCurrentFrameBuffer()
@@ -59,10 +43,17 @@ namespace RcEngine {
 			return mCurrentFrameBuffer;
 		}
 
+		FrameBuffer* RenderDevice::GetDefaultFrameBuffer()
+		{
+			return mDefaultFrameBuffer;
+		}
+
 		RenderFactory* RenderDevice::GetRenderFactory() const
 		{
 			return mRenderFactory;
 		}
+
+		
 
 
 	} // RenderSystem

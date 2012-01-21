@@ -1,6 +1,7 @@
 #ifndef Camera_h__
 #define Camera_h__
 
+#include "Core/Prerequisites.h"
 #include "Math/MathUtil.h"
 
 namespace RcEngine {
@@ -8,7 +9,7 @@ namespace RenderSystem {
 
 using namespace Math;
 
-class Camera
+class _ApiExport Camera
 {
 public:
 	Camera(void);
