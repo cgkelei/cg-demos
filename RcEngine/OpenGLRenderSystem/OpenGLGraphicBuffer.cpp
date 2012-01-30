@@ -4,8 +4,8 @@ namespace RcEngine
 {
 	namespace Render
 	{
-		OpenGLGraphicBuffer::OpenGLGraphicBuffer(BufferUsage usage, uint32 accessHint, GLenum target, ElementInitData* initData)
-			: GraphicBuffer(usage, accessHint), mTarget(target)
+		OpenGLGraphicsBuffer::OpenGLGraphicsBuffer(BufferUsage usage, uint32 accessHint, GLenum target, ElementInitData* initData)
+			: GraphicsBuffer(usage, accessHint), mTarget(target)
 		{
 			assert((GL_ARRAY_BUFFER == target) || (GL_ELEMENT_ARRAY_BUFFER == target));
 
@@ -21,22 +21,22 @@ namespace RcEngine
 		}
 
 
-		OpenGLGraphicBuffer::~OpenGLGraphicBuffer(void)
+		OpenGLGraphicsBuffer::~OpenGLGraphicsBuffer(void)
 		{
 			glDeleteBuffers(1, &mBufferID);
 		}
 
-		GLenum OpenGLGraphicBuffer::GetTarget() const
+		GLenum OpenGLGraphicsBuffer::GetTarget() const
 		{
 			return mTarget;
 		}
 
-		GLuint OpenGLGraphicBuffer::GetBufferID() const
+		GLuint OpenGLGraphicsBuffer::GetBufferID() const
 		{
 			return mBufferID;
 		}
 
-		void* OpenGLGraphicBuffer::Map( uint32 offset, uint32 length, BufferAccess options )
+		void* OpenGLGraphicsBuffer::Map( uint32 offset, uint32 length, BufferAccess options )
 		{
 			GLenum mapFlag;
 			void* pMapBuffer = NULL;
@@ -60,7 +60,7 @@ namespace RcEngine
 			return pMapBuffer;
 		}
 
-		void OpenGLGraphicBuffer::UnMap()
+		void OpenGLGraphicsBuffer::UnMap()
 		{
 			glBindBuffer(mTarget, mBufferID);
 			glUnmapBuffer(mTarget);

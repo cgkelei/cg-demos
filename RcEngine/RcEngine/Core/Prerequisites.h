@@ -109,7 +109,7 @@ namespace RcEngine {
 		class RenderTechnique;
 		class FrameBuffer;
 		class Texture;
-		class GraphicBuffer;
+		class GraphicsBuffer;
 		class VertexDeclaration;
 		class Camera;
 

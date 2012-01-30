@@ -250,7 +250,7 @@ enum ClearFlag
 
 enum IndexBufferType
 {
-	IBT_Bit16,
+	IBT_Bit16 = 0,
 	IBT_Bit32
 };
 
@@ -281,7 +281,6 @@ struct ElementInitData
 	uint32 rowPitch;
 	uint32 slicePitch;
 };
-
 
 } // RenderSystem
 } // RcEngine

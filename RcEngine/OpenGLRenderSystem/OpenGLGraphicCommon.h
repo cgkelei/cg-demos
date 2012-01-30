@@ -17,6 +17,7 @@ namespace RcEngine
 
 			static GLenum Mapping(VertexElementFormat format);
 			static GLenum Mapping(PrimitiveType type);
+			
 
 			// Reference glTexImage* function
 			static void Mapping(GLint& outInternalformat, GLenum& outFormat, GLenum& outType, PixelFormat inPixelFormat);

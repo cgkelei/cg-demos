@@ -22,8 +22,8 @@ protected:
 private:
 	RenderEffect* mEffect;
 	RenderTechnique* mTechnique;
-	GraphicBuffer* mVertexBuffer;
-	GraphicBuffer* mIndexBuffer;
+	GraphicsBuffer* mVertexBuffer;
+	GraphicsBuffer* mIndexBuffer;
 	VertexDeclaration mVertexDecl;
 	Texture* mTexture;
 };
