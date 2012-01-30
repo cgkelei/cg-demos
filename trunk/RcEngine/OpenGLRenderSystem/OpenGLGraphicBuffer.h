@@ -10,11 +10,11 @@ namespace RcEngine
 {
 	namespace Render
 	{
-		class _OpenGLExport OpenGLGraphicBuffer : public GraphicBuffer
+		class _OpenGLExport OpenGLGraphicsBuffer : public GraphicsBuffer
 		{
 		public:
-			OpenGLGraphicBuffer(BufferUsage usage, uint32 accessHint, GLenum target, ElementInitData* initData);
-			~OpenGLGraphicBuffer(void); 
+			OpenGLGraphicsBuffer(BufferUsage usage, uint32 accessHint, GLenum target, ElementInitData* initData);
+			~OpenGLGraphicsBuffer(void); 
 
 			GLenum GetTarget() const;
 			GLuint GetBufferID() const;

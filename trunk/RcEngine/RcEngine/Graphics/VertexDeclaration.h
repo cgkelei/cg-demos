@@ -119,7 +119,7 @@ namespace RcEngine {
 				return true;
 			}
 
-			inline bool operator!= (const VertexDeclaration& rhs) const
+			inline bool operator != (const VertexDeclaration& rhs) const
 			{
 				return !(*this == rhs);
 			}

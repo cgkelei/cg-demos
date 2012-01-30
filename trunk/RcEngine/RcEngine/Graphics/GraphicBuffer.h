@@ -7,11 +7,11 @@
 namespace RcEngine {
 namespace Render {
 
-class _ApiExport GraphicBuffer
+class _ApiExport GraphicsBuffer
 {
 public:
-	GraphicBuffer(BufferUsage usage, uint32 accessHint);
-	~GraphicBuffer(void);
+	GraphicsBuffer(BufferUsage usage, uint32 accessHint);
+	~GraphicsBuffer(void);
 
 	BufferUsage GetBufferUsage() const;
 	uint32		GetAccessHint() const;

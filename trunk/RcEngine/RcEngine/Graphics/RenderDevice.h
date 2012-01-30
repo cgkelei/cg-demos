@@ -32,9 +32,8 @@ namespace RcEngine {
 			virtual bool Fullscreen() const = 0;
 
 			virtual void CreateRenderWindow(const RenderSettings& settings) = 0;
-			virtual void BindVertexBuffer(const GraphicBuffer* vertexBuffer ) = 0;
-			virtual void BindIndexBuffer(const GraphicBuffer* indexBuffer) = 0;
-			virtual void Draw(RenderEffect* effect, const RenderOperation& operation) = 0;
+
+			virtual void Draw(RenderTechnique& tech, RenderOperation& operation) = 0;
 
 			void Resize(unsigned int width, unsigned int height);
 
@@ -42,6 +41,8 @@ namespace RcEngine {
 
 		protected:
 			virtual void DoBindFrameBuffer(FrameBuffer* fb) = 0;
+
+			virtual void BindOutputStreams(RenderOperation& operation) = 0;
 
 		protected:
 

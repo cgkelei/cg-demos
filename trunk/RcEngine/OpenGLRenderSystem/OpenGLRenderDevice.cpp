@@ -37,6 +37,15 @@ namespace RcEngine
 			Safe_Delete(mRenderFactory);
 		}
 
+		void OpenGLRenderDevice::InitGlew()
+		{
+			GLenum err = glewInit();
+			if (GLEW_OK != err)
+			{
+				String errMsg = reinterpret_cast<char const *>(glewGetErrorString(err));
+				ENGINE_EXCEPT(Core::Exception::ERR_RENDERINGAPI_ERROR, errMsg, "OpenGLRenderDevice::InitGlew");
+			}
+		}
 
 		void OpenGLRenderDevice::CreateRenderWindow( const RenderSettings& settings )
 		{
@@ -59,33 +68,6 @@ namespace RcEngine
 			this->BindFrameBuffer(mDefaultFrameBuffer);
 		}
 
-		void OpenGLRenderDevice::Draw( RenderEffect* effect, const RenderOperation& operation )
-		{
-			RenderTechnique* technique = effect->GetTechniques()[0];
-			RenderTechnique::PassList Passes = technique->GetPasses();
-			/*BindVertexStream(operation.mVertexBuffer, operation.mVertexDecl);
-			if(operation.mUseIndex)
-			{
-				BindIndexBuffer(operation.mIndexBuffer);
-			}*/
-	
-			for(RenderTechnique::PassList::iterator pass = Passes.begin(); pass != Passes.end(); ++pass)
-			{        
-				if ( (*pass)->BeginPass() )
-				{
-					glBegin(GL_QUADS);
-					glVertex3f(-1, 1, 0);
-					glVertex3f(-1, -1, 0);
-					glVertex3f(1, -1, 0);
-					glVertex3f(1, 1, 0);
-					glEnd();
-
-					//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, (void*)0);
-					(*pass)->EndPass();
-				}
-			}
-		}
-
 		void OpenGLRenderDevice::AdjustProjectionMatrix( Math::Matrix4f& pOut )
 		{
 			//修改投影矩阵，使OpenGL适应左右坐标系
@@ -94,35 +76,96 @@ namespace RcEngine
 			pOut =  pOut * scale * translate;
 		}
 
-		void OpenGLRenderDevice::BindVertexBuffer( const GraphicBuffer* buffer )
+		void OpenGLRenderDevice::BindVertexBufferOGL( const GraphicsBuffer* buffer )
 		{
-			const OpenGLGraphicBuffer* pBuffer = (const OpenGLGraphicBuffer*)buffer;
+			const OpenGLGraphicsBuffer* pBuffer = (const OpenGLGraphicsBuffer*)buffer;
 			glBindBuffer(GL_ARRAY_BUFFER, pBuffer->GetBufferID());
 		}
 
-		void OpenGLRenderDevice::BindIndexBuffer( const GraphicBuffer* indexBuffer )
+		void OpenGLRenderDevice::BindIndexBufferOGL( const GraphicsBuffer* indexBuffer )
 		{
-			const OpenGLGraphicBuffer* pBuffer =  (const OpenGLGraphicBuffer*)(indexBuffer);
-
+			const OpenGLGraphicsBuffer* pBuffer =  (const OpenGLGraphicsBuffer*)(indexBuffer);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pBuffer->GetBufferID());
 		}
 
-		void OpenGLRenderDevice::BindVertexStream( const GraphicBuffer* buffer, const VertexDeclaration& vertexDec )
-		{
-			BindVertexBuffer(buffer);
-			const VertexElementList& vertexAttrs = vertexDec.GetElements(); 
-			uint32 vertexSize = vertexDec.GetVertexSize();
-			for(size_t i = 0; i < vertexAttrs.size(); i++)
+		void OpenGLRenderDevice::BindOutputStreams( RenderOperation& operation )
+		{	
+			for (uint32 i = 0; i < operation.GetStreamCount(); i++)
 			{
-				const VertexElement& ve = vertexAttrs[i]; 
-				uint16 count = VertexElement::GetTypeCount(ve.GetType());
-				GLenum type = OpenGLMapping::Mapping(ve.GetType());
-				bool isNormalized = VertexElement::IsNormalized(ve.GetType());
-				uint32 offset = ve.GetOffset();
+				RenderOperation::StreamUnit streamUnit = operation.GetStreamUnit(i);
 
-				assert (type == GL_FLOAT);
-				glVertexAttribPointer(i, count, type, isNormalized, vertexSize, BUFFER_OFFSET(offset));
-				glEnableVertexAttribArray(i);
+				BindVertexBufferOGL(streamUnit.Stream);
+
+				const VertexElementList& vertexAttrs = streamUnit.VertexDecl->GetElements(); 
+				uint32 vertexSize = streamUnit.VertexSize;
+
+				for(size_t att = 0; att < vertexAttrs.size(); att++)
+				{
+					const VertexElement& ve = vertexAttrs[att]; 
+					uint16 count = VertexElement::GetTypeCount(ve.GetType());
+					GLenum type = OpenGLMapping::Mapping(ve.GetType());
+					bool isNormalized = VertexElement::IsNormalized(ve.GetType());
+					uint32 offset = ve.GetOffset() + operation.GetBaseVertexLocation() * vertexSize;
+
+					assert(type = GL_FLOAT);
+					glVertexAttribPointer(att, count, type, isNormalized, vertexSize, BUFFER_OFFSET(offset));
+					glEnableVertexAttribArray(att);
+				}
+			}
+
+			if(operation.UseIndices())
+			{
+				BindIndexBufferOGL(operation.GetIndexStream());
+			}
+		}
+
+		void OpenGLRenderDevice::Draw( RenderTechnique& tech, RenderOperation& operation )
+		{
+
+			GLenum indexType = GL_UNSIGNED_SHORT;
+			uint8* indexOffset = NULL;
+
+			GLenum mode = OpenGLMapping::Mapping(operation.GetPrimitiveType());
+			RenderTechnique::PassList Passes = tech.GetPasses();
+
+			BindOutputStreams(operation);
+
+			if(operation.UseIndices())
+			{
+				if(operation.GetIndexType() == IBT_Bit16)
+				{
+					indexType = GL_UNSIGNED_SHORT;
+					indexOffset += operation.GetStartIndexLocation() * 2;
+
+				}
+				else
+				{
+					indexType = GL_UNSIGNED_INT;
+					indexOffset += operation.GetStartIndexLocation() * 4;
+				}
+
+				for(RenderTechnique::PassList::iterator pass = Passes.begin(); pass != Passes.end(); ++pass)
+				{
+					if ( (*pass)->BeginPass() )
+					{
+						glDrawElements(GL_TRIANGLES, operation.GetIndicesCount(), indexType, indexOffset);	
+						(*pass)->EndPass();
+					}
+				}
+
+			}
+			else
+			{
+				for(RenderTechnique::PassList::iterator pass = Passes.begin(); pass != Passes.end(); ++pass)
+				{
+					if ( (*pass)->BeginPass() )
+					{
+						glDrawArrays(mode, operation.GetStartVertexLocation(), static_cast<GLsizei>(operation.GetVertexCount()));
+
+						(*pass)->EndPass();
+					}
+				}
+				
 			}
 		}
 
@@ -150,14 +193,5 @@ namespace RcEngine
 			return false;
 		}
 
-		void OpenGLRenderDevice::InitGlew()
-		{
-			GLenum err = glewInit();
-			if (GLEW_OK != err)
-			{
-				String errMsg = reinterpret_cast<char const *>(glewGetErrorString(err));
-				ENGINE_EXCEPT(Core::Exception::ERR_RENDERINGAPI_ERROR, errMsg, "OpenGLRenderDevice::InitGlew");
-			}
-		}
 	}
 }

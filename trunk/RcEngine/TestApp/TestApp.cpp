@@ -72,15 +72,16 @@ void TestApp::LoadContent()
 	mVertexDecl.AddElement(sizeof(Vector3f), VEF_Vector2, VEU_TextureCoordinate);
 	mVertexDecl.Sort();
 
-	mTexture = factory->CreateTextureFromFile("../Media/DeferredParticle.dds", EAH_GPU_Read);
+	mTexture = factory->CreateTextureFromFile("../Media/IMG_9882.dds", EAH_GPU_Read);
 
 	mCamera->SetViewParams(Vector3f(0, 0, 5), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
 	mCamera->SetProjectionParams(MathUtil::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 20.0f );
 
-	//mEffect = factory->CreateEffectFromFile("default", "../Media/default.cgfx");
-	//mTechnique = mEffect->GetTechniqueByName("LeftHandInOpenGL");
-	mEffect = factory->CreateEffectFromFile("Simplest", "../Media/Simplest.cgfx");
-	mTechnique = mEffect->GetTechniqueByName("SimplestTech");
+	mEffect = factory->CreateEffectFromFile("default", "../Media/default.cgfx");
+	mTechnique = mEffect->GetTechniqueByName("LeftHandInOpenGL");
+
+	//mEffect = factory->CreateEffectFromFile("Simplest", "../Media/Simplest.cgfx");
+	//mTechnique = mEffect->GetTechniqueByName("SimplestTech");
 }
 
 void TestApp::UnloadContent()
@@ -102,17 +103,25 @@ void TestApp::Render()
 	Matrix4f WVP = ViewMatrix * ProjMatrix;
 
 	RenderParameter* wvpPara = mEffect->GetParameterByName("worldViewProjection");
-	//RenderParameter* texPara = mEffect->GetParameterByName("texSamp");
+	RenderParameter* texPara = mEffect->GetParameterByName("texSamp");
 
 	wvpPara->SetValue(WVP);
-	//texPara->SetValue(mTexture);
+	texPara->SetValue(mTexture);
 
 	RenderOperation rop;
-	rop.mIndexBuffer = mIndexBuffer;
-	rop.mVertexBuffer = mVertexBuffer;
-	rop.mVertexDecl = mVertexDecl;
+	RenderOperation::StreamUnit streamUint;
 
-	mRenderDevice->Draw(mEffect, rop);
+	streamUint.Stream = mVertexBuffer;
+	streamUint.VertexDecl = &mVertexDecl;
+	streamUint.VertexSize = mVertexDecl.GetVertexSize();
+	streamUint.Type = RenderOperation::ST_Geometry;
+
+	rop.mVertexStreams.push_back(streamUint);
+
+	rop.mIndexBuffer = mIndexBuffer;
+	rop.mIndexType = IBT_Bit16;
+
+	mRenderDevice->Draw(*mTechnique, rop);
 
 
 	mRenderDevice->GetCurrentFrameBuffer()->SwapBuffers();

@@ -35,9 +35,9 @@ namespace RcEngine
 
 			virtual Texture* CreateTextureFromFile(const std::string& texFileName, unsigned int accessHint);
 
-			virtual GraphicBuffer* CreateVertexBuffer(BufferUsage usage, uint32 accessHint, ElementInitData* initData);
+			virtual GraphicsBuffer* CreateVertexBuffer(BufferUsage usage, uint32 accessHint, ElementInitData* initData);
 
-			virtual GraphicBuffer* CreateIndexBuffer(BufferUsage usage, uint32 accessHint, ElementInitData* initData);
+			virtual GraphicsBuffer* CreateIndexBuffer(BufferUsage usage, uint32 accessHint, ElementInitData* initData);
 	
 			virtual RenderEffect*  CreateEffectFromFile(const std::string& effectName, const std::string& effectFile);
 		private:

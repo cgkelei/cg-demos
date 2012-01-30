@@ -24,20 +24,20 @@ namespace RcEngine
 			bool Fullscreen() const;
 
 			void AdjustProjectionMatrix(Math::Matrix4f& pOut);
-			void Draw(RenderEffect* effect, const RenderOperation& operation);
 
-			void BindVertexBuffer(const GraphicBuffer* buffer );
-			void BindIndexBuffer(const GraphicBuffer*indexBuffer);
+			void Draw(RenderTechnique& tech, RenderOperation& operation);
 
 
 		protected:
 			void DoBindFrameBuffer(FrameBuffer* fb);
-			
 
+			void BindOutputStreams(RenderOperation& operation);
+			
 		private:
 			void InitGlew();
-			void BindVertexStream(const GraphicBuffer* buffer, const VertexDeclaration& vertexDec);
-
+			void BindVertexBufferOGL(const GraphicsBuffer* vertexBuffer );
+			void BindIndexBufferOGL(const GraphicsBuffer* indexBuffer);
+			
 		private:
 			
 		};

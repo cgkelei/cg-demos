@@ -46,14 +46,14 @@ namespace RcEngine
 
 
 
-		GraphicBuffer* OpenGLRenderFactory::CreateVertexBuffer( BufferUsage usage, uint32 accessHint, ElementInitData* initData )
+		GraphicsBuffer* OpenGLRenderFactory::CreateVertexBuffer( BufferUsage usage, uint32 accessHint, ElementInitData* initData )
 		{
-			return new OpenGLGraphicBuffer(usage, accessHint, GL_ARRAY_BUFFER, initData);
+			return new OpenGLGraphicsBuffer(usage, accessHint, GL_ARRAY_BUFFER, initData);
 		}
 
-		GraphicBuffer* OpenGLRenderFactory::CreateIndexBuffer( BufferUsage usage, uint32 accessHint, ElementInitData* initData )
+		GraphicsBuffer* OpenGLRenderFactory::CreateIndexBuffer( BufferUsage usage, uint32 accessHint, ElementInitData* initData )
 		{
-			return new OpenGLGraphicBuffer(usage, accessHint, GL_ELEMENT_ARRAY_BUFFER, initData);
+			return new OpenGLGraphicsBuffer(usage, accessHint, GL_ELEMENT_ARRAY_BUFFER, initData);
 		}
 
 		RenderEffect* OpenGLRenderFactory::CreateEffectFromFile( const std::string& effectName, const std::string& effectFile )

@@ -44,7 +44,7 @@ namespace RcEngine
 		class OpenGLRenderParameter;
 		class OpenGLRenderTechnique;
 		class OpenGLRenderPass;
-		class OpenGLGraphicBuffer;
+		class OpenGLGraphicsBuffer;
 		class OpenGLFrameBuffer;
 	}
 }
