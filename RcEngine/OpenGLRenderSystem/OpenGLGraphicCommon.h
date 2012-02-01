@@ -15,9 +15,13 @@ namespace RcEngine
 			OpenGLMapping(void);
 			~OpenGLMapping(void);
 
+			static GLenum Mapping(FillMode fm);
 			static GLenum Mapping(VertexElementFormat format);
 			static GLenum Mapping(PrimitiveType type);
-			
+			static GLenum Mapping(BlendOperation op);
+			static GLenum Mapping(AlphaBlendFactor factor);
+			static GLenum Mapping(CompareFunction cf);
+			static GLenum Mapping(StencilOperation sop);
 
 			// Reference glTexImage* function
 			static void Mapping(GLint& outInternalformat, GLenum& outFormat, GLenum& outType, PixelFormat inPixelFormat);

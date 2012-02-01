@@ -259,6 +259,138 @@ namespace RcEngine
 			}
 		}
 
+		GLenum OpenGLMapping::Mapping( BlendOperation op )
+		{
+			switch(op)
+			{
+			case BOP_Add:
+				return GL_FUNC_ADD;
+			case BOP_Sub:
+				return GL_FUNC_SUBTRACT;
+			case BOP_Rev_Sub:
+				return GL_FUNC_REVERSE_SUBTRACT;
+			case BOP_Min:
+				return GL_MIN;
+			case BOP_Max:
+				return GL_MAX;
+			default:
+				ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported BlendOperation!", 
+					"OpenGLMapping::Mapping( BlendOperation op )");
+			}
+		}
+
+		GLenum OpenGLMapping::Mapping( AlphaBlendFactor factor )
+		{
+			switch(factor)
+			{
+			case ABF_Zero:
+				return GL_ZERO;
+
+			case ABF_One:
+				return GL_ONE;
+
+			case ABF_Src_Alpha:
+				return GL_SRC_ALPHA;
+
+			case ABF_Dst_Alpha:
+				return GL_DST_ALPHA;
+
+			case ABF_Inv_Src_Alpha:
+				return GL_ONE_MINUS_SRC_ALPHA;
+
+			case ABF_Inv_Dst_Alpha:
+				return GL_ONE_MINUS_DST_ALPHA;
+
+			case ABF_Src_Color:
+				return GL_SRC_COLOR;
+
+			case ABF_Dst_Color:
+				return GL_DST_COLOR;
+
+			case ABF_Inv_Src_Color:
+				return GL_ONE_MINUS_SRC_COLOR;
+
+			case ABF_Inv_Dst_Color:
+				return GL_ONE_MINUS_DST_COLOR;
+
+			case ABF_Src_Alpha_Sat:
+				return GL_SRC_ALPHA_SATURATE;
+
+			default:
+				ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported AlphaBlendFactor!", 
+					"OpenGLMapping::Mapping( AlphaBlendFactor factor )");
+			}
+		}
+
+		GLenum OpenGLMapping::Mapping( FillMode fm )
+		{
+			switch(fm)
+			{
+			case FM_Solid:
+				return GL_FILL;
+			case FM_WireFrame:
+				return GL_LINE;
+			default:
+				ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported FillMode!", 
+					"OpenGLMapping::Mapping( FillMode fm )");
+			}
+		}
+
+		GLenum OpenGLMapping::Mapping( CompareFunction cf )
+		{
+
+			switch(cf)
+			{
+			case CF_AlwaysFail:
+				return GL_NEVER;
+			case CF_AlwaysPass:
+				return GL_ALWAYS;
+			case CF_Less:
+				return GL_LESS;
+			case CF_LessEqual:
+				return GL_LEQUAL;
+			case CF_Equal:
+				return GL_EQUAL;
+			case CF_NotEqual:
+				return GL_NOTEQUAL;
+			case CF_GreaterEqual:
+				return GL_GEQUAL;
+			case CF_Greater:
+				return GL_GREATER;
+
+			default:
+				ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported CompareFunction!", 
+					"OpenGLMapping::Mapping( CompareFunction cf )");
+			}
+		}
+
+		GLenum OpenGLMapping::Mapping( StencilOperation sop )
+		{				
+			switch(sop)
+			{
+			case SOP_Keep:
+				return GL_KEEP;
+			case SOP_Zero:
+				return GL_ZERO;
+			case SOP_Replace:
+				return GL_REPLACE;
+			case SOP_Incr:
+				return GL_INCR;
+			case SOP_Decr:
+				return GL_DECR;
+			case SOP_Invert:
+				return GL_INVERT;
+			case SOP_Incr_Wrap:
+				return GL_INCR_WRAP;
+			case SOP_Decr_Wrap:
+				return GL_DECR_WRAP;
+
+			default:
+				ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported StencilOperation!", 
+					"OpenGLMapping::Mapping( StencilOperation sop )");
+			}
+		}
+
 		PixelFormat OpenGLMapping::UnMapping( GLint internalformat, GLenum format, GLenum type )
 		{
 			switch(internalformat)
