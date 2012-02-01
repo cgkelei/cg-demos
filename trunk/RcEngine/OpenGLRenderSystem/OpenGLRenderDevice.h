@@ -9,6 +9,8 @@ namespace RcEngine
 {
 	namespace Render
 	{
+		using namespace Math;
+
 		class _OpenGLExport OpenGLRenderDevice : public RenderDevice
 		{
 		public:
@@ -22,6 +24,10 @@ namespace RcEngine
 
 			void ToggleFullscreen(bool fs);
 			bool Fullscreen() const;
+
+			void SetBlendState(const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32 sampleMask);		
+			void SetRasterizerState(const shared_ptr<RasterizerState>& state);
+			void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16 frontStencilRef, uint16 backStencilRef);
 
 			void AdjustProjectionMatrix(Math::Matrix4f& pOut);
 

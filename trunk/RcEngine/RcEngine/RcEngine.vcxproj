@@ -86,11 +86,15 @@
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="Core\Utility.cpp" />
     <ClCompile Include="Core\XMLDom.cpp" />
+    <ClCompile Include="Graphics\BlendState.cpp" />
     <ClCompile Include="Graphics\Camera.cpp" />
+    <ClCompile Include="Graphics\DepthStencilState.cpp" />
     <ClCompile Include="Graphics\FrameBuffer.cpp" />
     <ClCompile Include="Graphics\GraphicBuffer.cpp" />
     <ClCompile Include="Graphics\IRenderModule.cpp" />
+    <ClCompile Include="Graphics\Mesh.cpp" />
     <ClCompile Include="Graphics\PixelFormat.cpp" />
+    <ClCompile Include="Graphics\RasterizerState.cpp" />
     <ClCompile Include="Graphics\RenderDevice.cpp" />
     <ClCompile Include="Graphics\RenderEffect.cpp" />
     <ClCompile Include="Graphics\RenderFactory.cpp" />
@@ -98,14 +102,15 @@
     <ClCompile Include="Graphics\RenderOperation.cpp" />
     <ClCompile Include="Graphics\RenderParameter.cpp" />
     <ClCompile Include="Graphics\RenderView.cpp" />
+    <ClCompile Include="Graphics\SamplerState.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Graphics\VertexDeclaration.cpp" />
     <ClCompile Include="Graphics\VertexElement.cpp" />
     <ClCompile Include="Graphics\Viewport.cpp" />
     <ClCompile Include="MainApp\Application.cpp" />
     <ClCompile Include="MainApp\Window.cpp" />
+    <ClCompile Include="Math\BoundingSphere.cpp" />
     <ClCompile Include="Math\ColorRGBA.cpp" />
-    <ClCompile Include="Math\VectorUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\CompileConfig.h" />
@@ -119,12 +124,17 @@
     <ClInclude Include="Core\Timer.h" />
     <ClInclude Include="Core\Utility.h" />
     <ClInclude Include="Core\XMLDom.h" />
+    <ClInclude Include="Graphics\BlendState.h" />
     <ClInclude Include="Graphics\Camera.h" />
+    <ClInclude Include="Graphics\DepthStencilState.h" />
     <ClInclude Include="Graphics\FrameBuffer.h" />
     <ClInclude Include="Graphics\GraphicBuffer.h" />
     <ClInclude Include="Graphics\GraphicsCommon.h" />
     <ClInclude Include="Graphics\IRenderModule.h" />
+    <ClInclude Include="Graphics\Mesh.h" />
     <ClInclude Include="Graphics\PixelFormat.h" />
+    <ClInclude Include="Graphics\RasterizerState.h" />
+    <ClInclude Include="Graphics\Renderable.h" />
     <ClInclude Include="Graphics\RenderDevice.h" />
     <ClInclude Include="Graphics\RenderEffect.h" />
     <ClInclude Include="Graphics\RenderFactory.h" />
@@ -133,12 +143,14 @@
     <ClInclude Include="Graphics\RenderPatameter.h" />
     <ClInclude Include="Graphics\RenderSettings.h" />
     <ClInclude Include="Graphics\RenderView.h" />
+    <ClInclude Include="Graphics\SamplerState.h" />
     <ClInclude Include="Graphics\Texture.h" />
     <ClInclude Include="Graphics\VertexDeclaration.h" />
     <ClInclude Include="Graphics\VertexElement.h" />
     <ClInclude Include="Graphics\Viewport.h" />
     <ClInclude Include="MainApp\Application.h" />
     <ClInclude Include="MainApp\Window.h" />
+    <ClInclude Include="Math\BoundingSphere.h" />
     <ClInclude Include="Math\ColorRGBA.h" />
     <ClInclude Include="Math\MathUtil.h" />
     <ClInclude Include="Math\Matrix.h" />
@@ -146,6 +158,7 @@
     <ClInclude Include="Math\Vector.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Math\BoundingSphere.inl" />
     <None Include="Math\ColorRGBA.inl" />
     <None Include="Math\MathUtil.inl" />
     <None Include="Math\Matrix.inl" />

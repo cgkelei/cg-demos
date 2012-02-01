@@ -7,12 +7,7 @@
 #include "Math/ColorRGBA.h"
 #include "Math/MathUtil.h"
 #include "Core/Context.h"
-
-#include <gl/GL.h>
-#include <gl/GLU.h>
-
-#pragma comment(lib, "opengl32.lib")
-#pragma comment(lib, "glu32.lib")
+#include "Math/BoundingSphere.h"
 
 using namespace RcEngine::Math;
 
@@ -86,7 +81,7 @@ void TestApp::LoadContent()
 
 void TestApp::UnloadContent()
 {
-
+	BoundingSpheref sphere;
 }
 
 using namespace RcEngine::Render;

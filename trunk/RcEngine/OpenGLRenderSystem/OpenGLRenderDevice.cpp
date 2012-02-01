@@ -193,5 +193,255 @@ namespace RcEngine
 			return false;
 		}
 
+		void OpenGLRenderDevice::SetBlendState( const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32 sampleMask )
+		{
+			if( mCurrentBlendState != state )
+			{
+				const BlendStateDesc& currDesc = mCurrentBlendState->GetDesc();
+				const BlendStateDesc& stateDesc = state->GetDesc();
+
+				if (currDesc.AlphaToCoverageEnable != stateDesc.AlphaToCoverageEnable)
+				{
+					if (stateDesc.AlphaToCoverageEnable)
+					{
+						glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+					}
+					else
+					{
+						glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+					}
+				}
+
+				if( GLEW_EXT_draw_buffers2 ) 
+				{
+					for(int i = 0; i < 8; i++)
+					{
+						if(currDesc.RenderTarget[i].BlendEnable != stateDesc.RenderTarget[i].BlendEnable)
+						{
+							if (stateDesc.RenderTarget[i].BlendEnable)
+							{
+								glEnableIndexedEXT(GL_BLEND, i);
+							}
+							else
+							{
+								glDisableIndexedEXT(GL_BLEND, i);
+							}
+						}
+
+						if (currDesc.RenderTarget[i].RenderTargetWriteMask != stateDesc.RenderTarget[i].RenderTargetWriteMask)
+						{
+							glColorMaskIndexedEXT(i, (stateDesc.RenderTarget[i].RenderTargetWriteMask & CWM_Red) != 0,
+								(stateDesc.RenderTarget[i].RenderTargetWriteMask & CWM_Green) != 0,
+								(stateDesc.RenderTarget[i].RenderTargetWriteMask & CWM_Blue) != 0,
+								(stateDesc.RenderTarget[i].RenderTargetWriteMask & CWM_Alpha) != 0 );
+						}
+
+					}
+				}
+				else
+				{
+					if (currDesc.RenderTarget[0].BlendEnable != stateDesc.RenderTarget[0].BlendEnable)
+					{
+						if (stateDesc.RenderTarget[0].BlendEnable)
+						{
+							glEnable(GL_BLEND);
+						}
+						else
+						{
+							glDisable(GL_BLEND);
+						}
+					}
+
+					if (currDesc.RenderTarget[0].RenderTargetWriteMask != stateDesc.RenderTarget[0].RenderTargetWriteMask)
+					{
+						glColorMask( (stateDesc.RenderTarget[0].RenderTargetWriteMask & CWM_Red) != 0,
+							(stateDesc.RenderTarget[0].RenderTargetWriteMask & CWM_Green) != 0,
+							(stateDesc.RenderTarget[0].RenderTargetWriteMask & CWM_Blue) != 0,
+							(stateDesc.RenderTarget[0].RenderTargetWriteMask & CWM_Alpha) != 0 );
+					}
+				}
+				
+
+				if (currDesc.RenderTarget[0].BlendOp != stateDesc.RenderTarget[0].BlendOp)
+				{
+					glBlendEquationSeparate(OpenGLMapping::Mapping(stateDesc.RenderTarget[0].BlendOp),
+						OpenGLMapping::Mapping(stateDesc.RenderTarget[0].BlendOpAlpha));
+				}
+
+				if ( (currDesc.RenderTarget[0].SrcBlend != stateDesc.RenderTarget[0].SrcBlend)
+					|| (currDesc.RenderTarget[0].DestBlend != stateDesc.RenderTarget[0].DestBlend)
+					|| (currDesc.RenderTarget[0].SrcBlendAlpha != stateDesc.RenderTarget[0].SrcBlendAlpha)
+					|| (currDesc.RenderTarget[0].DestBlendAlpha != stateDesc.RenderTarget[0].DestBlendAlpha) )
+				{
+					glBlendFuncSeparate(OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlend), 
+						OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlend),
+						OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlendAlpha), 
+						OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlendAlpha));
+				}
+
+				// Set Current
+				mCurrentBlendState = state;	
+			}
+
+			if (mCurrentBlendFactor != blendFactor)
+			{
+				glBlendColor(blendFactor.R(), blendFactor.G(), blendFactor.B(), blendFactor.A());
+				// Set Current
+				mCurrentBlendFactor = blendFactor;
+			}
+
+			if(mCurrentSampleMask != sampleMask)
+			{
+				// Set Current
+				mCurrentSampleMask = sampleMask;
+			}
+
+		}
+
+		void OpenGLRenderDevice::SetRasterizerState( const shared_ptr<RasterizerState>& state )
+		{
+			if(mCurrentRasterizerState != state)
+			{
+				const RasterizerStateDesc& currDesc = mCurrentRasterizerState->GetDesc();
+				const RasterizerStateDesc& stateDesc = state->GetDesc();
+
+				if (currDesc.PolygonFillMode != stateDesc.PolygonFillMode)
+				{
+					glPolygonMode(GL_FRONT_AND_BACK, OpenGLMapping::Mapping(stateDesc.PolygonFillMode));
+				}
+
+				if(currDesc.PolygonCullMode != stateDesc.PolygonCullMode)
+				{
+					switch (stateDesc.PolygonCullMode)
+					{
+					case CM_None:
+						glDisable(GL_CULL_FACE);
+						break;
+
+					case CM_Front:
+						glEnable(GL_CULL_FACE);
+						glCullFace(GL_FRONT);
+						break;
+
+					case CM_Back:
+						glEnable(GL_CULL_FACE);
+						glCullFace(GL_BACK);
+						break;
+					}
+				}
+
+				if(currDesc.FrontCounterClockwise != stateDesc.FrontCounterClockwise)
+				{
+					glFrontFace(stateDesc.FrontCounterClockwise ? GL_CW : GL_CCW);
+				}
+
+				if ( (currDesc.DepthBias != stateDesc.DepthBias)
+					|| (currDesc.SlopeScaledDepthBias != stateDesc.SlopeScaledDepthBias))
+				{
+					// Bias is in {0, 16}, scale the unit addition appropriately
+					glPolygonOffset(stateDesc.SlopeScaledDepthBias, stateDesc.DepthBias);
+				}
+
+				if( currDesc.ScissorEnable != stateDesc.ScissorEnable )
+				{
+					if(stateDesc.ScissorEnable)
+						glEnable(GL_SCISSOR_TEST);
+					else
+						glDisable(GL_SCISSOR_TEST);
+				}
+
+				if( currDesc.MultisampleEnable != stateDesc.MultisampleEnable )
+				{
+					if(stateDesc.MultisampleEnable)
+						glEnable(GL_MULTISAMPLE);
+					else
+						glDisable(GL_MULTISAMPLE);
+				}
+
+				//Set Current
+				mCurrentRasterizerState = state;
+			}
+		}
+
+		void OpenGLRenderDevice::SetDepthStencilState( const shared_ptr<DepthStencilState>& state, uint16 frontStencilRef, uint16 backStencilRef )
+		{
+			if ( (mCurrentDepthStencilState != state) || (mCurrentFrontStencilRef != frontStencilRef) 
+				|| (mCurrentBackStencilRef != backStencilRef) )
+			{
+				const DepthStencilStateDesc& currDesc = mCurrentDepthStencilState->GetDesc();
+				const DepthStencilStateDesc& stateDesc = state->GetDesc();
+
+				if(currDesc.DepthEnable != stateDesc.DepthEnable)
+				{
+					if (stateDesc.DepthEnable)
+						glEnable(GL_DEPTH_TEST);
+					else
+						glDisable(GL_DEPTH_TEST);
+				}
+
+				if (currDesc.DepthWriteMask != stateDesc.DepthWriteMask)
+				{
+					glDepthMask(stateDesc.DepthWriteMask);
+				}
+
+				if (currDesc.DepthFunc != stateDesc.DepthFunc)
+				{
+					glDepthFunc(OpenGLMapping::Mapping(stateDesc.DepthFunc));
+				}
+
+				if(currDesc.StencilEnable != stateDesc.StencilEnable)
+				{
+					if (stateDesc.StencilEnable)
+						glEnable(GL_STENCIL_TEST);
+					else
+						glDisable(GL_STENCIL_TEST);
+				}
+
+				if (currDesc.StencilWriteMask != stateDesc.StencilWriteMask)
+				{
+					glStencilMask(stateDesc.DepthWriteMask);
+				}
+
+
+				if ((currDesc.FrontStencilFunc != stateDesc.FrontStencilFunc)
+					|| (mCurrentFrontStencilRef != frontStencilRef)
+					|| (currDesc.StencilReadMask != stateDesc.StencilReadMask))
+				{
+					glStencilFuncSeparate(GL_FRONT, OpenGLMapping::Mapping(stateDesc.FrontStencilFunc),
+						frontStencilRef, stateDesc.StencilReadMask);
+				}
+
+				if ((currDesc.BackStencilFunc != stateDesc.BackStencilFunc)
+					|| (mCurrentBackStencilRef != backStencilRef)
+					|| (currDesc.StencilReadMask != stateDesc.StencilReadMask))
+				{
+					glStencilFuncSeparate(GL_BACK, OpenGLMapping::Mapping(stateDesc.BackStencilFunc),
+						backStencilRef, stateDesc.StencilReadMask);
+				}
+
+				if ((currDesc.FrontStencilFailOp != stateDesc.FrontStencilFailOp)
+					|| (currDesc.FrontStencilDepthFailOp != stateDesc.FrontStencilDepthFailOp)
+					|| (currDesc.FrontStencilPassOp != stateDesc.FrontStencilPassOp))
+				{
+					glStencilOpSeparate(GL_FRONT, OpenGLMapping::Mapping(stateDesc.FrontStencilFailOp),
+						OpenGLMapping::Mapping(stateDesc.FrontStencilDepthFailOp),
+						OpenGLMapping::Mapping(stateDesc.FrontStencilPassOp) );
+				}
+
+				if ((currDesc.BackStencilFailOp != stateDesc.BackStencilFailOp)
+					|| (currDesc.BackStencilDepthFailOp != stateDesc.BackStencilDepthFailOp)
+					|| (currDesc.BackStencilPassOp != stateDesc.BackStencilPassOp))
+				{
+					glStencilOpSeparate(GL_BACK, OpenGLMapping::Mapping(stateDesc.BackStencilFailOp),
+						OpenGLMapping::Mapping(stateDesc.BackStencilDepthFailOp),
+						OpenGLMapping::Mapping(stateDesc.BackStencilPassOp) );
+				}
+			}
+
+			mCurrentDepthStencilState = state;
+			mCurrentFrontStencilRef = frontStencilRef;
+			mCurrentBackStencilRef = backStencilRef;
+		}
+
 	}
 }

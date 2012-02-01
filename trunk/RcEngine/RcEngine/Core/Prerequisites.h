@@ -28,6 +28,7 @@
 #include <cmath>
 #include <algorithm>
 #include <memory>
+#include <limits>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Dependencies
@@ -41,6 +42,7 @@
 #include <cstdio>
 #include <cstdarg>
 #include <ctime>
+
 
 // 3rd party includes.
 #include <FastDelegate/FastDelegate.h>
@@ -77,6 +79,7 @@ typedef unsigned long long  uint64;
 
 //RcEngine String 
 typedef std::string String;
+using std::shared_ptr;
 
 
 #define Safe_Delete(p) if(p) { delete p; p = NULL;}
@@ -112,6 +115,7 @@ namespace RcEngine {
 		class GraphicsBuffer;
 		class VertexDeclaration;
 		class Camera;
+		class Renderable;
 
 	}
 

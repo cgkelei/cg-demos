@@ -9,6 +9,7 @@ namespace RcEngine
 	{
 		class _ApiExport Renderable
 		{
+		public:
 
 		};
 	}

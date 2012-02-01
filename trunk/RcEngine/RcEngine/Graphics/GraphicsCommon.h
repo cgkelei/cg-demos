@@ -143,30 +143,15 @@ enum TextureAddressMode
 /** Filtering options for textures / mipmaps. */
 enum TextureFilter
 {
-	/** When used with D3DSAMP_MIPFILTER, disables mipmapping.
-	*/
-	TF_None,
-
-	/** Point filtering used as a texture magnification or minification filter. The
-	*   texel with coordinates nearest to the desired pixel value is used. The texture
-	*   filter used between mipmap levels is based on the nearest point; that is,
-	*   the rasterizer uses the color from the texel of the nearest mipmap texture.
-	*/
-	FO_Point,
-		
-	/** Bilinear interpolation filtering used as a texture magnification or minification
-	*   filter. A weighted average of a 2¡Á2 area of texels surrounding the desired
-	*   pixel is used. The texture filter used between mipmap levels is trilinear
-	*   mipmap interpolation, in which the rasterizer performs linear interpolation
-	*   on pixel color, using the texels of the two nearest mipmap textures.
-	*/
-	FO_Linear,
-		
-	/** Anisotropic texture filtering used as a texture magnification or minification
-	*   filter. This type of filtering compensates for distortion caused by the difference
-	*   in angle between the texture polygon and the plane of the screen.
-	*/
-	FO_Anisotropic 
+	TF_Min_Mag_Mip_Point                            = 0,
+	TF_Min_Mag_Point_Mip_Linear                     = 0x1,
+	TF_Min_Point_Mag_Linear_Mip_Point               = 0x4,
+	TF_Min_Point_Mag_Mip_Linear                     = 0x5,
+	TF_Min_Linear_Mag_Mip_Point                     = 0x10,
+	TF_Min_Linear_Mag_Point_Mip_Linear              = 0x11,
+	TF_Min_Mag_Linear_Mip_Point                     = 0x14,
+	TF_Min_Mag_Mip_Linear                           = 0x15,
+	TF_Anisotropic                                  = 0x55,
 };
 	
 enum CubeMapFace
@@ -187,36 +172,6 @@ enum TextureType
 	TT_TextureCube
 };
 	
-enum FilterType
-{
-	FT_Min,
-	FT_Mag,
-	FT_MipMap
-};
-
-enum FilterOp
-{
-	Filter_Min_Mag_Mip_Point                            = 0,
-	Filter_Min_Mag_Point_Mip_Linear                     = 0x1,
-	Filter_Min_Point_Mag_Linear_Mip_Point               = 0x4,
-	Filter_Min_Point_Mag_Mip_Linear                     = 0x5,
-	Filter_Min_Linear_Mag_Mip_Point                     = 0x10,
-	Filter_Min_Linear_Mag_Point_Mip_Linear              = 0x11,
-	Filter_Min_Mag_Linear_Mip_Point                     = 0x14,
-	Filter_Min_Mag_Mip_Linear                           = 0x15,
-	Filter_Anisotropic                                  = 0x55,
-	Filter_Cmp_Min_Mag_Mip_Point                        = 0x80,
-	Filter_Cmp_Min_Mag_Point_Mip_Linear                 = 0x81,
-	Filter_Cmp_Min_Point_Mag_Linear_Mip_Point           = 0x84,
-	Filter_Cmp_Min_Point_Mag_Mip_Linear                 = 0x85,
-	Filter_Cmp_Min_Linear_Mag_Mip_Point                 = 0x90,
-	Filter_Cmp_Min_Linear_Mag_Point_Mip_Linear          = 0x91,
-	Filter_Cmp_Min_Mag_Linear_Mip_Point                 = 0x94,
-	Filter_Cmp_Min_Mag_Mip_Linear                       = 0x95,
-	Filter_Cmp_Anisotropic                              = 0xd5,
-
-};
-
 enum PrimitiveType
 {
 	PT_Point_List = 1, 
@@ -227,6 +182,83 @@ enum PrimitiveType
 	PT_Triangle_Fan = 6 
 };
 
+enum BlendOperation
+{
+	BOP_Add		= 1,
+	BOP_Sub		= 2,
+	BOP_Rev_Sub	= 3,
+	BOP_Min		= 4,
+	BOP_Max		= 5,
+};
+
+enum AlphaBlendFactor
+{
+	ABF_Zero,
+	ABF_One,
+	ABF_Src_Alpha,
+	ABF_Dst_Alpha,
+	ABF_Inv_Src_Alpha,
+	ABF_Inv_Dst_Alpha,
+	ABF_Src_Color,
+	ABF_Dst_Color,
+	ABF_Inv_Src_Color,
+	ABF_Inv_Dst_Color,
+	ABF_Src_Alpha_Sat
+};
+
+enum CompareFunction
+{
+	CF_AlwaysFail,
+	CF_AlwaysPass,
+	CF_Less,
+	CF_LessEqual,
+	CF_Equal,
+	CF_NotEqual,
+	CF_GreaterEqual,
+	CF_Greater
+};
+
+enum StencilOperation
+{
+	// Leave the stencil buffer unchanged
+	SOP_Keep,
+	// Set the stencil value to zero
+	SOP_Zero,
+	// Set the stencil value to the reference value
+	SOP_Replace,
+	// Increase the stencil value by 1, clamping at the maximum value
+	SOP_Incr,
+	// Decrease the stencil value by 1, clamping at 0
+	SOP_Decr,
+	// Invert the bits of the stencil buffer
+	SOP_Invert,
+	// Increase the stencil value by 1, wrap the result if necessary
+	SOP_Incr_Wrap,
+	// Decrease the stencil value by 1, wrap the result if necessary
+	SOP_Decr_Wrap
+};
+
+enum ColorWriteMask
+{
+	CWM_Red     = 1,
+	CWM_Green   = 2,
+	CWM_Blue    = 4,
+	CWM_Alpha   = 8,
+	CWM_All     = ( CWM_Red | CWM_Green |  CWM_Blue | CWM_Alpha ) 
+};
+
+enum FillMode
+{
+	FM_Solid,
+	FM_WireFrame,
+};
+
+enum CullMode 
+{
+	CM_None    = 1,
+	CM_Front   = 2,
+	CM_Back    = 3 
+};
 
 enum BufferUsage
 {
