@@ -80,6 +80,7 @@ typedef unsigned long long  uint64;
 //RcEngine String 
 typedef std::string String;
 using std::shared_ptr;
+using std::weak_ptr;
 
 
 #define Safe_Delete(p) if(p) { delete p; p = NULL;}
@@ -116,6 +117,9 @@ namespace RcEngine {
 		class VertexDeclaration;
 		class Camera;
 		class Renderable;
+		class Mesh;
+		class Model;
+		class Material;
 
 	}
 
