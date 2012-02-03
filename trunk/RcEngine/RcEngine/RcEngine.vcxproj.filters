@@ -108,10 +108,16 @@
     <ClCompile Include="Graphics\DepthStencilState.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\RasterizerState.cpp">
+    <ClCompile Include="Graphics\SamplerState.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\SamplerState.cpp">
+    <ClCompile Include="Graphics\Model.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Material.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Renderable.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -243,6 +249,12 @@
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\SamplerState.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Model.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Material.h">
       <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>

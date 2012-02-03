@@ -92,9 +92,11 @@
     <ClCompile Include="Graphics\FrameBuffer.cpp" />
     <ClCompile Include="Graphics\GraphicBuffer.cpp" />
     <ClCompile Include="Graphics\IRenderModule.cpp" />
+    <ClCompile Include="Graphics\Material.cpp" />
     <ClCompile Include="Graphics\Mesh.cpp" />
+    <ClCompile Include="Graphics\Model.cpp" />
     <ClCompile Include="Graphics\PixelFormat.cpp" />
-    <ClCompile Include="Graphics\RasterizerState.cpp" />
+    <ClCompile Include="Graphics\Renderable.cpp" />
     <ClCompile Include="Graphics\RenderDevice.cpp" />
     <ClCompile Include="Graphics\RenderEffect.cpp" />
     <ClCompile Include="Graphics\RenderFactory.cpp" />
@@ -131,7 +133,9 @@
     <ClInclude Include="Graphics\GraphicBuffer.h" />
     <ClInclude Include="Graphics\GraphicsCommon.h" />
     <ClInclude Include="Graphics\IRenderModule.h" />
+    <ClInclude Include="Graphics\Material.h" />
     <ClInclude Include="Graphics\Mesh.h" />
+    <ClInclude Include="Graphics\Model.h" />
     <ClInclude Include="Graphics\PixelFormat.h" />
     <ClInclude Include="Graphics\RasterizerState.h" />
     <ClInclude Include="Graphics\Renderable.h" />

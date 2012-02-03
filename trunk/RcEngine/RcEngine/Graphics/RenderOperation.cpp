@@ -32,21 +32,6 @@ namespace RcEngine {
 			return mIndexBuffer->GetBufferSize() / sIndexSize[mIndexType];
 		}
 
-		RenderOperation::StreamUnit RenderOperation::GetStreamUnit( uint32 index ) const
-		{
-			return mVertexStreams[index];
-		}
-
-		void RenderOperation::SetStreamUnit( uint32 index, RenderOperation::StreamUnit s )
-		{
-			mVertexStreams[index] = s;
-		}
-
-		GraphicsBuffer* RenderOperation::GetIndexStream() const
-		{
-			return mIndexBuffer;
-		}
-
 		uint32 RenderOperation::GetStartVertexLocation() const
 		{
 			return mStartVertexLocation;
@@ -77,9 +62,78 @@ namespace RcEngine {
 			mStartIndexLocation = loc;
 		}
 
+		void RenderOperation::BindVertexStream( const shared_ptr<GraphicsBuffer>& buffer, const shared_ptr<VertexDeclaration>& vd, StreamType type /*= ST_Geometry*/, uint32 freq /*= 1*/ )
+		{
+			if(type == ST_Geometry)
+			{
+				for(size_t i = 0; i < mVertexStreams.size(); i++)
+				{
+					if( (*mVertexStreams[i].VertexDecl) == *vd )
+					{
+						mVertexStreams[i].Stream = buffer;
+						mVertexStreams[i].Type = type;
+						mVertexStreams[i].Frequency = freq;
+						return;
+					}
+				}
+			}
+				StreamUnit su;
+				su.Stream = buffer;
+				su.VertexDecl = vd;
+				su.Frequency = freq;
+				su.Type = type;
+				mVertexStreams.push_back(su);
+		}
+
+		void RenderOperation::BindIndexStream( const shared_ptr<GraphicsBuffer>& buffer, IndexBufferType type )
+		{
+			mIndexType = type;
+			mIndexBuffer = buffer;
+		}
+
+
+		//////////////////////////////////////////////////////////////////////////
+		/*RenderOperationBuffer::RenderOperationBuffer()
+		{
+
+		}
+
+		RenderOperationBuffer::~RenderOperationBuffer()
+		{
+
+		}
+
+		void RenderOperation::BindIndexStream( const shared_ptr<GraphicsBuffer>& buffer, IndexBufferType type )
+		{
+			mIndexBuffer = buffer;
+			mIndexType = type;
+		}
 		
 
+		void RenderOperationBuffer::AddRenderOperation( const RenderOperation& rop )
+		{
+			mRenderOperationList.push_back(rop);
+		}
 
+		const RenderOperation& RenderOperationBuffer::GetRenderOperation( uint32 index ) const
+		{
+			return mRenderOperationList.at(index);
+		}
 
-	} // RenderSystem
-} // RcEngine
+		void RenderOperationBuffer::ClearAll()
+		{
+			mRenderOperationList.clear();
+		}
+
+		RenderOperation& RenderOperationBuffer::operator[]( uint32 index )
+		{
+			return mRenderOperationList[index];
+		}
+
+		const RenderOperation& RenderOperationBuffer::operator[]( uint32 index ) const
+		{
+			return mRenderOperationList[index];
+		}*/
+
+	}
+}

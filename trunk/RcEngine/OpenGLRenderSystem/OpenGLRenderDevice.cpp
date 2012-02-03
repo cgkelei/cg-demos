@@ -92,7 +92,7 @@ namespace RcEngine
 		{	
 			for (uint32 i = 0; i < operation.GetStreamCount(); i++)
 			{
-				RenderOperation::StreamUnit streamUnit = operation.GetStreamUnit(i);
+				/*RenderOperation::StreamUnit streamUnit = operation.GetStreamUnit(i);
 
 				BindVertexBufferOGL(streamUnit.Stream);
 
@@ -109,7 +109,7 @@ namespace RcEngine
 
 					assert(type = GL_FLOAT);
 					glVertexAttribPointer(att, count, type, isNormalized, vertexSize, BUFFER_OFFSET(offset));
-					glEnableVertexAttribArray(att);
+					glEnableVertexAttribArray(att);*/
 				}
 			}
 
