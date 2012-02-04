@@ -44,7 +44,8 @@ namespace RcEngine {
 			uint32 GetStartIndexLocation() const;
 			void SetStartIndexLocation(uint32 loc);
 
-			uint32 GetStreamCount() const;									
+			uint32 GetStreamCount() const;
+			const StreamUnit& GetStreamUnit(uint32 index) const;
 			
 			void BindVertexStream(const shared_ptr<GraphicsBuffer>& buffer, const shared_ptr<VertexDeclaration>& vd,
 				StreamType type = ST_Geometry, uint32 freq = 1);
@@ -52,8 +53,10 @@ namespace RcEngine {
 
 			bool UseIndices() const;
 			uint32 GetIndicesCount() const;
-			shared_ptr<GraphicsBuffer> GetIndexStream() const				{ return mIndexBuffer; }			
-			IndexBufferType GetIndexType() const							{ return mIndexType; }
+
+			IndexBufferType GetIndexType() const									{ return mIndexType; }
+			const shared_ptr<GraphicsBuffer>& GetIndexStream() const				{ return mIndexBuffer; }			
+			
 
 
 		public:

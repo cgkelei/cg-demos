@@ -22,9 +22,9 @@ protected:
 private:
 	RenderEffect* mEffect;
 	RenderTechnique* mTechnique;
-	GraphicsBuffer* mVertexBuffer;
-	GraphicsBuffer* mIndexBuffer;
-	VertexDeclaration mVertexDecl;
-	Texture* mTexture;
+	shared_ptr<GraphicsBuffer> mVertexBuffer;
+	shared_ptr<GraphicsBuffer> mIndexBuffer;
+	shared_ptr<VertexDeclaration> mVertexDecl;
+	shared_ptr<Texture> mTexture;
 };
 

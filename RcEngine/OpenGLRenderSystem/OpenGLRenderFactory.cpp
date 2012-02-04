@@ -21,39 +21,34 @@ namespace RcEngine
 		}
 
 
-		Texture* OpenGLRenderFactory::CreateTexture1D( PixelFormat format, unsigned int numMipMaps, unsigned int width, unsigned int sampleCount, unsigned int sampleQuality, unsigned int accessHint, ElementInitData* initData )
+		shared_ptr<Texture> OpenGLRenderFactory::CreateTexture1D( unsigned int width, PixelFormat format, unsigned int arrSize, unsigned int numMipMaps, unsigned int sampleCount, unsigned int sampleQuality, unsigned int accessHint, ElementInitData* initData )
 		{
-			return new OpenGLTexture1D(format, 1, numMipMaps, width, sampleCount, sampleQuality, accessHint, initData);
+			return std::make_shared<OpenGLTexture1D>(format, arrSize, numMipMaps, width, sampleCount, sampleQuality, accessHint, initData);
 		}
 
-
-		Texture* OpenGLRenderFactory::CreateTexture2D( PixelFormat format, unsigned int numMipMaps, unsigned int width, unsigned int height, unsigned int sampleCount, unsigned int sampleQuality, unsigned int accessHint, ElementInitData* initData )
+		shared_ptr<Texture> OpenGLRenderFactory::CreateTexture2D( unsigned int width, unsigned int height, PixelFormat format, unsigned int arrSize, unsigned int numMipMaps, unsigned int sampleCount, unsigned int sampleQuality, unsigned int accessHint, ElementInitData* initData )
 		{
-			return new OpenGLTexture2D(format, 1, numMipMaps, width, height, sampleCount, sampleQuality, accessHint, initData);
+			return std::make_shared<OpenGLTexture2D>(format, arrSize, numMipMaps, width, height, sampleCount, sampleQuality, accessHint, initData);
 		}
 
-
-		Texture* OpenGLRenderFactory::CreateTexture3D( PixelFormat format, unsigned int arraySize, unsigned int numMipMaps, unsigned int width, unsigned int height, unsigned int depth, unsigned int sampleCount, unsigned int sampleQuality, unsigned int accessHint, ElementInitData* initData )
+		shared_ptr<Texture> OpenGLRenderFactory::CreateTexture3D( unsigned int width, unsigned int height, unsigned int depth, PixelFormat format, unsigned int arraySize, unsigned int numMipMaps, unsigned int sampleCount, unsigned int sampleQuality, unsigned int accessHint, ElementInitData* initData )
 		{
-			return new OpenGLTexture3D(format, arraySize, numMipMaps, width, height, depth, sampleCount, sampleQuality, accessHint, initData);
+			return std::make_shared<OpenGLTexture2D>(format, arraySize, numMipMaps, width, height, sampleCount, sampleQuality, accessHint, initData);
 		}
 
-
-		Texture* OpenGLRenderFactory::CreateTextureCube( PixelFormat format, unsigned int arraySize, unsigned int numMipMaps, unsigned int width, unsigned int height, unsigned int sampleCount, unsigned int sampleQuality, unsigned int accessHint, ElementInitData* initData )
+		shared_ptr<Texture> OpenGLRenderFactory::CreateTextureCube( unsigned int width, unsigned int height, PixelFormat format, unsigned int arraySize, unsigned int numMipMaps, unsigned int sampleCount, unsigned int sampleQuality, unsigned int accessHint, ElementInitData* initData )
 		{
-			return new OpenGLTextureCube(format, arraySize, numMipMaps, width, height, sampleCount, sampleQuality, accessHint, initData);
+			return std::make_shared<OpenGLTextureCube>(format, arraySize, numMipMaps, width, height, sampleCount, sampleQuality, accessHint, initData);
 		}
 
-
-
-		GraphicsBuffer* OpenGLRenderFactory::CreateVertexBuffer( BufferUsage usage, uint32 accessHint, ElementInitData* initData )
+		shared_ptr<GraphicsBuffer> OpenGLRenderFactory::CreateVertexBuffer( BufferUsage usage, uint32 accessHint, ElementInitData* initData )
 		{
-			return new OpenGLGraphicsBuffer(usage, accessHint, GL_ARRAY_BUFFER, initData);
+			return std::make_shared<OpenGLGraphicsBuffer>(usage, accessHint, GL_ARRAY_BUFFER, initData);
 		}
 
-		GraphicsBuffer* OpenGLRenderFactory::CreateIndexBuffer( BufferUsage usage, uint32 accessHint, ElementInitData* initData )
+		shared_ptr<GraphicsBuffer> OpenGLRenderFactory::CreateIndexBuffer( BufferUsage usage, uint32 accessHint, ElementInitData* initData )
 		{
-			return new OpenGLGraphicsBuffer(usage, accessHint, GL_ELEMENT_ARRAY_BUFFER, initData);
+			return std::make_shared<OpenGLGraphicsBuffer>(usage, accessHint, GL_ELEMENT_ARRAY_BUFFER, initData);
 		}
 
 		RenderEffect* OpenGLRenderFactory::CreateEffectFromFile( const std::string& effectName, const std::string& effectFile )
@@ -79,7 +74,7 @@ namespace RcEngine
 		}
 
 
-		Texture* OpenGLRenderFactory::CreateTextureFromFile( const std::string& texFileName, unsigned int accessHint )
+		shared_ptr<Texture> OpenGLRenderFactory::CreateTextureFromFile( const std::string& texFileName, unsigned int accessHint )
 		{
 			TextureType type;
 
@@ -151,13 +146,13 @@ namespace RcEngine
 			switch(type)
 			{
 			case TT_Texture1D:
-				return new OpenGLTexture1D(format, 1, numMipmaps, imageWidth, 0, 1, accessHint, &imageData[0]);
+				return CreateTexture1D(imageWidth, format, 1, numMipmaps, 0, 1, accessHint, &imageData[0]);
 			case TT_Texture2D:
-				return new OpenGLTexture2D(format, 1, numMipmaps, imageWidth, imageHeight, 0, 1, accessHint, &imageData[0]);
+				return CreateTexture2D(imageWidth, imageHeight, format, 1, numMipmaps, 0, 1, accessHint, &imageData[0]);
 			case TT_Texture3D:
-				return new OpenGLTexture3D(format, 1, numMipmaps, imageWidth, imageHeight, imageDepth, 0,  1, accessHint, &imageData[0]);
+				return CreateTexture3D(imageWidth, imageHeight, imageDepth, format, 1, numMipmaps, 0, 1, accessHint, &imageData[0]);
 			case TT_TextureCube:
-				return new OpenGLTextureCube(format, 1, numMipmaps, imageWidth, imageHeight, 0, 1, accessHint, &imageData[0]);
+				return CreateTextureCube(imageWidth, imageHeight, format, 1, numMipmaps, 0, 1, accessHint, &imageData[0]);
 			};
 	
 			ENGINE_EXCEPT(Exception::ERR_RT_ASSERTION_FAILED, "Unsupported Texture Format", "OpenGLRenderFactory::CreateTextureFromFile");
@@ -173,6 +168,10 @@ namespace RcEngine
 		{
 			return 0;
 		}
+
+		
+
+		
 
 
 

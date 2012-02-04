@@ -35,7 +35,7 @@ namespace RcEngine
 
 			void SetValue(const Matrix4<float>& value);
 
-			void SetValue(const Texture* value);
+			void SetValue(const shared_ptr<Texture>& value);
 
 		private:
 			void VerifyParameterType();

@@ -4,7 +4,7 @@
 
 //  [8/16/2011 hustruan]
 #include "Core/Prerequisites.h"
-#include "VertexElement.h"
+#include "Graphics/VertexElement.h"
 
 namespace RcEngine {
 	namespace Render {
@@ -13,6 +13,15 @@ namespace RcEngine {
 
 		typedef std::vector<VertexElement> VertexElementList;
 
+		struct _ApiExport VertexDeclarationDesc
+		{
+			unsigned int               Offset;
+			VertexElementFormat        Format;
+			VertexElementUsage         Usage;
+			unsigned int               UsageIndex;
+			
+			
+		};
 
 		class  _ApiExport VertexDeclaration
 		{

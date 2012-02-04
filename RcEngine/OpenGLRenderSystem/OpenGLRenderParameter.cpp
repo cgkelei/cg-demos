@@ -380,9 +380,9 @@ namespace RcEngine
 			}
 		}
 
-		void OpenGLRenderParameter::SetValue( const Texture* value )
+		void OpenGLRenderParameter::SetValue( const shared_ptr<Texture>& value)
 		{
-			const OpenGLTexture* glTex = static_cast<const OpenGLTexture*>(value);
+			const OpenGLTexture* glTex = static_cast<const OpenGLTexture*>(value.get());
 
 			cgGLSetTextureParameter(mCgParameter, glTex->GetOpenGLTexture());
 			cgSetSamplerState(mCgParameter);
