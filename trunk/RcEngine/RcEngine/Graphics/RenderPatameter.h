@@ -63,7 +63,7 @@ namespace RcEngine {
 
 			virtual void SetValue(const Matrix4<float>& value);
 
-			virtual void SetValue(const Texture* value);
+			virtual void SetValue(const shared_ptr<Texture>& value);
 
 		protected:
 			std::string         mParameterName;

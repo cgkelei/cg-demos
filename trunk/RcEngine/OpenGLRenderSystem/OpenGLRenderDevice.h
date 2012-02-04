@@ -41,8 +41,8 @@ namespace RcEngine
 			
 		private:
 			void InitGlew();
-			void BindVertexBufferOGL(const GraphicsBuffer* vertexBuffer );
-			void BindIndexBufferOGL(const GraphicsBuffer* indexBuffer);
+			void BindVertexBufferOGL(const shared_ptr<GraphicsBuffer>& vertexBuffer );
+			void BindIndexBufferOGL(const shared_ptr<GraphicsBuffer>& indexBuffer);
 			
 		private:
 			

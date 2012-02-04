@@ -114,7 +114,7 @@ void RenderParameter::SetValue(const ColorRGBA& value)
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Effect Parameter Error", "RenderParameter::SetValue");
 }
 
-void RenderParameter::SetValue( const Texture* tex )
+void RenderParameter::SetValue(const shared_ptr<Texture>& tex )
 {
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Effect Parameter Error", "RenderParameter::SetValue");
 }

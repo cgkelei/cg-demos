@@ -91,6 +91,11 @@ namespace RcEngine {
 			mIndexBuffer = buffer;
 		}
 
+		const RenderOperation::StreamUnit& RenderOperation::GetStreamUnit( uint32 index ) const
+		{
+			return mVertexStreams[index];
+		}
+
 
 		//////////////////////////////////////////////////////////////////////////
 		/*RenderOperationBuffer::RenderOperationBuffer()

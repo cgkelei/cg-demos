@@ -63,9 +63,15 @@ void TestApp::LoadContent()
 	mIndexBuffer =factory->CreateIndexBuffer(BU_Static, BA_Read_Only, &initData);
 
 
-	mVertexDecl.AddElement(0, VEF_Vector3, VEU_Position);
-	mVertexDecl.AddElement(sizeof(Vector3f), VEF_Vector2, VEU_TextureCoordinate);
-	mVertexDecl.Sort();
+	VertexDeclarationDesc vdsc[2] = {
+		{ 0, VEF_Vector3,  VEU_Position, 0 },
+		{ sizeof(Vector3f), VEF_Vector2, VEU_TextureCoordinate, 0 }
+	};
+
+	/*mVertexDecl.AddElement(0, VEF_Vector3, VEU_Position);
+	mVertexDecl.AddElement();
+	mVertexDecl.Sort();*/
+	mVertexDecl = factory->CreateVertexDeclaration(vdsc, 2);
 
 	mTexture = factory->CreateTextureFromFile("../Media/IMG_9882.dds", EAH_GPU_Read);
 
@@ -107,8 +113,7 @@ void TestApp::Render()
 	RenderOperation::StreamUnit streamUint;
 
 	streamUint.Stream = mVertexBuffer;
-	streamUint.VertexDecl = &mVertexDecl;
-	streamUint.VertexSize = mVertexDecl.GetVertexSize();
+	streamUint.VertexDecl = mVertexDecl;
 	streamUint.Type = RenderOperation::ST_Geometry;
 
 	rop.mVertexStreams.push_back(streamUint);

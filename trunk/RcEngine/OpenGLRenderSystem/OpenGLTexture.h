@@ -12,8 +12,7 @@ namespace RcEngine
 		class _OpenGLExport OpenGLTexture : public Texture
 		{
 		public:
-			OpenGLTexture(TextureType type, PixelFormat format, unsigned int arraySize, unsigned int numMipMaps, 
-				unsigned int sampleCount, unsigned int sampleQuality, unsigned int accessHint );
+			OpenGLTexture(TextureType type, PixelFormat format, unsigned int arraySize, unsigned int numMipMaps, unsigned int sampleCount, unsigned int sampleQuality, unsigned int accessHint );
 			virtual ~OpenGLTexture(void);
 
 			virtual unsigned int GetWidth(unsigned int level);

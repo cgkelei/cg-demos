@@ -76,15 +76,15 @@ namespace RcEngine
 			pOut =  pOut * scale * translate;
 		}
 
-		void OpenGLRenderDevice::BindVertexBufferOGL( const GraphicsBuffer* buffer )
+		void OpenGLRenderDevice::BindVertexBufferOGL( const shared_ptr<GraphicsBuffer>& buffer )
 		{
-			const OpenGLGraphicsBuffer* pBuffer = (const OpenGLGraphicsBuffer*)buffer;
+			const OpenGLGraphicsBuffer* pBuffer = static_cast<const OpenGLGraphicsBuffer*>(buffer.get());	
 			glBindBuffer(GL_ARRAY_BUFFER, pBuffer->GetBufferID());
 		}
 
-		void OpenGLRenderDevice::BindIndexBufferOGL( const GraphicsBuffer* indexBuffer )
+		void OpenGLRenderDevice::BindIndexBufferOGL( const shared_ptr<GraphicsBuffer>& indexBuffer )
 		{
-			const OpenGLGraphicsBuffer* pBuffer =  (const OpenGLGraphicsBuffer*)(indexBuffer);
+			const OpenGLGraphicsBuffer* pBuffer = static_cast<const OpenGLGraphicsBuffer*>(indexBuffer.get());	
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pBuffer->GetBufferID());
 		}
 
@@ -92,12 +92,12 @@ namespace RcEngine
 		{	
 			for (uint32 i = 0; i < operation.GetStreamCount(); i++)
 			{
-				/*RenderOperation::StreamUnit streamUnit = operation.GetStreamUnit(i);
+				RenderOperation::StreamUnit streamUnit = operation.GetStreamUnit(i);
 
 				BindVertexBufferOGL(streamUnit.Stream);
 
 				const VertexElementList& vertexAttrs = streamUnit.VertexDecl->GetElements(); 
-				uint32 vertexSize = streamUnit.VertexSize;
+				uint32 vertexSize = streamUnit.VertexDecl->GetVertexSize();
 
 				for(size_t att = 0; att < vertexAttrs.size(); att++)
 				{
@@ -109,7 +109,7 @@ namespace RcEngine
 
 					assert(type = GL_FLOAT);
 					glVertexAttribPointer(att, count, type, isNormalized, vertexSize, BUFFER_OFFSET(offset));
-					glEnableVertexAttribArray(att);*/
+					glEnableVertexAttribArray(att);
 				}
 			}
 
