@@ -193,7 +193,28 @@ namespace RcEngine
 				break;
 
 			case CG_PARAMETERCLASS_STRUCT:
+				{
+					mParameterType = PT_Struct_Buffer;
+					//if(mParameterSemantic == "CBuffer")
+					//{
+					//	CGparameter parameter = cgGetFirstStructParameter( mCgParameter );
+					//	while ( parameter != NULL )
+					//	{
+					//		// Create a new parameter and add it to the internal parameter list
+					//		OpenGLRenderParameter* pParameter = new OpenGLRenderParameter( m_cgContext, parameter );
+					//		m_NestedParameters.push_back( pParameter );
+					//		m_NestedParametersByName.insert( ParameterMap::value_type( pParameter->GetParameterName(), pParameter ) );
+
+					//		parameter = cgGetNextParameter(parameter);
+					//	}
+					//}
+				}
+				break;
 			case CG_PARAMETERCLASS_ARRAY:
+				{
+	
+				}
+				break;
 			case CG_PARAMETERCLASS_OBJECT:
 			default:
 				{
@@ -205,8 +226,6 @@ namespace RcEngine
 
 			}
 		}
-
-
 
 		void OpenGLRenderParameter::SetValue( const bool& value )
 		{

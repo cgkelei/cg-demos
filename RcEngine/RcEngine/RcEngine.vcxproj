@@ -105,6 +105,7 @@
     <ClCompile Include="Graphics\RenderParameter.cpp" />
     <ClCompile Include="Graphics\RenderView.cpp" />
     <ClCompile Include="Graphics\SamplerState.cpp" />
+    <ClCompile Include="Graphics\SimpleGeometry.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Graphics\VertexDeclaration.cpp" />
     <ClCompile Include="Graphics\VertexElement.cpp" />
@@ -148,6 +149,7 @@
     <ClInclude Include="Graphics\RenderSettings.h" />
     <ClInclude Include="Graphics\RenderView.h" />
     <ClInclude Include="Graphics\SamplerState.h" />
+    <ClInclude Include="Graphics\SimpleGeometry.h" />
     <ClInclude Include="Graphics\Texture.h" />
     <ClInclude Include="Graphics\VertexDeclaration.h" />
     <ClInclude Include="Graphics\VertexElement.h" />

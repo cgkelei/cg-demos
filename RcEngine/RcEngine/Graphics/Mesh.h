@@ -44,6 +44,7 @@ namespace RcEngine
 
 		};
 
+		//////////////////////////////////////////////////////////////////////////
 		void Mesh::SetStartVertexLocation( uint32 loc )
 		{
 			mRenderOperation.mStartVertexLocation = loc;
