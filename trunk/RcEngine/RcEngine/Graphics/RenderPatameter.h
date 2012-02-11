@@ -15,7 +15,7 @@ namespace RcEngine {
 		public:
 			enum ParamType
 			{
-				PT_Boolean,
+				PT_Boolean = 0,
 				PT_Float,
 				PT_Float2,
 				PT_Float3,
@@ -31,7 +31,9 @@ namespace RcEngine {
 				PT_Matrix2x2,
 				PT_Matrix3x3,
 				PT_Matrix4x4,
-				PT_Sampler
+				PT_Sampler,
+				PT_Struct_Buffer,
+				PT_Count
 			};
 
 		public:
@@ -70,6 +72,9 @@ namespace RcEngine {
 			std::string         mParameterSemantic;
 			ParamType			mParameterType;
 			bool                mIsValid;
+
+		public:
+			static String TypeNames[RenderParameter::PT_Count];
 		};
 
 

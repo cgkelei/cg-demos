@@ -120,6 +120,9 @@
     <ClCompile Include="Graphics\Renderable.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\SimpleGeometry.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainApp\Application.h">
@@ -255,6 +258,9 @@
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\Material.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\SimpleGeometry.h">
       <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>

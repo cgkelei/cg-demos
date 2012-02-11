@@ -7,6 +7,25 @@ namespace Render {
 using Core::Exception;
 
 
+String RenderParameter::TypeNames[RenderParameter::PT_Count] = {
+	"bool",
+	"float",
+	"float2",
+	"float3",
+	"float4",
+	"int",
+	"int2",
+	"int3",
+	"int4",
+	"uint",
+	"uint2",
+	"uint3",
+	"uint4",
+	"float2x2",
+	"float3x3",
+	"float4x4"
+	"sampler"
+};
 
 RenderParameter::RenderParameter()
 	: mIsValid(false)

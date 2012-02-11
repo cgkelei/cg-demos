@@ -11,10 +11,15 @@ namespace RcEngine {
 		public:
 			typedef std::vector<RenderTechnique*> TechniqueList;
 			typedef std::vector<RenderParameter*> ParameterList;
+			typedef std::vector<std::pair<String, std::vector<uint32> > > ConstBuffers;
+			typedef std::vector<std::pair<String, String> > Macros;
+
 
 		public:
 			RenderEffect(const std::string& effectFile, const std::string& effectName);
 			virtual ~RenderEffect(void);
+
+			void Load(const String& effectFile);
 
 			bool IsValid() const;
 
@@ -33,7 +38,9 @@ namespace RcEngine {
 		protected:
 
 			TechniqueList   mTechniques;
-			ParameterList    mParameters;
+			ParameterList   mParameters;
+			ConstBuffers    mConstBuffers;
+			Macros			mMacros;
 
 			bool            mIsValid;
 			std::string     mEffectName;

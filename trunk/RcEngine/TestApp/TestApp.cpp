@@ -103,7 +103,7 @@ void TestApp::Render()
 
 	Matrix4f WVP = ViewMatrix * ProjMatrix;
 
-	RenderParameter* wvpPara = mEffect->GetParameterByName("worldViewProjection");
+	RenderParameter* wvpPara = mEffect->GetParameterBySemantic("WorldViewProjection");
 	RenderParameter* texPara = mEffect->GetParameterByName("texSamp");
 
 	wvpPara->SetValue(WVP);
