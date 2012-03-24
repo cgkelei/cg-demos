@@ -8,7 +8,7 @@ namespace RcEngine
 {
 	namespace Render
 	{
-		using Math::Color
+		using Math::ColorRGBA;
 		class _ApiExport Material 
 		{
 		public:
@@ -17,7 +17,7 @@ namespace RcEngine
 
 		protected:			
 			String mName;
-			shared_ptr<Effect> mEffect;
+			shared_ptr<RenderEffect> mEffect;
 
 			ColorRGBA mAmbient;
 			ColorRGBA mDiffuse;

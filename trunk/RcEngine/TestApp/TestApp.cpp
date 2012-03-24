@@ -51,7 +51,6 @@ void TestApp::LoadContent()
 
 	mVertexBuffer = factory->CreateVertexBuffer(BU_Static, BA_Read_Only, &initData);
 
-
 	uint16 indices[] =
 	{
 		0, 1, 2,
@@ -62,27 +61,19 @@ void TestApp::LoadContent()
 	initData.pData = indices;
 	mIndexBuffer =factory->CreateIndexBuffer(BU_Static, BA_Read_Only, &initData);
 
-
 	VertexDeclarationDesc vdsc[2] = {
 		{ 0, VEF_Vector3,  VEU_Position, 0 },
 		{ sizeof(Vector3f), VEF_Vector2, VEU_TextureCoordinate, 0 }
 	};
-
-	/*mVertexDecl.AddElement(0, VEF_Vector3, VEU_Position);
-	mVertexDecl.AddElement();
-	mVertexDecl.Sort();*/
 	mVertexDecl = factory->CreateVertexDeclaration(vdsc, 2);
 
-	mTexture = factory->CreateTextureFromFile("../Media/IMG_9882.dds", EAH_GPU_Read);
+	mTexture = factory->CreateTextureFromFile("../Media/1.png", EAH_GPU_Read);
 
-	mCamera->SetViewParams(Vector3f(0, 0, 5), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
-	mCamera->SetProjectionParams(MathUtil::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 20.0f );
+	mCamera->SetViewParams(Vector3f(0, 0, 30), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+	mCamera->SetProjectionParams(MathUtil::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 100.0f );
 
-	mEffect = factory->CreateEffectFromFile("default", "../Media/default.cgfx");
+	mEffect = factory->CreateEffectFromFile("default", "../Media/Effects/default.cgfx");
 	mTechnique = mEffect->GetTechniqueByName("LeftHandInOpenGL");
-
-	//mEffect = factory->CreateEffectFromFile("Simplest", "../Media/Simplest.cgfx");
-	//mTechnique = mEffect->GetTechniqueByName("SimplestTech");
 }
 
 void TestApp::UnloadContent()

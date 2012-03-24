@@ -171,7 +171,7 @@ namespace RcEngine {
 	void Application::ReadConfiguration()
 	{
 		XMLDocument configXML;
-		XMLNodePtr root = configXML.Parse("F://Config.xml");
+		XMLNodePtr root = configXML.Parse("../Media/Config.xml");
 		std::string windowTitle = root->Attribute("Title")->ValueString();
 
 		XMLNodePtr graphics = root->FirstNode("Graphics");
