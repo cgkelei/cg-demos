@@ -1,13 +1,18 @@
 #include "OpenGLRenderDevice.h"
 #include "OpenGLRenderFactory.h"
 #include "OpenGLGraphicBuffer.h"
-#include "OpenGLRenderEffect.h"
 #include "OpenGLFrameBuffer.h"
 #include "OpenGLRenderWindow.h"
 #include "OpenGLRenderView.h"
 #include "OpenGLTexture.h"
+#include "OpenGLEffect.h"
+#include "OpenGLEffectTechnique.h"
+#include "OpenGLEffectPass.h"
+#include "Graphics/Material.h"
 #include "Graphics/Viewport.h"
+#include "Graphics/RenderJob.h"
 #include "Core/Exception.h"
+#include "Core/Context.h"
 
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
@@ -29,6 +34,7 @@ namespace RcEngine
 		void OpenGLRenderDevice::Create()
 		{
 			mRenderFactory = new OpenGLRenderFactory();
+			Core::Context::GetSingleton().SetRenderFactory(mRenderFactory);
 
 		}
 
@@ -88,99 +94,12 @@ namespace RcEngine
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pBuffer->GetBufferID());
 		}
 
-		void OpenGLRenderDevice::BindOutputStreams( RenderOperation& operation )
-		{	
-			for (uint32 i = 0; i < operation.GetStreamCount(); i++)
-			{
-				RenderOperation::StreamUnit streamUnit = operation.GetStreamUnit(i);
-
-				BindVertexBufferOGL(streamUnit.Stream);
-
-				const VertexElementList& vertexAttrs = streamUnit.VertexDecl->GetElements(); 
-				uint32 vertexSize = streamUnit.VertexDecl->GetVertexSize();
-
-				for(size_t att = 0; att < vertexAttrs.size(); att++)
-				{
-					const VertexElement& ve = vertexAttrs[att]; 
-					uint16 count = VertexElement::GetTypeCount(ve.GetType());
-					GLenum type = OpenGLMapping::Mapping(ve.GetType());
-					bool isNormalized = VertexElement::IsNormalized(ve.GetType());
-					uint32 offset = ve.GetOffset() + operation.GetBaseVertexLocation() * vertexSize;
-
-					assert(type = GL_FLOAT);
-					glVertexAttribPointer(att, count, type, isNormalized, vertexSize, BUFFER_OFFSET(offset));
-					glEnableVertexAttribArray(att);
-				}
-			}
-
-			if(operation.UseIndices())
-			{
-				BindIndexBufferOGL(operation.GetIndexStream());
-			}
-		}
-
-		void OpenGLRenderDevice::Draw( RenderTechnique& tech, RenderOperation& operation )
-		{
-
-			GLenum indexType = GL_UNSIGNED_SHORT;
-			uint8* indexOffset = NULL;
-
-			GLenum mode = OpenGLMapping::Mapping(operation.GetPrimitiveType());
-			RenderTechnique::PassList Passes = tech.GetPasses();
-
-			BindOutputStreams(operation);
-
-			if(operation.UseIndices())
-			{
-				if(operation.GetIndexType() == IBT_Bit16)
-				{
-					indexType = GL_UNSIGNED_SHORT;
-					indexOffset += operation.GetStartIndexLocation() * 2;
-
-				}
-				else
-				{
-					indexType = GL_UNSIGNED_INT;
-					indexOffset += operation.GetStartIndexLocation() * 4;
-				}
-
-				for(RenderTechnique::PassList::iterator pass = Passes.begin(); pass != Passes.end(); ++pass)
-				{
-					if ( (*pass)->BeginPass() )
-					{
-						glDrawElements(GL_TRIANGLES, operation.GetIndicesCount(), indexType, indexOffset);	
-						(*pass)->EndPass();
-					}
-				}
-
-			}
-			else
-			{
-				for(RenderTechnique::PassList::iterator pass = Passes.begin(); pass != Passes.end(); ++pass)
-				{
-					if ( (*pass)->BeginPass() )
-					{
-						glDrawArrays(mode, operation.GetStartVertexLocation(), static_cast<GLsizei>(operation.GetVertexCount()));
-
-						(*pass)->EndPass();
-					}
-				}
-				
-			}
-		}
-
 		void OpenGLRenderDevice::DoBindFrameBuffer( FrameBuffer* fb )
 		{
 			OpenGLFrameBuffer* oglFrameBuffer = static_cast<OpenGLFrameBuffer*>(fb);
-
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, oglFrameBuffer->GetFrameBufferObject());
-
 			const Viewport& vp = fb->GetViewport();
-			if (!(mViewport == vp))
-			{
-				mViewport = vp;
-				glViewport(vp.mLeft, vp.mTop, vp.mWidth, vp.mHeight);
-			}
+			glViewport(vp.Left, vp.Top, vp.Width, vp.Height);
 		}
 
 		void OpenGLRenderDevice::ToggleFullscreen( bool fs )
@@ -193,7 +112,7 @@ namespace RcEngine
 			return false;
 		}
 
-		void OpenGLRenderDevice::SetBlendState( const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32 sampleMask )
+		void OpenGLRenderDevice::SetBlendState( const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask )
 		{
 			if( mCurrentBlendState != state )
 			{
@@ -214,7 +133,7 @@ namespace RcEngine
 
 				if( GLEW_EXT_draw_buffers2 ) 
 				{
-					for(int i = 0; i < 8; i++)
+					for(int32_t i = 0; i < 8; i++)
 					{
 						if(currDesc.RenderTarget[i].BlendEnable != stateDesc.RenderTarget[i].BlendEnable)
 						{
@@ -363,7 +282,7 @@ namespace RcEngine
 			}
 		}
 
-		void OpenGLRenderDevice::SetDepthStencilState( const shared_ptr<DepthStencilState>& state, uint16 frontStencilRef, uint16 backStencilRef )
+		void OpenGLRenderDevice::SetDepthStencilState( const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef, uint16_t backStencilRef )
 		{
 			if ( (mCurrentDepthStencilState != state) || (mCurrentFrontStencilRef != frontStencilRef) 
 				|| (mCurrentBackStencilRef != backStencilRef) )
@@ -443,5 +362,75 @@ namespace RcEngine
 			mCurrentBackStencilRef = backStencilRef;
 		}
 
+		void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
+		{
+			RenderOperation::StreamSlots& streams = op.VertexStreams;
+
+			// bind vertex streams
+			for (size_t i = 0; i < streams.size(); ++i)
+			{
+				RenderOperation::StreamUnit streamUnit = streams[i];
+
+				// bind vertex buffer
+				BindVertexBufferOGL(streamUnit.Stream);
+
+				// set vertex attributes
+				const VertexElementList& vertexAttrs = streamUnit.VertexDecl->GetElements(); 
+				uint32_t vertexSize = streamUnit.VertexDecl->GetVertexSize();
+
+				for(size_t att = 0; att < vertexAttrs.size(); att++)
+				{
+					const VertexElement& ve = vertexAttrs[att]; 
+					uint16_t count = VertexElement::GetTypeCount(ve.GetType());
+					GLenum type = OpenGLMapping::Mapping(ve.GetType());
+					bool isNormalized = VertexElement::IsNormalized(ve.GetType());
+					uint32_t offset = ve.GetOffset() + op.BaseVertexLocation * vertexSize;
+
+					glVertexAttribPointer(att, count, type, isNormalized, vertexSize, BUFFER_OFFSET(offset));
+					glEnableVertexAttribArray(att);
+				}
+			}
+
+
+			// bind index buffer
+			GLenum indexType = GL_UNSIGNED_SHORT;
+			uint8_t* indexOffset = NULL;
+
+			if (op.UseIndex)
+			{
+				if(op.IndexType == IBT_Bit16)
+				{
+					indexType = GL_UNSIGNED_SHORT;
+					indexOffset += op.StartIndexLocation * 2;
+
+				}
+				else
+				{
+					indexType = GL_UNSIGNED_INT;
+					indexOffset += op.StartIndexLocation * 4;
+				}
+
+				BindIndexBufferOGL(op.IndexBuffer);
+			}
+
+			// get pass
+			EffectPassList passes= tech.GetPasses();
+			for(EffectPassList::iterator p = passes.begin(); p != passes.end(); ++p)
+			{
+				if ( (*p)->BeginPass() )
+				{
+					if (op.UseIndex)
+					{
+						glDrawElements(OpenGLMapping::Mapping(op.PrimitiveType), op.GetIndicesCount(), indexType, indexOffset);	
+					}
+					else
+					{
+						glDrawArrays(OpenGLMapping::Mapping(op.PrimitiveType), op.StartVertexLocation, static_cast<GLsizei>(op.GetVertexCount()));
+					}
+
+					(*p)->EndPass();
+				}
+			}
+		}
 	}
 }

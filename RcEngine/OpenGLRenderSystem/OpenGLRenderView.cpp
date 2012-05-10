@@ -29,27 +29,27 @@ namespace RcEngine
 
 		}
 
-		void OpenGLRenderView::ClearStencil( unsigned int stencil )
+		void OpenGLRenderView::ClearStencil( uint32_t stencil )
 		{
 
 		}
 
-		void OpenGLRenderView::ClearDepthStencil( float depth, unsigned int stencil )
+		void OpenGLRenderView::ClearDepthStencil( float depth, uint32_t stencil )
 		{
 
 		}
 
-		void OpenGLRenderView::OnAttached(FrameBuffer* fb, unsigned int att )
+		void OpenGLRenderView::OnAttached(FrameBuffer* fb, uint32_t att )
 		{
 
 		}
 
-		void OpenGLRenderView::OnDetached(FrameBuffer* fb, unsigned int att )
+		void OpenGLRenderView::OnDetached(FrameBuffer* fb, uint32_t att )
 		{
 
 		}
 
-		void OpenGLRenderView::DoClear( GLbitfield flag, const Math::ColorRGBA& clr, float depth, unsigned int stencil )
+		void OpenGLRenderView::DoClear( GLbitfield flag, const Math::ColorRGBA& clr, float depth, uint32_t stencil )
 		{
 			OpenGLRenderDevice* device = static_cast<OpenGLRenderDevice*>(Core::Context::GetSingleton().GetRenderDevicePtr());
 

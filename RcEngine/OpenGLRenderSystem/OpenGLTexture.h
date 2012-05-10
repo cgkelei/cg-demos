@@ -12,33 +12,33 @@ namespace RcEngine
 		class _OpenGLExport OpenGLTexture : public Texture
 		{
 		public:
-			OpenGLTexture(TextureType type, PixelFormat format, unsigned int arraySize, unsigned int numMipMaps, unsigned int sampleCount, unsigned int sampleQuality, unsigned int accessHint );
+			OpenGLTexture(TextureType type, PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint );
 			virtual ~OpenGLTexture(void);
 
-			virtual unsigned int GetWidth(unsigned int level);
-			virtual unsigned int GetHeight(unsigned int level);
-			virtual unsigned int GetDepth(unsigned int level); 
+			virtual uint32_t GetWidth(uint32_t level);
+			virtual uint32_t GetHeight(uint32_t level);
+			virtual uint32_t GetDepth(uint32_t level); 
 
-			virtual void Map1D(unsigned int arrayIndex, unsigned int level, TextureMapAccess tma,
-				unsigned int xOffset, unsigned int width, void*& data);
+			virtual void Map1D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+				uint32_t xOffset, uint32_t width, void*& data);
 
-			virtual void Map2D(unsigned int arrayIndex, unsigned int level, TextureMapAccess tma,
-				unsigned int xOffset, unsigned int yOffset, unsigned int width, unsigned int height,
-				void*& data, unsigned int& rowPitch);
+			virtual void Map2D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+				uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
+				void*& data, uint32_t& rowPitch);
 
-			virtual void Map3D(unsigned int arrayIndex, unsigned int level, TextureMapAccess tma,
-				unsigned int xOffset, unsigned int yOffset, unsigned int zOffset,
-				unsigned int width, unsigned int height, unsigned int depth,
-				void*& data, unsigned int& rowPitch, unsigned int& slicePitch);
+			virtual void Map3D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+				uint32_t xOffset, uint32_t yOffset, uint32_t zOffset,
+				uint32_t width, uint32_t height, uint32_t depth,
+				void*& data, uint32_t& rowPitch, uint32_t& slicePitch);
 
-			virtual void MapCube(unsigned int arrayIndex, CubeMapFace face, unsigned int level, TextureMapAccess tma,
-				unsigned int xOffset, unsigned int yOffset, unsigned int width, unsigned int height,
-				void*& data, unsigned int& rowPitch);
+			virtual void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, TextureMapAccess tma,
+				uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
+				void*& data, uint32_t& rowPitch);
 
-			virtual void Unmap1D(unsigned int arrayIndex, unsigned int level);
-			virtual void Unmap2D(unsigned int arrayIndex, unsigned int level);
-			virtual void Unmap3D(unsigned int arrayIndex, unsigned int level);
-			virtual void UnmapCube(unsigned int arrayIndex, CubeMapFace face, unsigned int level);
+			virtual void Unmap1D(uint32_t arrayIndex, uint32_t level);
+			virtual void Unmap2D(uint32_t arrayIndex, uint32_t level);
+			virtual void Unmap3D(uint32_t arrayIndex, uint32_t level);
+			virtual void UnmapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level);
 
 			GLuint GetOpenGLTexture() const { return mTextureID; }
 			GLenum GetOpenGLTextureTarget() const { return mTargetType; }
@@ -55,19 +55,19 @@ namespace RcEngine
 		class _OpenGLExport OpenGLTexture1D : public OpenGLTexture
 		{
 		public:
-			OpenGLTexture1D(PixelFormat format, unsigned int arraySize, unsigned int numMipMaps, unsigned int width,
-				unsigned int sampleCount, unsigned int sampleQuality, unsigned int accessHint, ElementInitData* initData);
+			OpenGLTexture1D(PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width,
+				uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData);
 
 			~OpenGLTexture1D();
 
-			virtual unsigned int GetWidth(unsigned int level);
+			virtual uint32_t GetWidth(uint32_t level);
 
-			virtual void Map1D(unsigned int arrayIndex, unsigned int level, TextureMapAccess tma,
-				unsigned int xOffset, unsigned int width, void*& data);
+			virtual void Map1D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+				uint32_t xOffset, uint32_t width, void*& data);
 
-			virtual void Unmap1D(unsigned int arrayIndex, unsigned int level);
+			virtual void Unmap1D(uint32_t arrayIndex, uint32_t level);
 		private:
-			std::vector<unsigned int> mWidths;
+			std::vector<uint32_t> mWidths;
 
 		};
 
@@ -76,23 +76,23 @@ namespace RcEngine
 		class _OpenGLExport OpenGLTexture2D : public OpenGLTexture
 		{
 		public:
-			OpenGLTexture2D(PixelFormat format, unsigned int arraySize, unsigned int numMipMaps, unsigned int width,
-				unsigned int height, unsigned int sampleCount, unsigned int sampleQuality, unsigned int accessHint, ElementInitData* initData);
+			OpenGLTexture2D(PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width,
+				uint32_t height, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData);
 
 			~OpenGLTexture2D();
 
-			virtual unsigned int GetWidth(unsigned int level);
-			virtual unsigned int GetHeight(unsigned int level);
+			virtual uint32_t GetWidth(uint32_t level);
+			virtual uint32_t GetHeight(uint32_t level);
 
-			virtual void Map2D(unsigned int arrayIndex, unsigned int level, TextureMapAccess tma,
-				unsigned int xOffset, unsigned int yOffset, unsigned int width, unsigned int height,
-				void*& data, unsigned int& rowPitch);
+			virtual void Map2D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+				uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
+				void*& data, uint32_t& rowPitch);
 
-			virtual void Unmap2D(unsigned int arrayIndex, unsigned int level);
+			virtual void Unmap2D(uint32_t arrayIndex, uint32_t level);
 
 		private:
-			std::vector<unsigned int> mWidths;
-			std::vector<unsigned int> mHeights;
+			std::vector<uint32_t> mWidths;
+			std::vector<uint32_t> mHeights;
 
 		};
 
@@ -100,26 +100,26 @@ namespace RcEngine
 		class _OpenGLExport OpenGLTexture3D : public OpenGLTexture
 		{
 		public:
-			OpenGLTexture3D(PixelFormat format, unsigned int arraySize, unsigned int numMipMaps, unsigned int width,
-				unsigned int height, unsigned int depth, unsigned int sampleCount, unsigned int sampleQuality, unsigned int accessHint, ElementInitData* initData);
+			OpenGLTexture3D(PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width,
+				uint32_t height, uint32_t depth, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData);
 			~OpenGLTexture3D();
 
-			virtual unsigned int GetWidth(unsigned int level);
-			virtual unsigned int GetHeight(unsigned int level);
-			virtual unsigned int GetDepth(unsigned int level);
+			virtual uint32_t GetWidth(uint32_t level);
+			virtual uint32_t GetHeight(uint32_t level);
+			virtual uint32_t GetDepth(uint32_t level);
 
-			virtual void Map3D(unsigned int arrayIndex, unsigned int level, TextureMapAccess tma,
-				unsigned int xOffset, unsigned int yOffset, unsigned int zOffset,
-				unsigned int width, unsigned int height, unsigned int depth,
-				void*& data, unsigned int& rowPitch, unsigned int& slicePitch);
+			virtual void Map3D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+				uint32_t xOffset, uint32_t yOffset, uint32_t zOffset,
+				uint32_t width, uint32_t height, uint32_t depth,
+				void*& data, uint32_t& rowPitch, uint32_t& slicePitch);
 
-			virtual void Unmap3D(unsigned int arrayIndex, unsigned int level);
+			virtual void Unmap3D(uint32_t arrayIndex, uint32_t level);
 
 
 		private:
-			std::vector<unsigned int> mWidths;
-			std::vector<unsigned int> mHeights;
-			std::vector<unsigned int> mDepths;
+			std::vector<uint32_t> mWidths;
+			std::vector<uint32_t> mHeights;
+			std::vector<uint32_t> mDepths;
 
 		};
 
@@ -127,22 +127,22 @@ namespace RcEngine
 		class _OpenGLExport OpenGLTextureCube : public OpenGLTexture
 		{
 		public:
-			OpenGLTextureCube(PixelFormat format, unsigned int arraySize, unsigned int numMipMaps, unsigned int width,
-				unsigned int height, unsigned int sampleCount, unsigned int sampleQuality, unsigned int accessHint, ElementInitData* initData);
+			OpenGLTextureCube(PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width,
+				uint32_t height, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData);
 
 			~OpenGLTextureCube();
 
-			virtual unsigned int GetWidth(unsigned int level);
-			virtual unsigned int GetHeight(unsigned int level);
+			virtual uint32_t GetWidth(uint32_t level);
+			virtual uint32_t GetHeight(uint32_t level);
 
-			virtual void MapCube(unsigned int arrayIndex, CubeMapFace face, unsigned int level, TextureMapAccess tma,
-				unsigned int xOffset, unsigned int yOffset, unsigned int width, unsigned int height,
-				void*& data, unsigned int& rowPitch);
+			virtual void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, TextureMapAccess tma,
+				uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
+				void*& data, uint32_t& rowPitch);
 
-			virtual void UnmapCube(unsigned int arrayIndex, CubeMapFace face, unsigned int level);
+			virtual void UnmapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level);
 
 		private:
-			std::vector<unsigned int> mSizes;
+			std::vector<uint32_t> mSizes;
 
 		};
 

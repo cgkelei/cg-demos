@@ -14,7 +14,8 @@ public:
 
 	HWND GetHwnd() const		{ return mhWnd; }
 	
-	void Reposition(int left, int top);
+	void Reposition(int32_t left, int32_t top);
+	void ShowWindow();
 
 private:
 	void OnUserResized();
@@ -37,8 +38,8 @@ public:
 	EventHandler ApplicationDeactivatedEvent;
 
 private:
-	unsigned int mLeft, mTop;
-	unsigned int mWidth, mHeight;
+	uint32_t mLeft, mTop;
+	uint32_t mWidth, mHeight;
 	std::string mName;
 
 	bool mFullscreen;

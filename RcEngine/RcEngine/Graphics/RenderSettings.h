@@ -9,11 +9,11 @@ namespace Render {
 struct RenderSettings
 {
 	bool Fullscreen;
-	unsigned int Left, Top;
-	unsigned int Width, Height;
+	uint32_t Left, Top;
+	uint32_t Width, Height;
 	PixelFormat ColorFormat;
 	PixelFormat DepthStencilFormat;
-	unsigned int SampleCount, SampleQuality;
+	uint32_t SampleCount, SampleQuality;
 };
 
 } // RenderSystem

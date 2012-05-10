@@ -19,6 +19,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <list>
 #include <string>
 #include <cassert>
@@ -35,6 +36,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // ANSI standard includes.
 #include <memory.h>
+#include <stdint.h>
 #include <cstring>
 #include <cstdlib>
 #include <cmath>
@@ -42,6 +44,7 @@
 #include <cstdio>
 #include <cstdarg>
 #include <ctime>
+
 
 
 // 3rd party includes.
@@ -64,23 +67,14 @@
 #	endif
 
 
-//------------------------------------------------------------------------------
-//brief Global types for RcEngine, encapsulates main datatypes and guarantees the
-//correct size in bytes.
-//------------------------------------------------------------------------------
-typedef unsigned char		uint8;
-typedef signed char			int8;
-typedef unsigned short		uint16;
-typedef signed short		int16;
-typedef unsigned int		uint32;
-typedef signed int			int32;
-typedef signed long long	int64;
-typedef unsigned long long  uint64;
-
-//RcEngine String 
+//////////////////////////////////////////////////////////////////////////
 typedef std::string String;
+
 using std::shared_ptr;
 using std::weak_ptr;
+using std::vector;
+using std::unordered_map;
+
 
 
 #define Safe_Delete(p) if(p) { delete p; p = NULL;}
@@ -101,16 +95,13 @@ namespace RcEngine {
 		class IModule;
 	}
 
+
 	namespace Render
 	{
 		struct RenderSettings;
 		class RenderDevice;
 		class RenderFactory;
 		class RenderView;
-		class RenderEffect;
-		class RenderParameter;
-		class RenderPass;
-		class RenderTechnique;
 		class FrameBuffer;
 		class Texture;
 		class GraphicsBuffer;
@@ -118,8 +109,18 @@ namespace RcEngine {
 		class Camera;
 		class Renderable;
 		class Mesh;
+		class MeshPart;
 		class Model;
 		class Material;
+		class Effect;
+		class EffectParameter;
+		class EffectTechnique;
+		class EffectPass;
+		class EffectAnnotation;
+		class RenderJob;
+		class RenderJobCollection;
+		class SimpleBox;
+	
 
 	}
 

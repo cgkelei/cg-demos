@@ -8,7 +8,7 @@
 namespace RcEngine {
 namespace Math {
 
-template< typename Real, int Size >
+template< typename Real, int32_t Size >
 class Vector
 {
 public:
@@ -44,16 +44,27 @@ public:
 	// arithmetic operations
 	inline Vector operator+ (const Vector<Real, Size>& rhs) const;
 	inline Vector operator- (const Vector<Real, Size>& rhs) const;
-	inline Real operator* (const Vector<Real, Size>& rhs) const;
+	inline Real   operator* (const Vector<Real, Size>& rhs) const;
 	inline Vector operator* (Real fScalar) const;
 	inline Vector operator/ (Real fScalar) const;
 	inline Vector operator- () const;
+
+	friend Vector operator* (Real fScalar, const Vector<Real, Size>& rhs)
+	{
+		Vector<Real, Size> result;
+		for(int32_t i = 0; i < Size; i++)
+			result[i] =  fScalar * rhs[i];
+
+		return result;
+	}
 
 	// arithmetic updates
 	inline Vector& operator+= (const Vector& rhs);
 	inline Vector& operator-= (const Vector& rhs);
 	inline Vector& operator*= (Real fScalar);
 	inline Vector& operator/= (Real fScalar);
+
+
 
 	// comparison
 	bool operator== (const Vector& rhs) const;
@@ -68,16 +79,12 @@ public:
 	inline static Vector Zero();
 
 private:
-	int CompareArrays (const Vector& rhs) const;
+	int32_t CompareArrays (const Vector& rhs) const;
 	Real mTuple[Size];
 };
 
-// arithmetic operations
-template <typename Real, int Size>
-Vector<Real, Size> operator* (Real fScalar, const Vector<Real, Size>& rhs);
-
 // debugging output
-template <class Real, int Size>
+template <class Real, int32_t Size>
 std::ostream& operator<< (std::ostream& rkOStr, const Vector<Real, Size>& rhs);
 
 

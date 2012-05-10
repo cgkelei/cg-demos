@@ -11,6 +11,7 @@
 #include "Graphics/RasterizerState.h"
 #include "Graphics/FrameBuffer.h"
 #include "Graphics/RenderSettings.h"
+#include "Graphics/RenderOperation.h"
 #include "Math/ColorRGBA.h"
 #include "Math/MathUtil.h"
 
@@ -31,40 +32,36 @@ namespace RcEngine {
 			FrameBuffer* GetCurrentFrameBuffer();
 			FrameBuffer* GetDefaultFrameBuffer();
 
-			virtual void SetBlendState(const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32 sampleMask) = 0;
+			void Render( EffectTechnique& tech, RenderOperation& op);
+			void Resize(uint32_t width, uint32_t height);
+
+			virtual void SetBlendState(const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask) = 0;
 			/*virtual void SetSamplerState(const shared_ptr<SamplerState>& state);*/
 			virtual void SetRasterizerState(const shared_ptr<RasterizerState>& state) = 0;
-			virtual void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16 frontStencilRef, uint16 backStencilRef) = 0;
+			virtual void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef, uint16_t backStencilRef) = 0;
 
 			virtual void Create() = 0;
 			virtual void Release() = 0;
-
 			virtual void ToggleFullscreen(bool fs) = 0;
 			virtual bool Fullscreen() const = 0;
-
-			virtual void CreateRenderWindow(const RenderSettings& settings) = 0;
-
-			virtual void Draw(RenderTechnique& tech, RenderOperation& operation) = 0;
-
-			void Resize(unsigned int width, unsigned int height);
-
+			virtual void CreateRenderWindow(const RenderSettings& settings) = 0;	
 			virtual void AdjustProjectionMatrix(Math::Matrix4f& pOut) = 0;
 
 
 
 		protected:
 			virtual void DoBindFrameBuffer(FrameBuffer* fb) = 0;
-			virtual void BindOutputStreams(RenderOperation& operation) = 0;
+			virtual void DoRender( EffectTechnique& tech, RenderOperation& op) = 0;
 
 		protected:
 
 
-			unsigned int mWidth, mHeight;
+			uint32_t mWidth, mHeight;
 
 			PixelFormat mColorFormat;
-			unsigned int mColorBits;
+			uint32_t mColorBits;
 
-			unsigned int mDepthBits, mStencilBits;
+			uint32_t mDepthBits, mStencilBits;
 			bool mIsDepthBuffered;
 
 			FrameBuffer* mCurrentFrameBuffer;
@@ -72,7 +69,7 @@ namespace RcEngine {
 
 			
 			RenderSettings mRenderSettings;
-			Viewport mViewport;
+			//Viewport mViewport;
 
 			RenderFactory* mRenderFactory;
 
@@ -82,9 +79,9 @@ namespace RcEngine {
 			shared_ptr<DepthStencilState> mCurrentDepthStencilState;
 
 			ColorRGBA mCurrentBlendFactor;
-			uint32 mCurrentSampleMask;
+			uint32_t mCurrentSampleMask;
 
-			uint16 mCurrentFrontStencilRef, mCurrentBackStencilRef;
+			uint16_t mCurrentFrontStencilRef, mCurrentBackStencilRef;
 			
 			
 

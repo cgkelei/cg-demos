@@ -25,8 +25,8 @@ inline typename Target LexicalCast( const Source& value )
 }
 
 std::wstring& Convert(std::wstring& dest, std::string const & src);
-uint32 FloatToUint32(float v);
-float Uint32ToFloat(uint32 v);
+uint32_t FloatToUint32(float v);
+float Uint32ToFloat(uint32_t v);
 
 
 #endif // _Utility__H

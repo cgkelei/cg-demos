@@ -27,7 +27,6 @@ public:
 
 	Window* GetMainWindow() { return mMainWindow; }
 
-	Render::Camera* GetCamera();
 	Render::RenderDevice* GetRenderDevice();
 
 protected:
@@ -94,13 +93,9 @@ protected:
 
 	Render::RenderDevice* mRenderDevice;
 
-
-	Render::Camera* mCamera;
-
 	// in case multiple threads are used
 	volatile bool mIsRunning;
- 
-	
+
 	std::string mConfigFile; 
 
 };

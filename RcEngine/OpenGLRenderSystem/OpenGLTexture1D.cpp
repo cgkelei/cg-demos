@@ -8,17 +8,17 @@ namespace RcEngine
 	{
 		using Core::Exception;
 
-		OpenGLTexture1D::OpenGLTexture1D( PixelFormat format, unsigned int arraySize, unsigned int numMipMaps, unsigned int width, unsigned int sampleCount, unsigned int sampleQuality, unsigned int accessHint, ElementInitData* initData )
+		OpenGLTexture1D::OpenGLTexture1D( PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData )
 			: OpenGLTexture(TT_Texture1D, format, arraySize, numMipMaps, sampleCount, sampleQuality, accessHint)
 		{
 			if( numMipMaps == 0 )
 			{
 				mMipMaps = 1;
-				unsigned int w = width;
+				uint32_t w = width;
 				while( w!= 1)
 				{
 					++mMipMaps;
-					w = std::max<unsigned int>(1U, w / 2);
+					w = std::max<uint32_t>(1U, w / 2);
 				}
 			}
 			else
@@ -28,15 +28,15 @@ namespace RcEngine
 
 			mWidths.resize(mMipMaps);
 			{
-				unsigned int w = width;
-				for(unsigned int level = 0; level < mMipMaps; level++)
+				uint32_t w = width;
+				for(uint32_t level = 0; level < mMipMaps; level++)
 				{
 					mWidths[level] = w;
-					w = std::max<unsigned int>(1U, w / 2);
+					w = std::max<uint32_t>(1U, w / 2);
 				}
 			}
 
-			unsigned int texelSize = PixelFormatUtils::GetNumElemBytes(mFormat);
+			uint32_t texelSize = PixelFormatUtils::GetNumElemBytes(mFormat);
 
 			GLint glinternalFormat;
 			GLenum glformat;
@@ -52,11 +52,11 @@ namespace RcEngine
 				glTexParameteri(mTargetType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 				glTexParameteri(mTargetType, GL_TEXTURE_MAX_LEVEL, mMipMaps - 1);
 
-				for (unsigned int arrIndex = 0; arrIndex < mTextureArraySize; ++ arrIndex)
+				for (uint32_t arrIndex = 0; arrIndex < mTextureArraySize; ++ arrIndex)
 				{
-					for (unsigned int level = 0; level < mMipMaps; ++ level)
+					for (uint32_t level = 0; level < mMipMaps; ++ level)
 					{
-						unsigned int levelWidth = mWidths[level];
+						uint32_t levelWidth = mWidths[level];
 
 						if (PixelFormatUtils::IsCompressed(mFormat))
 						{
@@ -96,7 +96,7 @@ namespace RcEngine
 		}
 
 
-		unsigned int OpenGLTexture1D::GetWidth( unsigned int level )
+		uint32_t OpenGLTexture1D::GetWidth( uint32_t level )
 		{
 			assert(level < mMipMaps);
 			return mWidths[level];
@@ -104,12 +104,12 @@ namespace RcEngine
 
 
 
-		void OpenGLTexture1D::Map1D( unsigned int arrayIndex, unsigned int level, TextureMapAccess tma, unsigned int xOffset, unsigned int width, void*& data )
+		void OpenGLTexture1D::Map1D( uint32_t arrayIndex, uint32_t level, TextureMapAccess tma, uint32_t xOffset, uint32_t width, void*& data )
 		{
 
 		}
 
-		void OpenGLTexture1D::Unmap1D( unsigned int arrayIndex, unsigned int level )
+		void OpenGLTexture1D::Unmap1D( uint32_t arrayIndex, uint32_t level )
 		{
 
 		}

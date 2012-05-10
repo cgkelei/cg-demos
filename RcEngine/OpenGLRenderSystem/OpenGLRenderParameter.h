@@ -18,15 +18,15 @@ namespace RcEngine
 			void SetValue(const bool& value);
 			void SetValue(const ColorRGBA& value);
 
-			void SetValue(const int& value);
-			void SetValue(const Vector<int, 2>& value);
-			void SetValue(const Vector<int, 3>& value);
-			void SetValue(const Vector<int, 4>& value);
+			void SetValue(const int32_t& value);
+			void SetValue(const Vector<int32_t, 2>& value);
+			void SetValue(const Vector<int32_t, 3>& value);
+			void SetValue(const Vector<int32_t, 4>& value);
 
-			void SetValue(const unsigned int& value);
-			void SetValue(const Vector<unsigned int, 2>& value);
-			void SetValue(const Vector<unsigned int, 3>& value);
-			void SetValue(const Vector<unsigned int, 4>& value);
+			void SetValue(const uint32_t& value);
+			void SetValue(const Vector<uint32_t, 2>& value);
+			void SetValue(const Vector<uint32_t, 3>& value);
+			void SetValue(const Vector<uint32_t, 4>& value);
 
 			void SetValue(const float& value);
 			void SetValue(const Vector<float, 2>& value);
@@ -46,7 +46,7 @@ namespace RcEngine
 			CGparameterclass mCgParameterClass;
 			CGtype mCgType;
 			CGtype mCgBaseType;
-			int mNumRows, mNumCols;
+			int32_t mNumRows, mNumCols;
 
 		};
 	}

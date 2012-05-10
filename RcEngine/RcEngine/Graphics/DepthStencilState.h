@@ -19,8 +19,8 @@ namespace RcEngine
 			CompareFunction		       DepthFunc;
 
 			bool                       StencilEnable;
-			uint16                     StencilReadMask;
-			uint16                     StencilWriteMask;
+			uint16_t                   StencilReadMask;
+			uint16_t                   StencilWriteMask;
 
 			StencilOperation		   FrontStencilFailOp;
 			StencilOperation		   FrontStencilDepthFailOp;

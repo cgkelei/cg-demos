@@ -11,7 +11,7 @@ namespace RcEngine
 	{
 		using Core::Exception;
 
-		OpenGLDepthStencilView::OpenGLDepthStencilView( unsigned int width, unsigned int height, unsigned int sampleCount, unsigned int sampleQuality, PixelFormat format )
+		OpenGLDepthStencilView::OpenGLDepthStencilView( uint32_t width, uint32_t height, uint32_t sampleCount, uint32_t sampleQuality, PixelFormat format )
 			: mSampleCount(sampleCount), mSampleQuality(sampleQuality), mArrIndex(0), mLevel(-1), mDepthStencilTexture(NULL)
 		{
 			//PixelFormatUtils::IsDepth()
@@ -39,7 +39,7 @@ namespace RcEngine
 		}
 
 
-		OpenGLDepthStencilView::OpenGLDepthStencilView( Texture* tex, unsigned int arrIndex, unsigned int level )
+		OpenGLDepthStencilView::OpenGLDepthStencilView( Texture* tex, uint32_t arrIndex, uint32_t level )
 		{
 			if(tex->GetTextureType() != TT_Texture2D)
 			{
@@ -68,7 +68,7 @@ namespace RcEngine
 		}
 
 
-		void OpenGLDepthStencilView::OnAttach( FrameBuffer* fb, unsigned int index )
+		void OpenGLDepthStencilView::OnAttach( FrameBuffer* fb, uint32_t index )
 		{
 			assert(index == ATT_DepthStencil);
 			mAttachedFrameBuffer = fb;
@@ -120,7 +120,7 @@ namespace RcEngine
 			device->BindFrameBuffer(oldFrameBuffer);
 		}
 
-		void OpenGLDepthStencilView::OnDetach( FrameBuffer* fb, unsigned int index )
+		void OpenGLDepthStencilView::OnDetach( FrameBuffer* fb, uint32_t index )
 		{
 			assert(index == ATT_DepthStencil);
 			assert(mAttachedFrameBuffer == fb);
@@ -176,19 +176,19 @@ namespace RcEngine
 
 		}
 
-		void OpenGLDepthStencilView::ClearStencil( unsigned int stencil )
+		void OpenGLDepthStencilView::ClearStencil( uint32_t stencil )
 		{
 
 		}
 
-		void OpenGLDepthStencilView::ClearDepthStencil( float depth, unsigned int stencil )
+		void OpenGLDepthStencilView::ClearDepthStencil( float depth, uint32_t stencil )
 		{
 
 		}
 
 
 		//////////////////////////////////////////////////////////////////////////
-		OpenGLScreenDepthStencilView::OpenGLScreenDepthStencilView( unsigned int width, unsigned int height, PixelFormat fmt )
+		OpenGLScreenDepthStencilView::OpenGLScreenDepthStencilView( uint32_t width, uint32_t height, PixelFormat fmt )
 		{
 			mWidth = width;
 			mHeight = height;
@@ -200,7 +200,7 @@ namespace RcEngine
 
 		}
 
-		void OpenGLScreenDepthStencilView::OnAttach( FrameBuffer* fb, unsigned int index )
+		void OpenGLScreenDepthStencilView::OnAttach( FrameBuffer* fb, uint32_t index )
 		{
 			OpenGLFrameBuffer* oglFrameBuffer = static_cast<OpenGLFrameBuffer*>(fb);
 			if(oglFrameBuffer->GetFrameBufferObject() != 0)
@@ -212,7 +212,7 @@ namespace RcEngine
 
 		}
 
-		void OpenGLScreenDepthStencilView::OnDetach( FrameBuffer* fb, unsigned int index )
+		void OpenGLScreenDepthStencilView::OnDetach( FrameBuffer* fb, uint32_t index )
 		{
 			OpenGLFrameBuffer* oglFrameBuffer = static_cast<OpenGLFrameBuffer*>(fb);
 			if(oglFrameBuffer->GetFrameBufferObject() != 0)

@@ -15,10 +15,10 @@ namespace RcEngine {
 
 		struct _ApiExport VertexDeclarationDesc
 		{
-			unsigned int               Offset;
+			uint32_t               Offset;
 			VertexElementFormat        Format;
 			VertexElementUsage         Usage;
-			unsigned int               UsageIndex;
+			uint32_t               UsageIndex;
 			
 			
 		};
@@ -34,7 +34,7 @@ namespace RcEngine {
 			/// <summary>
 			// Get the number of elements in the declaration
 			/// </summary>
-			uint32 GetElementCount(void) { return static_cast<uint32>(mElementList.size()); }
+			uint32_t GetElementCount(void) { return static_cast<uint32_t>(mElementList.size()); }
 
 			/// <summary>
 			// Gets read-only access to the list of vertex elements.
@@ -44,13 +44,13 @@ namespace RcEngine {
 			/// <summary>
 			// Get a single element.
 			/// </summary>
-			const VertexElement& GetElement(uint32 index)	{ return mElementList.at(index); }
+			const VertexElement& GetElement(uint32_t index)	{ return mElementList.at(index); }
 
 
 			/// <summary>
 			// Gets the vertex size defined by this declaration for a given source. 
 			/// </summary>
-			virtual uint32 GetVertexSize() const;
+			virtual uint32_t GetVertexSize() const;
 
 			/// <summary>
 			// Finds a VertexElement with the given semantic, and index if there is more than
@@ -59,7 +59,7 @@ namespace RcEngine {
 			// If the element is not found, this method returns null.
 			/// </remark>
 			/// </summary>
-			virtual const VertexElement* FindElementBySemantic(VertexElementUsage sem, uint16 index = 0);
+			virtual const VertexElement* FindElementBySemantic(VertexElementUsage sem, uint16_t index = 0);
 
 			/// <summary>
 			// Adds a new VertexElement to this declaration.
@@ -68,8 +68,18 @@ namespace RcEngine {
 			// vertex declaration.
 			/// </remark>
 			/// </summary>
-			virtual const VertexElement& AddElement( uint32 offset, VertexElementFormat theType,
-				VertexElementUsage semantic, uint16 index = 0);
+			virtual const VertexElement& AddElement( uint32_t offset, VertexElementFormat theType,
+				VertexElementUsage semantic, uint16_t index = 0);
+
+
+			/// <summary>
+			// Adds a new VertexElement to this declaration.
+			/// <remark>
+			// This method adds a single element (positions, normals etc) to the end of the
+			// vertex declaration.
+			/// </remark>
+			/// </summary>
+			virtual void AddElement( const VertexElement& ve);
 
 			/// <summary>
 			// Inserts a new VertexElement at a given position in this declaration.
@@ -78,13 +88,13 @@ namespace RcEngine {
 			//  vertex declaration.
 			/// </remark>
 			/// </summary>
-			virtual const VertexElement& InsertElement(uint32 atPosition,  uint32 offset, VertexElementFormat theType,
-				VertexElementUsage semantic, uint16 index = 0);
+			virtual const VertexElement& InsertElement(uint32_t atPosition,  uint32_t offset, VertexElementFormat theType,
+				VertexElementUsage semantic, uint16_t index = 0);
 
 			/// <summary>
 			// Remove the element at the given index from this declaration. 
 			/// </summary>
-			virtual void RemoveElement(uint32 elemIndex);
+			virtual void RemoveElement(uint32_t elemIndex);
 
 			/// <summary>
 			// Remove the element with the given semantic and usage index.
@@ -94,7 +104,7 @@ namespace RcEngine {
 			//  not refer to the index in the vector.
 			/// </remark>
 			/// </summary>
-			virtual void RemoveElement(VertexElementUsage semantic, uint16 index = 0);
+			virtual void RemoveElement(VertexElementUsage semantic, uint16_t index = 0);
 
 			/// <summary>
 			// Remove all elements. 

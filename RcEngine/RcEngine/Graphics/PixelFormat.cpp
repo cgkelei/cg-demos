@@ -16,7 +16,7 @@ namespace RcEngine {
 			/* Pixel format flags, see enum PixelFormatFlags for the bit field
 			* definitions
 			*/
-			uint32 flags;
+			uint32_t flags;
 			/** Component type
 			*/
 			PixelComponentType componentType;
@@ -28,7 +28,7 @@ namespace RcEngine {
 			unsigned char rbits,gbits,bbits,abits; /*, ibits, dbits, ... */
 
 			/* Masks and shifts as used by packers/unpackers */
-			uint32 rmask, gmask, bmask, amask;
+			uint32_t rmask, gmask, bmask, amask;
 			unsigned char rshift, gshift, bshift, ashift;
 		};
 
@@ -577,24 +577,24 @@ namespace RcEngine {
 
 		static inline const PixelFormatDescription &GetDescriptionFor(const PixelFormat fmt)
 		{
-			const int ord = (int)fmt;
+			const int32_t ord = (int32_t)fmt;
 			assert(ord>=0 && ord<PF_Count);
 
 			return _pixelFormats[ord];
 		}
 
-		uint32 PixelFormatUtils::GetNumElemBytes( PixelFormat format )
+		uint32_t PixelFormatUtils::GetNumElemBytes( PixelFormat format )
 		{
 			return GetDescriptionFor(format).elemBytes;
 		}
 
 
-		uint32 PixelFormatUtils::GetNumElemBits( PixelFormat format )
+		uint32_t PixelFormatUtils::GetNumElemBits( PixelFormat format )
 		{
 			return GetDescriptionFor(format).elemBytes * 8;
 		}
 
-		uint32 PixelFormatUtils::GetMemorySize( uint32 width, uint32 height, uint32 depth, PixelFormat format )
+		uint32_t PixelFormatUtils::GetMemorySize( uint32_t width, uint32_t height, uint32_t depth, PixelFormat format )
 		{
 			if(IsCompressed(format))
 			{
@@ -621,7 +621,7 @@ namespace RcEngine {
 			}
 		}
 
-		uint32 PixelFormatUtils::GetFlags( PixelFormat format )
+		uint32_t PixelFormatUtils::GetFlags( PixelFormat format )
 		{	
 			return GetDescriptionFor(format).flags;
 		}
@@ -667,14 +667,14 @@ namespace RcEngine {
 			return des.componentType;
 		}
 
-		uint32 PixelFormatUtils::GetComponentCount( PixelFormat fmt )
+		uint32_t PixelFormatUtils::GetComponentCount( PixelFormat fmt )
 		{
 			const PixelFormatDescription &des = GetDescriptionFor(fmt);
 			return des.componentCount;
 		}
 
 
-		void PixelFormatUtils::GetNumDepthStencilBits( PixelFormat format, uint32& depth, uint32& stencil )
+		void PixelFormatUtils::GetNumDepthStencilBits( PixelFormat format, uint32_t& depth, uint32_t& stencil )
 		{
 			switch(format)
 			{

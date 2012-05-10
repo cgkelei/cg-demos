@@ -231,7 +231,7 @@ namespace RcEngine
 		{
 			if(mCgParameterClass == CG_PARAMETERCLASS_SCALAR && mCgType == CG_BOOL1 )
 			{
-				cgSetParameter1i(mCgParameter, static_cast<int>(value));
+				cgSetParameter1i(mCgParameter, static_cast<int32_t>(value));
 			}
 			else
 			{
@@ -254,7 +254,7 @@ namespace RcEngine
 			}
 		}
 
-		void OpenGLRenderParameter::SetValue( const int& value )
+		void OpenGLRenderParameter::SetValue( const int32_t& value )
 		{
 			if(mCgParameterClass == CG_PARAMETERCLASS_SCALAR && mCgType ==CG_INT1)
 			{
@@ -263,12 +263,12 @@ namespace RcEngine
 			else
 			{
 				ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Effect Parameter Type Error",
-					"OpenGLRenderParameter::SetValue( const int& value )");
+					"OpenGLRenderParameter::SetValue( const int32& value )");
 			}
 
 		}
 
-		void OpenGLRenderParameter::SetValue( const Vector<int, 2>& value )
+		void OpenGLRenderParameter::SetValue( const Vector<int32_t, 2>& value )
 		{
 			if(mCgParameterClass == CG_PARAMETERCLASS_VECTOR && mCgType ==CG_INT2)
 			{
@@ -277,12 +277,12 @@ namespace RcEngine
 			else
 			{
 				ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Effect Parameter Type Error",
-					"OpenGLRenderParameter::SetValue( const Vector<int, 2>& value )");
+					"OpenGLRenderParameter::SetValue( const Vector<int32, 2>& value )");
 			}
 
 		}
 
-		void OpenGLRenderParameter::SetValue( const Vector<int, 3>& value )
+		void OpenGLRenderParameter::SetValue( const Vector<int32_t, 3>& value )
 		{
 			if(mCgParameterClass == CG_PARAMETERCLASS_VECTOR && mCgType ==CG_INT3)
 			{
@@ -291,12 +291,12 @@ namespace RcEngine
 			else
 			{
 				ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Effect Parameter Type Error",
-					"OpenGLRenderParameter::SetValue( const Vector<int, 3>& value )");
+					"OpenGLRenderParameter::SetValue( const Vector<int32, 3>& value )");
 			}
 
 		}
 
-		void OpenGLRenderParameter::SetValue( const Vector<int, 4>& value )
+		void OpenGLRenderParameter::SetValue( const Vector<int32_t, 4>& value )
 		{
 			if(mCgParameterClass == CG_PARAMETERCLASS_VECTOR && mCgType ==CG_INT4)
 			{
@@ -305,27 +305,27 @@ namespace RcEngine
 			else
 			{
 				ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Effect Parameter Type Error",
-					"OpenGLRenderParameter::SetValue( const Vector<int, 4>& value )");
+					"OpenGLRenderParameter::SetValue( const Vector<int32, 4>& value )");
 			}
 
 		}
 
-		void OpenGLRenderParameter::SetValue( const unsigned int& value )
+		void OpenGLRenderParameter::SetValue( const uint32_t& value )
 		{
 
 		}
 
-		void OpenGLRenderParameter::SetValue( const Vector<unsigned int, 2>& value )
+		void OpenGLRenderParameter::SetValue( const Vector<uint32_t, 2>& value )
 		{
 
 		}
 
-		void OpenGLRenderParameter::SetValue( const Vector<unsigned int, 3>& value )
+		void OpenGLRenderParameter::SetValue( const Vector<uint32_t, 3>& value )
 		{
 
 		}
 
-		void OpenGLRenderParameter::SetValue( const Vector<unsigned int, 4>& value )
+		void OpenGLRenderParameter::SetValue( const Vector<uint32_t, 4>& value )
 		{
 
 		}
@@ -395,7 +395,7 @@ namespace RcEngine
 			else
 			{
 				ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Effect Parameter Type Error",
-					"OpenGLRenderParameter::SetValue( const Vector<int, 4>& value )");
+					"OpenGLRenderParameter::SetValue( const Vector<int32, 4>& value )");
 			}
 		}
 

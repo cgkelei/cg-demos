@@ -13,7 +13,7 @@ String RenderParameter::TypeNames[RenderParameter::PT_Count] = {
 	"float2",
 	"float3",
 	"float4",
-	"int",
+	"int32",
 	"int2",
 	"int3",
 	"int4",
@@ -63,42 +63,42 @@ void RenderParameter::SetValue( const bool& value )
 {
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Effect Parameter Error", "RenderParameter::SetValue");
 }
-void RenderParameter::SetValue( const int& value )
+void RenderParameter::SetValue( const int32_t& value )
 {
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Effect Parameter Error", "RenderParameter::SetValue");
 }
 
-void RenderParameter::SetValue( const Vector<int, 2>& value )
+void RenderParameter::SetValue( const Vector<int32_t, 2>& value )
 {
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Effect Parameter Error", "RenderParameter::SetValue");
 }
 
-void RenderParameter::SetValue( const Vector<int, 3>& value )
+void RenderParameter::SetValue( const Vector<int32_t, 3>& value )
 {
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Effect Parameter Error", "RenderParameter::SetValue");
 }
 
-void RenderParameter::SetValue( const Vector<int, 4>& value )
+void RenderParameter::SetValue( const Vector<int32_t, 4>& value )
 {
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Effect Parameter Error", "RenderParameter::SetValue");
 }
 
-void RenderParameter::SetValue( const unsigned int& value )
+void RenderParameter::SetValue( const uint32_t& value )
 {
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Effect Parameter Error", "RenderParameter::SetValue");
 }
 
-void RenderParameter::SetValue( const Vector<unsigned int, 2>& value )
+void RenderParameter::SetValue( const Vector<uint32_t, 2>& value )
 {
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Effect Parameter Error", "RenderParameter::SetValue");
 }
 
-void RenderParameter::SetValue( const Vector<unsigned int, 3>& value )
+void RenderParameter::SetValue( const Vector<uint32_t, 3>& value )
 {
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Effect Parameter Error", "RenderParameter::SetValue");
 }
 
-void RenderParameter::SetValue( const Vector<unsigned int, 4>& value )
+void RenderParameter::SetValue( const Vector<uint32_t, 4>& value )
 {
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Effect Parameter Error", "RenderParameter::SetValue");
 }

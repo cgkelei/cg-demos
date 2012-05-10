@@ -1,20 +1,15 @@
-float4x4 WorldViewProj : WorldViewProjection;
-
-sampler2D texSamp = sampler_state {
-	minFilter = Linear;
-	magFilter = Linear;
-};
+float4x4 World : WorldMatrix;
+float4x4 ViewProj : ViewProjectionMatrix;
+float4 DiffuseColor : DiffuseMaterialColor;
 
 struct VS_INPUT
 {
     float4 Position  : POSITION;
-	float2 Tex  :  	TEXCOORD0;
 };
 
 struct VS_OUTPUT
 {
     float4 oPos       : POSITION;
-    float2 oTex 	  : TEXCOORD0;
 };
 
 
@@ -22,21 +17,19 @@ VS_OUTPUT vmain( VS_INPUT vInput )
 {
     VS_OUTPUT vOutput;
 
-    vOutput.oPos = mul( vInput.Position,  WorldViewProj);
-    vOutput.oTex = vInput.Tex;
-   
+    vOutput.oPos = mul( vInput.Position,  mul(World, ViewProj) );
+
     return vOutput;
 }
 
 float4 pmain( VS_OUTPUT pInput ) : COLOR
 {
-	//return float4(1, 0, 0, 0);
-    return tex2D(texSamp, pInput.oTex);
+	return DiffuseColor;
 }
 
 technique LeftHandInOpenGL
 {
-    pass
+    pass p0
     {
         VertexProgram   = compile gp4vp vmain();
         FragmentProgram = compile gp4fp pmain();

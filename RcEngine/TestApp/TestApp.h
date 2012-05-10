@@ -14,17 +14,19 @@ public:
 	~TestApp(void);
 
 protected:
+	void Initialize();
 	void LoadContent();
 	void UnloadContent();
 	void Render();
 	void Update(float deltaTime);
 
 private:
-	RenderEffect* mEffect;
-	RenderTechnique* mTechnique;
+	shared_ptr<Effect> mEffect;
+	EffectTechnique* mTechnique;
 	shared_ptr<GraphicsBuffer> mVertexBuffer;
 	shared_ptr<GraphicsBuffer> mIndexBuffer;
 	shared_ptr<VertexDeclaration> mVertexDecl;
 	shared_ptr<Texture> mTexture;
+	shared_ptr<SimpleBox> mBox;
 };
 

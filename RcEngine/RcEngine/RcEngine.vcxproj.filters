@@ -13,6 +13,9 @@
     <Filter Include="Core">
       <UniqueIdentifier>{87f8c305-8730-4b5e-b57c-85bbbb5fe576}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Content">
+      <UniqueIdentifier>{97babf34-b0b6-43fe-bf73-30e95d6dfcb5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainApp\Application.cpp">
@@ -36,16 +39,10 @@
     <ClCompile Include="Graphics\RenderDevice.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\RenderEffect.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\RenderFactory.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\RenderOperation.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\RenderParameter.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\RenderView.cpp">
@@ -120,6 +117,27 @@
     <ClCompile Include="Graphics\Renderable.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Content\MeshContentLoader.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\MaterialContentLoader.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\EffectParameter.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Effect.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\EffectPass.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\EffectTechnique.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\EffectAnnotation.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="Graphics\SimpleGeometry.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
@@ -161,16 +179,10 @@
     <ClInclude Include="Graphics\RenderDevice.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\RenderEffect.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\RenderFactory.h">
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\RenderOperation.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\RenderPatameter.h">
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\RenderView.h">
@@ -261,6 +273,27 @@
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\SimpleGeometry.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\MeshContentLoader.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\MaterialContentLoader.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\EffectParameter.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Effect.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\EffectPass.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\EffectTechnique.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\EffectAnnotation.h">
       <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>

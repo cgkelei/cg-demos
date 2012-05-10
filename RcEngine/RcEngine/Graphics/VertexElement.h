@@ -18,12 +18,12 @@ namespace RcEngine {
 			/// <summary>
 			// Constructor, should not be called directly, call VertexDeclaration::AddElement
 			/// </summary>
-			VertexElement(uint32 offset, VertexElementFormat theType, VertexElementUsage semantic, uint16 index = 0);
+			VertexElement(uint32_t offset, VertexElementFormat theType, VertexElementUsage semantic, uint16_t index = 0);
 
 			/// <summary>
 			// Gets the offset into the buffer where this element starts
 			/// </summary>
-			uint32 GetOffset(void) const { return mOffset; }
+			uint32_t GetOffset(void) const { return mOffset; }
 
 			/// <summary>
 			// Gets the data format of this element
@@ -38,12 +38,12 @@ namespace RcEngine {
 			/// <summary>
 			// Gets the index of this element, only applicable for repeating elements
 			/// </summary>
-			uint16 GetUsageIndex(void) const { return mUsageIndex; }
+			uint16_t GetUsageIndex(void) const { return mUsageIndex; }
 
 			/// <summary>
 			// Gets the size of this element in bytes
 			/// </summary>
-			uint32 GetSize(void) const { return GetTypeSize(mFormat); }
+			uint32_t GetSize(void) const { return GetTypeSize(mFormat); }
 
 			/// <summary>
 			// Compare two VertexElement 
@@ -67,12 +67,12 @@ namespace RcEngine {
 			/// <summary>
 			// Gets the size of this element in bytes
 			/// </summary>
-			static uint32 GetTypeSize(VertexElementFormat etype);
+			static uint32_t GetTypeSize(VertexElementFormat etype);
 
 			/// <summary>
 			// Utility method which returns the count of values in a given type
 			/// </summary>
-			static uint16 GetTypeCount(VertexElementFormat etype);
+			static uint16_t GetTypeCount(VertexElementFormat etype);
 
 			static bool IsNormalized(VertexElementFormat etype);
 
@@ -90,7 +90,7 @@ namespace RcEngine {
 			/// <summary>
 			// The offset in the buffer that this element starts at
 			/// </summary>
-			uint32 mOffset;
+			uint32_t mOffset;
 
 			/// <summary>
 			// The format of this vertex element.
@@ -105,7 +105,7 @@ namespace RcEngine {
 			/// <summary>
 			// Index of the item, only applicable for some elements like texture coords
 			/// </summary>
-			uint16 mUsageIndex;
+			uint16_t mUsageIndex;
 		};
 
 

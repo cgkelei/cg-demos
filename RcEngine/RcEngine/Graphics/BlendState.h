@@ -27,7 +27,7 @@ namespace RcEngine
 				AlphaBlendFactor    SrcBlendAlpha;
 				AlphaBlendFactor    DestBlendAlpha;
 				BlendOperation		BlendOpAlpha;
-				uint8				RenderTargetWriteMask;
+				uint8_t				RenderTargetWriteMask;
 			};
 
 		public:

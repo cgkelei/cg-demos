@@ -7,20 +7,20 @@ namespace RcEngine
 	{
 		using Core::Exception;
 
-		OpenGLTextureCube::OpenGLTextureCube( PixelFormat format, unsigned int arraySize, unsigned int numMipMaps, unsigned int width, unsigned int height, unsigned int sampleCount, unsigned int sampleQuality, unsigned int accessHint, ElementInitData* initData )
+		OpenGLTextureCube::OpenGLTextureCube( PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width, uint32_t height, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData )
 			: OpenGLTexture(TT_TextureCube, format, arraySize, numMipMaps, sampleCount, sampleQuality, accessHint)
 		{
 			assert(height == width);
-			unsigned int size = width;
+			uint32_t size = width;
 
 			if( numMipMaps == 0 )
 			{
 				mMipMaps = 1;
-				unsigned int w = size;
+				uint32_t w = size;
 				while( w > 1)
 				{
 					++mMipMaps;
-					w = std::max<unsigned int>(1U, w / 2);
+					w = std::max<uint32_t>(1U, w / 2);
 				}
 			}
 			else
@@ -30,15 +30,15 @@ namespace RcEngine
 
 			mSizes.resize(mMipMaps);
 			{
-				unsigned int w = size;
-				for(unsigned int level = 0; level < mMipMaps; level++)
+				uint32_t w = size;
+				for(uint32_t level = 0; level < mMipMaps; level++)
 				{
 					mSizes[level] = w;
-					w = std::max<unsigned int>(1U, w / 2);
+					w = std::max<uint32_t>(1U, w / 2);
 				}
 			}
 
-			unsigned int texelSize = PixelFormatUtils::GetNumElemBytes(mFormat);
+			uint32_t texelSize = PixelFormatUtils::GetNumElemBytes(mFormat);
 
 			GLint glinternalFormat;
 			GLenum glformat;
@@ -54,13 +54,13 @@ namespace RcEngine
 			glTexParameteri(mTargetType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameteri(mTargetType, GL_TEXTURE_MAX_LEVEL, mMipMaps - 1);
 
-			for (unsigned int  arrIndex = 0; arrIndex < mTextureArraySize; ++ arrIndex)
+			for (uint32_t  arrIndex = 0; arrIndex < mTextureArraySize; ++ arrIndex)
 			{
-				for (unsigned int level = 0; level < mMipMaps; ++ level)
+				for (uint32_t level = 0; level < mMipMaps; ++ level)
 				{
-					for(unsigned int face = 0; face < 6; ++ face)
+					for(uint32_t face = 0; face < 6; ++ face)
 					{
-						unsigned int levelSize= mSizes[level];
+						uint32_t levelSize= mSizes[level];
 						if (PixelFormatUtils::IsCompressed(mFormat))
 						{
 							ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Currently Unsupported Compressed Texture Format",
@@ -68,8 +68,8 @@ namespace RcEngine
 						}
 						else
 						{
-							unsigned int imageSize = levelSize * levelSize * texelSize;
-							unsigned int imageIndex =  arrIndex*mMipMaps*6 + face*mMipMaps + level;
+							uint32_t imageSize = levelSize * levelSize * texelSize;
+							uint32_t imageIndex =  arrIndex*mMipMaps*6 + face*mMipMaps + level;
 							mTextureData[imageIndex].resize(imageSize);
 
 
@@ -100,27 +100,27 @@ namespace RcEngine
 		}
 
 
-		unsigned int OpenGLTextureCube::GetWidth( unsigned int level )
+		uint32_t OpenGLTextureCube::GetWidth( uint32_t level )
 		{
 			assert(level < mMipMaps);
 			return mSizes[level];
 		}
 
 
-		unsigned int OpenGLTextureCube::GetHeight( unsigned int level )
+		uint32_t OpenGLTextureCube::GetHeight( uint32_t level )
 		{
 			assert(level < mMipMaps);
 			return mSizes[level];
 		}
 
 
-		void OpenGLTextureCube::MapCube( unsigned int arrayIndex, CubeMapFace face, unsigned int level, TextureMapAccess tma, unsigned int xOffset, unsigned int yOffset, unsigned int width, unsigned int height, void*& data, unsigned int& rowPitch )
+		void OpenGLTextureCube::MapCube( uint32_t arrayIndex, CubeMapFace face, uint32_t level, TextureMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height, void*& data, uint32_t& rowPitch )
 		{
 
 		}
 
 
-		void OpenGLTextureCube::UnmapCube( unsigned int arrayIndex, CubeMapFace face, unsigned int level )
+		void OpenGLTextureCube::UnmapCube( uint32_t arrayIndex, CubeMapFace face, uint32_t level )
 		{
 
 		}

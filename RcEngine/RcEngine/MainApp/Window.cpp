@@ -94,17 +94,20 @@ Window::Window( const std::string& title, const Render::RenderSettings& settings
 	mTop = settings.Top;
 	mWidth = WindowRect.right - WindowRect.left;
 	mHeight = WindowRect.bottom - WindowRect.top;
-
-	::ShowWindow(mhWnd, SW_SHOWNORMAL);
-	::UpdateWindow(mhWnd);
 }
-
 
 Window::~Window(void)
 {
 }
 
-void Window::Reposition( int left, int top )
+
+void Window::ShowWindow()
+{
+	::ShowWindow(mhWnd, SW_SHOWNORMAL);
+	::UpdateWindow(mhWnd);
+}
+
+void Window::Reposition( int32_t left, int32_t top )
 {
 	if(mhWnd && !mFullscreen)
 	{
@@ -224,5 +227,7 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
+
+
 
 } // Namespace RcEngine

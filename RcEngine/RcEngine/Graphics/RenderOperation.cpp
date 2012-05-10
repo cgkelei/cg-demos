@@ -5,140 +5,96 @@ namespace RcEngine {
 	namespace Render {
 
 		RenderOperation::RenderOperation( void )
-			: mUseIndex(true), mPrimitiveType(PT_Triangle_List),
-			mStartIndexLocation(0), mStartVertexLocation(0), mBaseVertexLocation(0)
+			: UseIndex(true), PrimitiveType(PT_Triangle_List),
+			StartIndexLocation(0), StartVertexLocation(0), BaseVertexLocation(0)
 		{
 
 		}
 
-		uint32 RenderOperation::GetVertexCount() const
+		uint32_t RenderOperation::GetVertexCount() const
 		{
 			return 0;
 		}
 
-		uint32 RenderOperation::GetStreamCount() const
+		uint32_t RenderOperation::GetStreamCount() const
 		{
-			return mVertexStreams.size();
+			return VertexStreams.size();
 		}
 
 		bool RenderOperation::UseIndices() const
 		{
-			return mUseIndex;
+			return UseIndex;
 		}
 
-		uint32 RenderOperation::GetIndicesCount() const
+		uint32_t RenderOperation::GetIndicesCount() const
 		{
-			static uint32 sIndexSize[2] = { 2, 4 };
-			return mIndexBuffer->GetBufferSize() / sIndexSize[mIndexType];
+			static uint32_t sIndexSize[2] = { 2, 4 };
+			return IndexBuffer->GetBufferSize() / sIndexSize[IndexType];
 		}
 
-		uint32 RenderOperation::GetStartVertexLocation() const
+		uint32_t RenderOperation::GetStartVertexLocation() const
 		{
-			return mStartVertexLocation;
+			return StartVertexLocation;
 		}
 
-		void RenderOperation::SetStartVertexLocation( uint32 loc )
+		void RenderOperation::SetStartVertexLocation( uint32_t loc )
 		{
-			mStartVertexLocation = loc;
+			StartVertexLocation = loc;
 		}
 
-		uint32 RenderOperation::GetBaseVertexLocation() const
+		uint32_t RenderOperation::GetBaseVertexLocation() const
 		{
-			return mBaseVertexLocation;
+			return BaseVertexLocation;
 		}
 
-		void RenderOperation::SetBaseVertexLocation( uint32 loc )
+		void RenderOperation::SetBaseVertexLocation( uint32_t loc )
 		{
-			mBaseVertexLocation = loc;
+			BaseVertexLocation = loc;
 		}
 
-		uint32 RenderOperation::GetStartIndexLocation() const
+		uint32_t RenderOperation::GetStartIndexLocation() const
 		{
-			return mStartIndexLocation;
+			return StartIndexLocation;
 		}
 
-		void RenderOperation::SetStartIndexLocation( uint32 loc )
+		void RenderOperation::SetStartIndexLocation( uint32_t loc )
 		{
-			mStartIndexLocation = loc;
+			StartIndexLocation = loc;
 		}
 
-		void RenderOperation::BindVertexStream( const shared_ptr<GraphicsBuffer>& buffer, const shared_ptr<VertexDeclaration>& vd, StreamType type /*= ST_Geometry*/, uint32 freq /*= 1*/ )
+		void RenderOperation::BindVertexStream( const shared_ptr<GraphicsBuffer>& buffer, const shared_ptr<VertexDeclaration>& vd, StreamType type /*= ST_Geometry*/, uint32_t freq /*= 1*/ )
 		{
 			if(type == ST_Geometry)
 			{
-				for(size_t i = 0; i < mVertexStreams.size(); i++)
+				for(size_t i = 0; i < VertexStreams.size(); i++)
 				{
-					if( (*mVertexStreams[i].VertexDecl) == *vd )
+					if( (*VertexStreams[i].VertexDecl) == *vd )
 					{
-						mVertexStreams[i].Stream = buffer;
-						mVertexStreams[i].Type = type;
-						mVertexStreams[i].Frequency = freq;
+						VertexStreams[i].Stream = buffer;
+						VertexStreams[i].Type = type;
+						VertexStreams[i].Frequency = freq;
 						return;
 					}
 				}
 			}
-				StreamUnit su;
-				su.Stream = buffer;
-				su.VertexDecl = vd;
-				su.Frequency = freq;
-				su.Type = type;
-				mVertexStreams.push_back(su);
+			StreamUnit su;
+			su.Stream = buffer;
+			su.VertexDecl = vd;
+			su.Frequency = freq;
+			su.Type = type;
+			VertexStreams.push_back(su);
 		}
 
 		void RenderOperation::BindIndexStream( const shared_ptr<GraphicsBuffer>& buffer, IndexBufferType type )
 		{
-			mIndexType = type;
-			mIndexBuffer = buffer;
+			IndexType = type;
+			IndexBuffer = buffer;
 		}
 
-		const RenderOperation::StreamUnit& RenderOperation::GetStreamUnit( uint32 index ) const
+		const RenderOperation::StreamUnit& RenderOperation::GetStreamUnit( uint32_t index ) const
 		{
-			return mVertexStreams[index];
+			return VertexStreams[index];
 		}
-
-
-		//////////////////////////////////////////////////////////////////////////
-		/*RenderOperationBuffer::RenderOperationBuffer()
-		{
-
-		}
-
-		RenderOperationBuffer::~RenderOperationBuffer()
-		{
-
-		}
-
-		void RenderOperation::BindIndexStream( const shared_ptr<GraphicsBuffer>& buffer, IndexBufferType type )
-		{
-			mIndexBuffer = buffer;
-			mIndexType = type;
-		}
-		
-
-		void RenderOperationBuffer::AddRenderOperation( const RenderOperation& rop )
-		{
-			mRenderOperationList.push_back(rop);
-		}
-
-		const RenderOperation& RenderOperationBuffer::GetRenderOperation( uint32 index ) const
-		{
-			return mRenderOperationList.at(index);
-		}
-
-		void RenderOperationBuffer::ClearAll()
-		{
-			mRenderOperationList.clear();
-		}
-
-		RenderOperation& RenderOperationBuffer::operator[]( uint32 index )
-		{
-			return mRenderOperationList[index];
-		}
-
-		const RenderOperation& RenderOperationBuffer::operator[]( uint32 index ) const
-		{
-			return mRenderOperationList[index];
-		}*/
 
 	}
 }

@@ -4,7 +4,7 @@ namespace RcEngine
 {
 	namespace Render
 	{
-		OpenGLGraphicsBuffer::OpenGLGraphicsBuffer(BufferUsage usage, uint32 accessHint, GLenum target, ElementInitData* initData)
+		OpenGLGraphicsBuffer::OpenGLGraphicsBuffer(BufferUsage usage, uint32_t accessHint, GLenum target, ElementInitData* initData)
 			: GraphicsBuffer(usage, accessHint), mTarget(target)
 		{
 			assert((GL_ARRAY_BUFFER == target) || (GL_ELEMENT_ARRAY_BUFFER == target));
@@ -36,7 +36,7 @@ namespace RcEngine
 			return mBufferID;
 		}
 
-		void* OpenGLGraphicsBuffer::Map( uint32 offset, uint32 length, BufferAccess options )
+		void* OpenGLGraphicsBuffer::Map( uint32_t offset, uint32_t length, BufferAccess options )
 		{
 			GLenum mapFlag;
 			void* pMapBuffer = NULL;
