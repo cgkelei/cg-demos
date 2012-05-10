@@ -19,14 +19,14 @@ namespace RcEngine
 
 			virtual void ClearColor(const Math::ColorRGBA& clr);
 			virtual void ClearDepth(float depth);
-			virtual void ClearStencil(unsigned int stencil);
-			virtual void ClearDepthStencil(float depth, unsigned int stencil);
+			virtual void ClearStencil(uint32_t stencil);
+			virtual void ClearDepthStencil(float depth, uint32_t stencil);
 
-			virtual void OnAttached(FrameBuffer* fb, unsigned int att);
-			virtual void OnDetached(FrameBuffer* fb, unsigned int att);	
+			virtual void OnAttached(FrameBuffer* fb, uint32_t att);
+			virtual void OnDetached(FrameBuffer* fb, uint32_t att);	
 
 		protected:
-			void DoClear(GLbitfield flag, const Math::ColorRGBA& clr, float depth, unsigned int stencil);
+			void DoClear(GLbitfield flag, const Math::ColorRGBA& clr, float depth, uint32_t stencil);
 
 		};
 
@@ -34,63 +34,63 @@ namespace RcEngine
 		class _OpenGLExport OpenGLDepthStencilView : public OpenGLRenderView
 		{
 		public:
-			OpenGLDepthStencilView(unsigned int width, unsigned int height, unsigned int sampleCount, unsigned int sampleQuality, PixelFormat format);
-			OpenGLDepthStencilView(Texture* tex, unsigned int arrIndex, unsigned int level);
+			OpenGLDepthStencilView(uint32_t width, uint32_t height, uint32_t sampleCount, uint32_t sampleQuality, PixelFormat format);
+			OpenGLDepthStencilView(Texture* tex, uint32_t arrIndex, uint32_t level);
 
 			~OpenGLDepthStencilView(void);
 
 			void ClearDepth(float depth);
-			void ClearStencil(unsigned int stencil);
-			void ClearDepthStencil(float depth, unsigned int stencil);
+			void ClearStencil(uint32_t stencil);
+			void ClearDepthStencil(float depth, uint32_t stencil);
 
-			void OnAttach(FrameBuffer* fb, unsigned int index);
-			void OnDetach(FrameBuffer* fb, unsigned int index);	
+			void OnAttach(FrameBuffer* fb, uint32_t index);
+			void OnDetach(FrameBuffer* fb, uint32_t index);	
 
 		private:
 			GLuint mRenderBufferObject;
 			GLenum mTarget;
-			unsigned int mArrIndex;
-			unsigned int mLevel;
-			unsigned int mSampleCount, mSampleQuality;
+			uint32_t mArrIndex;
+			uint32_t mLevel;
+			uint32_t mSampleCount, mSampleQuality;
 			OpenGLTexture2D* mDepthStencilTexture;
 		};
 
 		class _OpenGLExport OpenGLScreenDepthStencilView : public OpenGLRenderView
 		{
 		public:
-			OpenGLScreenDepthStencilView(unsigned int width, unsigned int height, PixelFormat fmt);
+			OpenGLScreenDepthStencilView(uint32_t width, uint32_t height, PixelFormat fmt);
 			~OpenGLScreenDepthStencilView();
 
-			void OnAttach(FrameBuffer* fb, unsigned int index);
-			void OnDetach(FrameBuffer* fb, unsigned int index);	
+			void OnAttach(FrameBuffer* fb, uint32_t index);
+			void OnDetach(FrameBuffer* fb, uint32_t index);	
 		};
 
 		//////////////////////////////////////////////////////////////////////////
 		class _OpenGLExport OpenGLRenderTarget2DView : public OpenGLRenderView
 		{
 		public:
-			OpenGLRenderTarget2DView(Texture* tex2d, unsigned int arrIndex, unsigned int level);
+			OpenGLRenderTarget2DView(Texture* tex2d, uint32_t arrIndex, uint32_t level);
 			~OpenGLRenderTarget2DView();
 
 			void ClearColor(const Math::ColorRGBA& clr);
 
-			virtual void OnAttach(FrameBuffer* fb, unsigned int att);
-			virtual void OnDetach(FrameBuffer* fb, unsigned int att);
+			virtual void OnAttach(FrameBuffer* fb, uint32_t att);
+			virtual void OnDetach(FrameBuffer* fb, uint32_t att);
 
 		private:
 			OpenGLTexture2D* mTexture;
-			unsigned int mArrIndex;
-			unsigned int mLevel;
+			uint32_t mArrIndex;
+			uint32_t mLevel;
 		};
 
 		class _OpenGLExport OpenGLScreenRenderTarget2DView :  public OpenGLRenderView
 		{
 		public:
-			OpenGLScreenRenderTarget2DView(unsigned int width, unsigned int height, PixelFormat fmt);
+			OpenGLScreenRenderTarget2DView(uint32_t width, uint32_t height, PixelFormat fmt);
 			~OpenGLScreenRenderTarget2DView();
 	
-			void OnAttach(FrameBuffer* fb, unsigned int index);
-			void OnDetach(FrameBuffer* fb, unsigned int index);
+			void OnAttach(FrameBuffer* fb, uint32_t index);
+			void OnDetach(FrameBuffer* fb, uint32_t index);
 		};
 
 	}

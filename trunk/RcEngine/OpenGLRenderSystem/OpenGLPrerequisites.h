@@ -40,10 +40,10 @@ namespace RcEngine
 		class OpenGLTexture2D;
 		class OpenGLTexture3D;
 		class OpenGLTextureCube;
-		class OpenGLRenderEffect;
-		class OpenGLRenderParameter;
-		class OpenGLRenderTechnique;
-		class OpenGLRenderPass;
+		class OpenGLEffect;
+		class OpenGLEffectParameter;
+		class OpenGLEffectTechnique;
+		class OpenGLEffectPass;
 		class OpenGLGraphicsBuffer;
 		class OpenGLFrameBuffer;
 	}

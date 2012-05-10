@@ -13,13 +13,13 @@ namespace RcEngine
 		class _OpenGLExport OpenGLGraphicsBuffer : public GraphicsBuffer
 		{
 		public:
-			OpenGLGraphicsBuffer(BufferUsage usage, uint32 accessHint, GLenum target, ElementInitData* initData);
+			OpenGLGraphicsBuffer(BufferUsage usage, uint32_t accessHint, GLenum target, ElementInitData* initData);
 			~OpenGLGraphicsBuffer(void); 
 
 			GLenum GetTarget() const;
 			GLuint GetBufferID() const;
 
-			void* Map(uint32 offset, uint32 length, BufferAccess options);
+			void* Map(uint32_t offset, uint32_t length, BufferAccess options);
 			void UnMap();
 
 		private:

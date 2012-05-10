@@ -52,8 +52,8 @@ public:
 	void Print(std::ostream& os);
 
 	XMLNodePtr AllocateNode(XMLNodeType type, const std::string& name);
-	XMLAttributePtr AllocateAttributeInt(const std::string& name, int32 value);
-	XMLAttributePtr AllocateAttributeUInt(const std::string& name, uint32 value);
+	XMLAttributePtr AllocateAttributeInt(const std::string& name, int32_t value);
+	XMLAttributePtr AllocateAttributeUInt(const std::string& name, uint32_t value);
 	XMLAttributePtr AllocateAttributeFloat(const std::string& name, float value);
 	XMLAttributePtr AllocateAttributeString(const std::string& name, const std::string& value);
 
@@ -84,8 +84,8 @@ public:
 	XMLAttributePtr LastAttribute( );
 		
 	XMLAttributePtr Attribute( const std::string& name );
-	int32  AttributeInt( const std::string& name , int32 defaultVar);
-	uint32 AttributeUInt( const std::string& name , uint32 defaultVar);
+	int32_t  AttributeInt( const std::string& name , int32_t defaultVar);
+	uint32_t AttributeUInt( const std::string& name , uint32_t defaultVar);
 	float  AttributeFloat( const std::string& name , float defaultVar);
 	std::string AttributeString( const std::string& name , std::string defaultVar);
 
@@ -115,8 +115,8 @@ public:
 	void RemoveAttribute( const XMLAttributePtr& where );
 	void RemoveAllAttributes();
 
-	uint32 ValueUInt()   const;
-	int32  ValueInt()    const;
+	uint32_t ValueUInt()   const;
+	int32_t  ValueInt()    const;
 	float  ValueFlaot()  const;
 	std::string ValueString() const;
 
@@ -147,8 +147,8 @@ public:
 	XMLAttributePtr PrevAttribute( ) const;
 	XMLAttributePtr NextAttribute( ) const;
 
-	uint32 ValueUInt()   const;
-	int32  ValueInt()    const;
+	uint32_t ValueUInt()   const;
+	int32_t  ValueInt()    const;
 	float  ValueFloat()  const;
 	std::string ValueString() const;
 

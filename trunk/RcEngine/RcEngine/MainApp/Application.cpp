@@ -19,7 +19,7 @@ namespace RcEngine {
 	Application* Application::msAppliation = NULL;
 
 	Application::Application( void )
-		: mIsRunning(false)
+		: mIsRunning(false), mAppPaused(false)
 	{
 		msAppliation = this;
 		mConfigFile = "Config.xml";
@@ -32,7 +32,6 @@ namespace RcEngine {
 
 	Application::~Application( void )
 	{
-		Safe_Delete(mCamera);
 		ModuleManager::Finalize();
 	}
 
@@ -43,6 +42,8 @@ namespace RcEngine {
 		Initialize();
 
 		LoadContent();
+
+		mMainWindow->ShowWindow();
 
 		// Reset Game Timer
 		mTimer.Reset();
@@ -92,8 +93,6 @@ namespace RcEngine {
 
 		// Init Render Device
 		InitializeDevice();
-
-		mCamera = new Render::Camera();
 	}
 
 	void Application::CreateGameWindow( )
@@ -113,11 +112,6 @@ namespace RcEngine {
 		mRenderDevice->CreateRenderWindow(mSettings);
 	}
 
-	Render::Camera* Application::GetCamera()
-	{
-		return mCamera;
-	}
-
 	Render::RenderDevice* Application::GetRenderDevice()
 	{
 		return mRenderDevice;
@@ -131,8 +125,6 @@ namespace RcEngine {
 			ModuleManager::GetSingleton().GetMoudleByType(MT_Render_OpengGL));
 		renderModule->Initialise();
 		mRenderDevice = renderModule->GetRenderDevice();
-		Context::GetSingleton().SetRenderDevice(mRenderDevice);
-
 	}
 
 	void Application::UnloadAllModules()
@@ -170,15 +162,15 @@ namespace RcEngine {
 
 	void Application::ReadConfiguration()
 	{
-		XMLDocument configXML;
+		/*XMLDocument configXML;
 		XMLNodePtr root = configXML.Parse("../Media/Config.xml");
 		std::string windowTitle = root->Attribute("Title")->ValueString();
 
 		XMLNodePtr graphics = root->FirstNode("Graphics");
-		XMLNodePtr frame = graphics->FirstNode("Frame");
+		XMLNodePtr frame = graphics->FirstNode("Frame");*/
 
 
-		mSettings.Left = 100;
+		/*mSettings.Left = 100;
 		mSettings.Top = 100;
 		mSettings.Width = frame->Attribute("Width")->ValueUInt();
 		mSettings.Height = frame->Attribute("Height")->ValueUInt();
@@ -189,7 +181,18 @@ namespace RcEngine {
 		std::string colorFmt = frame->Attribute("ColorForamt")->ValueString();
 		std::string depthStencilFmt = frame->Attribute("DepthStencilFormat")->ValueString();
 		mSettings.ColorFormat = Render::PF_R8G8B8A8;
+		mSettings.DepthStencilFormat = Render::PF_Depth24Stencil8;*/
+
+		mSettings.Left = 100;
+		mSettings.Top = 100;
+		mSettings.Width = 640;
+		mSettings.Height = 480;
+		mSettings.Fullscreen = false;
+		mSettings.SampleCount = 0;
+		mSettings.SampleQuality = 0;
+		mSettings.ColorFormat = Render::PF_R8G8B8A8;
 		mSettings.DepthStencilFormat = Render::PF_Depth24Stencil8;
+
 	}
 
 } // Namespace RcEngine

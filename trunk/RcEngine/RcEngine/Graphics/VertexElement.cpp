@@ -6,7 +6,7 @@ namespace Render {
 
 using Core::Exception;
 
-VertexElement::VertexElement(uint32 offset, VertexElementFormat theType, VertexElementUsage semantic, uint16 index /*= 0*/ )
+VertexElement::VertexElement(uint32_t offset, VertexElementFormat theType, VertexElementUsage semantic, uint16_t index /*= 0*/ )
 	:   mOffset(offset),
 		mFormat(theType),
 		mUsage(semantic),
@@ -15,12 +15,12 @@ VertexElement::VertexElement(uint32 offset, VertexElementFormat theType, VertexE
 	
 }
 
-uint32 VertexElement::GetTypeSize( VertexElementFormat etype )
+uint32_t VertexElement::GetTypeSize( VertexElementFormat etype )
 {
 	switch(etype)
 	{
 	case VEF_Color:
-		return sizeof(uint32);
+		return sizeof(uint32_t);
 
 	case VEF_Single:
 		return sizeof(float);
@@ -58,7 +58,7 @@ uint32 VertexElement::GetTypeSize( VertexElementFormat etype )
 	return 0;
 }
 
-uint16 VertexElement::GetTypeCount( VertexElementFormat etype )
+uint16_t VertexElement::GetTypeCount( VertexElementFormat etype )
 {
 	switch(etype)
 	{

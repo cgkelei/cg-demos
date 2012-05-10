@@ -3,7 +3,7 @@
 namespace RcEngine {
 namespace Render {
 
-GraphicsBuffer::GraphicsBuffer(BufferUsage usage, uint32 accessHint)
+GraphicsBuffer::GraphicsBuffer(BufferUsage usage, uint32_t accessHint)
 	: mBufferUsage(usage), mAccessHint(accessHint)
 {
 }
@@ -18,12 +18,12 @@ BufferUsage GraphicsBuffer::GetBufferUsage() const
 	return mBufferUsage;
 }
 
-uint32 GraphicsBuffer::GetAccessHint() const
+uint32_t GraphicsBuffer::GetAccessHint() const
 {
 	return mAccessHint;
 }
 
-uint32 GraphicsBuffer::GetBufferSize() const
+uint32_t GraphicsBuffer::GetBufferSize() const
 {
 	return mSizeInBytes;
 }

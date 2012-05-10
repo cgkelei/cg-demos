@@ -4,7 +4,7 @@
 namespace RcEngine {
 	namespace Render {
 
-		FrameBuffer::FrameBuffer(unsigned int width, unsigned int height,  bool offscreen /*= true*/ )
+		FrameBuffer::FrameBuffer(uint32_t width, uint32_t height,  bool offscreen /*= true*/ )
 			: mWidth(width), mHeight(height), mDepthStencilView(0), mDirty(false), mOffscreen(offscreen)
 		{
 
@@ -16,7 +16,7 @@ namespace RcEngine {
 		}
 
 
-		RenderView* FrameBuffer::GetAttachedView( unsigned int att )
+		RenderView* FrameBuffer::GetAttachedView( uint32_t att )
 		{
 			switch(att)
 			{
@@ -24,7 +24,7 @@ namespace RcEngine {
 				return mDepthStencilView;
 
 			default:
-				unsigned int index = att - ATT_Color0;
+				uint32_t index = att - ATT_Color0;
 				if(mColorViews.size() < index + 1)
 					return NULL;
 				else
@@ -33,7 +33,7 @@ namespace RcEngine {
 		}
 
 
-		void FrameBuffer::Attach( unsigned int att, RenderView* view )
+		void FrameBuffer::Attach( uint32_t att, RenderView* view )
 		{
 			switch(att)
 			{
@@ -48,7 +48,7 @@ namespace RcEngine {
 
 				break;
 			default:
-				unsigned int index = att - ATT_Color0;
+				uint32_t index = att - ATT_Color0;
 				if(index < mColorViews.size())
 				{
 					if(mColorViews[index] != NULL)
@@ -87,7 +87,7 @@ namespace RcEngine {
 			mDirty = true;
 		}
 
-		void FrameBuffer::Detach( unsigned int att )
+		void FrameBuffer::Detach( uint32_t att )
 		{
 			switch(att)
 			{
@@ -103,7 +103,7 @@ namespace RcEngine {
 				mStencilBits = 0;
 				break;
 			default:
-				unsigned int index = att - ATT_Color0;
+				uint32_t index = att - ATT_Color0;
 				if(mColorViews.size() < index + 1 )
 				{
 					mColorViews.resize(index + 1);

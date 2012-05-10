@@ -11,7 +11,7 @@ namespace RcEngine {
 		public:
 			typedef std::vector<RenderTechnique*> TechniqueList;
 			typedef std::vector<RenderParameter*> ParameterList;
-			typedef std::vector<std::pair<String, std::vector<uint32> > > ConstBuffers;
+			typedef std::vector<std::pair<String, std::vector<uint32_t> > > ConstBuffers;
 			typedef std::vector<std::pair<String, String> > Macros;
 
 

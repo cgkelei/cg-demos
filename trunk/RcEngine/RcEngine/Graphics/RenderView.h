@@ -14,22 +14,22 @@ namespace RcEngine {
 			RenderView();
 			virtual ~RenderView();
 
-			unsigned int GetWidth() const  { return mWidth; }
-			unsigned int GetHeight() const { return mHeight; }
+			uint32_t GetWidth() const  { return mWidth; }
+			uint32_t GetHeight() const { return mHeight; }
 			PixelFormat GetFormat() const  { return mFormat; }
 
 			virtual void ClearColor(const Math::ColorRGBA& clr) = 0;
 			virtual void ClearDepth(float depth) = 0;
-			virtual void ClearDepthStencil(float depth, unsigned int stencil) = 0;
+			virtual void ClearDepthStencil(float depth, uint32_t stencil) = 0;
 
-			virtual void OnAttach(FrameBuffer* fb, unsigned int attr) = 0;
-			virtual void OnDetach(FrameBuffer* fb, unsigned int attr) = 0;
+			virtual void OnAttach(FrameBuffer* fb, uint32_t attr) = 0;
+			virtual void OnDetach(FrameBuffer* fb, uint32_t attr) = 0;
 
-			virtual void OnBind(FrameBuffer* fb, unsigned int att);
-			virtual void OnUnbind(FrameBuffer* fb, unsigned int att);
+			virtual void OnBind(FrameBuffer* fb, uint32_t att);
+			virtual void OnUnbind(FrameBuffer* fb, uint32_t att);
 
 		protected:
-			unsigned int mWidth, mHeight;
+			uint32_t mWidth, mHeight;
 			PixelFormat mFormat;
 			FrameBuffer* mAttachedFrameBuffer;
 

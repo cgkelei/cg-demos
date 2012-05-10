@@ -26,6 +26,7 @@ namespace RcEngine{
 			RenderDevice* GetRenderDevicePtr();
 			
 
+			void SetRenderFactory(RenderFactory* factory);
 			RenderFactory& GetRenderFactory();
 			RenderFactory* GetRenderFactoryPtr(); 
 

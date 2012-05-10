@@ -47,16 +47,16 @@ namespace RcEngine {
 
 			virtual void SetValue(const bool& value);
 
-			virtual void SetValue(const int& value);
+			virtual void SetValue(const int32_t& value);
 			virtual void SetValue(const ColorRGBA& value);
-			virtual void SetValue(const Vector<int, 2>& value);
-			virtual void SetValue(const Vector<int, 3>& value);
-			virtual void SetValue(const Vector<int, 4>& value);
+			virtual void SetValue(const Vector<int32_t, 2>& value);
+			virtual void SetValue(const Vector<int32_t, 3>& value);
+			virtual void SetValue(const Vector<int32_t, 4>& value);
 
-			virtual void SetValue(const unsigned int& value);
-			virtual void SetValue(const Vector<unsigned int, 2>& value);
-			virtual void SetValue(const Vector<unsigned int, 3>& value);
-			virtual void SetValue(const Vector<unsigned int, 4>& value);
+			virtual void SetValue(const uint32_t& value);
+			virtual void SetValue(const Vector<uint32_t, 2>& value);
+			virtual void SetValue(const Vector<uint32_t, 3>& value);
+			virtual void SetValue(const Vector<uint32_t, 4>& value);
 
 			virtual void SetValue(const float& value);
 			virtual void SetValue(const Vector<float, 2>& value);

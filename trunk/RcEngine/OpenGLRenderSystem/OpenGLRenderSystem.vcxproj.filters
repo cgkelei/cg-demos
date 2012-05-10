@@ -33,13 +33,7 @@
     <ClCompile Include="OpenGLRenderDevice.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="OpenGLRenderEffect.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="OpenGLRenderFactory.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="OpenGLRenderParameter.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="OpenGLRenderTarget2DView.cpp">
@@ -69,6 +63,18 @@
     <ClCompile Include="OpenGLRenderModule.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="OpenGLEffect.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGLEffectPass.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGLEffectTechnique.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGLEffectParameter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OpenGLFrameBuffer.h">
@@ -83,13 +89,7 @@
     <ClInclude Include="OpenGLRenderDevice.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="OpenGLRenderEffect.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="OpenGLRenderFactory.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="OpenGLRenderParameter.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="OpenGLRenderView.h">
@@ -105,6 +105,18 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="OpenGLRenderModule.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLEffectParameter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLEffect.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLEffectPass.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLEffectTechnique.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -11,7 +11,7 @@ namespace RcEngine
 	{
 		using Core::Exception;
 
-		OpenGLRenderTarget2DView::OpenGLRenderTarget2DView( Texture* tex2d, unsigned int arrIndex, unsigned int level )
+		OpenGLRenderTarget2DView::OpenGLRenderTarget2DView( Texture* tex2d, uint32_t arrIndex, uint32_t level )
 			: mArrIndex(arrIndex), mLevel(level)
 		{
 			if(tex2d->GetTextureType() != TT_Texture2D)
@@ -36,9 +36,9 @@ namespace RcEngine
 
 		}
 
-		void OpenGLRenderTarget2DView::OnAttach( FrameBuffer* fb, unsigned int att )
+		void OpenGLRenderTarget2DView::OnAttach( FrameBuffer* fb, uint32_t att )
 		{
-			unsigned int index = att - ATT_Color0;
+			uint32_t index = att - ATT_Color0;
 			mAttachedFrameBuffer = fb;
 
 			OpenGLRenderDevice* device = static_cast<OpenGLRenderDevice*>(Core::Context::GetSingleton().GetRenderDevicePtr());
@@ -72,9 +72,9 @@ namespace RcEngine
 			device->BindFrameBuffer(oldFrameBuffer);
 		}
 
-		void OpenGLRenderTarget2DView::OnDetach( FrameBuffer* fb, unsigned int att )
+		void OpenGLRenderTarget2DView::OnDetach( FrameBuffer* fb, uint32_t att )
 		{
-			unsigned int index = att - ATT_Color0;
+			uint32_t index = att - ATT_Color0;
 			mAttachedFrameBuffer = fb;
 
 			OpenGLRenderDevice* device = static_cast<OpenGLRenderDevice*>(Core::Context::GetSingleton().GetRenderDevicePtr());
@@ -107,7 +107,7 @@ namespace RcEngine
 		}
 
 		//////////////////////////////////////////////////////////////////////////
-		OpenGLScreenRenderTarget2DView::OpenGLScreenRenderTarget2DView( unsigned int width, unsigned int height, PixelFormat fmt )
+		OpenGLScreenRenderTarget2DView::OpenGLScreenRenderTarget2DView( uint32_t width, uint32_t height, PixelFormat fmt )
 		{
 			mWidth = width;
 			mHeight = height;
@@ -119,7 +119,7 @@ namespace RcEngine
 
 		}
 
-		void OpenGLScreenRenderTarget2DView::OnAttach( FrameBuffer* fb, unsigned int index )
+		void OpenGLScreenRenderTarget2DView::OnAttach( FrameBuffer* fb, uint32_t index )
 		{
 			OpenGLFrameBuffer* oglFrameBuffer = static_cast<OpenGLFrameBuffer*>(fb);
 			if(oglFrameBuffer->GetFrameBufferObject() != 0)
@@ -130,7 +130,7 @@ namespace RcEngine
 			mAttachedFrameBuffer = fb;
 		}
 
-		void OpenGLScreenRenderTarget2DView::OnDetach( FrameBuffer* fb, unsigned int index )
+		void OpenGLScreenRenderTarget2DView::OnDetach( FrameBuffer* fb, uint32_t index )
 		{
 			OpenGLFrameBuffer* oglFrameBuffer = static_cast<OpenGLFrameBuffer*>(fb);
 			if(oglFrameBuffer->GetFrameBufferObject() != 0)

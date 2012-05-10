@@ -82,14 +82,16 @@
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="OpenGLDepthStencilView.cpp" />
+    <ClCompile Include="OpenGLEffect.cpp" />
+    <ClCompile Include="OpenGLEffectParameter.cpp" />
+    <ClCompile Include="OpenGLEffectPass.cpp" />
+    <ClCompile Include="OpenGLEffectTechnique.cpp" />
     <ClCompile Include="OpenGLFrameBuffer.cpp" />
     <ClCompile Include="OpenGLGraphicBuffer.cpp" />
     <ClCompile Include="OpenGLGraphicCommon.cpp" />
     <ClCompile Include="OpenGLRenderDevice.cpp" />
-    <ClCompile Include="OpenGLRenderEffect.cpp" />
     <ClCompile Include="OpenGLRenderFactory.cpp" />
     <ClCompile Include="OpenGLRenderModule.cpp" />
-    <ClCompile Include="OpenGLRenderParameter.cpp" />
     <ClCompile Include="OpenGLRenderTarget2DView.cpp" />
     <ClCompile Include="OpenGLRenderView.cpp" />
     <ClCompile Include="OpenGLRenderWindow.cpp" />
@@ -100,15 +102,17 @@
     <ClCompile Include="OpenGLTextureCube.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="OpenGLEffect.h" />
+    <ClInclude Include="OpenGLEffectParameter.h" />
+    <ClInclude Include="OpenGLEffectPass.h" />
+    <ClInclude Include="OpenGLEffectTechnique.h" />
     <ClInclude Include="OpenGLFrameBuffer.h" />
     <ClInclude Include="OpenGLGraphicBuffer.h" />
     <ClInclude Include="OpenGLGraphicCommon.h" />
     <ClInclude Include="OpenGLPrerequisites.h" />
     <ClInclude Include="OpenGLRenderDevice.h" />
-    <ClInclude Include="OpenGLRenderEffect.h" />
     <ClInclude Include="OpenGLRenderFactory.h" />
     <ClInclude Include="OpenGLRenderModule.h" />
-    <ClInclude Include="OpenGLRenderParameter.h" />
     <ClInclude Include="OpenGLRenderView.h" />
     <ClInclude Include="OpenGLRenderWindow.h" />
     <ClInclude Include="OpenGLTexture.h" />

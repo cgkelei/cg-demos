@@ -11,14 +11,15 @@ namespace RcEngine {
 		{
 		public:
 			Viewport();
-			Viewport(unsigned int left, unsigned int top, unsigned int width, unsigned int height);
+			Viewport(uint32_t left, uint32_t top, uint32_t width, uint32_t height);
 			~Viewport();
 
 			bool operator == (const Viewport& rhs);
 
 		public:
 
-			unsigned int mLeft, mTop, mWidth, mHeight;
+			uint32_t Left, Top, Width, Height;
+			Camera* AttachCamera;
 
 		};
 

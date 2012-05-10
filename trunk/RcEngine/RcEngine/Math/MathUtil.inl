@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-template< typename Real, int Size >
+template< typename Real, int32_t Size >
 inline static typename  Real
 SquaredLength(const Vector<Real, Size>& vec)
 {
@@ -7,27 +7,27 @@ SquaredLength(const Vector<Real, Size>& vec)
 }
 
 //----------------------------------------------------------------------------
-template< typename Real, int Size >
+template< typename Real, int32_t Size >
 inline static typename Real
 Length(const Vector<Real, Size>& vec)
 {
-	return (Real)sqrt((double)SquaredLength(vec));
+	return std::sqrt(SquaredLength(vec));
 }
 
 
 //----------------------------------------------------------------------------
-template< typename Real, int Size >
+template< typename Real, int32_t Size >
 inline static typename Real
 Dot( const Vector<Real, Size>& lhs, const Vector<Real, Size>& rhs )
 {
 	Real result = (Real)0;
-	for(int i = 0; i < Size; i++)
+	for(int32_t i = 0; i < Size; i++)
 		result +=  lhs[i] * rhs[i] ;
 	return result;
 }
 
 //----------------------------------------------------------------------------
-template< typename Real, int Size >
+template< typename Real, int32_t Size >
 inline static Vector<Real, Size>
 Normalize(const Vector<Real, Size>& vec)
 {

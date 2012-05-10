@@ -255,17 +255,17 @@ public:
 		
 	static std::string GetFormatName(PixelFormat srcformat);
 
-	static uint32 GetNumElemBytes(PixelFormat format);
+	static uint32_t GetNumElemBytes(PixelFormat format);
 
-	static uint32 GetNumElemBits(PixelFormat format);
+	static uint32_t GetNumElemBits(PixelFormat format);
 
-	static uint32 GetFlags( PixelFormat format );
+	static uint32_t GetFlags( PixelFormat format );
 
 	static PixelComponentType GetComponentType(PixelFormat fmt);
 
-	static uint32 GetComponentCount(PixelFormat fmt);
+	static uint32_t GetComponentCount(PixelFormat fmt);
 
-	static uint32 GetMemorySize(uint32 width, uint32 height, uint32 depth, PixelFormat format);
+	static uint32_t GetMemorySize(uint32_t width, uint32_t height, uint32_t depth, PixelFormat format);
 
 	/** Shortcut method to determine if the format has an alpha component */
 	static bool HasAlpha(PixelFormat format);
@@ -287,7 +287,7 @@ public:
 	/** Shortcut method to determine if the format is a luminance format. */
 	static bool IsLuminance(PixelFormat format);
 
-	static void GetNumDepthStencilBits(PixelFormat format, uint32& depth, uint32& stencil);
+	static void GetNumDepthStencilBits(PixelFormat format, uint32_t& depth, uint32_t& stencil);
 		
 };
 

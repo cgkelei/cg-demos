@@ -68,7 +68,7 @@ XMLDocument::XMLDocument()
 XMLNodePtr XMLDocument::Parse( const std::string& xmlName )
 {
 	FILE* pFile = NULL;
-	int len = 0;
+	int32_t len = 0;
 
 	fopen_s(&pFile, xmlName.c_str() , "r");
 	if (pFile == NULL) 
@@ -77,7 +77,7 @@ XMLNodePtr XMLDocument::Parse( const std::string& xmlName )
 		ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, str, "Application::Initialize" );
 	}
 	fseek (pFile , 0 , SEEK_END);
-	len = static_cast<int>( ftell(pFile) );
+	len = static_cast<int32_t>( ftell(pFile) );
 	fseek(pFile, 0, SEEK_SET);
 	mXMLSrc.resize(len+1, 0);
 	fread_s(&mXMLSrc[0], len, sizeof(char), len, pFile);
@@ -101,12 +101,12 @@ XMLNodePtr XMLDocument::AllocateNode( XMLNodeType type, const std::string& name 
 	return std::make_shared<XMLNode>(mDocument.get(), type, name);
 }
 
-XMLAttributePtr XMLDocument::AllocateAttributeInt( const std::string& name, int32 value )
+XMLAttributePtr XMLDocument::AllocateAttributeInt( const std::string& name, int32_t value )
 {
 	return AllocateAttributeString(name, LexicalCast<std::string>(value));
 }
 
-XMLAttributePtr XMLDocument::AllocateAttributeUInt(const std::string& name, uint32 value)
+XMLAttributePtr XMLDocument::AllocateAttributeUInt(const std::string& name, uint32_t value)
 {
 	return AllocateAttributeString(name, LexicalCast<std::string>(value));
 }
@@ -212,13 +212,13 @@ XMLAttributePtr XMLNode::Attribute( const std::string& name )
 	return FirstAttribute(name);
 }
 
-int32 XMLNode::AttributeInt( const std::string& name , int32 defaultVar  )
+int32_t XMLNode::AttributeInt( const std::string& name , int32_t defaultVar  )
 {
 	XMLAttributePtr attr = Attribute(name);
 	return attr ? attr->ValueInt() : defaultVar;
 }
 
-uint32 XMLNode::AttributeUInt( const std::string& name , uint32 defaultVar  )
+uint32_t XMLNode::AttributeUInt( const std::string& name , uint32_t defaultVar  )
 {
 	XMLAttributePtr attr = Attribute(name);
 	return attr ? attr->ValueUInt() : defaultVar;
@@ -444,14 +444,14 @@ void XMLNode::RemoveAllAttributes()
 	mAttributes.clear();
 }
 
-uint32 XMLNode::ValueUInt() const
+uint32_t XMLNode::ValueUInt() const
 {
-	return LexicalCast<uint32>(ValueString());
+	return LexicalCast<uint32_t>(ValueString());
 }
 
-int32 XMLNode::ValueInt() const
+int32_t XMLNode::ValueInt() const
 {
-	return LexicalCast<int32>(ValueString());
+	return LexicalCast<int32_t>(ValueString());
 }
 
 float XMLNode::ValueFlaot() const
@@ -542,14 +542,14 @@ XMLAttributePtr XMLAttribute::NextAttribute() const
 	}
 }
 
-uint32 XMLAttribute::ValueUInt() const
+uint32_t XMLAttribute::ValueUInt() const
 {
-	return LexicalCast<uint32>(mValue);	
+	return LexicalCast<uint32_t>(mValue);	
 }
 
-int32  XMLAttribute::ValueInt()    const
+int32_t  XMLAttribute::ValueInt()    const
 {
-	return LexicalCast<int32>(mValue);
+	return LexicalCast<int32_t>(mValue);
 }
 
 float  XMLAttribute::ValueFloat()  const

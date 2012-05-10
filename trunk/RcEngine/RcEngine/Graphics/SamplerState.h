@@ -19,7 +19,7 @@ namespace RcEngine
 			TextureAddressMode		   AddressV;
 			TextureAddressMode		   AddressW;
 			float                      MipMapLODBias;
-			uint8                      MaxAnisotropy;
+			uint8_t                    MaxAnisotropy;
 			CompareFunction            ComparisonFunc;
 			float                      MinLOD;
 			float                      MaxLOD;

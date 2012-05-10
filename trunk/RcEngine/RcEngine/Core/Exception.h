@@ -32,7 +32,7 @@ public:
 protected:
 
 	long line;							// Exception line number.
-	int  number;						// Exception type
+	int32_t  number;						// Exception type
 	std::string typeName;				// Exception type name
 	std::string description;			// Exception description
 	std::string source;				
@@ -42,10 +42,10 @@ protected:
 public:
 
 	// Default Constructor
-	Exception( int typeNum, const std::string& description, const std::string& source );
+	Exception( int32_t typeNum, const std::string& description, const std::string& source );
 
 	// Advanced Constructor
-	Exception( int typeNum, const std::string& description, const std::string& source, const char* type, const char* file, long line );
+	Exception( int32_t typeNum, const std::string& description, const std::string& source, const char* type, const char* file, long line );
 
 	// Copy Constructor
 	Exception(const Exception& rhs);
@@ -56,7 +56,7 @@ public:
 
 	virtual const std::string& GetFullDescription(void) const;
 
-	virtual int GetNumber(void) const throw();
+	virtual int32_t GetNumber(void) const throw();
 
 	virtual const std::string& GetSource() const; 
 
@@ -77,7 +77,7 @@ This is useful because it allows us to create an overloaded method
 for returning different exception types by value without ambiguity. 
 From 'Modern C++ Design' (Alexandrescu 2001).
 */
-template <int num>
+template <int32_t num>
 struct ExceptionCodeType
 {
 	enum { number = num };
@@ -86,63 +86,63 @@ struct ExceptionCodeType
 class _ApiExport UnimplementedException : public Exception 
 {
 public:
-	UnimplementedException(int inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
+	UnimplementedException(int32_t inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
 		: Exception(inNumber, inDescription, inSource, "UnimplementedException", inFile, inLine) {}
 };
 
 class _ApiExport FileNotFoundException : public Exception
 {
 public:
-	FileNotFoundException(int inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
+	FileNotFoundException(int32_t inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
 		: Exception(inNumber, inDescription, inSource, "FileNotFoundException", inFile, inLine) {}
 };
 
 class _ApiExport IOException : public Exception
 {
 public:
-	IOException(int inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
+	IOException(int32_t inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
 		: Exception(inNumber, inDescription, inSource, "IOException", inFile, inLine) {}
 };
 
 class _ApiExport InvalidStateException : public Exception
 {
 public:
-	InvalidStateException(int inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
+	InvalidStateException(int32_t inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
 		: Exception(inNumber, inDescription, inSource, "InvalidStateException", inFile, inLine) {}
 };
 
 class _ApiExport InvalidParametersException : public Exception
 {
 public:
-	InvalidParametersException(int inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
+	InvalidParametersException(int32_t inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
 		: Exception(inNumber, inDescription, inSource, "InvalidParametersException", inFile, inLine) {}
 };
 
 class _ApiExport ItemIdentityException : public Exception
 {
 public:
-	ItemIdentityException(int inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
+	ItemIdentityException(int32_t inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
 		: Exception(inNumber, inDescription, inSource, "ItemIdentityException", inFile, inLine) {}
 };
 
 class _ApiExport InternalErrorException : public Exception
 {
 public:
-	InternalErrorException(int inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
+	InternalErrorException(int32_t inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
 		: Exception(inNumber, inDescription, inSource, "InternalErrorException", inFile, inLine) {}
 };
 
 class _ApiExport RenderingAPIException : public Exception
 {
 public:
-	RenderingAPIException(int inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
+	RenderingAPIException(int32_t inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
 		: Exception(inNumber, inDescription, inSource, "RenderingAPIException", inFile, inLine) {}
 };
 
 class  _ApiExport RuntimeAssertionException : public Exception
 {
 public:
-	RuntimeAssertionException(int inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
+	RuntimeAssertionException(int32_t inNumber, const std::string& inDescription, const std::string& inSource, const char* inFile, long inLine)
 		: Exception(inNumber, inDescription, inSource, "RuntimeAssertionException", inFile, inLine) {}
 };
 

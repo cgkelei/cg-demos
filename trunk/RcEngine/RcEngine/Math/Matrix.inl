@@ -1,4 +1,6 @@
 //----------------------------------------------------------------------------
+#define MatrixItem(iRow, iCol) ( iRow*4 + iCol )
+
 template<typename Real>
 Matrix4<Real>::Matrix4()
 {
@@ -24,10 +26,10 @@ template<typename Real>
 template<typename T>
 Matrix4<Real>::Matrix4(const Matrix4<T>& rhs)
 {
-	for(int i = 0; i < 4; i++)
-		for (int j = 0; j < 4; j++)
+	for(int32_t i = 0; i < 4; i++)
+		for (int32_t j = 0; j < 4; j++)
 		{
-			Elements[MatrixItem(i, j)] = static_cast<Real>(rhs.Elements[MatrixItem(i, j))];
+			Elements[MatrixItem(i, j)] = static_cast<Real>(rhs.Elements[MatrixItem(i, j)]);
 		}
 
 }
@@ -105,35 +107,35 @@ Real* Matrix4<Real>::operator()()
 
 //----------------------------------------------------------------------------
 template<typename Real>
-const Real* Matrix4<Real>::operator[]( int iRow ) const
+const Real* Matrix4<Real>::operator[]( int32_t iRow ) const
 {
 	return &Elements[4*iRow];
 }
 
 //----------------------------------------------------------------------------
 template<typename Real>
-Real* Matrix4<Real>::operator[]( int iRow )
+Real* Matrix4<Real>::operator[]( int32_t iRow )
 {
 	return &Elements[4*iRow];
 }
 
 //----------------------------------------------------------------------------
 template<typename Real>
-Real Matrix4<Real>::operator()( int iRow, int iCol ) const
+Real Matrix4<Real>::operator()( int32_t iRow, int32_t iCol ) const
 {
 	return Elements[MatrixItem(iRow, iCol)];
 }
 
 //----------------------------------------------------------------------------
 template<typename Real>
-Real& Matrix4<Real>::operator()( int iRow, int iCol )
+Real& Matrix4<Real>::operator()( int32_t iRow, int32_t iCol )
 {
 	return Elements[MatrixItem(iRow, iCol)];
 }
 
 //----------------------------------------------------------------------------
 template<typename Real>
-void Matrix4<Real>::SetRow( int iRow, const Vector<Real, 4>& rhs )
+void Matrix4<Real>::SetRow( int32_t iRow, const Vector<Real, 4>& rhs )
 {
 	Elements[MatrixItem(iRow, 0)] = rhs[0];
 	Elements[MatrixItem(iRow, 1)] = rhs[1];
@@ -143,7 +145,7 @@ void Matrix4<Real>::SetRow( int iRow, const Vector<Real, 4>& rhs )
 
 //----------------------------------------------------------------------------
 template<typename Real>
-Vector<Real, 4> Matrix4<Real>::GetRow( int iRow ) const
+Vector<Real, 4> Matrix4<Real>::GetRow( int32_t iRow ) const
 {
 	return Vector<Real, 4>(Elements[MatrixItem(iRow, 0)], Elements[MatrixItem(iRow, 1)],
 				Elements[MatrixItem(iRow, 2)], Elements[MatrixItem(iRow, 3)]);
@@ -151,7 +153,7 @@ Vector<Real, 4> Matrix4<Real>::GetRow( int iRow ) const
 
 //----------------------------------------------------------------------------
 template<typename Real>
-void Matrix4<Real>::SetColumn( int iCol, const Vector<Real, 4>& rhs )
+void Matrix4<Real>::SetColumn( int32_t iCol, const Vector<Real, 4>& rhs )
 {
 	Elements[MatrixItem(0, iCol)] = rhs[0];
 	Elements[MatrixItem(1, iCol)]= rhs[1];
@@ -161,7 +163,7 @@ void Matrix4<Real>::SetColumn( int iCol, const Vector<Real, 4>& rhs )
 
 //----------------------------------------------------------------------------
 template<typename Real>
-Vector<Real, 4> Matrix4<Real>::GetColumn( int iCol ) const
+Vector<Real, 4> Matrix4<Real>::GetColumn( int32_t iCol ) const
 {
 	return Vector<Real, 4>(Elements[MatrixItem(0, iCol)], Elements[MatrixItem(1, iCol)],
 		Elements[MatrixItem(2, iCol)], Elements[MatrixItem(3, iCol)]);
@@ -193,7 +195,7 @@ Matrix4<Real>& Matrix4<Real>::operator=( const Matrix4<Real>& rhs )
 
 //----------------------------------------------------------------------------
 template<typename Real>
-int Matrix4<Real>::CompareArrays (const Matrix4<Real>& rhs) const
+int32_t Matrix4<Real>::CompareArrays (const Matrix4<Real>& rhs) const
 {
 	return memcmp(Elements,rhs.Elements,16*sizeof(Real));
 }
@@ -589,38 +591,4 @@ Real Matrix4<Real>::Determinant() const
 	Real fB5 = Elements[10]*Elements[15] - Elements[11]*Elements[14];
 	Real fDet = fA0*fB5-fA1*fB4+fA2*fB3+fA3*fB2-fA4*fB1+fA5*fB0;
 	return fDet;
-}
-
-//----------------------------------------------------------------------------
-template <typename Real>
-inline Matrix4<Real> operator* (Real fScalar, const Matrix4<Real>& rhs)
-{
-	return rhs * fScalar;
-}
-
-//////////////////////////////////////////////////////////////////////////
-// 重载模板函数，帮助编辑器找到正确的
-//////////////////////////////////////////////////////////////////////////
-template <typename Real>
-inline Matrix4<Real> operator* (int fScalar, const Matrix4<Real>& rhs)
-{
-	return rhs * static_cast<Real>(fScalar);
-}
-
-template <typename Real>
-inline Matrix4<Real> operator* (unsigned int fScalar, const Matrix4<Real>& rhs)
-{
-	return rhs * static_cast<Real>(fScalar);
-}
-//////////////////////////////////////////////////////////////////////////
-
-//----------------------------------------------------------------------------
-template <typename Real>
-inline Vector<Real, 4> operator* (const Vector<Real, 4>& lhs, const Matrix4<Real>& rhs)
-{
-	return Vector<Real, 4>(
-		lhs[0]*rhs.M11+lhs[1]*rhs.M21+lhs[2]*rhs.M31+lhs[3]*rhs.M41,
-		lhs[0]*rhs.M12+lhs[1]*rhs.M22+lhs[2]*rhs.M32+lhs[3]*rhs.M42,
-		lhs[0]*rhs.M13+lhs[1]*rhs.M23+lhs[2]*rhs.M33+lhs[3]*rhs.M43,
-		lhs[0]*rhs.M14+lhs[1]*rhs.M24+lhs[2]*rhs.M34+lhs[3]*rhs.M44);
 }

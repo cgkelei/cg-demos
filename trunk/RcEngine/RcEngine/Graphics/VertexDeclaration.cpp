@@ -13,7 +13,7 @@ VertexDeclaration::~VertexDeclaration()
 
 }
 
-const VertexElement* VertexDeclaration::FindElementBySemantic( VertexElementUsage sem, uint16 index /*= 0*/ )
+const VertexElement* VertexDeclaration::FindElementBySemantic( VertexElementUsage sem, uint16_t index /*= 0*/ )
 {
 	VertexElementList::const_iterator ei, eiend;
 	eiend = mElementList.end();
@@ -27,9 +27,9 @@ const VertexElement* VertexDeclaration::FindElementBySemantic( VertexElementUsag
 	return NULL;
 }
 
-uint32 VertexDeclaration::GetVertexSize() const
+uint32_t VertexDeclaration::GetVertexSize() const
 {
-	uint32 size = 0;
+	uint32_t size = 0;
 	VertexElementList::const_iterator ei, eiend;
 	eiend = mElementList.end();
 	for (ei = mElementList.begin(); ei != eiend; ++ei)
@@ -40,7 +40,7 @@ uint32 VertexDeclaration::GetVertexSize() const
 	return size;
 }
 
-const VertexElement& VertexDeclaration::AddElement(uint32 offset, VertexElementFormat theType, VertexElementUsage semantic, uint16 index /*= 0*/ )
+const VertexElement& VertexDeclaration::AddElement(uint32_t offset, VertexElementFormat theType, VertexElementUsage semantic, uint16_t index /*= 0*/ )
 {
 	mElementList.push_back(
 		VertexElement(offset, theType, semantic, index)
@@ -48,31 +48,36 @@ const VertexElement& VertexDeclaration::AddElement(uint32 offset, VertexElementF
 	return mElementList.back();
 }
 
-const VertexElement& VertexDeclaration::InsertElement( uint32 atPosition, uint32 offset, VertexElementFormat theType, VertexElementUsage semantic, uint16 index /*= 0*/ )
+void VertexDeclaration::AddElement( const VertexElement& ve )
 {
-	if ( atPosition >= static_cast<uint32>(mElementList.size()) )
+	mElementList.push_back(ve);
+}
+
+const VertexElement& VertexDeclaration::InsertElement( uint32_t atPosition, uint32_t offset, VertexElementFormat theType, VertexElementUsage semantic, uint16_t index /*= 0*/ )
+{
+	if ( atPosition >= static_cast<uint32_t>(mElementList.size()) )
 	{
 		return AddElement(offset, theType, semantic, index);
 	}
 
 	VertexElementList::iterator i = mElementList.begin();
-	for (uint32 n = 0; n < atPosition; ++n)
+	for (uint32_t n = 0; n < atPosition; ++n)
 		++i;
 
 	i = mElementList.insert(i,  VertexElement( offset, theType, semantic, index));
 	return *i;
 }
 
-void VertexDeclaration::RemoveElement( uint32 elemIndex )
+void VertexDeclaration::RemoveElement( uint32_t elemIndex )
 {
-	assert(elemIndex < static_cast<uint32>(mElementList.size()) && "Index out of bounds");
+	assert(elemIndex < static_cast<uint32_t>(mElementList.size()) && "Index out of bounds");
 	VertexElementList::iterator i = mElementList.begin();
-	for (uint32 n = 0; n < elemIndex; ++n)
+	for (uint32_t n = 0; n < elemIndex; ++n)
 		++i;
 	mElementList.erase(i);
 }
 
-void VertexDeclaration::RemoveElement( VertexElementUsage semantic, uint16 index /*= 0*/ )
+void VertexDeclaration::RemoveElement( VertexElementUsage semantic, uint16_t index /*= 0*/ )
 {
 	VertexElementList::iterator i = mElementList.begin();
 	for( ; i!= mElementList.end(); ++i)

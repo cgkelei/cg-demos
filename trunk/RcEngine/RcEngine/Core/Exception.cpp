@@ -3,13 +3,13 @@
 namespace RcEngine{
 namespace Core{
 
-Exception::Exception( int num, const std::string& desc, const std::string& src )
+Exception::Exception( int32_t num, const std::string& desc, const std::string& src )
 	: number(num), description(desc), source(src)
 {
 
 }
 
-Exception::Exception( int num, const std::string& desc, const std::string& src , const char* type, const char* fileName, long lineNum )
+Exception::Exception( int32_t num, const std::string& desc, const std::string& src , const char* type, const char* fileName, long lineNum )
 	: number(num), description(desc), source(src), file(fileName), line(lineNum)
 {
 
@@ -51,7 +51,7 @@ const std::string& Exception::GetFullDescription( void ) const
 	return fullDesc;
 }
 
-int Exception::GetNumber( void ) const throw()
+int32_t Exception::GetNumber( void ) const throw()
 {
 	return number;
 }

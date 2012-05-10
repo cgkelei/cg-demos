@@ -310,9 +310,181 @@ enum Attachment
 struct ElementInitData
 {
 	const void* pData;
-	uint32 rowPitch;
-	uint32 slicePitch;
+	uint32_t rowPitch;
+	uint32_t slicePitch;
 };
+
+/// <summary>
+/// Effect Parameter type enumeration.
+/// </summary>
+enum EffectParameterType 
+{
+	EPT_Boolean = 0,
+	EPT_Float,
+	EPT_Float2,
+	EPT_Float3,
+	EPT_Float4,
+	EPT_Int,
+	EPT_Int2,
+	EPT_Int3,
+	EPT_Int4,
+	EPT_Uint,
+	EPT_Uint2,
+	EPT_Uint3,
+	EPT_Uint4,
+	EPT_Matrix2x2,
+	EPT_Matrix3x3,
+	EPT_Matrix4x4,
+	EPT_Texture1D,
+	EPT_Texture2D,
+	EPT_Texture3D,
+	EPT_TextureCUBE,
+	EPT_Texture1DArray,
+	EPT_Texture2DArray,
+	EPT_Texture3DArray,
+	EPT_TextureCUBEArray,
+	EPT_Sampler,
+	EPT_Struct,
+	EPT_Count
+};
+
+/// <summary>
+/// Defines the class of an effect parameter.
+/// </summary>
+enum EffectParameterClass 
+{
+	/// <summary>
+	/// Parameter is a scalar value.
+	/// </summary>
+	EPC_Scalar,
+	/// <summary>
+	/// Parameter is a vector value.
+	/// </summary>
+	EPC_Vector,
+	/// <summary>
+	/// Parameter is a matrix value.
+	/// </summary>
+	EPC_Matrix,
+	/// <summary>
+	/// Parameter is either a texture, string, or other resource type.
+	/// </summary>
+	EPC_Object,
+	/// <summary>
+	/// Parameter is a struct.
+	/// </summary>
+	EPC_Struct
+};
+
+enum EffectParameterUsage
+{
+	/**
+	 * Unknown usage, need to check more
+	 */
+	EPU_Unknown = 0,
+
+	/**
+	 * World matrix to transform vertex in model space to world space.
+	 */
+	EPU_WorldMatrix,
+
+	/**
+	 * View matrix to transform vertex in world space to view space.
+	 */
+	EPU_ViewMatrix,
+
+	/**
+	 * Projection matrix to transform vertex in view space to clip/projection space.
+	 */
+	EPU_ProjectionMatrix,
+
+	/**
+	 * Concatenated World-View matrix.
+	 */
+	EPU_WorldViewMatrix,
+
+	/**
+	 * Concatenated View-Projection matrix
+	 */
+	EPU_ViewProjectionMatrix,
+
+	/**
+	 * Concatenated World-View-Projection matrix.
+	 */
+	EPU_WorldViewProjection,
+
+	/**
+	 * Transpose of the World Inverse matrix. Used to correctly transform normals of geometry with
+	 * non-uniform scaling for lighting.
+	 */
+	EPU_WorldInverseTranspose,
+
+	/**
+	 * Inverse of the world matrix, which takes a vertex from world space back to model space.
+	 */
+	EPU_WorldMatrixInverse,
+
+	/**
+	 * Inverse of the view matrix, which takes a vertex from view space to world space.
+	 */
+	EPU_ViewMatrixInverse,
+
+	/**
+	 * Inverse of the view matrix, which takes a vertex from projection space to view space.
+	 */
+	EPU_ProjectionMatrixInverse,
+
+	/**
+	 * The ambient component of material, ColorRGBA format 
+	 */
+	EPU_Material_Ambient_Color, 
+	
+	/**
+	 * The diffuse component of material, ColorRGBA format 
+	 */
+	EPU_Material_Diffuse_Color, 
+
+	/**
+	 * The specular component of material, ColorRGBA format 
+	 */
+	EPU_Material_Specular_Color, 
+
+	/**
+	 * The power component of specular, float 
+	 */
+	EPU_Material_Power,
+
+	/**
+	 * The emissive component of material, ColorRGBA format 
+	 */
+	EPU_Material_Emissive_Color, 
+
+	/**
+	 * The ambient component of light, ColorRGBA format 
+	 */
+	EPU_Light_Ambient, 
+	
+	/**
+	 * The diffuse component of light, ColorRGBA format 
+	 */
+	EPU_Light_Diffuse, 
+
+	/**
+	 * The specular component of light, ColorRGBA format 
+	 */
+	EPU_Light_Specular, 
+
+	/**
+	 * Direction of light, only for directional light
+	 */
+	EPU_Light_Dir,
+
+	/**
+	 * Position of light, for point light or spot light
+	 */
+	EPU_Light_Position,
+};
+
+
 
 } // RenderSystem
 } // RcEngine

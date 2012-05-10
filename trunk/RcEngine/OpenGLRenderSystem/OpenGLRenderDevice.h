@@ -25,19 +25,17 @@ namespace RcEngine
 			void ToggleFullscreen(bool fs);
 			bool Fullscreen() const;
 
-			void SetBlendState(const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32 sampleMask);		
+			void SetBlendState(const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask);		
 			void SetRasterizerState(const shared_ptr<RasterizerState>& state);
-			void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16 frontStencilRef, uint16 backStencilRef);
+			void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef, uint16_t backStencilRef);
 
 			void AdjustProjectionMatrix(Math::Matrix4f& pOut);
 
-			void Draw(RenderTechnique& tech, RenderOperation& operation);
-
+			//void Draw(RenderTechnique& tech, RenderOperation& operation);
+			void DoRender( EffectTechnique& tech, RenderOperation& op);
 
 		protected:
 			void DoBindFrameBuffer(FrameBuffer* fb);
-
-			void BindOutputStreams(RenderOperation& operation);
 			
 		private:
 			void InitGlew();

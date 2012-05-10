@@ -16,13 +16,13 @@ RenderView::~RenderView()
 }
 
 
-void RenderView::OnBind( FrameBuffer* fb, unsigned int att )
+void RenderView::OnBind( FrameBuffer* fb, uint32_t att )
 {
 
 }
 
 
-void RenderView::OnUnbind( FrameBuffer* fb, unsigned int att )
+void RenderView::OnUnbind( FrameBuffer* fb, uint32_t att )
 {
 
 }

@@ -6,7 +6,7 @@ namespace RcEngine
 {
 	namespace Render
 	{
-		OpenGLFrameBuffer::OpenGLFrameBuffer( unsigned int width, unsigned int height, bool offscreen /*= true*/ )
+		OpenGLFrameBuffer::OpenGLFrameBuffer( uint32_t width, uint32_t height, bool offscreen /*= true*/ )
 			: FrameBuffer(width, height, offscreen)
 		{
 			mLeft = 0;
@@ -55,7 +55,7 @@ namespace RcEngine
 
 		}
 
-		void OpenGLFrameBuffer::Clear( unsigned int flags, Math::ColorRGBA& clr, float depth, unsigned int stencil )
+		void OpenGLFrameBuffer::Clear( uint32_t flags, Math::ColorRGBA& clr, float depth, uint32_t stencil )
 		{
 			RenderDevice* device = Core::Context::GetSingleton().GetRenderDevicePtr();
 			//FrameBuffer* oldFrameBuffer = device->GetCurrentFrameBuffer();

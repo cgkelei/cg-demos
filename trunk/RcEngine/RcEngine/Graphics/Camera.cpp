@@ -36,7 +36,6 @@ void Camera::SetProjectionParams( float fov, float aspect, float nearPlane, floa
 	mProjectionMatrix = MathUtil::CreatePerspectiveFovLH(mFieldOfView, mAspect, mNearPlane, mFarPlane);
 	//修改投影矩阵，使OpenGL适应左右坐标系
 	Application::GetApplication()->GetRenderDevice()->AdjustProjectionMatrix(mProjectionMatrix);
-	
 }
 
 const Matrix4f& Camera::GetViewMatrix() const

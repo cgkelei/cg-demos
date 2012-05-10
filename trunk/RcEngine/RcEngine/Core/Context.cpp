@@ -64,5 +64,10 @@ namespace RcEngine{
 				mApplication = app;
 			}
 
+			void Context::SetRenderFactory( RenderFactory* factory )
+			{
+				mRenderFactory = factory;
+			}
+
 	} // Namespace Core
 } // Namespace RcEngine

@@ -1,6 +1,7 @@
 #include "Graphics/RenderDevice.h"
 #include "Graphics/GraphicsCommon.h"
 #include "Graphics/RenderOperation.h"
+#include "Core/Context.h"
 
 namespace RcEngine {
 	namespace Render {
@@ -8,14 +9,14 @@ namespace RcEngine {
 		RenderDevice::RenderDevice(void)
 			: mRenderFactory(0), mCurrentFrameBuffer(0), mDefaultFrameBuffer(0)
 		{
-
+			Core::Context::GetSingleton().SetRenderDevice(this);
 		}
 
 		RenderDevice::~RenderDevice(void)
 		{
 		}
 
-		void RenderDevice::Resize( unsigned int width, unsigned int height )
+		void RenderDevice::Resize( uint32_t width, uint32_t height )
 		{
 
 		}
@@ -51,6 +52,11 @@ namespace RcEngine {
 		RenderFactory* RenderDevice::GetRenderFactory() const
 		{
 			return mRenderFactory;
+		}
+
+		void RenderDevice::Render( EffectTechnique& tech, RenderOperation& op )
+		{
+			DoRender(tech, op);
 		}
 
 		

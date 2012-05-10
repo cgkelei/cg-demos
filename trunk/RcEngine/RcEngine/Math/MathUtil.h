@@ -21,19 +21,19 @@ namespace MathUtil
 {
 	float const PI		= 3.141592f;			// PI
 
-	template< typename Real, int Size >
+	template< typename Real, int32_t Size >
 	inline typename  Real
 	SquaredLength(const Vector<Real, Size>& vec);
 
-	template< typename Real, int Size >
+	template< typename Real, int32_t Size >
 	inline typename Real
 	Length(const Vector<Real, Size>& vec);
 		
-	template< typename Real, int Size >
+	template< typename Real, int32_t Size >
 	inline  typename Real
 	Dot( const Vector<Real, Size>& lhs, const Vector<Real, Size>& rhs );
 
-	template< typename Real, int Size >
+	template< typename Real, int32_t Size >
 	inline  Vector<Real, Size>
 	Normalize(const Vector<Real, Size>& vec);
 
@@ -96,6 +96,9 @@ namespace MathUtil
 		
 	template<typename Real>
 	inline Matrix4<Real> CreateTranslation(Real x, Real y, Real z);
+
+
+
 
 
 	////Quaternion

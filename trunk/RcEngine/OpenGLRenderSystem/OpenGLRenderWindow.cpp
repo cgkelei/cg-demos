@@ -72,7 +72,7 @@ namespace RcEngine
 			mHrc = ::wglCreateContext(mHdc);
 			::wglMakeCurrent(mHdc, mHrc);
 
-			unsigned int sampleCount = settings.SampleCount;
+			uint32_t sampleCount = settings.SampleCount;
 			if(sampleCount > 1)
 			{
 
@@ -81,10 +81,6 @@ namespace RcEngine
 			glPixelStorei(GL_PACK_ALIGNMENT, 1);
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-			mViewport.mLeft = 0;
-			mViewport.mTop = 0;
-			mViewport.mWidth = mWidth;
-			mViewport.mHeight = mHeight;
 
 			std::ostringstream oss;
 			oss << reinterpret_cast<char const *>(glGetString(GL_VENDOR)) << " "
@@ -135,16 +131,16 @@ namespace RcEngine
 			RECT rect;
 			::GetClientRect(mHwnd, &rect);
 
-			unsigned int newLeft = rect.left;
-			unsigned int newTop = rect.top;
+			uint32_t newLeft = rect.left;
+			uint32_t newTop = rect.top;
 
 			if ((newLeft != mLeft) || (newTop != mTop))
 			{
 				Core::Context::GetSingleton().GetApplication().GetMainWindow()->Reposition(newLeft, newTop);
 			}
 
-			unsigned int newWidth = rect.right - rect.left;
-			unsigned int newHeight = rect.bottom - rect.top;
+			uint32_t newWidth = rect.right - rect.left;
+			uint32_t newHeight = rect.bottom - rect.top;
 
 			if ((newWidth != mWidth) || (newHeight != mHeight))
 			{

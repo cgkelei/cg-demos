@@ -157,7 +157,7 @@ ColorRGBA& ColorRGBA::operator*= (float fScalar)
 
 void ColorRGBA::Saturate( void )
 {
-	for (int i = 0; i < 4; i++)
+	for (int32_t i = 0; i < 4; i++)
 	{
 		if (mTuple[i] > 1.0f)
 		{

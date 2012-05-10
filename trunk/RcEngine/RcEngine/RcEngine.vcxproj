@@ -78,6 +78,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Content\MaterialContentLoader.cpp" />
+    <ClCompile Include="Content\MeshContentLoader.cpp" />
     <ClCompile Include="Core\DynLib.cpp" />
     <ClCompile Include="Core\ModuleManager.cpp" />
     <ClCompile Include="Core\Context.cpp" />
@@ -89,22 +91,26 @@
     <ClCompile Include="Graphics\BlendState.cpp" />
     <ClCompile Include="Graphics\Camera.cpp" />
     <ClCompile Include="Graphics\DepthStencilState.cpp" />
+    <ClCompile Include="Graphics\Effect.cpp" />
+    <ClCompile Include="Graphics\EffectAnnotation.cpp" />
+    <ClCompile Include="Graphics\EffectPass.cpp" />
+    <ClCompile Include="Graphics\EffectTechnique.cpp" />
     <ClCompile Include="Graphics\FrameBuffer.cpp" />
     <ClCompile Include="Graphics\GraphicBuffer.cpp" />
     <ClCompile Include="Graphics\IRenderModule.cpp" />
     <ClCompile Include="Graphics\Material.cpp" />
+    <ClCompile Include="Graphics\EffectParameter.cpp" />
     <ClCompile Include="Graphics\Mesh.cpp" />
     <ClCompile Include="Graphics\Model.cpp" />
     <ClCompile Include="Graphics\PixelFormat.cpp" />
     <ClCompile Include="Graphics\Renderable.cpp" />
     <ClCompile Include="Graphics\RenderDevice.cpp" />
-    <ClCompile Include="Graphics\RenderEffect.cpp" />
     <ClCompile Include="Graphics\RenderFactory.cpp" />
     <ClCompile Include="Graphics\RenderJob.cpp" />
     <ClCompile Include="Graphics\RenderOperation.cpp" />
-    <ClCompile Include="Graphics\RenderParameter.cpp" />
     <ClCompile Include="Graphics\RenderView.cpp" />
     <ClCompile Include="Graphics\SamplerState.cpp" />
+    <ClCompile Include="Graphics\SimpleGeometry.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Graphics\VertexDeclaration.cpp" />
     <ClCompile Include="Graphics\VertexElement.cpp" />
@@ -115,6 +121,8 @@
     <ClCompile Include="Math\ColorRGBA.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Content\MaterialContentLoader.h" />
+    <ClInclude Include="Content\MeshContentLoader.h" />
     <ClInclude Include="Core\CompileConfig.h" />
     <ClInclude Include="Core\DynLib.h" />
     <ClInclude Include="Core\ModuleManager.h" />
@@ -129,22 +137,25 @@
     <ClInclude Include="Graphics\BlendState.h" />
     <ClInclude Include="Graphics\Camera.h" />
     <ClInclude Include="Graphics\DepthStencilState.h" />
+    <ClInclude Include="Graphics\Effect.h" />
+    <ClInclude Include="Graphics\EffectAnnotation.h" />
+    <ClInclude Include="Graphics\EffectPass.h" />
+    <ClInclude Include="Graphics\EffectTechnique.h" />
     <ClInclude Include="Graphics\FrameBuffer.h" />
     <ClInclude Include="Graphics\GraphicBuffer.h" />
     <ClInclude Include="Graphics\GraphicsCommon.h" />
     <ClInclude Include="Graphics\IRenderModule.h" />
     <ClInclude Include="Graphics\Material.h" />
+    <ClInclude Include="Graphics\EffectParameter.h" />
     <ClInclude Include="Graphics\Mesh.h" />
     <ClInclude Include="Graphics\Model.h" />
     <ClInclude Include="Graphics\PixelFormat.h" />
     <ClInclude Include="Graphics\RasterizerState.h" />
     <ClInclude Include="Graphics\Renderable.h" />
     <ClInclude Include="Graphics\RenderDevice.h" />
-    <ClInclude Include="Graphics\RenderEffect.h" />
     <ClInclude Include="Graphics\RenderFactory.h" />
     <ClInclude Include="Graphics\RenderJob.h" />
     <ClInclude Include="Graphics\RenderOperation.h" />
-    <ClInclude Include="Graphics\RenderPatameter.h" />
     <ClInclude Include="Graphics\RenderSettings.h" />
     <ClInclude Include="Graphics\RenderView.h" />
     <ClInclude Include="Graphics\SamplerState.h" />
