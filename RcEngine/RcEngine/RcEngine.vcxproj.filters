@@ -16,6 +16,9 @@
     <Filter Include="Content">
       <UniqueIdentifier>{97babf34-b0b6-43fe-bf73-30e95d6dfcb5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Input">
+      <UniqueIdentifier>{d03743f1-b6af-47c4-901b-50f4112a1e9a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainApp\Application.cpp">
@@ -139,6 +142,9 @@
       <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\SimpleGeometry.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\CameraControler.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -296,6 +302,12 @@
     <ClInclude Include="Graphics\EffectAnnotation.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\CameraControler.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Quaternion.h">
+      <Filter>Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Math\ColorRGBA.inl">
@@ -314,6 +326,9 @@
       <Filter>Math</Filter>
     </None>
     <None Include="Math\BoundingSphere.inl">
+      <Filter>Math</Filter>
+    </None>
+    <None Include="Math\Quaternion.inl">
       <Filter>Math</Filter>
     </None>
   </ItemGroup>

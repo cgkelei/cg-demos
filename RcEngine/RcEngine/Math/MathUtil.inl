@@ -225,61 +225,71 @@ CreateTranslation(Real x, Real y, Real z)
 
 }
 
-//////////////////////////////////////////////////////////////////////////
-//template <typename Real>
-//inline Quaternion<Real> 
-//QuaternionNormalize(const Quaternion<Real>& quat)
-//{
-//	Real mag = std::sqrt(quat[0]*quat[0]+quat[1]*quat[1]+quat[2]*quat[2]+quat[3]*quat[3]);
-//	//暂时不检查除0;
-//	Real oneOverMag = Real(1) / mag;
-//	return Quaternion<Real>(quat[0]*oneOverMag, quat[1]*oneOverMag, 
-//		quat[2]*oneOverMag, quat[3]*oneOverMag);
-//
-//}
-//
-//template <typename Real>
-//inline Quaternion<Real> 
-//QuaternionConjugate(const Quaternion<Real>& quat)
-//{
-//	return Quaternion<Real>(quat.W(), -quat.X(), -quat.Y(), -quat.Z());
-//}
-//
-//template <typename Real>
-//inline Quaternion<Real> 
-//QuaternionMultiply(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2)
-//{
-//	return Quaternion<Real>(
-//	quat1[0]*quat2[0] - quat1[1]*quat2[1] - quat1[2]*quat2[2] - quat1[3]*quat2[3],
-//	quat1[0]*quat2[1] + quat1[1]*quat2[0] + quat1[2]*quat2[3] - quat1[3]*quat2[2],
-//	quat1[0]*quat2[2] + quat1[2]*quat2[0] + quat1[3]*quat2[1] - quat1[1]*quat2[3],
-//	quat1[0]*quat2[3] + quat1[3]*quat2[0] + quat1[1]*quat2[2] - quat1[2]*quat2[1] );
-//	
-//}
-//
-//template <typename Real>
-//inline Quaternion<Real> 
-//QuaternionFromRotationMatrix(const Matrix4<Real>& rotMat)
-//{
-//	return Quaternion<Real>();
-//}
-//
-//template <typename Real>
-//inline Quaternion<Real> 
-//QuaternionFromRotationAxis(const Vector<Real, 3>& axis, Real angleRadius)
-//{
-//	Real halfAngle = ((Real)0.5)*angle;
-//	Real sn = std::sin(halfAngle); 
-//
-//	return Quaternion<Real>(std::cos(halfAngle), sn*axis[0], sn*axis[1], sn*axis[2]);
-//}
-//
-//template <typename Real>
-//inline Quaternion<Real> 
-//QuaternionFromRotationYawPitchRoll(Real yaw, Real pitch, Real roll)
-//{
-//	return Quaternion<Real>();
-//}
+//----------------------------------------------------------------------------
+template <typename Real>
+inline Quaternion<Real> 
+QuaternionNormalize(const Quaternion<Real>& quat)
+{
+	Real mag = std::sqrt(quat[0]*quat[0]+quat[1]*quat[1]+quat[2]*quat[2]+quat[3]*quat[3]);
+	Real oneOverMag = Real(1) / mag;	//暂时不检查除0;
+	return Quaternion<Real>(quat[0]*oneOverMag, quat[1]*oneOverMag, 
+		quat[2]*oneOverMag, quat[3]*oneOverMag);
+}
+
+template <typename Real>
+inline Quaternion<Real> 
+QuaternionConjugate(const Quaternion<Real>& quat)
+{
+	return Quaternion<Real>(quat.W(), -quat.X(), -quat.Y(), -quat.Z());
+}
+
+template <typename Real>
+inline Quaternion<Real> 
+	QuaternionMultiply(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2)
+{
+	return Quaternion<Real>(
+		quat1[0]*quat2[0] - quat1[1]*quat2[1] - quat1[2]*quat2[2] - quat1[3]*quat2[3],
+		quat1[0]*quat2[1] + quat1[1]*quat2[0] + quat1[2]*quat2[3] - quat1[3]*quat2[2],
+		quat1[0]*quat2[2] + quat1[2]*quat2[0] + quat1[3]*quat2[1] - quat1[1]*quat2[3],
+		quat1[0]*quat2[3] + quat1[3]*quat2[0] + quat1[1]*quat2[2] - quat1[2]*quat2[1] );
+
+}
+
+template <typename Real>
+inline Quaternion<Real> 
+QuaternionFromRotationMatrix(const Matrix4<Real>& rotMat)
+{
+	return Quaternion<Real>();
+}
+
+template <typename Real>
+inline Quaternion<Real> 
+QuaternionFromRotationAxis(const Vector<Real, 3>& axis, Real angleRadius)
+{
+	Real halfAngle = ((Real)0.5)*angle;
+	Real sn = std::sin(halfAngle); 
+	return Quaternion<Real>(std::cos(halfAngle), sn*axis[0], sn*axis[1], sn*axis[2]);
+}
+
+template <typename Real>
+inline Quaternion<Real> 
+QuaternionFromRotationYawPitchRoll(Real yaw, Real pitch, Real roll)
+{
+	const Real sinPitch(std::sin(pitch*((Real)0.5)));
+	const Real cosPitch(std::cos(pitch*((Real)0.5)));
+	const Real sinYaw(std::sin(yaw*((Real)0.5)));
+	const Real cosYaw(std::cos(yaw*((Real)0.5)));
+	const Real sinRoll(std::sin(roll*((Real)0.5)));
+	const Real cosRoll(std::cos(roll*((Real)0.5)));
+	const Real cosPitchCosYaw(cosPitch*cosYaw);
+	const Real sinPitchSinYaw(sinPitch*sinYaw);
+
+	return return Quaternion<Real>(
+		cosRoll * cosPitchCosYaw     + sinRoll * sinPitchSinYaw,
+		sinRoll * cosPitchCosYaw     - cosRoll * sinPitchSinYaw,
+		cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw,
+		cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw);	
+}
 //
 //template <typename Real>
 //inline Quaternion<Real> 
@@ -317,13 +327,15 @@ CreateTranslation(Real x, Real y, Real z)
 //
 //	return quat1 * scale1 + quat2 *  dir * scale2;
 //}
-//        
-//template <typename Real>
-//inline void
-//QuaternionToAxisAngle(const Quaternion<Real>& quat, Vector<Real, 3>& axis, Real& angle)
-//{
-//
-//}
+
+
+template <typename Real>
+inline void
+QuaternionToAxisAngle(const Quaternion<Real>& quat, Vector<Real, 3>& axis, Real& angle)
+{
+	Real halfAngle = 
+
+}
 
 //////////////////////////////////////////////////////////////////////////
 

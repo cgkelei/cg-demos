@@ -7,6 +7,7 @@
 #include <Graphics/GraphicsCommon.h>
 #include <Graphics/Camera.h>
 
+
 namespace RcEngine {
 
 class Window;
@@ -80,6 +81,10 @@ protected:
 	static Application* msAppliation;
 
 	Window* mMainWindow;
+
+	OIS::InputManager* mInputManager;
+	OIS::Mouse* mMouse;
+	OIS::Keyboard* mKeyboard;
 
 	bool mActice;
 	bool mAppPaused;

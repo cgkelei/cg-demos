@@ -13,8 +13,9 @@ namespace RcEngine
 		{
 			MT_Unknown = -1,
 			MT_Render_OpengGL = 0,
-			MT_Render_D3D10 = 1,
-			MT_Count = 2,
+			MT_Render_D3D10,
+			MT_Input,
+			MT_Count
 		};
 
 		//! Module names for plugin import
@@ -33,10 +34,6 @@ namespace RcEngine
 			"D3D10RenderSystem"
 		};
 #  endif
-
-
-		
-
 
 		class DynLib
 		{

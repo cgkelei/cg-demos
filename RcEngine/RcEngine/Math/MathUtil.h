@@ -6,7 +6,7 @@
 #include "Vector.h"
 #include "Matrix.h"
 #include "Plane.h"
-//#include "Quaternion.h"
+#include "Quaternion.h"
 
 namespace RcEngine{
 namespace Math {
@@ -97,43 +97,38 @@ namespace MathUtil
 	template<typename Real>
 	inline Matrix4<Real> CreateTranslation(Real x, Real y, Real z);
 
+	//Quaternion
+	template <typename Real>
+	inline Quaternion<Real> 
+	QuaternionNormalize(const Quaternion<Real>& quat);
 
+	template <typename Real>
+	inline Quaternion<Real> 
+	QuaternionConjugate(const Quaternion<Real>& quat);
 
+	template <typename Real>
+	inline Quaternion<Real> 
+	QuaternionMultiply(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2);
 
+	template <typename Real>
+	inline Quaternion<Real> 
+	QuaternionFromRotationMatrix(const Matrix4<Real>& rotMat);
 
-	////Quaternion
-	//template <typename Real>
-	//inline Quaternion<Real> 
-	//QuaternionNormalize(const Quaternion<Real>& quat);
+	template <typename Real>
+	inline Quaternion<Real> 
+	QuaternionFromRotationAxis(const Vector<Real, 3>& axis, Real angleRadius);
 
-	//template <typename Real>
-	//inline Quaternion<Real> 
-	//QuaternionConjugate(const Quaternion<Real>& quat);
-
-
-	//template <typename Real>
-	//inline Quaternion<Real> 
-	//QuaternionMultiply(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2);
-
-	//template <typename Real>
-	//inline Quaternion<Real> 
-	//QuaternionFromRotationMatrix(const Matrix4<Real>& rotMat);
-
-	//template <typename Real>
-	//inline Quaternion<Real> 
-	//QuaternionFromRotationAxis(const Vector<Real, 3>& axis, Real angleRadius);
-	//
-	//template <typename Real>
-	//inline Quaternion<Real> 
-	//QuaternionFromRotationYawPitchRoll(Real yaw, Real pitch, Real roll);
+	template <typename Real>
+	inline Quaternion<Real> 
+	QuaternionFromRotationYawPitchRoll(Real yaw, Real pitch, Real roll);
 
 	//template <typename Real>
 	//inline Quaternion<Real> 
 	//QuaternionSlerp(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2, Real t);
 
-	//template <typename Real>
-	//inline void
-	//QuaternionToAxisAngle(const Quaternion<Real>& quat, Vector<Real, 3>& axis, Real& angle);
+	template <typename Real>
+	inline void
+	QuaternionToAxisAngle(const Quaternion<Real>& quat, Vector<Real, 3>& axis, Real& angle);
 
 
 	#include "MathUtil.inl"
