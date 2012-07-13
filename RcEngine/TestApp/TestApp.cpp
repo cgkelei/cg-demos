@@ -59,6 +59,14 @@ void TestApp::Render()
 void TestApp::Update( float deltaTime )
 {
 	mBox->SetWorldMatrix(MathUtil::CreateScaling(5, 5, 5) * MathUtil::CreateTranslation(0.0f, 0.0f, 5.0f));
+
+	if(mKeyboard->isKeyDown(OIS::KC_W))
+	{
+		Camera* camera = RcEngine::Core::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
+		static float pos = 30;
+		camera->SetViewParams(Vector3f(0, 0, pos), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+		pos += 1;
+	}
 }
 
 int32_t main()
