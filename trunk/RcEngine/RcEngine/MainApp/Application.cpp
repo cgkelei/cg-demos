@@ -69,6 +69,11 @@ namespace RcEngine {
 
 	void Application::Tick()
 	{
+		// update input
+		mKeyboard->capture();
+		mMouse->capture();
+
+
 		mTimer.Tick();
 
 		if(!mAppPaused)
@@ -108,8 +113,29 @@ namespace RcEngine {
 
 	void Application::InitializeDevice()
 	{
+		// init render device
 		mRenderDevice->Create();
 		mRenderDevice->CreateRenderWindow(mSettings);
+
+		// init ois input system
+		OIS::ParamList pl;
+		std::ostringstream windowHndStr;
+		HWND hwnd = mMainWindow->GetHwnd();
+		size_t* p=(unsigned int*)&hwnd;
+		windowHndStr <<  *p;
+		pl.insert(std::make_pair(std::string("WINDOW"), windowHndStr.str()));
+		pl.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND" )));
+		pl.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_NONEXCLUSIVE")));
+		pl.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_FOREGROUND")));
+		pl.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_NONEXCLUSIVE")));
+		mInputManager = OIS::InputManager::createInputSystem(pl);
+	
+		mKeyboard = static_cast<OIS::Keyboard*>(mInputManager->createInputObject(OIS::OISKeyboard, false));
+		
+		mMouse = static_cast<OIS::Mouse*>(mInputManager->createInputObject(OIS::OISMouse, false));
+		const OIS::MouseState &ms = mMouse->getMouseState();
+		ms.width = mMainWindow->GetWidth();
+		ms.height = mMainWindow->GetHeight();		
 	}
 
 	Render::RenderDevice* Application::GetRenderDevice()
@@ -125,6 +151,7 @@ namespace RcEngine {
 			ModuleManager::GetSingleton().GetMoudleByType(MT_Render_OpengGL));
 		renderModule->Initialise();
 		mRenderDevice = renderModule->GetRenderDevice();
+
 	}
 
 	void Application::UnloadAllModules()

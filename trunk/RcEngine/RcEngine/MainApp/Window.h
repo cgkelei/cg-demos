@@ -13,6 +13,10 @@ public:
 	~Window(void);
 
 	HWND GetHwnd() const		{ return mhWnd; }
+	uint32_t GetWidth() const	{ return mWidth; }
+	uint32_t GetHeight() const  { return mHeight; }
+	uint32_t GetLeft() const	{ return mLeft; }
+	uint32_t GetTop() const		{ return mTop; }
 	
 	void Reposition(int32_t left, int32_t top);
 	void ShowWindow();
