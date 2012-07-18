@@ -154,6 +154,12 @@ namespace RcEngine {
 		};
 
 
+		shared_ptr<VertexDeclaration> _ApiExport CreateVertexDeclaration(VertexDeclarationDesc* inputElementDescs, uint32_t numElements);
+		
+		shared_ptr<VertexDeclaration> _ApiExport CreateVertexDeclaration(std::vector<VertexElement> elems);
+
+
+
 	} // RenderSystem
 } // RcEngine
 

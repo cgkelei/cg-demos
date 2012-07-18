@@ -20,7 +20,7 @@ namespace RcEngine
 			inline Real  Radius() const;
 			inline Real& Radius();
 
-		private:
+		public:
 			Vector<Real, 3> mCenter;
 			Real mRadius;
 		};

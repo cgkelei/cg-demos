@@ -94,7 +94,7 @@ namespace RcEngine
 			}
 		}
 
-		shared_ptr<Material> Material::LoadFrom( MaterialContentLoader* loader )
+		shared_ptr<Material> Material::LoadFrom( MaterialContent* loader )
 		{
 			if (!loader)
 			{
@@ -107,7 +107,7 @@ namespace RcEngine
 			material->mEffect = factory.CreateEffectFromFile(loader->EffectName, loader->EffectPath);
 			material->mCurrentTechnique = material->mEffect->GetTechniqueByIndex(0);
 
-			vector<MaterialContentLoader::ParamDesc>& params = loader->Params;
+			vector<MaterialContent::ParamDesc>& params = loader->Params;
 			for (size_t i = 0; i < params.size(); ++i)
 			{
 				MaterialParameter* parameter = new MaterialParameter;

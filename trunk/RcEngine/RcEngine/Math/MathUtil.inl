@@ -63,14 +63,14 @@ template<typename Real>
 inline Matrix4<Real> 
 CreateLookAtMatrixLH(const Vector<Real,3>& vEye, const Vector<Real,3>& vAt, const Vector<Real,3>& vUp)
 {
-	Vector<Real, 3> zAxis = MathUtil::Normalize(vAt - vEye);
-	Vector<Real, 3> xAxis = MathUtil::Normalize(Cross(vUp, zAxis));
-	Vector<Real, 3> yAxis = MathUtil::Cross(zAxis, xAxis);
+	Vector<Real, 3> zAxis = Normalize(vAt - vEye);
+	Vector<Real, 3> xAxis = Normalize(Cross(vUp, zAxis));
+	Vector<Real, 3> yAxis = Cross(zAxis, xAxis);
 
 	return Matrix4<Real>(xAxis.X(), yAxis.X(), zAxis.X(), (Real)0, 
 		xAxis.Y(), yAxis.Y(), zAxis.Y(), (Real)0, 
 		xAxis.Z(), yAxis.Z(), zAxis.Z(), (Real)0,
-		- MathUtil::Dot(xAxis, vEye), - MathUtil::Dot(yAxis, vEye), - MathUtil::Dot(zAxis, vEye), (Real)1);
+		- Dot(xAxis, vEye), - Dot(yAxis, vEye), - Dot(zAxis, vEye), (Real)1);
 }
 
 
@@ -79,14 +79,14 @@ template<typename Real>
 inline Matrix4<Real> 
 CreateLookAtMatrixRH(const Vector<Real,3>& vEye, const Vector<Real,3>& vAt, const Vector<Real,3>& vUp)
 {
-	Vector<Real, 3> zAxis = MathUtil::Normalize(vEye - vAt);
-	Vector<Real, 3> xAxis = MathUtil::Normalize(Cross(vUp, zAxis));
-	Vector<Real, 3> yAxis = MathUtil::Cross(zAxis, xAxis);
+	Vector<Real, 3> zAxis = Normalize(vEye - vAt);
+	Vector<Real, 3> xAxis = Normalize(Cross(vUp, zAxis));
+	Vector<Real, 3> yAxis = Cross(zAxis, xAxis);
 
 	return Matrix4<Real>(xAxis.X(), yAxis.X(), zAxis.X(), (Real)0, 
 		xAxis.Y(), yAxis.Y(), zAxis.Y(), (Real)0, 
 		xAxis.Z(), yAxis.Z(), zAxis.Z(), (Real)0,
-		- MathUtil::Dot(xAxis, vEye), - MathUtil::Dot(yAxis, vEye), - MathUtil::Dot(zAxis, vEye), (Real)1);
+		- Dot(xAxis, vEye), - Dot(yAxis, vEye), - Dot(zAxis, vEye), (Real)1);
 
 }
 
@@ -266,9 +266,39 @@ template <typename Real>
 inline Quaternion<Real> 
 QuaternionFromRotationAxis(const Vector<Real, 3>& axis, Real angleRadius)
 {
+	// assert:  axis[] is unit length
+	//
+	// The quaternion representing the rotation is
+	//   q = cos(A/2)+sin(A/2)*(x*i+y*j+z*k)
+
 	Real halfAngle = ((Real)0.5)*angle;
 	Real sn = std::sin(halfAngle); 
 	return Quaternion<Real>(std::cos(halfAngle), sn*axis[0], sn*axis[1], sn*axis[2]);
+}
+
+template <typename Real>
+inline void
+QuaternionToAxisAngle(const Quaternion<Real>& quat, Vector<Real, 3>& axis, Real& angle)
+{
+	Real squareLength = quat[0]*quat[0] + quat[1]*quat[1] + quat[2]*quat[2] + quat[3]*quat[3];
+	
+	if (squareLength > (Real)(1e-06))
+	{
+		angle = ((Real)2.0)*std::acos(quat[0]);
+		Real invLength = ((Real)1.0) / std::sqrt(squareLength);
+		axis[0] = quat[1]*invLength;
+		axis[1] = quat[2]*invLength;
+		axis[2] = quat[3]*invLength;
+	}
+	else
+	{
+		// angle is 0 (mod 2*pi), so any axis will do
+		angle = (Real)0.0;
+		axis[0] = (Real)1.0;
+		axis[1] = (Real)0.0;
+		axis[2] = (Real)0.0;
+	}
+
 }
 
 template <typename Real>
@@ -284,58 +314,52 @@ QuaternionFromRotationYawPitchRoll(Real yaw, Real pitch, Real roll)
 	const Real cosPitchCosYaw(cosPitch*cosYaw);
 	const Real sinPitchSinYaw(sinPitch*sinYaw);
 
-	return return Quaternion<Real>(
+	return Quaternion<Real>(
 		cosRoll * cosPitchCosYaw     + sinRoll * sinPitchSinYaw,
-		sinRoll * cosPitchCosYaw     - cosRoll * sinPitchSinYaw,
 		cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw,
-		cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw);	
+		cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw,
+		sinRoll * cosPitchCosYaw     - cosRoll * sinPitchSinYaw);	
 }
-//
-//template <typename Real>
-//inline Quaternion<Real> 
-//QuaternionSlerp(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2, Real t)
-//{
-//	// 用点乘计算两四元素夹角的cos值
-//	Real cosOmega = quat1[0]*quat2[0] + quat1[1]*quat2[1] + quat1[2]*quat2[2] + quat1[3]*quat2[3];
-//	
-//	Real dir = Real(1);
-//
-//	//如果点乘为负，则反转一个四元素以取得短的4D弧
-//	if( cosOmega < Real(0) )
-//	{
-//		dir = Real(-1);
-//		cosOmega = -cosOmega;
-//	}
-//	
-//	Real scale1, scale2;
-//
-//	// 检查是否过于接近以避免除零
-//	if( cosOmega < 1 - std::numeric_limits<Real>::epsilon() )
-//	{
-//		Real omega = std::acos(cosOmega);
-//		Real oneOverSinOmega = Real(1) / std::sin(omega);
-//
-//		scale1 = std::sin( (Real(1) - t)*omega ) * oneOverSinOmega;
-//		scale2 = std::sin(t * omega) * oneOverSinOmega;
-//	}
-//	else
-//	{
-//		//非常近，线性插值
-//		scale1 = Real(1) - t;
-//		scale2 = t;
-//	}
-//
-//	return quat1 * scale1 + quat2 *  dir * scale2;
-//}
-
 
 template <typename Real>
-inline void
-QuaternionToAxisAngle(const Quaternion<Real>& quat, Vector<Real, 3>& axis, Real& angle)
+inline Quaternion<Real> 
+QuaternionSlerp(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2, Real t)
 {
-	Real halfAngle = 
+	// 用点乘计算两四元素夹角的cos值
+	Real cosOmega = quat1[0]*quat2[0] + quat1[1]*quat2[1] + quat1[2]*quat2[2] + quat1[3]*quat2[3];
+	
+	Real dir = Real(1);
 
+	//如果点乘为负，则反转一个四元素以取得短的4D弧
+	if( cosOmega < Real(0) )
+	{
+		dir = Real(-1);
+		cosOmega = -cosOmega;
+	}
+	
+	Real scale1, scale2;
+
+	// 检查是否过于接近以避免除零
+	if( cosOmega < 1 - std::numeric_limits<Real>::epsilon() )
+	{
+		Real omega = std::acos(cosOmega);
+		Real oneOverSinOmega = Real(1) / std::sin(omega);
+
+		scale1 = std::sin( (Real(1) - t)*omega ) * oneOverSinOmega;
+		scale2 = std::sin(t * omega) * oneOverSinOmega;
+	}
+	else
+	{
+		//非常近，线性插值
+		scale1 = Real(1) - t;
+		scale2 = t;
+	}
+
+	return quat1 * scale1 + quat2 *  dir * scale2;
 }
+
+
+
 
 //////////////////////////////////////////////////////////////////////////
 

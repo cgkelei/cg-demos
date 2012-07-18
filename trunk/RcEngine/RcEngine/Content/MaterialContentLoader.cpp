@@ -8,7 +8,7 @@ namespace RcEngine
 	{
 		using namespace Core;
 
-		MaterialContentLoader::MaterialContentLoader(const String& path)
+		MaterialContent::MaterialContent(const String& path)
 		{
 			XMLDocument material;
 			XMLNodePtr root = material.Parse(path);
@@ -32,7 +32,12 @@ namespace RcEngine
 			EffectPath = node->AttributeString("file", "");		
 		}
 
-		MaterialContentLoader::~MaterialContentLoader()
+		MaterialContent::MaterialContent()
+		{
+			mTextures.rehash(4);
+		}
+
+		MaterialContent::~MaterialContent()
 		{
 
 		}

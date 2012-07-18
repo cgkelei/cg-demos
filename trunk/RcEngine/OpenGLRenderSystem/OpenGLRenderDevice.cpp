@@ -77,8 +77,8 @@ namespace RcEngine
 		void OpenGLRenderDevice::AdjustProjectionMatrix( Math::Matrix4f& pOut )
 		{
 			//修改投影矩阵，使OpenGL适应左右坐标系
-			Math::Matrix4f scale = Math::MathUtil::CreateScaling(1.0f, 1.0f, 2.0f);
-			Math::Matrix4f translate = Math::MathUtil::CreateTranslation(0.0f, 0.0f, -1.0f);
+			Math::Matrix4f scale = Math::CreateScaling(1.0f, 1.0f, 2.0f);
+			Math::Matrix4f translate = Math::CreateTranslation(0.0f, 0.0f, -1.0f);
 			pOut =  pOut * scale * translate;
 		}
 

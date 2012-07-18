@@ -121,6 +121,7 @@
     <ClCompile Include="MainApp\Window.cpp" />
     <ClCompile Include="Math\BoundingSphere.cpp" />
     <ClCompile Include="Math\ColorRGBA.cpp" />
+    <ClCompile Include="Math\Math.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Content\MaterialContentLoader.h" />
@@ -171,6 +172,7 @@
     <ClInclude Include="MainApp\Window.h" />
     <ClInclude Include="Math\BoundingSphere.h" />
     <ClInclude Include="Math\ColorRGBA.h" />
+    <ClInclude Include="Math\Math.h" />
     <ClInclude Include="Math\MathUtil.h" />
     <ClInclude Include="Math\Matrix.h" />
     <ClInclude Include="Math\Plane.h" />

@@ -11,14 +11,6 @@
 namespace RcEngine{
 namespace Math {
 
-//////////////////////////////////////////////////////////////////////////
-// 创建各种变化矩阵
-//	
-//
-//////////////////////////////////////////////////////////////////////////
-
-namespace MathUtil
-{
 	float const PI		= 3.141592f;			// PI
 
 	template< typename Real, int32_t Size >
@@ -119,21 +111,18 @@ namespace MathUtil
 	QuaternionFromRotationAxis(const Vector<Real, 3>& axis, Real angleRadius);
 
 	template <typename Real>
-	inline Quaternion<Real> 
-	QuaternionFromRotationYawPitchRoll(Real yaw, Real pitch, Real roll);
-
-	//template <typename Real>
-	//inline Quaternion<Real> 
-	//QuaternionSlerp(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2, Real t);
-
-	template <typename Real>
 	inline void
 	QuaternionToAxisAngle(const Quaternion<Real>& quat, Vector<Real, 3>& axis, Real& angle);
 
+	template <typename Real>
+	inline Quaternion<Real> 
+	QuaternionFromRotationYawPitchRoll(Real yaw, Real pitch, Real roll);
+
+	template <typename Real>
+	inline Quaternion<Real> 
+	QuaternionSlerp(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2, Real t);
 
 	#include "MathUtil.inl"
-
-}
 
 } // Namespace Math
 } // Namespace RcEngine

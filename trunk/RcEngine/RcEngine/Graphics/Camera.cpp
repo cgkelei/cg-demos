@@ -8,7 +8,7 @@ namespace Render {
 Camera::Camera(void)
 {
 	SetViewParams(Vector3f(0, 0, 0), Vector3f(0, 0, 1), Vector3f(0, 1, 0));
-	SetProjectionParams(MathUtil::PI / 4.0f, 1.0f, 1.0f, 1000.0f);
+	SetProjectionParams(PI / 4.0f, 1.0f, 1.0f, 1000.0f);
 }
 
 
@@ -22,8 +22,8 @@ void Camera::SetViewParams( const Vector3f& eyePos, const Vector3f& lookat, cons
 	mLookAt	= lookat;
 	mUpVec	= upVec;
 
-	mViewVec = MathUtil::Normalize(mLookAt - mPosition);
-	mViewMatrix = MathUtil::CreateLookAtMatrixLH(mPosition, mLookAt, mUpVec);
+	mViewVec = Normalize(mLookAt - mPosition);
+	mViewMatrix = CreateLookAtMatrixLH(mPosition, mLookAt, mUpVec);
 }
 
 void Camera::SetProjectionParams( float fov, float aspect, float nearPlane, float farPlane )
@@ -33,7 +33,7 @@ void Camera::SetProjectionParams( float fov, float aspect, float nearPlane, floa
 	mNearPlane = nearPlane;
 	mFarPlane = farPlane;
 
-	mProjectionMatrix = MathUtil::CreatePerspectiveFovLH(mFieldOfView, mAspect, mNearPlane, mFarPlane);
+	mProjectionMatrix = CreatePerspectiveFovLH(mFieldOfView, mAspect, mNearPlane, mFarPlane);
 	//修改投影矩阵，使OpenGL适应左右坐标系
 	Application::GetApplication()->GetRenderDevice()->AdjustProjectionMatrix(mProjectionMatrix);
 }

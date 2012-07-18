@@ -50,11 +50,11 @@ public:
 	// Clamps colour value to the range [0, 1].
 	void Saturate(void);
 
-	static const ColorRGBA Black;
-	static const ColorRGBA White;
-	static const ColorRGBA Red;
-	static const ColorRGBA Green;
-	static const ColorRGBA Blue;
+	//static const ColorRGBA Black;
+	//static const ColorRGBA White;
+	//static const ColorRGBA Red;
+	//static const ColorRGBA Green;
+	//static const ColorRGBA Blue;
 
 private:
 

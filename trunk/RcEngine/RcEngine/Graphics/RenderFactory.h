@@ -46,9 +46,6 @@ namespace RcEngine {
 			//-------------------------------------------------------------------------------------------------------
 			virtual RenderView* Create2DRenderTargetView(Texture* texture, uint32_t arraySize, uint32_t level) = 0;
 			virtual RenderView* CreateDepthStencilView(Texture* texture, uint32_t arraySize, uint32_t level) = 0;
-
-			shared_ptr<VertexDeclaration> CreateVertexDeclaration(VertexDeclarationDesc* inputElementDescs, uint32_t numElements);
-			shared_ptr<VertexDeclaration> CreateVertexDeclaration(std::vector<VertexElement> elems);
 			
 			/**
 			 * Create a material from file, if the material is already loaded, use the loaded one.
