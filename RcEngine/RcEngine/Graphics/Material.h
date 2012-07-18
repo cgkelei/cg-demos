@@ -14,14 +14,14 @@ namespace RcEngine
 	//Forward declaration 
 	namespace Content
 	{
-		class MaterialContentLoader;
+		class MaterialContent;
 	}
 
 	namespace Render
 	{	
 		// using 
 		using Math::ColorRGBA;
-		using Content::MaterialContentLoader;
+		using Content::MaterialContent;
 
 		static const int32_t MaxMaterialTextures = 16;
 
@@ -47,11 +47,15 @@ namespace RcEngine
 			
 			MaterialParameter* GetCustomParameter(EffectParameterUsage usage);
 
+			void SetAmbientColor(const ColorRGBA& ambient)		{ mAmbient = ambient; }
+			void SetDiffuseColor(const ColorRGBA& diffuse)		{ mDiffuse = diffuse; }
+			void SetSpecularColor(const ColorRGBA& specular)	{ mSpecular = specular; }
+			
 			virtual void ApplyMaterial();
 
 
 		public:
-			static shared_ptr<Material> LoadFrom(MaterialContentLoader* loader);
+			static shared_ptr<Material> LoadFrom(MaterialContent* loader);
 
 		protected:			
 			String mName;

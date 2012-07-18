@@ -46,7 +46,7 @@ namespace RcEngine
 
 			Matrix4f viewMat = mAttachedCamera->GetViewMatrix();
 
-			Quaternionf quat = MathUtil::QuaternionFromRotationYawPitchRoll(1, 2, 3);
+			Quaternionf quat = QuaternionFromRotationYawPitchRoll(1.0f, 1.0f, 1.0f);
 			
 		}
 

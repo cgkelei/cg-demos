@@ -126,5 +126,25 @@ void VertexDeclaration::Sort( void )
 }
 
 
+shared_ptr<VertexDeclaration> CreateVertexDeclaration( VertexDeclarationDesc* inputElementDescs, uint32_t numElements )
+{
+	shared_ptr<VertexDeclaration> vd = std::make_shared<VertexDeclaration>();
+	for(uint32_t i = 0; i < numElements; i++)
+	{
+		vd->AddElement(inputElementDescs[i].Offset, inputElementDescs[i].Format, inputElementDescs[i].Usage, inputElementDescs[i].UsageIndex);
+	}
+	return vd;
+}
+
+shared_ptr<VertexDeclaration> CreateVertexDeclaration( std::vector<VertexElement> elems )
+{
+	shared_ptr<VertexDeclaration> vd = std::make_shared<VertexDeclaration>();
+	for (size_t i = 0; i < elems.size(); ++i)
+	{
+		vd->AddElement(elems[i]);
+	}
+	return vd;
+}
+
 } // RenderSystem
 } // RcEngine

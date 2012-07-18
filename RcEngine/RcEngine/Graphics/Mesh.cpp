@@ -45,7 +45,7 @@ namespace RcEngine
 			return 1;
 		}
 
-		shared_ptr<MeshPart> MeshPart::LoadFrom( const shared_ptr<Mesh>& mesh, MeshPartContentLoader* mpLoader )
+		shared_ptr<MeshPart> MeshPart::LoadFrom( const shared_ptr<Mesh>& mesh, MeshPartContent* mpLoader )
 		{
 			if (!mesh || !mpLoader)
 			{
@@ -59,12 +59,12 @@ namespace RcEngine
 			meshPart->mIndexCount = mpLoader->IndexCount;
 			meshPart->mStartIndex = mpLoader->StartIndex;
 			meshPart->mIndexFormat = mpLoader->IndexFormat;
-			meshPart->mVertexOffset = mpLoader->VertexOffset;
+			meshPart->mStartVertex = mpLoader->StartVertex;
 			meshPart->mPrimitiveCount = mpLoader->IndexCount / 3;	// Only support triangles
 
 
 			ElementInitData iInitData;
-			iInitData.pData = mpLoader->IndexData;
+			iInitData.pData = &mpLoader->mFaces[0];
 			iInitData.rowPitch = mpLoader->IndexCount * ((mpLoader->IndexFormat == IBT_Bit16) ? 2 : 4);
 			iInitData.slicePitch = 0;
 			meshPart->mIndexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
@@ -96,7 +96,7 @@ namespace RcEngine
 		}
 
 
-		shared_ptr<Mesh> Mesh::LoadFrom( MeshContentLoader*  meshLoader )
+		shared_ptr<Mesh> Mesh::LoadFrom( MeshContent*  meshLoader )
 		{
 			if (!meshLoader)
 			{
@@ -106,14 +106,14 @@ namespace RcEngine
 			shared_ptr<Mesh> mesh = std::make_shared<Mesh>(meshLoader->Name, meshLoader->BoundingSphere);
 
 			// Create materials
-			vector<MaterialContentLoader*>& matLoaders = meshLoader->MaterialContentLoaders;
+			vector<MaterialContent*>& matLoaders = meshLoader->MaterialContentLoaders;
 			for (size_t i = 0; i < matLoaders.size(); ++i)
 			{
 				shared_ptr<Material> material = Material::LoadFrom(matLoaders[i]);
 				mesh->mMaterials.push_back(material);
 			}
 
-			vector<MeshPartContentLoader*>& mpLoaders = meshLoader->MeshPartContentLoaders;
+			vector<MeshPartContent*>& mpLoaders = meshLoader->MeshPartContentLoaders;
 			for (size_t i = 0; i < mpLoaders.size(); ++i)
 			{
 				shared_ptr<MeshPart> meshpart = MeshPart::LoadFrom(mesh, mpLoaders[i]);

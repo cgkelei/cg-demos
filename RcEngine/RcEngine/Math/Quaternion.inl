@@ -86,61 +86,123 @@ Real& Quaternion<Real>::Z()
 template<typename Real>
 Quaternion<Real>& Quaternion<Real>::operator+=( const Quaternion<Real>& rhs )
 {
-
+	for (int i = 0; i < 4; i++)
+	{
+		mTuple[i] += rhs.mTuple[i];
+	}
+	return *this;
 }
 
 template<typename Real>
 Quaternion<Real>& Quaternion<Real>::operator-=( const Quaternion<Real>& rhs )
 {
-
+	for (int i = 0; i < 4; i++)
+	{
+		mTuple[i] -= rhs.mTuple[i];
+	}
+	return *this;
 }
 
 template<typename Real>
 Quaternion<Real>& Quaternion<Real>::operator*=( const Quaternion<Real>& rhs )
 {
-
+	*this = QuaternionMultiply(*this, rhs);
+	return *this;
 }
 
 template<typename Real>
 Quaternion<Real>& Quaternion<Real>::operator*=( float scalar )
 {
-
+	for (int i = 0; i < 4; i++)
+	{
+		mTuple[i] *= scalar;
+	}
+	return *this;
 }
 
 template<typename Real>
 Quaternion<Real>& Quaternion<Real>::operator/=( float scalar )
 {
-
+	int i;
+	if (scalar != (Real)0.0)
+	{
+		Real invScalar = ((Real)1.0)/scalar;
+		for (i = 0; i < 4; i++)
+		{
+			mTuple[i] *= invScalar;
+		}
+	}
+	else
+	{
+		for (i = 0; i < 4; i++)
+		{
+			mTuple[i] = (std::numeric_limits<Real>::max)();
+		}
+	}
 }
 
 template<typename Real>
 Quaternion<Real> Quaternion<Real>::operator+( const Quaternion<Real>& rhs ) const
 {
-
+	Quaternion<Real> sum;
+	for (int i = 0; i < 4; i++)
+	{
+		sum.mTuple[i] = mTuple[i] + rhs.mTuple[i];
+	}
+	return sum;
 }
 
 template<typename Real>
 Quaternion<Real> Quaternion<Real>::operator-( const Quaternion<Real>& rhs ) const
 {
-
+	Quaternion<Real> diff;
+	for (int i = 0; i < 4; i++)
+	{
+		diff.mTuple[i] = mTuple[i] - rhs.mTuple[i];
+	}
+	return diff;
 }
 
 template<typename Real>
 Quaternion<Real> Quaternion<Real>::operator*( const Quaternion<Real>& rhs ) const
 {
-
+	return QuaternionMultiply(*this, rhs);
 }
 
 template<typename Real>
 Quaternion<Real> Quaternion<Real>::operator*( float scalar ) const
 {
-
+	Quaternion<Real> prod;
+	for (int i = 0; i < 4; i++)
+	{
+		prod.mTuple[i] = scalar*mTuple[i];
+	}
+	return prod;
 }
 
 template<typename Real>
 Quaternion<Real> Quaternion<Real>::operator/( float scalar ) const
 {
+	Quaternion quot;
+	int i;
 
+	if (scalar != (Real)0.0)
+	{
+		Real invScalar = ((Real)1.0)/scalar;
+		for (i = 0; i < 4; i++)
+		{
+			quot.mTuple[i] = invScalar*mTuple[i];
+		}
+	}
+	else
+	{
+		for (i = 0; i < 4; i++)
+		{
+			quot.mTuple[i] = (std::numeric_limits<Real>::max)();
+		}
+	}
+
+	return quot;
 }
 
 template<typename Real>

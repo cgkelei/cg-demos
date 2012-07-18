@@ -68,7 +68,7 @@ namespace RcEngine
 			VertexDeclarationDesc vdsc[] = {
 				{ 0, VEF_Vector3,  VEU_Position, 0 },
 			};
-			shared_ptr<VertexDeclaration> decla = factory.CreateVertexDeclaration(vdsc, 1);
+			shared_ptr<VertexDeclaration> decla = CreateVertexDeclaration(vdsc, 1);
 
 			ElementInitData iInitData;
 			iInitData.pData = indices;

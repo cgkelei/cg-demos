@@ -11,15 +11,15 @@ namespace RcEngine
 	//Forward declaration 
 	namespace Content
 	{
-		class MeshContentLoader;
-		class MeshPartContentLoader;
+		class MeshContent;
+		class MeshPartContent;
 	}
 
 	namespace Render
 	{
 		//using
-		using Content::MeshContentLoader;
-		using Content::MeshPartContentLoader;
+		using Content::MeshContent;
+		using Content::MeshPartContent;
 		using Math::BoundingSpheref;
 		using Math::Matrix4f;
 
@@ -36,7 +36,7 @@ namespace RcEngine
 			uint32_t GetPrimitiveCount() const			{ return mPrimitiveCount; }
 			uint32_t GetIndexCount() const				{ return mIndexCount; }
 			uint32_t GetStartIndex() const				{ return mStartIndex; }
-			uint32_t GetVertexOffset() const			{ return mVertexOffset;}
+			uint32_t GetStartVertex() const			    { return mStartVertex;}
 			uint32_t GetMaterialID() const				{ return mMaterialID; }
 
 			const shared_ptr<GraphicsBuffer>& GetVertexBuffer() const			{ return mVertexBuffer; }
@@ -56,7 +56,7 @@ namespace RcEngine
 			 * @param mesh The mesh that this is part of.
 			 * @param mploader loader contains mesh part data.
 			 */
-			static shared_ptr<MeshPart> LoadFrom( const shared_ptr<Mesh>& mesh, MeshPartContentLoader* mpLoader);
+			static shared_ptr<MeshPart> LoadFrom( const shared_ptr<Mesh>& mesh, MeshPartContent* mpLoader);
 			
 		private:
 			weak_ptr<Mesh> mParentMesh;
@@ -72,11 +72,13 @@ namespace RcEngine
 
 			BoundingSpheref mBoundingSphere;
 			
-			uint32_t mVertexCount;
-			uint32_t mPrimitiveCount; 
-			uint32_t mIndexCount;
+			uint32_t mPrimitiveCount; // Only support triangle
+	
 			uint32_t mStartIndex;
-			uint32_t mVertexOffset; 
+			uint32_t mIndexCount;
+
+			uint32_t mStartVertex;
+			uint32_t mVertexCount;
 		};
 
 
@@ -97,7 +99,7 @@ namespace RcEngine
 			/** 
 			 * Load a mesh from loader which contains the mesh data.
 			 */
-			static shared_ptr<Mesh> LoadFrom(MeshContentLoader* loader);
+			static shared_ptr<Mesh> LoadFrom(MeshContent* loader);
 
 
 		private:
