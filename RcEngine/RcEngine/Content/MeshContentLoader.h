@@ -63,10 +63,9 @@ namespace RcEngine
 			vector<MaterialContent*> MaterialContentLoaders;
 			vector<MeshPartContent*> MeshPartContentLoaders;
 		};
+
+		MeshContent* ReadMeshContent(const String& meshFile);
 	}
 }
-
-
-
 
 #endif // MeshContentLoader_h__

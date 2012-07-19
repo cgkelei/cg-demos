@@ -8,6 +8,16 @@ VertexDeclaration::VertexDeclaration()
 
 }
 
+VertexDeclaration::VertexDeclaration( const std::vector<VertexElement>& elements )
+{
+	AssignVertexElements(elements.begin(), elements.end());
+}
+
+VertexDeclaration::VertexDeclaration( const VertexElement* elements, uint32_t count )
+{
+	AssignVertexElements(elements, elements + count);
+}
+
 VertexDeclaration::~VertexDeclaration()
 {
 
@@ -19,7 +29,7 @@ const VertexElement* VertexDeclaration::FindElementBySemantic( VertexElementUsag
 	eiend = mElementList.end();
 	for (ei = mElementList.begin(); ei != eiend; ++ei)
 	{
-		if (ei->GetUsage() == sem && ei->GetUsageIndex() == index)
+		if (ei->Usage == sem && ei->UsageIndex == index)
 		{
 			return &(*ei);
 		}
@@ -82,7 +92,7 @@ void VertexDeclaration::RemoveElement( VertexElementUsage semantic, uint16_t ind
 	VertexElementList::iterator i = mElementList.begin();
 	for( ; i!= mElementList.end(); ++i)
 	{
-		if(i->GetUsage() == semantic && i->GetUsageIndex() == index)
+		if(i->Usage == semantic && i->UsageIndex == index)
 		{
 			mElementList.erase(i);
 			return;
@@ -99,14 +109,14 @@ bool VertexDeclaration::VertexElementLess( const VertexElement& e1, const Vertex
 {
 	
 	// Use ordering of semantics to sort
-	if (e1.GetUsage() < e2.GetUsage())
+	if (e1.Usage < e2.Usage)
 	{
 		return true;
 	}
-	else if (e1.GetUsage() == e2.GetUsage())
+	else if (e1.Usage == e2.Usage)
 	{
 		// Use index to sort
-		if (e1.GetUsageIndex() < e2.GetUsageIndex())
+		if (e1.UsageIndex < e2.UsageIndex)
 		{
 			return true;
 		}
@@ -123,27 +133,6 @@ const VertexElementList& VertexDeclaration::GetElements( void ) const
 void VertexDeclaration::Sort( void )
 {
 	std::sort(mElementList.begin(), mElementList.end(), VertexDeclaration::VertexElementLess);
-}
-
-
-shared_ptr<VertexDeclaration> CreateVertexDeclaration( VertexDeclarationDesc* inputElementDescs, uint32_t numElements )
-{
-	shared_ptr<VertexDeclaration> vd = std::make_shared<VertexDeclaration>();
-	for(uint32_t i = 0; i < numElements; i++)
-	{
-		vd->AddElement(inputElementDescs[i].Offset, inputElementDescs[i].Format, inputElementDescs[i].Usage, inputElementDescs[i].UsageIndex);
-	}
-	return vd;
-}
-
-shared_ptr<VertexDeclaration> CreateVertexDeclaration( std::vector<VertexElement> elems )
-{
-	shared_ptr<VertexDeclaration> vd = std::make_shared<VertexDeclaration>();
-	for (size_t i = 0; i < elems.size(); ++i)
-	{
-		vd->AddElement(elems[i]);
-	}
-	return vd;
 }
 
 } // RenderSystem

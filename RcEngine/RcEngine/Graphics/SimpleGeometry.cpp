@@ -11,6 +11,7 @@
 #include "Core/Context.h"
 #include "Math/Vector.h"
 #include "Math/Matrix.h"
+#include "Content/MeshContentLoader.h"
 
 namespace RcEngine 
 {
@@ -65,10 +66,10 @@ namespace RcEngine
 			vInitData.slicePitch = 0;
 			shared_ptr<GraphicsBuffer> vb = factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
 
-			VertexDeclarationDesc vdsc[] = {
-				{ 0, VEF_Vector3,  VEU_Position, 0 },
+			VertexElement vdsc[] = {
+				VertexElement(0, VEF_Vector3,  VEU_Position, 0),
 			};
-			shared_ptr<VertexDeclaration> decla = CreateVertexDeclaration(vdsc, 1);
+			shared_ptr<VertexDeclaration> decla = factory.CreateVertexDeclaration(vdsc, 1);
 
 			ElementInitData iInitData;
 			iInitData.pData = indices;
@@ -85,6 +86,12 @@ namespace RcEngine
 			mRenderOperation->IndexType = IBT_Bit16;
 			mRenderOperation->StartIndexLocation = 0;
 			mRenderOperation->StartVertexLocation = 0;
+
+
+
+		
+			Content::MeshContent* test = Content::ReadMeshContent("../Media/Mesh/test.xml");
+
 		}
 
 		SimpleBox::~SimpleBox()

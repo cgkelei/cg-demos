@@ -21,39 +21,19 @@ namespace RcEngine {
 			VertexElement(uint32_t offset, VertexElementFormat theType, VertexElementUsage semantic, uint16_t index = 0);
 
 			/// <summary>
-			// Gets the offset into the buffer where this element starts
-			/// </summary>
-			uint32_t GetOffset(void) const { return mOffset; }
-
-			/// <summary>
-			// Gets the data format of this element
-			/// </summary>
-			VertexElementFormat GetType(void) const { return mFormat; }
-
-			/// <summary>
-			// Gets the data format of this element
-			/// </summary>
-			VertexElementUsage GetUsage(void) const  { return mUsage; }
-
-			/// <summary>
-			// Gets the index of this element, only applicable for repeating elements
-			/// </summary>
-			uint16_t GetUsageIndex(void) const { return mUsageIndex; }
-
-			/// <summary>
 			// Gets the size of this element in bytes
 			/// </summary>
-			uint32_t GetSize(void) const { return GetTypeSize(mFormat); }
+			uint32_t GetSize(void) const { return GetTypeSize(Type); }
 
 			/// <summary>
 			// Compare two VertexElement 
 			/// </summary>
 			inline bool operator == (const VertexElement& rhs) const
 			{
-				return mFormat == rhs.mFormat &&
-					mUsageIndex == rhs.mUsageIndex &&
-					mOffset == rhs.mOffset &&
-					mUsage == rhs.mUsage;
+				return Type == rhs.Type &&
+					UsageIndex == rhs.UsageIndex &&
+					Offset == rhs.Offset &&
+					Usage == rhs.Usage;
 			}
 
 			inline bool operator != (const VertexElement& rhs) const
@@ -74,38 +54,38 @@ namespace RcEngine {
 			/// </summary>
 			static uint16_t GetTypeCount(VertexElementFormat etype);
 
-			static bool IsNormalized(VertexElementFormat etype);
-
-			/** Simple converter function which will turn a single-value type into a
-			multi-value type based on a parameter.
-			*/
+			/// <summary>
+			// Simple converter function which will turn a single-value type into a multi-value type based on a parameter.
+			/// </summary>
 			static VertexElementFormat MultiplyTypeCount(VertexElementFormat baseType, unsigned short count);
-			/** Simple converter function which will a type into it's single-value
-			equivalent - makes switches on type easier.
-			*/
+			
+			/// <summary>
+			// Simple converter function which will a type into it's single-value equivalent - makes switches on type easier.
+			/// </summary>
 			static VertexElementFormat GetBaseType(VertexElementFormat multiType);
 
+			static bool IsNormalized(VertexElementFormat etype);
 
-		private:
+		public:
 			/// <summary>
 			// The offset in the buffer that this element starts at
 			/// </summary>
-			uint32_t mOffset;
+			uint32_t Offset;
 
 			/// <summary>
 			// The format of this vertex element.
 			/// </summary>
-			VertexElementFormat mFormat;
+			VertexElementFormat Type;
 
 			/// <summary>
 			// The format of this vertex element.
 			/// </summary>
-			VertexElementUsage mUsage;
+			VertexElementUsage Usage;
 
 			/// <summary>
 			// Index of the item, only applicable for some elements like texture coords
 			/// </summary>
-			uint16_t mUsageIndex;
+			uint16_t UsageIndex;
 		};
 
 
