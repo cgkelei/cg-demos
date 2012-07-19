@@ -381,10 +381,10 @@ namespace RcEngine
 				for(size_t att = 0; att < vertexAttrs.size(); att++)
 				{
 					const VertexElement& ve = vertexAttrs[att]; 
-					uint16_t count = VertexElement::GetTypeCount(ve.GetType());
-					GLenum type = OpenGLMapping::Mapping(ve.GetType());
-					bool isNormalized = VertexElement::IsNormalized(ve.GetType());
-					uint32_t offset = ve.GetOffset() + op.BaseVertexLocation * vertexSize;
+					uint16_t count = VertexElement::GetTypeCount(ve.Type);
+					GLenum type = OpenGLMapping::Mapping(ve.Type);
+					bool isNormalized = VertexElement::IsNormalized(ve.Type);
+					uint32_t offset = ve.Offset + op.BaseVertexLocation * vertexSize;
 
 					glVertexAttribPointer(att, count, type, isNormalized, vertexSize, BUFFER_OFFSET(offset));
 					glEnableVertexAttribArray(att);

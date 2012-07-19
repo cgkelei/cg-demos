@@ -70,7 +70,7 @@ XMLNodePtr XMLDocument::Parse( const std::string& xmlName )
 	FILE* pFile = NULL;
 	int32_t len = 0;
 
-	fopen_s(&pFile, xmlName.c_str() , "r");
+	fopen_s(&pFile, xmlName.c_str() , "rb");
 	if (pFile == NULL) 
 	{
 		std::string str = "FILE: " + xmlName + "does't exit.";
@@ -82,6 +82,13 @@ XMLNodePtr XMLDocument::Parse( const std::string& xmlName )
 	mXMLSrc.resize(len+1, 0);
 	fread_s(&mXMLSrc[0], len, sizeof(char), len, pFile);
 	fclose(pFile);
+
+	/*mXMLSrc.clear();
+	std::ifstream myfile(xmlName);
+	std::copy(std::istreambuf_iterator<char>(myfile), std::istreambuf_iterator<char>(), 
+		std::back_inserter(mXMLSrc));
+    mXMLSrc.push_back('\0');
+	myfile.close();*/
 
 	mDocument->parse<0>(&mXMLSrc[0]);
 	mRoot = std::make_shared<XMLNode>(mDocument->first_node());

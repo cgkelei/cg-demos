@@ -8,6 +8,7 @@
 #include "Graphics/EffectParameter.h"
 #include "Graphics/Material.h"
 #include "Graphics/SimpleGeometry.h"
+#include "Content/MeshContentLoader.h"
 #include "Math/ColorRGBA.h"
 #include "Math/MathUtil.h"
 #include "Core/Context.h"
@@ -17,6 +18,8 @@
 #pragma comment(lib, "D3DX10.lib")
 
 using namespace RcEngine::Math;
+using namespace RcEngine::Render;
+using namespace RcEngine::Content;
 
 TestApp::TestApp(void)
 {
@@ -35,7 +38,6 @@ void TestApp::Initialize()
 	camera->SetViewParams(Vector3f(0, 0, 30), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
 	camera->SetProjectionParams(PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 100.0f );
 }
-
 
 void TestApp::LoadContent()
 {
@@ -58,7 +60,6 @@ void TestApp::LoadContent()
 	Quaternionf myQuat1 = QuaternionFromRotationYawPitchRoll(yaw, pitch, roll);
 	Quaternionf myQuat2 = QuaternionFromRotationYawPitchRoll(pitch, roll, yaw);
 	Quaternionf mySlerp = QuaternionSlerp(myQuat1, myQuat2, 0.62f);	
-
 }
 
 void TestApp::UnloadContent()
@@ -66,7 +67,7 @@ void TestApp::UnloadContent()
 	
 }
 
-using namespace RcEngine::Render;
+
 
 void TestApp::Render()
 {

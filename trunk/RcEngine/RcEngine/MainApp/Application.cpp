@@ -67,12 +67,12 @@ namespace RcEngine {
 	}
 
 
+
 	void Application::Tick()
 	{
 		// update input
 		mKeyboard->capture();
 		mMouse->capture();
-
 
 		mTimer.Tick();
 

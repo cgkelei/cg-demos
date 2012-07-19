@@ -60,7 +60,9 @@ namespace RcEngine {
 			 * @param effectFile: the effect file location.
 			 */
 			virtual shared_ptr<Effect> CreateEffectFromFile(const String& effectName, const String& effectFile) = 0;
-	
+			
+			shared_ptr<VertexDeclaration> CreateVertexDeclaration(const std::vector<VertexElement>& elems);
+			shared_ptr<VertexDeclaration> CreateVertexDeclaration(VertexElement* elems, uint32_t count);
 
 		protected:
 			typedef unordered_map<String, shared_ptr<Effect> > EffectMap;

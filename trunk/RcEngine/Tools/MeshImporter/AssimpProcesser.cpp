@@ -121,7 +121,7 @@ void AssimpProcesser::ProcessMesh( aiMesh* mesh, MeshContent* meshContent )
 		}
 	}
 
-	meshPartContent->VertexDeclaration = CreateVertexDeclaration(vertexElements);
+	meshPartContent->VertexDeclaration = std::make_shared<VertexDeclaration>(vertexElements);
 	meshPartContent->VertexCount = mesh->mNumVertices;
 	unsigned int vertexSize = offset;
 	
@@ -139,8 +139,8 @@ void AssimpProcesser::ProcessMesh( aiMesh* mesh, MeshContent* meshContent )
 		for (size_t ve = 0; ve < vertexElements.size(); ++ve)
 		{
 			const VertexElement& element = vertexElements[ve];
-			float* vertexPtr = (float*)(meshPartContent->VertexData + baseOffset + element.GetOffset());
-			switch(element.GetUsage())
+			float* vertexPtr = (float*)(meshPartContent->VertexData + baseOffset + element.Offset);
+			switch(element.Usage)
 			{
 			case VEU_Position:
 				*(vertexPtr) = mesh->mVertices[i].x;
@@ -163,14 +163,14 @@ void AssimpProcesser::ProcessMesh( aiMesh* mesh, MeshContent* meshContent )
 				*(vertexPtr+2) = mesh->mBitangents[i].z;
 				break;
 			case VEU_TextureCoordinate:
-				switch(mesh->mNumUVComponents[element.GetUsageIndex()])
+				switch(mesh->mNumUVComponents[element.UsageIndex])
 				{
 				case 3:
-					*(vertexPtr+2) = mesh->mTextureCoords[element.GetUsageIndex()][i].z;
+					*(vertexPtr+2) = mesh->mTextureCoords[element.UsageIndex][i].z;
 				case 2:
-					*(vertexPtr+1) = mesh->mTextureCoords[element.GetUsageIndex()][i].y;	
+					*(vertexPtr+1) = mesh->mTextureCoords[element.UsageIndex][i].y;	
 				case 1:
-					*(vertexPtr) = mesh->mTextureCoords[element.GetUsageIndex()][i].x;
+					*(vertexPtr) = mesh->mTextureCoords[element.UsageIndex][i].x;
 					break;
 				}
 			case VEU_BlendIndices:
@@ -280,51 +280,53 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 {
 	fstream stream(output, fstream::out);
 
-	stream << "<mesh>\n";
+	stream << "<mesh>" << endl;
 
 	// output materials
-	stream << "<materialChunk>\n";
+	stream << "<materialsChunk materialCount=\"" << meshContent->MaterialContentLoaders.size() << "\">" << endl;
 	vector<MaterialContent*>& materials = meshContent->MaterialContentLoaders;
 	for (size_t i = 0; i < materials.size(); ++i)
 	{
 		MaterialContent* material = materials[i];
-		stream << "\t<matrial>\n";
+		stream << "\t<matrial>" << endl;
 		stream << "\t\t<ambient r=\"" << material->Ambient.R() << "\" g=\"" << material->Ambient.G()
-			<< "\" b=\"" << material->Ambient.B() << "\"/>\n";
+			<< "\" b=\"" << material->Ambient.B() << "\"/>" << endl;
 		stream << "\t\t<diffuse r=\"" << material->Diffuse.R() << "\" g=\"" << material->Diffuse.G()
-			<< "\" b=\"" << material->Diffuse.B() << "\"/>\n";
+			<< "\" b=\"" << material->Diffuse.B() << "\"/>" << endl;
 		stream << "\t\t<specular r=\"" << material->Specular.R() << "\" g=\"" << material->Specular.G()
-			<< "\" b=\"" << material->Specular.B() << "\"/>\n";
+			<< "\" b=\"" << material->Specular.B() << "\"/>" << endl;
 		stream << "\t\t<emissive r=\"" << material->Emissive.R() << "\" g=\"" << material->Emissive.G()
-			<< "\" b=\"" << material->Emissive.B() << "\"/>\n";
-		stream << "\t\t<shininess v=\"" << material->Power << "\"/>\n";
+			<< "\" b=\"" << material->Emissive.B() << "\"/>" << endl;
+		stream << "\t\t<shininess v=\"" << material->Power << "\"/>" << endl;
 		
-		stream << "\t\t<texturesChunk>\n";
+		stream << "\t\t<texturesChunk>" << endl;
 		for (auto iter = material->mTextures.begin(); iter != material->mTextures.end(); ++iter)
 		{
-			stream << "\t\t\t<texture type=\"" << iter->first << "\" name=\"" << iter->second << "\"/>\n";
+			stream << "\t\t\t<texture type=\"" << iter->first << "\" name=\"" << iter->second << "\"/>" << endl;
 		}
-		stream << "\t\t</texturesChunk>\n";
+		stream << "\t\t</texturesChunk>" << endl;
 
-		stream << "\t</matrial>\n";
+		stream << "\t</matrial>" << endl;
 
 	} 
-	stream << "</materialChunk>\n";
+	stream << "</materialsChunk>" << endl;
 
+	stream << "<meshPartsChunk>" << endl;
 
 	vector<MeshPartContent*>& meshParts = meshContent->MeshPartContentLoaders;
 	for (size_t i = 0; i < meshParts.size(); ++i)
 	{
 		MeshPartContent* meshPart = meshParts[i];
-		stream << "<meshPart ";
+		stream << "\t<meshPart ";
 		if (!meshPart->Name.empty())
 		{
 			stream <<"name=\"" << meshPart->Name << "\" ";
 		}
-		stream << "materialID=\"" << meshPart->MaterialID << "\">\n"; 
+		stream << "materialID=\"" << meshPart->MaterialID << "\">" << endl; 
 
 		// Output vertices
-		stream << "\t<verticesChunk>\n";
+		stream << "\t\t<verticesChunk vertexCount=\"" << meshPart->VertexCount
+			   << "\" vertexSize=\"" << meshPart->VertexDeclaration->GetVertexSize() << "\">" << endl;
 
 		const shared_ptr<VertexDeclaration>& vd = meshPart->VertexDeclaration;
 		for (unsigned int j = 0; j < meshPart->VertexCount; ++j)
@@ -335,14 +337,14 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 			for (size_t k = 0; k < vd->GetElementCount(); ++k)
 			{	
 				const VertexElement& e = vd->GetElement(k);	
-				switch(e.GetUsage())
+				switch(e.Usage)
 				{
 				case VEU_Position:
 					{	
 						float x = *(temp); temp++;
 						float y = *(temp); temp++;
 						float z = *(temp); temp++;
-						stream << "\t\t<vertex x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\">\n";
+						stream << "\t\t\t<vertex x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\">" << endl;
 					}	
 					break;
 				case VEU_Normal:
@@ -350,7 +352,7 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 						float x = *(temp); temp++;
 						float y = *(temp); temp++;
 						float z = *(temp); temp++;
-						stream << "\t\t\t<normal x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\"/>\n";
+						stream << "\t\t\t\t<normal x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\"/>" << endl;
 					}	
 					break;
 				case VEU_Tangent:
@@ -358,7 +360,7 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 						float x = *(temp); temp++;
 						float y = *(temp); temp++;
 						float z = *(temp); temp++;
-						stream << "\t\t\t<tangent x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\"/>\n";
+						stream << "\t\t\t\t<tangent x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\"/>" << endl;
 					}	
 					break;
 				case VEU_Binormal:
@@ -366,24 +368,24 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 						float x = *(temp); temp++;
 						float y = *(temp); temp++;
 						float z = *(temp); temp++;
-						stream << "\t\t\t<binormal x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\"/>\n";
+						stream << "\t\t\t\t<binormal x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\"/>" << endl;
 					}	
 					break;
 				case VEU_TextureCoordinate:
 					{
-						switch(VertexElement::GetTypeCount(e.GetType()))
+						switch(VertexElement::GetTypeCount(e.Type))
 						{
 						case 1:
 							{
 								float x = *(temp); temp++;
-								stream << "\t\t\t<texcoord u=\"" << x << "\"/>\n";
+								stream << "\t\t\t\t<texcoord u=\"" << x << "\"/>" << endl;
 							}
 							break;
 						case 2:
 							{
 								float x = *(temp); temp++;
 								float y = *(temp); temp++;
-								stream << "\t\t\t<texcoord u=\"" << x <<"\" v=\"" << y << "\"/>\n";
+								stream << "\t\t\t\t<texcoord u=\"" << x <<"\" v=\"" << y << "\"/>" << endl;
 							}
 							break;
 						case 3:
@@ -391,7 +393,7 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 								float x = *(temp); temp++;
 								float y = *(temp); temp++;
 								float z = *(temp); temp++;
-								stream << "\t\t\t<texcoord u=\"" << x <<"\" v=\"" << y << "\" w=\"" << z << "\"/>\n";
+								stream << "\t\t\t\t<texcoord u=\"" << x <<"\" v=\"" << y << "\" w=\"" << z << "\"/>" << endl;
 							}
 							break;
 						}
@@ -405,24 +407,25 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 					break;
 				}
 			}
-			stream << "\t\t</vertex>\n";
+			stream << "\t\t\t</vertex>" << endl;
 		}
-		stream << "\t</verticesChunk>\n";	
-
+		stream << "\t\t</verticesChunk>" << endl;	
 
 		// Output triangles
-		stream << "\t<trianglesChunk>\n";	
+		stream << "\t\t<trianglesChunk>" << endl;	
 		for (unsigned int i = 0; i < meshPart->mFaces.size(); ++i)
 		{
 			MeshPartContent::Face face = meshPart->mFaces[i];
-			stream << "\t\t<triangle a=\""<<face.Indices[0] 
-				   << "\" b=\"" << face.Indices[1] << "\" c=\"" << face.Indices[2] <<"\"/>\n";
+			stream << "\t\t\t<triangle a=\""<<face.Indices[0] 
+				   << "\" b=\"" << face.Indices[1] << "\" c=\"" << face.Indices[2] <<"\"/>" << endl;
 		}
-		stream << "\t</trianglesChunk>\n";	
+		stream << "\t\t</trianglesChunk>" << endl;	
 		
-		stream << "</meshPart>\n";
+		stream << "\t</meshPart>" << endl;
 	}
+	
+	stream << "</meshPartsChunk>" << endl;
 
-	stream << "</mesh>";
+	stream << "</mesh>" << endl;
 	stream.close();
 }

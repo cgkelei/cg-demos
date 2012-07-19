@@ -7,10 +7,10 @@ namespace Render {
 using Core::Exception;
 
 VertexElement::VertexElement(uint32_t offset, VertexElementFormat theType, VertexElementUsage semantic, uint16_t index /*= 0*/ )
-	:   mOffset(offset),
-		mFormat(theType),
-		mUsage(semantic),
-		mUsageIndex(index)
+	:   Offset(offset),
+		Type(theType),
+		Usage(semantic),
+		UsageIndex(index)
 {
 	
 }
