@@ -117,6 +117,10 @@
     <ClCompile Include="Graphics\VertexDeclaration.cpp" />
     <ClCompile Include="Graphics\VertexElement.cpp" />
     <ClCompile Include="Graphics\Viewport.cpp" />
+    <ClCompile Include="IO\FileStream.cpp" />
+    <ClCompile Include="IO\MemoryStream.cpp" />
+    <ClCompile Include="IO\Stream.cpp" />
+    <ClCompile Include="IO\FileSystem.cpp" />
     <ClCompile Include="MainApp\Application.cpp" />
     <ClCompile Include="MainApp\Window.cpp" />
     <ClCompile Include="Math\BoundingSphere.cpp" />
@@ -168,6 +172,10 @@
     <ClInclude Include="Graphics\VertexDeclaration.h" />
     <ClInclude Include="Graphics\VertexElement.h" />
     <ClInclude Include="Graphics\Viewport.h" />
+    <ClInclude Include="IO\FileStream.h" />
+    <ClInclude Include="IO\MemoryStream.h" />
+    <ClInclude Include="IO\Stream.h" />
+    <ClInclude Include="IO\FileSystem.h" />
     <ClInclude Include="MainApp\Application.h" />
     <ClInclude Include="MainApp\Window.h" />
     <ClInclude Include="Math\BoundingSphere.h" />
