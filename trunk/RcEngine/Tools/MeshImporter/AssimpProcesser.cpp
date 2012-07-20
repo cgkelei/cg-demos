@@ -37,6 +37,9 @@ bool AssimpProcesser::Process( const char* filePath )
 		return false;
 	}
 
+	aiNode* rootNode = scene->mRootNode;
+	string name(rootNode->mName.data);
+	uint32_t c = rootNode->mNumChildren;
 	ProcessScene(scene);
 
 	return true;
@@ -283,7 +286,7 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 	stream << "<mesh>" << endl;
 
 	// output materials
-	stream << "<materialsChunk materialCount=\"" << meshContent->MaterialContentLoaders.size() << "\">" << endl;
+	stream << "<materials materialCount=\"" << meshContent->MaterialContentLoaders.size() << "\">" << endl;
 	vector<MaterialContent*>& materials = meshContent->MaterialContentLoaders;
 	for (size_t i = 0; i < materials.size(); ++i)
 	{
@@ -309,15 +312,15 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 		stream << "\t</matrial>" << endl;
 
 	} 
-	stream << "</materialsChunk>" << endl;
+	stream << "</materials>" << endl;
 
-	stream << "<meshPartsChunk>" << endl;
+	stream << "<subMeshes>" << endl;
 
 	vector<MeshPartContent*>& meshParts = meshContent->MeshPartContentLoaders;
 	for (size_t i = 0; i < meshParts.size(); ++i)
 	{
 		MeshPartContent* meshPart = meshParts[i];
-		stream << "\t<meshPart ";
+		stream << "\t<subMesh ";
 		if (!meshPart->Name.empty())
 		{
 			stream <<"name=\"" << meshPart->Name << "\" ";
@@ -325,7 +328,7 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 		stream << "materialID=\"" << meshPart->MaterialID << "\">" << endl; 
 
 		// Output vertices
-		stream << "\t\t<verticesChunk vertexCount=\"" << meshPart->VertexCount
+		stream << "\t\t<vertices vertexCount=\"" << meshPart->VertexCount
 			   << "\" vertexSize=\"" << meshPart->VertexDeclaration->GetVertexSize() << "\">" << endl;
 
 		const shared_ptr<VertexDeclaration>& vd = meshPart->VertexDeclaration;
@@ -334,6 +337,7 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 			uint32_t vs = vd->GetVertexSize();
 			char* vertexPtr = meshPart->VertexData + j * vd->GetVertexSize();
 			float* temp = (float*)vertexPtr;
+			stream << "\t\t\t<vertex>" << endl;
 			for (size_t k = 0; k < vd->GetElementCount(); ++k)
 			{	
 				const VertexElement& e = vd->GetElement(k);	
@@ -344,7 +348,7 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 						float x = *(temp); temp++;
 						float y = *(temp); temp++;
 						float z = *(temp); temp++;
-						stream << "\t\t\t<vertex x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\">" << endl;
+						stream << "\t\t\t\t<position x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\"/>" << endl;
 					}	
 					break;
 				case VEU_Normal:
@@ -409,22 +413,23 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 			}
 			stream << "\t\t\t</vertex>" << endl;
 		}
-		stream << "\t\t</verticesChunk>" << endl;	
+		stream << "\t\t\t</vertex>" << endl;
+		stream << "\t\t</vertices>" << endl;	
 
 		// Output triangles
-		stream << "\t\t<trianglesChunk>" << endl;	
+		stream << "\t\t<triangles>" << endl;	
 		for (unsigned int i = 0; i < meshPart->mFaces.size(); ++i)
 		{
 			MeshPartContent::Face face = meshPart->mFaces[i];
 			stream << "\t\t\t<triangle a=\""<<face.Indices[0] 
 				   << "\" b=\"" << face.Indices[1] << "\" c=\"" << face.Indices[2] <<"\"/>" << endl;
 		}
-		stream << "\t\t</trianglesChunk>" << endl;	
+		stream << "\t\t</triangles>" << endl;	
 		
-		stream << "\t</meshPart>" << endl;
+		stream << "\t</subMesh>" << endl;
 	}
 	
-	stream << "</meshPartsChunk>" << endl;
+	stream << "</subMeshes>" << endl;
 
 	stream << "</mesh>" << endl;
 	stream.close();
