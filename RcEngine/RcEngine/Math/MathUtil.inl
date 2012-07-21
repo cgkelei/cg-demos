@@ -143,7 +143,7 @@ CreatePerspectiveFovRH(Real fovy, Real aspect,  Real zNear,  Real zFar)
 //----------------------------------------------------------------------------
 template<typename Real>
 inline Matrix4<Real> 
-CreateRotationX(Matrix4<Real>& outMat, Real angle)
+CreateRotationX(Real angle)
 {
 	Real cos = std::cos(angle);
 	Real sin = std::sin(angle);
@@ -157,7 +157,7 @@ CreateRotationX(Matrix4<Real>& outMat, Real angle)
 //----------------------------------------------------------------------------
 template<typename Real>
 inline Matrix4<Real> 
-CreateRotationY(Matrix4<Real>& outMat, Real angle)
+CreateRotationY(Real angle)
 {
 	Real cos = std::cos(angle);
 	Real sin = std::sin(angle);
@@ -171,7 +171,7 @@ CreateRotationY(Matrix4<Real>& outMat, Real angle)
 //----------------------------------------------------------------------------
 template<typename Real>
 inline Matrix4<Real> 
-CreateRotationZ(Matrix4<Real>& outMat, Real angle)
+CreateRotationZ(Real angle)
 {
 	Real cos = std::cos(angle);
 	Real sin = std::sin(angle);
@@ -186,7 +186,15 @@ CreateRotationZ(Matrix4<Real>& outMat, Real angle)
 //----------------------------------------------------------------------------
 template<typename Real>
 inline Matrix4<Real> 
-CreateRotationAxis(Matrix4<Real>& outMat,  const Vector<Real,3>& axis, Real angle)
+CreateRotationAxis(const Vector<Real,3>& axis, Real angle)
+{
+
+}
+
+//----------------------------------------------------------------------------
+template<typename Real>
+inline Matrix4<Real> 
+CreateRotationYawPitchRoll(Real yaw, Real pitch, Real roll)
 {
 
 }
@@ -212,6 +220,50 @@ CreateTranslation(const Vector<Real,3>& trans)
 						  (Real)0,    (Real)0,  (Real)1,   (Real)0,
 						 trans.X(),  trans.Y(), trans.Z(), (Real)1 );
 }
+
+
+template<typename Real>
+inline void 
+MatrixDecompose(Vector<Real, 3>& sacle, Quaternion<Real>& rotation, Vector<Real, 3>& translation, const Matrix4<Real>& mat)
+{
+	translation.X() = mat.M41;
+	translation.Y() = mat.M42;
+	translation.Z() = mat.M43;
+
+	Vector<Real,3> cols[] =
+	{
+		Vector<Real,3>(mat.M11, mat.M12, mat.M13),
+		Vector<Real,3>(mat.M21, mat.M22, mat.M23),
+		Vector<Real,3>(mat.M31, mat.M32, mat.M33)
+	};
+
+	sacle.X() = cols[0].Length();
+	sacle.Y() = cols[1].Length();
+	sacle.Z() = cols[2].Length();
+
+	if (sacle.X() != 0)
+	{
+		cols[0] = cols[0] / sacle.X();
+	}
+
+	if (sacle.Y() != 0)
+	{
+		cols[1] = cols[1] / sacle.Y();
+	}
+
+	if (sacle.Z() != 0)
+	{
+		cols[2] = cols[2] / sacle.Z();
+	}
+
+	rotation = QuaternionFromRotationMatrix(Matrix4<Real>(
+		cols[0].X(), cols[0].Y(), cols[0].Z(), (Real)0,
+		cols[1].X(), cols[1].Y(), cols[1].Z(), (Real)0,
+		cols[2].X(), cols[2].Y(), cols[2].Z(), (Real)0,
+		(Real)0,     (Real)0,     (Real)0,     (Real)1
+		));
+}
+
 
 //----------------------------------------------------------------------------
 template<typename Real>
@@ -245,7 +297,7 @@ QuaternionConjugate(const Quaternion<Real>& quat)
 
 template <typename Real>
 inline Quaternion<Real> 
-	QuaternionMultiply(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2)
+QuaternionMultiply(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2)
 {
 	return Quaternion<Real>(
 		quat1[0]*quat2[0] - quat1[1]*quat2[1] - quat1[2]*quat2[2] - quat1[3]*quat2[3],
@@ -259,7 +311,97 @@ template <typename Real>
 inline Quaternion<Real> 
 QuaternionFromRotationMatrix(const Matrix4<Real>& rotMat)
 {
-	return Quaternion<Real>();
+	float m11 = rotMat.M11;
+	float m12 = rotMat.M12;
+	float m13 = rotMat.M13;
+
+	float m21 = rotMat.M21;
+	float m22 = rotMat.M22;
+	float m23 = rotMat.M23;
+
+	float m31 = rotMat.M31;
+	float m32 = rotMat.M32;
+	float m33 = rotMat.M33;
+
+	float trace = m11 + m22 + m33;
+
+	Quaternion<Real> ret;
+
+	if (trace > (Real)0)
+	{
+		Real s1 = std::sqrt((trace + (Real)1));
+		ret.W() = s1 * (Real)0.5;
+		s1 = (Real)0.5 / s1;
+		ret.X() = (m23 - m32) * s1;
+		ret.Y() = (m31 - m13) * s1;
+		ret.Z() = (m12 - m21) * s1;
+		return ret;
+	}
+	if ((m11 >= m22) && (m11 >= m33))
+	{
+		float s2 = std::sqrt(((((Real)1.0 + m11) - m22) - m33));
+		s2 = (Real)0.5 / s2;
+		ret.X() = (Real)0.5 * s2;
+		ret.Y() = (m12 + m21) * s2;
+		ret.Z() = (m13 + m31) * s2;
+		ret.W() = (m23 - m32) * s2;
+		return ret;
+	}
+	if (m22 > m33)
+	{
+		float s3 = std::sqrt(((((Real)1 + m22) - m11) - m33));
+		s3 = (Real)0.5 / s3;
+		ret.X() = (m21 + m12) * s3;
+		ret.Y() = 0.5f * s3;
+		ret.Z() = (m32 + m23) * s3;
+		ret.W() = (m31 - m13) * s3;
+		return ret;
+	}
+
+	float s4 = std::sqrt(((((Real)1 + m33) - m11) - m22));
+	s4 = (Real)0.5 / s4;
+	ret.X() = (m31 + m13) * s4;
+	ret.Y() = (m32 + m23) * s4;
+	ret.Z() = 0.5f * s4;
+	ret.W() = (m12 - m21) * s4;
+	return ret;
+}
+
+template <typename Real>
+inline Matrix4<Real>
+QuaternionToRotationMatrix(const Quaternion<Real>& rot)
+{
+	Real norm = (rot.W() * rot.W()) + (rot.X() * rot.X()) + (rot.Y() * rot.Y()) + (rot.Z() * rot.Z());
+	Real s = (Real)0;
+	//We must ensure the quaternion is normalized first. We also use 2 / norm to save mults later
+	if(norm == (Real)1.0) {
+		s = (Real)2;
+	} else if(norm > 0.0f) {
+		s = (Real)2 / norm;
+	}
+
+	//Compute xs/ys/zs since we use them 2-4 times, saves 6 mults
+	float xs = rot.X() * s;
+	float ys = rot.Y() * s;
+	float zs = rot.Z() * s;
+
+	float xx = rot.X() * xs;
+	float xy = rot.X() * ys;
+	float xz = rot.X() * zs;
+	float xw = rot.W() * xs;
+
+	float yy = rot.Y() * ys;
+	float yz = rot.Y() * zs;
+	float yw = rot.W() * ys;
+
+	float zz = rot.Z() * zs;
+	float zw = rot.W() * zs;
+
+	return Matrix4<Real>(
+		1-yy-zz,  xy+zw,   xz-yw,   (Real)0,
+		xy-zw,    1-xx-zz, yz+xw,   (Real)0,
+		xz+yw,    yz-xw,   1-xx-yy, (Real)0,
+	    (Real)0,  (Real)0, (Real)0, (Real)1);
 }
 
 template <typename Real>

@@ -100,7 +100,8 @@ void TestApp::Update( float deltaTime )
 
 int32_t main()
 {
-	TestApp* app = new TestApp();
-	app->RunGame();
+	/*TestApp* app = new TestApp();
+	app->RunGame();*/
+
 	return 0;
 }

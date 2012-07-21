@@ -5,6 +5,7 @@
 #include "Graphics/GraphicsCommon.h"
 #include "Graphics/Renderable.h"
 #include "Math/BoundingSphere.h"
+#include "IO/Stream.h"
 
 namespace RcEngine
 {
@@ -39,9 +40,11 @@ namespace RcEngine
 			uint32_t GetStartVertex() const			    { return mStartVertex;}
 			uint32_t GetMaterialID() const				{ return mMaterialID; }
 
+			void SetVertexBuffer(const shared_ptr<GraphicsBuffer>& vb, const shared_ptr<VertexDeclaration>& vd);
 			const shared_ptr<GraphicsBuffer>& GetVertexBuffer() const			{ return mVertexBuffer; }
 			const shared_ptr<VertexDeclaration>& GetVertexDeclaration() const	{ return mVertexDecl;}
 
+			void SetIndexBuffer(const shared_ptr<GraphicsBuffer>& indexBuffer, IndexBufferType format);
 			const shared_ptr<GraphicsBuffer>& GetIndexBuffer()	const	{ return mIndexBuffer; }
 			IndexBufferType GetIndexFormat() const						{ return mIndexFormat;  }
 		
@@ -50,6 +53,9 @@ namespace RcEngine
 
 			void GetWorldTransforms(Math::Matrix4f* xform) const;
 			uint32_t GetWorldTransformsCount() const;
+
+			void Load(Stream& source);
+			void Save(Stream& dest);
 
 			/** 
 			 * Load a mesh part from MeshPartContentLoader

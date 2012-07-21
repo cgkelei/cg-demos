@@ -82,6 +82,23 @@ namespace RcEngine
 			return meshPart;
 		}
 
+		void MeshPart::SetVertexBuffer( const shared_ptr<GraphicsBuffer>& vb, const shared_ptr<VertexDeclaration>& vd )
+		{
+			mVertexBuffer = vb;
+			mVertexDecl = vd;
+		}
+
+
+		void MeshPart::SetIndexBuffer( const shared_ptr<GraphicsBuffer>& indexBuffer, IndexBufferType format )
+		{
+			mIndexBuffer = indexBuffer;
+			mIndexFormat = format;
+		}
+
+		void MeshPart::Save( Stream& dest )
+		{
+
+		}
 		
 		//////////////////////////////////////////////////////////////////////////
 		Mesh::Mesh( const String& name, const BoundingSpheref& bs )
