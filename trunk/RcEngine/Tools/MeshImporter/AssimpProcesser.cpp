@@ -6,6 +6,8 @@
 #include "Math/ColorRGBA.h"
 #include "Math/Matrix.h"
 #include "Math/MathUtil.h"
+#include "Graphics/Mesh.h"
+#include "MainApp/Application.h"
 
 #include <fstream>
 
@@ -41,8 +43,6 @@ void TransformMatrix(Matrix4f& out, aiMatrix4x4& in)
 	out.M44 = in.d4;
 }
 
-
-
 AssimpProcesser::AssimpProcesser(void)
 {
 }
@@ -73,68 +73,59 @@ bool AssimpProcesser::Process( const char* filePath )
 
 void AssimpProcesser::ProcessScene( const aiScene* scene )
 {
+	if (scene->HasAnimations())
+	{
+		mSkeleton = CreateBoneTrees(scene->mRootNode, NULL);
 
-	mSkeleton = CreateBoneTrees(scene->mRootNode, NULL);
+		for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
+		{
+			aiMesh* mesh = scene->mMeshes[i];
+
+			for (unsigned int j = 0; j < mesh->mNumBones; j++)
+			{
+				aiBone* bone = mesh->mBones[j];
+				string boneName = string(bone->mName.data);
+				auto found = mNodeByName.find(boneName);
+				if ( mNodeByName.end() != found)
+				{
+					// found it, make sure its not already in the bone list
+					bool skip = false;
+					for (size_t k = 0; k < mBones.size(); ++k)
+					{
+						if (mBones[k]->Name == boneName)
+						{
+							skip = true;
+							break;
+						}
+					}
+
+					if (!skip)
+					{
+						TransformMatrix(found->second->Offset, bone->mOffsetMatrix);
+						mBones.push_back(found->second);
+						mBonesToIndex[found->first] = mBones.size()-1;
+					}
+				}
+			}
+		}
+		mTransforms.resize(mBones.size());
+	}
+
+	MeshContent* meshContent = new MeshContent;
 
 	for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
 	{
 		aiMesh* mesh = scene->mMeshes[i];
-
-		for (unsigned int j = 0; j < mesh->mNumBones; j++)
-		{
-			aiBone* bone = mesh->mBones[j];
-			string boneName = string(bone->mName.data);
-			auto found = mNodeByName.find(boneName);
-			if ( mNodeByName.end() != found)
-			{
-				// found it, make sure its not already in the bone list
-				bool skip = false;
-				for (size_t k = 0; k < mBones.size(); ++k)
-				{
-					if (mBones[k]->Name == boneName)
-					{
-						skip = true;
-						break;
-					}
-				}
-
-				if (!skip)
-				{
-					TransformMatrix(found->second->Offset, bone->mOffsetMatrix);
-					mBones.push_back(found->second);
-					mBonesToIndex[found->first] = mBones.size()-1;
-				}
-			}
-		}
+		ProcessMesh(mesh, meshContent);
 	}
-	mTransforms.resize(mBones.size());
+	
+	for (unsigned int i = 0; i < scene->mNumMaterials; ++i)
+	{
+		aiMaterial* material = scene->mMaterials[i];
+		ProcessMaterial(material, meshContent);
+	}
 
-	fstream stream("E:/text.xml", fstream::out);
-	SaveSkeleton(stream, NULL);
-
-
-
-
-
-
-
-
-
-	//MeshContent* meshContent = new MeshContent;
-
-	//for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
-	//{
-	//	aiMesh* mesh = scene->mMeshes[i];
-	//	ProcessMesh(mesh, meshContent);
-	//}
-	//
-	//for (unsigned int i = 0; i < scene->mNumMaterials; ++i)
-	//{
-	//	aiMaterial* material = scene->mMaterials[i];
-	//	ProcessMaterial(material, meshContent);
-	//}
-
-	//Export("Test.xml", meshContent);
+	Export("Test.xml", meshContent);
 }
 
 void AssimpProcesser::ProcessMesh( aiMesh* mesh, MeshContent* meshContent )
@@ -359,7 +350,8 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 	fstream stream(output, fstream::out);
 
 	stream << "<mesh>" << endl;
-
+	
+	/*
 	// output materials
 	stream << "<materials materialCount=\"" << meshContent->MaterialContentLoaders.size() << "\">" << endl;
 	vector<MaterialContent*>& materials = meshContent->MaterialContentLoaders;
@@ -388,6 +380,7 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 
 	} 
 	stream << "</materials>" << endl;
+	*/
 
 	stream << "<subMeshes>" << endl;
 
@@ -400,7 +393,8 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 		{
 			stream <<"name=\"" << meshPart->Name << "\" ";
 		}
-		stream << "materialID=\"" << meshPart->MaterialID << "\">" << endl; 
+		//stream << "materialID=\"" << meshPart->MaterialID << "\">" << endl; 
+		stream << ">" << endl;
 
 		// Output vertices
 		stream << "\t\t<vertices vertexCount=\"" << meshPart->VertexCount

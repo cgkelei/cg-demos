@@ -97,7 +97,49 @@ namespace RcEngine
 
 		void MeshPart::Save( Stream& dest )
 		{
+			// write submesh name
+			dest.WriteString(mName);
 
+			// write vertices count
+			dest.WriteUInt(mVertexCount);
+			
+			// write vertex size
+			dest.WriteUInt(mVertexDecl->GetVertexSize());
+
+			// write vertex declaration, element size
+			dest.WriteUInt(mVertexDecl->GetElementCount());
+
+			// write each vertex element
+			const std::vector<VertexElement>& elements = mVertexDecl->GetElements();
+			for (auto iter = elements.begin(); iter != elements.end(); ++iter)
+			{
+				const VertexElement& ve = *iter;
+				dest.WriteUInt(ve.Offset);
+				dest.WriteUInt(ve.Type);
+				dest.WriteUInt(ve.Usage);
+				dest.WriteUShort(ve.UsageIndex);
+			}
+
+			// write vertex buffer data
+			uint32_t bufferSize = mVertexBuffer->GetBufferSize();
+			void* data = mVertexBuffer->Map(0, bufferSize, BA_Read_Only);
+			if (!data)
+			{
+				// Exception
+			}
+			dest.Write(data, bufferSize);
+			mVertexBuffer->UnMap();
+
+			// write index buffer
+			bufferSize = mIndexBuffer->GetBufferSize();
+			dest.WriteUInt(bufferSize);
+			data = mIndexBuffer->Map(0, bufferSize, BA_Read_Only);
+			if (data)
+			{
+				// Exception
+			}
+			dest.Write(data, bufferSize);
+			mIndexBuffer->UnMap();
 		}
 		
 		//////////////////////////////////////////////////////////////////////////
@@ -139,5 +181,26 @@ namespace RcEngine
 			return mesh;
 		}	
 
+		void Mesh::Load( Stream& source )
+		{
+			uint32_t subMeshCount = source.ReadUInt();
+			for (uint32_t i = 0 ; i < subMeshCount; ++i)
+			{
+				String name = source.ReadString();
+				shared_ptr<MeshPart> subMesh = std::make_shared<MeshPart>(name, )
+			}
+		}
+
+		void Mesh::Save( Stream& dest )
+		{
+			// write submesh count
+			dest.WriteUInt(mMeshParts.size());
+
+			// write each submesh
+			for (auto iter = mMeshParts.begin(); iter != mMeshParts.end(); ++iter)
+			{
+				(*iter)->Save(dest);
+			}
+		}
 	}
 }

@@ -107,6 +107,8 @@ namespace RcEngine
 			 */
 			static shared_ptr<Mesh> LoadFrom(MeshContent* loader);
 
+			void Load(Stream& source);
+			void Save(Stream& dest);
 
 		private:
 			String mName;

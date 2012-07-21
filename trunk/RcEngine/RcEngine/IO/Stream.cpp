@@ -78,6 +78,19 @@ namespace RcEngine
 		return ret;
 	}
 
+	String Stream::ReadString()
+	{
+		String ret;
+		for (;;)
+		{
+			char c = ReadByte();
+			if (!c)
+				break;
+			else
+				ret += c;
+		}
+		return ret;
+	}
 
 	bool Stream::WriteInt(int32_t value)
 	{
@@ -119,4 +132,10 @@ namespace RcEngine
 		return Write(&value, sizeof value) == sizeof value;
 	}
 
+	bool Stream::WriteString(const String& value)
+	{
+		const char* str = value.c_str();
+		size_t length = strlen(str);
+		return Write(str, length + 1) == length + 1;
+	}
 }

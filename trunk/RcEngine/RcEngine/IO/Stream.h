@@ -45,6 +45,8 @@ namespace RcEngine
 		bool ReadBool();
 		/// Read a float.
 		float ReadFloat();
+		/// Read a null-terminated string.
+		String ReadString();
 
 		/// Write bytes to the stream. Return number of bytes actually written.
 		virtual uint32_t Write(const void* data, uint32_t size) = 0;
@@ -64,6 +66,8 @@ namespace RcEngine
 		bool WriteBool(bool value);
 		/// Write a float.
 		bool WriteFloat(float value);
+		/// Write a null-terminated string.
+		bool WriteString(const String& value);
 
 	protected:
 		uint32_t mPosition;
