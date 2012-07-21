@@ -30,13 +30,7 @@
 #include <algorithm>
 #include <memory>
 #include <limits>
-
-////////////////////////////////////////////////////////////////////////////////
-// Dependencies
-////////////////////////////////////////////////////////////////////////////////
-// ANSI standard includes.
-#include <memory.h>
-#include <stdint.h>
+#include <cstdint>
 #include <cstring>
 #include <cstdlib>
 #include <cmath>

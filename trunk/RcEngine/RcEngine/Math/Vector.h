@@ -2,6 +2,7 @@
 #ifndef _Vector__H
 #define _Vector__H
 
+#include <cstdint>
 #include <iostream>
 
 //  [8/22/2011 hustruan]

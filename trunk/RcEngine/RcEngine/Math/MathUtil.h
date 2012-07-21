@@ -81,6 +81,9 @@ namespace Math {
 	inline Matrix4<Real> CreateRotationAxis(const Vector<Real,3>& axis, Real angle);
 
 	template<typename Real>
+	inline Matrix4<Real> CreateRotationYawPitchRoll(Real yaw, Real pitch, Real roll);
+
+	template<typename Real>
 	inline Matrix4<Real> CreateScaling(Real sX, Real sY, Real sZ);
 		
 	template<typename Real>
@@ -88,6 +91,10 @@ namespace Math {
 		
 	template<typename Real>
 	inline Matrix4<Real> CreateTranslation(Real x, Real y, Real z);
+
+	template<typename Real>
+	inline void 
+	MatrixDecompose(Vector<Real, 3>& sacle, Quaternion<Real>& rotation, Vector<Real, 3>& translation, const Matrix4<Real>& mat);
 
 	//Quaternion
 	template <typename Real>
@@ -105,6 +112,10 @@ namespace Math {
 	template <typename Real>
 	inline Quaternion<Real> 
 	QuaternionFromRotationMatrix(const Matrix4<Real>& rotMat);
+
+	template <typename Real>
+	inline Matrix4<Real>
+	QuaternionToRotationMatrix(const Quaternion<Real>& rotQuat);
 
 	template <typename Real>
 	inline Quaternion<Real> 

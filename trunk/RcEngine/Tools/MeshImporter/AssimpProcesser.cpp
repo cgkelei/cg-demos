@@ -4,15 +4,44 @@
 #include "Graphics/VertexDeclaration.h"
 #include "Graphics/RenderFactory.h"
 #include "Math/ColorRGBA.h"
+#include "Math/Matrix.h"
+#include "Math/MathUtil.h"
 
 #include <fstream>
-using namespace std;
-
 
 #pragma comment(lib, "assimp.lib")
 
 using namespace RcEngine::Render;
-using namespace RcEngine::Math;
+
+
+// Convert aiMatrix to RcEngine matrix, note that assimp 
+// assume the right handed coordinate system, so aiMatrix 
+// is a right-handed matrix.You need to transpose it to get
+// a left-handed matrix.
+void TransformMatrix(Matrix4f& out, aiMatrix4x4& in)
+{
+	out.M11 = in.a1;
+	out.M12 = in.a2;
+	out.M13 = in.a3;
+	out.M14 = in.a4;
+	
+	out.M21 = in.b1;
+	out.M22 = in.b2;
+	out.M23 = in.b3;
+	out.M24 = in.b4;
+	
+	out.M31 = in.c1;
+	out.M32 = in.c2;
+	out.M33 = in.c3;
+	out.M34 = in.c4;
+	
+	out.M41 = in.d1;
+	out.M42 = in.d2;
+	out.M43 = in.d3;
+	out.M44 = in.d4;
+}
+
+
 
 AssimpProcesser::AssimpProcesser(void)
 {
@@ -37,9 +66,6 @@ bool AssimpProcesser::Process( const char* filePath )
 		return false;
 	}
 
-	aiNode* rootNode = scene->mRootNode;
-	string name(rootNode->mName.data);
-	uint32_t c = rootNode->mNumChildren;
 	ProcessScene(scene);
 
 	return true;
@@ -47,21 +73,68 @@ bool AssimpProcesser::Process( const char* filePath )
 
 void AssimpProcesser::ProcessScene( const aiScene* scene )
 {
-	MeshContent* meshContent = new MeshContent;
+
+	mSkeleton = CreateBoneTrees(scene->mRootNode, NULL);
 
 	for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
 	{
 		aiMesh* mesh = scene->mMeshes[i];
-		ProcessMesh(mesh, meshContent);
-	}
-	
-	for (unsigned int i = 0; i < scene->mNumMaterials; ++i)
-	{
-		aiMaterial* material = scene->mMaterials[i];
-		ProcessMaterial(material, meshContent);
-	}
 
-	Export("Test.xml", meshContent);
+		for (unsigned int j = 0; j < mesh->mNumBones; j++)
+		{
+			aiBone* bone = mesh->mBones[j];
+			string boneName = string(bone->mName.data);
+			auto found = mNodeByName.find(boneName);
+			if ( mNodeByName.end() != found)
+			{
+				// found it, make sure its not already in the bone list
+				bool skip = false;
+				for (size_t k = 0; k < mBones.size(); ++k)
+				{
+					if (mBones[k]->Name == boneName)
+					{
+						skip = true;
+						break;
+					}
+				}
+
+				if (!skip)
+				{
+					TransformMatrix(found->second->Offset, bone->mOffsetMatrix);
+					mBones.push_back(found->second);
+					mBonesToIndex[found->first] = mBones.size()-1;
+				}
+			}
+		}
+	}
+	mTransforms.resize(mBones.size());
+
+	fstream stream("E:/text.xml", fstream::out);
+	SaveSkeleton(stream, NULL);
+
+
+
+
+
+
+
+
+
+	//MeshContent* meshContent = new MeshContent;
+
+	//for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
+	//{
+	//	aiMesh* mesh = scene->mMeshes[i];
+	//	ProcessMesh(mesh, meshContent);
+	//}
+	//
+	//for (unsigned int i = 0; i < scene->mNumMaterials; ++i)
+	//{
+	//	aiMaterial* material = scene->mMaterials[i];
+	//	ProcessMaterial(material, meshContent);
+	//}
+
+	//Export("Test.xml", meshContent);
 }
 
 void AssimpProcesser::ProcessMesh( aiMesh* mesh, MeshContent* meshContent )
@@ -80,6 +153,8 @@ void AssimpProcesser::ProcessMesh( aiMesh* mesh, MeshContent* meshContent )
 		assert(face.mNumIndices == 3);
 		meshPartContent->mFaces[f] = MeshPartContent::Face(face.mIndices[0], face.mIndices[1], face.mIndices[2]);
 	}
+	
+	bool bones = mesh->HasBones();
 
 	// Process vertices
 	std::vector<VertexElement> vertexElements;
@@ -433,4 +508,72 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 
 	stream << "</mesh>" << endl;
 	stream.close();
+}
+
+Bone* AssimpProcesser::CreateBoneTrees( aiNode* pNode, Bone* parent )
+{
+	Bone* internalNode = new Bone;
+	internalNode->Name = string(pNode->mName.data);
+	internalNode->Parent = parent;
+
+	mNodeByName[internalNode->Name] = internalNode;
+
+	// local transform
+	TransformMatrix(internalNode->LocalTransform, pNode->mTransformation);
+	internalNode->LocalTransform.Transpose();		// switch right-handed to left handed
+	
+	// copy 
+	internalNode->OriginalLocalTransform = internalNode->LocalTransform;
+
+	// calculate world transform
+	CalculateBoneToWorldTransform(internalNode);
+
+	for (unsigned int child = 0; child < pNode->mNumChildren; ++child)
+	{
+		internalNode->Children.push_back( 
+			CreateBoneTrees(pNode->mChildren[child], internalNode));
+	}
+
+	return internalNode;
+}
+
+void AssimpProcesser::UpdateTransforms( Bone* pNode )
+{
+	CalculateBoneToWorldTransform(pNode);
+	for(size_t i = 0; i < pNode->Children.size(); i++)
+	{
+		Bone* childNode = pNode->Children[i];
+		UpdateTransforms( pNode);// update global transform as well
+	}
+}
+
+void AssimpProcesser::CalculateBoneToWorldTransform(Bone* pNode)
+{
+	pNode->GlobalTransform = pNode->LocalTransform;
+	Bone* parent = pNode->Parent;
+	while(parent)
+	{
+		pNode->GlobalTransform = pNode->GlobalTransform * parent->LocalTransform;
+		parent = parent->Parent;
+	}
+}
+
+void AssimpProcesser::SaveSkeleton(fstream& stream, Bone* parent)
+{
+	for (size_t i = 0; i < mBones.size(); ++i)
+	{
+		Bone* bone = mBones[i];
+		Vector3f scale, translation;
+		Quaternionf rotation;
+		MatrixDecompose(scale, rotation, translation, bone->OriginalLocalTransform);
+
+		stream << "<bone id=\"" << i << "\" name=\"" << bone->Name << "\" parent=\""
+			<< mBonesToIndex[bone->Parent->Name] << "\">" << endl;
+		stream << "\t<position x=\"" << translation.X() << "\" y=\"" 
+			<< translation.Y()  << "\" z=\"" << translation.Z()  
+			<< "\"/>" << endl;
+		stream <<"\t<rotation x=\"" << rotation.X() << "\" y=\"" << rotation.Y() 
+			<< "\" z=\"" << rotation.Z() << "\" w=\"" << rotation.W() << "\"/>" << endl;
+		stream << "</bone>" << endl;
+	}
 }
