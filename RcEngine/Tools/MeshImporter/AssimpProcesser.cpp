@@ -8,11 +8,13 @@
 #include "Math/MathUtil.h"
 #include "Graphics/Mesh.h"
 #include "MainApp/Application.h"
+#include "IO/FileStream.h"
 
 #include <fstream>
 
 #pragma comment(lib, "assimp.lib")
 
+using namespace RcEngine;
 using namespace RcEngine::Render;
 
 
@@ -125,7 +127,8 @@ void AssimpProcesser::ProcessScene( const aiScene* scene )
 		ProcessMaterial(material, meshContent);
 	}
 
-	Export("Test.xml", meshContent);
+	//ExportBinary("Test.mdl", meshContent);
+	ExportXML("Test.xml", meshContent);
 }
 
 void AssimpProcesser::ProcessMesh( aiMesh* mesh, MeshContent* meshContent )
@@ -345,11 +348,13 @@ void AssimpProcesser::ProcessMaterial( aiMaterial* material, MeshContent* meshCo
 	meshContent->MaterialContentLoaders.push_back(materialContent);	
 }
 
-void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
+void AssimpProcesser::ExportXML( const char* output, MeshContent* meshContent )
 {
+	meshContent->Name = "Dwarf";
+
 	fstream stream(output, fstream::out);
 
-	stream << "<mesh>" << endl;
+	stream << "<mesh name=\"" << meshContent->Name << "\">" << endl;
 	
 	/*
 	// output materials
@@ -382,7 +387,7 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 	stream << "</materials>" << endl;
 	*/
 
-	stream << "<subMeshes>" << endl;
+	stream << "<subMeshes count=\"" << meshContent->MeshPartContentLoaders.size() << "\">" << endl;
 
 	vector<MeshPartContent*>& meshParts = meshContent->MeshPartContentLoaders;
 	for (size_t i = 0; i < meshParts.size(); ++i)
@@ -486,7 +491,7 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 		stream << "\t\t</vertices>" << endl;	
 
 		// Output triangles
-		stream << "\t\t<triangles>" << endl;	
+		stream << "\t\t<triangles triangleCount=\"" << meshPart->mFaces.size() << "\">" << endl;	
 		for (unsigned int i = 0; i < meshPart->mFaces.size(); ++i)
 		{
 			MeshPartContent::Face face = meshPart->mFaces[i];
@@ -503,6 +508,52 @@ void AssimpProcesser::Export( const char* output, MeshContent* meshContent )
 	stream << "</mesh>" << endl;
 	stream.close();
 }
+
+void AssimpProcesser::ExportBinary( const char* output, MeshContent* meshContent )
+{
+	FileStream stream(output, FILE_WRITE);
+
+	meshContent->Name = "Dwarf";
+
+	// write mesh name, for test
+	stream.WriteString(meshContent->Name);
+	stream.WriteUInt(meshContent->MeshPartContentLoaders.size());
+
+	vector<MeshPartContent*> subMeshes = meshContent->MeshPartContentLoaders;
+	for (size_t i = 0; i < subMeshes.size(); ++i)
+	{
+		MeshPartContent* submesh = subMeshes[i];
+		stream.WriteString(submesh->Name);
+		stream.WriteUInt(submesh->VertexCount);
+		stream.WriteUInt(submesh->VertexDeclaration->GetVertexSize());
+		
+		// write vertex declaration, element size
+		stream.WriteUInt(submesh->VertexDeclaration->GetElementCount());
+
+		// write each vertex element
+		const std::vector<VertexElement>& elements = submesh->VertexDeclaration->GetElements();
+		for (auto iter = elements.begin(); iter != elements.end(); ++iter)
+		{
+			const VertexElement& ve = *iter;
+			stream.WriteUInt(ve.Offset);
+			stream.WriteUInt(ve.Type);
+			stream.WriteUInt(ve.Usage);
+			stream.WriteUShort(ve.UsageIndex);
+		}
+
+		// write vertex buffer data
+		uint32_t bufferSize = submesh->VertexCount * submesh->VertexDeclaration->GetVertexSize();
+		stream.Write(submesh->VertexData, bufferSize);
+
+		// write triangles count
+		stream.WriteUInt(submesh->mFaces.size());
+		bufferSize = submesh->mFaces.size() * sizeof(MeshPartContent::Face);
+		stream.Write(&submesh->mFaces[0], bufferSize);
+	}
+	
+	stream.Close();
+}
+
 
 Bone* AssimpProcesser::CreateBoneTrees( aiNode* pNode, Bone* parent )
 {

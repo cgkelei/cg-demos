@@ -54,15 +54,15 @@ namespace RcEngine
 			void GetWorldTransforms(Math::Matrix4f* xform) const;
 			uint32_t GetWorldTransformsCount() const;
 
-			void Load(Stream& source);
-			void Save(Stream& dest);
+			static shared_ptr<MeshPart> Load(const shared_ptr<Mesh>& mesh, Stream& source);
+			static void Save(const shared_ptr<MeshPart>& meshPart, Stream& dest);
 
 			/** 
 			 * Load a mesh part from MeshPartContentLoader
 			 * @param mesh The mesh that this is part of.
 			 * @param mploader loader contains mesh part data.
 			 */
-			static shared_ptr<MeshPart> LoadFrom( const shared_ptr<Mesh>& mesh, MeshPartContent* mpLoader);
+			//static shared_ptr<MeshPart> LoadFrom( const shared_ptr<Mesh>& mesh, MeshPartContent* mpLoader);
 			
 		private:
 			weak_ptr<Mesh> mParentMesh;
@@ -91,7 +91,7 @@ namespace RcEngine
 		class _ApiExport Mesh
 		{
 		public:
-			Mesh(const String& name, const BoundingSpheref& bs);
+			Mesh(const String& name);
 			virtual ~Mesh();
 
 			const String& GetName() const								{ return mName; }
@@ -105,10 +105,10 @@ namespace RcEngine
 			/** 
 			 * Load a mesh from loader which contains the mesh data.
 			 */
-			static shared_ptr<Mesh> LoadFrom(MeshContent* loader);
+			//static shared_ptr<Mesh> LoadFrom(MeshContent* loader);
 
-			void Load(Stream& source);
-			void Save(Stream& dest);
+			static shared_ptr<Mesh> Load(Stream& source);
+			static void Save(const shared_ptr<Mesh>& mesh, Stream& dest);
 
 		private:
 			String mName;

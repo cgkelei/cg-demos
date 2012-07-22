@@ -45,7 +45,8 @@ private:
 
 	void GetBoundingBox(const aiScene* scene, aiVector3D* min, aiVector3D* max);
 
-	void Export(const char* output, MeshContent* meshContent);
+	void ExportXML(const char* output, MeshContent* meshContent);
+	void ExportBinary(const char* output, MeshContent* meshContent);
 
 
 private:

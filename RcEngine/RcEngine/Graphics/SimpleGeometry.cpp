@@ -86,12 +86,6 @@ namespace RcEngine
 			mRenderOperation->IndexType = IBT_Bit16;
 			mRenderOperation->StartIndexLocation = 0;
 			mRenderOperation->StartVertexLocation = 0;
-
-
-
-		
-			Content::MeshContent* test = Content::ReadMeshContent("../Media/Mesh/test.xml");
-
 		}
 
 		SimpleBox::~SimpleBox()

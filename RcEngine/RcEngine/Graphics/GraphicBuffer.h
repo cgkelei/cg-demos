@@ -22,7 +22,7 @@ public:
 
 protected:
 	BufferUsage mBufferUsage;
-	uint32_t mAccessHint;
+	uint32_t mAccessHint;	// CPU access flags 
 	uint32_t mSizeInBytes;
 };
 
