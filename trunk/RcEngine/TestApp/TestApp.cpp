@@ -7,12 +7,14 @@
 #include "Graphics/EffectPass.h"
 #include "Graphics/EffectParameter.h"
 #include "Graphics/Material.h"
+#include "Graphics/Mesh.h"
 #include "Graphics/SimpleGeometry.h"
 #include "Content/MeshContentLoader.h"
 #include "Math/ColorRGBA.h"
 #include "Math/MathUtil.h"
 #include "Core/Context.h"
 #include "Math/BoundingSphere.h"
+#include "IO/FileStream.h"
 #include <D3DX10Math.h>
 
 #pragma comment(lib, "D3DX10.lib")
@@ -47,19 +49,11 @@ void TestApp::LoadContent()
 	shared_ptr<Material> matrial = mBox->GetMaterial();
 	matrial->SetDiffuseColor(ColorRGBA(1, 0, 0, 0));
 
-	const float yaw = PI / 4;
-	const float pitch = PI / 6;
-	const float roll = PI / 8;
+	//Content::MeshContent* test = Content::ReadMeshContent("../Media/Mesh/test.xml");
 
-	D3DXQUATERNION d3dQuat1, d3dQuat2, d3dSlerp;
-	D3DXQuaternionRotationYawPitchRoll(&d3dQuat1, yaw, pitch, roll);
-	D3DXQuaternionRotationYawPitchRoll(&d3dQuat2, pitch, roll, yaw);
-	D3DXQuaternionSlerp(&d3dSlerp,&d3dQuat1, &d3dQuat2, 0.62f);
+	RcEngine::FileStream modelSource("../Media/Mesh/Test.mdl", RcEngine::FILE_READ);
 
-
-	Quaternionf myQuat1 = QuaternionFromRotationYawPitchRoll(yaw, pitch, roll);
-	Quaternionf myQuat2 = QuaternionFromRotationYawPitchRoll(pitch, roll, yaw);
-	Quaternionf mySlerp = QuaternionSlerp(myQuat1, myQuat2, 0.62f);	
+	shared_ptr<Mesh> dwarf = Mesh::Load(modelSource);
 }
 
 void TestApp::UnloadContent()
@@ -100,8 +94,8 @@ void TestApp::Update( float deltaTime )
 
 int32_t main()
 {
-	/*TestApp* app = new TestApp();
-	app->RunGame();*/
+	TestApp* app = new TestApp();
+	app->RunGame();
 
 	return 0;
 }
