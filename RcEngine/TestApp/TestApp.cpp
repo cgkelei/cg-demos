@@ -37,7 +37,7 @@ void TestApp::Initialize()
 	Application::Initialize();
 
 	Camera* camera = RcEngine::Core::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
-	camera->SetViewParams(Vector3f(0, 0, 30), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+	camera->SetViewParams(Vector3f(0, 10, 30), Vector3f(0, 10, 0), Vector3f(0, 1, 0));
 	camera->SetProjectionParams(PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 100.0f );
 }
 
@@ -45,15 +45,27 @@ void TestApp::LoadContent()
 {
 	RenderFactory* factory = RcEngine::Core::Context::GetSingleton().GetRenderDevice().GetRenderFactory();
 	
-	mBox = std::make_shared<SimpleBox>("SimpleBox");
+	/*mBox = std::make_shared<SimpleBox>("SimpleBox");
 	shared_ptr<Material> matrial = mBox->GetMaterial();
-	matrial->SetDiffuseColor(ColorRGBA(1, 0, 0, 0));
+	matrial->SetDiffuseColor(ColorRGBA(1, 0, 0, 0));*/
+
+	
 
 	//Content::MeshContent* test = Content::ReadMeshContent("../Media/Mesh/test.xml");
 
+	// Load mesh
 	RcEngine::FileStream modelSource("../Media/Mesh/Test.mdl", RcEngine::FILE_READ);
+	mDwarf = Mesh::Load(modelSource);
 
-	shared_ptr<Mesh> dwarf = Mesh::Load(modelSource);
+	// Load texture
+	shared_ptr<Texture> texture = factory->CreateTextureFromFile("../Media/Textures/Glass.dds", 0);
+
+	// Load material 
+	mDwarfMaterial = factory->CreateMaterialFromFile("SimpleTextured", "../Media/Materials/SimpleTextured.xml");
+	mDwarfMaterial->SetDiffuseColor(ColorRGBA(1, 0, 0, 0));
+	mDwarf->SetMaterial(mDwarfMaterial);
+
+	mDwarfMaterial->GetEffect()->GetParameterByName("DiffuseMap")->SetValue(texture);
 }
 
 void TestApp::UnloadContent()
@@ -66,18 +78,27 @@ void TestApp::UnloadContent()
 void TestApp::Render()
 {
 	mRenderDevice->GetCurrentFrameBuffer()->Clear(CF_Color | CF_Depth |CF_Stencil, 
-		RcEngine::Math::ColorRGBA(1, 1, 1, 1), 1.0f, 0);
+		RcEngine::Math::ColorRGBA(0.1f, 0.1f, 0.1f, 1.0f), 1.0f, 0);
 
-	mBox->Render();
+	/*mBox->Render();*/
+
+	for (uint32_t i = 0; i < mDwarf->GetMeshPartCount(); ++i)
+	{
+		mDwarf->GetMeshPart(i)->Render();
+	}
 
 	mRenderDevice->GetCurrentFrameBuffer()->SwapBuffers();
 }
 
 void TestApp::Update( float deltaTime )
 {
-	mBox->SetWorldMatrix(CreateScaling(5, 5, 5) * CreateTranslation(0.0f, 0.0f, 5.0f));
+	//mBox->SetWorldMatrix(CreateScaling(5, 5, 5) * CreateTranslation(0.0f, 0.0f, 5.0f));
 
-	static float pos = 30;
+	static float degree = 0;
+	degree += deltaTime * 0.01f ;
+	mDwarf->SetWorldMatrix( CreateRotationY(ToRadian(degree)) * CreateScaling(10, 10, 10) );
+
+	/*static float pos = 30;
 	if(mKeyboard->isKeyDown(OIS::KC_W))
 	{	
 		pos += 5 * deltaTime;
@@ -89,7 +110,7 @@ void TestApp::Update( float deltaTime )
 	}
 
 	Camera* camera = RcEngine::Core::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
-	camera->SetViewParams(Vector3f(0, 0, pos), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+	camera->SetViewParams(Vector3f(0, 0, pos), Vector3f(0, 0, 0), Vector3f(0, 1, 0));*/
 }
 
 int32_t main()

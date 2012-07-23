@@ -1,5 +1,6 @@
 #include "Graphics/Renderable.h"
 #include "Graphics/RenderDevice.h"
+#include "Graphics/RenderOperation.h"
 #include "Graphics/Material.h"
 #include "Graphics/Effect.h"
 #include "Graphics/EffectTechnique.h"
@@ -13,6 +14,7 @@ namespace RcEngine
 	{
 
 		Renderable::Renderable()
+			: mRenderOperation( new RenderOperation )
 		{
 
 		}

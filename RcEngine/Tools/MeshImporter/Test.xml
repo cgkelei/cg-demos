@@ -1,4 +1,96 @@
 <mesh name="Dwarf">
+<materials materialCount="9">
+	<matrial>
+		<ambient r="0" g="0" b="0"/>
+		<diffuse r="0" g="0" b="0"/>
+		<specular r="0" g="0" b="0"/>
+		<emissive r="0" g="0" b="0"/>
+		<shininess v="1"/>
+		<texturesChunk>
+			<texture type="DiffuseMap" name="Weapons.dds"/>
+		</texturesChunk>
+	</matrial>
+	<matrial>
+		<ambient r="0" g="0" b="0"/>
+		<diffuse r="0" g="0" b="0"/>
+		<specular r="0" g="0" b="0"/>
+		<emissive r="0" g="0" b="0"/>
+		<shininess v="1"/>
+		<texturesChunk>
+			<texture type="DiffuseMap" name="Pack.dds"/>
+		</texturesChunk>
+	</matrial>
+	<matrial>
+		<ambient r="0" g="0" b="0"/>
+		<diffuse r="0" g="0" b="0"/>
+		<specular r="0" g="0" b="0"/>
+		<emissive r="0" g="0" b="0"/>
+		<shininess v="1"/>
+		<texturesChunk>
+			<texture type="DiffuseMap" name="Body.dds"/>
+		</texturesChunk>
+	</matrial>
+	<matrial>
+		<ambient r="0" g="0" b="0"/>
+		<diffuse r="0" g="0" b="0"/>
+		<specular r="0" g="0" b="0"/>
+		<emissive r="0" g="0" b="0"/>
+		<shininess v="1"/>
+		<texturesChunk>
+			<texture type="DiffuseMap" name="Body.dds"/>
+		</texturesChunk>
+	</matrial>
+	<matrial>
+		<ambient r="0" g="0" b="0"/>
+		<diffuse r="0" g="0" b="0"/>
+		<specular r="0" g="0" b="0"/>
+		<emissive r="0" g="0" b="0"/>
+		<shininess v="1"/>
+		<texturesChunk>
+			<texture type="DiffuseMap" name="Body.dds"/>
+		</texturesChunk>
+	</matrial>
+	<matrial>
+		<ambient r="0" g="0" b="0"/>
+		<diffuse r="0" g="0" b="0"/>
+		<specular r="0" g="0" b="0"/>
+		<emissive r="0" g="0" b="0"/>
+		<shininess v="1"/>
+		<texturesChunk>
+			<texture type="DiffuseMap" name="Body.dds"/>
+		</texturesChunk>
+	</matrial>
+	<matrial>
+		<ambient r="0" g="0" b="0"/>
+		<diffuse r="0" g="0" b="0"/>
+		<specular r="0" g="0" b="0"/>
+		<emissive r="0" g="0" b="0"/>
+		<shininess v="1"/>
+		<texturesChunk>
+			<texture type="DiffuseMap" name="Armor.dds"/>
+		</texturesChunk>
+	</matrial>
+	<matrial>
+		<ambient r="0" g="0" b="0"/>
+		<diffuse r="0" g="0" b="0"/>
+		<specular r="0" g="0" b="0"/>
+		<emissive r="0" g="0" b="0"/>
+		<shininess v="1"/>
+		<texturesChunk>
+			<texture type="DiffuseMap" name="Headgear.dds"/>
+		</texturesChunk>
+	</matrial>
+	<matrial>
+		<ambient r="0" g="0" b="0"/>
+		<diffuse r="0" g="0" b="0"/>
+		<specular r="0" g="0" b="0"/>
+		<emissive r="0" g="0" b="0"/>
+		<shininess v="1"/>
+		<texturesChunk>
+			<texture type="DiffuseMap" name="DwarfHead.dds"/>
+		</texturesChunk>
+	</matrial>
+</materials>
 <subMeshes count="9">
 	<subMesh >
 		<vertices vertexCount="1116" vertexSize="32">

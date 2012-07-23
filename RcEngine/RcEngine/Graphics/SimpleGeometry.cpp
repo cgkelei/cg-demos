@@ -32,7 +32,7 @@ namespace RcEngine
 
 
 		SimpleBox::SimpleBox(const String& name)
-			: RenderableHelper(name), mRenderOperation( new RenderOperation )
+			: RenderableHelper(name)
 		{
 			RenderFactory& factory = Core::Context::GetSingleton().GetRenderFactory();
 

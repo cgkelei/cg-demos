@@ -28,5 +28,7 @@ private:
 	shared_ptr<VertexDeclaration> mVertexDecl;
 	shared_ptr<Texture> mTexture;
 	shared_ptr<SimpleBox> mBox;
+	shared_ptr<Mesh> mDwarf;
+	shared_ptr<Material> mDwarfMaterial;
 };
 

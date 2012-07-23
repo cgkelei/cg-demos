@@ -41,9 +41,6 @@ namespace RcEngine
 			~SimpleBox();
 
 			const shared_ptr<RenderOperation>& GetRenderOperation() const;
-
-		private:
-			shared_ptr<RenderOperation> mRenderOperation;
 		};
 		
 

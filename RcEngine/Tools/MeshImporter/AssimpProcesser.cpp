@@ -203,7 +203,6 @@ void AssimpProcesser::ProcessMesh( aiMesh* mesh, MeshContent* meshContent )
 
 	meshPartContent->VertexData = new char[vertexSize * mesh->mNumVertices];
 
-	aiVector3D v = mesh->mVertices[mesh->mNumVertices-1];
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
 	{
@@ -215,9 +214,12 @@ void AssimpProcesser::ProcessMesh( aiMesh* mesh, MeshContent* meshContent )
 			switch(element.Usage)
 			{
 			case VEU_Position:
-				*(vertexPtr) = mesh->mVertices[i].x;
-				*(vertexPtr+1) = mesh->mVertices[i].y;
-				*(vertexPtr+2) = mesh->mVertices[i].z;
+				{
+					aiVector3D v = mesh->mVertices[i];
+					*(vertexPtr) = mesh->mVertices[i].x;
+					*(vertexPtr+1) = mesh->mVertices[i].y;
+					*(vertexPtr+2) = mesh->mVertices[i].z;
+				}	
 				break;
 			case VEU_Normal:
 				*(vertexPtr) = mesh->mNormals[i].x;
@@ -356,7 +358,7 @@ void AssimpProcesser::ExportXML( const char* output, MeshContent* meshContent )
 
 	stream << "<mesh name=\"" << meshContent->Name << "\">" << endl;
 	
-	/*
+	
 	// output materials
 	stream << "<materials materialCount=\"" << meshContent->MaterialContentLoaders.size() << "\">" << endl;
 	vector<MaterialContent*>& materials = meshContent->MaterialContentLoaders;
@@ -385,7 +387,7 @@ void AssimpProcesser::ExportXML( const char* output, MeshContent* meshContent )
 
 	} 
 	stream << "</materials>" << endl;
-	*/
+	
 
 	stream << "<subMeshes count=\"" << meshContent->MeshPartContentLoaders.size() << "\">" << endl;
 

@@ -32,14 +32,19 @@ namespace RcEngine
 
 			const String& GetName() const								{ return mName; }
 			const BoundingSpheref& GetBoundingSphere() const			{ return mBoundingSphere; }
+			
+			const shared_ptr<RenderOperation>& GetRenderOperation() const 	{ return mRenderOperation; }
 
 			uint32_t GetVertexCount() const				{ return mVertexCount; }
 			uint32_t GetPrimitiveCount() const			{ return mPrimitiveCount; }
 			uint32_t GetIndexCount() const				{ return mIndexCount; }
 			uint32_t GetStartIndex() const				{ return mStartIndex; }
 			uint32_t GetStartVertex() const			    { return mStartVertex;}
+			
 			uint32_t GetMaterialID() const				{ return mMaterialID; }
-
+			void SetMaterialID(size_t id)				{ mMaterialID = id; }
+			const shared_ptr<Material>& GetMaterial() const;
+			
 			void SetVertexBuffer(const shared_ptr<GraphicsBuffer>& vb, const shared_ptr<VertexDeclaration>& vd);
 			const shared_ptr<GraphicsBuffer>& GetVertexBuffer() const			{ return mVertexBuffer; }
 			const shared_ptr<VertexDeclaration>& GetVertexDeclaration() const	{ return mVertexDecl;}
@@ -47,10 +52,7 @@ namespace RcEngine
 			void SetIndexBuffer(const shared_ptr<GraphicsBuffer>& indexBuffer, IndexBufferType format);
 			const shared_ptr<GraphicsBuffer>& GetIndexBuffer()	const	{ return mIndexBuffer; }
 			IndexBufferType GetIndexFormat() const						{ return mIndexFormat;  }
-		
-			const shared_ptr<RenderOperation>& GetRenderOperation() const	{ return mRenderOperation; }
-			const shared_ptr<Material>& GetMaterial() const;
-
+			
 			void GetWorldTransforms(Math::Matrix4f* xform) const;
 			uint32_t GetWorldTransformsCount() const;
 
@@ -77,7 +79,7 @@ namespace RcEngine
 			IndexBufferType			   mIndexFormat;
 
 			BoundingSpheref mBoundingSphere;
-			
+		
 			uint32_t mPrimitiveCount; // Only support triangle
 	
 			uint32_t mStartIndex;
@@ -102,6 +104,20 @@ namespace RcEngine
 
 			const shared_ptr<Material>& GetMaterial(size_t i) const 	{ return mMaterials[i]; }
 
+			uint32_t GetMeshPartCount() const							{ return mMeshParts.size(); }
+			const shared_ptr<MeshPart>& GetMeshPart(size_t i) const		{ return mMeshParts[i]; }
+			
+
+			/**
+			 * Set all mesh part to the same material
+			 */
+			void SetMaterial(const shared_ptr<Material>& mat);
+
+			/**
+			 * Set a material to the given mesh part
+			 */
+			void SetMaterial(size_t meshPartIndex, const shared_ptr<Material>& mat);
+
 			/** 
 			 * Load a mesh from loader which contains the mesh data.
 			 */
@@ -114,8 +130,6 @@ namespace RcEngine
 			String mName;
 			
 			Math::BoundingSpheref mBoundingSphere;
-
-			RenderOperation mRenderOperation;
 
 			uint32_t mPrimitiveCount;
 			uint32_t mVertexCount;
