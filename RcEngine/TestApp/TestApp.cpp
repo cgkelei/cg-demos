@@ -49,23 +49,23 @@ void TestApp::LoadContent()
 	shared_ptr<Material> matrial = mBox->GetMaterial();
 	matrial->SetDiffuseColor(ColorRGBA(1, 0, 0, 0));*/
 
-	
+	// Load texture
+	mTexture = factory->CreateTextureFromFile("../Media/Textures/Body.dds", 0);
 
-	//Content::MeshContent* test = Content::ReadMeshContent("../Media/Mesh/test.xml");
+	
+	mQuad = std::make_shared<SimpleTexturedQuad>("SimpleQuad");
+	shared_ptr<Material> matrial = mQuad->GetMaterial();
+	EffectParameter* para = matrial->GetEffect()->GetParameterByName("DiffuseMap");
+	para->SetValue(mTexture);
 
 	// Load mesh
 	RcEngine::FileStream modelSource("../Media/Mesh/Test.mdl", RcEngine::FILE_READ);
 	mDwarf = Mesh::Load(modelSource);
 
-	// Load texture
-	shared_ptr<Texture> texture = factory->CreateTextureFromFile("../Media/Textures/Glass.dds", 0);
-
 	// Load material 
 	mDwarfMaterial = factory->CreateMaterialFromFile("SimpleTextured", "../Media/Materials/SimpleTextured.xml");
 	mDwarfMaterial->SetDiffuseColor(ColorRGBA(1, 0, 0, 0));
 	mDwarf->SetMaterial(mDwarfMaterial);
-
-	mDwarfMaterial->GetEffect()->GetParameterByName("DiffuseMap")->SetValue(texture);
 }
 
 void TestApp::UnloadContent()
@@ -78,9 +78,9 @@ void TestApp::UnloadContent()
 void TestApp::Render()
 {
 	mRenderDevice->GetCurrentFrameBuffer()->Clear(CF_Color | CF_Depth |CF_Stencil, 
-		RcEngine::Math::ColorRGBA(0.1f, 0.1f, 0.1f, 1.0f), 1.0f, 0);
+		RcEngine::Math::ColorRGBA(1.1f, 1.1f, 1.1f, 1.0f), 1.0f, 0);
 
-	/*mBox->Render();*/
+	//mQuad->Render();
 
 	for (uint32_t i = 0; i < mDwarf->GetMeshPartCount(); ++i)
 	{
@@ -92,7 +92,7 @@ void TestApp::Render()
 
 void TestApp::Update( float deltaTime )
 {
-	//mBox->SetWorldMatrix(CreateScaling(5, 5, 5) * CreateTranslation(0.0f, 0.0f, 5.0f));
+	mQuad->SetWorldMatrix( CreateScaling(10, 10, 10) * CreateTranslation(0.0f, 10.0f, -10.0f) );
 
 	static float degree = 0;
 	degree += deltaTime * 0.01f ;

@@ -43,44 +43,6 @@ namespace RcEngine
 			return 1;
 		}
 
-
-		//shared_ptr<MeshPart> MeshPart::LoadFrom( const shared_ptr<Mesh>& mesh, MeshPartContent* mpLoader )
-		//{
-		//	if (!mesh || !mpLoader)
-		//	{
-		//		return nullptr;
-		//	}
-
-		//	RenderFactory& factory = Core::Context::GetSingleton().GetRenderFactory();
-
-		//	shared_ptr<MeshPart> meshPart = std::make_shared<MeshPart>(mpLoader->Name, mesh);
-		//	meshPart->mMaterialID = mpLoader->MaterialID;
-		//	meshPart->mIndexCount = mpLoader->IndexCount;
-		//	meshPart->mStartIndex = mpLoader->StartIndex;
-		//	meshPart->mIndexFormat = mpLoader->IndexFormat;
-		//	meshPart->mStartVertex = mpLoader->StartVertex;
-		//	meshPart->mPrimitiveCount = mpLoader->IndexCount / 3;	// Only support triangles
-
-
-		//	ElementInitData iInitData;
-		//	iInitData.pData = &mpLoader->mFaces[0];
-		//	iInitData.rowPitch = mpLoader->IndexCount * ((mpLoader->IndexFormat == IBT_Bit16) ? 2 : 4);
-		//	iInitData.slicePitch = 0;
-		//	meshPart->mIndexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
-
-		//	meshPart->mRenderOperation->PrimitiveType = PT_Triangle_List;
-
-		//	// add index buffer
-		//	meshPart->mRenderOperation->BindIndexStream(meshPart->mIndexBuffer, meshPart->mIndexFormat);
-
-		//	// add vertex buffer
-		//	meshPart->mRenderOperation->BindVertexStream(meshPart->mVertexBuffer, meshPart->mVertexDecl);
-
-		//	
-
-		//	return meshPart;
-		//}
-
 		void MeshPart::SetVertexBuffer( const shared_ptr<GraphicsBuffer>& vb, const shared_ptr<VertexDeclaration>& vd )
 		{
 			mVertexBuffer = vb;
@@ -235,33 +197,6 @@ namespace RcEngine
 		{
 
 		}
-
-
-		//shared_ptr<Mesh> Mesh::LoadFrom( MeshContent*  meshLoader )
-		//{
-		//	if (!meshLoader)
-		//	{
-		//		return nullptr;
-		//	}
-
-		//	shared_ptr<Mesh> mesh = std::make_shared<Mesh>(meshLoader->Name, meshLoader->BoundingSphere);
-
-		//	// Create materials
-		//	vector<MaterialContent*>& matLoaders = meshLoader->MaterialContentLoaders;
-		//	for (size_t i = 0; i < matLoaders.size(); ++i)
-		//	{
-		//		shared_ptr<Material> material = Material::LoadFrom(matLoaders[i]);
-		//		mesh->mMaterials.push_back(material);
-		//	}
-
-		//	vector<MeshPartContent*>& mpLoaders = meshLoader->MeshPartContentLoaders;
-		//	for (size_t i = 0; i < mpLoaders.size(); ++i)
-		//	{
-		//		shared_ptr<MeshPart> meshpart = MeshPart::LoadFrom(mesh, mpLoaders[i]);
-		//		mesh->mMeshParts.push_back(meshpart);
-		//	}
-		//	return mesh;
-		//}	
 
 		 void Mesh::SetMaterial( const shared_ptr<Material>& mat )
 		 {

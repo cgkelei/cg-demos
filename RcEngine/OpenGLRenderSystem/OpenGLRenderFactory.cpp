@@ -176,7 +176,12 @@ namespace RcEngine
 
 		shared_ptr<Effect> OpenGLRenderFactory::CreateEffectFromFile( const String& effectName, const String& effectFile )
 		{
-			return OpenGLEffect::LoadEffectFromFile(effectFile, effectName);
+			EffectMapIter find = mEffectPool.find(effectName);
+			if ( find == mEffectPool.end())
+			{
+				mEffectPool[effectName] = OpenGLEffect::LoadEffectFromFile(effectFile, effectName);
+			}	
+			return mEffectPool[effectName];
 		}
 
 		
