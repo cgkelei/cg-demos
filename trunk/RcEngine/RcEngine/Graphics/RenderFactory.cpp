@@ -17,8 +17,13 @@ RenderFactory::~RenderFactory(void)
 
 shared_ptr<Material> RenderFactory::CreateMaterialFromFile( const String& matName, const String& path )
 {
-	Content::MaterialContent loader(path);
-	return Material::LoadFrom(&loader);
+	MaterialMapIter find = mMaterialPool.find(matName);
+	if ( find == mMaterialPool.end())
+	{
+		Content::MaterialContent loader(path);
+		mMaterialPool[matName] = Material::LoadFrom(&loader);
+	}	
+	return mMaterialPool[matName];
 }
 
 shared_ptr<VertexDeclaration> RenderFactory::CreateVertexDeclaration( VertexElement* elems, uint32_t count )

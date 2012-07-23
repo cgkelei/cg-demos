@@ -42,6 +42,15 @@ namespace RcEngine
 
 			const shared_ptr<RenderOperation>& GetRenderOperation() const;
 		};
+
+		class _ApiExport SimpleTexturedQuad : public RenderableHelper
+		{
+		public:
+			SimpleTexturedQuad(const String& name);
+			~SimpleTexturedQuad();
+
+			const shared_ptr<RenderOperation>& GetRenderOperation() const;
+		};
 		
 
 	}

@@ -69,7 +69,7 @@ namespace RcEngine {
 			typedef EffectMap::iterator EffectMapIter;
 
 			typedef unordered_map<String, shared_ptr<Material> > MaterialMap;
-			MaterialMap::iterator MaterialMapIter;
+			typedef MaterialMap::iterator MaterialMapIter;
 
 			EffectMap mEffectPool;
 			MaterialMap mMaterialPool;

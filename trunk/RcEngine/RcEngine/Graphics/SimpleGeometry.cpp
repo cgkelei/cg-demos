@@ -98,6 +98,74 @@ namespace RcEngine
 			return mRenderOperation;
 		}
 
+		//------------------------------------------------------------------------------------------
+		SimpleTexturedQuad::SimpleTexturedQuad(const String& name)
+			: RenderableHelper(name)
+		{
+			RenderFactory& factory = Core::Context::GetSingleton().GetRenderFactory();
+
+			mMaterial = factory.CreateMaterialFromFile("SimpleTextured", "../Media/Materials/SimpleTextured.xml");
+
+			struct PosNormalTexVertex
+			{
+				Vector3f Pos;
+				Vector3f Normal;
+				Vector2f Tex;
+			};
+
+			PosNormalTexVertex vertives[4] = 
+			{
+				{ Vector3f( -1.0f,  1.0f, 0.0f ), Vector3f(0.0f, 0.0f, 1.0f), Vector2f(0.0f, 1.0f) },
+				{ Vector3f( 1.0f,  1.0f, 0.0f ), Vector3f(0.0f, 0.0f, 1.0f), Vector2f(1.0f, 1.0f) },
+				{ Vector3f( 1.0f,  -1.0f, 0.0f ), Vector3f(0.0f, 0.0f, 1.0f), Vector2f(1.0f, 0.0f) },
+				{ Vector3f( -1.0f,  -1.0f, 0.0f ), Vector3f(0.0f, 0.0f, 1.0f), Vector2f(0.0f, 0.0f) }
+			};
+
+			uint16_t indices[] = 
+			{
+				0, 3, 2, 0, 2, 1
+			};
+
+			ElementInitData vInitData;
+			vInitData.pData = vertives;
+			vInitData.rowPitch = sizeof(vertives);
+			vInitData.slicePitch = 0;
+			shared_ptr<GraphicsBuffer> vb = factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
+
+			VertexElement vdsc[] = {
+				VertexElement(0, VEF_Vector3,  VEU_Position, 0),
+				VertexElement(12, VEF_Vector3,  VEU_Normal, 0),
+				VertexElement(24, VEF_Vector2,  VEU_TextureCoordinate, 0),
+			};
+			shared_ptr<VertexDeclaration> decla = factory.CreateVertexDeclaration(vdsc, 3);
+
+			ElementInitData iInitData;
+			iInitData.pData = indices;
+			iInitData.rowPitch = sizeof(indices);
+			iInitData.slicePitch = 0;
+			shared_ptr<GraphicsBuffer> ib = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
+
+
+			mRenderOperation->BaseVertexLocation = 0;
+			mRenderOperation->UseIndex = true;
+			mRenderOperation->IndexBuffer = ib;
+			mRenderOperation->BindVertexStream(vb, decla);
+			mRenderOperation->PrimitiveType = PT_Triangle_List;
+			mRenderOperation->IndexType = IBT_Bit16;
+			mRenderOperation->StartIndexLocation = 0;
+			mRenderOperation->StartVertexLocation = 0;
+		}
+
+		SimpleTexturedQuad::~SimpleTexturedQuad()
+		{
+
+		}
+
+		const shared_ptr<RenderOperation>& SimpleTexturedQuad::GetRenderOperation() const
+		{
+			return mRenderOperation;
+		}
+
 	}
 
 }

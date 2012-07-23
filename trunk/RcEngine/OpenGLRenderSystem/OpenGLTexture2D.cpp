@@ -68,22 +68,32 @@ namespace RcEngine
 
 						if (PixelFormatUtils::IsCompressed(mFormat))
 						{
+							int blockSize = (glinternalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16; 
+							uint32_t imageSize = ((levelWidth+3)/4)*((levelHeight+3)/4)*blockSize; 
+							// resize texture data for copy
+							mTextureData[arrIndex * mMipMaps + level].resize(imageSize);
 
 							if (mTextureArraySize > 1)
-							{
-
+							{	
+								if (0 == arrIndex)
+								{
+									glCompressedTexImage3D(mTargetType, level, glinternalFormat, levelWidth, levelHeight, mTextureArraySize,
+										0, imageSize, NULL);
+								}
+								glCompressedTexSubImage3D(mTargetType, level, 0, 0, arrIndex, levelWidth, levelHeight, 1, glinternalFormat, 
+									imageSize, (NULL == initData) ? NULL : initData[arrIndex * mMipMaps + level].pData);
+								
 							}
 							else
 							{
-								//glCompressedTexImage2DARB(GL_TEXTURE_2D, level, glinternalFormat, levelWidth, levelHeight, )
+								glCompressedTexImage2D(GL_TEXTURE_2D, level, glinternalFormat, levelWidth, levelHeight, 0,
+									imageSize, (NULL == initData) ? NULL : initData[arrIndex * mMipMaps + level].pData);
 							}
-							
-							/*ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Currently Unsupported Compressed Texture Format",
-								"OpenGLTexture1D::OpenGLTexture1D");*/
 						}
 						else
 						{
 							uint32_t imageSize = levelWidth * levelHeight * texelSize;
+							// resize texture data for copy
 							mTextureData[arrIndex * mMipMaps + level].resize(imageSize);
 
 							if (mTextureArraySize > 1)

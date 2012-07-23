@@ -71,7 +71,7 @@ namespace RcEngine
 					new OpenGLScreenDepthStencilView(mDefaultFrameBuffer->GetWidth(), mDefaultFrameBuffer->GetHeight(), settings.DepthStencilFormat));
 			}
 		
-			this->BindFrameBuffer(mDefaultFrameBuffer);
+			BindFrameBuffer(mDefaultFrameBuffer);
 		}
 
 		void OpenGLRenderDevice::AdjustProjectionMatrix( Math::Matrix4f& pOut )
