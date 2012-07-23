@@ -253,6 +253,18 @@ namespace RcEngine
 				outType = GL_UNSIGNED_SHORT;
 				break;
 
+			case PF_DXT1:
+				outInternalformat =  GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+				break;
+
+			case PF_DXT3:
+				outInternalformat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+				break;
+
+			case PF_DXT5:
+				outInternalformat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+				break;
+	
 			default:
 				ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported Pixel Format!", 
 					"OpenGLMapping::Mapping( GLint& outInternalformat, GLenum& outFormat, GLenum& outType, PixelFormat inPixelFormat)");
@@ -681,6 +693,20 @@ namespace RcEngine
 					assert(false);
 					return PF_Unknown;
 				}
+
+			case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+			case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+			case GL_COMPRESSED_SRGB_S3TC_DXT1_EXT:
+			case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT:
+				return PF_DXT1;
+				
+			case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+			case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT:
+				return PF_DXT3;
+
+			case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+			case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT:
+				return PF_DXT5;
 
 			default:
 				// not supported

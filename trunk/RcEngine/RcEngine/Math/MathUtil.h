@@ -11,7 +11,12 @@
 namespace RcEngine{
 namespace Math {
 
-	float const PI		= 3.141592f;			// PI
+	const float PI		= 3.141592f;			// PI
+	const float RadianToDegree = 180.0f / PI;
+	const float DegreeToRadian = PI / 180.0f;
+
+	inline float ToDegree(float radian)	{ return radian * DegreeToRadian;}
+	inline float ToRadian(float degree)	{ return degree * RadianToDegree; }
 
 	template< typename Real, int32_t Size >
 	inline typename  Real

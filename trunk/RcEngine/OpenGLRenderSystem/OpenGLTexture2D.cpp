@@ -68,8 +68,18 @@ namespace RcEngine
 
 						if (PixelFormatUtils::IsCompressed(mFormat))
 						{
-							ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Currently Unsupported Compressed Texture Format",
-								"OpenGLTexture1D::OpenGLTexture1D");
+
+							if (mTextureArraySize > 1)
+							{
+
+							}
+							else
+							{
+								//glCompressedTexImage2DARB(GL_TEXTURE_2D, level, glinternalFormat, levelWidth, levelHeight, )
+							}
+							
+							/*ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Currently Unsupported Compressed Texture Format",
+								"OpenGLTexture1D::OpenGLTexture1D");*/
 						}
 						else
 						{

@@ -366,6 +366,8 @@ namespace RcEngine
 		{
 			RenderOperation::StreamSlots& streams = op.VertexStreams;
 
+			glEnable(GL_DEPTH_TEST);
+
 			// bind vertex streams
 			for (size_t i = 0; i < streams.size(); ++i)
 			{

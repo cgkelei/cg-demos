@@ -17,7 +17,6 @@ namespace RcEngine
 		MeshPart::MeshPart( const String& name, const shared_ptr<Mesh>& mesh )
 			:mName(name), mParentMesh(mesh)
 		{
-			mRenderOperation = std::make_shared<RenderOperation>();
 		}
 
 		const shared_ptr<Material>& MeshPart::GetMaterial() const
@@ -43,6 +42,7 @@ namespace RcEngine
 		{
 			return 1;
 		}
+
 
 		//shared_ptr<MeshPart> MeshPart::LoadFrom( const shared_ptr<Mesh>& mesh, MeshPartContent* mpLoader )
 		//{
@@ -209,9 +209,20 @@ namespace RcEngine
 			meshPart->mStartIndex = 0;
 			meshPart->mIndexCount = triangleCount * 3;
 
+			// set render operation
+			meshPart->mRenderOperation->BaseVertexLocation = 0;
+			meshPart->mRenderOperation->UseIndex = true;
+			meshPart->mRenderOperation->IndexBuffer = meshPart->mIndexBuffer;
+			meshPart->mRenderOperation->BindVertexStream(meshPart->mVertexBuffer, meshPart->mVertexDecl);
+			meshPart->mRenderOperation->PrimitiveType = PT_Triangle_List;
+			meshPart->mRenderOperation->IndexType = IBT_Bit32;
+			meshPart->mRenderOperation->StartIndexLocation = 0;
+			meshPart->mRenderOperation->StartVertexLocation = 0;
+
 			return meshPart;	
 		}
 
+	
 
 		//////////////////////////////////////////////////////////////////////////
 		Mesh::Mesh( const String& name )
@@ -252,21 +263,41 @@ namespace RcEngine
 		//	return mesh;
 		//}	
 
+		 void Mesh::SetMaterial( const shared_ptr<Material>& mat )
+		 {
+			 mMaterials.clear();
+			 mMaterials.push_back(mat);
+
+			 for (auto iter = mMeshParts.begin(); iter != mMeshParts.end(); ++iter)
+			 {
+				 (*iter)->SetMaterialID(0);
+			 }
+		 }
+
+		 void Mesh::SetMaterial( size_t meshPartIndex, const shared_ptr<Material>& mat )
+		 {
+			 mMaterials.push_back(mat);
+			 size_t matID = mMaterials.size() - 1;
+
+			 mMeshParts[meshPartIndex]->SetMaterialID(matID);
+		 }
+
 		 shared_ptr<Mesh> Mesh::Load( Stream& source )
-		{
-			String meshName = source.ReadString();
+		 {
+			 String meshName = source.ReadString();
 
-			// result mesh
-			shared_ptr<Mesh> mesh( new Mesh(meshName) );
-			
-			uint32_t subMeshCount = source.ReadUInt();
-			for (uint32_t i = 0 ; i < subMeshCount; ++i)
-			{
-				shared_ptr<MeshPart> subMesh = MeshPart::Load(mesh, source);
-			}
+			 // result mesh
+			 shared_ptr<Mesh> mesh( new Mesh(meshName) );
 
-			return mesh;
-		}
+			 uint32_t subMeshCount = source.ReadUInt();
+			 for (uint32_t i = 0 ; i < subMeshCount; ++i)
+			 {
+				 shared_ptr<MeshPart> subMesh = MeshPart::Load(mesh, source);
+				 mesh->mMeshParts.push_back(subMesh);
+			 }
+
+			 return mesh;
+		 }
 
 		 void Mesh::Save( const shared_ptr<Mesh>& mesh, Stream& dest )
 		 {
@@ -282,5 +313,6 @@ namespace RcEngine
 				 MeshPart::Save((*iter), dest);
 			 }
 		 }
+
 	}
 }
