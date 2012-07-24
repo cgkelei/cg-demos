@@ -84,7 +84,7 @@ void TestApp::Render()
 
 	for (uint32_t i = 0; i < mDwarf->GetMeshPartCount(); ++i)
 	{
-		mDwarf->GetMeshPart(i)->Render();
+	mDwarf->GetMeshPart(i)->Render();
 	}
 
 	mRenderDevice->GetCurrentFrameBuffer()->SwapBuffers();
@@ -107,10 +107,7 @@ void TestApp::Update( float deltaTime )
 	if(mKeyboard->isKeyDown(OIS::KC_S))
 	{
 		pos -= 5 * deltaTime;
-	}
-
-	Camera* camera = RcEngine::Core::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
-	camera->SetViewParams(Vector3f(0, 0, pos), Vector3f(0, 0, 0), Vector3f(0, 1, 0));*/
+	}*/
 }
 
 int32_t main()

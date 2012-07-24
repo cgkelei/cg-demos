@@ -2,9 +2,20 @@
 #define StreamWriter_h__
 
 #include "Core/Prerequisites.h"
+#include "Core/Singleton.h"
 
 namespace RcEngine
 {
+	class _ApiExport FileSystem : public Singleton<FileSystem>  
+	{
+	public:
+		SINGLETON_DECL_HEADER(FileSystem);
+
+	public:
+		FileSystem();
+		virtual ~FileSystem();
+
+	};
 
 }
 
