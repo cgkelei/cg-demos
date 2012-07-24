@@ -15,6 +15,7 @@
 #include "Core/Context.h"
 #include "Math/BoundingSphere.h"
 #include "IO/FileStream.h"
+#include "MainApp/Window.h"
 #include <D3DX10Math.h>
 
 #pragma comment(lib, "D3DX10.lib")

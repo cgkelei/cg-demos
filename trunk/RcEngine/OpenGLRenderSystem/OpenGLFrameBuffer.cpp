@@ -28,7 +28,6 @@ namespace RcEngine
 				glDeleteFramebuffersEXT(1, &mFrameBufferObject);
 		}
 
-
 		void OpenGLFrameBuffer::DoBind()
 		{
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferObject);

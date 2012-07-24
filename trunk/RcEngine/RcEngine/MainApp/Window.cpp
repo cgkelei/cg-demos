@@ -17,7 +17,7 @@ LRESULT CALLBACK Window::WndProcStatic( HWND hWnd, UINT message, WPARAM wParam, 
 
 
 Window::Window( const std::string& title, const Render::RenderSettings& settings )
-	: mName(title)
+	: mName(title), mInSizeMove(false), mMaximized(false), mMinimized(false)
 {
 	msWindow = this;
 	mhInstance	= GetModuleHandle(NULL);
@@ -62,10 +62,10 @@ Window::Window( const std::string& title, const Render::RenderSettings& settings
 		dwStyle=WS_OVERLAPPEDWINDOW;							// Windows Style
 	}
 
-	WindowRect.left = (long)0;
-	WindowRect.right=(long)settings.Width;		
-	WindowRect.top=(long)0;				
-	WindowRect.bottom=(long)settings.Height;
+	WindowRect.left = (long)settings.Left;
+	WindowRect.top=(long)settings.Top;		
+	WindowRect.right=(long)settings.Width+WindowRect.left ;		
+	WindowRect.bottom=(long)settings.Height+WindowRect.top;
 
 	::AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);		// Adjust Window To True Requested Size
 
@@ -77,7 +77,7 @@ Window::Window( const std::string& title, const Render::RenderSettings& settings
 		dwStyle |							// Defined Window Style
 		WS_CLIPSIBLINGS |					// Required Window Style
 		WS_CLIPCHILDREN,					// Required Window Style
-		0, 0,								// Window Position
+		WindowRect.left, WindowRect.top,	// Window Position
 		WindowRect.right-WindowRect.left,	// Calculate Window Width
 		WindowRect.bottom-WindowRect.top,	// Calculate Window Height
 		NULL,								// No Parent Window
@@ -111,6 +111,8 @@ void Window::Reposition( int32_t left, int32_t top )
 {
 	if(mhWnd && !mFullscreen)
 	{
+		mLeft = left;
+		mTop = top;
 		::SetWindowPos(mhWnd, 0, left, top, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 	}
 }
@@ -201,8 +203,9 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 
 	case WM_ENTERSIZEMOVE:
 		{
-			mInSizeMove = true;
 			OnSuspend();
+			mInSizeMove = true;
+			//OnUserResized();
 		}
 
 		break;

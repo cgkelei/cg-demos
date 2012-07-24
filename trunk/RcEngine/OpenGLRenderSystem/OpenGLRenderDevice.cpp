@@ -57,21 +57,21 @@ namespace RcEngine
 		{
 			mRenderSettings = settings;
 
-			mDefaultFrameBuffer = new OpenGLRenderWindow(settings);
+			mScreenFrameBuffer = new OpenGLRenderWindow(settings);
 
 			// create a valid OpenGL rendering context and init glew
 			InitGlew();
 
-			mDefaultFrameBuffer->Attach(ATT_Color0, 
-				new OpenGLScreenRenderTarget2DView(mDefaultFrameBuffer->GetWidth(), mDefaultFrameBuffer->GetHeight(), mDefaultFrameBuffer->GetColorFormat()));
+			mScreenFrameBuffer->Attach(ATT_Color0, 
+				new OpenGLScreenRenderTarget2DView(mScreenFrameBuffer->GetWidth(), mScreenFrameBuffer->GetHeight(), mScreenFrameBuffer->GetColorFormat()));
 			
-			if(mDefaultFrameBuffer->IsDepthBuffered())
+			if(mScreenFrameBuffer->IsDepthBuffered())
 			{
-				mDefaultFrameBuffer->Attach(ATT_DepthStencil,
-					new OpenGLScreenDepthStencilView(mDefaultFrameBuffer->GetWidth(), mDefaultFrameBuffer->GetHeight(), settings.DepthStencilFormat));
+				mScreenFrameBuffer->Attach(ATT_DepthStencil,
+					new OpenGLScreenDepthStencilView(mScreenFrameBuffer->GetWidth(), mScreenFrameBuffer->GetHeight(), settings.DepthStencilFormat));
 			}
 		
-			BindFrameBuffer(mDefaultFrameBuffer);
+			BindFrameBuffer(mScreenFrameBuffer);
 		}
 
 		void OpenGLRenderDevice::AdjustProjectionMatrix( Math::Matrix4f& pOut )

@@ -52,12 +52,8 @@ namespace RcEngine
 		void OpenGLRenderView::DoClear( GLbitfield flag, const Math::ColorRGBA& clr, float depth, uint32_t stencil )
 		{
 			OpenGLRenderDevice* device = static_cast<OpenGLRenderDevice*>(Core::Context::GetSingleton().GetRenderDevicePtr());
-
 			FrameBuffer* oldFrameBuffer = device->GetCurrentFrameBuffer();
-
 			device->BindFrameBuffer(mAttachedFrameBuffer);
-
-
 		}
 	
 	}
