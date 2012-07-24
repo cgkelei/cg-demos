@@ -9,7 +9,7 @@ namespace Render {
 struct RenderSettings
 {
 	bool Fullscreen;
-	uint32_t Left, Top;
+	int32_t Left, Top;
 	uint32_t Width, Height;
 	PixelFormat ColorFormat;
 	PixelFormat DepthStencilFormat;

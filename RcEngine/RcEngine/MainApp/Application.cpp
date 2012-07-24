@@ -51,11 +51,12 @@ namespace RcEngine {
 		MSG msg;
 		ZeroMemory( &msg, sizeof( msg ) );
 		while( msg.message != WM_QUIT)
-		{                       
+		{   
 			if( PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE ) )
 			{
 				TranslateMessage( &msg );
 				DispatchMessage( &msg );
+
 			}
 			else
 			{
@@ -80,6 +81,7 @@ namespace RcEngine {
 			Update(mTimer.GetDeltaTime());
 		else
 			::Sleep(50);
+
 
 		Render();
 	}
@@ -108,7 +110,7 @@ namespace RcEngine {
 		mMainWindow->ResumeEvent.bind(this, &Application::Window_Resume);
 		mMainWindow->ApplicationActivatedEvent.bind(this, &Application::Window_ApplicationActivated);
 		mMainWindow->ApplicationDeactivatedEvent.bind(this, &Application::Window_ApplicationDeactivated);
-
+		
 	}
 
 	void Application::InitializeDevice()

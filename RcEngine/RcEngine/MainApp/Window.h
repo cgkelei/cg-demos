@@ -21,6 +21,8 @@ public:
 	void Reposition(int32_t left, int32_t top);
 	void ShowWindow();
 
+	bool InSizeMoveTest() const { return mInSizeMove; }
+
 private:
 	void OnUserResized();
 	void OnSuspend();

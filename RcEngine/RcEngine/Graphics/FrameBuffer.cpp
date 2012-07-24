@@ -5,16 +5,24 @@ namespace RcEngine {
 	namespace Render {
 
 		FrameBuffer::FrameBuffer(uint32_t width, uint32_t height,  bool offscreen /*= true*/ )
-			: mWidth(width), mHeight(height), mDepthStencilView(0), mDirty(false), mOffscreen(offscreen)
+			: mWidth(width), mHeight(height), mDepthStencilView(0), mDirty(false), mOffscreen(offscreen),
+			mViewport(0, 0, width, height)
 		{
-
+			
 		}
-
 
 		FrameBuffer::~FrameBuffer(void)
 		{
-		}
+			for (size_t i = 0; i < mColorViews.size(); ++i)
+			{
+				if (mColorViews[i])
+				{
+					Safe_Delete(mColorViews[i]);
+				}
+			}
 
+			Safe_Delete(mDepthStencilView);
+		}
 
 		RenderView* FrameBuffer::GetAttachedView( uint32_t att )
 		{
@@ -32,26 +40,26 @@ namespace RcEngine {
 			}
 		}
 
-
 		void FrameBuffer::Attach( uint32_t att, RenderView* view )
 		{
 			switch(att)
 			{
 			case ATT_DepthStencil:
-				if(mDepthStencilView != NULL)
 				{
-					Detach(ATT_DepthStencil);
+					if(mDepthStencilView)
+					{
+						Detach(ATT_DepthStencil);
+					}
+					mIsDepthBuffered = true;
+					mDepthStencilView = view;
+					PixelFormatUtils::GetNumDepthStencilBits(view->GetFormat(), mDepthBits, mStencilBits);
 				}
-				mIsDepthBuffered = true;
-				mDepthStencilView = view;
-				PixelFormatUtils::GetNumDepthStencilBits(view->GetFormat(), mDepthBits, mStencilBits);
-
 				break;
 			default:
 				uint32_t index = att - ATT_Color0;
 				if(index < mColorViews.size())
 				{
-					if(mColorViews[index] != NULL)
+					if(mColorViews[index])
 					{
 						Detach(att);
 					}
@@ -68,7 +76,7 @@ namespace RcEngine {
 				size_t minColorView = index;
 				for(size_t i = 0; i < mColorViews.size(); ++i)
 				{
-					if(mColorViews[i] != NULL)
+					if(mColorViews[i])
 					{
 						minColorView = i;
 					}
@@ -95,7 +103,7 @@ namespace RcEngine {
 				if(mDepthStencilView)
 				{
 					mDepthStencilView->OnDetach(this, att);
-					mDepthStencilView = NULL;
+					Safe_Delete(mDepthStencilView);
 				}
 
 				mIsDepthBuffered = false;
@@ -112,6 +120,7 @@ namespace RcEngine {
 				if(mColorViews[index])
 				{
 					mColorViews[index]->OnDetach(this, att);
+					delete mColorViews[index];
 					mColorViews[index] = NULL;
 				}
 			}

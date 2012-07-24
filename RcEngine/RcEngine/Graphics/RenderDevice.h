@@ -28,9 +28,10 @@ namespace RcEngine {
 
 			RenderFactory* GetRenderFactory() const;
 
+			FrameBuffer* GetCurrentFrameBuffer() const	{ return mCurrentFrameBuffer; }
+			FrameBuffer* GetScreenFrameBuffer() const	{ return mScreenFrameBuffer; }
+			
 			void BindFrameBuffer(FrameBuffer* fb);
-			FrameBuffer* GetCurrentFrameBuffer();
-			FrameBuffer* GetDefaultFrameBuffer();
 
 			void Render( EffectTechnique& tech, RenderOperation& op);
 			void Resize(uint32_t width, uint32_t height);
@@ -47,17 +48,12 @@ namespace RcEngine {
 			virtual void CreateRenderWindow(const RenderSettings& settings) = 0;	
 			virtual void AdjustProjectionMatrix(Math::Matrix4f& pOut) = 0;
 
-
-
 		protected:
 			virtual void DoBindFrameBuffer(FrameBuffer* fb) = 0;
 			virtual void DoRender( EffectTechnique& tech, RenderOperation& op) = 0;
 
 		protected:
-
-
 			uint32_t mWidth, mHeight;
-
 			PixelFormat mColorFormat;
 			uint32_t mColorBits;
 
@@ -65,11 +61,9 @@ namespace RcEngine {
 			bool mIsDepthBuffered;
 
 			FrameBuffer* mCurrentFrameBuffer;
-			FrameBuffer* mDefaultFrameBuffer;
-
+			FrameBuffer* mScreenFrameBuffer;
 			
 			RenderSettings mRenderSettings;
-			//Viewport mViewport;
 
 			RenderFactory* mRenderFactory;
 

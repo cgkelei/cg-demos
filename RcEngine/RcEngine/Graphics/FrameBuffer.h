@@ -19,8 +19,8 @@ public:
 	bool IsActice() const					{ return mActice; }
 	void SetActice(bool state)				{ mActice = state; }
 
-	uint32_t GetLeft() const			{ return mLeft; }
-	uint32_t GetTop() const				{ return mTop; }
+	int32_t GetLeft() const			    { return mLeft; }
+	int32_t GetTop() const				{ return mTop; }
 	uint32_t GetWidth() const			{ return mWidth; }
 	uint32_t GetHeight() const			{ return mHeight; }
 	
@@ -55,7 +55,7 @@ protected:
 protected:
 	bool mActice;
 
-	uint32_t mLeft, mTop;
+	int32_t mLeft, mTop;
 	uint32_t mWidth, mHeight;
 
 	PixelFormat mColorFormat;
