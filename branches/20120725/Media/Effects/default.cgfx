@@ -1,0 +1,38 @@
+float4x4 World : WorldMatrix;
+float4x4 ViewProj : ViewProjectionMatrix;
+float4 DiffuseColor : DiffuseMaterialColor;
+
+struct VS_INPUT
+{
+    float4 Position  : POSITION;
+};
+
+struct VS_OUTPUT
+{
+    float4 oPos       : POSITION;
+};
+
+
+VS_OUTPUT vmain( VS_INPUT vInput )
+{
+    VS_OUTPUT vOutput;
+
+    vOutput.oPos = mul( vInput.Position,  mul(World, ViewProj) );
+
+    return vOutput;
+}
+
+float4 pmain( VS_OUTPUT pInput ) : COLOR
+{
+	return DiffuseColor;
+}
+
+technique LeftHandInOpenGL
+{
+    pass p0
+    {
+        VertexProgram   = compile gp4vp vmain();
+        FragmentProgram = compile gp4fp pmain();
+    }
+}
+
