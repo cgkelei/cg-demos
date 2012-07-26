@@ -192,11 +192,11 @@ namespace RcEngine {
 	void Application::ReadConfiguration()
 	{
 		/*XMLDocument configXML;
-		XMLNodePtr root = configXML.Parse("../Media/Config.xml");
+		XMLNode* root = configXML.Parse("../Media/Config.xml");
 		std::string windowTitle = root->Attribute("Title")->ValueString();
 
-		XMLNodePtr graphics = root->FirstNode("Graphics");
-		XMLNodePtr frame = graphics->FirstNode("Frame");*/
+		XMLNode* graphics = root->FirstNode("Graphics");
+		XMLNode* frame = graphics->FirstNode("Frame");*/
 
 
 		/*mSettings.Left = 100;

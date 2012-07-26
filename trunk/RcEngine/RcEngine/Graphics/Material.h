@@ -2,6 +2,7 @@
 #define Material_h__
 
 #include "Core/Prerequisites.h"
+#include "Core/XMLDom.h"
 #include "Math/ColorRGBA.h"
 #include "Graphics/DepthStencilState.h"
 #include "Graphics/SamplerState.h"
@@ -22,6 +23,7 @@ namespace RcEngine
 		// using 
 		using Math::ColorRGBA;
 		using Content::MaterialContent;
+		using namespace Core;
 
 		static const int32_t MaxMaterialTextures = 16;
 
@@ -42,10 +44,13 @@ namespace RcEngine
 			Material(void);
 			virtual ~Material(void);
 
+			const String& GetName() const						{ return mName; }
+
 			const shared_ptr<Effect>& GetEffect() const			{ return mEffect; }
 			EffectTechnique* GetCurrentTechnique() const		{ return mCurrentTechnique; }
 			
 			MaterialParameter* GetCustomParameter(EffectParameterUsage usage);
+			MaterialParameter* GetCustomParameter(const String& name);
 
 			void SetAmbientColor(const ColorRGBA& ambient)		{ mAmbient = ambient; }
 			void SetDiffuseColor(const ColorRGBA& diffuse)		{ mDiffuse = diffuse; }
@@ -55,7 +60,7 @@ namespace RcEngine
 
 
 		public:
-			static shared_ptr<Material> LoadFrom(MaterialContent* loader);
+			static shared_ptr<Material> LoadFrom(Stream& source);
 
 		protected:			
 			String mName;
@@ -73,8 +78,9 @@ namespace RcEngine
 			ColorRGBA mEmissive;
 			float mPower;
 
-			shared_ptr<Texture> mTextures[MaxMaterialTextures];
-			unordered_map<int32_t, String> mTextureNames;
+			//shared_ptr<Texture> mTextures[MaxMaterialTextures];
+			//unordered_map<int32_t, String> mTextureNames;
+			unordered_map<String, shared_ptr<Texture> > mTextures;
 			
 		};
 	}

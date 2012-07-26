@@ -1,16 +1,10 @@
 #ifndef XMLDom_h__
 #define XMLDom_h__
 
-#include <Core/Prerequisites.h>
+#include "Core/Prerequisites.h"
 
 namespace RcEngine{
 namespace Core{
-
-class XMLNode;
-typedef std::shared_ptr<XMLNode> XMLNodePtr;
-
-class XMLAttribute;
-typedef std::shared_ptr<XMLAttribute> XMLAttributePtr;
 
 enum XMLNodeType
 {
@@ -43,12 +37,12 @@ enum XMLNodeType
 /* Class XMLDocument represents a root of the DOM hierarchy.                                                                     */
 /************************************************************************/
 
-class _ApiExport XMLDocument
+class _ApiExport XMLDoc
 {
 public:
-	XMLDocument();
+	XMLDoc();
 
-	XMLNodePtr Parse(const std::string& xmlName);
+	XMLNodePtr Parse(Stream& source);
 	void Print(std::ostream& os);
 
 	XMLNodePtr AllocateNode(XMLNodeType type, const std::string& name);
@@ -60,14 +54,14 @@ public:
 	void RootNode( const XMLNodePtr& newNode );
 
 private:
-	std::shared_ptr<rapidxml::xml_document<> > mDocument;
+	shared_ptr<rapidxml::xml_document<> > mDocument;
 	XMLNodePtr mRoot;
 	std::vector<char> mXMLSrc; // must read xml file in memory
 };
 
 class _ApiExport XMLNode
 {
-	friend class XMLDocument;
+	friend class XMLDoc;
 
 public:
 	explicit XMLNode( rapidxml::xml_node<>* node);
@@ -123,17 +117,11 @@ public:
 private:
 	rapidxml::xml_node<>* mNode;
 	std::string mName;
-		
-	std::vector<XMLNodePtr> mChildren;
-	std::vector<XMLAttributePtr> mAttributes;
-
-public:
-	static XMLNodePtr NullObejct;
 };
 
 class _ApiExport XMLAttribute
 {
-	friend class XMLDocument;
+	friend class XMLDoc;
 	friend class XMLNode;
 
 public:
@@ -156,10 +144,6 @@ private:
 	rapidxml::xml_attribute<>* mAttribute;
 	std::string mName;
 	std::string mValue;
-	
-public:
-	static XMLAttributePtr NullObejct;
-
 };
 
 } // Namespace Core

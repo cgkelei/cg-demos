@@ -9,6 +9,7 @@
 #include "Graphics/Mesh.h"
 #include "MainApp/Application.h"
 #include "IO/FileStream.h"
+#include "Core/XMLDom.h"
 
 #include <fstream>
 
@@ -365,7 +366,7 @@ void AssimpProcesser::ExportXML( const char* output, MeshContent* meshContent )
 	for (size_t i = 0; i < materials.size(); ++i)
 	{
 		MaterialContent* material = materials[i];
-		stream << "\t<matrial>" << endl;
+		stream << "\t<matrial name=\"" << material->MaterialName << "\">" << endl;
 		stream << "\t\t<ambient r=\"" << material->Ambient.R() << "\" g=\"" << material->Ambient.G()
 			<< "\" b=\"" << material->Ambient.B() << "\"/>" << endl;
 		stream << "\t\t<diffuse r=\"" << material->Diffuse.R() << "\" g=\"" << material->Diffuse.G()
@@ -400,8 +401,8 @@ void AssimpProcesser::ExportXML( const char* output, MeshContent* meshContent )
 		{
 			stream <<"name=\"" << meshPart->Name << "\" ";
 		}
-		//stream << "materialID=\"" << meshPart->MaterialID << "\">" << endl; 
-		stream << ">" << endl;
+		stream << "materialID=\"" << meshPart->MaterialID << "\">" << endl; 
+		//stream << ">" << endl;
 
 		// Output vertices
 		stream << "\t\t<vertices vertexCount=\"" << meshPart->VertexCount
@@ -555,7 +556,6 @@ void AssimpProcesser::ExportBinary( const char* output, MeshContent* meshContent
 	
 	stream.Close();
 }
-
 
 Bone* AssimpProcesser::CreateBoneTrees( aiNode* pNode, Bone* parent )
 {

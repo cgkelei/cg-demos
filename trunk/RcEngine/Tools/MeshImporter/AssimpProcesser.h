@@ -7,6 +7,7 @@
 #include <assimp/scene.h>           // Output data structure
 #include <assimp/postprocess.h>     // Post processing flags
 
+#include "Core/Prerequisites.h"
 #include "Math/Matrix.h"
 #include "Content/MeshContentLoader.h"
 
@@ -26,6 +27,57 @@ public:
 
 	Bone() :Parent(0){}
 	~Bone(){ for(size_t i(0); i< Children.size(); i++) delete Children[i]; }
+};
+
+class _ApiExport MeshPartContent
+{
+public:
+	struct _ApiExport Face
+	{
+		uint32_t Indices[3];
+
+		Face() { };
+		Face(uint32_t A, uint32_t B, uint32_t C)
+		{
+			Indices[0] = A;
+			Indices[1] = B;
+			Indices[2] = C;
+		}			
+	};
+
+public:
+	MeshPartContent();
+
+	String Name;
+	uint32_t MaterialID;
+
+	Math::BoundingSpheref BoundingSphere;
+
+	std::vector<Face> mFaces;
+
+	Render::IndexBufferType IndexFormat;
+
+	shared_ptr<Render::VertexDeclaration> VertexDeclaration;
+
+	uint32_t StartIndex;
+	uint32_t IndexCount;
+
+	uint32_t VertexCount;
+	uint32_t StartVertex;
+
+	char* VertexData;
+};
+
+class MeshContent
+{
+public:
+	MeshContent();
+
+	String Name;
+	Math::BoundingSpheref BoundingSphere;
+
+	vector<MaterialContent*> MaterialContentLoaders;
+	vector<MeshPartContent*> MeshPartContentLoaders;
 };
 
 

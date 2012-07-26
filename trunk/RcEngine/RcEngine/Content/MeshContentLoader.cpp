@@ -64,7 +64,7 @@ namespace RcEngine
 		{
 			MeshContent* meshContent = new MeshContent; 
 
-			XMLDocument xmlFile;
+			/*XMLDoc xmlFile;
 			XMLNodePtr root = xmlFile.Parse(meshFile);
 
 			XMLNodePtr meshPartsNode = root->FirstNode("meshPartsChunk");
@@ -75,7 +75,7 @@ namespace RcEngine
 					MeshPartContent* meshPart = ReadMeshPartContent(node);
 					meshContent->MeshPartContentLoaders.push_back(meshPart);
 				}
-			}
+			}*/
 
 			return meshContent;
 		}
