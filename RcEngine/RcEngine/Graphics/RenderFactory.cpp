@@ -1,6 +1,8 @@
 #include "Graphics/RenderFactory.h"
 #include "Graphics/Material.h"
 #include "Content/MaterialContentLoader.h"
+#include "IO/FileStream.h"
+#include "Core/Exception.h"
 
 namespace RcEngine {
 namespace Render {
@@ -20,8 +22,14 @@ shared_ptr<Material> RenderFactory::CreateMaterialFromFile( const String& matNam
 	MaterialMapIter find = mMaterialPool.find(matName);
 	if ( find == mMaterialPool.end())
 	{
-		Content::MaterialContent loader(path);
-		mMaterialPool[matName] = Material::LoadFrom(&loader);
+		FileStream file;
+		if (!file.Open(path, FILE_READ))
+		{
+			ENGINE_EXCEPT(Core::Exception::ERR_FILE_NOT_FOUND, 
+				"Error: " + path + " not exits!", "RenderFactory::CreateMaterialFromFile");
+		}
+
+		mMaterialPool[matName] = Material::LoadFrom(file);
 	}	
 	return mMaterialPool[matName];
 }

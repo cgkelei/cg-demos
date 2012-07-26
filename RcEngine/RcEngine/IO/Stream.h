@@ -18,9 +18,9 @@ namespace RcEngine
 		/// Set position from the beginning of the stream.
 		virtual uint32_t Seek(uint32_t position) = 0;
 		/// Return current position.
-		uint64_t GetPosition() const { return mPosition; }
+		uint32_t GetPosition() const { return mPosition; }
 		/// Return size.
-		uint64_t GetSize() const { return mSize; }
+		uint32_t GetSize() const { return mSize; }
 		/// Return whether the end of stream has been reached.
 		bool IsEof() const { return mPosition >= mSize; }
 

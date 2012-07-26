@@ -12,20 +12,20 @@ namespace RcEngine
 
 		Effect::~Effect()
 		{
-			for ( EffectTechniqueList::iterator iter = mTechniques.begin(); iter != mTechniques.end(); ++iter )
+			for (auto iter = mTechniques.begin(); iter != mTechniques.end(); ++iter )
 			{
 				Safe_Delete(*iter);
 			}
 		}
 
-		EffectTechniqueList& Effect::GetTechniques()
+		vector<EffectTechnique*>& Effect::GetTechniques()
 		{
 			return mTechniques;
 		}
 
 		EffectTechnique* Effect::GetTechniqueByName( const String& techName )
 		{
-			EffectTechniqueList::iterator iter = mTechniques.begin();
+			auto iter = mTechniques.begin();
 			while( iter != mTechniques.end() )
 			{
 				if( (*iter)->GetTechniqueName() == techName )

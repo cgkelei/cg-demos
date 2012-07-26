@@ -1,13 +1,11 @@
 #include "Core/XMLDom.h"
 #include "Core/Utility.h"
 #include "Core/Exception.h"
+#include "IO/Stream.h"
 
 namespace RcEngine{
 namespace Core{
 
-XMLNodePtr XMLNode::NullObejct;
-XMLAttributePtr XMLAttribute::NullObejct;
-	
 rapidxml::node_type MapToRapidxml(XMLNodeType type)
 {
 	switch(type)
@@ -59,76 +57,57 @@ XMLNodeType UnMapToRapidxml(rapidxml::node_type type)
 }
 
 
-XMLDocument::XMLDocument()
+XMLDoc::XMLDoc()
 	: mDocument(std::make_shared<rapidxml::xml_document<> >())
 {
 
 }
 
-XMLNodePtr XMLDocument::Parse( const std::string& xmlName )
+XMLNodePtr XMLDoc::Parse( Stream& source )
 {
-	FILE* pFile = NULL;
-	int32_t len = 0;
-
-	fopen_s(&pFile, xmlName.c_str() , "rb");
-	if (pFile == NULL) 
-	{
-		std::string str = "FILE: " + xmlName + "does't exit.";
-		ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, str, "Application::Initialize" );
-	}
-	fseek (pFile , 0 , SEEK_END);
-	len = static_cast<int32_t>( ftell(pFile) );
-	fseek(pFile, 0, SEEK_SET);
-	mXMLSrc.resize(len+1, 0);
-	fread_s(&mXMLSrc[0], len, sizeof(char), len, pFile);
-	fclose(pFile);
-
-	/*mXMLSrc.clear();
-	std::ifstream myfile(xmlName);
-	std::copy(std::istreambuf_iterator<char>(myfile), std::istreambuf_iterator<char>(), 
-		std::back_inserter(mXMLSrc));
-    mXMLSrc.push_back('\0');
-	myfile.close();*/
+	uint32_t size = source.GetSize();
+	mXMLSrc.resize(size + 1, 0);
+	source.Read(&mXMLSrc[0], size);
+	mXMLSrc[size] = '\0';
 
 	mDocument->parse<0>(&mXMLSrc[0]);
 	mRoot = std::make_shared<XMLNode>(mDocument->first_node());
 
 	return mRoot;
-
 }
 
-void XMLDocument::Print( std::ostream& os )
+void XMLDoc::Print( std::ostream& os )
 {
 	os << "<?xml version=\"1.0\"?>" << std::endl; 
 	os << *static_cast<rapidxml::xml_document<>*>(mDocument.get());
 }
 
-XMLNodePtr XMLDocument::AllocateNode( XMLNodeType type, const std::string& name )
+XMLNodePtr XMLDoc::AllocateNode( XMLNodeType type, const std::string& name )
 {
 	return std::make_shared<XMLNode>(mDocument.get(), type, name);
 }
 
-XMLAttributePtr XMLDocument::AllocateAttributeInt( const std::string& name, int32_t value )
+XMLAttributePtr XMLDoc::AllocateAttributeInt( const std::string& name, int32_t value )
 {
 	return AllocateAttributeString(name, LexicalCast<std::string>(value));
 }
 
-XMLAttributePtr XMLDocument::AllocateAttributeUInt(const std::string& name, uint32_t value)
+XMLAttributePtr XMLDoc::AllocateAttributeUInt(const std::string& name, uint32_t value)
 {
 	return AllocateAttributeString(name, LexicalCast<std::string>(value));
 }
 
-XMLAttributePtr XMLDocument::AllocateAttributeFloat(const std::string& name, float value)
+XMLAttributePtr XMLDoc::AllocateAttributeFloat(const std::string& name, float value)
 {
 	return AllocateAttributeString(name, LexicalCast<std::string>(value));
 }
 
-XMLAttributePtr XMLDocument::AllocateAttributeString(const std::string& name, const std::string& value)
+XMLAttributePtr XMLDoc::AllocateAttributeString(const std::string& name, const std::string& value)
 {
 	return std::make_shared<XMLAttribute>(mDocument.get(), name, value);
 }
 
-void XMLDocument::RootNode( const XMLNodePtr& newNode )
+void XMLDoc::RootNode( const XMLNodePtr& newNode )
 {
 	mDocument->remove_all_nodes();
 	mDocument->append_node(newNode->mNode);
@@ -140,7 +119,7 @@ void XMLDocument::RootNode( const XMLNodePtr& newNode )
 XMLNode::XMLNode( rapidxml::xml_node<>* node )
 	: mNode(node)
 {
-	if(mNode != NULL)
+	if(mNode)
 	{
 		mName = std::string(mNode->name(), mNode->name_size()); 
 	}
@@ -171,7 +150,7 @@ XMLAttributePtr XMLNode::FirstAttribute( const std::string& name  )
 	}
 	else
 	{
-		return XMLAttribute::NullObejct;
+		return nullptr;
 	}
 }
 
@@ -184,7 +163,7 @@ XMLAttributePtr XMLNode::FirstAttribute()
 	}
 	else
 	{
-		return XMLAttribute::NullObejct;
+		return nullptr;
 	}
 }
 
@@ -197,7 +176,7 @@ XMLAttributePtr XMLNode::LastAttribute( const std::string& name )
 	}
 	else
 	{
-		return XMLAttribute::NullObejct;
+		return nullptr;
 	}
 }
 
@@ -210,7 +189,7 @@ XMLAttributePtr XMLNode::LastAttribute()
 	}
 	else
 	{
-		return XMLAttribute::NullObejct;
+		return nullptr;
 	}
 }
 
@@ -250,7 +229,7 @@ XMLNodePtr XMLNode::FirstNode( const std::string& name )
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullObejct;
+		return nullptr;
 	}
 }
 
@@ -261,7 +240,7 @@ XMLNodePtr XMLNode::LastNode( const std::string& name )
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullObejct;
+		return nullptr;
 	}
 }
 
@@ -272,7 +251,7 @@ XMLNodePtr XMLNode::FirstNode()
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullObejct;
+		return nullptr;
 	}
 }
 
@@ -283,7 +262,7 @@ XMLNodePtr XMLNode::LastNode()
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullObejct;
+		return nullptr;
 	}
 }	
 
@@ -294,7 +273,7 @@ XMLNodePtr XMLNode::PrevSibling( const std::string& name )
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullObejct;
+		return nullptr;
 	}
 }
 
@@ -305,7 +284,7 @@ XMLNodePtr XMLNode::PrevSibling()
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullObejct;
+		return nullptr;
 	}
 }
 
@@ -316,7 +295,7 @@ XMLNodePtr XMLNode::NextSibling( const std::string& name )
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullObejct;
+		return nullptr;
 	}
 }
 
@@ -327,48 +306,28 @@ XMLNodePtr XMLNode::NextSibling()
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullObejct;
+		return nullptr;
 	}
 }
 
 void XMLNode::InsertNode( const XMLNodePtr& where, const XMLNodePtr& child )
 {
 	mNode->insert_node(where->mNode, child->mNode);
-
-	// update child node position
-	for(size_t i = 0; i < mChildren.size(); i++)
-	{
-		if(mChildren[i]->mNode == where->mNode)
-		{
-			mChildren.insert(mChildren.begin() + i, child);
-		}
-	}
 }
 
 void XMLNode::AppendNode( const XMLNodePtr& child )
 {
 	mNode->append_node(child->mNode);
-	mChildren.push_back(child);
 }
 
 void XMLNode::AppendAttribute( const XMLAttributePtr& attribute )
 {
 	mNode->append_attribute(attribute->mAttribute);
-	mAttributes.push_back(attribute);
 }
 
 void XMLNode::InsertAttribute( const XMLAttributePtr& where, const XMLAttributePtr& attribute )
 {
 	mNode->insert_attribute(where->mAttribute, attribute->mAttribute);
-
-	// update attribute position
-	for(size_t i = 0; i < mAttributes.size(); i++)
-	{
-		if(mAttributes[i]->mAttribute == where->mAttribute)
-		{
-			mAttributes.insert(mAttributes.begin() + i, attribute);
-		}
-	}
 }
 
 void XMLNode::RemoveFirstNode()
@@ -377,8 +336,6 @@ void XMLNode::RemoveFirstNode()
 	{
 		mNode->remove_first_node();
 	}
-	// erase first node
-	mChildren.erase(mChildren.begin());
 }
 
 void XMLNode::RemoveLastNode()
@@ -387,28 +344,16 @@ void XMLNode::RemoveLastNode()
 	{
 		mNode->remove_last_node();
 	}
-
-	// erase last node
-	mChildren.pop_back();
 }
 
 void XMLNode::RemoveNode( const XMLNodePtr& where )
 {
 	mNode->remove_node(where->mNode);
-	for(size_t i = 0; i < mChildren.size(); i++)
-	{
-		if(mChildren[i] == where)
-		{
-			mChildren.erase(mChildren.begin() + i);
-			break;
-		}
-	}
 }
 
 void XMLNode::RemoveAllNodes()
 {
 	mNode->remove_all_nodes();
-	mChildren.clear();
 }
 
 void XMLNode::RemoveFirstAttribute()
@@ -416,7 +361,6 @@ void XMLNode::RemoveFirstAttribute()
 	if(mNode->first_attribute())
 	{
 		mNode->remove_first_attribute();
-		mAttributes.erase(mAttributes.begin());
 	}
 
 }
@@ -426,29 +370,17 @@ void XMLNode::RemoveLastAttribute()
 	if(mNode->first_attribute())
 	{
 		mNode->remove_last_attribute();
-		mAttributes.erase(mAttributes.begin());
 	}
 }
 
 void XMLNode::RemoveAttribute( const XMLAttributePtr& where )
 {
 	mNode->remove_attribute(where->mAttribute);
-
-	// update attribute position
-	for(size_t i = 0; i < mAttributes.size(); i++)
-	{
-		if(mAttributes[i] == where)
-		{
-			//mAttributes.erase(mAttributes.begin() + i, where);
-		}
-	}
-
 }
 
 void XMLNode::RemoveAllAttributes()
 {
 	mNode->remove_all_attributes();
-	mAttributes.clear();
 }
 
 uint32_t XMLNode::ValueUInt() const
@@ -478,7 +410,7 @@ XMLNodePtr XMLNode::GetParent()
 		return std::make_shared<XMLNode>(node);
 	}
 	else{
-		return XMLNode::NullObejct;
+		return nullptr;
 	}
 }
 
@@ -512,7 +444,7 @@ XMLAttributePtr XMLAttribute::PrevAttribute( const std::string& name ) const
 		return std::make_shared<XMLAttribute>(attr);
 	}
 	else{
-		return XMLAttribute::NullObejct;
+		return nullptr;
 	}
 }
 
@@ -523,7 +455,7 @@ XMLAttributePtr XMLAttribute::PrevAttribute() const
 		return std::make_shared<XMLAttribute>(attr);
 	}
 	else{
-		return XMLAttribute::NullObejct;
+		return nullptr;
 	}
 }
 
@@ -534,7 +466,7 @@ XMLAttributePtr XMLAttribute::NextAttribute( const std::string& name ) const
 		return std::make_shared<XMLAttribute>(attr);
 	}
 	else{
-		return XMLAttribute::NullObejct;
+		return nullptr;
 	}
 }
 
@@ -545,7 +477,7 @@ XMLAttributePtr XMLAttribute::NextAttribute() const
 		return std::make_shared<XMLAttribute>(attr);
 	}
 	else{
-		return XMLAttribute::NullObejct;
+		return nullptr;
 	}
 }
 

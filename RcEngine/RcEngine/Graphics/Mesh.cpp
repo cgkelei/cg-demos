@@ -62,6 +62,9 @@ namespace RcEngine
 			// write submesh name
 			dest.WriteString(meshPart->mName);
 
+			// write submesh material name
+			dest.WriteString(meshPart->GetMaterial()->GetName());
+
 			// write vertices count
 			dest.WriteUInt(meshPart->mVertexCount);
 
@@ -110,6 +113,8 @@ namespace RcEngine
 
 			// result meshpart
 			shared_ptr<MeshPart> meshPart( new MeshPart(name, mesh) );
+
+			//String matName = source.ReadString();
 
 			// read vertex count
 			uint32_t vertexCount = source.ReadUInt();

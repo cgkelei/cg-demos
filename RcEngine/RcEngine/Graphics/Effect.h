@@ -24,7 +24,7 @@ namespace RcEngine
 			const String& GetName() const	{ return mName; }
 			bool IsValid() const			{ return mValid; }
 
-			EffectTechniqueList& GetTechniques();
+			vector<EffectTechnique*>& GetTechniques();
 			EffectTechnique* GetTechniqueByName(const String& techName);
 			EffectTechnique* GetTechniqueByIndex(uint32_t index);
 
@@ -36,7 +36,7 @@ namespace RcEngine
 			String mName;
 			bool mValid;
 			EffectParameterCollection mParameters;
-			EffectTechniqueList mTechniques;
+			vector<EffectTechnique*> mTechniques;
 			
 		};
 	}

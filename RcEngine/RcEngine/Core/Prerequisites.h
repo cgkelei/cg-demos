@@ -84,12 +84,18 @@ namespace RcEngine {
 
 	class Application;
 	class Window;
+	class Stream;
 
 	namespace Core
 	{
 		class Timer;
 		class Exception;
 		class IModule;
+		class XMLDoc;
+		class XMLNode;
+		class XMLAttribute;
+		typedef shared_ptr<XMLNode> XMLNodePtr;
+		typedef shared_ptr<XMLAttribute> XMLAttributePtr;
 	}
 
 	namespace Input

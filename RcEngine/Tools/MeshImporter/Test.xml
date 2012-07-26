@@ -1,6 +1,6 @@
 <mesh name="Dwarf">
 <materials materialCount="9">
-	<matrial>
+	<matrial name="material0">
 		<ambient r="0" g="0" b="0"/>
 		<diffuse r="0" g="0" b="0"/>
 		<specular r="0" g="0" b="0"/>
@@ -10,7 +10,7 @@
 			<texture type="DiffuseMap" name="Weapons.dds"/>
 		</texturesChunk>
 	</matrial>
-	<matrial>
+	<matrial name="material0">
 		<ambient r="0" g="0" b="0"/>
 		<diffuse r="0" g="0" b="0"/>
 		<specular r="0" g="0" b="0"/>
@@ -20,7 +20,7 @@
 			<texture type="DiffuseMap" name="Pack.dds"/>
 		</texturesChunk>
 	</matrial>
-	<matrial>
+	<matrial name="material0">
 		<ambient r="0" g="0" b="0"/>
 		<diffuse r="0" g="0" b="0"/>
 		<specular r="0" g="0" b="0"/>
@@ -30,7 +30,7 @@
 			<texture type="DiffuseMap" name="Body.dds"/>
 		</texturesChunk>
 	</matrial>
-	<matrial>
+	<matrial name="material0">
 		<ambient r="0" g="0" b="0"/>
 		<diffuse r="0" g="0" b="0"/>
 		<specular r="0" g="0" b="0"/>
@@ -40,7 +40,7 @@
 			<texture type="DiffuseMap" name="Body.dds"/>
 		</texturesChunk>
 	</matrial>
-	<matrial>
+	<matrial name="material0">
 		<ambient r="0" g="0" b="0"/>
 		<diffuse r="0" g="0" b="0"/>
 		<specular r="0" g="0" b="0"/>
@@ -50,7 +50,7 @@
 			<texture type="DiffuseMap" name="Body.dds"/>
 		</texturesChunk>
 	</matrial>
-	<matrial>
+	<matrial name="material0">
 		<ambient r="0" g="0" b="0"/>
 		<diffuse r="0" g="0" b="0"/>
 		<specular r="0" g="0" b="0"/>
@@ -60,7 +60,7 @@
 			<texture type="DiffuseMap" name="Body.dds"/>
 		</texturesChunk>
 	</matrial>
-	<matrial>
+	<matrial name="material0">
 		<ambient r="0" g="0" b="0"/>
 		<diffuse r="0" g="0" b="0"/>
 		<specular r="0" g="0" b="0"/>
@@ -70,7 +70,7 @@
 			<texture type="DiffuseMap" name="Armor.dds"/>
 		</texturesChunk>
 	</matrial>
-	<matrial>
+	<matrial name="material0">
 		<ambient r="0" g="0" b="0"/>
 		<diffuse r="0" g="0" b="0"/>
 		<specular r="0" g="0" b="0"/>
@@ -80,7 +80,7 @@
 			<texture type="DiffuseMap" name="Headgear.dds"/>
 		</texturesChunk>
 	</matrial>
-	<matrial>
+	<matrial name="material0">
 		<ambient r="0" g="0" b="0"/>
 		<diffuse r="0" g="0" b="0"/>
 		<specular r="0" g="0" b="0"/>
@@ -92,7 +92,7 @@
 	</matrial>
 </materials>
 <subMeshes count="9">
-	<subMesh >
+	<subMesh materialID="0">
 		<vertices vertexCount="1116" vertexSize="32">
 			<vertex>
 				<position x="-0.026516" y="1.488" z="0.268401"/>
@@ -6051,7 +6051,7 @@
 			<triangle a="1115" b="1114" c="1113"/>
 		</triangles>
 	</subMesh>
-	<subMesh >
+	<subMesh materialID="1">
 		<vertices vertexCount="318" vertexSize="32">
 			<vertex>
 				<position x="0.260844" y="1.24217" z="0.372073"/>
@@ -7754,7 +7754,7 @@
 			<triangle a="317" b="316" c="315"/>
 		</triangles>
 	</subMesh>
-	<subMesh >
+	<subMesh materialID="5">
 		<vertices vertexCount="1794" vertexSize="32">
 			<vertex>
 				<position x="-0.409258" y="1.21153" z="0.184591"/>
@@ -17329,7 +17329,7 @@
 			<triangle a="1793" b="1792" c="1791"/>
 		</triangles>
 	</subMesh>
-	<subMesh >
+	<subMesh materialID="5">
 		<vertices vertexCount="1620" vertexSize="32">
 			<vertex>
 				<position x="-0.533298" y="0.473961" z="-0.02874"/>
@@ -25976,7 +25976,7 @@
 			<triangle a="1619" b="1618" c="1617"/>
 		</triangles>
 	</subMesh>
-	<subMesh >
+	<subMesh materialID="5">
 		<vertices vertexCount="1200" vertexSize="32">
 			<vertex>
 				<position x="0.152976" y="0.441318" z="-0.113564"/>
@@ -32383,7 +32383,7 @@
 			<triangle a="1199" b="1198" c="1197"/>
 		</triangles>
 	</subMesh>
-	<subMesh >
+	<subMesh materialID="5">
 		<vertices vertexCount="1332" vertexSize="32">
 			<vertex>
 				<position x="-0.096455" y="1.18307" z="-0.096219"/>
@@ -39494,7 +39494,7 @@
 			<triangle a="1331" b="1330" c="1329"/>
 		</triangles>
 	</subMesh>
-	<subMesh >
+	<subMesh materialID="6">
 		<vertices vertexCount="4992" vertexSize="32">
 			<vertex>
 				<position x="0.280963" y="1.22923" z="0.2415"/>
@@ -66125,7 +66125,7 @@
 			<triangle a="4991" b="4990" c="4989"/>
 		</triangles>
 	</subMesh>
-	<subMesh >
+	<subMesh materialID="7">
 		<vertices vertexCount="888" vertexSize="32">
 			<vertex>
 				<position x="-0" y="1.30654" z="-0.139283"/>
@@ -70868,7 +70868,7 @@
 			<triangle a="887" b="886" c="885"/>
 		</triangles>
 	</subMesh>
-	<subMesh >
+	<subMesh materialID="8">
 		<vertices vertexCount="2550" vertexSize="32">
 			<vertex>
 				<position x="0.066864" y="1.3314" z="-0.104322"/>

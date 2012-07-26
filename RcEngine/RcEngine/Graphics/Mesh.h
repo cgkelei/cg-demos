@@ -56,15 +56,10 @@ namespace RcEngine
 			void GetWorldTransforms(Math::Matrix4f* xform) const;
 			uint32_t GetWorldTransformsCount() const;
 
+
+		public:
 			static shared_ptr<MeshPart> Load(const shared_ptr<Mesh>& mesh, Stream& source);
 			static void Save(const shared_ptr<MeshPart>& meshPart, Stream& dest);
-
-			/** 
-			 * Load a mesh part from MeshPartContentLoader
-			 * @param mesh The mesh that this is part of.
-			 * @param mploader loader contains mesh part data.
-			 */
-			//static shared_ptr<MeshPart> LoadFrom( const shared_ptr<Mesh>& mesh, MeshPartContent* mpLoader);
 			
 		private:
 			weak_ptr<Mesh> mParentMesh;

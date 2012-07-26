@@ -10,7 +10,7 @@ namespace RcEngine
 
 		MaterialContent::MaterialContent(const String& path)
 		{
-			XMLDocument material;
+			/*XMLDoc material;
 			XMLNodePtr root = material.Parse(path);
 			XMLNodePtr node;
 
@@ -29,7 +29,7 @@ namespace RcEngine
 
 			node = root->FirstNode("Effect");
 			EffectName = node->AttributeString("name", "");
-			EffectPath = node->AttributeString("file", "");		
+			EffectPath = node->AttributeString("file", "");		*/
 		}
 
 		MaterialContent::MaterialContent()

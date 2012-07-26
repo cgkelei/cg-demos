@@ -34,8 +34,6 @@ namespace RcEngine
 			EffectPassList mPasses;
 			EffectAnnotationList mAnnotations;
 		};
-
-		typedef vector<EffectTechnique*> EffectTechniqueList;
 	}
 }
 
