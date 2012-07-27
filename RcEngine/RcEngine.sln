@@ -18,6 +18,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MeshImporter", "Tools\MeshI
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{F40A2145-80F8-4121-8764-9E6E667B07E8}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XML2Binary", "Tools\XML2Binary\XML2Binary.vcxproj", "{536FE929-BB63-487E-B419-614AB399199C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -40,11 +42,16 @@ Global
 		{C6F62DF1-E874-4347-9EA5-567181DA4DBC}.Debug|Win32.Build.0 = Debug|Win32
 		{C6F62DF1-E874-4347-9EA5-567181DA4DBC}.Release|Win32.ActiveCfg = Release|Win32
 		{C6F62DF1-E874-4347-9EA5-567181DA4DBC}.Release|Win32.Build.0 = Release|Win32
+		{536FE929-BB63-487E-B419-614AB399199C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{536FE929-BB63-487E-B419-614AB399199C}.Debug|Win32.Build.0 = Debug|Win32
+		{536FE929-BB63-487E-B419-614AB399199C}.Release|Win32.ActiveCfg = Release|Win32
+		{536FE929-BB63-487E-B419-614AB399199C}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C6F62DF1-E874-4347-9EA5-567181DA4DBC} = {F40A2145-80F8-4121-8764-9E6E667B07E8}
+		{536FE929-BB63-487E-B419-614AB399199C} = {F40A2145-80F8-4121-8764-9E6E667B07E8}
 	EndGlobalSection
 EndGlobal

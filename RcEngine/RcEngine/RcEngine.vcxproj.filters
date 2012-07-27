@@ -123,12 +123,6 @@
     <ClCompile Include="Graphics\Renderable.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Content\MeshContentLoader.cpp">
-      <Filter>Content</Filter>
-    </ClCompile>
-    <ClCompile Include="Content\MaterialContentLoader.cpp">
-      <Filter>Content</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\EffectParameter.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
@@ -164,6 +158,9 @@
     </ClCompile>
     <ClCompile Include="IO\FileSystem.cpp">
       <Filter>IO</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Skeleton.cpp">
+      <Filter>Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -299,12 +296,6 @@
     <ClInclude Include="Graphics\SimpleGeometry.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Content\MeshContentLoader.h">
-      <Filter>Content</Filter>
-    </ClInclude>
-    <ClInclude Include="Content\MaterialContentLoader.h">
-      <Filter>Content</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\EffectParameter.h">
       <Filter>Graphics</Filter>
     </ClInclude>
@@ -340,6 +331,9 @@
     </ClInclude>
     <ClInclude Include="IO\FileSystem.h">
       <Filter>IO</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Skeleton.h">
+      <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
