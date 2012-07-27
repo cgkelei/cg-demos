@@ -16,7 +16,7 @@
 
 struct OutModel
 {
-	String Name;
+	String OutName;
 	vector<aiMesh*> Meshes;
 	vector<aiNode*> MeshNodes;
 	vector<aiNode*> Bones;
@@ -111,45 +111,6 @@ bool AssimpProcesser::Process( const char* filePath )
 
 void AssimpProcesser::ProcessScene( const aiScene* scene )
 {
-	if (scene->HasAnimations())
-	{
-		mSkeleton = CreateBoneTrees(scene->mRootNode, NULL);
-
-		for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
-		{
-			aiMesh* mesh = scene->mMeshes[i];
-
-			for (unsigned int j = 0; j < mesh->mNumBones; j++)
-			{
-				aiBone* bone = mesh->mBones[j];
-				string boneName = string(bone->mName.data);
-				auto found = mNodeByName.find(boneName);
-				if ( mNodeByName.end() != found)
-				{
-					// found it, make sure its not already in the bone list
-					bool skip = false;
-					for (size_t k = 0; k < mBones.size(); ++k)
-					{
-						if (mBones[k]->Name == boneName)
-						{
-							skip = true;
-							break;
-						}
-					}
-
-					if (!skip)
-					{
-						TransformMatrix(found->second->Offset, bone->mOffsetMatrix);
-						mBones.push_back(found->second);
-						mBonesToIndex[found->first] = mBones.size()-1;
-					}
-				}
-			}
-		}
-		mTransforms.resize(mBones.size());
-	}
-	
-
 	OutModel model;
 	CollectMeshes(model, scene->mRootNode);
 	CollectBones(model);
@@ -420,127 +381,6 @@ shared_ptr<MaterialData> AssimpProcesser::ProcessMaterial( aiMaterial* material 
 	return materialData;
 }
 
-/*
-void AssimpProcesser::ExportXML( const char* output, MeshContent* meshContent )
-{
-	
-}
-
-void AssimpProcesser::ExportBinary( const char* output, MeshContent* meshContent )
-{
-	FileStream stream(output, FILE_WRITE);
-
-	meshContent->Name = "Dwarf";
-
-	// write mesh name, for test
-	stream.WriteString(meshContent->Name);
-	stream.WriteUInt(meshContent->MeshPartContentLoaders.size());
-
-	vector<MeshPartContent*> subMeshes = meshContent->MeshPartContentLoaders;
-	for (size_t i = 0; i < subMeshes.size(); ++i)
-	{
-		MeshPartContent* submesh = subMeshes[i];
-		stream.WriteString(submesh->Name);
-		stream.WriteUInt(submesh->VertexCount);
-		stream.WriteUInt(submesh->VertexDeclaration->GetVertexSize());
-		
-		// write vertex declaration, element size
-		stream.WriteUInt(submesh->VertexDeclaration->GetElementCount());
-
-		// write each vertex element
-		const std::vector<VertexElement>& elements = submesh->VertexDeclaration->GetElements();
-		for (auto iter = elements.begin(); iter != elements.end(); ++iter)
-		{
-			const VertexElement& ve = *iter;
-			stream.WriteUInt(ve.Offset);
-			stream.WriteUInt(ve.Type);
-			stream.WriteUInt(ve.Usage);
-			stream.WriteUShort(ve.UsageIndex);
-		}
-
-		// write vertex buffer data
-		uint32_t bufferSize = submesh->VertexCount * submesh->VertexDeclaration->GetVertexSize();
-		stream.Write(submesh->VertexData, bufferSize);
-
-		// write triangles count
-		stream.WriteUInt(submesh->mFaces.size());
-		bufferSize = submesh->mFaces.size() * sizeof(MeshPartContent::Face);
-		stream.Write(&submesh->mFaces[0], bufferSize);
-	}
-	
-	stream.Close();
-}
-
-*/
-
-Bone* AssimpProcesser::CreateBoneTrees( aiNode* pNode, Bone* parent )
-{
-	Bone* internalNode = new Bone;
-	internalNode->Name = string(pNode->mName.data);
-	internalNode->Parent = parent;
-
-	mNodeByName[internalNode->Name] = internalNode;
-
-	// local transform
-	TransformMatrix(internalNode->LocalTransform, pNode->mTransformation);
-	internalNode->LocalTransform.Transpose();		// switch right-handed to left handed
-	
-	// copy 
-	internalNode->OriginalLocalTransform = internalNode->LocalTransform;
-
-	// calculate world transform
-	CalculateBoneToWorldTransform(internalNode);
-
-	for (unsigned int child = 0; child < pNode->mNumChildren; ++child)
-	{
-		internalNode->Children.push_back( 
-			CreateBoneTrees(pNode->mChildren[child], internalNode));
-	}
-
-	return internalNode;
-}
-
-void AssimpProcesser::UpdateTransforms( Bone* pNode )
-{
-	CalculateBoneToWorldTransform(pNode);
-	for(size_t i = 0; i < pNode->Children.size(); i++)
-	{
-		Bone* childNode = pNode->Children[i];
-		UpdateTransforms( pNode);// update global transform as well
-	}
-}
-
-void AssimpProcesser::CalculateBoneToWorldTransform(Bone* pNode)
-{
-	pNode->GlobalTransform = pNode->LocalTransform;
-	Bone* parent = pNode->Parent;
-	while(parent)
-	{
-		pNode->GlobalTransform = pNode->GlobalTransform * parent->LocalTransform;
-		parent = parent->Parent;
-	}
-}
-
-void AssimpProcesser::SaveSkeleton(fstream& stream, Bone* parent)
-{
-	for (size_t i = 0; i < mBones.size(); ++i)
-	{
-		Bone* bone = mBones[i];
-		Vector3f scale, translation;
-		Quaternionf rotation;
-		MatrixDecompose(scale, rotation, translation, bone->OriginalLocalTransform);
-
-		stream << "<bone id=\"" << i << "\" name=\"" << bone->Name << "\" parent=\""
-			<< mBonesToIndex[bone->Parent->Name] << "\">" << endl;
-		stream << "\t<position x=\"" << translation.X() << "\" y=\"" 
-			<< translation.Y()  << "\" z=\"" << translation.Z()  
-			<< "\"/>" << endl;
-		stream <<"\t<rotation x=\"" << rotation.X() << "\" y=\"" << rotation.Y() 
-			<< "\" z=\"" << rotation.Z() << "\" w=\"" << rotation.W() << "\"/>" << endl;
-		stream << "</bone>" << endl;
-	}
-}
-
 void AssimpProcesser::ExportXML( const String& fileName )
 {
 	//fstream stream(output, fstream::out);
@@ -768,6 +608,46 @@ void AssimpProcesser::CollectBones( OutModel& outModel )
 	 // If we find multiple root nodes
 	if (rootNodes.size() > 1)
 	{
-		
+		aiNode* commonParent =  (*rootNodes.begin())->mParent;
+
+		for(auto iter = rootNodes.begin(); iter != rootNodes.begin(); ++iter)
+		{
+			if ( (*iter) != commonParent )
+			{
+				if (!commonParent || (*iter)->mParent != commonParent)
+				{
+					 ENGINE_EXCEPT(Core::Exception::ERR_INTERNAL_ERROR,
+						 "Skeleton with multiple root nodes found, not supported", "AssimpProcesser::CollectBones");
+				}
+			}
+		}
+
+		rootNodes.clear();
+		rootNodes.insert(commonParent);
+		necessary.insert(commonParent);
 	}
+
+	if (rootNodes.empty())
+		return;
+
+	outModel.RootBone = *rootNodes.begin();
+	CollectBonesFinal(outModel.Bones, necessary, outModel.RootBone);
+}
+
+void AssimpProcesser::CollectBonesFinal( vector<aiNode*>& bones, const set<aiNode*>& necessary, aiNode* node )
+{
+	if (necessary.find(node) != necessary.end())
+	{
+		bones.push_back(node);
+
+		for (size_t i = 0; i < node->mNumChildren; ++i)
+		{
+			CollectBonesFinal(bones, necessary, node->mChildren[i]);
+		}
+	}
+}
+
+void AssimpProcesser::ExportModel( OutModel& outModel, const String& outName )
+{
+	outModel.OutName = outName;
 }
