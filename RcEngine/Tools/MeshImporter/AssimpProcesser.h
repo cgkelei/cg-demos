@@ -21,19 +21,6 @@ using namespace RcEngine::Math;
 using namespace RcEngine::Render;
 
 
-
-class Bone {
-public:
-
-	std::string Name;
-	Matrix4f Offset, LocalTransform, GlobalTransform, OriginalLocalTransform;
-	Bone* Parent;
-	vector<Bone*> Children;
-
-	Bone() :Parent(0){}
-	~Bone(){ for(size_t i(0); i< Children.size(); i++) delete Children[i]; }
-};
-
 struct MaterialData;
 struct MeshPartData;
 struct OutModel;
@@ -56,27 +43,16 @@ private:
 
 	void GetBoundingBox(const aiScene* scene, aiVector3D* min, aiVector3D* max);
 
-private:
-	Bone* CreateBoneTrees(aiNode* pNode, Bone* parent);
-	void CalculateBoneToWorldTransform(Bone* pNode);
-
-	void UpdateTransforms(Bone* pNode);
-	void SaveSkeleton(fstream& stream, Bone* parent);
-
+	
+	void ExportModelExportModel( OutModel& outModel, const String& outName );
 
 private:
 	void CollectMeshes(OutModel& outModel, aiNode* rootNode);
 	void CollectBones(OutModel& outModel);
+	void CollectBonesFinal(vector<aiNode*>& bones, const set<aiNode*>& necessary, aiNode* node);
 
 private:
 	aiScene* mAIScene;
-
-
-	unordered_map<String, Bone*> mNodeByName;
-	vector<Bone*> mBones;
-	unordered_map<string, unsigned int> mBonesToIndex;
-	Bone* mSkeleton;
-	vector<Matrix4f> mTransforms;
 
 	String mName;
 	vector<shared_ptr<MaterialData> > mMaterials;
