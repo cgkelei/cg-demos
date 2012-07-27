@@ -64,6 +64,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AssimpProcesser.h" />
+    <ClInclude Include="MaterialData.h" />
+    <ClInclude Include="MeshData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssimpProcesser.cpp" />

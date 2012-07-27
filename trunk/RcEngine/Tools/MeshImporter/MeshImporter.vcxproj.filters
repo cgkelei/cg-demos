@@ -18,6 +18,12 @@
     <ClInclude Include="AssimpProcesser.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="MaterialData.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshData.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssimpProcesser.cpp">

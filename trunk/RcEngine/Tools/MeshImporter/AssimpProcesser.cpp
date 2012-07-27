@@ -1,6 +1,4 @@
 #include "AssimpProcesser.h"
-#include "Content/MeshContentLoader.h"
-#include "Content/MaterialContentLoader.h"
 #include "Graphics/VertexDeclaration.h"
 #include "Graphics/RenderFactory.h"
 #include "Math/ColorRGBA.h"
@@ -8,16 +6,26 @@
 #include "Math/MathUtil.h"
 #include "Graphics/Mesh.h"
 #include "MainApp/Application.h"
-#include "IO/FileStream.h"
-#include "Core/XMLDom.h"
+#include "Core/Exception.h"
 
-#include <fstream>
+#include "MaterialData.h"
+#include "MeshData.h"
 
 #pragma comment(lib, "assimp.lib")
 
-using namespace RcEngine;
-using namespace RcEngine::Render;
 
+struct OutModel
+{
+	String Name;
+	vector<aiMesh*> Meshes;
+	vector<aiNode*> MeshNodes;
+	vector<aiNode*> Bones;
+	vector<aiAnimation*> Animations;
+	aiNode* RootNode;
+	aiNode* RootBone;
+	uint32_t TotalVertices;
+	uint32_t TotalIndices;
+};
 
 // Convert aiMatrix to RcEngine matrix, note that assimp 
 // assume the right handed coordinate system, so aiMatrix 
@@ -46,6 +54,33 @@ void TransformMatrix(Matrix4f& out, aiMatrix4x4& in)
 	out.M44 = in.d4;
 }
 
+aiNode* GetNode(const String& name, aiNode* node)
+{
+	if (!node)
+		return nullptr;
+	
+	if (String(node->mName.C_Str()) == name)
+	{
+		return node;
+	}
+
+	for (uint32_t i = 0; i < node->mNumChildren; ++i)
+	{
+		aiNode* found = GetNode(name, node->mChildren[i]);
+		if (found)
+		{
+			return found;
+		}
+	}
+
+	return nullptr;
+}
+
+void PrintLine(const String& str)
+{
+	cout << str << endl;
+}
+
 AssimpProcesser::AssimpProcesser(void)
 {
 }
@@ -59,17 +94,17 @@ bool AssimpProcesser::Process( const char* filePath )
 {
 	Assimp::Importer importer;
 	
-	const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate |
-		aiProcess_RemoveRedundantMaterials | aiProcess_OptimizeMeshes | aiProcess_FlipUVs);
+	mAIScene = const_cast<aiScene*>( importer.ReadFile(filePath, aiProcess_Triangulate |
+		aiProcess_RemoveRedundantMaterials | aiProcess_OptimizeMeshes | aiProcess_FlipUVs) );
 	
-	if(!scene)
+	if(!mAIScene)
 	{
 		// Error
 		std::cerr <<  importer.GetErrorString() << std::endl;
 		return false;
 	}
 
-	ProcessScene(scene);
+	ProcessScene(mAIScene);
 
 	return true;
 }
@@ -113,46 +148,68 @@ void AssimpProcesser::ProcessScene( const aiScene* scene )
 		}
 		mTransforms.resize(mBones.size());
 	}
+	
 
-	MeshContent* meshContent = new MeshContent;
+	OutModel model;
+	CollectMeshes(model, scene->mRootNode);
+	CollectBones(model);
 
+	mMeshParts.resize(scene->mNumMeshes);
 	for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
 	{
 		aiMesh* mesh = scene->mMeshes[i];
-		ProcessMesh(mesh, meshContent);
+		mMeshParts.push_back(  ProcessMeshPart(mesh) );
 	}
-	
+
+	mMaterials.reserve(scene->mNumMaterials);
 	for (unsigned int i = 0; i < scene->mNumMaterials; ++i)
 	{
 		aiMaterial* material = scene->mMaterials[i];
-		ProcessMaterial(material, meshContent);
+		mMaterials.push_back( ProcessMaterial(material) );
 	}
-
-	//ExportBinary("Test.mdl", meshContent);
-	ExportXML("Test.xml", meshContent);
 }
 
-void AssimpProcesser::ProcessMesh( aiMesh* mesh, MeshContent* meshContent )
+shared_ptr<MeshPartData> AssimpProcesser::ProcessMeshPart( aiMesh* mesh )
 {
-	MeshPartContent* meshPartContent = new MeshPartContent;
-	meshPartContent->Name = std::string(mesh->mName.C_Str());
-	meshPartContent->MaterialID = mesh->mMaterialIndex;
-	
+	if (!mesh)
+	{
+		return nullptr;
+	}
+
+	shared_ptr<MeshPartData> meshPart( new MeshPartData() );
+
+	meshPart->Name = std::string(mesh->mName.C_Str());
+	meshPart->MaterialID = mesh->mMaterialIndex;
+
 	// process faces
-	meshPartContent->mFaces.resize(mesh->mNumFaces);
-	meshPartContent->IndexCount = mesh->mNumFaces * 3;
-	meshPartContent->IndexFormat = IBT_Bit32;
+	uint16_t faceCount = mesh->mNumFaces;
+	meshPart->StartIndex = 0;
+	meshPart->IndexCount = mesh->mNumFaces * 3;		// only support triangle
+	
+	if ( meshPart->IndexCount < (std::numeric_limits<uint16_t>::max)() )
+	{
+		meshPart->IndexFormat = IBT_Bit16;
+	}
+	else
+	{
+		meshPart->IndexFormat = IBT_Bit32;
+	}
+	
+	meshPart->IndexData.resize(meshPart->IndexCount);
+	
 	for (unsigned int f = 0; f < mesh->mNumFaces; ++f)
 	{
 		aiFace face = mesh->mFaces[f];
 		assert(face.mNumIndices == 3);
-		meshPartContent->mFaces[f] = MeshPartContent::Face(face.mIndices[0], face.mIndices[1], face.mIndices[2]);
+		meshPart->IndexData[ f*3 + 0] = face.mIndices[0];
+		meshPart->IndexData[ f*3 + 1] = face.mIndices[1];
+		meshPart->IndexData[ f*3 + 2] = face.mIndices[2];
 	}
-	
+
 	bool bones = mesh->HasBones();
 
 	// Process vertices
-	std::vector<VertexElement> vertexElements;
+	vector<VertexElement> vertexElements;
 	unsigned int offset = 0;
 	if (mesh->HasPositions())
 	{
@@ -194,24 +251,23 @@ void AssimpProcesser::ProcessMesh( aiMesh* mesh, MeshContent* meshContent )
 		}
 	}
 
-	meshPartContent->VertexDeclaration = std::make_shared<VertexDeclaration>(vertexElements);
-	meshPartContent->VertexCount = mesh->mNumVertices;
 	unsigned int vertexSize = offset;
 	
 	// bounding sphere
-	meshPartContent->BoundingSphere.mCenter = Vector3f(0.0f, 0.0f, 0.0f);
-	meshPartContent->BoundingSphere.mRadius = 0.0f;
+	meshPart->BoundingSphere.mCenter = Vector3f(0.0f, 0.0f, 0.0f);
+	meshPart->BoundingSphere.mRadius = 0.0f;
 
-	meshPartContent->VertexData = new char[vertexSize * mesh->mNumVertices];
+	meshPart->VertexCount = mesh->mNumVertices;
+	meshPart->VertexData.resize(vertexSize * mesh->mNumVertices);
 
-
+	
 	for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
 	{
 		int baseOffset = vertexSize * i;
 		for (size_t ve = 0; ve < vertexElements.size(); ++ve)
 		{
 			const VertexElement& element = vertexElements[ve];
-			float* vertexPtr = (float*)(meshPartContent->VertexData + baseOffset + element.Offset);
+			float* vertexPtr = (float*)(&meshPart->VertexData[0] + baseOffset + element.Offset);
 			switch(element.Usage)
 			{
 			case VEU_Position:
@@ -220,33 +276,43 @@ void AssimpProcesser::ProcessMesh( aiMesh* mesh, MeshContent* meshContent )
 					*(vertexPtr) = mesh->mVertices[i].x;
 					*(vertexPtr+1) = mesh->mVertices[i].y;
 					*(vertexPtr+2) = mesh->mVertices[i].z;
+
+					// bouding sphere
 				}	
 				break;
 			case VEU_Normal:
-				*(vertexPtr) = mesh->mNormals[i].x;
-				*(vertexPtr+1) = mesh->mNormals[i].y;
-				*(vertexPtr+2) = mesh->mNormals[i].z;
+				{
+					*(vertexPtr) = mesh->mNormals[i].x;
+					*(vertexPtr+1) = mesh->mNormals[i].y;
+					*(vertexPtr+2) = mesh->mNormals[i].z;
+				}
 				break;
 			case VEU_Tangent:
-				*(vertexPtr) = mesh->mTangents[i].x;
-				*(vertexPtr+1) = mesh->mTangents[i].y;
-				*(vertexPtr+2) = mesh->mTangents[i].z;
+				{
+					*(vertexPtr) = mesh->mTangents[i].x;
+					*(vertexPtr+1) = mesh->mTangents[i].y;
+					*(vertexPtr+2) = mesh->mTangents[i].z;
+				}			
 				break;
 			case VEU_Binormal:
-				*(vertexPtr) = mesh->mBitangents[i].x;
-				*(vertexPtr+1) = mesh->mBitangents[i].y;
-				*(vertexPtr+2) = mesh->mBitangents[i].z;
+				{
+					*(vertexPtr) = mesh->mBitangents[i].x;
+					*(vertexPtr+1) = mesh->mBitangents[i].y;
+					*(vertexPtr+2) = mesh->mBitangents[i].z;
+				}			
 				break;
 			case VEU_TextureCoordinate:
-				switch(mesh->mNumUVComponents[element.UsageIndex])
 				{
-				case 3:
-					*(vertexPtr+2) = mesh->mTextureCoords[element.UsageIndex][i].z;
-				case 2:
-					*(vertexPtr+1) = mesh->mTextureCoords[element.UsageIndex][i].y;	
-				case 1:
-					*(vertexPtr) = mesh->mTextureCoords[element.UsageIndex][i].x;
-					break;
+					switch(mesh->mNumUVComponents[element.UsageIndex])
+					{
+					case 3:
+						*(vertexPtr+2) = mesh->mTextureCoords[element.UsageIndex][i].z;
+					case 2:
+						*(vertexPtr+1) = mesh->mTextureCoords[element.UsageIndex][i].y;	
+					case 1:
+						*(vertexPtr) = mesh->mTextureCoords[element.UsageIndex][i].x;
+						break;
+					}
 				}
 			case VEU_BlendIndices:
 				break;
@@ -258,48 +324,52 @@ void AssimpProcesser::ProcessMesh( aiMesh* mesh, MeshContent* meshContent )
 			}
 		}
 	}
-	
-	// combine in mesh
-	meshContent->MeshPartContentLoaders.push_back(meshPartContent);	
+
+	return meshPart;
 }
 
-void AssimpProcesser::ProcessMaterial( aiMaterial* material, MeshContent* meshContent )
+shared_ptr<MaterialData> AssimpProcesser::ProcessMaterial( aiMaterial* material )
 {
-	MaterialContent* materialContent = new MaterialContent;
+	if (!material)
+	{
+		return nullptr;
+	}
+
+	shared_ptr<MaterialData> materialData( new MaterialData );
 
 	for (unsigned int i = 0; i < material->mNumProperties; ++i)
 	{
 		aiMaterialProperty* prop = material->mProperties[i];
-		
+
 		if (prop->mKey == aiString("?mat.name"))
 		{
 			aiString name;
 			material->Get(AI_MATKEY_NAME,name);
-			materialContent->MaterialName = string(name.C_Str());
+			materialData->Name = string(name.C_Str());
 		}
 		else if (prop->mKey == aiString("$clr.ambient"))
 		{
 			aiColor3D color (0.f,0.f,0.f);
 			material->Get(AI_MATKEY_COLOR_AMBIENT,color);
-			materialContent->Ambient = ColorRGBA(color.r, color.g, color.b, 1.0f);
+			materialData->Ambient = ColorRGBA(color.r, color.g, color.b, 1.0f);
 		}
 		else if (prop->mKey == aiString("$clr.diffuse"))
 		{
 			aiColor3D color (0.f,0.f,0.f);
 			material->Get(AI_MATKEY_COLOR_DIFFUSE,color);
-			materialContent->Diffuse = ColorRGBA(color.r, color.g, color.b, 1.0f);
+			materialData->Diffuse = ColorRGBA(color.r, color.g, color.b, 1.0f);
 		}
 		else if (prop->mKey == aiString("$clr.specular"))
 		{
 			aiColor3D color (0.f,0.f,0.f);
 			material->Get(AI_MATKEY_COLOR_SPECULAR,color);
-			materialContent->Diffuse = ColorRGBA(color.r, color.g, color.b, 1.0f);
+			materialData->Diffuse = ColorRGBA(color.r, color.g, color.b, 1.0f);
 		}
 		else if (prop->mKey == aiString("$mat.shininess"))
 		{
 			float shininess;
 			material->Get(AI_MATKEY_SHININESS,shininess);
-			materialContent->Power = shininess;
+			materialData->Power = shininess;
 		}
 		else if (prop->mKey == aiString("$tex.file"))
 		{
@@ -309,207 +379,51 @@ void AssimpProcesser::ProcessMaterial( aiMaterial* material, MeshContent* meshCo
 				{
 					aiString file;
 					material->GetTexture(aiTextureType_AMBIENT, 0, &file);
-					materialContent->mTextures.insert(make_pair(string("AmbientMap"), string(file.C_Str())));
+					materialData->Textures.insert(make_pair(string("AmbientMap"), string(file.C_Str())));
 				}
 			case aiTextureType_DIFFUSE:
 				{
 					aiString file;
 					material->GetTexture(aiTextureType_DIFFUSE, 0, &file);
-					materialContent->mTextures.insert(make_pair(String("DiffuseMap"), String(file.C_Str())));
+					materialData->Textures.insert(make_pair(String("DiffuseMap"), String(file.C_Str())));
 				}
 				break;
 			case aiTextureType_SPECULAR:
 				{
 					aiString file;
 					material->GetTexture(aiTextureType_SPECULAR, 0, &file);
-					materialContent->mTextures.insert(make_pair(string("SpecularMap"), string(file.C_Str())));
+					materialData->Textures.insert(make_pair(string("SpecularMap"), string(file.C_Str())));
 				}
 				break;
 			case aiTextureType_NORMALS:
 				{
 					aiString file;
 					material->GetTexture(aiTextureType_NORMALS, 0, &file);
-					materialContent->mTextures.insert(make_pair(string("NormalMap"), string(file.C_Str())));
+					materialData->Textures.insert(make_pair(string("NormalMap"), string(file.C_Str())));
 				}
 				break;
 			case aiTextureType_DISPLACEMENT:
 				{
 					aiString file;
 					material->GetTexture(aiTextureType_DISPLACEMENT, 0, &file);
-					materialContent->mTextures.insert(make_pair(string("DisplacementMap"), string(file.C_Str())));
+					materialData->Textures.insert(make_pair(string("DisplacementMap"), string(file.C_Str())));
 				}
 				break;
 			default:
 				{
-					
+
 				}
 			}
 		}
 	}
 
-	// combine in mesh
-	meshContent->MaterialContentLoaders.push_back(materialContent);	
+	return materialData;
 }
 
+/*
 void AssimpProcesser::ExportXML( const char* output, MeshContent* meshContent )
 {
-	meshContent->Name = "Dwarf";
-
-	fstream stream(output, fstream::out);
-
-	stream << "<mesh name=\"" << meshContent->Name << "\">" << endl;
 	
-	
-	// output materials
-	stream << "<materials materialCount=\"" << meshContent->MaterialContentLoaders.size() << "\">" << endl;
-	vector<MaterialContent*>& materials = meshContent->MaterialContentLoaders;
-	for (size_t i = 0; i < materials.size(); ++i)
-	{
-		MaterialContent* material = materials[i];
-		stream << "\t<matrial name=\"" << material->MaterialName << "\">" << endl;
-		stream << "\t\t<ambient r=\"" << material->Ambient.R() << "\" g=\"" << material->Ambient.G()
-			<< "\" b=\"" << material->Ambient.B() << "\"/>" << endl;
-		stream << "\t\t<diffuse r=\"" << material->Diffuse.R() << "\" g=\"" << material->Diffuse.G()
-			<< "\" b=\"" << material->Diffuse.B() << "\"/>" << endl;
-		stream << "\t\t<specular r=\"" << material->Specular.R() << "\" g=\"" << material->Specular.G()
-			<< "\" b=\"" << material->Specular.B() << "\"/>" << endl;
-		stream << "\t\t<emissive r=\"" << material->Emissive.R() << "\" g=\"" << material->Emissive.G()
-			<< "\" b=\"" << material->Emissive.B() << "\"/>" << endl;
-		stream << "\t\t<shininess v=\"" << material->Power << "\"/>" << endl;
-		
-		stream << "\t\t<texturesChunk>" << endl;
-		for (auto iter = material->mTextures.begin(); iter != material->mTextures.end(); ++iter)
-		{
-			stream << "\t\t\t<texture type=\"" << iter->first << "\" name=\"" << iter->second << "\"/>" << endl;
-		}
-		stream << "\t\t</texturesChunk>" << endl;
-
-		stream << "\t</matrial>" << endl;
-
-	} 
-	stream << "</materials>" << endl;
-	
-
-	stream << "<subMeshes count=\"" << meshContent->MeshPartContentLoaders.size() << "\">" << endl;
-
-	vector<MeshPartContent*>& meshParts = meshContent->MeshPartContentLoaders;
-	for (size_t i = 0; i < meshParts.size(); ++i)
-	{
-		MeshPartContent* meshPart = meshParts[i];
-		stream << "\t<subMesh ";
-		if (!meshPart->Name.empty())
-		{
-			stream <<"name=\"" << meshPart->Name << "\" ";
-		}
-		stream << "materialID=\"" << meshPart->MaterialID << "\">" << endl; 
-		//stream << ">" << endl;
-
-		// Output vertices
-		stream << "\t\t<vertices vertexCount=\"" << meshPart->VertexCount
-			   << "\" vertexSize=\"" << meshPart->VertexDeclaration->GetVertexSize() << "\">" << endl;
-
-		const shared_ptr<VertexDeclaration>& vd = meshPart->VertexDeclaration;
-		for (unsigned int j = 0; j < meshPart->VertexCount; ++j)
-		{	
-			uint32_t vs = vd->GetVertexSize();
-			char* vertexPtr = meshPart->VertexData + j * vd->GetVertexSize();
-			float* temp = (float*)vertexPtr;
-			stream << "\t\t\t<vertex>" << endl;
-			for (size_t k = 0; k < vd->GetElementCount(); ++k)
-			{	
-				const VertexElement& e = vd->GetElement(k);	
-				switch(e.Usage)
-				{
-				case VEU_Position:
-					{	
-						float x = *(temp); temp++;
-						float y = *(temp); temp++;
-						float z = *(temp); temp++;
-						stream << "\t\t\t\t<position x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\"/>" << endl;
-					}	
-					break;
-				case VEU_Normal:
-					{
-						float x = *(temp); temp++;
-						float y = *(temp); temp++;
-						float z = *(temp); temp++;
-						stream << "\t\t\t\t<normal x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\"/>" << endl;
-					}	
-					break;
-				case VEU_Tangent:
-					{
-						float x = *(temp); temp++;
-						float y = *(temp); temp++;
-						float z = *(temp); temp++;
-						stream << "\t\t\t\t<tangent x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\"/>" << endl;
-					}	
-					break;
-				case VEU_Binormal:
-					{
-						float x = *(temp); temp++;
-						float y = *(temp); temp++;
-						float z = *(temp); temp++;
-						stream << "\t\t\t\t<binormal x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\"/>" << endl;
-					}	
-					break;
-				case VEU_TextureCoordinate:
-					{
-						switch(VertexElement::GetTypeCount(e.Type))
-						{
-						case 1:
-							{
-								float x = *(temp); temp++;
-								stream << "\t\t\t\t<texcoord u=\"" << x << "\"/>" << endl;
-							}
-							break;
-						case 2:
-							{
-								float x = *(temp); temp++;
-								float y = *(temp); temp++;
-								stream << "\t\t\t\t<texcoord u=\"" << x <<"\" v=\"" << y << "\"/>" << endl;
-							}
-							break;
-						case 3:
-							{
-								float x = *(temp); temp++;
-								float y = *(temp); temp++;
-								float z = *(temp); temp++;
-								stream << "\t\t\t\t<texcoord u=\"" << x <<"\" v=\"" << y << "\" w=\"" << z << "\"/>" << endl;
-							}
-							break;
-						}
-					}
-				case VEU_BlendIndices:
-					break;
-				case VEU_BlendWeight:
-					break; 
-
-				default:
-					break;
-				}
-			}
-			stream << "\t\t\t</vertex>" << endl;
-		}
-		stream << "\t\t\t</vertex>" << endl;
-		stream << "\t\t</vertices>" << endl;	
-
-		// Output triangles
-		stream << "\t\t<triangles triangleCount=\"" << meshPart->mFaces.size() << "\">" << endl;	
-		for (unsigned int i = 0; i < meshPart->mFaces.size(); ++i)
-		{
-			MeshPartContent::Face face = meshPart->mFaces[i];
-			stream << "\t\t\t<triangle a=\""<<face.Indices[0] 
-				   << "\" b=\"" << face.Indices[1] << "\" c=\"" << face.Indices[2] <<"\"/>" << endl;
-		}
-		stream << "\t\t</triangles>" << endl;	
-		
-		stream << "\t</subMesh>" << endl;
-	}
-	
-	stream << "</subMeshes>" << endl;
-
-	stream << "</mesh>" << endl;
-	stream.close();
 }
 
 void AssimpProcesser::ExportBinary( const char* output, MeshContent* meshContent )
@@ -556,6 +470,8 @@ void AssimpProcesser::ExportBinary( const char* output, MeshContent* meshContent
 	
 	stream.Close();
 }
+
+*/
 
 Bone* AssimpProcesser::CreateBoneTrees( aiNode* pNode, Bone* parent )
 {
@@ -622,5 +538,236 @@ void AssimpProcesser::SaveSkeleton(fstream& stream, Bone* parent)
 		stream <<"\t<rotation x=\"" << rotation.X() << "\" y=\"" << rotation.Y() 
 			<< "\" z=\"" << rotation.Z() << "\" w=\"" << rotation.W() << "\"/>" << endl;
 		stream << "</bone>" << endl;
+	}
+}
+
+void AssimpProcesser::ExportXML( const String& fileName )
+{
+	//fstream stream(output, fstream::out);
+
+	//stream << "<mesh name=\"" << meshContent->Name << "\">" << endl;
+
+
+	//// output materials
+	//stream << "<materials materialCount=\"" << meshContent->MaterialContentLoaders.size() << "\">" << endl;
+	//vector<MaterialContent*>& materials = meshContent->MaterialContentLoaders;
+	//for (size_t i = 0; i < materials.size(); ++i)
+	//{
+	//	MaterialContent* material = materials[i];
+	//	stream << "\t<matrial name=\"" << material->MaterialName << "\">" << endl;
+	//	stream << "\t\t<ambient r=\"" << material->Ambient.R() << "\" g=\"" << material->Ambient.G()
+	//		<< "\" b=\"" << material->Ambient.B() << "\"/>" << endl;
+	//	stream << "\t\t<diffuse r=\"" << material->Diffuse.R() << "\" g=\"" << material->Diffuse.G()
+	//		<< "\" b=\"" << material->Diffuse.B() << "\"/>" << endl;
+	//	stream << "\t\t<specular r=\"" << material->Specular.R() << "\" g=\"" << material->Specular.G()
+	//		<< "\" b=\"" << material->Specular.B() << "\"/>" << endl;
+	//	stream << "\t\t<emissive r=\"" << material->Emissive.R() << "\" g=\"" << material->Emissive.G()
+	//		<< "\" b=\"" << material->Emissive.B() << "\"/>" << endl;
+	//	stream << "\t\t<shininess v=\"" << material->Power << "\"/>" << endl;
+
+	//	stream << "\t\t<texturesChunk>" << endl;
+	//	for (auto iter = material->mTextures.begin(); iter != material->mTextures.end(); ++iter)
+	//	{
+	//		stream << "\t\t\t<texture type=\"" << iter->first << "\" name=\"" << iter->second << "\"/>" << endl;
+	//	}
+	//	stream << "\t\t</texturesChunk>" << endl;
+
+	//	stream << "\t</matrial>" << endl;
+
+	//} 
+	//stream << "</materials>" << endl;
+
+
+	//stream << "<subMeshes count=\"" << meshContent->MeshPartContentLoaders.size() << "\">" << endl;
+
+	//vector<MeshPartContent*>& meshParts = meshContent->MeshPartContentLoaders;
+	//for (size_t i = 0; i < meshParts.size(); ++i)
+	//{
+	//	MeshPartContent* meshPart = meshParts[i];
+	//	stream << "\t<subMesh ";
+	//	if (!meshPart->Name.empty())
+	//	{
+	//		stream <<"name=\"" << meshPart->Name << "\" ";
+	//	}
+	//	stream << "materialID=\"" << meshPart->MaterialID << "\">" << endl; 
+	//	//stream << ">" << endl;
+
+	//	// Output vertices
+	//	stream << "\t\t<vertices vertexCount=\"" << meshPart->VertexCount
+	//		<< "\" vertexSize=\"" << meshPart->VertexDeclaration->GetVertexSize() << "\">" << endl;
+
+	//	const shared_ptr<VertexDeclaration>& vd = meshPart->VertexDeclaration;
+	//	for (unsigned int j = 0; j < meshPart->VertexCount; ++j)
+	//	{	
+	//		uint32_t vs = vd->GetVertexSize();
+	//		char* vertexPtr = meshPart->VertexData + j * vd->GetVertexSize();
+	//		float* temp = (float*)vertexPtr;
+	//		stream << "\t\t\t<vertex>" << endl;
+	//		for (size_t k = 0; k < vd->GetElementCount(); ++k)
+	//		{	
+	//			const VertexElement& e = vd->GetElement(k);	
+	//			switch(e.Usage)
+	//			{
+	//			case VEU_Position:
+	//				{	
+	//					float x = *(temp); temp++;
+	//					float y = *(temp); temp++;
+	//					float z = *(temp); temp++;
+	//					stream << "\t\t\t\t<position x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\"/>" << endl;
+	//				}	
+	//				break;
+	//			case VEU_Normal:
+	//				{
+	//					float x = *(temp); temp++;
+	//					float y = *(temp); temp++;
+	//					float z = *(temp); temp++;
+	//					stream << "\t\t\t\t<normal x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\"/>" << endl;
+	//				}	
+	//				break;
+	//			case VEU_Tangent:
+	//				{
+	//					float x = *(temp); temp++;
+	//					float y = *(temp); temp++;
+	//					float z = *(temp); temp++;
+	//					stream << "\t\t\t\t<tangent x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\"/>" << endl;
+	//				}	
+	//				break;
+	//			case VEU_Binormal:
+	//				{
+	//					float x = *(temp); temp++;
+	//					float y = *(temp); temp++;
+	//					float z = *(temp); temp++;
+	//					stream << "\t\t\t\t<binormal x=\"" << x <<"\" y=\"" << y << "\" z=\"" << z << "\"/>" << endl;
+	//				}	
+	//				break;
+	//			case VEU_TextureCoordinate:
+	//				{
+	//					switch(VertexElement::GetTypeCount(e.Type))
+	//					{
+	//					case 1:
+	//						{
+	//							float x = *(temp); temp++;
+	//							stream << "\t\t\t\t<texcoord u=\"" << x << "\"/>" << endl;
+	//						}
+	//						break;
+	//					case 2:
+	//						{
+	//							float x = *(temp); temp++;
+	//							float y = *(temp); temp++;
+	//							stream << "\t\t\t\t<texcoord u=\"" << x <<"\" v=\"" << y << "\"/>" << endl;
+	//						}
+	//						break;
+	//					case 3:
+	//						{
+	//							float x = *(temp); temp++;
+	//							float y = *(temp); temp++;
+	//							float z = *(temp); temp++;
+	//							stream << "\t\t\t\t<texcoord u=\"" << x <<"\" v=\"" << y << "\" w=\"" << z << "\"/>" << endl;
+	//						}
+	//						break;
+	//					}
+	//				}
+	//			case VEU_BlendIndices:
+	//				break;
+	//			case VEU_BlendWeight:
+	//				break; 
+
+	//			default:
+	//				break;
+	//			}
+	//		}
+	//		stream << "\t\t\t</vertex>" << endl;
+	//	}
+	//	stream << "\t\t\t</vertex>" << endl;
+	//	stream << "\t\t</vertices>" << endl;	
+
+	//	// Output triangles
+	//	stream << "\t\t<triangles triangleCount=\"" << meshPart->mFaces.size() << "\">" << endl;	
+	//	for (unsigned int i = 0; i < meshPart->mFaces.size(); ++i)
+	//	{
+	//		MeshPartContent::Face face = meshPart->mFaces[i];
+	//		stream << "\t\t\t<triangle a=\""<<face.Indices[0] 
+	//		<< "\" b=\"" << face.Indices[1] << "\" c=\"" << face.Indices[2] <<"\"/>" << endl;
+	//	}
+	//	stream << "\t\t</triangles>" << endl;	
+
+	//	stream << "\t</subMesh>" << endl;
+	//}
+
+	//stream << "</subMeshes>" << endl;
+
+	//stream << "</mesh>" << endl;
+	//stream.close();
+}
+
+void AssimpProcesser::CollectMeshes( OutModel& outModel, aiNode* node )
+{
+	for (uint32_t i = 0; i < node->mNumMeshes; ++i)
+	{
+		aiMesh* mesh = mAIScene->mMeshes[node->mMeshes[i]];
+		for (size_t j = 0; j < outModel.Meshes.size(); ++j)
+		{
+			if (outModel.Meshes[j] == mesh)
+			{
+				PrintLine("Same mesh found in multiple node");
+				break;;
+			}
+		}
+
+		outModel.Meshes.push_back(mesh);
+		outModel.MeshNodes.push_back(node);
+		outModel.TotalVertices += mesh->mNumVertices;
+		outModel.TotalVertices += mesh->mNumFaces * 3;
+	}
+
+	for (uint32_t i = 0; i < node->mNumChildren; ++i)
+	{
+		CollectMeshes(outModel, node->mChildren[i]);
+	}
+}
+
+void AssimpProcesser::CollectBones( OutModel& outModel )
+{
+	std::set<aiNode*> necessary;
+	std::set<aiNode*> rootNodes;
+
+	for (uint32_t i =0; i < outModel.Meshes.size(); ++i)
+	{
+		aiMesh* mesh = outModel.Meshes[i];
+		aiNode* meshNode = outModel.MeshNodes[i];
+		aiNode* meshParentNode = meshNode->mParent;
+		aiNode* rootNode;
+
+		for (size_t j = 0; j < mesh->mNumBones; ++j)
+		{
+			aiBone* bone = mesh->mBones[j];
+			String boneName(bone->mName.C_Str());
+			aiNode* boneNode = GetNode(boneName, mAIScene->mRootNode);
+			if (!boneNode)
+			{
+				ENGINE_EXCEPT(Core::Exception::ERR_INTERNAL_ERROR, "Couldn't find the scene node for Bone: " + boneName
+					, "AssimpProcesser::CollectBones");
+			}
+
+			necessary.insert(boneNode);
+			rootNode = boneNode;
+
+			// find all precursor node
+			while(true)
+			{
+				boneNode = boneNode->mParent;
+				if (!boneNode || boneNode == meshNode || boneNode == meshParentNode)
+					break;
+				rootNode = boneNode;
+				necessary.insert(boneNode);
+			}
+			rootNodes.insert(rootNode);
+		}
+	}
+
+	 // If we find multiple root nodes
+	if (rootNodes.size() > 1)
+	{
+		
 	}
 }

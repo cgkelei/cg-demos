@@ -4,6 +4,6 @@
 int main(int argc, char** argv)
 {
 	AssimpProcesser processer;
-	processer.Process("media/Dwarf.x");
+	processer.Process("media/tiny.x");
 	return 0;
 }

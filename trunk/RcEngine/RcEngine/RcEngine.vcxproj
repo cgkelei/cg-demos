@@ -79,8 +79,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Content\MaterialContentLoader.cpp" />
-    <ClCompile Include="Content\MeshContentLoader.cpp" />
     <ClCompile Include="Core\DynLib.cpp" />
     <ClCompile Include="Core\ModuleManager.cpp" />
     <ClCompile Include="Core\Context.cpp" />
@@ -113,6 +111,7 @@
     <ClCompile Include="Graphics\RenderView.cpp" />
     <ClCompile Include="Graphics\SamplerState.cpp" />
     <ClCompile Include="Graphics\SimpleGeometry.cpp" />
+    <ClCompile Include="Graphics\Skeleton.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Graphics\VertexDeclaration.cpp" />
     <ClCompile Include="Graphics\VertexElement.cpp" />
@@ -128,8 +127,6 @@
     <ClCompile Include="Math\Math.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Content\MaterialContentLoader.h" />
-    <ClInclude Include="Content\MeshContentLoader.h" />
     <ClInclude Include="Core\CompileConfig.h" />
     <ClInclude Include="Core\DynLib.h" />
     <ClInclude Include="Core\ModuleManager.h" />
@@ -168,6 +165,7 @@
     <ClInclude Include="Graphics\RenderView.h" />
     <ClInclude Include="Graphics\SamplerState.h" />
     <ClInclude Include="Graphics\SimpleGeometry.h" />
+    <ClInclude Include="Graphics\Skeleton.h" />
     <ClInclude Include="Graphics\Texture.h" />
     <ClInclude Include="Graphics\VertexDeclaration.h" />
     <ClInclude Include="Graphics\VertexElement.h" />
