@@ -48,6 +48,14 @@ namespace Math {
 	Cross(const Vector<Real, 3>& lhs, const Vector<Real, 3>& rhs);
 		
 
+	// Matrix
+	//////////////////////////////////////////////////////////////////////////
+	template<typename Real>
+	inline Matrix4<Real> 
+	MatrixInverse(const Matrix4<Real>& mat);
+
+
+
 	//////////////////////////////////////////////////////////////////////////
 	template<typename Real>
 	inline Matrix4<Real> 
@@ -99,7 +107,7 @@ namespace Math {
 
 	template<typename Real>
 	inline void 
-	MatrixDecompose(Vector<Real, 3>& sacle, Quaternion<Real>& rotation, Vector<Real, 3>& translation, const Matrix4<Real>& mat);
+		MatrixDecompose(Vector<Real, 3>& sacle, Quaternion<Real>& rotation, Vector<Real, 3>& translation, const Matrix4<Real>& mat);
 
 	//Quaternion
 	template <typename Real>

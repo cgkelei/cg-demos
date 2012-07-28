@@ -56,7 +56,65 @@ Normalize(const Plane3<Real>& plane)
 	return Plane3<Real>(Normalize(plane.Normal), plane.Constant);
 }
 
+//----------------------------------------------------------------------------
+template<typename Real>
+inline Matrix4<Real> 
+MatrixInverse(const Matrix4<Real>& mat)
+{
+	Real v0 = mat.M31 * mat.M42 - mat.M32 * mat.M41;
+	Real v1 = mat.M31 * mat.M43 - mat.M33 * mat.M41;
+	Real v2 = mat.M31 * mat.M44 - mat.M34 * mat.M41;
+	Real v3 = mat.M32 * mat.M43 - mat.M33 * mat.M42;
+	Real v4 = mat.M32 * mat.M44 - mat.M34 * mat.M42;
+	Real v5 = mat.M33 * mat.M44 - mat.M34 * mat.M43;
 
+	Real i11 = (v5 * mat.M22 - v4 * mat.M23 + v3 * mat.M24);
+	Real i21 = -(v5 * mat.M21 - v2 * mat.M23 + v1 * mat.M24);
+	Real i31 = (v4 * mat.M21 - v2 * mat.M22 + v0 * mat.M24);
+	Real i41 = -(v3 * mat.M21 - v1 * mat.M22 + v0 * mat.M23);
+
+	Real invDet = 1.0f / (i11 * mat.M11 + i21 * mat.M12 + i31 * mat.M13 + i41 * mat.M14);
+
+	i11 *= invDet;
+	i21 *= invDet;
+	i31 *= invDet;
+	i41 *= invDet;
+
+	Real i12 = -(v5 * mat.M12 - v4 * mat.M13 + v3 * mat.M14) * invDet;
+	Real i22 = (v5 * mat.M11 - v2 * mat.M13 + v1 * mat.M14) * invDet;
+	Real i32 = -(v4 * mat.M11 - v2 * mat.M12 + v0 * mat.M14) * invDet;
+	Real i42 = (v3 * mat.M11 - v1 * mat.M12 + v0 * mat.M13) * invDet;
+
+	v0 = mat.M21 * mat.M42 - mat.M22 * mat.M41;
+	v1 = mat.M21 * mat.M43 - mat.M23 * mat.M41;
+	v2 = mat.M21 * mat.M44 - mat.M24 * mat.M41;
+	v3 = mat.M22 * mat.M43 - mat.M23 * mat.M42;
+	v4 = mat.M22 * mat.M44 - mat.M24 * mat.M42;
+	v5 = mat.M23 * mat.M44 - mat.M24 * mat.M43;
+
+	Real i13 = (v5 * mat.M12 - v4 * mat.M13 + v3 * mat.M14) * invDet;
+	Real i23 = -(v5 * mat.M11 - v2 * mat.M13 + v1 * mat.M14) * invDet;
+	Real i33 = (v4 * mat.M11 - v2 * mat.M12 + v0 * mat.M14) * invDet;
+	Real i43 = -(v3 * mat.M11 - v1 * mat.M12 + v0 * mat.M13) * invDet;
+
+	v0 = mat.M32 * mat.M21 - mat.M31 * mat.M22;
+	v1 = mat.M33 * mat.M21 - mat.M31 * mat.M23;
+	v2 = mat.M34 * mat.M21 - mat.M31 * mat.M24;
+	v3 = mat.M33 * mat.M22 - mat.M32 * mat.M23;
+	v4 = mat.M34 * mat.M22 - mat.M32 * mat.M24;
+	v5 = mat.M34 * mat.M23 - mat.M33 * mat.M24;
+
+	Real i14 = -(v5 * mat.M12 - v4 * mat.M13 + v3 * mat.M14) * invDet;
+	Real i24 = (v5 * mat.M11 - v2 * mat.M13 + v1 * mat.M14) * invDet;
+	Real i34 = -(v4 * mat.M11 - v2 * mat.M12 + v0 * mat.M14) * invDet;
+	Real i44 = (v3 * mat.M11 - v1 * mat.M12 + v0 * mat.M13) * invDet;
+
+	return Matrix4<Real>(
+		i11, i12, i13, i14,
+		i21, i22, i23, i24,
+		i31, i32, i33, i34,
+		i41, i42, i43, i44);
+}
 //----------------------------------------------------------------------------
 
 template<typename Real>

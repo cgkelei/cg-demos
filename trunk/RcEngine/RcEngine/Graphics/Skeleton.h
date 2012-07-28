@@ -14,6 +14,8 @@ namespace RcEngine
 
 		struct _ApiExport Joint
 		{
+			Joint();
+
 			 /// Bone name.
 			String Name;
 			/// Parent bone index.
@@ -34,8 +36,10 @@ namespace RcEngine
 			Skeleton();
 			~Skeleton();
 
+			vector<Joint>& GetJoints() { return mJoints; }
+
 		private:
-			vector<Joint*> mJoints;
+			vector<Joint> mJoints;
 		};
 	}
 }
