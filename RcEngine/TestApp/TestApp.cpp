@@ -40,6 +40,19 @@ void TestApp::Initialize()
 	Camera* camera = RcEngine::Core::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
 	camera->SetViewParams(Vector3f(0, 10, 30), Vector3f(0, 10, 0), Vector3f(0, 1, 0));
 	camera->SetProjectionParams(PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 100.0f );
+
+
+	//Matrix4f mat = camera->GetViewMatrix();
+	//
+	//D3DXMATRIX d3dMat((float*)&mat);
+
+	//Matrix4f matInv = RcEngine::Math::MatrixInverse(mat);
+	//float det = mat.Determinant();
+
+	//D3DXMATRIX d3dMatInv;float d3dDet;
+	//D3DXMatrixInverse(&d3dMatInv, &d3dDet, &d3dMat);
+
+
 }
 
 void TestApp::LoadContent()
@@ -80,6 +93,8 @@ void TestApp::Update( float deltaTime )
 	static float degree = 0;
 	degree += deltaTime * 0.01f ;
 	mDwarf->SetWorldMatrix( CreateRotationY(ToRadian(degree)) * CreateScaling(10, 10, 10) );
+
+
 
 	/*static float pos = 30;
 	if(mKeyboard->isKeyDown(OIS::KC_W))

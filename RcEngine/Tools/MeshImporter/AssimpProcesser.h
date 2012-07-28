@@ -44,12 +44,14 @@ private:
 	void GetBoundingBox(const aiScene* scene, aiVector3D* min, aiVector3D* max);
 
 	
-	void ExportModelExportModel( OutModel& outModel, const String& outName );
+	void ExportModel( OutModel& outModel, const String& outName );
 
 private:
 	void CollectMeshes(OutModel& outModel, aiNode* rootNode);
 	void CollectBones(OutModel& outModel);
 	void CollectBonesFinal(vector<aiNode*>& bones, const set<aiNode*>& necessary, aiNode* node);
+
+	void BuildAndSaveModel(OutModel& outModel);
 
 private:
 	aiScene* mAIScene;

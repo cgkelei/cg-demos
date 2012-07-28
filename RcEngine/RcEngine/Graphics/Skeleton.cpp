@@ -4,6 +4,14 @@ namespace RcEngine
 {
 	namespace Render
 	{
+
+		Joint::Joint()
+		{
+
+		}
+
+
+
 		Skeleton::Skeleton()
 		{
 
@@ -13,5 +21,5 @@ namespace RcEngine
 		{
 
 		}
-	}
+}
 }

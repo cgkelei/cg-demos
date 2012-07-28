@@ -27,7 +27,7 @@ struct MeshPartData
 
 	BoundingSpheref BoundingSphere;
 
-	vector<uint32_t> IndexData;
+	vector<char> IndexData;
 	vector<char> VertexData;
 };
 
