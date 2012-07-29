@@ -39,8 +39,8 @@ private:
 	shared_ptr<MaterialData> ProcessMaterial(aiMaterial* material);
 	shared_ptr<MeshPartData> ProcessMeshPart(aiMesh* mesh);
 
-	void ExportXML(const String& fileName);
-
+	void ExportXML( OutModel& outModel);
+	void ExportBinary( OutModel& outModel );
 	void GetBoundingBox(const aiScene* scene, aiVector3D* min, aiVector3D* max);
 
 	

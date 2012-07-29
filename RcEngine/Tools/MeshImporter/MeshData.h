@@ -4,6 +4,7 @@
 #include "Core/Prerequisites.h"
 #include "Graphics/GraphicsCommon.h"
 #include "Graphics/VertexElement.h"
+#include "Graphics/VertexDeclaration.h"
 #include "Math/BoundingSphere.h"
 
 #include "MaterialData.h"
@@ -24,6 +25,9 @@ struct MeshPartData
 
 	uint32_t VertexCount;
 	uint32_t StartVertex;
+
+
+	shared_ptr<VertexDeclaration> VertexDeclaration;
 
 	BoundingSpheref BoundingSphere;
 
