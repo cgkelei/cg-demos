@@ -1,150 +1,98 @@
 <Joints>
-<joint name="Box01" parent="0">
-	<bindPosition x="-88.6967" y="-246.342" z="-858.815">
-	<bindRotation w="0" x="0" y="-0.707107" z="0.176777">
-</joint>
 <joint name="Bip01" parent="0">
-	<bindPosition x="-88.9779" y="-857.346" z="-247.542">
-	<bindRotation w="0.769235" x="0.0394184" y="0.0476786" z="-0.635964">
+	<bindPosition x="0" y="3.13979" z="-0.123974">
+	<bindRotation w="0.707107" x="0" y="-0.707106" z="0">
 </joint>
-<joint name="Bip01_Pelvis" parent="1">
-	<bindPosition x="-2.4543" y="-1.95098" z="5e-006">
-	<bindRotation w="0.49704" x="0.502943" y="0.248537" z="-0.497039">
+<joint name="Bip01_Pelvis" parent="0">
+	<bindPosition x="0" y="0" z="-0">
+	<bindRotation w="0.5" x="-0.5" y="-0.5" z="0.5">
 </joint>
-<joint name="Bip01_Spine" parent="2">
-	<bindPosition x="27.4222" y="8.70948" z="0.319006">
-	<bindRotation w="0.993948" x="0.107869" y="0.00272901" z="0.0205956">
+<joint name="Bip01_Spine" parent="1">
+	<bindPosition x="0.886966" y="1e-006" z="-0.185583">
+	<bindRotation w="1" x="-2e-006" y="0.000398" z="5e-007">
 </joint>
-<joint name="Bip01_Spine1" parent="3">
-	<bindPosition x="28.1781" y="-0.022084" z="-0">
-	<bindRotation w="0.996195" x="0" y="-0" z="-0.0871556">
+<joint name="Bip01_L_Thigh" parent="2">
+	<bindPosition x="-0.887113" y="0.92724" z="0.184879">
+	<bindRotation w="0.0368947" x="0.012631" y="0.00455001" z="0.125096">
 </joint>
-<joint name="Bip01_Spine2" parent="4">
-	<bindPosition x="28.1822" y="-0.02243" z="-0.00104">
-	<bindRotation w="0.999721" x="0.0231857" y="0.00183651" z="0.00420017">
+<joint name="Bip01_L_Calf" parent="3">
+	<bindPosition x="1.73346" y="-0" z="-0">
+	<bindRotation w="0.993217" x="0" y="-0.116276" z="0">
 </joint>
-<joint name="Bip01_Spine3" parent="5">
-	<bindPosition x="28.1814" y="-0.03388" z="-0.001568">
-	<bindRotation w="0.99969" x="0.0232077" y="0.00153273" z="-0.00888626">
+<joint name="Bip01_L_Foot" parent="4">
+	<bindPosition x="1.13405" y="0" z="-0">
+	<bindRotation w="0.981433" x="-0.136873" y="0.122767" z="0.0546224">
 </joint>
-<joint name="Bip01_Neck" parent="6">
-	<bindPosition x="42.5661" y="-0.019138" z="-1e-006">
-	<bindRotation w="0.964787" x="0" y="5.18249e-007" z="0.263031">
+<joint name="Bip01_L_Toe0" parent="5">
+	<bindPosition x="1.23394" y="0" z="-1.28569">
+	<bindRotation w="0.707107" x="0" y="0.707107" z="0">
 </joint>
-<joint name="Bip01_Head" parent="7">
-	<bindPosition x="27.9002" y="3e-006" z="-0">
-	<bindRotation w="0.993074" x="-0.0607613" y="-0.0276583" z="-0.0966836">
+<joint name="Bip01_R_Thigh" parent="2">
+	<bindPosition x="-0.887113" y="-0.927241" z="0.184874">
+	<bindRotation w="-0.0368949" x="0.0126307" y="-0.00455251" z="0.125096">
 </joint>
-<joint name="Bip01_L_Clavicle" parent="7">
-	<bindPosition x="-12.375" y="4.00688" z="-8.34622">
-	<bindRotation w="0.264143" x="-0.580991" y="0.0821244" z="0.1633">
+<joint name="Bip01_R_Calf" parent="7">
+	<bindPosition x="1.73346" y="-0" z="-0">
+	<bindRotation w="0.993217" x="0" y="-0.116276" z="0">
 </joint>
-<joint name="Bip01_L_UpperArm" parent="9">
-	<bindPosition x="31.0002" y="-3.2e-005" z="4e-006">
-	<bindRotation w="0.899249" x="-0.107531" y="-0.423765" z="0.0145516">
+<joint name="Bip01_R_Foot" parent="8">
+	<bindPosition x="1.13405" y="0" z="0">
+	<bindRotation w="0.981433" x="0.136873" y="0.122767" z="-0.0546227">
 </joint>
-<joint name="Bip01_L_Forearm" parent="10">
-	<bindPosition x="89.2025" y="-2.3e-005" z="-1.4e-005">
-	<bindRotation w="0.861782" x="-0" y="0" z="-0.507279">
+<joint name="Bip01_R_Toe0" parent="9">
+	<bindPosition x="1.23394" y="0" z="-1.28569">
+	<bindRotation w="0.707107" x="0" y="0.707107" z="0">
 </joint>
-<joint name="Bip01_L_Hand" parent="11">
-	<bindPosition x="61.6715" y="1e-006" z="1e-006">
-	<bindRotation w="0.700498" x="0.713483" y="-0.0150172" z="-0.00435547">
+<joint name="Bip01_Spine1" parent="2">
+	<bindPosition x="0.932254" y="-0" z="0.00105">
+	<bindRotation w="0.998598" x="0" y="-0.0529428" z="-0">
 </joint>
-<joint name="Bip01_L_Finger0" parent="12">
-	<bindPosition x="12.4105" y="3.05496" z="10.7554">
-	<bindRotation w="0.639886" x="0.668707" y="-0.262903" z="0.272504">
-</joint>
-<joint name="Bip01_L_Finger01" parent="13">
-	<bindPosition x="10.0751" y="6e-006" z="7e-006">
+<joint name="Bip01_Neck" parent="11">
+	<bindPosition x="1.32629" y="-0" z="0.000433">
 	<bindRotation w="1" x="0" y="0" z="-0">
 </joint>
-<joint name="Bip01_L_Finger02" parent="14">
-	<bindPosition x="5.96157" y="-8e-006" z="-6e-006">
-	<bindRotation w="1" x="0" y="0" z="-0">
+<joint name="Bip01_Head" parent="12">
+	<bindPosition x="0.544204" y="-0" z="-0">
+	<bindRotation w="0.99041" x="0" y="0.138157" z="5.04841e-007">
 </joint>
-<joint name="Bip01_L_Finger1" parent="12">
-	<bindPosition x="24.088" y="0.354694" z="0.505022">
-	<bindRotation w="1" x="0.000398" y="-0" z="0">
+<joint name="Bip01_Ponytail1" parent="13">
+	<bindPosition x="-0.327765" y="1e-006" z="-1.29655">
+	<bindRotation w="0.325792" x="-6.01237e-014" y="0.132213" z="2.64427e-006">
 </joint>
-<joint name="Bip01_L_Finger11" parent="16">
-	<bindPosition x="9.30009" y="-2.2e-005" z="2.4e-005">
-	<bindRotation w="1" x="-0" y="0" z="0">
+<joint name="Bip01_Ponytail11" parent="14">
+	<bindPosition x="0.819243" y="0" z="0.000489">
+	<bindRotation w="0.993483" x="0" y="0.113978" z="5.0328e-007">
 </joint>
-<joint name="Bip01_L_Finger12" parent="17">
-	<bindPosition x="10.8501" y="2.8e-005" z="-4e-005">
-	<bindRotation w="1" x="-0" y="0" z="0">
+<joint name="Bip01_L_Clavicle" parent="12">
+	<bindPosition x="-0.085097" y="0.950225" z="0.13319">
+	<bindRotation w="-0.101257" x="0.604132" y="0.16037" z="0.131265">
 </joint>
-<joint name="Bip01_R_Clavicle" parent="7">
-	<bindPosition x="-12.3749" y="4.00696" z="8.34619">
-	<bindRotation w="0.264687" x="0.481002" y="-0.0638814" z="0.149994">
+<joint name="Bip01_L_UpperArm" parent="16">
+	<bindPosition x="1.21144" y="0" z="-0">
+	<bindRotation w="0.901958" x="0.227227" y="0.0165864" z="-0.366831">
 </joint>
-<joint name="Bip01_R_UpperArm" parent="19">
-	<bindPosition x="31.0002" y="-4e-006" z="-4e-006">
-	<bindRotation w="0.857889" x="0.174564" y="0.37966" z="0.29902">
+<joint name="Bip01_L_Forearm" parent="17">
+	<bindPosition x="1.63809" y="0" z="-0">
+	<bindRotation w="0.99413" x="0" y="-0.108196" z="0">
 </joint>
-<joint name="Bip01_R_Forearm" parent="20">
-	<bindPosition x="89.2025" y="-2.6e-005" z="-0">
-	<bindRotation w="0.969979" x="0" y="0" z="-0.243189">
+<joint name="Bip01_L_Hand" parent="18">
+	<bindPosition x="1.29443" y="0" z="-0">
+	<bindRotation w="0.704737" x="-0.70392" y="0.0640165" z="-0.061187">
 </joint>
-<joint name="Bip01_R_Hand" parent="21">
-	<bindPosition x="61.6715" y="9e-006" z="0">
-	<bindRotation w="0.700653" x="-0.713449" y="0.00857165" z="0.00158067">
+<joint name="Bip01_R_Clavicle" parent="12">
+	<bindPosition x="-0.085097" y="-0.950226" z="0.133184">
+	<bindRotation w="-0.101256" x="-0.604132" y="0.16037" z="-0.131263">
 </joint>
-<joint name="Bip01_R_Finger0" parent="22">
-	<bindPosition x="12.4105" y="3.05497" z="-10.7554">
-	<bindRotation w="0.639886" x="-0.668707" y="0.262903" z="0.272504">
+<joint name="Bip01_R_UpperArm" parent="20">
+	<bindPosition x="1.21144" y="0" z="-0">
+	<bindRotation w="0.901957" x="-0.227227" y="0.0165864" z="0.366832">
 </joint>
-<joint name="Bip01_R_Finger01" parent="23">
-	<bindPosition x="10.0751" y="2e-005" z="1e-006">
-	<bindRotation w="1" x="0" y="0" z="0">
+<joint name="Bip01_R_Forearm" parent="21">
+	<bindPosition x="1.6381" y="0" z="-0">
+	<bindRotation w="0.99413" x="0" y="-0.108196" z="-0">
 </joint>
-<joint name="Bip01_R_Finger02" parent="24">
-	<bindPosition x="5.96157" y="-1e-005" z="3e-006">
-	<bindRotation w="1" x="0" y="0" z="0">
-</joint>
-<joint name="Bip01_R_Finger1" parent="22">
-	<bindPosition x="24.088" y="0.354687" z="-0.504994">
-	<bindRotation w="1" x="-0.000398" y="0" z="0">
-</joint>
-<joint name="Bip01_R_Finger11" parent="26">
-	<bindPosition x="9.30005" y="-3e-006" z="3.6e-005">
-	<bindRotation w="1" x="0" y="0" z="-0">
-</joint>
-<joint name="Bip01_R_Finger12" parent="27">
-	<bindPosition x="10.8501" y="9e-006" z="-1.2e-005">
-	<bindRotation w="1" x="0" y="0" z="-0">
-</joint>
-<joint name="Bip01_L_Thigh" parent="3">
-	<bindPosition x="-27.7303" y="-13.9587" z="-28.2952">
-	<bindRotation w="0.0141348" x="-0.14178" y="0.126318" z="-0.0214827">
-</joint>
-<joint name="Bip01_L_Calf" parent="29">
-	<bindPosition x="119.231" y="-8e-006" z="1e-006">
-	<bindRotation w="0.977761" x="0" y="0" z="-0.209721">
-</joint>
-<joint name="Bip01_L_Foot" parent="30">
-	<bindPosition x="119.231" y="-6e-006" z="-0">
-	<bindRotation w="0.957031" x="-0.0132854" y="0.0443379" z="0.286268">
-</joint>
-<joint name="Bip01_L_Toe0" parent="31">
-	<bindPosition x="27.4233" y="34.5771" z="-2e-006">
-	<bindRotation w="0.707107" x="0" y="0" z="0.707107">
-</joint>
-<joint name="Bip01_R_Thigh" parent="3">
-	<bindPosition x="-27.7897" y="-0.9639" z="30.864">
-	<bindRotation w="-0.000479281" x="0.13045" y="0.128702" z="0.199191">
-</joint>
-<joint name="Bip01_R_Calf" parent="33">
-	<bindPosition x="119.232" y="2.1e-005" z="1.1e-005">
-	<bindRotation w="1" x="0" y="-0" z="-0.0003455">
-</joint>
-<joint name="Bip01_R_Foot" parent="34">
-	<bindPosition x="119.231" y="-3.9e-005" z="-2.3e-005">
-	<bindRotation w="0.997139" x="0.0113525" y="0.0420475" z="0.0617772">
-</joint>
-<joint name="Bip01_R_Toe0" parent="35">
-	<bindPosition x="27.4233" y="34.5772" z="1e-005">
-	<bindRotation w="0.707107" x="0" y="0" z="0.707107">
+<joint name="Bip01_R_Hand" parent="22">
+	<bindPosition x="1.29443" y="-0" z="-0">
+	<bindRotation w="0.704737" x="0.70392" y="0.0640164" z="0.061187">
 </joint>
 </Joints>
