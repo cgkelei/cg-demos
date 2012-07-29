@@ -38,8 +38,8 @@ void TestApp::Initialize()
 	Application::Initialize();
 
 	Camera* camera = RcEngine::Core::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
-	camera->SetViewParams(Vector3f(0, 10, 30), Vector3f(0, 10, 0), Vector3f(0, 1, 0));
-	camera->SetProjectionParams(PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 100.0f );
+	camera->SetViewParams(Vector3f(0, 3000, 3000), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+	camera->SetProjectionParams(PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 10000.0f );
 
 
 	//Matrix4f mat = camera->GetViewMatrix();
@@ -60,10 +60,10 @@ void TestApp::LoadContent()
 	RenderFactory* factory = RcEngine::Core::Context::GetSingleton().GetRenderDevice().GetRenderFactory();
 
 	// Load mesh
-	RcEngine::FileStream modelSource("../Media/Mesh/Dwarf/Dwarf.mdl", RcEngine::FILE_READ);
+	RcEngine::FileStream modelSource("../Media/Mesh/Test/Test.mdl", RcEngine::FILE_READ);
 	mDwarf = Mesh::Load(modelSource);
 
-	mDwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Dwarf/Body.material.xml");
+	mDwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Test/Armor.material.xml");
 	mDwarf->SetMaterial(mDwarfMaterial);
 }
 
@@ -91,7 +91,7 @@ void TestApp::Render()
 void TestApp::Update( float deltaTime )
 {
 	static float degree = 0;
-	degree += deltaTime * 0.01f ;
+	//degree += deltaTime * 0.01f ;
 	mDwarf->SetWorldMatrix( CreateRotationY(ToRadian(degree)) * CreateScaling(10, 10, 10) );
 
 

@@ -279,7 +279,9 @@ void AssimpProcesser::ProcessScene( const aiScene* scene )
 {
 	OutModel model;
 	model.RootNode = mAIScene->mRootNode;
-	ExportModel(model, "Test");
+	ExportModel(model, "Test.mdl");
+	ExportBinary(model);
+	ExportXML(model);
 	/*CollectMeshes(model, scene->mRootNode);
 	CollectBones(model);
 
@@ -549,8 +551,150 @@ shared_ptr<MaterialData> AssimpProcesser::ProcessMaterial( aiMaterial* material 
 	return materialData;
 }
 
-void AssimpProcesser::ExportXML( const String& fileName )
+void AssimpProcesser::ExportXML(  OutModel& outModel )
 {
+	ofstream file("newTest.xml");
+	vector<shared_ptr<MeshPartData> >& subMeshes = outModel.MeshParts;
+	for (size_t i = 0; i < subMeshes.size(); ++i)
+	{
+		shared_ptr<MeshPartData> submesh = subMeshes[i];
+		
+		file << "<subMesh>" << endl;
+
+		// write each vertex element
+		const std::vector<VertexElement>& elements = submesh->VertexDeclaration->GetElements();
+		file << "\t<vertice vertexCount=\"" << submesh->VertexCount << "\" vertexSize=\"" << submesh->VertexDeclaration->GetVertexSize()<<"\"/>\n";
+
+		for (size_t i = 0; i < submesh->VertexCount; ++i)
+		{
+			file << "\t\t<vertex>\n";
+			int baseOffset = submesh->VertexDeclaration->GetVertexSize() * i;
+			for (auto iter = elements.begin(); iter != elements.end(); ++iter)
+			{
+				const VertexElement& element = *iter;
+				float* vertexPtr = (float*)(&submesh->VertexData[0] + baseOffset + element.Offset);
+				switch(element.Usage)
+				{
+				case VEU_Position:
+					{
+						file << "\t\t\t<position x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
+					}	
+					break;
+				case VEU_Normal:
+					{
+						file << "\t\t\t<normal x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
+					}
+					break;
+				case VEU_Tangent:
+					{
+						file << "\t\t\t<tangent x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
+					}			
+					break;
+				case VEU_Binormal:
+					{
+						file << "\t\t\t<binormal x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
+					}			
+					break;
+				case VEU_TextureCoordinate:
+					{
+						switch(VertexElement::GetTypeCount(element.Type))
+						{
+						case 3:
+							file << "\t\t\t<texcoord u=\"" << vertexPtr[0] << "\" v=\"" << vertexPtr[1] << "\" r=\"" << vertexPtr[2] << "\"/>\n";
+							break;
+						case 2:
+							file << "\t\t\t<texcoord u=\"" << vertexPtr[0] << "\" v=\"" << vertexPtr[1] << "\"/>\n";
+							break;
+						case 1:
+							file << "\t\t\t<texcoord u=\"" << vertexPtr[0] << "\"/>\n";
+							break;
+						}
+					}
+					break;
+				case VEU_BlendWeight:
+					{
+						
+					}
+					break;
+				case VEU_BlendIndices:
+					{
+						
+					}
+					break;
+
+				default:
+					break;
+				}
+			}
+			file << "\t\t</vertex>\n";
+		}
+		file << "\t<vertices/>\n";
+
+		file << "\t<triangles triangleCount=\""<<submesh->IndexCount/3 << "\">\n";
+		
+		uint32_t offset = 0;
+		for (size_t i = 0; i < submesh->IndexCount / 3; i+=3)
+		{
+			
+			if (submesh->IndexFormat == IBT_Bit32)
+			{
+				uint32_t* idx = (uint32_t*)( &submesh->IndexData[0] + offset);
+				offset += sizeof(uint32_t) * 3;
+				file << "\t\t<triangle a=\"" << idx[0] << "\" b=\"" << idx[1] << "\" c=\"" << idx[2] << "\"/>\n";
+			}else
+			{
+				uint16_t* idx = (uint16_t*)( &submesh->IndexData[0] + offset);
+				offset += sizeof(uint16_t) * 3;
+				file << "\t\t<triangle a=\"" << idx[0] << "\" b=\"" << idx[1] << "\" c=\"" << idx[2] << "\"/>\n";
+			}
+		}
+		file << "\t</triangles>\n";
+		file << "</submesh>\n";
+	}
+	
+}
+
+void AssimpProcesser::ExportBinary( OutModel& outModel )
+{
+	FileStream stream(outModel.OutName, FILE_WRITE);
+
+	// write mesh name, for test
+	stream.WriteString("Test");
+	stream.WriteUInt(outModel.MeshParts.size());
+
+	vector<shared_ptr<MeshPartData> >& subMeshes = outModel.MeshParts;
+	for (size_t i = 0; i < subMeshes.size(); ++i)
+	{
+		shared_ptr<MeshPartData> submesh = subMeshes[i];
+		stream.WriteString(submesh->Name);
+		stream.WriteUInt(submesh->VertexCount);
+		stream.WriteUInt(submesh->VertexDeclaration->GetVertexSize());
+
+		// write vertex declaration, element size
+		stream.WriteUInt(submesh->VertexDeclaration->GetElementCount());
+
+		// write each vertex element
+		const std::vector<VertexElement>& elements = submesh->VertexDeclaration->GetElements();
+		for (auto iter = elements.begin(); iter != elements.end(); ++iter)
+		{
+			const VertexElement& ve = *iter;
+			stream.WriteUInt(ve.Offset);
+			stream.WriteUInt(ve.Type);
+			stream.WriteUInt(ve.Usage);
+			stream.WriteUShort(ve.UsageIndex);
+		}
+
+		// write vertex buffer data
+		uint32_t bufferSize = submesh->VertexCount * submesh->VertexDeclaration->GetVertexSize();
+		stream.Write(&(submesh->VertexData[0]), sizeof(char) * submesh->VertexData.size());
+
+		// write triangles count
+		stream.WriteUInt(submesh->IndexCount);
+		stream.WriteUInt(submesh->IndexFormat);
+		stream.Write(&submesh->IndexData[0], sizeof(char) * submesh->IndexData.size());
+	}
+
+	stream.Close();
 }
 
 void AssimpProcesser::CollectMeshes( OutModel& outModel, aiNode* node )
@@ -670,49 +814,49 @@ void AssimpProcesser::ExportModel( OutModel& outModel, const String& outName )
 
 	/*XMLDoc file;
 	XMLNodePtr root = file.AllocateNode(XML_Node_Element, "Joints");*/
-	ofstream stream("Joint.xml", std::ios::out);
+	//ofstream stream("Joint.xml", std::ios::out);
 
-	auto help1 = [](const Vector3f& vec) -> string{
-		stringstream sss;
-		sss << "x=\"" << vec.X() << "\" y=\"" << vec.Y() << "\" z=\"" << vec.Z() << "\"" ;
-		return sss.str();
-	};
+	//auto help1 = [](const Vector3f& vec) -> string{
+	//	stringstream sss;
+	//	sss << "x=\"" << vec.X() << "\" y=\"" << vec.Y() << "\" z=\"" << vec.Z() << "\"" ;
+	//	return sss.str();
+	//};
 
-	auto help2 = [](const Quaternionf& quat) -> string{
-		stringstream sss;
-		sss << "w=\"" << quat.W() << "\" x=\"" << quat.X() << "\" y=\"" << quat.Y() << "\" z=\"" << quat.Z() << "\"" ;
-		return sss.str();
-	};
+	//auto help2 = [](const Quaternionf& quat) -> string{
+	//	stringstream sss;
+	//	sss << "w=\"" << quat.W() << "\" x=\"" << quat.X() << "\" y=\"" << quat.Y() << "\" z=\"" << quat.Z() << "\"" ;
+	//	return sss.str();
+	//};
 
-	vector<Joint> joints = outModel.Skeleton->GetJoints();
-	stream << "<Joints>" << endl;
-	for (size_t i = 0; i < joints.size(); ++i)
-	{
-		/*XMLNodePtr jointNode = file.AllocateNode(XML_Node_Element, "Joint");
-		jointNode->AppendAttribute( file.AllocateAttributeString("name", joints[i].Name) );
-		jointNode->AppendAttribute( file.AllocateAttributeUInt("parent", joints[i].ParentIndex) );
-		XMLNodePtr bindPosNode = file.AllocateNode(XML_Node_Element, "bindPostion");
-		bindPosNode->AppendAttribute(file.AllocateAttributeFloat("x", joints[i].InitialPosition.X()));
-		bindPosNode->AppendAttribute(file.AllocateAttributeFloat("y", joints[i].InitialPosition.Y()));
-		bindPosNode->AppendAttribute(file.AllocateAttributeFloat("z", joints[i].InitialPosition.Z()));
-		XMLNodePtr bindRotationNode = file.AllocateNode(XML_Node_Element, "bindRotation");
-		bindRotationNode->AppendAttribute(file.AllocateAttributeFloat("w", joints[i].InitialRotation.W()));
-		bindRotationNode->AppendAttribute(file.AllocateAttributeFloat("x", joints[i].InitialRotation.X()));
-		bindRotationNode->AppendAttribute(file.AllocateAttributeFloat("y", joints[i].InitialRotation.Y()));
-		bindRotationNode->AppendAttribute(file.AllocateAttributeFloat("z", joints[i].InitialRotation.Z()));*/
-	
-		/*	jointNode->AppendNode(bindPosNode);
-		jointNode->AppendNode(bindRotationNode);
-		root->AppendNode(jointNode);*/
+	//vector<Joint> joints = outModel.Skeleton->GetJoints();
+	//stream << "<Joints>" << endl;
+	//for (size_t i = 0; i < joints.size(); ++i)
+	//{
+	//	/*XMLNodePtr jointNode = file.AllocateNode(XML_Node_Element, "Joint");
+	//	jointNode->AppendAttribute( file.AllocateAttributeString("name", joints[i].Name) );
+	//	jointNode->AppendAttribute( file.AllocateAttributeUInt("parent", joints[i].ParentIndex) );
+	//	XMLNodePtr bindPosNode = file.AllocateNode(XML_Node_Element, "bindPostion");
+	//	bindPosNode->AppendAttribute(file.AllocateAttributeFloat("x", joints[i].InitialPosition.X()));
+	//	bindPosNode->AppendAttribute(file.AllocateAttributeFloat("y", joints[i].InitialPosition.Y()));
+	//	bindPosNode->AppendAttribute(file.AllocateAttributeFloat("z", joints[i].InitialPosition.Z()));
+	//	XMLNodePtr bindRotationNode = file.AllocateNode(XML_Node_Element, "bindRotation");
+	//	bindRotationNode->AppendAttribute(file.AllocateAttributeFloat("w", joints[i].InitialRotation.W()));
+	//	bindRotationNode->AppendAttribute(file.AllocateAttributeFloat("x", joints[i].InitialRotation.X()));
+	//	bindRotationNode->AppendAttribute(file.AllocateAttributeFloat("y", joints[i].InitialRotation.Y()));
+	//	bindRotationNode->AppendAttribute(file.AllocateAttributeFloat("z", joints[i].InitialRotation.Z()));*/
+	//
+	//	/*	jointNode->AppendNode(bindPosNode);
+	//	jointNode->AppendNode(bindRotationNode);
+	//	root->AppendNode(jointNode);*/
 
-		stream << "<joint name=\"" << joints[i].Name << "\" parent=\"" << joints[i].ParentIndex << "\">" << endl;
-		stream << "\t<bindPosition " + help1(joints[i].InitialPosition) + ">" << endl; 
-		stream << "\t<bindRotation " + help2(joints[i].InitialRotation) + ">" << endl; 
-		stream << "</joint>" << endl;
+	//	stream << "<joint name=\"" << joints[i].Name << "\" parent=\"" << joints[i].ParentIndex << "\">" << endl;
+	//	stream << "\t<bindPosition " + help1(joints[i].InitialPosition) + ">" << endl; 
+	//	stream << "\t<bindRotation " + help2(joints[i].InitialRotation) + ">" << endl; 
+	//	stream << "</joint>" << endl;
 
-	}
-	stream << "</Joints>" << endl;
-	stream.close();
+	//}
+	//stream << "</Joints>" << endl;
+	//stream.close();
 	//file.RootNode(root);
 
 	
@@ -733,7 +877,6 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 		return;
 	}
 
-	outModel.MeshParts.resize(outModel.Meshes.size());
 	for (size_t i = 0; i < outModel.Meshes.size(); ++i)
 	{
 		// Get the world transform of the mesh for baking into the vertices
@@ -761,9 +904,9 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 			{
 				aiFace face = mesh->mFaces[f];
 				assert(face.mNumIndices == 3);
-				meshPart->IndexData[ f*3 + 0] = face.mIndices[0];
-				meshPart->IndexData[ f*3 + 1] = face.mIndices[1];
-				meshPart->IndexData[ f*3 + 2] = face.mIndices[2];
+				*dest++ =  face.mIndices[0];
+				*dest++ =  face.mIndices[1];
+				*dest++ =  face.mIndices[2];
 			}
 			meshPart->IndexFormat = IBT_Bit16;
 			meshPart->IndexCount =  mesh->mNumFaces * 3;
@@ -776,9 +919,9 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 			{
 				aiFace face = mesh->mFaces[f];
 				assert(face.mNumIndices == 3);
-				meshPart->IndexData[ f*3 + 0] = face.mIndices[0];
-				meshPart->IndexData[ f*3 + 1] = face.mIndices[1];
-				meshPart->IndexData[ f*3 + 2] = face.mIndices[2];
+				*dest++ =  face.mIndices[0];
+				*dest++ =  face.mIndices[1];
+				*dest++ =  face.mIndices[2];
 			}
 			meshPart->IndexFormat = IBT_Bit32;
 			meshPart->IndexCount =  mesh->mNumFaces * 3;
@@ -884,6 +1027,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 
 		meshPart->StartVertex = 0;
 		meshPart->VertexCount = mesh->mNumVertices;
+		meshPart->VertexDeclaration = vertexDecl;
 		outModel.MeshParts.push_back(meshPart);
 	}
 

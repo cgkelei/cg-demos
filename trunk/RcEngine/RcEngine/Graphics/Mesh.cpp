@@ -159,8 +159,17 @@ namespace RcEngine
 			meshPart->mStartVertex = 0;
 			meshPart->mVertexCount = vertexCount;
 			
-			uint32_t triangleCount = source.ReadUInt();
-			uint32_t indexBufferSize = sizeof(uint32_t) * 3 * triangleCount;		// Only support 32 bit index
+			uint32_t indexCount = source.ReadUInt();
+			IndexBufferType indexFormat = (IndexBufferType)source.ReadUInt();
+			uint32_t indexBufferSize;
+			if (indexFormat == IBT_Bit32)
+			{
+				indexBufferSize = sizeof(uint32_t) * indexCount;		
+			}else
+			{
+				indexBufferSize = sizeof(uint16_t) * indexCount;		
+			}
+			
 			// create index buffer
 			ElementInitData iInitData;
 			iInitData.pData = NULL;
@@ -171,10 +180,10 @@ namespace RcEngine
 			source.Read(data, indexBufferSize);
 			meshPart->mIndexBuffer->UnMap();
 			
-			meshPart->mPrimitiveCount = triangleCount;
-			meshPart->mIndexFormat = IBT_Bit32;
+			meshPart->mPrimitiveCount = indexCount / 3;
+			meshPart->mIndexFormat = indexFormat;
 			meshPart->mStartIndex = 0;
-			meshPart->mIndexCount = triangleCount * 3;
+			meshPart->mIndexCount = indexCount;
 
 			// set render operation
 			meshPart->mRenderOperation->BaseVertexLocation = 0;
@@ -182,7 +191,7 @@ namespace RcEngine
 			meshPart->mRenderOperation->IndexBuffer = meshPart->mIndexBuffer;
 			meshPart->mRenderOperation->BindVertexStream(meshPart->mVertexBuffer, meshPart->mVertexDecl);
 			meshPart->mRenderOperation->PrimitiveType = PT_Triangle_List;
-			meshPart->mRenderOperation->IndexType = IBT_Bit32;
+			meshPart->mRenderOperation->IndexType = indexFormat;
 			meshPart->mRenderOperation->StartIndexLocation = 0;
 			meshPart->mRenderOperation->StartVertexLocation = 0;
 
