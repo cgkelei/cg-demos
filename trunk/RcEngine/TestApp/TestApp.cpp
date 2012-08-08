@@ -38,21 +38,14 @@ void TestApp::Initialize()
 	Application::Initialize();
 
 	Camera* camera = RcEngine::Core::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
-	camera->SetViewParams(Vector3f(0, 3000, 3000), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+	camera->SetViewParams(Vector3f(0, 10, 30), Vector3f(0, 10, 0), Vector3f(0, 1, 0));
 	camera->SetProjectionParams(PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 10000.0f );
 
+	Quaternionf quat(ToRadian(60.0f), 0.0f, 1.0f, 0.0f);
+	Matrix4f mat = QuaternionToRotationMatrix(quat);
 
-	//Matrix4f mat = camera->GetViewMatrix();
-	//
-	//D3DXMATRIX d3dMat((float*)&mat);
-
-	//Matrix4f matInv = RcEngine::Math::MatrixInverse(mat);
-	//float det = mat.Determinant();
-
-	//D3DXMATRIX d3dMatInv;float d3dDet;
-	//D3DXMatrixInverse(&d3dMatInv, &d3dDet, &d3dMat);
-
-
+	D3DXQUATERNION d3dQuat(0.0f, 1.0f, 0.0f, ToRadian(60.0f));
+	D3DXMATRIX d3dMat;
 }
 
 void TestApp::LoadContent()
@@ -61,8 +54,11 @@ void TestApp::LoadContent()
 
 	// Load mesh
 	RcEngine::FileStream modelSource("../Media/Mesh/Test/Test.mdl", RcEngine::FILE_READ);
+	//RcEngine::FileStream modelSource("../Media/Mesh/Dwarf/Dwarf.mdl", RcEngine::FILE_READ);
 	mDwarf = Mesh::Load(modelSource);
 
+	//mDwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Dwarf/Body.material.xml");
+	
 	mDwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Test/Armor.material.xml");
 	mDwarf->SetMaterial(mDwarfMaterial);
 }
@@ -91,12 +87,14 @@ void TestApp::Render()
 void TestApp::Update( float deltaTime )
 {
 	static float degree = 0;
-	//degree += deltaTime * 0.01f ;
-	mDwarf->SetWorldMatrix( CreateRotationY(ToRadian(degree)) * CreateScaling(10, 10, 10) );
+	degree += deltaTime * 0.01f ;
+	//mDwarf->SetWorldMatrix( CreateRotationY(ToRadian(degree)) * CreateScaling(0.05, 0.05, 0.05) );
+
+	Quaternionf quat = QuaternionFromRotationYawPitchRoll(0.0f, ToRadian(degree), 0.0f);
+	mDwarf->SetWorldMatrix(/* QuaternionToRotationMatrix(quat)**/ CreateScaling(10.0f, 10.0f, 10.0f) );
 
 
-
-	/*static float pos = 30;
+	static float pos = 30;
 	if(mKeyboard->isKeyDown(OIS::KC_W))
 	{	
 		pos += 5 * deltaTime;
@@ -105,7 +103,7 @@ void TestApp::Update( float deltaTime )
 	if(mKeyboard->isKeyDown(OIS::KC_S))
 	{
 		pos -= 5 * deltaTime;
-	}*/
+	}
 }
 
 int32_t main()

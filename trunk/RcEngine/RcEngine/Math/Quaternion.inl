@@ -208,13 +208,13 @@ Quaternion<Real> Quaternion<Real>::operator/( float scalar ) const
 template<typename Real>
 bool Quaternion<Real>::operator!=( const Quaternion<Real>& rhs ) const
 {
-	return CompareArrays(rhs) == 0;
+	return CompareArrays(rhs) != 0;
 }
 
 template<typename Real>
 bool Quaternion<Real>::operator==( const Quaternion<Real>& rhs ) const
 {
-	return CompareArrays(rhs) != 0;
+	return CompareArrays(rhs) == 0;
 }
 
 template<typename Real>

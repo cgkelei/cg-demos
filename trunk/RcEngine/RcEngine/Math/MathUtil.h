@@ -107,7 +107,7 @@ namespace Math {
 
 	template<typename Real>
 	inline void 
-		MatrixDecompose(Vector<Real, 3>& sacle, Quaternion<Real>& rotation, Vector<Real, 3>& translation, const Matrix4<Real>& mat);
+	MatrixDecompose(Vector<Real, 3>& sacle, Quaternion<Real>& rotation, Vector<Real, 3>& translation, const Matrix4<Real>& mat);
 
 	//Quaternion
 	template <typename Real>
