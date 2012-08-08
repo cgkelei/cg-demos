@@ -9,10 +9,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 // API.
 ////////////////////////////////////////////////////////////////////////////////
-#ifdef WIN32
-#define WIN32_LEAN_AND_MEAN
+//#ifdef WIN32
+//#define WIN32_LEAN_AND_MEAN
 #	include <Windows.h>
-#endif
+//#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // StableSTLHeader
@@ -20,6 +20,7 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 #include <list>
 #include <string>
 #include <cassert>
@@ -71,7 +72,7 @@ using std::shared_ptr;
 using std::weak_ptr;
 using std::vector;
 using std::unordered_map;
-
+using std::unordered_set;
 
 
 #define Safe_Delete(p) if(p) { delete p; p = NULL;}
@@ -101,6 +102,7 @@ namespace RcEngine {
 	namespace Input
 	{
 		class InputDevice;
+		class InputSystem;
 	}
 
 	namespace Render

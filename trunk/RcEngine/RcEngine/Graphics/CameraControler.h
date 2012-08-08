@@ -10,6 +10,9 @@ namespace RcEngine
 {
 	namespace Render
 	{
+		/**
+		 * Camera controller. Controller provides camera movement and rotation control using keyboard and mouse.
+		 */
 		class _ApiExport CameraControler 
 		{
 		protected:
@@ -28,6 +31,20 @@ namespace RcEngine
 
 		class _ApiExport FirstPersonCameraControler : public CameraControler
 		{
+		public:
+			enum Action
+			{
+				TurnLeftRight,
+				TurnUpDown,
+				RollLeft,
+				RollRight,
+
+				Forward,
+				Backward,
+				MoveLeft,
+				MoveRight
+			};
+
 		public:
 			FirstPersonCameraControler();
 			~FirstPersonCameraControler();

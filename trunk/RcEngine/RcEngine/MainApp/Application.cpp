@@ -116,7 +116,6 @@ namespace RcEngine {
 	void Application::InitializeDevice()
 	{
 		// init render device
-		mRenderDevice->Create();
 		mRenderDevice->CreateRenderWindow(mSettings);
 
 		// init ois input system

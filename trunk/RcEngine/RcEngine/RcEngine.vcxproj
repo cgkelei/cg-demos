@@ -116,6 +116,9 @@
     <ClCompile Include="Graphics\VertexDeclaration.cpp" />
     <ClCompile Include="Graphics\VertexElement.cpp" />
     <ClCompile Include="Graphics\Viewport.cpp" />
+    <ClCompile Include="Input\InputDevice.cpp" />
+    <ClCompile Include="Input\InputModule.cpp" />
+    <ClCompile Include="Input\InputMouse.cpp" />
     <ClCompile Include="IO\FileStream.cpp" />
     <ClCompile Include="IO\MemoryStream.cpp" />
     <ClCompile Include="IO\Stream.cpp" />
@@ -170,6 +173,8 @@
     <ClInclude Include="Graphics\VertexDeclaration.h" />
     <ClInclude Include="Graphics\VertexElement.h" />
     <ClInclude Include="Graphics\Viewport.h" />
+    <ClInclude Include="Input\InputDevice.h" />
+    <ClInclude Include="Input\InputModule.h" />
     <ClInclude Include="IO\FileStream.h" />
     <ClInclude Include="IO\MemoryStream.h" />
     <ClInclude Include="IO\Stream.h" />
