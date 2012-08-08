@@ -367,61 +367,83 @@ QuaternionMultiply(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2)
 
 template <typename Real>
 inline Quaternion<Real> 
-QuaternionFromRotationMatrix(const Matrix4<Real>& rotMat)
+QuaternionFromRotationMatrix(const Matrix4<Real>& mat)
 {
-	float m11 = rotMat.M11;
-	float m12 = rotMat.M12;
-	float m13 = rotMat.M13;
-
-	float m21 = rotMat.M21;
-	float m22 = rotMat.M22;
-	float m23 = rotMat.M23;
-
-	float m31 = rotMat.M31;
-	float m32 = rotMat.M32;
-	float m33 = rotMat.M33;
-
-	float trace = m11 + m22 + m33;
-
 	Quaternion<Real> ret;
+	
+	Real trace = mat.M11 + mat.M22 + mat.M33;
 
+	Real S;
+
+	if (trace > 0) { 
+		 S = std::sqrt(trace+(Real)1) * 2; // S=4*qw 
+		ret.W() = (Real)0.25 * S;
+		ret.X() = (mat.M23 - mat.M32) / S;
+		ret.Y() = (mat.M31 - mat.M13) / S; 
+		ret.Z() = (mat.M12 - mat.M21) / S; 
+	} else if ((mat.M11 > mat.M22)&(mat.M11 > mat.M33)) { 
+		 S = std::sqrt((Real)1.0 + mat.M11 - mat.M22 - mat.M33) * 2; // S=4*qx 
+		ret.W() = (mat.M23 - mat.M32) / S;
+		ret.X() = (Real)0.25 * S;
+		ret.Y() = (mat.M21 + mat.M12) / S; 
+		ret.Z() = (mat.M13 + mat.M31) / S; 
+	} else if (mat.M22 > mat.M33) { 
+		 S = std::sqrt((Real)1 + mat.M22 - mat.M11 - mat.M33) * 2; // S=4*qy
+		ret.W() = (mat.M31 - mat.M13) / S;
+		ret.X() = (mat.M12 + mat.M21) / S; 
+		ret.Y() = (Real)0.25 * S;
+		ret.Z() = (mat.M23 + mat.M32) / S; 
+	} else { 
+		 S = std::sqrt((Real)1 + mat.M33 - mat.M11 - mat.M22) * 2; // S=4*qz
+		ret.W() = (mat.M12 - mat.M21) / S;
+		ret.X() = (mat.M31 + mat.M13) / S;
+		ret.Y() = (mat.M32 + mat.M23) / S;
+		ret.Z() = (Real)0.25 * S;
+	}
+
+	/*Real s;
 	if (trace > (Real)0)
 	{
-		Real s1 = std::sqrt((trace + (Real)1));
-		ret.W() = s1 * (Real)0.5;
-		s1 = (Real)0.5 / s1;
-		ret.X() = (m23 - m32) * s1;
-		ret.Y() = (m31 - m13) * s1;
-		ret.Z() = (m12 - m21) * s1;
-		return ret;
+		s = std::sqrt((trace + (Real)1));
+		ret.W() =s * (Real)0.5;
+		s = (Real)0.5 / s;
+		ret.X() = (mat.M23 - mat.M32) * s;
+		ret.Y() = (mat.M31 - mat.M13) * s;
+		ret.Z() = (mat.M12 - mat.M21) * s;
 	}
-	if ((m11 >= m22) && (m11 >= m33))
+	else
 	{
-		float s2 = std::sqrt(((((Real)1.0 + m11) - m22) - m33));
-		s2 = (Real)0.5 / s2;
-		ret.X() = (Real)0.5 * s2;
-		ret.Y() = (m12 + m21) * s2;
-		ret.Z() = (m13 + m31) * s2;
-		ret.W() = (m23 - m32) * s2;
-		return ret;
-	}
-	if (m22 > m33)
-	{
-		float s3 = std::sqrt(((((Real)1 + m22) - m11) - m33));
-		s3 = (Real)0.5 / s3;
-		ret.X() = (m21 + m12) * s3;
-		ret.Y() = 0.5f * s3;
-		ret.Z() = (m32 + m23) * s3;
-		ret.W() = (m31 - m13) * s3;
-		return ret;
-	}
-
-	float s4 = std::sqrt(((((Real)1 + m33) - m11) - m22));
-	s4 = (Real)0.5 / s4;
-	ret.X() = (m31 + m13) * s4;
-	ret.Y() = (m32 + m23) * s4;
-	ret.Z() = 0.5f * s4;
-	ret.W() = (m12 - m21) * s4;
+		if ((mat.M22 > mat.M11) && (mat.M33 <= mat.M22))
+		{
+			s = std::sqrt((mat.M22 - (mat.M33 + mat.M11)) + (Real)1);
+			ret.Y() = s * (Real)0.5;
+			s = (Real)0.5 / s;
+			ret.W() = (mat.M31 - mat.M13) * s;
+			ret.Z() = (mat.M32 + mat.M23) * s;
+			ret.X() = (mat.M12 + mat.M21) * s;
+		}
+		else
+		{
+			if (((mat.M22 <= mat.M11) && (mat.M33 > mat.M11)) || (mat.M33 > mat.M22))
+			{
+				s = sqrt((mat.M33 - (mat.M11 + mat.M22)) + 1);
+				ret.Z() =s * (Real)0.5;
+				s = (Real)0.5 / s;
+				ret.W() = (mat.M12 - mat.M21) * s;
+				ret.X() = (mat.M13 + mat.M31) * s;
+				ret.Y() = (mat.M23 + mat.M32) * s;
+			}
+			else
+			{
+				s = sqrt((mat.M11 - (mat.M22 + mat.M33)) + 1);
+				ret.X() = s * (Real)0.5;
+				s = (Real)0.5 / s;
+				ret.W() = (mat.M23 - mat.M32) * s;
+				ret.Y() = (mat.M21 + mat.M12) * s;
+				ret.Z() = (mat.M31 + mat.M13) * s;
+			}
+		}
+	}*/
 	return ret;
 }
 

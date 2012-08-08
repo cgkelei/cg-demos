@@ -4,6 +4,6 @@
 int main(int argc, char** argv)
 {
 	AssimpProcesser processer;
-	processer.Process("media/tiny.x");
+	processer.Process("media/bat.x");
 	return 0;
 }

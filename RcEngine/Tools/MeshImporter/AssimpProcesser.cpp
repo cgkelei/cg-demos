@@ -76,6 +76,18 @@ Vector3f FromAIVector(const aiVector3D& vec)
 	 return Vector3f(vec.x, vec.y, vec.z);
 }
 
+void GetPosRotScale(const aiMatrix4x4& transform, Vector3f& pos, Quaternionf& rot, Vector3f& scale)
+{
+	aiVector3D aiPos;
+	aiQuaternion aiRot;
+	aiVector3D aiScale;
+	transform.Decompose(aiScale, aiRot, aiPos);
+	pos = FromAIVector(aiPos);
+	rot.X() = aiRot.x; rot.Y() = aiRot.y;rot.Z() = aiRot.z;rot.W() = aiRot.w;
+	scale = FromAIVector(aiScale);
+}
+
+
 aiNode* GetNode(const String& name, aiNode* node)
 {
 	if (!node)
@@ -143,9 +155,16 @@ aiMatrix4x4 GetOffsetMatrix(const OutModel& model, const String& boneName)
 			if (String(bone->mName.C_Str()) == boneName)
 			{
 				aiMatrix4x4 offset = bone->mOffsetMatrix;
-				aiMatrix4x4 transformInverse = GetMeshBakingTransform(meshNode, model.RootNode);
-				transformInverse.Inverse();
-				offset *= transformInverse;
+
+				/* Note that the all mesh vertex has been baked into the same coordinate system which
+				 * is defined by the root node, called model space. So offset matrix must first transform
+				 * vertex from model space to mesh space, then transform mesh space to bone space in bind pose
+				 * that why we multiply the nodeDerivedInverse matrix.If you use left-handed, change it correspondingli 
+				 * V(bone) = offset * nodeDerivedInverse * V(model),
+				 */
+				aiMatrix4x4 nodeDerivedInverse = GetMeshBakingTransform(meshNode, model.RootNode);
+				nodeDerivedInverse.Inverse();
+				offset *= nodeDerivedInverse;
 				return offset;
 			}
 		}
@@ -199,8 +218,8 @@ shared_ptr<VertexDeclaration> GetVertexDeclaration(aiMesh* mesh)
 
 	if (mesh->HasBones())
 	{
-		vertexElements.push_back(VertexElement(offset, VEF_Vector2, VEU_BlendWeight, 0));
-		offset += VertexElement::GetTypeSize(VEF_Vector2);
+		vertexElements.push_back(VertexElement(offset, VEF_Vector4, VEU_BlendWeight, 0));
+		offset += VertexElement::GetTypeSize(VEF_Vector4);
 
 		vertexElements.push_back(VertexElement(offset, VEF_UByte4, VEU_BlendIndices, 0));
 		offset += VertexElement::GetTypeSize(VEF_UByte4);
@@ -282,22 +301,6 @@ void AssimpProcesser::ProcessScene( const aiScene* scene )
 	ExportModel(model, "Test.mdl");
 	ExportBinary(model);
 	ExportXML(model);
-	/*CollectMeshes(model, scene->mRootNode);
-	CollectBones(model);
-
-	mMeshParts.resize(scene->mNumMeshes);
-	for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
-	{
-	aiMesh* mesh = scene->mMeshes[i];
-	mMeshParts.push_back(  ProcessMeshPart(mesh) );
-	}
-
-	mMaterials.reserve(scene->mNumMaterials);
-	for (unsigned int i = 0; i < scene->mNumMaterials; ++i)
-	{
-	aiMaterial* material = scene->mMaterials[i];
-	mMaterials.push_back( ProcessMaterial(material) );
-	}*/
 }
 
 shared_ptr<MeshPartData> AssimpProcesser::ProcessMeshPart( aiMesh* mesh )
@@ -613,15 +616,14 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 					break;
 				case VEU_BlendWeight:
 					{
-						
+						float* weightPtr = vertexPtr;
+						uint8_t* indexPtr = (uint8_t*)(vertexPtr + 4);
+						for (size_t k = 0; k < 4; ++k)
+						{
+							file << "\t\t\t<bone weight=\"" << weightPtr[k] << "\" index=\"" << (uint16_t)indexPtr[k] << "\"/>\n";
+						}	
 					}
-					break;
-				case VEU_BlendIndices:
-					{
-						
-					}
-					break;
-
+					break;	
 				default:
 					break;
 				}
@@ -882,7 +884,13 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 		// Get the world transform of the mesh for baking into the vertices
 		Matrix4f vertexTransform = FromAIMatrix(
 			GetMeshBakingTransform(outModel.MeshNodes[i], outModel.RootNode) );
-	
+		
+		aiMatrix4x4 verteAI = GetMeshBakingTransform(outModel.MeshNodes[i], outModel.RootNode );
+		
+		Vector3f scaleAI, positionAI;
+		Quaternionf rotAI;
+		GetPosRotScale(verteAI, positionAI, rotAI, scaleAI);
+
 		Matrix4f normalTransform = MatrixInverse(vertexTransform).GetTransposed();
 
 		Vector3f scale, translation;
@@ -950,7 +958,12 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 				{
 				case VEU_Position:
 					{
+						// Bake the mesh vertex in model space defined by the root node
+						// So even without the skeleton, the mesh can render with unskin mesh.
 						Vector3f vertex = Transform( FromAIVector(mesh->mVertices[i]), vertexTransform );
+						
+						aiVector3D v = verteAI *  mesh->mVertices[i];
+						
 						*(vertexPtr) = vertex.X();
 						*(vertexPtr+1) = vertex.Y();
 						*(vertexPtr+2) = vertex.Z();
@@ -1000,7 +1013,10 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 						for (uint32_t j = 0; j < 4; ++j)
 						{
 							if (j < blendWeights[i].size())
-								*vertexPtr++ = blendWeights[i][j];
+							{
+								float weight = blendWeights[i][j];
+								*vertexPtr++ = weight;
+							}
 							else
 								*vertexPtr++ = 0.0f;
 						}
@@ -1012,7 +1028,10 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 						for (uint32_t j = 0; j < 4; ++j)
 						{
 							if (j < blendIndices[i].size())
+							{
+								uint16_t index =  blendIndices[i][j];
 								*destBytes++ = blendIndices[i][j];
+							}
 							else
 								*destBytes++ = 0;
 						}
@@ -1046,13 +1065,20 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 			newJoint.Name = boneName;
 
 			aiMatrix4x4 transform = boneNode->mTransformation;
+
 			// Make the root bone transform relative to the model's root node, if it is not already
+		    // This will put the mesh in model coordinate system.
 			if (boneNode == outModel.RootBone)
 				transform = GetDerivedTransform(boneNode, outModel.RootNode, boneNode->mTransformation);
 
 			Matrix4f trans = FromAIMatrix(transform);
 
 			MatrixDecompose(newJoint.InitialScale, newJoint.InitialRotation, newJoint.InitialPosition, trans);
+
+
+			Vector3f scale, position;
+			Quaternionf rot;
+			GetPosRotScale(transform, position, rot, scale);
 
 			// Get offset information if exists
 			newJoint.OffsetMatrix = FromAIMatrix(GetOffsetMatrix(outModel, boneName));
