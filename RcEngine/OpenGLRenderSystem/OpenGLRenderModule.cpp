@@ -26,6 +26,7 @@ namespace RcEngine
 		void OpenGLRenderModule::Initialise()
 		{
 			mRenderDevice = new OpenGLRenderDevice();
+			mRenderDevice->Create();
 		}
 
 		void OpenGLRenderModule::Shutdown()
