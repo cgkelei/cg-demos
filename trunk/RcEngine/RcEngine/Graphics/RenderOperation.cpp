@@ -11,6 +11,11 @@ namespace RcEngine {
 
 		}
 
+
+		RenderOperation::~RenderOperation()
+		{
+		}
+
 		uint32_t RenderOperation::GetVertexCount() const
 		{
 			return 0;

@@ -5,14 +5,12 @@
 #include "Graphics/RenderFactory.h"
 #include "Graphics/FrameBuffer.h"
 #include "Graphics/Camera.h"
-#include "Graphics/IRenderModule.h"
 #include "Core/Exception.h"
 #include "Core/Context.h"
 #include "Core/XMLDom.h"
+#include "Core/IModule.h"
 #include "Core/ModuleManager.h"
-#include "Input/InputModule.h"
-#include "Input/InputDevice.h"
-
+#include "Input/InputSystem.h"
 
 namespace RcEngine {
 
@@ -22,19 +20,11 @@ namespace RcEngine {
 	Application::Application( void )
 		: mIsRunning(false), mAppPaused(false)
 	{
-		Context::GetSingleton().SetApplication(this);
-
 		mConfigFile = "Config.xml";
 		Context::Initialize();
 		ModuleManager::Initialize();
-		
-		// Create main window
-		mMainWindow = new Window("RcEngine", mSettings);
-		mMainWindow->PaintEvent.bind(this, &Application::Window_Paint);
-		mMainWindow->SuspendEvent.bind(this, &Application::Window_Suspend);
-		mMainWindow->ResumeEvent.bind(this, &Application::Window_Resume);
-		mMainWindow->ApplicationActivatedEvent.bind(this, &Application::Window_ApplicationActivated);
-		mMainWindow->ApplicationDeactivatedEvent.bind(this, &Application::Window_ApplicationDeactivated);
+
+		Context::GetSingleton().SetApplication(this);
 	}
 
 	Application::~Application( void )
@@ -80,7 +70,7 @@ namespace RcEngine {
 		{
 			Context::GetSingleton().GetInputSystem().Update();
 		}
-		
+
 		mTimer.Tick();
 
 		if(!mAppPaused)
@@ -111,7 +101,9 @@ namespace RcEngine {
 	void Application::Window_ApplicationActivated()
 	{
 		mActice = true;
+
 		Core::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->SetActice(true);
+		Core::Context::GetSingleton().GetInputSystem().Update();
 	}
 
 	void Application::Window_ApplicationDeactivated()
@@ -137,27 +129,6 @@ namespace RcEngine {
 
 	void Application::ReadConfiguration()
 	{
-		/*XMLDocument configXML;
-		XMLNode* root = configXML.Parse("../Media/Config.xml");
-		std::string windowTitle = root->Attribute("Title")->ValueString();
-
-		XMLNode* graphics = root->FirstNode("Graphics");
-		XMLNode* frame = graphics->FirstNode("Frame");*/
-
-
-		/*mSettings.Left = 100;
-		mSettings.Top = 100;
-		mSettings.Width = frame->Attribute("Width")->ValueUInt();
-		mSettings.Height = frame->Attribute("Height")->ValueUInt();
-		mSettings.Fullscreen = (frame->Attribute("FullScreen")->ValueInt() == 1);
-		mSettings.SampleCount = 0;
-		mSettings.SampleQuality = 0;
-
-		std::string colorFmt = frame->Attribute("ColorForamt")->ValueString();
-		std::string depthStencilFmt = frame->Attribute("DepthStencilFormat")->ValueString();
-		mSettings.ColorFormat = Render::PF_R8G8B8A8;
-		mSettings.DepthStencilFormat = Render::PF_Depth24Stencil8;*/
-
 		mSettings.Left = 100;
 		mSettings.Top = 100;
 		mSettings.Width = 640;
@@ -175,6 +146,14 @@ namespace RcEngine {
 		// todo move this to context
 		ReadConfiguration();
 
+		// Create main window
+		mMainWindow = new Window("RcEngine", mSettings);
+		mMainWindow->PaintEvent.bind(this, &Application::Window_Paint);
+		mMainWindow->SuspendEvent.bind(this, &Application::Window_Suspend);
+		mMainWindow->ResumeEvent.bind(this, &Application::Window_Resume);
+		mMainWindow->ApplicationActivatedEvent.bind(this, &Application::Window_ApplicationActivated);
+		mMainWindow->ApplicationDeactivatedEvent.bind(this, &Application::Window_ApplicationDeactivated);
+
 		// load all modules
 		LoadAllModules();
 
@@ -187,7 +166,7 @@ namespace RcEngine {
 
 	void Application::Release()
 	{
-		UnloadAllModules();
+		//UnloadAllModules();
 	}
 
 } // Namespace RcEngine

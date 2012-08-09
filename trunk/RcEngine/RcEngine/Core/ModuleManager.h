@@ -53,6 +53,7 @@ namespace RcEngine{
 		private:
 			ModuleInfo* GetMoudleInfoByName(const String &strModule);
 			ModuleInfo* GetMoudleInfoByType(ModuleType modType);
+			void Unload(ModuleInfo* module);
 
 		private:
 			std::vector<ModuleInfo*> mMoudles;

@@ -90,8 +90,10 @@ namespace RcEngine
 
 		void OpenGLRenderDevice::BindIndexBufferOGL( const shared_ptr<GraphicsBuffer>& indexBuffer )
 		{
-			const OpenGLGraphicsBuffer* pBuffer = static_cast<const OpenGLGraphicsBuffer*>(indexBuffer.get());	
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pBuffer->GetBufferID());
+			const OpenGLGraphicsBuffer* pBuffer = dynamic_cast<const OpenGLGraphicsBuffer*>(indexBuffer.get());
+			if (pBuffer){
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pBuffer->GetBufferID());
+			}
 		}
 
 		void OpenGLRenderDevice::DoBindFrameBuffer( FrameBuffer* fb )

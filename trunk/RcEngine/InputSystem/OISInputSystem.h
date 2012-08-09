@@ -1,5 +1,5 @@
 #include "OISInputPrerequisites.h"
-#include "Input/InputDevice.h"
+#include "Input/InputSystem.h"
 
 namespace RcEngine
 {

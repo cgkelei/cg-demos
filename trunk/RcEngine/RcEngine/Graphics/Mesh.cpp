@@ -175,7 +175,7 @@ namespace RcEngine
 			iInitData.pData = NULL;
 			iInitData.rowPitch = indexBufferSize;
 			iInitData.slicePitch = 0;
-			meshPart->mIndexBuffer = factory.CreateVertexBuffer(BU_Static, 0, &iInitData);
+			meshPart->mIndexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
 			data = meshPart->mIndexBuffer->Map(0, indexBufferSize, BA_Write_Only);
 			source.Read(data, indexBufferSize);
 			meshPart->mIndexBuffer->UnMap();
@@ -198,6 +198,12 @@ namespace RcEngine
 			return meshPart;	
 		}
 
+		MeshPart::~MeshPart()
+		{
+			long v = mVertexBuffer.use_count();
+			GraphicsBuffer* bf = mVertexBuffer.get();
+		}
+
 	
 
 		//////////////////////////////////////////////////////////////////////////
@@ -209,7 +215,7 @@ namespace RcEngine
 
 		Mesh::~Mesh()
 		{
-
+			long v = mMeshParts[0]->GetVertexBuffer().use_count();
 		}
 
 		 void Mesh::SetMaterial( const shared_ptr<Material>& mat )

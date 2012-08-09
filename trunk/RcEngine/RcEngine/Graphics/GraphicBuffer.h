@@ -11,7 +11,7 @@ class _ApiExport GraphicsBuffer
 {
 public:
 	GraphicsBuffer(BufferUsage usage, uint32_t accessHint);
-	~GraphicsBuffer(void);
+	virtual ~GraphicsBuffer(void);
 
 	BufferUsage GetBufferUsage() const;
 	uint32_t		GetAccessHint() const;
