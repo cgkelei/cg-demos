@@ -58,7 +58,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Program Files\NVIDIA Corporation\Cg\lib;../3rdParty/ois/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>OIS_static_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -118,7 +118,7 @@
     <ClCompile Include="Graphics\Viewport.cpp" />
     <ClCompile Include="Input\InputDevice.cpp" />
     <ClCompile Include="Input\InputModule.cpp" />
-    <ClCompile Include="Input\InputMouse.cpp" />
+    <ClCompile Include="Input\InputSystem.cpp" />
     <ClCompile Include="IO\FileStream.cpp" />
     <ClCompile Include="IO\MemoryStream.cpp" />
     <ClCompile Include="IO\Stream.cpp" />
@@ -175,6 +175,7 @@
     <ClInclude Include="Graphics\Viewport.h" />
     <ClInclude Include="Input\InputDevice.h" />
     <ClInclude Include="Input\InputModule.h" />
+    <ClInclude Include="Input\InputSystem.h" />
     <ClInclude Include="IO\FileStream.h" />
     <ClInclude Include="IO\MemoryStream.h" />
     <ClInclude Include="IO\Stream.h" />

@@ -47,9 +47,6 @@
 #include <FastDelegate/FastDelegateBind.h>
 #include <rapidxml/rapidxml.hpp>
 #include <rapidxml/rapidxml_print.hpp>
-#include <ois/includes/OISMouse.h>
-#include <ois/includes/OISKeyboard.h>
-#include <ois/includes/OISInputManager.h>
 
 //------------------------------------------------------------------------------
 // Dll Define

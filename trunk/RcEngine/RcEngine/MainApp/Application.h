@@ -18,7 +18,16 @@ public:
 	Application(void);
 	virtual ~Application(void);
 
-	static Application* GetApplication() { return msAppliation; }
+	/**
+	 * This method will create reader device with render settings and then 
+	 * load all modules, create render window
+	 */
+	virtual void Create(); 
+
+	/**
+	 * This method will release all modules.
+	 */
+	virtual void Release();
 
 	/// <summary>
 	// Call this method to initialize the game, begin running the game loop
@@ -28,11 +37,10 @@ public:
 
 	Window* GetMainWindow() { return mMainWindow; }
 
-	Render::RenderDevice* GetRenderDevice();
-
 protected:
 
-	virtual void Initialize();
+	//Called after the Game and GraphicsDevice are created, but before LoadContent.
+	virtual void Initialize() = 0;
 
 	/// <summary>
 	// Load Graphical Resources
@@ -66,25 +74,15 @@ private:
 
 	void ReadConfiguration();
 
-	void CreateGameWindow();
-	void InitializeDevice();
-
 	void Window_ApplicationActivated();
 	void Window_ApplicationDeactivated();
 	void Window_Suspend();
 	void Window_Resume();
 	void Window_Paint();
 
-
 protected:
 
-	static Application* msAppliation;
-
 	Window* mMainWindow;
-
-	OIS::InputManager* mInputManager;
-	OIS::Mouse* mMouse;
-	OIS::Keyboard* mKeyboard;
 
 	bool mActice;
 	bool mAppPaused;
@@ -95,8 +93,6 @@ protected:
 	Timer mTimer;
 
 	Render::RenderSettings mSettings;
-
-	Render::RenderDevice* mRenderDevice;
 
 	// in case multiple threads are used
 	volatile bool mIsRunning;

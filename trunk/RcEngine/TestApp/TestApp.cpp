@@ -24,6 +24,7 @@
 using namespace RcEngine::Math;
 using namespace RcEngine::Render;
 using namespace RcEngine::Content;
+using namespace RcEngine::Input;
 
 TestApp::TestApp(void)
 {
@@ -36,18 +37,9 @@ TestApp::~TestApp(void)
 
 void TestApp::Initialize()
 {
-	Application::Initialize();
-
 	Camera* camera = RcEngine::Core::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
 	camera->SetViewParams(Vector3f(0, 10, 60), Vector3f(0, 10, 0), Vector3f(0, 1, 0));
 	camera->SetProjectionParams(PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 1000.0f );
-
-	//Quaternionf quat(ToRadian(60.0f), 0.0f, 1.0f, 0.0f);
-	//Matrix4f mat = QuaternionToRotationMatrix(quat);
-
-	//D3DXQUATERNION d3dQuat(0.0f, 1.0f, 0.0f, ToRadian(60.0f));
-	//D3DXMATRIX d3dMat;
-
 }
 
 void TestApp::LoadContent()
@@ -74,7 +66,9 @@ void TestApp::UnloadContent()
 
 void TestApp::Render()
 {
-	mRenderDevice->GetCurrentFrameBuffer()->Clear(CF_Color | CF_Depth |CF_Stencil, 
+	RenderDevice* device = Context::GetSingleton().GetRenderDevicePtr();
+
+	device->GetCurrentFrameBuffer()->Clear(CF_Color | CF_Depth |CF_Stencil, 
 		RcEngine::Math::ColorRGBA(1.1f, 1.1f, 1.1f, 1.0f), 1.0f, 0);
 
 
@@ -83,7 +77,7 @@ void TestApp::Render()
 		mDwarf->GetMeshPart(i)->Render();
 	}
 
-	mRenderDevice->GetCurrentFrameBuffer()->SwapBuffers();
+	device->GetCurrentFrameBuffer()->SwapBuffers();
 }
 
 void TestApp::Update( float deltaTime )
@@ -94,23 +88,38 @@ void TestApp::Update( float deltaTime )
 	Quaternionf quat = QuaternionFromRotationYawPitchRoll(0.0f, ToRadian(degree), 0.0f);
 	mDwarf->SetWorldMatrix(/* QuaternionToRotationMatrix(quat)**/ CreateScaling(10.0f, 10.0f, 10.0f) );
 
+	Keyboard* keyboard = static_cast<Keyboard*>( Context::GetSingleton().GetInputSystem().GetDevice(0) );
+	Mouse* mouse =  static_cast<Mouse*>( Context::GetSingleton().GetInputSystem().GetDevice(1) );
 
 	static float pos = 30;
-	if(mKeyboard->isKeyDown(OIS::KC_W))
+	if(keyboard->KeyPress(KC_W))
 	{	
-		pos += 5 * deltaTime;
+		std::cout << "KC_W Pressed" << std::endl;
 	}
 
-	if(mKeyboard->isKeyDown(OIS::KC_S))
+	if(keyboard->KeyDown(KC_S))
 	{
-		pos -= 5 * deltaTime;
+		std::cout << "KC_S Pressed" << std::endl;
 	}
+
+	if (mouse->ButtonDown(MS_LeftButton))
+	{
+		std::cout << "X=" << mouse->MouseMoveX() << " Y=" << mouse->MouseMoveY() << std::endl;
+	}
+
+	if (mouse->ButtonPress(MS_RightButton))
+	{
+		std::cout << "X=" << mouse->X() << " Y=" << mouse->Y() << std::endl;
+	}
+
+
 }
 
 int32_t main()
 {
 	TestApp* app = new TestApp();
+	app->Create();
 	app->RunGame();
-
+	app->Release();
 	return 0;
 }

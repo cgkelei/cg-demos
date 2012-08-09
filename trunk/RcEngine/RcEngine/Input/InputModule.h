@@ -7,20 +7,14 @@ namespace RcEngine
 {
 	namespace Input
 	{
-		class _ApiExport InputModule : public IModule
+		class _ApiExport InputModule : public Core::IModule
 		{
-		public:
+		protected:
 			InputModule();
+
+		public:
 			virtual ~InputModule();
-
-			const String& GetName() const ;
-			InputDevice* GetInputDevice();
-
-			void Initialise();
-			void Shutdown();
-
-		private:
-			InputDevice* mInputDevice;
+			virtual InputSystem* GetInputSystem() = 0;
 		};
 	}
 }

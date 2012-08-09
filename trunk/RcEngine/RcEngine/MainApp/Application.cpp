@@ -10,29 +10,37 @@
 #include "Core/Context.h"
 #include "Core/XMLDom.h"
 #include "Core/ModuleManager.h"
+#include "Input/InputModule.h"
+#include "Input/InputDevice.h"
 
 
 namespace RcEngine {
 
 	using namespace Core;
 
-	Application* Application::msAppliation = NULL;
 
 	Application::Application( void )
 		: mIsRunning(false), mAppPaused(false)
 	{
-		msAppliation = this;
-		mConfigFile = "Config.xml";
+		Context::GetSingleton().SetApplication(this);
 
+		mConfigFile = "Config.xml";
 		Context::Initialize();
 		ModuleManager::Initialize();
-
-		Context::GetSingleton().SetApplication(this);
+		
+		// Create main window
+		mMainWindow = new Window("RcEngine", mSettings);
+		mMainWindow->PaintEvent.bind(this, &Application::Window_Paint);
+		mMainWindow->SuspendEvent.bind(this, &Application::Window_Suspend);
+		mMainWindow->ResumeEvent.bind(this, &Application::Window_Resume);
+		mMainWindow->ApplicationActivatedEvent.bind(this, &Application::Window_ApplicationActivated);
+		mMainWindow->ApplicationDeactivatedEvent.bind(this, &Application::Window_ApplicationDeactivated);
 	}
 
 	Application::~Application( void )
 	{
 		ModuleManager::Finalize();
+		Context::Finalize();
 	}
 
 	void Application::RunGame()
@@ -40,10 +48,7 @@ namespace RcEngine {
 		mIsRunning = true;
 
 		Initialize();
-
 		LoadContent();
-
-		mMainWindow->ShowWindow();
 
 		// Reset Game Timer
 		mTimer.Reset();
@@ -71,10 +76,11 @@ namespace RcEngine {
 
 	void Application::Tick()
 	{
-		// update input
-		mKeyboard->capture();
-		mMouse->capture();
-
+		if (mActice)
+		{
+			Context::GetSingleton().GetInputSystem().Update();
+		}
+		
 		mTimer.Tick();
 
 		if(!mAppPaused)
@@ -84,80 +90,21 @@ namespace RcEngine {
 
 
 		Render();
-	}
-
-
-	void Application::Initialize()
-	{
-		// Read Configuration
-		ReadConfiguration();
-
-		// Read configuration
-		CreateGameWindow();
-
-		// Load Modules
-		LoadAllModules();
-
-		// Init Render Device
-		InitializeDevice();
-	}
-
-	void Application::CreateGameWindow( )
-	{
-		mMainWindow = new Window("RcEngine", mSettings);
-		mMainWindow->PaintEvent.bind(this, &Application::Window_Paint);
-		mMainWindow->SuspendEvent.bind(this, &Application::Window_Suspend);
-		mMainWindow->ResumeEvent.bind(this, &Application::Window_Resume);
-		mMainWindow->ApplicationActivatedEvent.bind(this, &Application::Window_ApplicationActivated);
-		mMainWindow->ApplicationDeactivatedEvent.bind(this, &Application::Window_ApplicationDeactivated);
 		
 	}
-
-	void Application::InitializeDevice()
-	{
-		// init render device
-		mRenderDevice->CreateRenderWindow(mSettings);
-
-		// init ois input system
-		OIS::ParamList pl;
-		std::ostringstream windowHndStr;
-		HWND hwnd = mMainWindow->GetHwnd();
-		size_t* p=(unsigned int*)&hwnd;
-		windowHndStr <<  *p;
-		pl.insert(std::make_pair(std::string("WINDOW"), windowHndStr.str()));
-		pl.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND" )));
-		pl.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_NONEXCLUSIVE")));
-		pl.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_FOREGROUND")));
-		pl.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_NONEXCLUSIVE")));
-		mInputManager = OIS::InputManager::createInputSystem(pl);
-	
-		mKeyboard = static_cast<OIS::Keyboard*>(mInputManager->createInputObject(OIS::OISKeyboard, false));
-		
-		mMouse = static_cast<OIS::Mouse*>(mInputManager->createInputObject(OIS::OISMouse, false));
-		const OIS::MouseState &ms = mMouse->getMouseState();
-		ms.width = mMainWindow->GetWidth();
-		ms.height = mMainWindow->GetHeight();		
-	}
-
-	Render::RenderDevice* Application::GetRenderDevice()
-	{
-		return mRenderDevice;
-	}
-
 
 	void Application::LoadAllModules()
 	{
 		ModuleManager::GetSingleton().Load(MT_Render_OpengGL);
-		Render::IRenderModule* renderModule = static_cast<Render::IRenderModule*>(
-			ModuleManager::GetSingleton().GetMoudleByType(MT_Render_OpengGL));
-		renderModule->Initialise();
-		mRenderDevice = renderModule->GetRenderDevice();
+		ModuleManager::GetSingleton().GetMoudleByType(MT_Render_OpengGL)->Initialise();
 
+		ModuleManager::GetSingleton().Load(MT_Input_OIS);
+		ModuleManager::GetSingleton().GetMoudleByType(MT_Input_OIS)->Initialise();
 	}
 
 	void Application::UnloadAllModules()
 	{
-		ModuleManager::GetSingleton().GetMoudleByType(MT_Render_OpengGL)->Shutdown();
+		ModuleManager::GetSingleton().UnloadAll();
 	}
 
 
@@ -221,6 +168,26 @@ namespace RcEngine {
 		mSettings.ColorFormat = Render::PF_R8G8B8A8;
 		mSettings.DepthStencilFormat = Render::PF_Depth24Stencil8;
 
+	}
+
+	void Application::Create()
+	{
+		// todo move this to context
+		ReadConfiguration();
+
+		// load all modules
+		LoadAllModules();
+
+		// Create render window
+		Context::GetSingleton().GetRenderDevice().CreateRenderWindow(mSettings);
+
+		// Show main window
+		mMainWindow->ShowWindow();
+	}
+
+	void Application::Release()
+	{
+		UnloadAllModules();
 	}
 
 } // Namespace RcEngine

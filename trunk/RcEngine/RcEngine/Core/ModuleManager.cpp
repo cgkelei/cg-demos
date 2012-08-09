@@ -1,5 +1,6 @@
 #include "Core/ModuleManager.h"
 #include "Core/Utility.h"
+#include "Core/IModule.h"
 
 namespace RcEngine{
 
@@ -13,13 +14,8 @@ namespace RcEngine{
 
 			ModuleManager::~ModuleManager(void)
 			{
-				/*for( DynLibList::iterator it = mDynLibList.begin(); it != mDynLibList.end(); ++it )
-				{
-				it->second->Unload();
-				delete it->second;
-				}
-
-				mDynLibList.clear();*/
+				UnloadAll();
+				mMoudles.clear();
 			}
 
 
@@ -56,17 +52,6 @@ namespace RcEngine{
 				return true;
 			}
 
-			/*void ModuleManager::Unload( DynLib* lib )
-			{
-				DynLibList::iterator iter = mDynLibList.find(lib->GetName());
-				if (iter != mDynLibList.end())
-				{
-					mDynLibList.erase(iter);
-				}
-				lib->Unload();
-				delete lib;
-			}*/
-
 			bool ModuleManager::Unload( const String& name )
 			{
 				return true;
@@ -84,12 +69,20 @@ namespace RcEngine{
 
 			bool ModuleManager::UnloadAll()
 			{
+				for (auto iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
+				{
+					(*iter)->mModuleSystem->Shutdown();
+					(*iter)->mDynLib->Unload();
+					delete (*iter)->mModuleSystem;
+					delete (*iter)->mDynLib;
+					delete (*iter);
+				}
 				return true;
 			}
 
 			bool ModuleManager::HasMoudle( const String& strModule )
 			{
-				for(ModuleArrayIter iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
+				for(auto iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
 				{
 					if((*iter)->mModuleName == strModule)
 						return true;
@@ -99,7 +92,7 @@ namespace RcEngine{
 
 			bool ModuleManager::HasModule( ModuleType modType )
 			{
-				for(ModuleArrayIter iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
+				for(auto iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
 				{
 					if((*iter)->mModuleType == modType)
 						return true;
@@ -109,7 +102,7 @@ namespace RcEngine{
 
 			IModule* ModuleManager::GetModuleByName( const String &strModule )
 			{
-				for(ModuleArrayIter iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
+				for(auto iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
 				{
 					if((*iter)->mModuleName == strModule)
 						return (*iter)->mModuleSystem;
@@ -119,7 +112,7 @@ namespace RcEngine{
 
 			IModule* ModuleManager::GetMoudleByType( ModuleType modType )
 			{
-				for(ModuleArrayIter iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
+				for(auto iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
 				{
 					if((*iter)->mModuleType == modType)
 						return (*iter)->mModuleSystem;
@@ -129,7 +122,7 @@ namespace RcEngine{
 
 			ModuleInfo* ModuleManager::GetMoudleInfoByName( const String &strModule )
 			{
-				for(ModuleArrayIter iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
+				for(auto iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
 				{
 					if((*iter)->mModuleName == strModule)
 						return (*iter);
@@ -139,7 +132,7 @@ namespace RcEngine{
 
 			ModuleInfo* ModuleManager::GetMoudleInfoByType( ModuleType modType )
 			{
-				for(ModuleArrayIter iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
+				for(auto iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
 				{
 					if((*iter)->mModuleType == modType)
 						return (*iter);

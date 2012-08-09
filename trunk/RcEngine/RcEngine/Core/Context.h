@@ -9,6 +9,7 @@ namespace RcEngine{
 
 		using Render::RenderDevice;
 		using Render::RenderFactory;
+		using Input::InputSystem;
 
 		class _ApiExport Context : public Singleton<Context>
 		{
@@ -25,7 +26,6 @@ namespace RcEngine{
 			RenderDevice& GetRenderDevice();
 			RenderDevice* GetRenderDevicePtr();
 			
-
 			void SetRenderFactory(RenderFactory* factory);
 			RenderFactory& GetRenderFactory();
 			RenderFactory* GetRenderFactoryPtr(); 
@@ -34,10 +34,16 @@ namespace RcEngine{
 			Application* GetApplicationPtr();
 			Application& GetApplication();
 
+			void SetInputSystem(InputSystem* input);
+			InputSystem* GetInputSystemPtr();
+			InputSystem& GetInputSystem();
+
 
 		private:
 			RenderDevice* mRenderDevice;
+			InputSystem* mInputSystem;
 			RenderFactory* mRenderFactory;
+			
 			Application* mApplication;
 		};
 

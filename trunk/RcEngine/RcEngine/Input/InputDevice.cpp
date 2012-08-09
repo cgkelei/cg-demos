@@ -1,4 +1,5 @@
 #include "InputDevice.h"
+#include "Core/Context.h"
 
 namespace RcEngine{
 namespace Input{
@@ -17,7 +18,7 @@ namespace Input{
 
 	InputSystem::InputSystem()
 	{
-
+		Core::Context::GetSingleton().SetInputSystem(this);
 	}
 
 	InputSystem::~InputSystem()
@@ -25,12 +26,12 @@ namespace Input{
 
 	}
 
-	void InputSystem::Update( float delta )
+	void InputSystem::Update( )
 	{
 		// update all input device
 		for(auto iter = mDevices.begin(); iter != mDevices.end(); ++iter)
 		{
-			(*iter)->Update(delta);
+			(*iter)->Update();
 		}
 
 		//
@@ -114,9 +115,21 @@ namespace Input{
 
 	}
 
+	bool Mouse::ButtonDown( MouseCode button ) const
+	{
+		return ((mButtons[mIndex]) & (1L<<(button-MS_LeftButton))) != 0;
+	}
+
+	bool Mouse::ButtonPress( MouseCode button ) const
+	{
+		return (((mButtons[mIndex]) & (1L<<(button-MS_LeftButton))) != 0)
+			&& (((mButtons[!mIndex]) & (1L<<(button-MS_LeftButton))) == 0);
+			
+	}
+
 
 	Keyboard::Keyboard( InputSystem* inputSystem )
-		: InputDevice(inputSystem)
+		: InputDevice(inputSystem), mIndex(0)
 	{
 
 	}
@@ -124,6 +137,16 @@ namespace Input{
 	Keyboard::~Keyboard()
 	{
 
+	}
+
+	bool Keyboard::KeyDown( KeyCode key ) const
+	{
+		return mKeyBuffer[mIndex][key];
+	}
+
+	bool Keyboard::KeyPress( KeyCode key ) const
+	{
+		return (mKeyBuffer[mIndex][key] && !mKeyBuffer[!mIndex][key]);
 	}
 
 
