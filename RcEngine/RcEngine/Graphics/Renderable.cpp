@@ -21,7 +21,7 @@ namespace RcEngine
 
 		Renderable::~Renderable()
 		{
-
+			
 		}
 
 		EffectTechnique* Renderable::GetTechnique() const

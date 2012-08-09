@@ -31,6 +31,7 @@ namespace RcEngine {
 
 		public:
 			RenderOperation(void);
+			~RenderOperation();
 
 			PrimitiveType GetPrimitiveType() const							{ return PrimitiveType; }
 			void SetPrimitiveType(PrimitiveType type)						{ PrimitiveType = type; }

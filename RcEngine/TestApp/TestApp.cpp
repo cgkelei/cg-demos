@@ -16,6 +16,7 @@
 #include "Math/BoundingSphere.h"
 #include "IO/FileStream.h"
 #include "MainApp/Window.h"
+#include "Input/InputSystem.h"
 #include "Input/InputDevice.h"
 #include <D3DX10Math.h>
 
@@ -52,7 +53,7 @@ void TestApp::LoadContent()
 	mDwarf = Mesh::Load(modelSource);
 
 	mDwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Dwarf/Body.material.xml");
-	
+	//
 	//mDwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Test/Armor.material.xml");
 	mDwarf->SetMaterial(mDwarfMaterial);
 }
@@ -97,29 +98,29 @@ void TestApp::Update( float deltaTime )
 		std::cout << "KC_W Pressed" << std::endl;
 	}
 
-	if(keyboard->KeyDown(KC_S))
-	{
-		std::cout << "KC_S Pressed" << std::endl;
-	}
+	//if(keyboard->KeyDown(KC_S))
+	//{
+	//	std::cout << "KC_S Pressed" << std::endl;
+	//}
 
-	if (mouse->ButtonDown(MS_LeftButton))
-	{
-		std::cout << "X=" << mouse->MouseMoveX() << " Y=" << mouse->MouseMoveY() << std::endl;
-	}
+	//if (mouse->ButtonDown(MS_LeftButton))
+	//{
+	//std::cout << "X=" << mouse->MouseMoveX() << " Y=" << mouse->MouseMoveY() << std::endl;
+	//}
 
-	if (mouse->ButtonPress(MS_RightButton))
-	{
-		std::cout << "X=" << mouse->X() << " Y=" << mouse->Y() << std::endl;
-	}
+	//if (mouse->ButtonPress(MS_RightButton))
+	//{
+	//	std::cout << "X=" << mouse->X() << " Y=" << mouse->Y() << std::endl;
+	//}
 
 
 }
 
 int32_t main()
 {
-	TestApp* app = new TestApp();
-	app->Create();
-	app->RunGame();
-	app->Release();
+	TestApp app;
+	app.Create();
+	app.RunGame();
+	app.Release();
 	return 0;
 }

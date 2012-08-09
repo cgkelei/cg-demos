@@ -11,6 +11,7 @@ GraphicsBuffer::GraphicsBuffer(BufferUsage usage, uint32_t accessHint)
 
 GraphicsBuffer::~GraphicsBuffer(void)
 {
+	int a = 0;
 }
 
 BufferUsage GraphicsBuffer::GetBufferUsage() const

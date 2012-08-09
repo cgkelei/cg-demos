@@ -62,6 +62,15 @@ namespace RcEngine{
 				return true;
 			}
 
+			void ModuleManager::Unload( ModuleInfo* info )
+			{
+				assert(info);
+				DLL_START_PLUGIN pFunc = (DLL_START_PLUGIN)info->mDynLib->GetSymbol("dllStopPlugin");
+				pFunc(&info->mModuleSystem);
+				info->mDynLib->Unload();
+				delete info->mDynLib;
+			}
+
 			bool ModuleManager::LoadAll()
 			{
 				return true;
@@ -72,10 +81,8 @@ namespace RcEngine{
 				for (auto iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
 				{
 					(*iter)->mModuleSystem->Shutdown();
-					(*iter)->mDynLib->Unload();
-					delete (*iter)->mModuleSystem;
-					delete (*iter)->mDynLib;
-					delete (*iter);
+					Unload(*iter);
+					delete *iter;
 				}
 				return true;
 			}

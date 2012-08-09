@@ -29,6 +29,7 @@ namespace RcEngine
 		{
 		public:
 			MeshPart(const String& name, const shared_ptr<Mesh>& mesh);
+			~MeshPart();
 
 			const String& GetName() const								{ return mName; }
 			const BoundingSpheref& GetBoundingSphere() const			{ return mBoundingSphere; }
