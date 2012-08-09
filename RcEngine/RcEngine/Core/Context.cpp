@@ -69,5 +69,20 @@ namespace RcEngine{
 				mRenderFactory = factory;
 			}
 
+			void Context::SetInputSystem( InputSystem* input )
+			{
+				mInputSystem = input;
+			}
+
+			InputSystem* Context::GetInputSystemPtr()
+			{
+				return mInputSystem;
+			}
+
+			InputSystem& Context::GetInputSystem()
+			{
+				return *mInputSystem;
+			}
+
 	} // Namespace Core
 } // Namespace RcEngine

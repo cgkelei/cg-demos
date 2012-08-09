@@ -66,12 +66,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="OISInputKeyboard.cpp" />
+    <ClCompile Include="OISInputModule.cpp" />
     <ClCompile Include="OISInputMouse.cpp" />
     <ClCompile Include="OISInputSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OISInputKeyboard.h" />
+    <ClInclude Include="OISInputModule.h" />
     <ClInclude Include="OISInputMouse.h" />
     <ClInclude Include="OISInputPrerequisites.h" />
     <ClInclude Include="OISInputSystem.h" />

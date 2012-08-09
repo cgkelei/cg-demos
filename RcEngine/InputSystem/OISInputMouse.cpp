@@ -23,6 +23,7 @@ namespace RcEngine
 		}
 
 		OISInputMouse::OISInputMouse( InputSystem* inputSystem, uint32_t width, uint32_t height )
+			: Mouse(inputSystem)
 		{
 			assert(inputSystem);
 			OIS::InputManager* inputManager = (static_cast<OISInputSystem*>(mInputSystem))->GetInputManager();
@@ -38,31 +39,22 @@ namespace RcEngine
 		{
 
 		}
-
-		long OISInputMouse::X() const
-		{
-			return mMouse->getMouseState().X.rel;
-		}
-
-		long OISInputMouse::Y() const
-		{
-			return mMouse->getMouseState().Y.rel;
-		}
-
-		bool OISInputMouse::ButtonDown( MouseCode button ) const
-		{
-			return mMouse->getMouseState().buttonDown(MapToOIS(button));
-		}
-
 		
 		const String& OISInputMouse::GetName() const
 		{
 			return MouseName;
 		}
 
-		void OISInputMouse::Update( float delta )
+		void OISInputMouse::Update()
 		{
-
+			mMouse->capture();
+			const OIS::MouseState& mouseState = mMouse->getMouseState();
+			mIndex =  !mIndex;
+			mButtons[mIndex] = mouseState.buttons;
+			mMouseMove.X() = mouseState.X.rel;
+			mMouseMove.Y() = mouseState.X.rel;
+			mCurrentPosition.X() = mouseState.X.abs;
+			mCurrentPosition.Y() = mouseState.Y.abs;
 		}
 
 	}

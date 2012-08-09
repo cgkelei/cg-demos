@@ -5,6 +5,7 @@
 #include "Core/Context.h"
 #include "MainApp/Application.h"
 #include "MainApp/Window.h"
+#include "Core/Exception.h"
 
 namespace RcEngine
 {
@@ -17,7 +18,15 @@ namespace RcEngine
 			// init ois input system
 			OIS::ParamList pl;
 			std::ostringstream windowHndStr;
-			HWND hwnd = Core::Context::GetSingleton().GetApplication().GetMainWindow()->GetHwnd();
+			Window* mainWin = Core::Context::GetSingleton().GetApplication().GetMainWindow();
+
+			if (!mainWin)
+			{
+				ENGINE_EXCEPT(Core::Exception::ERR_INTERNAL_ERROR, "Couldn't init input system before main window created",
+					"OISInputSystem::OISInputSystem");
+			}
+
+			HWND hwnd = mainWin ->GetHwnd();
 			size_t* p=(unsigned int*)&hwnd;
 			windowHndStr <<  *p;
 			pl.insert(std::make_pair(std::string("WINDOW"), windowHndStr.str()));
@@ -29,7 +38,7 @@ namespace RcEngine
 
 			// Here we just create mouse and keyboard
 			mDevices.push_back( new OISInputKeyboard(this) );
-			mDevices.push_back( new OISInputMouse(this) );
+			mDevices.push_back( new OISInputMouse(this, mainWin->GetWidth(), mainWin->GetHeight() ) );
 		}
 
 		OISInputSystem::~OISInputSystem()

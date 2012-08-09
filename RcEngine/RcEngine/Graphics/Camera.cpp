@@ -1,5 +1,5 @@
 #include "Graphics/Camera.h"
-#include "MainApp/Application.h"
+#include "Core/Context.h"
 #include "Graphics/RenderDevice.h"
 
 namespace RcEngine {
@@ -35,7 +35,7 @@ void Camera::SetProjectionParams( float fov, float aspect, float nearPlane, floa
 
 	mProjectionMatrix = CreatePerspectiveFovLH(mFieldOfView, mAspect, mNearPlane, mFarPlane);
 	//修改投影矩阵，使OpenGL适应左右坐标系
-	Application::GetApplication()->GetRenderDevice()->AdjustProjectionMatrix(mProjectionMatrix);
+	Core::Context::GetSingletonPtr()->GetRenderDevicePtr()->AdjustProjectionMatrix(mProjectionMatrix);
 }
 
 const Matrix4f& Camera::GetViewMatrix() const

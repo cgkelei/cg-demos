@@ -14,7 +14,7 @@ namespace RcEngine
 			MT_Unknown = -1,
 			MT_Render_OpengGL = 0,
 			MT_Render_D3D10,
-			MT_Input,
+			MT_Input_OIS,
 			MT_Count
 		};
 
@@ -24,14 +24,16 @@ namespace RcEngine
 		const std::string ModuleNames[MT_Count] =
 		{
 			"OpenGLRenderSystem_d",
-			"D3D10RenderSystem_d"
+			"D3D10RenderSystem_d",
+			"InputSystem_d"
 		};
 #endif
 #else
 		const std::string ModuleNames[MT_Count] =
 		{
 			"OpenGLRenderSystem",
-			"D3D10RenderSystem"
+			"D3D10RenderSystem",
+			"InputSystem"
 		};
 #  endif
 

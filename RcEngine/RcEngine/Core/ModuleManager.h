@@ -26,29 +26,6 @@ namespace RcEngine{
 			DynLib* mDynLib;
 		};
 
-		/*bool ModuleInfo::operator==( const ModuleInfo &other ) const
-		{
-			return	(mModuleName == other.mModuleName &&
-				mModuleSystem == other.mModuleSystem &&
-				mModuleType == other.mModuleType && 
-				mLoaded == other.mLoaded &&
-				mDynLib == other.mDynLib);
-		}
-
-		ModuleInfo & ModuleInfo::operator=( const ModuleInfo &other )
-		{
-			if (other == *this)
-				return *this;
-
-			mModuleName   = other.mModuleName;
-			mModuleSystem = other.mModuleSystem;
-			mModuleType   = other.mModuleType;
-			mDynLib		  = other.mDynLib;
-			mLoaded       = other.mLoaded;
-
-			return *this;
-		}*/
-
 		class _ApiExport ModuleManager : public Singleton<ModuleManager>
 		{
 		public:
@@ -78,11 +55,7 @@ namespace RcEngine{
 			ModuleInfo* GetMoudleInfoByType(ModuleType modType);
 
 		private:
-			typedef std::vector<ModuleInfo*> ModuleArray;
-			typedef std::vector<ModuleInfo*>::iterator ModuleArrayIter;
-
-			ModuleArray mMoudles;
-
+			std::vector<ModuleInfo*> mMoudles;
 		};
 
 

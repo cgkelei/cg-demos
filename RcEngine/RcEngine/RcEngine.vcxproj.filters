@@ -168,15 +168,12 @@
     <ClCompile Include="Input\InputModule.cpp">
       <Filter>Input</Filter>
     </ClCompile>
-    <ClCompile Include="Input\InputMouse.cpp">
+    <ClCompile Include="Input\InputSystem.cpp">
       <Filter>Input</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainApp\Application.h">
-      <Filter>MainApp</Filter>
-    </ClInclude>
-    <ClInclude Include="MainApp\Window.h">
       <Filter>MainApp</Filter>
     </ClInclude>
     <ClInclude Include="Core\CompileConfig.h">
@@ -349,6 +346,12 @@
     </ClInclude>
     <ClInclude Include="Input\InputModule.h">
       <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\InputSystem.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="MainApp\Window.h">
+      <Filter>Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

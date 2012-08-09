@@ -12,11 +12,7 @@ namespace RcEngine
 			~OISInputMouse();
 
 			virtual const String& GetName() const;
-			virtual void Update(float delta);
-
-			virtual long X() const;
-			virtual long Y() const;
-			virtual bool ButtonDown(MouseCode button) const;
+			virtual void Update();
 
 		private:
 			OIS::Mouse* mMouse;

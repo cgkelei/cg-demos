@@ -24,6 +24,12 @@
     <ClCompile Include="OISInputSystem.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="DllMain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="OISInputModule.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OISInputKeyboard.h">
@@ -36,6 +42,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="OISInputPrerequisites.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="OISInputModule.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

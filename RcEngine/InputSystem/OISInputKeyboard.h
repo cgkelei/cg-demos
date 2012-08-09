@@ -11,12 +11,11 @@ namespace RcEngine
 			OISInputKeyboard(InputSystem* inputSystem);
 			~OISInputKeyboard();
 
-			virtual bool IsKeyDown(KeyCode key) const;
 			virtual const String& GetName() const ;
-			virtual void Update(float delta) ;
+			virtual void Update() ;
 
 		private:
-			OIS::Keyboard* mKeyboard;
+			OIS::Keyboard* mKeyboard;	
 		};
 	}
 }

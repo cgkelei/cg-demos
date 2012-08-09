@@ -17,7 +17,10 @@ namespace RcEngine
 
 			virtual const String& GetName() const = 0;
 
+			// Initialise module
 			virtual void Initialise() = 0;
+			
+			// Shutdown module
 			virtual void Shutdown() = 0;
 
 		};

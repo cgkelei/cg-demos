@@ -25,15 +25,11 @@ namespace RcEngine
 			return Name;
 		}
 
-		void OISInputKeyboard::Update( float delta )
+		void OISInputKeyboard::Update( )
 		{
 			mKeyboard->capture();
+			mIndex = !mIndex;
+			mKeyboard->copyKeyStates((char*)mKeyBuffer[mIndex]);
 		}
-
-		bool OISInputKeyboard::IsKeyDown( KeyCode key ) const
-		{
-			return mKeyboard->isKeyDown((OIS::KeyCode)key);
-		}
-
 	}
 }
