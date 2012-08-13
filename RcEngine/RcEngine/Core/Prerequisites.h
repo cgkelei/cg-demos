@@ -40,13 +40,17 @@
 #include <cstdarg>
 #include <ctime>
 
-
-
 // 3rd party includes.
-#include <FastDelegate/FastDelegate.h>
-#include <FastDelegate/FastDelegateBind.h>
 #include <rapidxml/rapidxml.hpp>
 #include <rapidxml/rapidxml_print.hpp>
+#include <FastDelegate/FastDelegate.h>
+#include <FastDelegate/FastDelegateBind.h>
+
+typedef fastdelegate::FastDelegate0<> EventHandler;
+typedef fastdelegate::FastDelegate1<bool*, void> CancellableEventHandler;
+typedef fastdelegate::FastDelegate3<uint32_t, bool, float> InputActionHandler;
+typedef fastdelegate::FastDelegate3<uint32_t, bool, float> InputStateHandler;
+typedef fastdelegate::FastDelegate3<uint32_t, float, float> InputRangeHandler;
 
 //------------------------------------------------------------------------------
 // Dll Define
@@ -74,8 +78,9 @@ using std::unordered_set;
 
 #define Safe_Delete(p) if(p) { delete p; p = NULL;}
 
-typedef fastdelegate::FastDelegate0<> EventHandler;
-typedef fastdelegate::FastDelegate1<bool*, void> CancellableEventHandler;
+
+
+
 
 
 namespace RcEngine {
@@ -98,7 +103,6 @@ namespace RcEngine {
 
 	namespace Input
 	{
-		class InputDevice;
 		class InputSystem;
 	}
 

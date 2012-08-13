@@ -19,8 +19,6 @@ public:
 	bool IsActice() const					{ return mActice; }
 	void SetActice(bool state)				{ mActice = state; }
 
-	int32_t GetLeft() const			    { return mLeft; }
-	int32_t GetTop() const				{ return mTop; }
 	uint32_t GetWidth() const			{ return mWidth; }
 	uint32_t GetHeight() const			{ return mHeight; }
 	
@@ -36,6 +34,7 @@ public:
 
 	virtual void Clear(uint32_t flags, Math::ColorRGBA& clr, float depth, uint32_t stencil) = 0;
 	virtual void SwapBuffers() = 0;
+	virtual void Resize(uint32_t width, uint32_t height) = 0;
 
 	Camera* GetCamera() const			{ return mViewport.AttachCamera; }
 
@@ -55,7 +54,6 @@ protected:
 protected:
 	bool mActice;
 
-	int32_t mLeft, mTop;
 	uint32_t mWidth, mHeight;
 
 	PixelFormat mColorFormat;

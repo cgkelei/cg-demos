@@ -37,8 +37,8 @@ namespace RcEngine
 			mInputManager = OIS::InputManager::createInputSystem(pl);
 
 			// Here we just create mouse and keyboard
-			mDevices.push_back( new OISInputKeyboard(this) );
-			mDevices.push_back( new OISInputMouse(this, mainWin->GetWidth(), mainWin->GetHeight() ) );
+			mKeyboard =  new OISInputKeyboard(this);
+			mMouse =  new OISInputMouse(this, mainWin->GetWidth(), mainWin->GetHeight());
 		}
 
 		OISInputSystem::~OISInputSystem()

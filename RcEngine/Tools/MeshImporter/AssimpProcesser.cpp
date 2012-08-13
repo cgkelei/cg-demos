@@ -388,8 +388,8 @@ shared_ptr<MeshPartData> AssimpProcesser::ProcessMeshPart( aiMesh* mesh )
 	unsigned int vertexSize = offset;
 	
 	// bounding sphere
-	meshPart->BoundingSphere.mCenter = Vector3f(0.0f, 0.0f, 0.0f);
-	meshPart->BoundingSphere.mRadius = 0.0f;
+	meshPart->BoundingSphere.Center = Vector3f(0.0f, 0.0f, 0.0f);
+	meshPart->BoundingSphere.Radius = 0.0f;
 
 	meshPart->VertexCount = mesh->mNumVertices;
 	meshPart->VertexData.resize(vertexSize * mesh->mNumVertices);

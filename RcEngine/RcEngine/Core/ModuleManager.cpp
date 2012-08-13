@@ -14,8 +14,8 @@ namespace RcEngine{
 
 			ModuleManager::~ModuleManager(void)
 			{
-				UnloadAll();
-				mMoudles.clear();
+				//UnloadAll();
+				//mMoudles.clear();
 			}
 
 

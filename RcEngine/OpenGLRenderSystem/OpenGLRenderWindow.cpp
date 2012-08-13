@@ -18,9 +18,6 @@ namespace RcEngine
 			mIsDepthBuffered = PixelFormatUtils::IsDepthStencil(settings.DepthStencilFormat);
 			PixelFormatUtils::GetNumDepthStencilBits(settings.DepthStencilFormat, mDepthBits, mStencilBits);
 
-			Window* win = Core::Context::GetSingleton().GetApplication().GetMainWindow();
-			win->UserResizedEvent.bind(this, &OpenGLRenderWindow::OnSize);
-
 			mHwnd = Core::Context::GetSingleton().GetApplication().GetMainWindow()->GetHwnd();
 			mHdc = GetDC(mHwnd);
 
@@ -119,48 +116,24 @@ namespace RcEngine
 
 		}
 
-		void OpenGLRenderWindow::OnSize()
-		{
-			if (mActice)
-			{
-				WindowMovedOrResized();
-			}
-		}
-
-		void OpenGLRenderWindow::WindowMovedOrResized()
-		{
-			RECT rect;
-			::GetWindowRect(mHwnd, &rect);
-
-			int32_t newLeft = rect.left;
-			int32_t newTop = rect.top;
-
-			if ((newLeft != mLeft) || (newTop != mTop))
-			{
-				Core::Context::GetSingleton().GetApplication().GetMainWindow()->Reposition(newLeft, newTop);
-			}
-			
-			::GetClientRect(mHwnd, &rect);
-			uint32_t newWidth = rect.right - rect.left;
-			uint32_t newHeight = rect.bottom - rect.top;
-
-			if ((newWidth != mWidth) || (newHeight != mHeight))
-			{
-				mViewport.Width = newWidth;
-				mViewport.Height = newHeight;
-				mWidth = newWidth;
-				mHeight = newWidth;
-				Core::Context::GetSingleton().GetRenderDevice().Resize(newWidth, newHeight);
-			}
-
-			mDirty = true;
-		}
-
 		void OpenGLRenderWindow::SwapBuffers()
 		{
 			::SwapBuffers(mHdc);
 		}
 
-
+		void OpenGLRenderWindow::Resize( uint32_t width, uint32_t height )
+		{
+			if (mActice)
+			{
+				if ((width != mWidth) || (height != mHeight))
+				{
+					mViewport.Width = width;
+					mViewport.Height = height;
+					mWidth = width;
+					mHeight = height;
+				}
+				mDirty = true;
+			}
+		}
 	}
 }

@@ -68,7 +68,7 @@ namespace RcEngine {
 	{
 		if (mActice)
 		{
-			Context::GetSingleton().GetInputSystem().Update();
+			Context::GetSingleton().GetInputSystem().Update(mTimer.GetDeltaTime());
 		}
 
 		mTimer.Tick();
@@ -77,11 +77,26 @@ namespace RcEngine {
 			Update(mTimer.GetDeltaTime());
 		else
 			::Sleep(50);
+	
+		static int frameCount = 0;
+		static float baseTime = 0;
+
+		frameCount++;
+
+		if (mTimer.GetGameTime()-baseTime >= 1.0f)
+		{
+			float fps = (float)frameCount;
+			std::stringstream sss; 
+			sss << "FPS: " << fps;
+			mMainWindow->SetTitle(sss.str());
+			frameCount = 0;
+			baseTime += 1.0f;
+		}
 
 
-		Render();
+		Render();	
 		
-	}
+ 	}
 
 	void Application::LoadAllModules()
 	{
@@ -101,9 +116,7 @@ namespace RcEngine {
 	void Application::Window_ApplicationActivated()
 	{
 		mActice = true;
-
 		Core::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->SetActice(true);
-		Core::Context::GetSingleton().GetInputSystem().Update();
 	}
 
 	void Application::Window_ApplicationDeactivated()
@@ -148,6 +161,7 @@ namespace RcEngine {
 
 		// Create main window
 		mMainWindow = new Window("RcEngine", mSettings);
+		mMainWindow->UserResizedEvent.bind(this, &Application::Window_UserResized);
 		mMainWindow->PaintEvent.bind(this, &Application::Window_Paint);
 		mMainWindow->SuspendEvent.bind(this, &Application::Window_Suspend);
 		mMainWindow->ResumeEvent.bind(this, &Application::Window_Resume);
@@ -166,7 +180,16 @@ namespace RcEngine {
 
 	void Application::Release()
 	{
-		//UnloadAllModules();
+	
+	}
+
+	void Application::Window_UserResized()
+	{
+		mMainWindow->UpdateWindowSize();
+		uint32_t width = mMainWindow->GetWidth();
+		uint32_t height = mMainWindow->GetHeight();
+		Context::GetSingleton().GetInputSystem().Resize(width, height);
+		Context::GetSingleton().GetRenderDevice().Resize(width, height);	
 	}
 
 } // Namespace RcEngine

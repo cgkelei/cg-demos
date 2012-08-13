@@ -52,9 +52,16 @@ namespace RcEngine
 			mIndex =  !mIndex;
 			mButtons[mIndex] = mouseState.buttons;
 			mMouseMove.X() = mouseState.X.rel;
-			mMouseMove.Y() = mouseState.X.rel;
+			mMouseMove.Y() = mouseState.Y.rel;
 			mCurrentPosition.X() = mouseState.X.abs;
 			mCurrentPosition.Y() = mouseState.Y.abs;
+		}
+
+		void OISInputMouse::SetWindowSize( uint32_t width, uint32_t height )
+		{
+			const OIS::MouseState &ms = mMouse->getMouseState();
+			ms.width = width;
+			ms.height = height;
 		}
 
 	}

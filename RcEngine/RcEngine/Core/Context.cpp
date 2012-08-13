@@ -10,6 +10,7 @@ namespace RcEngine{
 		namespace Core{
 
 			Context::Context()
+				: mInputSystem(nullptr), mApplication(nullptr), mRenderDevice(nullptr), mRenderFactory(nullptr)
 			{
 
 			}
