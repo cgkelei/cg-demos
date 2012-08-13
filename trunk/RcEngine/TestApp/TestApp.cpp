@@ -8,6 +8,7 @@
 #include "Graphics/EffectParameter.h"
 #include "Graphics/Material.h"
 #include "Graphics/Mesh.h"
+#include "Graphics/CameraControler.h"
 #include "Graphics/SimpleGeometry.h"
 #include "Content/MeshContentLoader.h"
 #include "Math/ColorRGBA.h"
@@ -36,11 +37,45 @@ TestApp::~TestApp(void)
 {
 }
 
+bool Equal(const D3DXMATRIX& mat1, const Matrix4f& mat2)
+{
+	for (size_t i = 0; i < 4; ++i)
+		for (size_t j = 0; j < 4; ++j)
+		{
+			if (mat1(i, j) != mat2(i,j))
+			{
+				float a = mat1(i, j);
+				float b = mat2(i,j);
+				return false;
+			}
+		}
+	return true;
+}
+
 void TestApp::Initialize()
 {
 	Camera* camera = RcEngine::Core::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
-	camera->SetViewParams(Vector3f(0, 10, 60), Vector3f(0, 10, 0), Vector3f(0, 1, 0));
+	
+	Vector3f up(0, 1, 0);
+	Vector3f eye(0, 10, 60);
+	Vector3f target(0, 60, 0);
+
+	Vector3f view = target - eye;
+	view.Normalize();
+
+	Vector3f right = Cross(up, view);
+	right.Normalize();
+
+	up = Cross(view, right);
+	up.Normalize();
+
+	camera->SetViewParams(Vector3f(0, 10, 60), Vector3f(0, 10, 0), up);
+	//camera->SetViewParams(eye, target, up);
 	camera->SetProjectionParams(PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 1000.0f );
+
+	mCameraControler = new FPSCameraControler;
+	mCameraControler->AttachCamera(camera);
+
 }
 
 void TestApp::LoadContent()
@@ -84,34 +119,39 @@ void TestApp::Render()
 void TestApp::Update( float deltaTime )
 {
 	static float degree = 0;
-	degree += deltaTime * 0.001f ;
+	//degree += deltaTime * 90 ;
 
-	Quaternionf quat = QuaternionFromRotationYawPitchRoll(0.0f, ToRadian(degree), 0.0f);
-	mDwarf->SetWorldMatrix(/* QuaternionToRotationMatrix(quat)**/ CreateScaling(10.0f, 10.0f, 10.0f) );
+	Quaternionf quat = QuaternionFromRotationYawPitchRoll( ToRadian(degree), 0.0f, 0.0f);
+	mDwarf->SetWorldMatrix( QuaternionToRotationMatrix(quat)* CreateScaling(10.0f, 10.0f, 10.0f) );
 
-	Keyboard* keyboard = static_cast<Keyboard*>( Context::GetSingleton().GetInputSystem().GetDevice(0) );
-	Mouse* mouse =  static_cast<Mouse*>( Context::GetSingleton().GetInputSystem().GetDevice(1) );
+	//mCameraControler.Update(deltaTime);
 
-	static float pos = 30;
-	if(keyboard->KeyPress(KC_W))
+	Camera* camera = RcEngine::Core::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
+	Vector3f pos = camera->GetPosition();
+	//std::cout << "Camera Pos " << "(" << pos.X() << "," << pos.Y() << ","<<pos.Z() << ")\n"; 
+	
+	Keyboard* keyboard = Context::GetSingleton().GetInputSystem().GetKeyboard();
+	Mouse* mouse =   Context::GetSingleton().GetInputSystem().GetMouse();
+
+	/*if(keyboard->KeyPress(KC_W))
 	{	
 		std::cout << "KC_W Pressed" << std::endl;
 	}
 
-	//if(keyboard->KeyDown(KC_S))
-	//{
-	//	std::cout << "KC_S Pressed" << std::endl;
-	//}
+	if(keyboard->KeyDown(KC_S))
+	{
+		std::cout << "KC_S Pressed" << std::endl;
+	}
 
-	//if (mouse->ButtonDown(MS_LeftButton))
-	//{
-	//std::cout << "X=" << mouse->MouseMoveX() << " Y=" << mouse->MouseMoveY() << std::endl;
-	//}
+	if (mouse->ButtonDown(MS_LeftButton))
+	{
+		std::cout << "X=" << mouse->MouseMoveX() << " Y=" << mouse->MouseMoveY() << std::endl;
+	}*/
 
-	//if (mouse->ButtonPress(MS_RightButton))
-	//{
-	//	std::cout << "X=" << mouse->X() << " Y=" << mouse->Y() << std::endl;
-	//}
+	if (mouse->ButtonPress(MS_RightButton))
+	{
+		std::cout << "X=" << mouse->X() << " Y=" << mouse->Y() << std::endl;
+	}
 
 
 }

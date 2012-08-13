@@ -10,7 +10,7 @@ namespace Input{
 	// ¼üÅÌ¶¯×÷
 	enum KeyCode
 	{
-		KC_UNASSIGNED					= 0x00,
+		KC_UnAssigned    				= 0x00,
 		KC_Escape                       = 0x01,
 		KC_1                            = 0x02,
 		KC_2                            = 0x03,
@@ -163,41 +163,34 @@ namespace Input{
 		MS_X                            = 0x100,
 		MS_Y                            = 0x101,
 		MS_Z                            = 0x102,
-		MS_LeftButton                   = 0x103,
-		MS_RightButton                  = 0x104,
-		MS_MiddleButton                 = 0x105,
-		MS_Button3                      = 0x106,
-		MS_Button4                      = 0x107,
-		MS_Button5                      = 0x108,
-		MS_Button6                      = 0x109,
-		MS_Button7                      = 0x10A,
+		MS_XDelta                       = 0x103,
+		MS_YDelta                       = 0x104,
+		MS_ZDelta                       = 0x105,
+		MS_LeftButton                   = 0x106,
+		MS_RightButton                  = 0x107,
+		MS_MiddleButton                 = 0x108,
+		MS_Button3                      = 0x109,
+		MS_Button4                      = 0x10A,
+		MS_Button5                      = 0x10B,
+		MS_Button6                      = 0x10C,
+		MS_Button7                      = 0x10D,
 	};
 
-/**
-/* Brief any device that is able to interact with the user (keyboard, mouse, joystick, touchscreen, ...)
-/*/
-class _ApiExport InputDevice
-{
-public:
-	InputDevice(InputSystem* inputSystem);
-	virtual ~InputDevice();
+	enum InputDeviceType
+	{
+		IDT_Mouse,
+		IDT_Keyboard
+	};
 
-	virtual const String& GetName() const = 0;
-
-	 /**
-      * Updates all input states of this device
-      */
-	virtual void Update() = 0;
-
-protected:
-	InputSystem* mInputSystem;
-};
-
-class _ApiExport Mouse : public InputDevice
+class _ApiExport Mouse
 {
 public:
 	Mouse(InputSystem* inputSystem);
 	virtual ~Mouse();
+
+	virtual const String& GetName() const = 0;
+	virtual void Update() = 0;
+	virtual void SetWindowSize(uint32_t width, uint32_t height) = 0;
 
 	int32_t X() const	{ return mCurrentPosition.X(); }
 	int32_t Y() const   { return mCurrentPosition.Y(); }
@@ -209,6 +202,7 @@ public:
 	bool ButtonPress(MouseCode button) const;
 	
 protected:
+	InputSystem* mInputSystem;
 	Math::Vector<int32_t, 2>  mCurrentPosition;
 	/// Mouse movement since last frame.
 	Math::Vector<int32_t, 2>  mMouseMove;
@@ -217,12 +211,14 @@ protected:
 
 };
 
-
-class _ApiExport Keyboard : public InputDevice
+class _ApiExport Keyboard 
 {
 public:
 	Keyboard(InputSystem* inputSystem);
 	virtual ~Keyboard();
+
+	virtual const String& GetName() const = 0;
+	virtual void Update() = 0;
 
 	/// Check if a key is held down.
 	bool KeyDown(KeyCode key) const;
@@ -230,6 +226,7 @@ public:
 	bool KeyPress(KeyCode key) const;
 
 protected:
+	InputSystem* mInputSystem;
 	// One for previous frame, One for current
 	bool mKeyBuffer[2][256];
 	int32_t mIndex;

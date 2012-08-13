@@ -9,8 +9,6 @@ namespace RcEngine
 		OpenGLFrameBuffer::OpenGLFrameBuffer( uint32_t width, uint32_t height, bool offscreen /*= true*/ )
 			: FrameBuffer(width, height, offscreen)
 		{
-			mLeft = 0;
-			mTop = 0;
 
 			if (mOffscreen)
 			{
@@ -84,6 +82,11 @@ namespace RcEngine
 		}
 
 		void OpenGLFrameBuffer::SwapBuffers()
+		{
+
+		}
+
+		void OpenGLFrameBuffer::Resize( uint32_t width, uint32_t height )
 		{
 
 		}

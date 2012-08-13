@@ -29,7 +29,7 @@ namespace RcEngine
 
 		};
 
-		class _ApiExport FirstPersonCameraControler : public CameraControler
+		class _ApiExport FPSCameraControler : public CameraControler
 		{
 		public:
 			enum Action
@@ -46,14 +46,39 @@ namespace RcEngine
 			};
 
 		public:
-			FirstPersonCameraControler();
-			~FirstPersonCameraControler();
+			FPSCameraControler();
+			~FPSCameraControler();
 
 			void AttachCamera(Camera* camera);
 
-		private:
+		protected:
 			void Move(float x, float y, float z);
 			void Rotate(float yaw, float pitch, float roll);
+			void HandleMove(uint32_t action, bool value, float delta);
+			void HandleRoatate(uint32_t action, float value, float delta);
+
+		protected:
+			Math::Quaternionf mCameraRot;
+			float mCameraYawAngle;
+			float mCameraPitchAngle;
+			float mCameraRollAngle;
+		};
+
+
+		class _ApiExport ModelViewerCameraControler : public CameraControler
+		{
+		public:
+			ModelViewerCameraControler();
+			~ModelViewerCameraControler();
+
+			void AttachCamera(Camera* camera);
+
+		protected:
+			class ArcBall
+			{
+
+			};
+
 
 		};
 	}

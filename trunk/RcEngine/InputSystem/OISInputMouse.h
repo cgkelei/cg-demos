@@ -11,8 +11,9 @@ namespace RcEngine
 			OISInputMouse(InputSystem* inputSystem, uint32_t width, uint32_t height);
 			~OISInputMouse();
 
-			virtual const String& GetName() const;
-			virtual void Update();
+			void SetWindowSize(uint32_t width, uint32_t height);
+			const String& GetName() const;
+			void Update();
 
 		private:
 			OIS::Mouse* mMouse;

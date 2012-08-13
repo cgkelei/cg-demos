@@ -18,10 +18,16 @@ public:
 	uint32_t GetLeft() const	{ return mLeft; }
 	uint32_t GetTop() const		{ return mTop; }
 	
+	bool InSizeMove() const	{ return mInSizeMove; }
+
+
 	void Reposition(int32_t left, int32_t top);
 	void ShowWindow();
+	void SetTitle(const String& title);
 
-	bool InSizeMoveTest() const { return mInSizeMove; }
+
+	// After Resize or reposition, this will compute new window size
+	void UpdateWindowSize();
 
 private:
 	void OnUserResized();
@@ -49,9 +55,8 @@ private:
 	std::string mName;
 
 	bool mFullscreen;
-	
-	bool mMinimized, mMaximized;
 	bool mInSizeMove;
+	bool mMinimized, mMaximized;
 
 	HWND mhWnd;
 	HINSTANCE mhInstance;

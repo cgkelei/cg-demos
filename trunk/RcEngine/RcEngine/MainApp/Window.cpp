@@ -231,6 +231,34 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
+void Window::SetTitle( const String& title )
+{
+	std::wstring text;
+	Convert(text, title);
+	::SetWindowText(mhWnd, text.c_str());
+}
+
+void Window::UpdateWindowSize()
+{
+	RECT rect;
+	::GetWindowRect(mhWnd, &rect);
+
+	int32_t newLeft = rect.left;
+	int32_t newTop = rect.top;
+
+	if ((newLeft != mLeft) || (newTop != mTop))
+	{
+		mLeft = newLeft;
+		mTop = newTop;
+		Reposition(newLeft, newTop);
+	}
+
+	::GetClientRect(mhWnd, &rect);	
+
+	mWidth = rect.right - rect.left;
+	mHeight = rect.bottom - rect.top;
+}
+
 
 
 } // Namespace RcEngine

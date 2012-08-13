@@ -74,6 +74,7 @@ private:
 
 	void ReadConfiguration();
 
+	void Window_UserResized();
 	void Window_ApplicationActivated();
 	void Window_ApplicationDeactivated();
 	void Window_Suspend();

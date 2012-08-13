@@ -5,21 +5,9 @@
 namespace RcEngine{
 namespace Input{
 
-	InputDevice::InputDevice(InputSystem* inputSystem)
-		:mInputSystem(inputSystem)
-	{
-
-	}
-
-	InputDevice::~InputDevice()
-	{
-
-	}
-
-
 //---------------------------------------------------------------------------------
 	Mouse::Mouse( InputSystem* inputSystem )
-		: InputDevice(inputSystem)
+		: mInputSystem(inputSystem)
 	{
 	}
 
@@ -42,7 +30,7 @@ namespace Input{
 
 
 	Keyboard::Keyboard( InputSystem* inputSystem )
-		: InputDevice(inputSystem), mIndex(0)
+		: mInputSystem(inputSystem), mIndex(0)
 	{
 
 	}

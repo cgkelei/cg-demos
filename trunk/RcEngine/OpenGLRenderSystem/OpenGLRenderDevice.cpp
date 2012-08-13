@@ -84,16 +84,14 @@ namespace RcEngine
 
 		void OpenGLRenderDevice::BindVertexBufferOGL( const shared_ptr<GraphicsBuffer>& buffer )
 		{
-			const OpenGLGraphicsBuffer* pBuffer = static_cast<const OpenGLGraphicsBuffer*>(buffer.get());	
+			shared_ptr<OpenGLGraphicsBuffer> pBuffer = std::static_pointer_cast<OpenGLGraphicsBuffer>(buffer);
 			glBindBuffer(GL_ARRAY_BUFFER, pBuffer->GetBufferID());
 		}
 
 		void OpenGLRenderDevice::BindIndexBufferOGL( const shared_ptr<GraphicsBuffer>& indexBuffer )
 		{
-			const OpenGLGraphicsBuffer* pBuffer = dynamic_cast<const OpenGLGraphicsBuffer*>(indexBuffer.get());
-			if (pBuffer){
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pBuffer->GetBufferID());
-			}
+			shared_ptr<OpenGLGraphicsBuffer> pBuffer = std::static_pointer_cast<OpenGLGraphicsBuffer>(indexBuffer);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pBuffer->GetBufferID());
 		}
 
 		void OpenGLRenderDevice::DoBindFrameBuffer( FrameBuffer* fb )

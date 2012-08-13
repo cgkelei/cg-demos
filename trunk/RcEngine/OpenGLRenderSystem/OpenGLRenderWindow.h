@@ -17,15 +17,14 @@ namespace RcEngine
 			void ToggleFullscreen(bool fs);
 			bool Fullscreen() const;
 			void SwapBuffers();
+			void Resize(uint32_t width, uint32_t height);
 
 		protected:
 			void DoBind();
 			void DoUnbind();
 
-			void OnSize();
-			void WindowMovedOrResized();
-
 		private:
+			int32_t mLeft, mTop;
 			HDC  mHdc;
 			HGLRC mHrc;
 			HWND mHwnd;

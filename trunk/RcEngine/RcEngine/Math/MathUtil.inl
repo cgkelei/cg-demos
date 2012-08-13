@@ -37,6 +37,45 @@ Normalize(const Vector<Real, Size>& vec)
 }
 
 //----------------------------------------------------------------------------
+template< typename Real, int32_t Size >
+Vector<Real,Size> Clamp(const Vector<Real,Size>& value, const Vector<Real,Size>& min, const Vector<Real,Size>& max)
+{
+	Vector<Real, Size> clamped = value;
+
+	for (int32_t i = 0; i < Size; ++i)
+	{
+		clamped[i] = (clamped[i] > max[i]) ? max[i] : clamped[i];
+		clamped[i] = (clamped[i] < min[i]) ? min[i] : clamped[i];
+	}
+
+	return clamped;
+}
+
+//----------------------------------------------------------------------------
+template< typename Real, int32_t Size >
+Vector<Real,Size> VectorMinimize(const Vector<Real,Size>& left, const Vector<Real,Size>& right)
+{
+	Vector<Real,Size> vector;
+	for (int32_t i = 0; i < Size; ++i)
+	{
+		vector[i] = (left[i] < right[i]) ? left[i] : right[i];
+	}
+	return vector;
+}
+
+//----------------------------------------------------------------------------
+template< typename Real, int32_t Size >
+Vector<Real,Size> VectorMaximize(const Vector<Real,Size>& left, const Vector<Real,Size>& right)
+{
+	Vector<Real,Size> vector;
+	for (int32_t i = 0; i < Size; ++i)
+	{
+		vector[i] = (left[i] > right[i]) ? left[i] : right[i];
+	}
+	return vector;
+}
+
+//----------------------------------------------------------------------------
 template<typename Real>
 inline Vector<Real, 3>
 Cross( const Vector<Real, 3>& vec1, const Vector<Real, 3>& vec2 )
@@ -46,7 +85,6 @@ Cross( const Vector<Real, 3>& vec1, const Vector<Real, 3>& vec2 )
 		vec1.Z() * vec2.X() - vec1.X() * vec2.Z(), 
 		vec1.X() * vec2.Y() - vec1.Y() * vec2.X());
 }
-
 
 //----------------------------------------------------------------------------
 template< typename Real >
@@ -246,7 +284,18 @@ template<typename Real>
 inline Matrix4<Real> 
 CreateRotationAxis(const Vector<Real,3>& axis, Real angle)
 {
+	const Real cosAngle = std::cos(angle);
+	const Real sinAngle = std::sin(angle);	
+	const Real lengthInv = (Real)1 / axis.Length();
+	const Real nx = axis.X() * lengthInv;
+	const Real ny = axis.Y() * lengthInv;
+	const Real nz = axis.Z() * lengthInv;
+	const Real oneMinusCos = (Real)1-cosAngle;
 
+	return Matrix4<Real>(nx*nx*oneMinusCos+cosAngle,    nx*ny*oneMinusCos+nz*sinAngle, nx*nz*oneMinusCos-ny*sinAngle, (Real)0, 
+		                 nx*ny*oneMinusCos-nz*sinAngle, ny*ny*oneMinusCos+cosAngle,    ny*nz*oneMinusCos+nx*sinAngle, (Real)0, 
+		                 nx*nz*oneMinusCos+ny*sinAngle, ny*nz*oneMinusCos-nx*sinAngle, nz*nz*oneMinusCos+cosAngle,    (Real)0, 
+						 (Real)0,                      (Real)0,                       (Real)0,                        (Real)1 );
 }
 
 //----------------------------------------------------------------------------
@@ -254,7 +303,24 @@ template<typename Real>
 inline Matrix4<Real> 
 CreateRotationYawPitchRoll(Real yaw, Real pitch, Real roll)
 {
+/**
+ * The order of transformations is roll first, then pitch, then yaw. Relative to the object's local coordinate axis,
+ * this is equivalent to rotation around the z-axis, followed by rotation around the x-axis, followed by rotation around 
+ * the y-axis, as shown in the following illustration.
+ * Equal to CreateRotationZ * CreateRotationX * CreateRotationY
+ */ 
+ 
+ const Real sinYaw = std::sin(yaw);
+ const Real cosYaw = std::cos(yaw);
+ const Real sinPitch = std::sin(pitch);
+ const Real cosPitch =  std::cos(pitch);
+ const Real sinRoll = std::sin(roll);
+ const Real cosRoll = std::cos(roll); 
 
+ return Matrix4<Real>( cosYaw*cosRoll+sinYaw*sinPitch*sinRoll,   sinRoll*cosPitch,   -sinYaw*cosRoll+cosYaw*sinPitch*sinRoll,  (Real)0, 
+					   -cosYaw*sinRoll+sinYaw*sinPitch*cosRoll,  cosRoll*cosPitch,    sinRoll*sinYaw+cosYaw*sinPitch*cosRoll,  (Real)0, 
+					   sinYaw*cosPitch,                          -sinPitch,           cosYaw*cosPitch,                          (Real)0,
+					   (Real)0,                                 (Real)0,             (Real)0,                                  (Real)1 );
 }
 
 //----------------------------------------------------------------------------
@@ -268,7 +334,7 @@ CreateScaling(Real sX, Real sY, Real sZ)
 						(Real)0, (Real)0, (Real)0,  (Real)1 );
 }
 
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------
 template<typename Real>
 inline Matrix4<Real> 
 CreateTranslation(const Vector<Real,3>& trans)
@@ -277,6 +343,69 @@ CreateTranslation(const Vector<Real,3>& trans)
 						  (Real)0,    (Real)1,  (Real)0,   (Real)0, 
 						  (Real)0,    (Real)0,  (Real)1,   (Real)0,
 						 trans.X(),  trans.Y(), trans.Z(), (Real)1 );
+}
+
+//----------------------------------------------------------------------------------------
+template<typename Real>
+inline void 
+RotationMatrixToYawPitchRoll(Real& yaw, Real& pitch, Real& roll, const Matrix4<Real>& mat)
+{
+/**
+ * R = Rz * Ry * Rx 
+ * | cosYcosR+sinYsinPsinR   sinRcosP    -sinYcosR+cosYsinPsinR |
+ * | -cosYsinR+sinYsinPcosR  cosRcosP    sinRsinY+cosYsinPcosR  |
+ * |   sinYcosP               -sinP      cosYcosP               |
+ */
+	
+	// 从M32中直接接触Pitch
+	Real sinPitch = -mat.M32;
+
+	if (sinPitch <= Real(-0.999))
+	{
+		// 检查万向硕的情况，正在向上看
+		pitch = Real(-PI/2);
+		roll = 0;
+		yaw = std::atan2(-mat.M13, mat.M11);
+	}
+	else if( sinPitch >= Real(0.999))
+	{
+		// 检查万向硕的情况，正在向下看
+		pitch = Real(PI/2);
+		roll = 0;
+		yaw = std::atan2(-mat.M13, mat.M11);
+	}
+	else
+	{
+		pitch = std::asin(sinPitch);
+		yaw = std::atan2(mat.M31, mat.M33);
+		roll = std::atan2(mat.M12, mat.M22);
+		
+	}
+}
+
+//----------------------------------------------------------------------------------------
+template<typename Real>
+Vector<Real, 3> Transform(const Vector<Real, 3>& vec, const Matrix4<Real>& mat)
+{
+	Vector<Real, 4> result(vec.X(), vec.Y(), vec.Z(), (Real)1);
+	result = result * mat;
+	return Vector<Real, 3>(result.X(), result.Y(), result.Z());
+}
+
+template<typename Real>
+Vector<Real, 3> TransformCoord(const Vector<Real, 3>& vec, const Matrix4<Real>& mat)
+{
+	Vector<Real, 4> result(vec.X(), vec.Y(), vec.Z(), (Real)1);
+	result = result * mat;
+	return Vector<Real, 3>(result.X() / result.W(), result.Y()/ result.W(), result.Z()/ result.W());
+}
+
+template<typename Real>
+Vector<Real, 3> Transform(const Vector<Real, 3>& vec, const Quaternion<Real>& quat)
+{
+	Quaternion<Real> quatVec(Real(0), vec.X(), vec.Y(), vec.Z());
+	Quaternion<Real> result = QuaternionInverse(quat) * quatVec * quat;
+ 	return Vector3f(result.X(), result.Y(), result.Z());
 }
 
 
@@ -337,6 +466,19 @@ CreateTranslation(Real x, Real y, Real z)
 
 //----------------------------------------------------------------------------
 template <typename Real>
+inline Real QuaternionLength(const Quaternion<Real>& quat)
+{
+	return  std::sqrt(quat[0]*quat[0]+quat[1]*quat[1]+quat[2]*quat[2]+quat[3]*quat[3]);
+}
+
+template <typename Real>
+inline Real
+QuaternionDot(const Quaternion<Real>& quat)
+{
+	return quat[0]*quat[0]+quat[1]*quat[1]+quat[2]*quat[2]+quat[3]*quat[3];
+}
+
+template <typename Real>
 inline Quaternion<Real> 
 QuaternionNormalize(const Quaternion<Real>& quat)
 {
@@ -363,6 +505,14 @@ QuaternionMultiply(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2)
 		quat1[0]*quat2[2] + quat1[2]*quat2[0] + quat1[3]*quat2[1] - quat1[1]*quat2[3],
 		quat1[0]*quat2[3] + quat1[3]*quat2[0] + quat1[1]*quat2[2] - quat1[2]*quat2[1] );
 
+}
+
+template <typename Real>
+Quaternion<Real> 
+QuaternionInverse(const Quaternion<Real>& quat)
+{
+	Real inv = Real(1) / QuaternionLength(quat);
+	return QuaternionConjugate(quat) * inv;
 }
 
 template <typename Real>
@@ -544,6 +694,89 @@ QuaternionFromRotationYawPitchRoll(Real yaw, Real pitch, Real roll)
 }
 
 template <typename Real>
+inline void 
+QuaternionToRotationYawPitchRoll(Real& yaw, Real& pitch, Real& roll, const Quaternion<Real>& quat)
+{
+	RotationMatrixToYawPitchRoll(yaw, pitch, roll, QuaternionToRotationMatrix(quat));
+	//Real sqx = quat.X()*quat.X();
+	//Real sqy = quat.Y()*quat.Y();
+	//Real sqz = quat.Z()*quat.Z();
+	//Real sqw = quat.W()*quat.W();
+	//Real unit = sqx + sqy + sqz + sqw; // if normalised is one, otherwise is correction factor
+	//
+	//// sinPitch 
+	//Real test = Real(-2.0) * ( quat.Y() * quat.Z() - quat.X() * quat.W() );
+
+	//if(test >  Real(0.999) * unit)
+	//{
+	//	// singularity at north pole
+	//	yaw = std::atan2(quat.W()*quat.Y()-quat.X()*quat.Z(), Real(0.5)-quat.Y()*quat.Y()-quat.Z()*quat.Z());
+	//	pitch = Real(PI/2);
+	//	roll = 0;
+	//}
+	//else if(test <  Real(-0.999) * unit)
+	//{
+	//	// singularity at south pole
+	//	yaw = -2 * std::atan2(quat.Z(), quat.W());
+	//	pitch = -Real(PI/2);
+	//	roll = 0;
+	//}
+	//else
+	//{
+	//	yaw = atan2((quat.Y() * quat.W() + quat.X() * quat.Z()), -sqx - sqy + sqz + sqw);
+	//	pitch = asin(test / unit);
+	//	roll = atan2((quat.Z() * quat.W() + quat.X() * quat.Y()), -sqx + sqy - sqz + sqw);
+	//}
+	//	
+
+	//if (sinPitch <= Real(-0.999))
+	//{
+	//	// 检查万向硕的情况，正在向上看
+	//	pitch = Real(-PI/2);
+	//	roll = 0;
+	//	yaw = std::atan2(-mat.M13, mat.M11);
+	//}
+	//else if( sinPitch >= Real(0.999))
+	//{
+	//	// 检查万向硕的情况，正在向下看
+	//	pitch = Real(PI/2);
+	//	roll = 0;
+	//	yaw = std::atan2(-mat.M13, mat.M11);
+	//}
+	//else
+	//{
+	//	pitch = std::asin(sinPitch);
+	//	yaw = std::atan2(mat.M31, mat.M33);
+	//	roll = std::atan2(mat.M12, mat.M22);
+
+	//}
+		
+	//	(quat.X() * quat.W() + quat.Y() * quat.Z();
+
+	//if(test >  Real(0.499) * unit)
+	//{
+	//	// singularity at north pole
+	//	yaw = 2 * std::atan2(quat.Z(), quat.W());
+	//	pitch = Math::PI / 2;
+	//	roll = 0;
+	//}
+	//else if(test <  Real(-0.499) * unit)
+	//{
+	//	// singularity at south pole
+	//	yaw = -2 * std::atan2(quat.Z(), quat.W());
+	//	pitch = -Math::PI / 2;
+	//	roll = 0;
+	//}
+	//else
+	//{
+	//	yaw = atan2(2 * (quat.Y() * quat.W() - quat.X() * quat.Z()), -sqx - sqy + sqz + sqw);
+	//	pitch = asin(2 * test / unit);
+	//	roll = atan2(2 * (quat.Z() * quat.W() - quat.X() * quat.Y()), -sqx + sqy - sqz + sqw);
+	//}
+}
+
+
+template <typename Real>
 inline Quaternion<Real> 
 QuaternionSlerp(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2, Real t)
 {
@@ -581,8 +814,261 @@ QuaternionSlerp(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2, Re
 }
 
 
-
-
 //////////////////////////////////////////////////////////////////////////
+template<typename Real>
+ContainmentType Contains(const BoundingSphere<Real>& sphere1,const BoundingSphere<Real>& sphere2 )
+{
+	Real distance;
+	Real x = sphere1.Center.X() - sphere2.Center.X();
+	Real y = sphere1.Center.Y() - sphere2.Center.Y();
+	Real z = sphere1.Center.Z() - sphere2.Center.Z();
+
+	distance = std::sqrt( (x * x) + (y * y) + (z * z) );
+	Real radius = sphere1.Radius;
+	Real radius2 = sphere2.Radius;
+
+	if( radius + radius2 < distance )
+		return CT_Disjoint;
+
+	if( radius - radius2 < distance )
+		return CT_Intersects;
+
+	return CT_Contains;
+}
+
+template<typename Real>
+ContainmentType Contains(const BoundingSphere<Real>& sphere, const Vector<Real,3>& vector )
+{
+	Real x = vector.X() - sphere.Center.X();
+	Real y = vector.Y() - sphere.Center.Y();
+	Real z = vector.Z() - sphere.Center.Z();
+
+	Real distance = (x * x) + (y * y) + (z * z);
+
+	if( distance >= (sphere.Radius * sphere.Radius) )
+		return CT_Disjoint;
+
+	return CT_Contains;
+}
+
+template<typename Real>
+BoundingSphere<Real> FromBox( const BoundingBox<Real>& box )
+{
+	BoundingSphere sphere;
+	sphere.Center =  (box.Min + box.Max) * Real(0.5);
+
+	Real x = box.Min.X - box.Max.X;
+	Real y = box.Min.Y - box.Max.Y;
+	Real z = box.Min.Z - box.Max.Z;
+
+	Real distance = std::sqrt( (x * x) + (y * y) + (z * z) );
+
+	sphere.Radius = distance * Real(0.5);
+
+	return sphere;
+}
+
+template<typename Real>
+BoundingSphere<Real> Merge(const BoundingSphere<Real>& sphere1,const BoundingSphere<Real>& sphere2 )
+{
+	BoundingSphere<Real> sphere;
+	Vector<Real, 3> difference = sphere1.Center() - sphere2.Center();
+
+	Real length = difference.Length();
+	Real radius1 = sphere1.Radius;
+	Real radius2 = sphere2.Radius;
+
+	if (radius1 + radius2 > length)
+	{
+		if( radius1 - radius2 >= length )
+			return sphere1;
+
+		if( radius2 - radius1 >= length )
+			return sphere2;
+	}
+
+	Vector<Real, 3> vector = difference * ( Real(1) / length );
+	float min = (std::min)( -radius1, length - radius2 );
+	float max = (std::max( radius1, length + radius2 ) - min ) * Real(0.5);
+
+	sphere.Center = sphere1.Center + vector * ( max + min );
+	sphere.Radius = max;
+
+	return sphere;
+}
+
+template<typename Real>
+bool Intersects(const BoundingSphere<Real>& sphere, const BoundingBox<Real>& box )
+{
+	Vector<Real, 3> vector;
+
+	if( !Intersects( box, sphere ) )
+		return CT_Disjoint;
+
+	Real radius = sphere.Radius * sphere.Radius;
+	vector.X() = sphere.Center.X() - box.Min.X();
+	vector.Y() = sphere.Center.Y() - box.Max.Y();
+	vector.Z() = sphere.Center.Z() - box.Max.Z();
+
+	if( vector.SquaredLength() > radius )
+		return CT_Intersects;
+
+	vector.X() = sphere.Center.X() - box.Max.X();
+	vector.Y() = sphere.Center.Y() - box.Max.Y();
+	vector.Z() = sphere.Center.Z() - box.Max.Z();
+
+	if( vector.SquaredLength() > radius )
+		return CT_Intersects;
+
+	vector.X() = sphere.Center.X() - box.Max.X();
+	vector.Y() = sphere.Center.Y() - box.Min.Y();
+	vector.Z() = sphere.Center.Z() - box.Max.Z();
+
+	if( vector.SquaredLength() > radius )
+		return CT_Intersects;
+
+	vector.X() = sphere.Center.X() - box.Min.X();
+	vector.Y() = sphere.Center.Y() - box.Min.Y();
+	vector.Z() = sphere.Center.Z() - box.Max.Z();
+
+	if( vector.SquaredLength() > radius )
+		return CT_Intersects;
+
+	vector.X() = sphere.Center.X() - box.Min.X();
+	vector.Y() = sphere.Center.Y() - box.Max.Y();
+	vector.Z() = sphere.Center.Z() - box.Min.Z();
+
+	if( vector.SquaredLength() > radius )
+		return CT_Intersects;
+
+	vector.X() = sphere.Center.X() - box.Max.X();
+	vector.Y() = sphere.Center.Y() - box.Max.Y();
+	vector.Z() = sphere.Center.Z() - box.Min.Z();
+
+	if( vector.SquaredLength() > radius )
+		return CT_Intersects;
+
+	vector.X() = sphere.Center.X() - box.Max.X();
+	vector.Y() = sphere.Center.Y() - box.Min.Y();
+	vector.Z() = sphere.Center.Z() - box.Min.Z();
+
+	if( vector.SquaredLength() > radius )
+		return CT_Intersects;
+
+	vector.X() = sphere.Center.X() - box.Min.X();
+	vector.Y() = sphere.Center.Y() - box.Min.Y();
+	vector.Z() = sphere.Center.Z() - box.Min.Z();
+
+	if( vector.SquaredLength() > radius )
+		return CT_Intersects;
+
+	return CT_Contains;
+}
+
+//template<typename Real>
+//bool Intersects(const BoundingSphere<Real>& sphere, Ray ray, Real& distance )
+//{
+//
+//}
+
+template<typename Real>
+ContainmentType Contains(const BoundingBox<Real>& box, const BoundingSphere<Real>& sphere)
+{
+	Real dist;
+	Vector<Real, 3> clamped = VectorClamp( sphere.Center, box.Min, box.Max);
+
+	Real x = sphere.Center.X() - clamped.X();
+	Real y = sphere.Center.Y() - clamped.Y();
+	Real z = sphere.Center.Z() - clamped.Z();
+
+	dist = (x * x) + (y * y) + (z * z);
+	Real radius = sphere.Radius;
+
+	if( dist > (radius * radius) )
+		return CT_Disjoint;
+
+	if( box.Min.X() + radius <= sphere.Center.X() && sphere.Center.X() <= box.Max.X() - radius && 
+		box.Max.X() - box.Min.X() > radius && box.Min.Y() + radius <= sphere.Center.Y() && 
+		sphere.Center.Y() <= box.Max.Y() - radius && box.Max.Y() - box.Min.Y() > radius && 
+		box.Min.Z() + radius <= sphere.Center.Z() && sphere.Center.Z() <= box.Max.Z() - radius &&
+		box.Max.X() - box.Min.X() > radius )
+		return CT_Contains;
+
+	return CT_Intersects;
+}
+
+template<typename Real>
+ContainmentType Contains( const BoundingBox<Real>& box1, const BoundingBox<Real>& box2 )
+{
+	if( box1.Max.X() < box2.Min.X() || box1.Min.X() > box2.Max.X() )
+		return CT_Disjoint;
+
+	if( box1.Max.Y() < box2.Min.Y() || box1.Min.Y() > box2.Max.Y() )
+		return CT_Disjoint;
+
+	if( box1.Max.Z() < box2.Min.Z() || box1.Min.Z() > box2.Max.Z() )
+		return CT_Disjoint;
+
+	if( box1.Min.X() <= box2.Min.X() && box2.Max.X() <= box1.Max.X() && box1.Min.Y() <= box2.Min.Y() && 
+		box2.Max.Y() <= box1.Max.Y() && box1.Min.Z() <= box2.Min.Z() && box2.Max.Z() <= box1.Max.Z() )
+		return CT_Contains;
+
+	return CT_Intersects;
+}
+
+template<typename Real>
+ContainmentType Contains(const BoundingBox<Real>& box, const Vector<Real,3>& vector )
+{
+	if( box.Min.X() <= vector.X() && vector.X() <= box.Max.X() && box.Min.Y() <= vector.Y() && 
+		vector.Y() <= box.Max.Y() && box.Min.Z() <= vector.Z() && vector.Z() <= box.Max.Z() )
+		return CT_Contains;
+
+	return CT_Disjoint;
+}
+
+template<typename Real>
+BoundingBox<Real> FromSphere( const BoundingSphere<Real>& sphere )
+{
+	BoundingBox box;
+	box.Min = Vector<Real, 3>( sphere.Center.X() - sphere.Radius, sphere.Center.Y() - sphere.Radius, sphere.Center.Z() - sphere.Radius );
+	box.Max = Vector<Real, 3>( sphere.Center.X() + sphere.Radius, sphere.Center.Y() + sphere.Radius, sphere.Center.Z() + sphere.Radius );
+	return box;
+}
+
+template<typename Real>
+BoundingBox<Real> Merge( const BoundingBox<Real>& box1, const BoundingBox<Real>& box2 )
+{
+	BoundingBox<Real> box;
+	VectorMinimize( box1.Min, box2.Min, box.Min );
+	VectorMaximize( box1.Max, box2.Max, box.Max );
+	return box;
+}
+
+template<typename Real>
+bool Intersects( const BoundingBox<Real>& box1, const BoundingBox<Real>& box2 )
+{
+	if ( box1.Max.X() < box2.Min.X() || box1.Min.X() > box2.Max.X() )
+		return false;
+
+	if ( box1.Max.Y() < box2.Min.Y() || box1.Min.Y() > box2.Max.Y() )
+		return false;
+
+	return ( box1.Max.Z() >= box2.Min.Z() && box1.Min.Z() <= box2.Max.Z() );
+}
+
+template<typename Real>
+bool Intersects( const BoundingBox<Real>& box, const BoundingSphere<Real>& sphere )
+{
+	Real dist;
+	Vector<Real, 3> clamped = Vector3Clamp( sphere.Center, box.Min, box.Max);
+
+	Real x = sphere.Center.X() - clamped.X();
+	Real y = sphere.Center.Y() - clamped.Y();
+	Real z = sphere.Center.Z() - clamped.Z();
+
+	dist = (x * x) + (y * y) + (z * z);
+
+	return ( dist <= (sphere.Radius * sphere.Radius) );
+}
 
 
