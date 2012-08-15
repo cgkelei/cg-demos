@@ -3,7 +3,7 @@
 #include "OpenGLRenderView.h"
 #include "OpenGLTexture.h"
 #include "OpenGLEffect.h"
-#include "Core/Exception.h"
+#include <Core/Exception.h>
 
 
 namespace RcEngine

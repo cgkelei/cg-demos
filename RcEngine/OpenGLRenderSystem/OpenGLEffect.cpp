@@ -1,7 +1,7 @@
 #include "OpenGLEffect.h"
 #include "OpenGLEffectParameter.h"
 #include "OpenGLEffectTechnique.h"
-#include "Core/Exception.h"
+#include <Core/Exception.h>
 
 
 namespace RcEngine

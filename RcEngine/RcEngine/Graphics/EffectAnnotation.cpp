@@ -1,18 +1,17 @@
-#include "EffectAnnotation.h"
+#include <Graphics/EffectAnnotation.h>
 
-namespace RcEngine
+namespace RcEngine {
+namespace Render {
+
+EffectAnnotation::EffectAnnotation()
 {
-	namespace Render
-	{
-		EffectAnnotation::EffectAnnotation()
-		{
 
-		}
-
-		EffectAnnotation::~ EffectAnnotation()
-		{
-
-		}
-
-	}
 }
+
+EffectAnnotation::~ EffectAnnotation()
+{
+
+}
+
+} // Namespace Render
+} // Namespace RcEngine

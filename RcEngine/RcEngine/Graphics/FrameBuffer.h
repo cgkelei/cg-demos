@@ -1,11 +1,11 @@
 #ifndef FrameBuffer_h__
 #define FrameBuffer_h__
 
-#include "Core/Prerequisites.h"
-#include "Graphics/PixelFormat.h"
-#include "Graphics/GraphicsCommon.h"
-#include "Graphics/Viewport.h"
-#include "Math/ColorRGBA.h"
+#include <Core/Prerequisites.h>
+#include <Graphics/PixelFormat.h>
+#include <Graphics/GraphicsCommon.h>
+#include <Graphics/Viewport.h>
+#include <Math/ColorRGBA.h>
 
 namespace RcEngine {
 namespace Render {
@@ -70,7 +70,7 @@ protected:
 	bool mDirty;
 };
 
-} // RenderSystem
-} // RcEngine
+} // Namespace Render
+} // Namespace RcEngine
 
 #endif // FrameBuffer_h__

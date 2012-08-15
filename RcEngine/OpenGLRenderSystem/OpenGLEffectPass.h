@@ -2,7 +2,7 @@
 #define OpenGLEffectPass_h__
 
 #include "OpenGLPrerequisites.h"
-#include "Graphics/EffectPass.h"
+#include <Graphics/EffectPass.h>
 
 namespace RcEngine
 {

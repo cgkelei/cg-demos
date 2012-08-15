@@ -1,6 +1,6 @@
 #include "OpenGLEffectParameter.h"
 #include "OpenGLTexture.h"
-#include "Core/Exception.h"
+#include <Core/Exception.h>
 
 namespace RcEngine
 {

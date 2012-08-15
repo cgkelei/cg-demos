@@ -1,25 +1,24 @@
-#include "Graphics/Skeleton.h"
+#include <Graphics/Skeleton.h>
 
-namespace RcEngine
+namespace RcEngine {
+namespace Render {
+
+Joint::Joint()
 {
-	namespace Render
-	{
 
-		Joint::Joint()
-		{
-
-		}
-
-
-
-		Skeleton::Skeleton()
-		{
-
-		}
-
-		Skeleton::~Skeleton()
-		{
-
-		}
 }
+
+
+
+Skeleton::Skeleton()
+{
+
 }
+
+Skeleton::~Skeleton()
+{
+
+}
+
+} // Namespace Render
+} // Namespace RcEngine

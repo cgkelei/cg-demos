@@ -1,8 +1,9 @@
 #ifndef OpenGLRenderModule_h__
 #define OpenGLRenderModule_h__
 
-#include "Graphics/IRenderModule.h"
 #include "OpenGLPrerequisites.h"
+#include <Graphics/IRenderModule.h>
+
 
 namespace RcEngine
 {

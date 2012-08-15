@@ -2,8 +2,9 @@
 #ifndef OpenGLRenderDevice_h__
 #define OpenGLRenderDevice_h__
 
-#include "Graphics/RenderDevice.h"
 #include "OpenGLGraphicCommon.h"
+#include <Graphics/RenderDevice.h>
+
 
 namespace RcEngine
 {

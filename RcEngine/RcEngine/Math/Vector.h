@@ -89,7 +89,7 @@ template <class Real, int32_t Size>
 std::ostream& operator<< (std::ostream& rkOStr, const Vector<Real, Size>& rhs);
 
 
-#include "Vector.inl"
+#include <Math/Vector.inl>
 
 typedef Vector<float, 2> Vector2f;
 typedef Vector<double, 2> Vector2d;
@@ -99,9 +99,5 @@ typedef Vector<double,3> Vector3d;
 typedef Vector<double,4> Vector4d;
 
 } // Namespace Math
-
-
-
-
 } // Namespace RcEngine
 #endif

@@ -1,7 +1,7 @@
 #ifndef XMLDom_h__
 #define XMLDom_h__
 
-#include "Core/Prerequisites.h"
+#include <Core/Prerequisites.h>
 
 namespace RcEngine{
 namespace Core{

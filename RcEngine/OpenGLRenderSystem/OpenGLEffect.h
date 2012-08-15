@@ -2,7 +2,7 @@
 #define OpenGLEffect_h__
 
 #include "OpenGLPrerequisites.h"
-#include "Graphics/Effect.h"
+#include <Graphics/Effect.h>
 
 namespace RcEngine
 {

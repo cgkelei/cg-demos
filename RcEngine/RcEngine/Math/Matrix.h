@@ -1,7 +1,7 @@
 #ifndef _Matrix__H
 #define _Matrix__H
 
-#include "Vector.h"
+#include <Math/Vector.h>
 
 namespace RcEngine{
 namespace Math {
@@ -98,14 +98,12 @@ private:
 		
 };
 	
-#include "Matrix.inl"
+#include <Math/Matrix.inl>
 
 typedef Matrix4<float> Matrix4f;
 typedef Matrix4<double> Matrix4d;
 
 } // Namespace Math
-
-
 } // Namespace RcEngine
 
 #endif // _Matrix__H

@@ -1,6 +1,6 @@
-#include "Graphics/Camera.h"
-#include "Core/Context.h"
-#include "Graphics/RenderDevice.h"
+#include <Graphics/Camera.h>
+#include <Core/Context.h>
+#include <Graphics/RenderDevice.h>
 
 namespace RcEngine {
 namespace Render {
@@ -48,5 +48,5 @@ const Matrix4f& Camera::GetProjectionMatrix() const
 	return mProjectionMatrix;
 }
 
-} // RenderSystem
-} // RcEngine
+} // Namespace Render
+} // Namespace RcEngine

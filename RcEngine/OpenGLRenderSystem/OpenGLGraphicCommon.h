@@ -2,8 +2,8 @@
 #define OpenGLGraphicCommon_h__
 
 #include "OpenGLPrerequisites.h"
-#include "Graphics/GraphicsCommon.h"
-#include "Graphics/PixelFormat.h"
+#include <Graphics/GraphicsCommon.h>
+#include <Graphics/PixelFormat.h>
 
 namespace RcEngine
 {

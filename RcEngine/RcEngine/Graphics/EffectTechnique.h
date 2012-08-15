@@ -1,40 +1,40 @@
 #ifndef EffectTechnique_h__
 #define EffectTechnique_h__
 
-#include "Core/Prerequisites.h"
-#include "Graphics/EffectPass.h"
-#include "Graphics/EffectAnnotation.h"
+#include <Core/Prerequisites.h>
+#include <Graphics/EffectPass.h>
+#include <Graphics/EffectAnnotation.h>
 
 
-namespace RcEngine
+namespace RcEngine {
+namespace Render {
+
+class _ApiExport EffectTechnique
 {
-	namespace Render
-	{
-		class _ApiExport EffectTechnique
-		{
-		public:
-			EffectTechnique();
-			virtual ~EffectTechnique();
+public:
+	EffectTechnique();
+	virtual ~EffectTechnique();
 
-			const String& GetTechniqueName() const				{ return nName; }
+	const String& GetTechniqueName() const				{ return nName; }
 
 
-			EffectPassList& GetPasses();
-			EffectPass*	GetPassByName(const String& name);
-			EffectPass* GetPassByIndex(uint32_t index);
+	EffectPassList& GetPasses();
+	EffectPass*	GetPassByName(const String& name);
+	EffectPass* GetPassByIndex(uint32_t index);
 
-			EffectAnnotationList& GetAnnotations();
-			EffectAnnotation* GetAnnotationByName(const String& name);
-			EffectAnnotation* GetAnnotationByIndex(uint32_t index);
-			
+	EffectAnnotationList& GetAnnotations();
+	EffectAnnotation* GetAnnotationByName(const String& name);
+	EffectAnnotation* GetAnnotationByIndex(uint32_t index);
 
-		protected:
-			String nName;
-			bool mValid;
-			EffectPassList mPasses;
-			EffectAnnotationList mAnnotations;
-		};
-	}
-}
+
+protected:
+	String nName;
+	bool mValid;
+	EffectPassList mPasses;
+	EffectAnnotationList mAnnotations;
+};
+
+} // Namespace Render
+} // Namespace RcEngine
 
 #endif // EffectTechnique_h__

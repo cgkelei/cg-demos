@@ -1,5 +1,5 @@
-#include "VertexElement.h"
-#include "Core/Exception.h"
+#include <Graphics/VertexElement.h>
+#include <Core/Exception.h>
 
 namespace RcEngine {
 namespace Render {
@@ -101,5 +101,5 @@ bool VertexElement::IsNormalized( VertexElementFormat etype )
 }
 
 
-} // RenderSystem
-} // RcEngine
+} // Namespace Render
+} // Namespace RcEngine

@@ -1,7 +1,7 @@
 #ifndef EffectAnnotation_h__
 #define EffectAnnotation_h__
 
-#include "Core/Prerequisites.h"
+#include <Core/Prerequisites.h>
 
 namespace RcEngine
 {

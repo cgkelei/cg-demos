@@ -1,4 +1,4 @@
-#include "Texture.h"
+#include <Graphics/Texture.h>
 
 namespace RcEngine {
 namespace Render {
@@ -14,5 +14,5 @@ Texture::~Texture()
 
 }
 
-} // RenderSystem
-} // RcEngine
+} // Namespace Render
+} // Namespace RcEngine

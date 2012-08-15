@@ -1,5 +1,5 @@
-#include "RenderView.h"
-#include "FrameBuffer.h"
+#include <Graphics/RenderView.h>
+#include <Graphics/FrameBuffer.h>
 
 namespace RcEngine {
 namespace Render {
@@ -28,5 +28,5 @@ void RenderView::OnUnbind( FrameBuffer* fb, uint32_t att )
 }
 
 
-} // RenderSystem
-} // RcEngine
+} // Namespace Render
+} // Namespace RcEngine

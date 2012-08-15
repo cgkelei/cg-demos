@@ -1,38 +1,37 @@
 #ifndef EffectPass_h__
 #define EffectPass_h__
 
-#include "Core/Prerequisites.h"
-#include "Graphics/EffectAnnotation.h"
+#include <Core/Prerequisites.h>
+#include <Graphics/EffectAnnotation.h>
 
-namespace RcEngine
+namespace RcEngine {
+namespace Render {
+
+class _ApiExport EffectPass
 {
-	namespace Render
-	{
-		class _ApiExport EffectPass
-		{
-		public:
-			EffectPass();
-			virtual ~EffectPass();
+public:
+	EffectPass();
+	virtual ~EffectPass();
 
-			const String& GetPassName() const	{ return mName; }
-			
-			EffectAnnotationList& GetAnnotations();
-			EffectAnnotation* GetAnnotationByName(const String& name);
-			EffectAnnotation* GetAnnotationByIndex(uint32_t index);
+	const String& GetPassName() const	{ return mName; }
 
-			virtual bool BeginPass() = 0;
-			virtual void EndPass() = 0;
+	EffectAnnotationList& GetAnnotations();
+	EffectAnnotation* GetAnnotationByName(const String& name);
+	EffectAnnotation* GetAnnotationByIndex(uint32_t index);
 
-		protected:
-			String mName;
-			bool mValid;
-			EffectAnnotationList mAnnotations;
+	virtual bool BeginPass() = 0;
+	virtual void EndPass() = 0;
 
-		};
+protected:
+	String mName;
+	bool mValid;
+	EffectAnnotationList mAnnotations;
 
-		typedef vector<EffectPass*> EffectPassList;
+};
 
-	}
-}
+typedef vector<EffectPass*> EffectPassList;
+
+} // Namespace Render
+} // Namespace RcEngine
 
 #endif // EffectPass_h__

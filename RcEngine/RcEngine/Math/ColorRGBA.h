@@ -1,7 +1,7 @@
 #ifndef _ColorValue__H
 #define _ColorValue__H
 
-#include "Core/Prerequisites.h"
+#include <Core/Prerequisites.h>
 
 namespace RcEngine{
 namespace Math {
@@ -63,7 +63,7 @@ private:
 
 ColorRGBA operator* (float fScalar, const ColorRGBA& rhs);
 
-#include "ColorRGBA.inl"
+#include <Math/ColorRGBA.inl>
 
 } // Namespace Math
 } // Namespace RcEngine

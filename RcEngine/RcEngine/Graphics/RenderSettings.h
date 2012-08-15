@@ -1,7 +1,7 @@
 #ifndef RenderSettings_h__
 #define RenderSettings_h__
 
-#include "PixelFormat.h"
+#include <Graphics/PixelFormat.h>
 
 namespace RcEngine {
 namespace Render {
@@ -16,8 +16,8 @@ struct RenderSettings
 	uint32_t SampleCount, SampleQuality;
 };
 
-} // RenderSystem
-} // RcEngine
+} // Namespace Render
+} // Namespace RcEngine
 
 
 #endif // RenderSettings_h__
