@@ -24,6 +24,16 @@ Quaternion<Real>::Quaternion( const Quaternion<Real>& rhs )
 }
 
 template<typename Real>
+void Quaternion<Real>::MakeIdentity()
+{
+	mTuple[0] = Real(1);
+	mTuple[1] = Real(0);
+	mTuple[2] = Real(0);
+	mTuple[3] = Real(0);
+}
+
+
+template<typename Real>
 Real Quaternion<Real>::operator[]( int i ) const
 {
 	return mTuple[i];
@@ -106,7 +116,7 @@ Quaternion<Real>& Quaternion<Real>::operator-=( const Quaternion<Real>& rhs )
 template<typename Real>
 Quaternion<Real>& Quaternion<Real>::operator*=( const Quaternion<Real>& rhs )
 {
-	*this = QuaternionMultiply(*this, rhs);
+	*this = (*this) * rhs;
 	return *this;
 }
 
@@ -166,7 +176,11 @@ Quaternion<Real> Quaternion<Real>::operator-( const Quaternion<Real>& rhs ) cons
 template<typename Real>
 Quaternion<Real> Quaternion<Real>::operator*( const Quaternion<Real>& rhs ) const
 {
-	return QuaternionMultiply(*this, rhs);
+	return Quaternion<Real>(
+		mTuple[0]*rhs.mTuple[0] - mTuple[1]*rhs.mTuple[1] - mTuple[2]*rhs[2] - mTuple[3]*rhs.mTuple[3],
+		mTuple[0]*rhs.mTuple[1] + mTuple[1]*rhs.mTuple[0] + mTuple[2]*rhs[3] - mTuple[3]*rhs.mTuple[2],
+		mTuple[0]*rhs.mTuple[2] + mTuple[2]*rhs.mTuple[0] + mTuple[3]*rhs[1] - mTuple[1]*rhs.mTuple[3],
+		mTuple[0]*rhs.mTuple[3] + mTuple[3]*rhs.mTuple[0] + mTuple[1]*rhs[2] - mTuple[2]*rhs.mTuple[1] );
 }
 
 template<typename Real>

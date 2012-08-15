@@ -12,6 +12,8 @@ public:
 	Quaternion(Real w, Real x, Real y, Real z);
 	Quaternion(const Quaternion& rhs);
 
+	void MakeIdentity();
+
 	inline Real operator[] (int i) const;
 	inline Real& operator[] (int i);
 	inline Real W () const;

@@ -50,7 +50,7 @@ typedef fastdelegate::FastDelegate0<> EventHandler;
 typedef fastdelegate::FastDelegate1<bool*, void> CancellableEventHandler;
 typedef fastdelegate::FastDelegate3<uint32_t, bool, float> InputActionHandler;
 typedef fastdelegate::FastDelegate3<uint32_t, bool, float> InputStateHandler;
-typedef fastdelegate::FastDelegate3<uint32_t, float, float> InputRangeHandler;
+typedef fastdelegate::FastDelegate3<uint32_t, int32_t, float> InputRangeHandler;
 
 //------------------------------------------------------------------------------
 // Dll Define
