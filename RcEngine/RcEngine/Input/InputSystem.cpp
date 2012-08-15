@@ -140,7 +140,7 @@ void InputSystem::DispatchRanges(float delata) const
 		{
 			if (!foundHandler->second.empty())
 			{
-				foundHandler->second(iter->second, (float)value, delata);
+				foundHandler->second(iter->second, value, delata);
 			}
 		}
 	}

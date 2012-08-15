@@ -43,10 +43,12 @@ namespace Math {
 	VectorClamp(const Vector<Real,Size>& value, const Vector<Real,Size>& min, const Vector<Real,Size>& max);
 
 	template< typename Real, int32_t Size >
-	Vector<Real,Size> VectorMinimize(const Vector<Real,Size>& left, const Vector<Real,Size>& right);
+	Vector<Real,Size> 
+	VectorMinimize(const Vector<Real,Size>& left, const Vector<Real,Size>& right);
 
 	template< typename Real, int32_t Size >
-	Vector<Real,Size> VectorMaximize(const Vector<Real,Size>& left, const Vector<Real,Size>& right);
+	Vector<Real,Size> 
+	VectorMaximize(const Vector<Real,Size>& left, const Vector<Real,Size>& right);
 
 	template<typename Real>
 	inline  Vector<Real, 3> 

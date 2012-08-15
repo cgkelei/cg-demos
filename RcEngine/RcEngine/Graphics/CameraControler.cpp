@@ -12,6 +12,9 @@ namespace RcEngine
 		using namespace Math;
 		using namespace Input;
 
+		/************************************************************************/
+		/*                                                                      */
+		/************************************************************************/
 		CameraControler::CameraControler()
 			: mAttachedCamera(nullptr)
 		{
@@ -33,7 +36,9 @@ namespace RcEngine
 			mAttachedCamera = nullptr;
 		}
 
-
+		/************************************************************************/
+		/*                                                                      */
+		/************************************************************************/
 		FPSCameraControler::FPSCameraControler()
 		{
 			InputState states[] =
@@ -82,6 +87,7 @@ namespace RcEngine
 			CameraControler::AttachCamera(camera);		
 
 			const Matrix4f& viewMatrix = camera->GetViewMatrix();
+			
 			/*Matrix4f invViewMatrix = MatrixInverse(viewMatrix);	
 
 			Vector4f camPos = invViewMatrix.GetRow(3);
@@ -135,7 +141,7 @@ namespace RcEngine
 			}
 		}
 
-		void FPSCameraControler::HandleRoatate( uint32_t action, float value, float dt)
+		void FPSCameraControler::HandleRoatate( uint32_t action, int32_t value, float dt)
 		{
 			if (action == TurnLeftRight)
 			{
@@ -169,5 +175,143 @@ namespace RcEngine
 			mAttachedCamera->SetViewParams(mAttachedCamera->GetPosition(), mAttachedCamera->GetPosition() + vWorldAhead, vWorldUp);
 		}
 
+		/************************************************************************/
+		/*                                                                      */
+		/************************************************************************/
+		ArcBall::ArcBall()
+		{
+
+		}
+
+		ArcBall::~ArcBall()
+		{
+
+		}
+
+		void ArcBall::Reset()
+		{
+			mQuatDown.MakeIdentity();
+			mDrag = false;
+			mRadius = 1.0f;
+		}
+
+		void ArcBall::SetOffset( int32_t offX, int32_t offY )
+		{
+			mOffset.X() = offX;
+			mOffset.Y() = offY;
+		}
+
+		Vector3f ArcBall::ScreenToSphere( float screenX, float screenY )
+		{
+			// Scale to screen
+			float x = -( screenX - mOffset.X() - mWindowWidth / 2 ) / ( mRadius * mWindowWidth / 2 );
+			float y = ( screenY - mOffset.Y() - mWindowHeight / 2 ) / ( mRadius * mWindowHeight / 2 );
+
+			float z = 0.0f;
+			float mag = x * x + y * y;
+
+			if( mag > 1.0f )
+			{
+				float scale = 1.0f / sqrtf( mag );
+				x *= scale;
+				y *= scale;
+			}
+			else
+			{
+				z = sqrtf( 1.0f - mag );
+			}
+
+			return Vector3f( x, y, z );
+		}
+
+		void ArcBall::OnMove( int32_t mouseX, int32_t mouseY )
+		{
+			if( mDrag )
+			{
+				mCurrentPt = ScreenToSphere((float)mouseX, (float)mouseY);
+
+				// Calculate quaternion form start and end point
+				Vector3f part = Cross(mDownPt, mCurrentPt);
+				float dot = Dot(mDownPt, mCurrentPt);
+
+				mQuatNow = mQuatDown * Quaternionf(dot, part.X(), part.Y(), part.Z());
+			}
+		}
+
+		void ArcBall::OnBegin( int32_t mouseX, int32_t mouseY )
+		{
+			// Only enter the drag state if the click falls inside the click rectangle.
+			if( mouseX >= mOffset.X() && mouseX < mOffset.X() + mWindowWidth &&
+				mouseY >= mOffset.Y() && mouseY < mOffset.Y() + mWindowHeight )
+			{
+				mDrag = true;
+				mQuatDown = mQuatNow;
+				mDownPt = ScreenToSphere((float)mouseX, (float)mouseY);
+			}
+		}
+
+		void ArcBall::OnEnd()
+		{
+			mDrag = false;
+		}
+
+		
+
+		
+		/************************************************************************/
+		/*                                                                      */
+		/************************************************************************/
+		ModelViewerCameraControler::ModelViewerCameraControler()
+		{
+			InputState actions[] = 
+			{
+				InputState(MS_LeftButton, CameraView),
+				InputState(MS_RightButton, ModelView)
+			};
+		}
+
+		ModelViewerCameraControler::~ModelViewerCameraControler()
+		{
+
+		}
+
+		void ModelViewerCameraControler::AttachCamera( Camera* camera )
+		{
+			CameraControler::AttachCamera(camera);
+
+
+		}
+
+		void ModelViewerCameraControler::HandleMouse( uint32_t action, bool value, float delta )
+		{
+			ArcBall* updateBall = nullptr;
+			
+			if(action == CameraView)
+			{
+				updateBall = &mCameraArcBall;
+			}
+			else if (action == ModelView)
+			{
+				updateBall = &mModelArcBall;
+			}
+
+			// Get mouse device to fetch position
+			Mouse* mouse =	Core::Context::GetSingleton().GetInputSystem().GetMouse();
+			if (value == true)
+			{
+				if (updateBall->IsDragging() == false)
+				{
+					updateBall->OnBegin(mouse->X(), mouse->Y());
+				}
+				else
+				{
+					updateBall->OnMove(mouse->X(), mouse->Y());
+				}
+			}
+			else
+			{
+				updateBall->OnEnd();
+			}
+		}	
 	}
 }
