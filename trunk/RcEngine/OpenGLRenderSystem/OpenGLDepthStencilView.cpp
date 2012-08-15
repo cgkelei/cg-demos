@@ -2,8 +2,8 @@
 #include "OpenGLRenderDevice.h"
 #include "OpenGLFrameBuffer.h"
 #include "OpenGLTexture.h"
-#include "Core/Context.h"
-#include "Core/Exception.h"
+#include <Core/Context.h>
+#include <Core/Exception.h>
 
 namespace RcEngine
 {

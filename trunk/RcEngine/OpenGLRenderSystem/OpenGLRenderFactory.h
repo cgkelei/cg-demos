@@ -3,8 +3,9 @@
 #define OpenGLRenderFactory_h__
 
 #include "OpenGLPrerequisites.h"
-#include "Graphics/RenderFactory.h"
 #include "OpenGLGraphicCommon.h"
+#include <Graphics/RenderFactory.h>
+
 
 namespace RcEngine
 {

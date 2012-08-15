@@ -1,8 +1,8 @@
-#include "Graphics/RenderFactory.h"
-#include "Graphics/Material.h"
-#include "Content/MaterialContentLoader.h"
-#include "IO/FileStream.h"
-#include "Core/Exception.h"
+#include <Graphics/RenderFactory.h>
+#include <Graphics/Material.h>
+#include <Graphics/VertexDeclaration.h>
+#include <IO/FileStream.h>
+#include <Core/Exception.h>
 
 namespace RcEngine {
 namespace Render {
@@ -45,5 +45,5 @@ shared_ptr<VertexDeclaration> RenderFactory::CreateVertexDeclaration( const std:
 }
 
 
-} // RenderSystem
-} // RcEngine
+} // Namespace Render
+} // Namespace RcEngine

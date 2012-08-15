@@ -1,5 +1,5 @@
 #include "OpenGLGraphicCommon.h"
-#include "Core/Exception.h"
+#include <Core/Exception.h>
 
 namespace RcEngine
 {

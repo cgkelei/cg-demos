@@ -4,7 +4,7 @@
 
 //  [8/24/2011 hustruan]
 
-#include "MathUtil.h"
+#include <Math/MathUtil.h>
 
 namespace RcEngine{
 namespace Math {
@@ -51,7 +51,7 @@ public:
 	Real Constant;
 };
 
-#include "Plane.inl"
+#include <Math/Plane.inl>
 
 typedef Plane3<float> Plane3f;
 

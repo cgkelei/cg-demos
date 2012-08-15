@@ -291,10 +291,8 @@ public:
 		
 };
 
-
-
-} // RenderSystem
-} // RcEngine
+} // Namespace Render
+} // Namespace RcEngine
 
 
 

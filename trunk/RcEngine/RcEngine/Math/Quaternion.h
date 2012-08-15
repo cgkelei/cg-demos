@@ -49,10 +49,7 @@ private:
 	Real mTuple[4];
 };
 
-
-
-
-#include "Quaternion.inl"
+#include <Math/Quaternion.inl>
 
 typedef Quaternion<float> Quaternionf;
 typedef Quaternion<double> Quaterniond;

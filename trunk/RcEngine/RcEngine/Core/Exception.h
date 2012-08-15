@@ -1,7 +1,7 @@
 #ifndef Exception_h__
 #define Exception_h__
 
-#include "Core/Prerequisites.h"
+#include <Core/Prerequisites.h>
 
 namespace RcEngine{
 namespace Core{

@@ -135,5 +135,5 @@ void VertexDeclaration::Sort( void )
 	std::sort(mElementList.begin(), mElementList.end(), VertexDeclaration::VertexElementLess);
 }
 
-} // RenderSystem
-} // RcEngine
+} // Namespace Render
+} // Namespace RcEngine

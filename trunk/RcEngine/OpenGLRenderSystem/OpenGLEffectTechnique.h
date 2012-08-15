@@ -2,7 +2,7 @@
 #define OpenGLEffectTechnique_h__
 
 #include "OpenGLPrerequisites.h"
-#include "Graphics/EffectTechnique.h"
+#include <Graphics/EffectTechnique.h>
 
 namespace RcEngine
 {

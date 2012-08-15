@@ -1,5 +1,4 @@
-#include "Timer.h"
-#include "Prerequisites.h"
+#include <Core/Timer.h>
 
 namespace RcEngine {
 

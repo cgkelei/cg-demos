@@ -3,7 +3,7 @@
 
 #include "OpenGLPrerequisites.h"
 #include "OpenGLGraphicCommon.h"
-#include "Graphics/EffectParameter.h"
+#include <Graphics/EffectParameter.h>
 
 namespace RcEngine
 {

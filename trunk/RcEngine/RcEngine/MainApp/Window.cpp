@@ -1,10 +1,9 @@
-#include "Window.h"
+#include <MainApp/Window.h>
 #include <Core/Utility.h>
 
 namespace RcEngine {
 
 Window* Window::msWindow = 0;
-
 
 LRESULT CALLBACK Window::WndProcStatic( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
@@ -258,7 +257,5 @@ void Window::UpdateWindowSize()
 	mWidth = rect.right - rect.left;
 	mHeight = rect.bottom - rect.top;
 }
-
-
 
 } // Namespace RcEngine

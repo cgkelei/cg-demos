@@ -1,60 +1,62 @@
-#include "Graphics/RenderDevice.h"
-#include "Graphics/GraphicsCommon.h"
-#include "Graphics/Camera.h"
-#include "Graphics/RenderOperation.h"
-#include "Core/Context.h"
+#include <Graphics/RenderDevice.h>
+#include <Graphics/Camera.h>
+#include <Graphics/RenderOperation.h>
+#include <Graphics/VertexDeclaration.h>
+#include <Graphics/BlendState.h>
+#include <Graphics/DepthStencilState.h>
+#include <Graphics/SamplerState.h>
+#include <Graphics/RasterizerState.h>
+#include <Graphics/FrameBuffer.h>
+#include <Core/Context.h>
 
 namespace RcEngine {
-	namespace Render {
+namespace Render {
 
-		RenderDevice::RenderDevice(void)
-			: mRenderFactory(0), mCurrentFrameBuffer(0), mScreenFrameBuffer(0)
-		{
-			Core::Context::GetSingleton().SetRenderDevice(this);
+	RenderDevice::RenderDevice(void)
+		: mRenderFactory(0), mCurrentFrameBuffer(0), mScreenFrameBuffer(0)
+	{
+		Core::Context::GetSingleton().SetRenderDevice(this);
+	}
+
+	RenderDevice::~RenderDevice(void)
+	{
+	}
+
+	void RenderDevice::Resize( uint32_t width, uint32_t height )
+	{
+		mScreenFrameBuffer->Resize(width, height);
+
+		Camera* cam = GetCurrentFrameBuffer()->GetCamera();
+		cam->SetProjectionParams(cam->GetFov(), (float)width/(float)height, cam->GetNearPlane(), cam->GetFarPlane());
+	}
+
+	void RenderDevice::BindFrameBuffer( FrameBuffer* fb )
+	{
+		assert(fb != NULL);
+
+		if( mCurrentFrameBuffer && (fb != mCurrentFrameBuffer) )
+		{	
+			mCurrentFrameBuffer->OnUnbind();
 		}
 
-		RenderDevice::~RenderDevice(void)
+		mCurrentFrameBuffer = fb; 
+
+		if(mCurrentFrameBuffer->IsDirty())
 		{
+			mCurrentFrameBuffer->OnBind();
+			DoBindFrameBuffer(mCurrentFrameBuffer);
 		}
+	}
 
-		void RenderDevice::Resize( uint32_t width, uint32_t height )
-		{
-			mScreenFrameBuffer->Resize(width, height);
+	RenderFactory* RenderDevice::GetRenderFactory() const
+	{
+		return mRenderFactory;
+	}
 
-			Camera* cam = GetCurrentFrameBuffer()->GetCamera();
-			cam->SetProjectionParams(cam->GetFov(), (float)width/(float)height, cam->GetNearPlane(), cam->GetFarPlane());
-		}
+	void RenderDevice::Render( EffectTechnique& tech, RenderOperation& op )
+	{
+		DoRender(tech, op);
+	}
 
-		void RenderDevice::BindFrameBuffer( FrameBuffer* fb )
-		{
-			assert(fb != NULL);
-
-			if( mCurrentFrameBuffer && (fb != mCurrentFrameBuffer) )
-			{	
-				mCurrentFrameBuffer->OnUnbind();
-			}
-
-			mCurrentFrameBuffer = fb; 
-
-			if(mCurrentFrameBuffer->IsDirty())
-			{
-				mCurrentFrameBuffer->OnBind();
-				DoBindFrameBuffer(mCurrentFrameBuffer);
-			}
-		}
-
-		RenderFactory* RenderDevice::GetRenderFactory() const
-		{
-			return mRenderFactory;
-		}
-
-		void RenderDevice::Render( EffectTechnique& tech, RenderOperation& op )
-		{
-			DoRender(tech, op);
-		}
-
-		
-
-
-	} // RenderSystem
-} // RcEngine
+} // Namespace Render
+} // Namespace RcEngine

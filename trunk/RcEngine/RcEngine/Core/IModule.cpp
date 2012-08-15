@@ -1,18 +1,18 @@
-#include "IModule.h"
-namespace RcEngine
+#include <Core/IModule.h>
+
+namespace RcEngine {
+namespace Core {
+
+IModule::IModule( void )
 {
-	namespace Core
-	{
-		IModule::IModule( void )
-		{
 
-		}
-
-
-		IModule::~IModule( void )
-		{
-
-		}
-
-	}
 }
+
+
+IModule::~IModule( void )
+{
+
+}
+
+} // Namespace Core
+} // Namespace RcEngine

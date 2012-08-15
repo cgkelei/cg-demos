@@ -2,28 +2,28 @@
 #ifndef _Viewport__H
 #define _Viewport__H
 
-#include "Core/Prerequisites.h"
+#include <Core/Prerequisites.h>
 
 namespace RcEngine {
-	namespace Render {
+namespace Render {
 
-		class  _ApiExport Viewport
-		{
-		public:
-			Viewport();
-			Viewport(uint32_t left, uint32_t top, uint32_t width, uint32_t height);
-			~Viewport();
+class  _ApiExport Viewport
+{
+public:
+	Viewport();
+	Viewport(uint32_t left, uint32_t top, uint32_t width, uint32_t height);
+	~Viewport();
 
-			bool operator == (const Viewport& rhs);
+	bool operator == (const Viewport& rhs);
 
-		public:
+public:
 
-			uint32_t Left, Top, Width, Height;
-			Camera* AttachCamera;
+	uint32_t Left, Top, Width, Height;
+	Camera* AttachCamera;
 
-		};
+};
 
-	} // RenderSystem
-} // RcEngine
+} // Namespace Render
+} // Namespace RcEngine
 
 #endif // _Viewport__H

@@ -8,11 +8,18 @@
 #include "OpenGLEffect.h"
 #include "OpenGLEffectTechnique.h"
 #include "OpenGLEffectPass.h"
-#include "Graphics/Material.h"
-#include "Graphics/Viewport.h"
-#include "Graphics/RenderJob.h"
-#include "Core/Exception.h"
-#include "Core/Context.h"
+#include <Graphics/Material.h>
+#include <Graphics/Viewport.h>
+#include <Graphics/RenderJob.h>
+#include <Graphics/BlendState.h>
+#include <Graphics/RasterizerState.h>
+#include <Graphics/SamplerState.h>
+#include <Graphics/DepthStencilState.h>
+#include <Graphics/BlendState.h>
+#include <Graphics/RenderOperation.h>
+#include <Core/Exception.h>
+#include <Core/Context.h>
+#include <Math/MathUtil.h>
 
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 

@@ -2,7 +2,7 @@
 #define OpenGLFrameBuffer_h__
 
 #include "OpenGLPrerequisites.h"
-#include "Graphics/FrameBuffer.h"
+#include <Graphics/FrameBuffer.h>
 
 namespace RcEngine
 {

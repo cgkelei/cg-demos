@@ -4,7 +4,7 @@
 
 #include "OpenGLPrerequisites.h"
 #include "OpenGLGraphicCommon.h"
-#include "Graphics/GraphicBuffer.h"
+#include <Graphics/GraphicBuffer.h>
 
 namespace RcEngine
 {

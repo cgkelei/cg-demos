@@ -1,8 +1,8 @@
 #ifndef Camera_h__
 #define Camera_h__
 
-#include "Core/Prerequisites.h"
-#include "Math/MathUtil.h"
+#include <Core/Prerequisites.h>
+#include <Math/MathUtil.h>
 
 namespace RcEngine {
 namespace Render {
@@ -45,7 +45,7 @@ private:
 	Matrix4f	mProjectionMatrix;
 };
 
-} // RenderSystem
-} // RcEngine
+} // Namespace Render
+} // Namespace RcEngine
 
 #endif // Camera_h__

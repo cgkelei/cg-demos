@@ -13,7 +13,7 @@ namespace Math {
 
 
 //----------------------------------------------------------------------------
-	ColorRGBA::ColorRGBA ()
+ColorRGBA::ColorRGBA ()
 {
 	mTuple[0] = 0.0f;
 	mTuple[1] = 0.0f;

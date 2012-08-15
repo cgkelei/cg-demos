@@ -1,19 +1,17 @@
-#include "Graphics/IRenderModule.h"
+#include <Graphics/IRenderModule.h>
 
-namespace RcEngine
+namespace RcEngine {
+namespace Render {
+
+IRenderModule::IRenderModule()
 {
-	namespace Render
-	{
-		IRenderModule::IRenderModule()
-		{
 
-		}
-
-		IRenderModule::~IRenderModule()
-		{
-
-		}
-
-	}
 }
 
+IRenderModule::~IRenderModule()
+{
+
+}
+
+} // Namespace Render
+} // Namespace RcEngine

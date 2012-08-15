@@ -1,7 +1,7 @@
-#include "Core/XMLDom.h"
-#include "Core/Utility.h"
-#include "Core/Exception.h"
-#include "IO/Stream.h"
+#include <Core/XMLDom.h>
+#include <Core/Utility.h>
+#include <Core/Exception.h>
+#include <IO/Stream.h>
 
 namespace RcEngine{
 namespace Core{

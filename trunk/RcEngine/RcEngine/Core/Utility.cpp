@@ -1,4 +1,4 @@
-#include "Utility.h"
+#include <Core/Utility.h>
 
 std::wstring& Convert( std::wstring& dest, std::string const & src )
 {

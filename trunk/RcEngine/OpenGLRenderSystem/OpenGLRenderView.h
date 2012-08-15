@@ -3,7 +3,7 @@
 
 #include "OpenGLPrerequisites.h"
 #include "OpenGLGraphicCommon.h"
-#include "Graphics/RenderView.h"
+#include <Graphics/RenderView.h>
 
 
 namespace RcEngine

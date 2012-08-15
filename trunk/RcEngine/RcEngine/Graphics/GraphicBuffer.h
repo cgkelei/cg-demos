@@ -2,7 +2,7 @@
 #ifndef GraphicBuffer_h__
 #define GraphicBuffer_h__
 
-#include "GraphicsCommon.h"
+#include <Graphics/GraphicsCommon.h>
 
 namespace RcEngine {
 namespace Render {
@@ -26,6 +26,7 @@ protected:
 	uint32_t mSizeInBytes;
 };
 
-} // RenderSystem
-} // RcEngine
+} // Namespace Render
+} // Namespace RcEngine
+
 #endif // GraphicBuffer_h__

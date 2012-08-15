@@ -3,7 +3,7 @@
 
 #include "OpenGLPrerequisites.h"
 #include "OpenGLGraphicCommon.h"
-#include "Graphics/Texture.h"
+#include <Graphics/Texture.h>
 
 namespace RcEngine
 {

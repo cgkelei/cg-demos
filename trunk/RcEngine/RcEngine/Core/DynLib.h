@@ -1,61 +1,61 @@
 #ifndef DynLib_h__
 #define DynLib_h__
 
-#include "Core/Prerequisites.h"
+#include <Core/Prerequisites.h>
 
-namespace RcEngine
+namespace RcEngine {
+namespace Core {
+
+typedef void (*DLL_START_PLUGIN)(IModule** pModule);
+
+enum ModuleType
 {
-	namespace Core
-	{
-		typedef void (*DLL_START_PLUGIN)(IModule** pModule);
+	MT_Unknown = -1,
+	MT_Render_OpengGL = 0,
+	MT_Render_D3D10,
+	MT_Input_OIS,
+	MT_Count
+};
 
-		enum ModuleType
-		{
-			MT_Unknown = -1,
-			MT_Render_OpengGL = 0,
-			MT_Render_D3D10,
-			MT_Input_OIS,
-			MT_Count
-		};
-
-		//! Module names for plugin import
+//! Module names for plugin import
 #ifdef WIN32
 #  ifdef _DEBUG
-		const std::string ModuleNames[MT_Count] =
-		{
-			"OpenGLRenderSystem_d",
-			"D3D10RenderSystem_d",
-			"InputSystem_d"
-		};
+const std::string ModuleNames[MT_Count] =
+{
+	"OpenGLRenderSystem_d",
+	"D3D10RenderSystem_d",
+	"InputSystem_d"
+};
 #endif
 #else
-		const std::string ModuleNames[MT_Count] =
-		{
-			"OpenGLRenderSystem",
-			"D3D10RenderSystem",
-			"InputSystem"
-		};
+const std::string ModuleNames[MT_Count] =
+{
+	"OpenGLRenderSystem",
+	"D3D10RenderSystem",
+	"InputSystem"
+};
 #  endif
 
-		class DynLib
-		{
-		public:
-			DynLib(const std::string& name);
-			~DynLib();
+class DynLib
+{
+public:
+	DynLib(const std::string& name);
+	~DynLib();
 
-			void Load();
-			void Unload();
+	void Load();
+	void Unload();
 
-			const std::string& GetName() const { return mName; }
-			void* GetSymbol( const std::string& strName ) const throw();
+	const std::string& GetName() const { return mName; }
+	void* GetSymbol( const std::string& strName ) const throw();
 
-		private:
-			std::string mName;
-			HINSTANCE m_hInst;
+private:
+	std::string mName;
+	HINSTANCE m_hInst;
 
-			std::string DynLibError();
-		};
-	}
-}
+	std::string DynLibError();
+};
+
+} // Namespace Core
+} // Namespace RcEngine
 
 #endif // DynLib_h__
