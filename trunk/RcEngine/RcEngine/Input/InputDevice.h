@@ -36,8 +36,8 @@ enum KeyCode
 	KC_I                            = 0x17,
 	KC_O                            = 0x18,
 	KC_P                            = 0x19,
-	KC_LeftBracket          = 0x1A,
-	KC_ReftBracket          = 0x1B,
+	KC_LeftBracket					= 0x1A,
+	KC_ReftBracket				    = 0x1B,
 	KC_Enter                        = 0x1C,         // Enter on main keyboard
 	KC_LeftCtrl                     = 0x1D,
 	KC_A                            = 0x1E,
