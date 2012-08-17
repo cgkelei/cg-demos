@@ -75,9 +75,9 @@ void TestApp::Initialize()
 	//camera->SetViewParams(eye, target, up);
 	camera->SetProjectionParams(PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 1000.0f );
 
-	mCameraControler = new FPSCameraControler;
+	//mCameraControler = new FPSCameraControler;
+	mCameraControler = new ModelViewerCameraControler();
 	mCameraControler->AttachCamera(camera);
-
 }
 
 void TestApp::LoadContent()
@@ -124,37 +124,10 @@ void TestApp::Update( float deltaTime )
 	//degree += deltaTime * 90 ;
 
 	Quaternionf quat = QuaternionFromRotationYawPitchRoll( ToRadian(degree), 0.0f, 0.0f);
-	mDwarf->SetWorldMatrix( QuaternionToRotationMatrix(quat)* CreateScaling(10.0f, 10.0f, 10.0f) );
 
-	//mCameraControler.Update(deltaTime);
 
-	Camera* camera = RcEngine::Core::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
-	Vector3f pos = camera->GetPosition();
-	//std::cout << "Camera Pos " << "(" << pos.X() << "," << pos.Y() << ","<<pos.Z() << ")\n"; 
-	
-	Keyboard* keyboard = Context::GetSingleton().GetInputSystem().GetKeyboard();
-	Mouse* mouse =   Context::GetSingleton().GetInputSystem().GetMouse();
-
-	/*if(keyboard->KeyPress(KC_W))
-	{	
-		std::cout << "KC_W Pressed" << std::endl;
-	}
-
-	if(keyboard->KeyDown(KC_S))
-	{
-		std::cout << "KC_S Pressed" << std::endl;
-	}
-
-	if (mouse->ButtonDown(MS_LeftButton))
-	{
-		std::cout << "X=" << mouse->MouseMoveX() << " Y=" << mouse->MouseMoveY() << std::endl;
-	}*/
-
-	if (mouse->ButtonPress(MS_RightButton))
-	{
-		std::cout << "X=" << mouse->X() << " Y=" << mouse->Y() << std::endl;
-	}
-
+	Matrix4f world = mCameraControler->GetWorldMatrix();
+	mDwarf->SetWorldMatrix( world* CreateScaling(10.0f, 10.0f, 10.0f) );
 
 }
 
