@@ -71,12 +71,13 @@ void TestApp::Initialize()
 	up = Cross(view, right);
 	up.Normalize();
 
-	camera->SetViewParams(Vector3f(0, 10, 60), Vector3f(0, 10, 0), up);
+	camera->SetViewParams(Vector3f(0, 10, 30), Vector3f(0, 10, 0), up);
 	//camera->SetViewParams(eye, target, up);
 	camera->SetProjectionParams(PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 1000.0f );
 
 	//mCameraControler = new FPSCameraControler;
 	mCameraControler = new ModelViewerCameraControler();
+	mCameraControler->SetWindowSize(GetMainWindow()->GetWidth(), GetMainWindow()->GetHeight());
 	mCameraControler->AttachCamera(camera);
 }
 

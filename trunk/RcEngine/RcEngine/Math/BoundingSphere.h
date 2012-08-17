@@ -17,13 +17,13 @@ template<typename Real>
 class BoundingSphere
 {
 public:
-	BoundingSphere(){ }
+	BoundingSphere(), Defined(false) { }
 
 	BoundingSphere(const Vector<Real, 3>& center, Real radius)
-		: Center(center), Radius(radius) {}
+		: Center(center), Radius(radius), Defined(true) {}
 
 	BoundingSphere(const BoundingSphere<Real>& rhs)
-		: Center(rhs.Center), Radius(rhs.Radius) {}
+		: Center(rhs.Center), Radius(rhs.Radius), Defined(true) {}
 
 	BoundingSphere& operator = (const BoundingSphere<Real>& rhs)
 	{
@@ -40,10 +40,33 @@ public:
 		return (Center == rhs.Center) && (Radius == rhs.Radius);
 	}
 
+	void Merge( const Vector<Real, 3>& point );
+	void Merge( const BoundingSphere<Real>& sphere );
+
+
+	/**
+	 * Determines whether contains the specified sphere.
+	 */
+	ContainmentType Contains( const BoundingSphere<Real>& sphere );
+
+	/**
+	 * Determines whether contains the specified point.
+	 */
+	ContainmentType Contains( const Vector<Real,3>& vector );
+
+	bool Intersects( const BoundingBox<Real>& box );
+
+	bool Intersects( const BoundingSphere<Real>& sphere );
+
+
 public:
 	Vector<Real, 3> Center;
 	Real Radius;
+	bool Defined;
 };
+
+
+
 
 typedef BoundingSphere<float> BoundingSpheref;
 typedef BoundingSphere<double> BoundingSphered;
@@ -75,13 +98,44 @@ public:
 		return (Min == rhs.Min) && (Max == rhs.Max);
 	}
 
+	void Merge( const Vector<Real,3>& point );
+	void Merge( const BoundingBox<Real>& box );
+
+
+	ContainmentType Contains( const BoundingBox<Real>& box2 );
+
+	ContainmentType Contains( const BoundingSphere<Real>& sphere );
+
+	ContainmentType Contains( const Vector<Real,3>& vector );
+
+	bool Intersects( const BoundingBox<Real>& box );
+
+	bool Intersects( const BoundingSphere<Real>& sphere );
+
+
 public:
 	Vector<Real,3> Max;
 	Vector<Real,3> Min;
+	bool Defined;
 };
+
+template<typename Real>
+void RcEngine::Math::BoundingBox<Real>::Merge( const BoundingBox<Real>& box )
+{
+
+}
+
+template<typename Real>
+void RcEngine::Math::BoundingBox<Real>::Merge( const Vector<Real,3>& point )
+{
+
+}
 
 typedef BoundingBox<float> BoundingBoxf;
 typedef BoundingBox<double> BoundingBoxd;
+
+
+#include "Math/BoundingSphere.inl"
 
 } // Namespace Math
 } // Namespace RcEngine

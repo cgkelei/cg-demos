@@ -5,6 +5,7 @@
 #include "Math/ColorRGBA.h"
 #include "Math/Matrix.h"
 #include "Math/MathUtil.h"
+#include "Math/BoundingSphere.h"
 #include "Graphics/Mesh.h"
 #include "MainApp/Application.h"
 #include "Core/Exception.h"
@@ -28,6 +29,7 @@ struct OutModel
 	uint32_t TotalVertices;
 	uint32_t TotalIndices;
 	vector<shared_ptr<MeshPartData> > MeshParts;
+	BoundingSpheref MeshBoundingSphere;
 	shared_ptr<Skeleton> Skeleton;
 };
 
@@ -881,6 +883,8 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 
 	for (size_t i = 0; i < outModel.Meshes.size(); ++i)
 	{
+		BoundingSpheref sphere; 
+
 		// Get the world transform of the mesh for baking into the vertices
 		Matrix4f vertexTransform = FromAIMatrix(
 			GetMeshBakingTransform(outModel.MeshNodes[i], outModel.RootNode) );
@@ -960,14 +964,16 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 					{
 						// Bake the mesh vertex in model space defined by the root node
 						// So even without the skeleton, the mesh can render with unskin mesh.
-						Vector3f vertex = Transform( FromAIVector(mesh->mVertices[i]), vertexTransform );
-						
+						Vector3f vertex = Transform( FromAIVector(mesh->mVertices[i]), vertexTransform );				
+
 						aiVector3D v = verteAI *  mesh->mVertices[i];
 						
 						*(vertexPtr) = vertex.X();
 						*(vertexPtr+1) = vertex.Y();
 						*(vertexPtr+2) = vertex.Z();
+
 						// bouding sphere
+						sphere.Merge(vertex);
 					}	
 					break;
 				case VEU_Normal:
@@ -1047,6 +1053,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 		meshPart->StartVertex = 0;
 		meshPart->VertexCount = mesh->mNumVertices;
 		meshPart->VertexDeclaration = vertexDecl;
+		meshPart->BoundingSphere = sphere;
 		outModel.MeshParts.push_back(meshPart);
 	}
 

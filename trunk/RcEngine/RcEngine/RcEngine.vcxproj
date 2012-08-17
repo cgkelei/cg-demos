@@ -192,6 +192,7 @@
     <ClInclude Include="Math\Vector.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Math\BoundingSphere.inl" />
     <None Include="Math\ColorRGBA.inl" />
     <None Include="Math\MathUtil.inl" />
     <None Include="Math\Matrix.inl" />
