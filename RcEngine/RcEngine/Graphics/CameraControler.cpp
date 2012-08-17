@@ -179,7 +179,19 @@ void FPSCameraControler::Rotate( float yaw, float pitch, float roll )
 /************************************************************************/
 ArcBall::ArcBall()
 {
+	Reset();
+	SetNoConstraintAxis();
+	mCenter.X() = mCenter.Y() = 0;
+	mRadius = 1.0f;
+}
 
+ArcBall::ArcBall( int32_t windowWidth, int32_t windowHeight )
+	: mWindowWidth(windowWidth), mWindowHeight(windowHeight)
+{
+	Reset();
+	SetNoConstraintAxis();
+	mCenter = Vector2f( (float)windowWidth/2, (float)windowHeight/2 );
+	mRadius = (std::min)( (float)windowWidth/2, (float)windowHeight/2 );
 }
 
 ArcBall::~ArcBall()
@@ -190,37 +202,40 @@ ArcBall::~ArcBall()
 void ArcBall::Reset()
 {
 	mQuatDown.MakeIdentity();
+	mQuatNow.MakeIdentity();
+
 	mDrag = false;
-	mRadius = 1.0f;
 }
 
-void ArcBall::SetOffset( int32_t offX, int32_t offY )
-{
-	mOffset.X() = offX;
-	mOffset.Y() = offY;
-}
 
 Vector3f ArcBall::ScreenToSphere( float screenX, float screenY )
 {
 	// Scale to screen
-	float x = -( screenX - mOffset.X() - mWindowWidth / 2 ) / ( mRadius * mWindowWidth / 2 );
-	float y = ( screenY - mOffset.Y() - mWindowHeight / 2 ) / ( mRadius * mWindowHeight / 2 );
+	/*float x = -( screenX - mOffset.X() - mWindowWidth / 2 ) / ( mRadius * mWindowWidth / 2 );
+	float y = ( screenY - mOffset.Y() - mWindowHeight / 2 ) / ( mRadius * mWindowHeight / 2 );*/
 
-	float z = 0.0f;
-	float mag = x * x + y * y;
+	Vector3f result;
+
+	// map to [-1, 1]
+	/*result.X() = -(screenX - mCenter.X()) / mRadius;
+	result.Y() = (screenY - mCenter.Y()) / mRadius;*/
+
+	result.X() = -( screenX  - mWindowWidth / 2 ) / (  mWindowWidth / 2 );
+	result.Y() = ( screenY  - mWindowHeight / 2 ) / (  mWindowHeight / 2 );
+	result.Z() = 0.0f;
+	
+	float mag = result.SquaredLength();
 
 	if( mag > 1.0f )
 	{
-		float scale = 1.0f / sqrtf( mag );
-		x *= scale;
-		y *= scale;
+		result.Normalize();
 	}
 	else
 	{
-		z = sqrtf( 1.0f - mag );
+		result.Z() = sqrtf( 1.0f - mag );
 	}
 
-	return Vector3f( x, y, z );
+	return result;
 }
 
 void ArcBall::OnMove( int32_t mouseX, int32_t mouseY )
@@ -240,8 +255,8 @@ void ArcBall::OnMove( int32_t mouseX, int32_t mouseY )
 void ArcBall::OnBegin( int32_t mouseX, int32_t mouseY )
 {
 	// Only enter the drag state if the click falls inside the click rectangle.
-	if( mouseX >= mOffset.X() && mouseX < mOffset.X() + mWindowWidth &&
-		mouseY >= mOffset.Y() && mouseY < mOffset.Y() + mWindowHeight )
+	if( mouseX >= 0 && mouseX < mWindowWidth &&
+		mouseY >= 0 && mouseY < mWindowHeight )
 	{
 		mDrag = true;
 		mQuatDown = mQuatNow;
@@ -253,7 +268,22 @@ void ArcBall::OnEnd()
 {
 	mDrag = false;
 }
-	
+
+void ArcBall::SetWindowSize( int32_t windowWidth, int32_t windowHeight )
+{
+	mWindowWidth = windowWidth;
+	mWindowHeight = windowHeight;
+	mCenter = Vector2f( (float)mWindowWidth/2, (float)mWindowHeight/2 );
+	mRadius = (std::min)( (float)mWindowWidth/2, (float)mWindowHeight/2 );
+}
+
+void ArcBall::SetCenterAndRadius( const Math::Vector2f& center, float radius )
+{
+	mCenter = center;
+	mRadius = radius;
+}
+
+
 /************************************************************************/
 /*                                                                      */
 /************************************************************************/
@@ -282,10 +312,6 @@ ModelViewerCameraControler::~ModelViewerCameraControler()
 void ModelViewerCameraControler::AttachCamera( Camera* camera )
 {
 	CameraControler::AttachCamera(camera);
-
-
-
-
 }
 
 void ModelViewerCameraControler::HadnleCameraView( uint32_t action, bool value, float delta )
@@ -352,9 +378,22 @@ void ModelViewerCameraControler::HandleModelView( uint32_t action, bool value, f
 	}
 	else
 	{
-		mModelArcBall.OnEnd();
+		if (mModelArcBall.IsDragging() == true)
+			mModelArcBall.OnEnd();
 	}
 
+}
+
+void ModelViewerCameraControler::SetWindowSize( int32_t width, int32_t height )
+{
+	mCameraArcBall.SetWindowSize(width, height);
+	mModelArcBall.SetWindowSize(width, height);
+}
+
+void ModelViewerCameraControler::SetCenterAndRadius( const Math::Vector2f& center, float radis )
+{
+	mCameraArcBall.SetCenterAndRadius(center, radis);
+	mModelArcBall.SetCenterAndRadius(center, radis);
 }
 
 } // Namespace Render

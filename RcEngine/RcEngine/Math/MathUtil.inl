@@ -815,41 +815,9 @@ QuaternionSlerp(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2, Re
 
 
 //////////////////////////////////////////////////////////////////////////
-template<typename Real>
-ContainmentType Contains(const BoundingSphere<Real>& sphere1,const BoundingSphere<Real>& sphere2 )
-{
-	Real distance;
-	Real x = sphere1.Center.X() - sphere2.Center.X();
-	Real y = sphere1.Center.Y() - sphere2.Center.Y();
-	Real z = sphere1.Center.Z() - sphere2.Center.Z();
 
-	distance = std::sqrt( (x * x) + (y * y) + (z * z) );
-	Real radius = sphere1.Radius;
-	Real radius2 = sphere2.Radius;
 
-	if( radius + radius2 < distance )
-		return CT_Disjoint;
 
-	if( radius - radius2 < distance )
-		return CT_Intersects;
-
-	return CT_Contains;
-}
-
-template<typename Real>
-ContainmentType Contains(const BoundingSphere<Real>& sphere, const Vector<Real,3>& vector )
-{
-	Real x = vector.X() - sphere.Center.X();
-	Real y = vector.Y() - sphere.Center.Y();
-	Real z = vector.Z() - sphere.Center.Z();
-
-	Real distance = (x * x) + (y * y) + (z * z);
-
-	if( distance >= (sphere.Radius * sphere.Radius) )
-		return CT_Disjoint;
-
-	return CT_Contains;
-}
 
 template<typename Real>
 BoundingSphere<Real> FromBox( const BoundingBox<Real>& box )
@@ -868,102 +836,6 @@ BoundingSphere<Real> FromBox( const BoundingBox<Real>& box )
 	return sphere;
 }
 
-template<typename Real>
-BoundingSphere<Real> Merge(const BoundingSphere<Real>& sphere1,const BoundingSphere<Real>& sphere2 )
-{
-	BoundingSphere<Real> sphere;
-	Vector<Real, 3> difference = sphere1.Center() - sphere2.Center();
-
-	Real length = difference.Length();
-	Real radius1 = sphere1.Radius;
-	Real radius2 = sphere2.Radius;
-
-	if (radius1 + radius2 > length)
-	{
-		if( radius1 - radius2 >= length )
-			return sphere1;
-
-		if( radius2 - radius1 >= length )
-			return sphere2;
-	}
-
-	Vector<Real, 3> vector = difference * ( Real(1) / length );
-	float min = (std::min)( -radius1, length - radius2 );
-	float max = (std::max( radius1, length + radius2 ) - min ) * Real(0.5);
-
-	sphere.Center = sphere1.Center + vector * ( max + min );
-	sphere.Radius = max;
-
-	return sphere;
-}
-
-template<typename Real>
-bool Intersects(const BoundingSphere<Real>& sphere, const BoundingBox<Real>& box )
-{
-	Vector<Real, 3> vector;
-
-	if( !Intersects( box, sphere ) )
-		return CT_Disjoint;
-
-	Real radius = sphere.Radius * sphere.Radius;
-	vector.X() = sphere.Center.X() - box.Min.X();
-	vector.Y() = sphere.Center.Y() - box.Max.Y();
-	vector.Z() = sphere.Center.Z() - box.Max.Z();
-
-	if( vector.SquaredLength() > radius )
-		return CT_Intersects;
-
-	vector.X() = sphere.Center.X() - box.Max.X();
-	vector.Y() = sphere.Center.Y() - box.Max.Y();
-	vector.Z() = sphere.Center.Z() - box.Max.Z();
-
-	if( vector.SquaredLength() > radius )
-		return CT_Intersects;
-
-	vector.X() = sphere.Center.X() - box.Max.X();
-	vector.Y() = sphere.Center.Y() - box.Min.Y();
-	vector.Z() = sphere.Center.Z() - box.Max.Z();
-
-	if( vector.SquaredLength() > radius )
-		return CT_Intersects;
-
-	vector.X() = sphere.Center.X() - box.Min.X();
-	vector.Y() = sphere.Center.Y() - box.Min.Y();
-	vector.Z() = sphere.Center.Z() - box.Max.Z();
-
-	if( vector.SquaredLength() > radius )
-		return CT_Intersects;
-
-	vector.X() = sphere.Center.X() - box.Min.X();
-	vector.Y() = sphere.Center.Y() - box.Max.Y();
-	vector.Z() = sphere.Center.Z() - box.Min.Z();
-
-	if( vector.SquaredLength() > radius )
-		return CT_Intersects;
-
-	vector.X() = sphere.Center.X() - box.Max.X();
-	vector.Y() = sphere.Center.Y() - box.Max.Y();
-	vector.Z() = sphere.Center.Z() - box.Min.Z();
-
-	if( vector.SquaredLength() > radius )
-		return CT_Intersects;
-
-	vector.X() = sphere.Center.X() - box.Max.X();
-	vector.Y() = sphere.Center.Y() - box.Min.Y();
-	vector.Z() = sphere.Center.Z() - box.Min.Z();
-
-	if( vector.SquaredLength() > radius )
-		return CT_Intersects;
-
-	vector.X() = sphere.Center.X() - box.Min.X();
-	vector.Y() = sphere.Center.Y() - box.Min.Y();
-	vector.Z() = sphere.Center.Z() - box.Min.Z();
-
-	if( vector.SquaredLength() > radius )
-		return CT_Intersects;
-
-	return CT_Contains;
-}
 
 //template<typename Real>
 //bool Intersects(const BoundingSphere<Real>& sphere, Ray ray, Real& distance )

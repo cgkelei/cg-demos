@@ -69,13 +69,20 @@ class _ApiExport ArcBall
 {
 public:
 	ArcBall();
+	ArcBall( int32_t windowWidth, int32_t windowHeight );
 	~ArcBall();
 
 	void Reset();
-	void SetOffset( int32_t offX, int32_t offY ); 
+	void SetWindowSize( int32_t windowWidth, int32_t windowHeight );
+	void SetCenterAndRadius( const Math::Vector2f& center, float radius );
 
-	void OnMove(int32_t mouseX, int32_t mouseY);
-	void OnBegin(int32_t mouseX, int32_t mouseY);
+	Math::Vector3f GetConstraintAxis() const			    { return mConstraintAxis; }
+	void SetConstraintAxis( const Math::Vector3f& axis )    { mConstraintAxis = axis; mUseConstraint = true; }
+	void SetNoConstraintAxis( )								{ mUseConstraint = false; }
+	bool IsUsingConstraint() const							{ return mUseConstraint; }
+
+	void OnMove( int32_t mouseX, int32_t mouseY );
+	void OnBegin( int32_t mouseX, int32_t mouseY );
 	void OnEnd();
 
 	bool IsDragging() const { return mDrag; }
@@ -83,21 +90,20 @@ public:
 	Math::Quaternionf GetRotation() const { return mQuatNow; }
 
 private:
-	Math::Vector3f ScreenToSphere(float screenX, float screenY);
+	Math::Vector3f ScreenToSphere( float screenX, float screenY );
 
 private:
 			
 	int32_t mWindowWidth;		// arc ball's window width
-	int32_t mWindowHeight;		// arc ball's window height
-
-	Math::Vector<int32_t,2> mOffset;	// window offset, or upper-left corner of window		
+	int32_t mWindowHeight;		// arc ball's window height	
 
 	Math::Vector2f mCenter;		 // center of arc ball in screen coordinates
 	float mRadius;              // arc ball's radius in screen coordinates
 	
 	float mRadiusTranslation;   // arc ball's radius for translating the target
 
-	bool mConstrain;
+	bool mUseConstraint;
+	Math::Vector3f mConstraintAxis;
 
 	bool mDrag;
 
@@ -126,7 +132,19 @@ public:
 	ModelViewerCameraControler();
 	~ModelViewerCameraControler();
 
-	void AttachCamera(Camera* camera);
+	void AttachCamera( Camera* camera );
+
+	/**
+	 * Set window size, the arcball need window size. by default, arcball 
+	 * center is window center, radius is half window size.
+	 */
+	void SetWindowSize( int32_t width, int32_t height );
+	
+	/**
+	 * Set arcball center and radius
+	 */
+	void SetCenterAndRadius( const Math::Vector2f& center, float radis );
+
 
 	/**
 	 * Get the world matrix of model

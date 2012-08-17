@@ -219,40 +219,11 @@ QuaternionSlerp(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2, Re
 /* Bounding                                                             */
 /************************************************************************/
 template<typename Real>
-ContainmentType Contains(const BoundingSphere<Real>& sphere1,const BoundingSphere<Real>& sphere2 );
-
-template<typename Real>
-ContainmentType Contains(const BoundingSphere<Real>& sphere, const Vector<Real,3>& vector );
-
-template<typename Real>
 BoundingSphere<Real> FromBox( const BoundingBox<Real>& box );
 
 template<typename Real>
 BoundingSphere<Real> Merge(const BoundingSphere<Real>& sphere1,const BoundingSphere<Real>& sphere2 );
 
-template<typename Real>
-bool Intersects(const BoundingSphere<Real>& sphere, const BoundingBox<Real>& box );
-
-
-template<typename Real>
-bool Intersects(const BoundingSphere<Real>& sphere1,const BoundingSphere<Real>& sphere2 );
-
-/*	template<typename Real>
-bool Intersects(const BoundingSphere<Real>& sphere, Ray ray, Real& distance );*/
-
-
-/*template<typename Real>
-PlaneIntersectionType Intersects(const BoundingSphere<Real>& sphere, Plane plane );*/
-
-
-template<typename Real>
-ContainmentType Contains( const BoundingBox<Real>& box1, const BoundingBox<Real>& box2 );
-
-template<typename Real>
-ContainmentType Contains(const BoundingBox<Real>& box, const BoundingSphere<Real>& sphere);
-
-template<typename Real>
-ContainmentType Contains(const BoundingBox<Real>& box, const Vector<Real,3>& vector );
 
 template<typename Real>
 BoundingBox<Real> FromSphere( const BoundingSphere<Real>& sphere );
@@ -260,17 +231,7 @@ BoundingBox<Real> FromSphere( const BoundingSphere<Real>& sphere );
 template<typename Real>
 BoundingBox<Real> Merge( const BoundingBox<Real>& box1, const BoundingBox<Real>& box2 );
 
-template<typename Real>
-bool Intersects( const BoundingBox<Real>& box1, const BoundingBox<Real>& box2 );
 
-template<typename Real>
-bool Intersects( const BoundingBox<Real>& box, const BoundingSphere<Real>& sphere );
-
-/*template<typename Real>
-bool Intersects( const BoundingBox<Real>& box, Ray ray, float& distance );*/
-
-//template<typename Real>
-//PlaneIntersectionType Intersects( const BoundingBox<Real>& box, Plane plane );
 
 #include <Math/MathUtil.inl>
 
