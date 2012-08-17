@@ -4,14 +4,15 @@
 #include <Core/Prerequisites.h>
 #include <Math/Vector.h>
 #include <Math/Quaternion.h>
+#include <Math/Matrix.h>
 
 
 namespace RcEngine {
 namespace Render {
 		
 /**
-	* Camera controller. Controller provides camera movement and rotation control using keyboard and mouse.
-	*/
+* Camera controller. Controller provides camera movement and rotation control using keyboard and mouse.
+*/
 class _ApiExport CameraControler 
 {
 protected:
@@ -77,7 +78,9 @@ public:
 	void OnBegin(int32_t mouseX, int32_t mouseY);
 	void OnEnd();
 
-	bool IsDragging() const { return mDrag; };
+	bool IsDragging() const { return mDrag; }
+
+	Math::Quaternionf GetRotation() const { return mQuatNow; }
 
 private:
 	Math::Vector3f ScreenToSphere(float screenX, float screenY);
@@ -86,12 +89,15 @@ private:
 			
 	int32_t mWindowWidth;		// arc ball's window width
 	int32_t mWindowHeight;		// arc ball's window height
-			
-	Math::Vector2f mCenter;				// center of arc ball 
-	Math::Vector<int32_t,2> mOffset;	// window offset, or upper-left corner of window
 
-	float mRadius;              // arc ball's radius in screen coords
+	Math::Vector<int32_t,2> mOffset;	// window offset, or upper-left corner of window		
+
+	Math::Vector2f mCenter;		 // center of arc ball in screen coordinates
+	float mRadius;              // arc ball's radius in screen coordinates
+	
 	float mRadiusTranslation;   // arc ball's radius for translating the target
+
+	bool mConstrain;
 
 	bool mDrag;
 
@@ -122,12 +128,20 @@ public:
 
 	void AttachCamera(Camera* camera);
 
+	/**
+	 * Get the world matrix of model
+	 */
+	Math::Matrix4f GetWorldMatrix() const	{ return mWorld; }
+
 protected:
-	void HandleMouse(uint32_t action, bool value, float delta);
+	void HandleModelView(uint32_t action, bool value, float delta);
+	void HadnleCameraView(uint32_t action, bool value, float delta);
 
 protected:
 	ArcBall mCameraArcBall;
 	ArcBall mModelArcBall;
+	Math::Quaternionf mCameraRot;
+	Math::Matrix4f mWorld; // world matrix of model
 };
 
 } // Namespace Render

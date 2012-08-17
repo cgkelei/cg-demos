@@ -253,15 +253,15 @@ void ArcBall::OnEnd()
 {
 	mDrag = false;
 }
-
-		
-
-		
+	
 /************************************************************************/
 /*                                                                      */
 /************************************************************************/
 ModelViewerCameraControler::ModelViewerCameraControler()
 {
+	mWorld.MakeIdentity();
+	mCameraRot.MakeIdentity();
+
 	InputState states[] = 
 	{
 		InputState(MS_LeftButton, CameraView),
@@ -270,8 +270,8 @@ ModelViewerCameraControler::ModelViewerCameraControler()
 
 	InputSystem* inputSystem = Core::Context::GetSingleton().GetInputSystemPtr();
 	inputSystem->AddState(states, states+ sizeof(states)/ sizeof(InputState));
-	inputSystem->AddStateHandler(CameraView, fastdelegate::MakeDelegate(this, &ModelViewerCameraControler::HandleMouse));
-	inputSystem->AddStateHandler(ModelView, fastdelegate::MakeDelegate(this, &ModelViewerCameraControler::HandleMouse));
+	inputSystem->AddStateHandler(CameraView, fastdelegate::MakeDelegate(this, &ModelViewerCameraControler::HadnleCameraView));
+	inputSystem->AddStateHandler(ModelView, fastdelegate::MakeDelegate(this, &ModelViewerCameraControler::HandleModelView));
 }
 
 ModelViewerCameraControler::~ModelViewerCameraControler()
@@ -284,39 +284,78 @@ void ModelViewerCameraControler::AttachCamera( Camera* camera )
 	CameraControler::AttachCamera(camera);
 
 
+
+
 }
 
-void ModelViewerCameraControler::HandleMouse( uint32_t action, bool value, float delta )
+void ModelViewerCameraControler::HadnleCameraView( uint32_t action, bool value, float delta )
 {
-	ArcBall* updateBall = nullptr;
-			
-	if(action == CameraView)
-	{
-		updateBall = &mCameraArcBall;
-	}
-	else if (action == ModelView)
-	{
-		updateBall = &mModelArcBall;
-	}
-
+	assert(action == CameraView);
 	// Get mouse device to fetch position
 	Mouse* mouse =	Core::Context::GetSingleton().GetInputSystem().GetMouse();
 	if (value == true)
 	{
-		if (updateBall->IsDragging() == false)
+		if (mCameraArcBall.IsDragging() == false)
 		{
-			updateBall->OnBegin(mouse->X(), mouse->Y());
+			mCameraArcBall.OnBegin(mouse->X(), mouse->Y());
 		}
 		else
 		{
-			updateBall->OnMove(mouse->X(), mouse->Y());
+			mCameraArcBall.OnMove(mouse->X(), mouse->Y());
+
+			// Now need to update camera view matrix
+			mCameraRot = QuaternionInverse(mCameraArcBall.GetRotation());
+
+			// Transform vectors based on camera's rotation matrix
+			Vector3f vWorldUp, vWorldAhead;
+			Vector3f vLocalUp = Vector3f( 0, 1, 0 );
+			Vector3f vLocalAhead = Vector3f( 0, 0, 1 );
+			vWorldUp = Transform(vLocalUp, mCameraRot );
+			vWorldAhead = Transform( vLocalAhead, mCameraRot );
+
+			mAttachedCamera->SetViewParams(mAttachedCamera->GetPosition(), mAttachedCamera->GetPosition() + vWorldAhead, vWorldUp);
+
+
 		}
 	}
 	else
 	{
-		updateBall->OnEnd();
+		mCameraArcBall.OnEnd();
 	}
-}	
+}
+
+
+void ModelViewerCameraControler::HandleModelView( uint32_t action, bool value, float delta )
+{
+	assert(action == ModelView);
+	// Get mouse device to fetch position
+	Mouse* mouse =	Core::Context::GetSingleton().GetInputSystem().GetMouse();
+	if (value == true)
+	{
+		if (mModelArcBall.IsDragging() == false)
+		{
+			mModelArcBall.OnBegin(mouse->X(), mouse->Y());
+		}
+		else
+		{
+			mModelArcBall.OnMove(mouse->X(), mouse->Y());
+
+			// 
+			Matrix4f invView = MatrixInverse(mAttachedCamera->GetViewMatrix());
+			invView.M41 = invView.M42 = invView.M43 = 0;
+
+			// Accumulate the delta of the arcball's rotation in view space.
+			// Note that per-frame delta rotations could be problematic over long periods of time.
+			Matrix4f modelRot = QuaternionToRotationMatrix( mModelArcBall.GetRotation() );
+			mWorld = modelRot;
+		}
+	}
+	else
+	{
+		mModelArcBall.OnEnd();
+	}
+
+}
 
 } // Namespace Render
 } // Namespace RcEngine
