@@ -125,6 +125,7 @@
     <ClCompile Include="IO\FileSystem.cpp" />
     <ClCompile Include="MainApp\Application.cpp" />
     <ClCompile Include="MainApp\Window.cpp" />
+    <ClCompile Include="Math\BoundingBox.inl" />
     <ClCompile Include="Math\Frustum.h" />
     <ClCompile Include="Math\ColorRGBA.cpp" />
     <ClCompile Include="Math\Math.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="IO\FileSystem.h" />
     <ClInclude Include="MainApp\Application.h" />
     <ClInclude Include="MainApp\Window.h" />
+    <ClInclude Include="Math\BoundingBox.h" />
     <ClInclude Include="Math\BoundingSphere.h" />
     <ClInclude Include="Math\ColorRGBA.h" />
     <ClInclude Include="Math\Math.h" />
