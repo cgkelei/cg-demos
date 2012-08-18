@@ -171,6 +171,9 @@
     <ClCompile Include="Math\Frustum.h">
       <Filter>Math</Filter>
     </ClCompile>
+    <ClCompile Include="Math\BoundingBox.inl">
+      <Filter>Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainApp\Application.h">
@@ -352,6 +355,9 @@
     </ClInclude>
     <ClInclude Include="MainApp\Window.h">
       <Filter>MainApp</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\BoundingBox.h">
+      <Filter>Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

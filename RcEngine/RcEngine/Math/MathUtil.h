@@ -38,18 +38,6 @@ template< typename Real, int32_t Size >
 inline  Vector<Real, Size>
 Normalize(const Vector<Real, Size>& vec);
 
-template< typename Real, int32_t Size >
-Vector<Real,Size> 
-VectorClamp(const Vector<Real,Size>& value, const Vector<Real,Size>& min, const Vector<Real,Size>& max);
-
-template< typename Real, int32_t Size >
-Vector<Real,Size> 
-VectorMinimize(const Vector<Real,Size>& left, const Vector<Real,Size>& right);
-
-template< typename Real, int32_t Size >
-Vector<Real,Size> 
-VectorMaximize(const Vector<Real,Size>& left, const Vector<Real,Size>& right);
-
 template<typename Real>
 inline  Vector<Real, 3> 
 Cross(const Vector<Real, 3>& lhs, const Vector<Real, 3>& rhs);
@@ -133,29 +121,29 @@ inline void
 MatrixDecompose(Vector<Real, 3>& sacle, Quaternion<Real>& rotation, Vector<Real, 3>& translation, const Matrix4<Real>& mat);
 
 /**
-	* Get euler angle from rotation matrix
-	*/
+ * Get euler angle from rotation matrix
+ */
 template<typename Real>
 inline void 
 RotationMatrixToYawPitchRoll(Real& yaw, Real& pitch, Real& roll, const Matrix4<Real>& mat);
 
 /**
-    * Transforms vector (x, y, z, 1) by a given matrix.
-	*/
+ * Transforms vector (x, y, z, 1) by a given matrix.
+ */
 template<typename Real>
 Vector<Real, 3> 
 Transform(const Vector<Real, 3>& vec, const Matrix4<Real>& mat);
 
 /**
-    * Transforms vector (x, y, z, 1) by a given quaternion.
-	*/
+ * Transforms vector (x, y, z, 1) by a given quaternion.
+ */
 template<typename Real>
 Vector<Real, 3> 
 Transform(const Vector<Real, 3>& vec, const Quaternion<Real>& quat);
 
 /**
-	* Transforms a 3D vector by a given matrix, projecting the result back into w = 1.
-	*/
+ * Transforms a 3D vector by a given matrix, projecting the result back into w = 1.
+ */
 template<typename Real>
 Vector<Real, 3> 
 TransformCoord(const Vector<Real, 3>& vec, const Matrix4<Real>& mat);
@@ -213,25 +201,6 @@ QuaternionToRotationYawPitchRoll(Real& yaw, Real& pitch, Real& roll, const Quate
 template <typename Real>
 inline Quaternion<Real> 
 QuaternionSlerp(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2, Real t);
-
-
-/************************************************************************/
-/* Bounding                                                             */
-/************************************************************************/
-template<typename Real>
-BoundingSphere<Real> FromBox( const BoundingBox<Real>& box );
-
-template<typename Real>
-BoundingSphere<Real> Merge(const BoundingSphere<Real>& sphere1,const BoundingSphere<Real>& sphere2 );
-
-
-template<typename Real>
-BoundingBox<Real> FromSphere( const BoundingSphere<Real>& sphere );
-
-template<typename Real>
-BoundingBox<Real> Merge( const BoundingBox<Real>& box1, const BoundingBox<Real>& box2 );
-
-
 
 #include <Math/MathUtil.inl>
 
