@@ -5,7 +5,6 @@
 #include <Core/Prerequisites.h>
 
 namespace RcEngine {
-namespace Render {
 
 class  _ApiExport Viewport
 {
@@ -23,7 +22,6 @@ public:
 
 };
 
-} // Namespace Render
 } // Namespace RcEngine
 
 #endif // _Viewport__H

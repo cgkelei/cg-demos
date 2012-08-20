@@ -15,7 +15,6 @@ void BoundingBox<Real>::Merge( const Vector<Real,3>& point )
 	if (point.X() > Max.X())	Max.X() = point.X();
 	if (point.Y() > Max.Y())	Max.Y() = point.Y();
 	if (point.Z() > Max.Z())	Max.X() = point.Z();
-
 }
 
 template<typename Real>
@@ -59,57 +58,6 @@ ContainmentType BoundingBox<Real>::Contains( const BoundingBox<Real>& box )
 }
 
 template<typename Real>
-ContainmentType BoundingBox<Real>::Contains( const BoundingSphere<Real>& sphere )
-{
-	Real distanceSquared, temp;
-	const Vector<Real, 3>& center = sphere.Center;
-	Real radius = sphere.Radius;
-
-	if (center.X() < Min.X())
-	{
-		temp = center.X() - Min.X();
-		distanceSquared += temp * temp;
-	}
-	else if (center.X() > Max.X())
-	{
-		temp = center.X() - Max.X();
-		distanceSquared += temp * temp;
-	}
-
-	if (center.Y() < Min.Y())
-	{
-		temp = center.Y() - Min.Y();
-		distanceSquared += temp * temp;
-	}
-	else if (center.Y() > Max.Y())
-	{
-		temp = center.Y() - Max.Y();
-		distanceSquared += temp * temp;
-	}
-
-	if (center.Z() < Min.Z())
-	{
-		temp = center.Z() - Min.Z();
-		distanceSquared += temp * temp;
-	}
-	else if (center.Z() > Max.Z())
-	{
-		temp = center.Z() - Max.Z();
-		distanceSquared += temp * temp;
-	}
-
-	if( distanceSquared > (radius * radius) )
-		return CT_Disjoint;
-
-	if ( center.X() - radius >= Min.X() && center.X() + radius <= Max.X() && Max.X() - Min.X() > radius &&
-		center.Y() - radius >= Min.Y() && center.Y() + radius <= Max.Y() && Max.Y() - Min.Y() > radius &&
-		center.Z() - radius >= Min.Z() && center.Z() + radius <= Max.Z() && Max.Z() - Min.Z() > radius )
-		return CT_Contains;
-
-	return CT_Intersects;
-}
-
-template<typename Real>
 ContainmentType BoundingBox<Real>::Contains( const Vector<Real,3>& vector )
 {
 	if( Min.X() <= vector.X() && vector.X() <= Max.X() && Min.Y() <= vector.Y() && 
@@ -117,48 +65,6 @@ ContainmentType BoundingBox<Real>::Contains( const Vector<Real,3>& vector )
 		return CT_Contains;
 
 	return CT_Disjoint;
-}
-
-template<typename Real>
-bool BoundingBox<Real>::Intersects( const BoundingSphere<Real>& sphere )
-{
-	Real distanceSquared, temp;
-	const Vector<Real, 3>& center = sphere.Center;
-
-	if (center.X() < Min.X())
-	{
-		temp = center.X() - Min.X();
-		distanceSquared += temp * temp;
-	}
-	else if (center.X() > Max.X())
-	{
-		temp = center.X() - Max.X();
-		distanceSquared += temp * temp;
-	}
-
-	if (center.Y() < Min.Y())
-	{
-		temp = center.Y() - Min.Y();
-		distanceSquared += temp * temp;
-	}
-	else if (center.Y() > Max.Y())
-	{
-		temp = center.Y() - Max.Y();
-		distanceSquared += temp * temp;
-	}
-
-	if (center.Z() < Min.Z())
-	{
-		temp = center.Z() - Min.Z();
-		distanceSquared += temp * temp;
-	}
-	else if (center.Z() > Max.Z())
-	{
-		temp = center.Z() - Max.Z();
-		distanceSquared += temp * temp;
-	}
-
-	return ( distanceSquared <= (sphere.Radius * sphere.Radius) );
 }
 
 template<typename Real>
@@ -173,15 +79,6 @@ bool BoundingBox<Real>::Intersects( const BoundingBox<Real>& box )
 	return ( Max.Z() >= box.Min.Z() && Min.Z() <= box.Max.Z() );
 }
 
-
-template<typename Real>
-BoundingBox<Real> FromSphere( const BoundingSphere<Real>& sphere )
-{
-	BoundingBox box;
-	box.Min = Vector<Real, 3>( sphere.Center.X() - sphere.Radius, sphere.Center.Y() - sphere.Radius, sphere.Center.Z() - sphere.Radius );
-	box.Max = Vector<Real, 3>( sphere.Center.X() + sphere.Radius, sphere.Center.Y() + sphere.Radius, sphere.Center.Z() + sphere.Radius );
-	return box;
-}
 
 template<typename Real>
 BoundingBox<Real> Merge( const BoundingBox<Real>& box1, const BoundingBox<Real>& box2 )

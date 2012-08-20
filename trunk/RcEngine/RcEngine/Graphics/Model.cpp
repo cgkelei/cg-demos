@@ -2,8 +2,6 @@
 
 namespace RcEngine
 {
-	namespace Render
-	{
 
 		Model::Model(void)
 		{
@@ -14,5 +12,5 @@ namespace RcEngine
 		{
 		}
 
-	}
+
 }

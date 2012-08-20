@@ -22,6 +22,9 @@
     <Filter Include="IO">
       <UniqueIdentifier>{72e87970-ea4d-4353-abb2-4874e3c8683b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{1bd2210f-27b8-46b3-969a-9538e14fce07}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainApp\Application.cpp">
@@ -171,8 +174,8 @@
     <ClCompile Include="Math\Frustum.h">
       <Filter>Math</Filter>
     </ClCompile>
-    <ClCompile Include="Math\BoundingBox.inl">
-      <Filter>Math</Filter>
+    <ClCompile Include="Scene\Scene.cpp">
+      <Filter>Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -359,6 +362,12 @@
     <ClInclude Include="Math\BoundingBox.h">
       <Filter>Math</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\Scene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\SceneNode.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Math\ColorRGBA.inl">
@@ -381,6 +390,24 @@
     </None>
     <None Include="Math\BoundingSphere.inl">
       <Filter>Math</Filter>
+    </None>
+    <None Include="Math\BoundingBox.inl">
+      <Filter>Math</Filter>
+    </None>
+    <None Include="Scene\新建文本文档 - 副本 - 副本 - 副本.txt">
+      <Filter>Scene</Filter>
+    </None>
+    <None Include="Scene\新建文本文档 - 副本 - 副本 (2).txt">
+      <Filter>Scene</Filter>
+    </None>
+    <None Include="Scene\新建文本文档 - 副本 - 副本.txt">
+      <Filter>Scene</Filter>
+    </None>
+    <None Include="Scene\新建文本文档 - 副本.txt">
+      <Filter>Scene</Filter>
+    </None>
+    <None Include="Scene\新建文本文档.txt">
+      <Filter>Scene</Filter>
     </None>
   </ItemGroup>
 </Project>

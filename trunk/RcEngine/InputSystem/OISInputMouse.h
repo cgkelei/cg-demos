@@ -1,22 +1,20 @@
 #include "OISInputPrerequisites.h"
 #include "Input/InputDevice.h"
 
-namespace RcEngine
+namespace RcEngine {
+
+class _InputExport OISInputMouse : public Mouse
 {
-	namespace Input
-	{
-		class _InputExport OISInputMouse : public Mouse
-		{
-		public:
-			OISInputMouse(InputSystem* inputSystem, uint32_t width, uint32_t height);
-			~OISInputMouse();
+public:
+	OISInputMouse(InputSystem* inputSystem, uint32_t width, uint32_t height);
+	~OISInputMouse();
 
-			void SetWindowSize(uint32_t width, uint32_t height);
-			const String& GetName() const;
-			void Update();
+	void SetWindowSize(uint32_t width, uint32_t height);
+	const String& GetName() const;
+	void Update();
 
-		private:
-			OIS::Mouse* mMouse;
-		};
-	}
+private:
+	OIS::Mouse* mMouse;
+};
+
 }

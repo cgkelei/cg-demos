@@ -4,7 +4,6 @@
 #include <Core/Prerequisites.h>
 
 namespace RcEngine {
-namespace Render {
 
 enum VertexElementFormat
 {
@@ -504,9 +503,6 @@ enum EffectParameterUsage
 	EPU_Light_Position,
 };
 
-
-
-} // RenderSystem
 } // RcEngine
 
 

@@ -15,9 +15,6 @@
 
 
 namespace RcEngine {
-namespace {
-
-using namespace Render;
 
 class EffectParamsUsageDefs
 {
@@ -78,15 +75,10 @@ private:
 unordered_map<String, EffectParameterUsage> mDefs;
 static EffectParamsUsageDefs* msInstance;
 };
+
 EffectParamsUsageDefs* EffectParamsUsageDefs::msInstance;
 
-}
-
-
-namespace Render
-{
-using Core::Exception;
-
+//--------------------------------------------------------------------------------------------------
 Material::Material(void)
 {
 }
@@ -102,7 +94,7 @@ for(size_t i = 0; i < mCachedEffectParams.size(); ++i)
 
 void Material::ApplyMaterial()
 {
-Camera* camera = Core::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
+Camera* camera = Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
 
 for(size_t i = 0; i < mCachedEffectParams.size(); ++i)
 {
@@ -184,7 +176,7 @@ return nullptr;
 
 shared_ptr<Material> Material::LoadFrom( Stream& source )
 {
-RenderFactory&  factory = Core::Context::GetSingleton().GetRenderFactory();
+RenderFactory&  factory = Context::GetSingleton().GetRenderFactory();
 shared_ptr<Material> material = std::make_shared<Material>();
 
 XMLDoc doc;
@@ -234,5 +226,5 @@ for (XMLNodePtr paramNode = root->FirstNode(); paramNode; paramNode = paramNode-
 return material;
 }
 
-} // Namespace Render
+
 } // Namespace RcEngine

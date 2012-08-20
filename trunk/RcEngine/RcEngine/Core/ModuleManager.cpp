@@ -4,9 +4,9 @@
 
 namespace RcEngine{
 
-SINGLETON_DECL(Core::ModuleManager)
+SINGLETON_DECL(ModuleManager)
 
-namespace Core{
+
 
 ModuleManager::ModuleManager(void)
 {
@@ -147,5 +147,5 @@ ModuleInfo* ModuleManager::GetMoudleInfoByType( ModuleType modType )
 	return 0;
 }
 
-} // Namespace Core
+
 } // Namespace RcEngine

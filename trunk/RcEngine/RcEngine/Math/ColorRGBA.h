@@ -4,7 +4,7 @@
 #include <Core/Prerequisites.h>
 
 namespace RcEngine{
-namespace Math {
+
 
 class _ApiExport ColorRGBA
 {
@@ -65,7 +65,7 @@ ColorRGBA operator* (float fScalar, const ColorRGBA& rhs);
 
 #include <Math/ColorRGBA.inl>
 
-} // Namespace Math
+
 } // Namespace RcEngine
 
 #endif

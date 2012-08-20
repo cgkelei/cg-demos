@@ -7,7 +7,7 @@
 #include <Math/MathUtil.h>
 
 namespace RcEngine{
-namespace Math {
+
 
 // The plane is represented as Dot(N,X) = c where N is a unit-length
 // normal vector, c is the plane constant, and X is any point on the
@@ -55,7 +55,7 @@ public:
 
 typedef Plane3<float> Plane3f;
 
-} // Namespace Math
+
 } // Namespace RcEngine
 
 

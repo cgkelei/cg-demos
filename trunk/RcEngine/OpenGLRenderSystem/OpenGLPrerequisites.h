@@ -32,21 +32,20 @@ typedef nv::Image Image;
 
 namespace RcEngine
 {
-	namespace Render
-	{
-		class OpenGLRenderDevice;
-		class OpenGLTexture;
-		class OpenGLTexture1D;
-		class OpenGLTexture2D;
-		class OpenGLTexture3D;
-		class OpenGLTextureCube;
-		class OpenGLEffect;
-		class OpenGLEffectParameter;
-		class OpenGLEffectTechnique;
-		class OpenGLEffectPass;
-		class OpenGLGraphicsBuffer;
-		class OpenGLFrameBuffer;
-	}
+
+class OpenGLRenderDevice;
+class OpenGLTexture;
+class OpenGLTexture1D;
+class OpenGLTexture2D;
+class OpenGLTexture3D;
+class OpenGLTextureCube;
+class OpenGLEffect;
+class OpenGLEffectParameter;
+class OpenGLEffectTechnique;
+class OpenGLEffectPass;
+class OpenGLGraphicsBuffer;
+class OpenGLFrameBuffer;
+
 }
 
 

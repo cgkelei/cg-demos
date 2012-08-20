@@ -4,11 +4,11 @@
 #include <Core/Prerequisites.h>
 
 namespace RcEngine{
-namespace Core{
+
 
 #ifndef ENGINE_EXCEPT
-#define ENGINE_EXCEPT(num, desc, src) throw RcEngine::Core::ExceptionFactory::Create( \
-	RcEngine::Core::ExceptionCodeType<num>(), desc, src, __FILE__, __LINE__ );
+#define ENGINE_EXCEPT(num, desc, src) throw RcEngine::ExceptionFactory::Create( \
+	RcEngine::ExceptionCodeType<num>(), desc, src, __FILE__, __LINE__ );
 #endif
 
 
@@ -236,7 +236,7 @@ public:
 };
 
 
-} // Namespace Core
+
 } // Namespace RcEngine
 
 #endif // Exception_h__

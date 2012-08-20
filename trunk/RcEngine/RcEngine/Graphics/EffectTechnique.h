@@ -7,7 +7,7 @@
 
 
 namespace RcEngine {
-namespace Render {
+
 
 class _ApiExport EffectTechnique
 {
@@ -34,7 +34,7 @@ protected:
 	EffectAnnotationList mAnnotations;
 };
 
-} // Namespace Render
+
 } // Namespace RcEngine
 
 #endif // EffectTechnique_h__

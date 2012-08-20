@@ -2,7 +2,7 @@
 #include <Graphics/RenderView.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 FrameBuffer::FrameBuffer(uint32_t width, uint32_t height,  bool offscreen /*= true*/ )
 	: mWidth(width), mHeight(height), mDepthStencilView(0), mDirty(false), mOffscreen(offscreen),
@@ -167,5 +167,5 @@ void FrameBuffer::OnUnbind()
 	}
 }
 
-} // Namespace Render
+
 } // Namespace RcEngine

@@ -5,9 +5,6 @@
 #include <Math/MathUtil.h>
 
 namespace RcEngine {
-namespace Render {
-
-using namespace Math;
 
 class _ApiExport Camera
 {
@@ -45,7 +42,6 @@ private:
 	Matrix4f	mProjectionMatrix;
 };
 
-} // Namespace Render
 } // Namespace RcEngine
 
 #endif // Camera_h__

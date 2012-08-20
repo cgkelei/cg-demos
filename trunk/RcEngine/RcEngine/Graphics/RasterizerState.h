@@ -5,7 +5,7 @@
 #include <Graphics/GraphicsCommon.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 class _ApiExport RasterizerStateDesc
 {
@@ -45,7 +45,7 @@ protected:
 	RasterizerStateDesc mDesc;
 };
 
-} // Namespace Render
+
 } // Namespace RcEngine
 
 #endif // RasterizerState_h__

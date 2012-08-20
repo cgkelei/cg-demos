@@ -83,52 +83,45 @@ namespace RcEngine {
 class Application;
 class Window;
 class Stream;
+class Timer;
+class Exception;
+class IModule;
+class XMLDoc;
+class XMLNode;
+class XMLAttribute;
+typedef shared_ptr<XMLNode> XMLNodePtr;
+typedef shared_ptr<XMLAttribute> XMLAttributePtr;
 
-namespace Core
-{
-	class Timer;
-	class Exception;
-	class IModule;
-	class XMLDoc;
-	class XMLNode;
-	class XMLAttribute;
-	typedef shared_ptr<XMLNode> XMLNodePtr;
-	typedef shared_ptr<XMLAttribute> XMLAttributePtr;
-}
+class InputSystem;
+struct RenderSettings;
+class RenderDevice;
+class RenderFactory;
+class RenderView;
+class FrameBuffer;
+class Texture;
+class GraphicsBuffer;
+class VertexDeclaration;
+class Camera;
+class Renderable;
+class Mesh;
+class MeshPart;
+class Model;
+class Material;
+class Effect;
+class EffectParameter;
+class EffectTechnique;
+class EffectPass;
+class EffectAnnotation;
+class RenderOperation;
+class SimpleBox;
+class DepthStencilState;
+class RasterizerState;
+class BlendState;
+class SamplerState;
+class Scene;
+class SceneNode;
 
-namespace Input
-{
-	class InputSystem;
-}
 
-namespace Render
-{
-	struct RenderSettings;
-	class RenderDevice;
-	class RenderFactory;
-	class RenderView;
-	class FrameBuffer;
-	class Texture;
-	class GraphicsBuffer;
-	class VertexDeclaration;
-	class Camera;
-	class Renderable;
-	class Mesh;
-	class MeshPart;
-	class Model;
-	class Material;
-	class Effect;
-	class EffectParameter;
-	class EffectTechnique;
-	class EffectPass;
-	class EffectAnnotation;
-	class RenderOperation;
-	class SimpleBox;
-	class DepthStencilState;
-	class RasterizerState;
-	class BlendState;
-	class SamplerState;
-}
 
 } // Namespace RcEngine
 

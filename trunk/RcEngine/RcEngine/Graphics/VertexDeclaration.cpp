@@ -1,7 +1,7 @@
 #include "VertexDeclaration.h"
 
 namespace RcEngine {
-namespace Render {
+
 
 VertexDeclaration::VertexDeclaration()
 {
@@ -135,5 +135,4 @@ void VertexDeclaration::Sort( void )
 	std::sort(mElementList.begin(), mElementList.end(), VertexDeclaration::VertexElementLess);
 }
 
-} // Namespace Render
 } // Namespace RcEngine

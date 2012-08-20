@@ -8,7 +8,7 @@
 #include <Graphics/VertexDeclaration.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 class _ApiExport RenderFactory
 {
@@ -77,7 +77,7 @@ protected:
 };
 
 
-} // Namespace Render
+
 } // Namespace RcEngine
 
 

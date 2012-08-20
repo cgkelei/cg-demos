@@ -39,6 +39,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <EmbedManifest>false</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -125,10 +126,10 @@
     <ClCompile Include="IO\FileSystem.cpp" />
     <ClCompile Include="MainApp\Application.cpp" />
     <ClCompile Include="MainApp\Window.cpp" />
-    <ClCompile Include="Math\BoundingBox.inl" />
     <ClCompile Include="Math\Frustum.h" />
     <ClCompile Include="Math\ColorRGBA.cpp" />
     <ClCompile Include="Math\Math.cpp" />
+    <ClCompile Include="Scene\Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\CompileConfig.h" />
@@ -192,8 +193,11 @@
     <ClInclude Include="Math\Plane.h" />
     <ClInclude Include="Math\Quaternion.h" />
     <ClInclude Include="Math\Vector.h" />
+    <ClInclude Include="Scene\Scene.h" />
+    <ClInclude Include="Scene\SceneNode.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Math\BoundingBox.inl" />
     <None Include="Math\BoundingSphere.inl" />
     <None Include="Math\ColorRGBA.inl" />
     <None Include="Math\MathUtil.inl" />
@@ -201,6 +205,11 @@
     <None Include="Math\Plane.inl" />
     <None Include="Math\Quaternion.inl" />
     <None Include="Math\Vector.inl" />
+    <None Include="Scene\新建文本文档 - 副本 - 副本 (2).txt" />
+    <None Include="Scene\新建文本文档 - 副本 - 副本 - 副本.txt" />
+    <None Include="Scene\新建文本文档 - 副本 - 副本.txt" />
+    <None Include="Scene\新建文本文档 - 副本.txt" />
+    <None Include="Scene\新建文本文档.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

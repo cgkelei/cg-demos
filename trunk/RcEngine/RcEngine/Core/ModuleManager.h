@@ -6,7 +6,7 @@
 #include <Core/DynLib.h>
 
 namespace RcEngine{
-namespace Core{
+
 
 class ModuleInfo
 {
@@ -60,7 +60,7 @@ private:
 };
 
 
-} // Namespace Core
+
 } // Namespace RcEngine
 
 #endif // ModuleManager_h__

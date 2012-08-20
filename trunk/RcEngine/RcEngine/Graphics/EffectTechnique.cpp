@@ -1,7 +1,7 @@
 #include <Graphics/EffectTechnique.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 EffectTechnique::EffectTechnique()
 {
@@ -67,5 +67,5 @@ EffectAnnotation* EffectTechnique::GetAnnotationByIndex( uint32_t index )
 	return nullptr;
 }
 
-} // Namespace Render
+
 } // Namespace RcEngine

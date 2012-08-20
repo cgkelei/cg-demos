@@ -5,11 +5,6 @@
 #include <Core/Singleton.h>
 
 namespace RcEngine{
-namespace Core{
-
-using Render::RenderDevice;
-using Render::RenderFactory;
-using Input::InputSystem;
 
 class _ApiExport Context : public Singleton<Context>
 {
@@ -48,7 +43,7 @@ private:
 };
 
 
-} // Namespace Core
+
 } // Namespace RcEngine
 
 #endif // EngineContext_h__

@@ -4,7 +4,6 @@
 #include <Core/Prerequisites.h>
 
 namespace RcEngine {
-namespace Core {
 
 typedef void (*DLL_START_PLUGIN)(IModule** pModule);
 
@@ -55,7 +54,7 @@ private:
 	std::string DynLibError();
 };
 
-} // Namespace Core
+
 } // Namespace RcEngine
 
 #endif // DynLib_h__

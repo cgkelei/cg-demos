@@ -1,21 +1,19 @@
 #include "OISInputPrerequisites.h"
 #include "Input/InputSystem.h"
 
-namespace RcEngine
+namespace RcEngine {
+
+class _InputExport OISInputSystem : public InputSystem
 {
-	namespace Input
-	{
-		class _InputExport OISInputSystem : public InputSystem
-		{
-		public:
-			OISInputSystem();
-			~OISInputSystem();
+public:
+	OISInputSystem();
+	~OISInputSystem();
 
-			virtual const String& Name() const ;
-			OIS::InputManager* GetInputManager() const	{ return mInputManager; }
+	virtual const String& Name() const ;
+	OIS::InputManager* GetInputManager() const	{ return mInputManager; }
 
-		private:
-			OIS::InputManager* mInputManager;
-		};
-	}
+private:
+	OIS::InputManager* mInputManager;
+};
+
 }

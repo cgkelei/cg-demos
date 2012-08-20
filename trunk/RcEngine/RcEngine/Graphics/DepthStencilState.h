@@ -5,7 +5,7 @@
 #include <Graphics/GraphicsCommon.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 class _ApiExport DepthStencilStateDesc
 {
@@ -56,7 +56,7 @@ protected:
 };
 
 
-} // Namespace Render
+
 } // Namespace RcEngine
 
 #endif // DepthStencilState_h__

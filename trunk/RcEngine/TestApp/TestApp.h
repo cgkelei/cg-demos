@@ -7,7 +7,7 @@
 
 #pragma comment(lib, "RcEngine.lib")
 
-using namespace RcEngine::Render;
+using namespace RcEngine;
 
 class TestApp : public RcEngine::Application
 {

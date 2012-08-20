@@ -2,7 +2,6 @@
 #include <Graphics/Camera.h>
 
 namespace RcEngine {
-namespace Render {
 
 Viewport::Viewport( )	
 	: AttachCamera( new Camera() )
@@ -30,5 +29,4 @@ bool Viewport::operator==( const Viewport& rhs )
 	return true;
 }
 
-} // Namespace Render
 } // Namespace RcEngine

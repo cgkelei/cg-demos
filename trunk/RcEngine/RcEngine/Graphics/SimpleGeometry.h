@@ -7,7 +7,6 @@
 #include <Math/Matrix.h>
 
 namespace RcEngine {
-namespace Render {
 
 class _ApiExport RenderableHelper : public Renderable
 {
@@ -16,20 +15,20 @@ public:
 	virtual ~RenderableHelper();
 
 	const String& GetName() const								{ return mName; }
-	const Math::BoundingSpheref& GetBoundingSphere() const		{ return mBoundingSphere; }
+	const BoundingSpheref& GetBoundingSphere() const		{ return mBoundingSphere; }
 
 	const shared_ptr<Material>& GetMaterial() const				{ return mMaterial; }
 
-	void GetWorldTransforms(Math::Matrix4f* xform) const		{ xform[0] = mWorldMatrix; }
+	void GetWorldTransforms(Matrix4f* xform) const		{ xform[0] = mWorldMatrix; }
 	uint32_t GetWorldTransformsCount() const					{ return 1; }
 
-	void SetWorldMatrix(const Math::Matrix4f& mat)				{ mWorldMatrix = mat; }
+	void SetWorldMatrix(const Matrix4f& mat)				{ mWorldMatrix = mat; }
 
 protected:
 	String mName;
-	Math::BoundingSpheref mBoundingSphere;
+	BoundingSpheref mBoundingSphere;
 
-	Math::Matrix4f mWorldMatrix;
+	Matrix4f mWorldMatrix;
 	shared_ptr<Material> mMaterial;
 };
 
@@ -50,8 +49,7 @@ public:
 
 	const shared_ptr<RenderOperation>& GetRenderOperation() const;
 };
-		
-} // Namespace Render
+
 } // Namespace RcEngine
 
 #endif // SimpleGeometry_h__

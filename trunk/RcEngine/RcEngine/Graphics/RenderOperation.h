@@ -6,7 +6,7 @@
 #include <Graphics/GraphicsCommon.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 class _ApiExport RenderOperation
 {
@@ -70,7 +70,7 @@ public:
 	uint32_t StartInstanceLocation;
 };
 
-} // Namespace Render
+
 } // Namespace RcEngine
 
 

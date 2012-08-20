@@ -718,14 +718,14 @@ QuaternionToRotationYawPitchRoll(Real& yaw, Real& pitch, Real& roll, const Quate
 	//{
 	//	// singularity at north pole
 	//	yaw = 2 * std::atan2(quat.Z(), quat.W());
-	//	pitch = Math::PI / 2;
+	//	pitch = PI / 2;
 	//	roll = 0;
 	//}
 	//else if(test <  Real(-0.499) * unit)
 	//{
 	//	// singularity at south pole
 	//	yaw = -2 * std::atan2(quat.Z(), quat.W());
-	//	pitch = -Math::PI / 2;
+	//	pitch = -PI / 2;
 	//	roll = 0;
 	//}
 	//else
@@ -776,6 +776,23 @@ QuaternionSlerp(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2, Re
 
 
 //////////////////////////////////////////////////////////////////////////
+template<typename Real>
+BoundingBox<Real> FromSphere( const BoundingSphere<Real>& sphere )
+{
+	BoundingBox box;
+	box.Min = Vector<Real, 3>( sphere.Center.X() - sphere.Radius, sphere.Center.Y() - sphere.Radius, sphere.Center.Z() - sphere.Radius );
+	box.Max = Vector<Real, 3>( sphere.Center.X() + sphere.Radius, sphere.Center.Y() + sphere.Radius, sphere.Center.Z() + sphere.Radius );
+	return box;
+}
 
+template<typename Real>
+BoundingSphere<Real> FromBox( const BoundingBox<Real>& box )
+{
+	Vector<Real,3> difference = box.Max - box.Min;
+	Vector<Real,3> center = (box.Min + box.Max) * Real(0.5);
+	Real radius = difference.Length() * Real(0.5);
+
+	return BoundingSphere<Real>(center, radius);
+}
 
 

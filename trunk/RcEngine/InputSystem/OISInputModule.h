@@ -2,25 +2,22 @@
 #include "OISInputSystem.h"
 #include "Input/InputModule.h"
 
-namespace RcEngine
+namespace RcEngine {
+
+class _InputExport OISInputModule : public InputModule
 {
-	namespace Input
-	{
-		class _InputExport OISInputModule : public InputModule
-		{
-		public:
-			OISInputModule();
-			~OISInputModule();
+public:
+	OISInputModule();
+	~OISInputModule();
 
-			virtual const String& GetName() const;
-			virtual void Initialise();
-			virtual void Shutdown();
+	virtual const String& GetName() const;
+	virtual void Initialise();
+	virtual void Shutdown();
 
-			virtual InputSystem* GetInputSystem();
+	virtual InputSystem* GetInputSystem();
 
-		private:
-			OISInputSystem* mInputSystem;
-		};
+private:
+	OISInputSystem* mInputSystem;
+};
 
-	}
 }

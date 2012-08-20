@@ -4,9 +4,9 @@
 #include "Core/IModule.h"
 
 namespace RcEngine{
-namespace Input{
+
 		
-class _ApiExport InputModule : public Core::IModule
+class _ApiExport InputModule : public IModule
 {
 protected:
 	InputModule();
@@ -16,7 +16,7 @@ public:
 	virtual InputSystem* GetInputSystem() = 0;
 };
 
-} // Namespace Input 
+
 } // Namespace RcEngine
 
 

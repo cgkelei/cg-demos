@@ -9,7 +9,7 @@
 #include <Core/Context.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 Renderable::Renderable()
 	: mRenderOperation( new RenderOperation )
@@ -35,7 +35,7 @@ void Renderable::AddToRenderQueue()
 
 void Renderable::Render()
 {
-	RenderDevice& device = Core::Context::GetSingleton().GetRenderDevice();
+	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
 	EffectTechnique* technique = GetTechnique();
 			
 	OnRenderBegin();
@@ -47,7 +47,7 @@ void Renderable::OnRenderBegin()
 {
 	// Get world transforms
 	uint32_t matCounts = GetWorldTransformsCount();
-	Math::Matrix4f* matWorlds = new Math::Matrix4f[matCounts];
+	Matrix4f* matWorlds = new Matrix4f[matCounts];
 	GetWorldTransforms(matWorlds);
 
 	// Get material 
@@ -72,5 +72,5 @@ void Renderable::OnRenderEnd()
 
 }
 
-} // Namespace Render
+
 } // Namespace RcEngine

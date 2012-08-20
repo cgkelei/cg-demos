@@ -1,19 +1,16 @@
 #include "Input/InputModule.h"
 
-namespace RcEngine
+namespace RcEngine{
+
+InputModule::InputModule()
 {
-	namespace Input
-	{
 
-		InputModule::InputModule()
-		{
+}
 
-		}
+InputModule::~InputModule()
+{
 
-		InputModule::~InputModule()
-		{
+}
 
-		}
 
-	}
 }

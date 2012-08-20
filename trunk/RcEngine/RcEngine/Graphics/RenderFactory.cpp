@@ -5,7 +5,7 @@
 #include <Core/Exception.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 RenderFactory::RenderFactory(void)
 {
@@ -25,7 +25,7 @@ shared_ptr<Material> RenderFactory::CreateMaterialFromFile( const String& matNam
 		FileStream file;
 		if (!file.Open(path, FILE_READ))
 		{
-			ENGINE_EXCEPT(Core::Exception::ERR_FILE_NOT_FOUND, 
+			ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, 
 				"Error: " + path + " not exits!", "RenderFactory::CreateMaterialFromFile");
 		}
 
@@ -45,5 +45,5 @@ shared_ptr<VertexDeclaration> RenderFactory::CreateVertexDeclaration( const std:
 }
 
 
-} // Namespace Render
+
 } // Namespace RcEngine

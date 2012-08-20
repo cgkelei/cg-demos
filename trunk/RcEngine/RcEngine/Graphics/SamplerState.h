@@ -6,7 +6,6 @@
 #include <Math/ColorRGBA.h>
 
 namespace RcEngine {
-namespace Render {
 
 class _ApiExport SamplerStateDesc
 {
@@ -23,7 +22,7 @@ public:
 	float                      MinLOD;
 	float                      MaxLOD;
 
-	Math::ColorRGBA			   BorderColor;	
+	ColorRGBA			   BorderColor;	
 };
 
 inline SamplerStateDesc::SamplerStateDesc()
@@ -52,7 +51,6 @@ protected:
 	SamplerStateDesc mDesc;
 };
 
-} // Namespace Render
 } // Namespace RcEngine
 
 #endif // SamplerState_h__

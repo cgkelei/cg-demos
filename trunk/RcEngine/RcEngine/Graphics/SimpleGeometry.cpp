@@ -14,9 +14,7 @@
 
 
 namespace RcEngine {
-namespace Render {
 
-using namespace  Math;
 	
 RenderableHelper::RenderableHelper( const String& name )
 	: mName(name)
@@ -33,7 +31,7 @@ RenderableHelper::~RenderableHelper()
 SimpleBox::SimpleBox(const String& name)
 	: RenderableHelper(name)
 {
-	RenderFactory& factory = Core::Context::GetSingleton().GetRenderFactory();
+	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 
 	mMaterial = factory.CreateMaterialFromFile("SimpleMat", "../Media/Materials/SimpleMat.xml");
 
@@ -101,7 +99,7 @@ const shared_ptr<RenderOperation>& SimpleBox::GetRenderOperation() const
 SimpleTexturedQuad::SimpleTexturedQuad(const String& name)
 	: RenderableHelper(name)
 {
-	RenderFactory& factory = Core::Context::GetSingleton().GetRenderFactory();
+	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 
 	mMaterial = factory.CreateMaterialFromFile("SimpleTextured", "../Media/Materials/SimpleTextured.xml");
 
@@ -165,7 +163,6 @@ const shared_ptr<RenderOperation>& SimpleTexturedQuad::GetRenderOperation() cons
 	return mRenderOperation;
 }
 
-} // Namespace Render
 } // Namespace RcEngine
 
 

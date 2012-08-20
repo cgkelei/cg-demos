@@ -7,7 +7,7 @@
 
 //  [8/22/2011 hustruan]
 namespace RcEngine {
-namespace Math {
+
 
 template< typename Real, int32_t Size >
 class Vector
@@ -98,6 +98,6 @@ typedef Vector<float,4> Vector4f;
 typedef Vector<double,3> Vector3d;
 typedef Vector<double,4> Vector4d;
 
-} // Namespace Math
+
 } // Namespace RcEngine
 #endif

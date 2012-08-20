@@ -1,21 +1,19 @@
 #include "OISInputPrerequisites.h"
 #include "Input/InputDevice.h"
 
-namespace RcEngine
+namespace RcEngine {
+
+class _InputExport OISInputKeyboard : public Keyboard
 {
-	namespace Input
-	{
-		class _InputExport OISInputKeyboard : public Keyboard
-		{
-		public:
-			OISInputKeyboard(InputSystem* inputSystem);
-			~OISInputKeyboard();
+public:
+	OISInputKeyboard(InputSystem* inputSystem);
+	~OISInputKeyboard();
 
-			virtual const String& GetName() const ;
-			virtual void Update() ;
+	virtual const String& GetName() const ;
+	virtual void Update() ;
 
-		private:
-			OIS::Keyboard* mKeyboard;	
-		};
-	}
+private:
+	OIS::Keyboard* mKeyboard;	
+};
+
 }

@@ -1,46 +1,42 @@
 #include "OpenGLEffectPass.h"
 #include "OpenGLEffectParameter.h"
 
-namespace RcEngine
+namespace RcEngine {
+
+OpenGLEffectPass::OpenGLEffectPass( CGpass pass )
+	: mCgPass(pass)
 {
-	namespace Render
+	if ( mCgPass != NULL )
 	{
-		
-		OpenGLEffectPass::OpenGLEffectPass( CGpass pass )
-			: mCgPass(pass)
+		mValid = true;
+		const char* passName = cgGetPassName(mCgPass);
+		if ( passName != NULL )
 		{
-			if ( mCgPass != NULL )
-			{
-				mValid = true;
-				const char* passName = cgGetPassName(mCgPass);
-				if ( passName != NULL )
-				{
-					mName = passName;
-				}
-			}
+			mName = passName;
 		}
-
-		OpenGLEffectPass::~OpenGLEffectPass()
-		{
-
-		}
-
-		bool OpenGLEffectPass::BeginPass()
-		{
-			if ( mValid )
-			{
-				cgSetPassState( mCgPass );
-			}
-			return mValid;
-		}
-
-		void OpenGLEffectPass::EndPass()
-		{
-			if ( mValid )
-			{
-				cgResetPassState( mCgPass );
-			}
-		}
-
 	}
+}
+
+OpenGLEffectPass::~OpenGLEffectPass()
+{
+
+}
+
+bool OpenGLEffectPass::BeginPass()
+{
+	if ( mValid )
+	{
+		cgSetPassState( mCgPass );
+	}
+	return mValid;
+}
+
+void OpenGLEffectPass::EndPass()
+{
+	if ( mValid )
+	{
+		cgResetPassState( mCgPass );
+	}
+}
+
 }

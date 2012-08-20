@@ -4,8 +4,7 @@
 #include "Core/Prerequisites.h"
 
 namespace RcEngine{
-namespace Input{
-	
+
 typedef std::pair<uint32_t, uint32_t> InputAction;
 typedef std::pair<uint32_t, uint32_t> InputState;
 typedef std::pair<uint32_t, uint32_t> InputRange;
@@ -117,8 +116,6 @@ private:
 	std::unordered_map<uint32_t, InputRangeHandler> mRangeHandlers;
 };
 
-
-} // Namespace Input 
 } // Namespace RcEngine
 
 

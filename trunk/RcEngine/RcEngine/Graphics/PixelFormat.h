@@ -4,7 +4,7 @@
 #include <Core/Prerequisites.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 enum PixelFormat
 {
@@ -291,7 +291,7 @@ public:
 		
 };
 
-} // Namespace Render
+
 } // Namespace RcEngine
 
 

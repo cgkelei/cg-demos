@@ -8,13 +8,6 @@
 #include <Math/ColorRGBA.h>
 
 namespace RcEngine {
-namespace Render {
-		
-using Math::Matrix4f;
-using Math::Vector2f;
-using Math::Vector3f;
-using Math::Vector4f;
-using Math::ColorRGBA;
 
 class EffectParameter;
 
@@ -341,7 +334,7 @@ protected:
 	bool mValid;
 };
 
-} // Namespace Render
+
 } // Namespace RcEngine
 
 

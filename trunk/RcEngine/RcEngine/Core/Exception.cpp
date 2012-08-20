@@ -1,7 +1,7 @@
 #include <Core/Exception.h>
 
 namespace RcEngine{
-namespace Core{
+
 
 Exception::Exception( int32_t num, const std::string& desc, const std::string& src )
 	: number(num), description(desc), source(src)
@@ -76,5 +76,5 @@ const std::string& Exception::GetDescription( void ) const
 	return description;
 }
 
-} // Namespace Core
+
 } // Namespace RcEngine

@@ -1,7 +1,7 @@
 #include <Graphics/Effect.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 Effect::Effect(const String& name)
 	:  mName(name)
@@ -61,5 +61,5 @@ EffectParameter* Effect::GetParameterByIndex(uint32_t index) const
 	return mParameters.GetParameterByIndex(index);
 }
 
-} // Namespace Render
+
 } // Namespace RcEngine

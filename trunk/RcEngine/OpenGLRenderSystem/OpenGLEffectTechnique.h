@@ -4,21 +4,19 @@
 #include "OpenGLPrerequisites.h"
 #include <Graphics/EffectTechnique.h>
 
-namespace RcEngine
+namespace RcEngine {
+
+class _OpenGLExport OpenGLEffectTechnique : public EffectTechnique
 {
-	namespace Render
-	{
-		class _OpenGLExport OpenGLEffectTechnique : public EffectTechnique
-		{
-		public:
-			OpenGLEffectTechnique(CGtechnique technique);
-			~OpenGLEffectTechnique();
+public:
+	OpenGLEffectTechnique(CGtechnique technique);
+	~OpenGLEffectTechnique();
 
-		private:
-			CGtechnique mCgTechnique;
+private:
+	CGtechnique mCgTechnique;
 
-		};
-	}
+};
+
 }
 
 

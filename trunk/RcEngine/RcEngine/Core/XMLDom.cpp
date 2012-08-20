@@ -4,7 +4,7 @@
 #include <IO/Stream.h>
 
 namespace RcEngine{
-namespace Core{
+
 
 rapidxml::node_type MapToRapidxml(XMLNodeType type)
 {
@@ -501,5 +501,5 @@ std::string XMLAttribute::ValueString() const
 	return mValue;
 }
 
-} // Namespace Core
+
 } // Namespace RcEngine

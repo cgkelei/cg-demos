@@ -4,37 +4,34 @@
 #include "OpenGLPrerequisites.h"
 #include "OpenGLFrameBuffer.h"
 
-namespace RcEngine
+namespace RcEngine {
+
+class _OpenGLExport OpenGLRenderWindow : public OpenGLFrameBuffer
 {
-	namespace Render
-	{
-		class _OpenGLExport OpenGLRenderWindow : public OpenGLFrameBuffer
-		{
-		public:
-			OpenGLRenderWindow(const RenderSettings& settings);
-			~OpenGLRenderWindow();
+public:
+	OpenGLRenderWindow(const RenderSettings& settings);
+	~OpenGLRenderWindow();
 
-			void ToggleFullscreen(bool fs);
-			bool Fullscreen() const;
-			void SwapBuffers();
-			void Resize(uint32_t width, uint32_t height);
+	void ToggleFullscreen(bool fs);
+	bool Fullscreen() const;
+	void SwapBuffers();
+	void Resize(uint32_t width, uint32_t height);
 
-		protected:
-			void DoBind();
-			void DoUnbind();
+protected:
+	void DoBind();
+	void DoUnbind();
 
-		private:
-			int32_t mLeft, mTop;
-			HDC  mHdc;
-			HGLRC mHrc;
-			HWND mHwnd;
-			bool mFullscreen;
-			std::string mDescription;
+private:
+	int32_t mLeft, mTop;
+	HDC  mHdc;
+	HGLRC mHrc;
+	HWND mHwnd;
+	bool mFullscreen;
+	std::string mDescription;
 			
 
-		};
+};
 
-	}
 }
 
 #endif // OpenGLRenderWindow_h__

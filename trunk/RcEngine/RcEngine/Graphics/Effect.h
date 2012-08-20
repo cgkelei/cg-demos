@@ -7,7 +7,7 @@
 #include <Graphics/EffectParameter.h>
 
 namespace RcEngine {
-namespace Render {
+
 		
 /**
 	* Defines an effect which can be applied during rendering.
@@ -38,6 +38,6 @@ protected:
 			
 };
 
-} // Namespace Render
+
 } // Namespace RcEngine
 #endif // Effect_h__

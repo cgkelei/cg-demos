@@ -4,23 +4,21 @@
 #include "OpenGLPrerequisites.h"
 #include <Graphics/EffectPass.h>
 
-namespace RcEngine
+namespace RcEngine {
+
+class _OpenGLExport OpenGLEffectPass : public EffectPass
 {
-	namespace Render
-	{
-		class _OpenGLExport OpenGLEffectPass : public EffectPass
-		{
-		public:
-			OpenGLEffectPass(CGpass pass);
-			~OpenGLEffectPass();
+public:
+	OpenGLEffectPass(CGpass pass);
+	~OpenGLEffectPass();
 
-			bool BeginPass();
-			void EndPass();
+	bool BeginPass();
+	void EndPass();
 
-		private:
-			CGpass mCgPass;
-		};
-	}
+private:
+	CGpass mCgPass;
+};
+
 }
 
 

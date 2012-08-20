@@ -7,9 +7,6 @@
 #include <Math/Quaternion.h>
 
 namespace RcEngine {
-namespace Render {
-
-using namespace RcEngine::Math;
 
 struct _ApiExport Joint
 {
@@ -41,7 +38,6 @@ private:
 	vector<Joint> mJoints;
 };
 
-} // Namespace Render
 } // Namespace RcEngine
 
 #endif // Skeleton_h__

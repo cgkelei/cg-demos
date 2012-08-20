@@ -6,28 +6,25 @@
 #include "OpenGLGraphicCommon.h"
 #include <Graphics/GraphicBuffer.h>
 
-namespace RcEngine
+namespace RcEngine {
+
+class _OpenGLExport OpenGLGraphicsBuffer : public GraphicsBuffer
 {
-	namespace Render
-	{
-		class _OpenGLExport OpenGLGraphicsBuffer : public GraphicsBuffer
-		{
-		public:
-			OpenGLGraphicsBuffer(BufferUsage usage, uint32_t accessHint, GLenum target, ElementInitData* initData);
-			~OpenGLGraphicsBuffer(void); 
+public:
+	OpenGLGraphicsBuffer(BufferUsage usage, uint32_t accessHint, GLenum target, ElementInitData* initData);
+	~OpenGLGraphicsBuffer(void); 
 
-			GLenum GetTarget() const;
-			GLuint GetBufferID() const;
+	GLenum GetTarget() const;
+	GLuint GetBufferID() const;
 
-			void* Map(uint32_t offset, uint32_t length, BufferAccess options);
-			void UnMap();
+	void* Map(uint32_t offset, uint32_t length, BufferAccess options);
+	void UnMap();
 
-		private:
-			GLuint mBufferID;
-			GLenum mTarget;
-		};
+private:
+	GLuint mBufferID;
+	GLenum mTarget;
+};
 
-	}
 }
 
 #endif // OpenGLGraphicBuffer_h__

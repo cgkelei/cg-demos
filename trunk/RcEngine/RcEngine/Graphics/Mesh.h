@@ -8,11 +8,6 @@
 #include <IO/Stream.h>
 
 namespace RcEngine {
-namespace Render {
-//using
-using Math::BoundingSpheref;
-using Math::Matrix4f;
-
 
 class _ApiExport MeshPart : public Renderable
 {
@@ -43,7 +38,7 @@ public:
 	const shared_ptr<GraphicsBuffer>& GetIndexBuffer()	const	{ return mIndexBuffer; }
 	IndexBufferType GetIndexFormat() const						{ return mIndexFormat;  }
 			
-	void GetWorldTransforms(Math::Matrix4f* xform) const;
+	void GetWorldTransforms(Matrix4f* xform) const;
 	uint32_t GetWorldTransformsCount() const;
 
 
@@ -114,7 +109,7 @@ public:
 private:
 	String mName;
 			
-	Math::BoundingSpheref mBoundingSphere;
+	BoundingSpheref mBoundingSphere;
 
 	uint32_t mPrimitiveCount;
 	uint32_t mVertexCount;
@@ -122,10 +117,10 @@ private:
 	vector<shared_ptr<MeshPart> > mMeshParts;  
 	vector<shared_ptr<Material> > mMaterials;
 
-	Math::Matrix4f mWorld;
+	Matrix4f mWorld;
 };
 
-} // Namespace Render
+
 } // Namespace RcEngine
 
 #endif // Mesh_h__

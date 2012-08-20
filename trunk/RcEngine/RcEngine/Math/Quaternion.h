@@ -2,7 +2,7 @@
 #define Quaternion_h__
 
 namespace RcEngine{
-namespace Math {
+
 
 template<typename Real>
 class Quaternion
@@ -54,7 +54,7 @@ private:
 typedef Quaternion<float> Quaternionf;
 typedef Quaternion<double> Quaterniond;
 
-} // Namespace Math
+
 } // Namespace RcEngine
 
 

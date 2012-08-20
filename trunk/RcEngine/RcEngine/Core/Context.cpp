@@ -5,9 +5,9 @@
 
 namespace RcEngine{
 
-SINGLETON_DECL(Core::Context)
+SINGLETON_DECL(Context)
 
-namespace Core{
+
 
 Context::Context()
 	: mInputSystem(nullptr), mApplication(nullptr), mRenderDevice(nullptr), mRenderFactory(nullptr)
@@ -85,5 +85,5 @@ InputSystem& Context::GetInputSystem()
 	return *mInputSystem;
 }
 
-} // Namespace Core
+
 } // Namespace RcEngine

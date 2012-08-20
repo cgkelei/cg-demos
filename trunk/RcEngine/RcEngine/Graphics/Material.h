@@ -7,12 +7,7 @@
 #include <Graphics/EffectAnnotation.h>
 
 namespace RcEngine {
-namespace Render {	
-		
-// using 
-using Math::ColorRGBA;
-using namespace Core;
-
+	
 static const int32_t MaxMaterialTextures = 16;
 
 class _ApiExport MaterialParameter
@@ -72,7 +67,7 @@ protected:
 			
 };
 
-} // Namespace Render
+
 } // Namespace RcEngine
 
 #endif // Material_h__

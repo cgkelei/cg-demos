@@ -7,9 +7,7 @@
 
 namespace RcEngine
 {
-	namespace Render
-	{
-		using Math::BoundingSpheref;
+
 
 		class _ApiExport Model 
 		{
@@ -18,7 +16,7 @@ namespace RcEngine
 			~Model(void);
 		};
 
-	}
+
 }
 
 #endif // Model_h__

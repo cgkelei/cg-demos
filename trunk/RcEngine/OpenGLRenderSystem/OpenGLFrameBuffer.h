@@ -4,32 +4,29 @@
 #include "OpenGLPrerequisites.h"
 #include <Graphics/FrameBuffer.h>
 
-namespace RcEngine
+namespace RcEngine {
+
+
+class _OpenGLExport OpenGLFrameBuffer : public FrameBuffer
 {
-	namespace Render
-	{
+public:
+	OpenGLFrameBuffer(uint32_t width, uint32_t height, bool offscreen = true);
+	virtual ~OpenGLFrameBuffer();
 
-		class _OpenGLExport OpenGLFrameBuffer : public FrameBuffer
-		{
-		public:
-			OpenGLFrameBuffer(uint32_t width, uint32_t height, bool offscreen = true);
-			virtual ~OpenGLFrameBuffer();
+	virtual void DoBind();
+	virtual void DoUnbind();
 
-			virtual void DoBind();
-			virtual void DoUnbind();
+	virtual void Resize(uint32_t width, uint32_t height);
+	virtual void Clear(uint32_t flags, ColorRGBA& clr, float depth, uint32_t stencil);
+	virtual void SwapBuffers();
 
-			virtual void Resize(uint32_t width, uint32_t height);
-			virtual void Clear(uint32_t flags, Math::ColorRGBA& clr, float depth, uint32_t stencil);
-			virtual void SwapBuffers();
+	GLuint GetFrameBufferObject() const { return mFrameBufferObject; }
 
-			GLuint GetFrameBufferObject() const { return mFrameBufferObject; }
+private:
+	GLuint mFrameBufferObject;
 
-		private:
-			GLuint mFrameBufferObject;
+};
 
-		};
-
-	}
 }
 
 

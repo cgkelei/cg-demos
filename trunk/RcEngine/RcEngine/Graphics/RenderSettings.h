@@ -4,7 +4,7 @@
 #include <Graphics/PixelFormat.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 struct RenderSettings
 {
@@ -16,7 +16,7 @@ struct RenderSettings
 	uint32_t SampleCount, SampleQuality;
 };
 
-} // Namespace Render
+
 } // Namespace RcEngine
 
 
