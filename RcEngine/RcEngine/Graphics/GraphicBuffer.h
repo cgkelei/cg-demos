@@ -5,7 +5,7 @@
 #include <Graphics/GraphicsCommon.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 class _ApiExport GraphicsBuffer
 {
@@ -26,7 +26,7 @@ protected:
 	uint32_t mSizeInBytes;
 };
 
-} // Namespace Render
+
 } // Namespace RcEngine
 
 #endif // GraphicBuffer_h__

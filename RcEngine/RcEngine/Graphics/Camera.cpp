@@ -3,7 +3,6 @@
 #include <Graphics/RenderDevice.h>
 
 namespace RcEngine {
-namespace Render {
 
 Camera::Camera(void)
 {
@@ -35,7 +34,7 @@ void Camera::SetProjectionParams( float fov, float aspect, float nearPlane, floa
 
 	mProjectionMatrix = CreatePerspectiveFovLH(mFieldOfView, mAspect, mNearPlane, mFarPlane);
 	//修改投影矩阵，使OpenGL适应左右坐标系
-	Core::Context::GetSingletonPtr()->GetRenderDevicePtr()->AdjustProjectionMatrix(mProjectionMatrix);
+	Context::GetSingletonPtr()->GetRenderDevicePtr()->AdjustProjectionMatrix(mProjectionMatrix);
 }
 
 const Matrix4f& Camera::GetViewMatrix() const
@@ -48,5 +47,4 @@ const Matrix4f& Camera::GetProjectionMatrix() const
 	return mProjectionMatrix;
 }
 
-} // Namespace Render
 } // Namespace RcEngine

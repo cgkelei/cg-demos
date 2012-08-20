@@ -25,10 +25,6 @@
 
 #pragma comment(lib, "D3DX10.lib")
 
-using namespace RcEngine::Math;
-using namespace RcEngine::Render;
-using namespace RcEngine::Content;
-using namespace RcEngine::Input;
 
 TestApp::TestApp(void)
 {
@@ -56,22 +52,22 @@ bool Equal(const D3DXMATRIX& mat1, const Matrix4f& mat2)
 
 void TestApp::Initialize()
 {
-	Camera* camera = RcEngine::Core::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
+	Camera* camera = RcEngine::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
 	
 	Vector3f up(0, 1, 0);
-	Vector3f eye(0, 10, 60);
-	Vector3f target(0, 60, 0);
+	//Vector3f eye(0, 10, 100);
+	//Vector3f target(0, 10, 0);
 
-	Vector3f view = target - eye;
-	view.Normalize();
+	//Vector3f view = target - eye;
+	//view.Normalize();
 
-	Vector3f right = Cross(up, view);
-	right.Normalize();
+	//Vector3f right = Cross(up, view);
+	//right.Normalize();
 
-	up = Cross(view, right);
-	up.Normalize();
+	//up = Cross(view, right);
+	//up.Normalize();
 
-	camera->SetViewParams(Vector3f(0, 10, 30), Vector3f(0, 10, 0), up);
+	camera->SetViewParams(Vector3f(0, 0, 40), Vector3f(0, 0, 0), up);
 	//camera->SetViewParams(eye, target, up);
 	camera->SetProjectionParams(PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 1000.0f );
 
@@ -83,7 +79,7 @@ void TestApp::Initialize()
 
 void TestApp::LoadContent()
 {
-	RenderFactory* factory = RcEngine::Core::Context::GetSingleton().GetRenderDevice().GetRenderFactory();
+	RenderFactory* factory = RcEngine::Context::GetSingleton().GetRenderDevice().GetRenderFactory();
 
 	// Load mesh
 	//RcEngine::FileStream modelSource("../Media/Mesh/Test/Test.mdl", RcEngine::FILE_READ);
@@ -108,7 +104,7 @@ void TestApp::Render()
 	RenderDevice* device = Context::GetSingleton().GetRenderDevicePtr();
 
 	device->GetCurrentFrameBuffer()->Clear(CF_Color | CF_Depth |CF_Stencil, 
-		RcEngine::Math::ColorRGBA(1.1f, 1.1f, 1.1f, 1.0f), 1.0f, 0);
+		RcEngine::ColorRGBA(1.1f, 1.1f, 1.1f, 1.0f), 1.0f, 0);
 
 
 	for (uint32_t i = 0; i < mDwarf->GetMeshPartCount(); ++i)
@@ -119,6 +115,7 @@ void TestApp::Render()
 	device->GetCurrentFrameBuffer()->SwapBuffers();
 }
 
+
 void TestApp::Update( float deltaTime )
 {
 	static float degree = 0;
@@ -126,11 +123,19 @@ void TestApp::Update( float deltaTime )
 
 	Quaternionf quat = QuaternionFromRotationYawPitchRoll( ToRadian(degree), 0.0f, 0.0f);
 
+	const Vector3f& center = mDwarf->GetBoundingSphere().Center;
+	float radius = mDwarf->GetBoundingSphere().Radius;
 
+	Matrix4f worldScale = CreateTranslation(-center.X(), -center.Y(), -center.Z());
+	//worldScale.MakeIdentity();
+	worldScale = worldScale * CreateScaling(10.0f / radius, 10.0f / radius, 10.0f / radius);
 	Matrix4f world = mCameraControler->GetWorldMatrix();
-	mDwarf->SetWorldMatrix( world* CreateScaling(10.0f, 10.0f, 10.0f) );
+
+	mDwarf->SetWorldMatrix( worldScale * world );
 
 }
+
+BoundingBoxf bf;
 
 int32_t main()
 {

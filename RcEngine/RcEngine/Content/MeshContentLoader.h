@@ -32,13 +32,13 @@ namespace RcEngine
 			String Name;
 			uint32_t MaterialID;
 
-			Math::BoundingSpheref BoundingSphere;
+			BoundingSpheref BoundingSphere;
 
 			std::vector<Face> mFaces;
 			
-			Render::IndexBufferType IndexFormat;
+			IndexBufferType IndexFormat;
 
-			shared_ptr<Render::VertexDeclaration> VertexDeclaration;
+			shared_ptr<VertexDeclaration> VertexDeclaration;
 
 			uint32_t StartIndex;
 			uint32_t IndexCount;
@@ -58,7 +58,7 @@ namespace RcEngine
 			MeshContent();
 
 			String Name;
-			Math::BoundingSpheref BoundingSphere;
+			BoundingSpheref BoundingSphere;
 
 			vector<MaterialContent*> MaterialContentLoaders;
 			vector<MeshPartContent*> MeshPartContentLoaders;

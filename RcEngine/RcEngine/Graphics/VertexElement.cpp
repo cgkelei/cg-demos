@@ -2,9 +2,6 @@
 #include <Core/Exception.h>
 
 namespace RcEngine {
-namespace Render {
-
-using Core::Exception;
 
 VertexElement::VertexElement(uint32_t offset, VertexElementFormat theType, VertexElementUsage semantic, uint16_t index /*= 0*/ )
 	:   Offset(offset),
@@ -101,5 +98,4 @@ bool VertexElement::IsNormalized( VertexElementFormat etype )
 }
 
 
-} // Namespace Render
 } // Namespace RcEngine

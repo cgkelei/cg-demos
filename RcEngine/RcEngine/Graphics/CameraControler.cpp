@@ -6,10 +6,6 @@
 #include <Core/Context.h>
 
 namespace RcEngine {
-namespace Render {
-		
-using namespace Math;
-using namespace Input;
 
 /************************************************************************/
 /*                                                                      */
@@ -60,7 +56,7 @@ FPSCameraControler::FPSCameraControler()
 		InputRange(MS_YDelta, TurnUpDown),
 	};
 
-	InputSystem* inputSystem = Core::Context::GetSingleton().GetInputSystemPtr();
+	InputSystem* inputSystem = Context::GetSingleton().GetInputSystemPtr();
 	if (inputSystem)
 	{
 		inputSystem->AddState(states, states+ sizeof(states)/ sizeof(InputState));
@@ -159,8 +155,8 @@ void FPSCameraControler::Rotate( float yaw, float pitch, float roll )
 	mCameraYawAngle += yaw * 0.05f;
 	mCameraPitchAngle += pitch * 0.05f;
 
-	mCameraPitchAngle = (std::max)( -Math::PI / 2.0f, mCameraPitchAngle );
-	mCameraPitchAngle = (std::min)( +Math::PI / 2.0f, mCameraPitchAngle );
+	mCameraPitchAngle = (std::max)( -PI / 2.0f, mCameraPitchAngle );
+	mCameraPitchAngle = (std::min)( +PI / 2.0f, mCameraPitchAngle );
 
 	mCameraRot = QuaternionFromRotationYawPitchRoll(mCameraYawAngle, mCameraPitchAngle, 0.0f);
 
@@ -211,17 +207,11 @@ void ArcBall::Reset()
 Vector3f ArcBall::ScreenToSphere( float screenX, float screenY )
 {
 	// Scale to screen
-	/*float x = -( screenX - mOffset.X() - mWindowWidth / 2 ) / ( mRadius * mWindowWidth / 2 );
-	float y = ( screenY - mOffset.Y() - mWindowHeight / 2 ) / ( mRadius * mWindowHeight / 2 );*/
-
 	Vector3f result;
 
 	// map to [-1, 1]
-	/*result.X() = -(screenX - mCenter.X()) / mRadius;
-	result.Y() = (screenY - mCenter.Y()) / mRadius;*/
-
-	result.X() = -( screenX  - mWindowWidth / 2 ) / (  mWindowWidth / 2 );
-	result.Y() = ( screenY  - mWindowHeight / 2 ) / (  mWindowHeight / 2 );
+	result.X() = -(screenX - mCenter.X()) / mRadius;
+	result.Y() = -(screenY - mCenter.Y()) / mRadius;
 	result.Z() = 0.0f;
 	
 	float mag = result.SquaredLength();
@@ -273,11 +263,18 @@ void ArcBall::SetWindowSize( int32_t windowWidth, int32_t windowHeight )
 {
 	mWindowWidth = windowWidth;
 	mWindowHeight = windowHeight;
+
+	// Make the radius of the arcball slightly smaller than the smalest dimension of the screen.
+	if (windowWidth > windowHeight)
+		mRadius = (windowHeight * .95f) * 0.5f;
+	else
+		mRadius = (windowWidth * .95f) * 0.5f;
+
 	mCenter = Vector2f( (float)mWindowWidth/2, (float)mWindowHeight/2 );
-	mRadius = (std::min)( (float)mWindowWidth/2, (float)mWindowHeight/2 );
+	
 }
 
-void ArcBall::SetCenterAndRadius( const Math::Vector2f& center, float radius )
+void ArcBall::SetCenterAndRadius( const Vector2f& center, float radius )
 {
 	mCenter = center;
 	mRadius = radius;
@@ -298,7 +295,7 @@ ModelViewerCameraControler::ModelViewerCameraControler()
 		InputState(MS_RightButton, ModelView)
 	};
 
-	InputSystem* inputSystem = Core::Context::GetSingleton().GetInputSystemPtr();
+	InputSystem* inputSystem = Context::GetSingleton().GetInputSystemPtr();
 	inputSystem->AddState(states, states+ sizeof(states)/ sizeof(InputState));
 	inputSystem->AddStateHandler(CameraView, fastdelegate::MakeDelegate(this, &ModelViewerCameraControler::HadnleCameraView));
 	inputSystem->AddStateHandler(ModelView, fastdelegate::MakeDelegate(this, &ModelViewerCameraControler::HandleModelView));
@@ -318,7 +315,7 @@ void ModelViewerCameraControler::HadnleCameraView( uint32_t action, bool value, 
 {
 	assert(action == CameraView);
 	// Get mouse device to fetch position
-	Mouse* mouse =	Core::Context::GetSingleton().GetInputSystem().GetMouse();
+	Mouse* mouse =	Context::GetSingleton().GetInputSystem().GetMouse();
 	if (value == true)
 	{
 		if (mCameraArcBall.IsDragging() == false)
@@ -339,7 +336,7 @@ void ModelViewerCameraControler::HadnleCameraView( uint32_t action, bool value, 
 			vWorldUp = Transform(vLocalUp, mCameraRot );
 			vWorldAhead = Transform( vLocalAhead, mCameraRot );
 
-			mAttachedCamera->SetViewParams(mAttachedCamera->GetPosition(), mAttachedCamera->GetPosition() + vWorldAhead, vWorldUp);
+			//mAttachedCamera->SetViewParams(mAttachedCamera->GetPosition(), mAttachedCamera->GetPosition() + vWorldAhead, vWorldUp);
 
 
 		}
@@ -355,7 +352,7 @@ void ModelViewerCameraControler::HandleModelView( uint32_t action, bool value, f
 {
 	assert(action == ModelView);
 	// Get mouse device to fetch position
-	Mouse* mouse =	Core::Context::GetSingleton().GetInputSystem().GetMouse();
+	Mouse* mouse =	Context::GetSingleton().GetInputSystem().GetMouse();
 	if (value == true)
 	{
 		if (mModelArcBall.IsDragging() == false)
@@ -365,15 +362,7 @@ void ModelViewerCameraControler::HandleModelView( uint32_t action, bool value, f
 		else
 		{
 			mModelArcBall.OnMove(mouse->X(), mouse->Y());
-
-			// 
-			Matrix4f invView = MatrixInverse(mAttachedCamera->GetViewMatrix());
-			invView.M41 = invView.M42 = invView.M43 = 0;
-
-			// Accumulate the delta of the arcball's rotation in view space.
-			// Note that per-frame delta rotations could be problematic over long periods of time.
-			Matrix4f modelRot = QuaternionToRotationMatrix( mModelArcBall.GetRotation() );
-			mWorld = modelRot;
+			mWorld = QuaternionToRotationMatrix( mModelArcBall.GetRotation() );
 		}
 	}
 	else
@@ -390,11 +379,10 @@ void ModelViewerCameraControler::SetWindowSize( int32_t width, int32_t height )
 	mModelArcBall.SetWindowSize(width, height);
 }
 
-void ModelViewerCameraControler::SetCenterAndRadius( const Math::Vector2f& center, float radis )
+void ModelViewerCameraControler::SetCenterAndRadius( const Vector2f& center, float radis )
 {
 	mCameraArcBall.SetCenterAndRadius(center, radis);
 	mModelArcBall.SetCenterAndRadius(center, radis);
 }
 
-} // Namespace Render
 } // Namespace RcEngine

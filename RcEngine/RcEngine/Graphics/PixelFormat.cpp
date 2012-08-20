@@ -2,7 +2,7 @@
 #include <Core/Exception.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 //-----------------------------------------------------------------------
 /**
@@ -611,7 +611,7 @@ uint32_t PixelFormatUtils::GetMemorySize( uint32_t width, uint32_t height, uint3
 			return ((width+3)/4)*((height+3)/4)*16 * depth;
 
 		default:
-			ENGINE_EXCEPT(Core::Exception::ERR_INVALIDPARAMS, "Invalid compressed pixel format",
+			ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid compressed pixel format",
 				"PixelUtil::GetMemorySize");
 		}
 	}
@@ -704,5 +704,5 @@ bool PixelFormatUtils::IsStencil( PixelFormat format )
 	return false;
 }
 
-} // Namespace Render
+
 } // Namespace RcEngineRcEngine

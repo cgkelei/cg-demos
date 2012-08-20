@@ -5,7 +5,7 @@
 #include <Graphics/EffectAnnotation.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 class _ApiExport EffectPass
 {
@@ -31,7 +31,7 @@ protected:
 
 typedef vector<EffectPass*> EffectPassList;
 
-} // Namespace Render
+
 } // Namespace RcEngine
 
 #endif // EffectPass_h__

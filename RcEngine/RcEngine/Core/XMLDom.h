@@ -4,7 +4,7 @@
 #include <Core/Prerequisites.h>
 
 namespace RcEngine{
-namespace Core{
+
 
 enum XMLNodeType
 {
@@ -146,7 +146,7 @@ private:
 	std::string mValue;
 };
 
-} // Namespace Core
+
 } // Namespace RcEngine
 
 #endif // XMLDom_h__

@@ -5,30 +5,28 @@
 #include <Graphics/GraphicsCommon.h>
 #include <Graphics/PixelFormat.h>
 
-namespace RcEngine
+namespace RcEngine {
+
+class _OpenGLExport OpenGLMapping
 {
-	namespace Render
-	{
-		class _OpenGLExport OpenGLMapping
-		{
-		public:
-			OpenGLMapping(void);
-			~OpenGLMapping(void);
+public:
+	OpenGLMapping(void);
+	~OpenGLMapping(void);
 
-			static GLenum Mapping(FillMode fm);
-			static GLenum Mapping(VertexElementFormat format);
-			static GLenum Mapping(PrimitiveType type);
-			static GLenum Mapping(BlendOperation op);
-			static GLenum Mapping(AlphaBlendFactor factor);
-			static GLenum Mapping(CompareFunction cf);
-			static GLenum Mapping(StencilOperation sop);
+	static GLenum Mapping(FillMode fm);
+	static GLenum Mapping(VertexElementFormat format);
+	static GLenum Mapping(PrimitiveType type);
+	static GLenum Mapping(BlendOperation op);
+	static GLenum Mapping(AlphaBlendFactor factor);
+	static GLenum Mapping(CompareFunction cf);
+	static GLenum Mapping(StencilOperation sop);
 
-			// Reference glTexImage* function
-			static void Mapping(GLint& outInternalformat, GLenum& outFormat, GLenum& outType, PixelFormat inPixelFormat);
-			static PixelFormat UnMapping( GLint inInternalformat, GLenum inFormat, GLenum inType);
+	// Reference glTexImage* function
+	static void Mapping(GLint& outInternalformat, GLenum& outFormat, GLenum& outType, PixelFormat inPixelFormat);
+	static PixelFormat UnMapping( GLint inInternalformat, GLenum inFormat, GLenum inType);
 
-		};
-	}
+};
+
 }
 
 

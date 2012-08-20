@@ -6,16 +6,13 @@
 #include <Math/Matrix.h>
 
 namespace RcEngine {
-namespace Render {
-
-using Math::BoundingSpheref;
 
 
 /** 
-	* Renderable discrete objects which will be queued in the render pipeline, grouped by material. Classes
-	* implementing this interface must be based on a single material, a single world matrix (or a collection
-	* of world matrices which are blended by weights), and must be renderable via a single render operation.
-	*/
+ * Renderable discrete objects which will be queued in the render pipeline, grouped by material. Classes
+ * implementing this interface must be based on a single material, a single world matrix (or a collection
+ * of world matrices which are blended by weights), and must be renderable via a single render operation.
+ */
 class _ApiExport Renderable
 {
 public:
@@ -35,7 +32,7 @@ public:
 
 	virtual const shared_ptr<RenderOperation>& GetRenderOperation() const = 0;
 
-	virtual void GetWorldTransforms(Math::Matrix4f* xform) const = 0;
+	virtual void GetWorldTransforms(Matrix4f* xform) const = 0;
 	virtual uint32_t GetWorldTransformsCount() const = 0;
 
 	virtual void AddToRenderQueue();
@@ -50,7 +47,7 @@ protected:
 
 };
 
-} // Namespace Render
+
 } // Namespace RcEngine
 
 #endif // Renderable_h__

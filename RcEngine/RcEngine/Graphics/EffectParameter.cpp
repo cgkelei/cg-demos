@@ -1,7 +1,7 @@
 #include <Graphics/EffectParameter.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 EffectParameter::EffectParameter()
 {
@@ -77,5 +77,5 @@ EffectParameter* EffectParameterCollection::GetParameterBySemantic( const String
 	return nullptr;
 }
 
-} // Namespace Render
+
 } // Namespace RcEngine

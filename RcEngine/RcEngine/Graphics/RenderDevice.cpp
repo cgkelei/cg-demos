@@ -10,12 +10,12 @@
 #include <Core/Context.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 	RenderDevice::RenderDevice(void)
 		: mRenderFactory(0), mCurrentFrameBuffer(0), mScreenFrameBuffer(0)
 	{
-		Core::Context::GetSingleton().SetRenderDevice(this);
+		Context::GetSingleton().SetRenderDevice(this);
 	}
 
 	RenderDevice::~RenderDevice(void)
@@ -58,5 +58,5 @@ namespace Render {
 		DoRender(tech, op);
 	}
 
-} // Namespace Render
+
 } // Namespace RcEngine

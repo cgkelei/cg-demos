@@ -7,7 +7,6 @@
 #include <Graphics/PixelFormat.h>
 
 namespace RcEngine {
-namespace Render {
 
 class _ApiExport Texture
 {
@@ -55,7 +54,6 @@ protected:
 	TextureType mType;
 };
 
-} // Namespace Render
 } // Namespace RcEngine
 
 #endif

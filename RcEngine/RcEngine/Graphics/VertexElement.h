@@ -5,9 +5,8 @@
 #include <Graphics/GraphicsCommon.h>
 
 namespace RcEngine {
-namespace Render {
 
-class  _ApiExport VertexElement
+class _ApiExport VertexElement
 {
 public:
 	/// <summary>
@@ -88,8 +87,6 @@ public:
 	uint16_t UsageIndex;
 };
 
-
-} // Namespace Render
 } // Namespace RcEngine
 
 #endif // _VertexElement__H

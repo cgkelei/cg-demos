@@ -8,9 +8,6 @@
 #include <Math/Matrix.h>
 
 namespace RcEngine {
-namespace Render {
-
-using namespace Math;
 
 class _ApiExport RenderDevice
 {
@@ -38,7 +35,7 @@ public:
 	virtual void ToggleFullscreen(bool fs) = 0;
 	virtual bool Fullscreen() const = 0;
 	virtual void CreateRenderWindow(const RenderSettings& settings) = 0;	
-	virtual void AdjustProjectionMatrix(Math::Matrix4f& pOut) = 0;
+	virtual void AdjustProjectionMatrix(Matrix4f& pOut) = 0;
 
 protected:
 	virtual void DoBindFrameBuffer(FrameBuffer* fb) = 0;
@@ -71,7 +68,6 @@ protected:
 		
 };
 
-} // Namespace Render
 } // Namespace RcEngine
 
 #endif // RenderDevice_h__

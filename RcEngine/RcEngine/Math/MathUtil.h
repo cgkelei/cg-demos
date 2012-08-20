@@ -3,14 +3,16 @@
 #define _MathUtil__H
 
 //  [8/23/2011 hustruan]
+#include <Math/Math.h>
 #include <Math/Vector.h>
 #include <Math/Matrix.h>
 #include <Math/Plane.h>
 #include <Math/Quaternion.h>
 #include <Math/BoundingSphere.h>
+#include <Math/BoundingBox.h>
 
 namespace RcEngine{
-namespace Math {
+
 
 const float PI		= 3.141592f;			// PI
 const float RadianToDegree = 180.0f / PI;
@@ -202,9 +204,21 @@ template <typename Real>
 inline Quaternion<Real> 
 QuaternionSlerp(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2, Real t);
 
+/**
+ * Create a new bounding box form a bounding sphere
+ */
+template<typename Real>
+BoundingBox<Real> FromSphere( const BoundingSphere<Real>& sphere );
+
+/**
+ * Create a new bounding sphere form a bounding box
+ */
+template<typename Real>
+BoundingSphere<Real> FromBox( const BoundingBox<Real>& box );
+
 #include <Math/MathUtil.inl>
 
-} // Namespace Math
+
 } // Namespace RcEngine
 
 

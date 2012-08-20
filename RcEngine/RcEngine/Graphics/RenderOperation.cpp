@@ -3,7 +3,7 @@
 #include <Graphics/VertexDeclaration.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 RenderOperation::RenderOperation( void )
 	: UseIndex(true), PrimitiveType(PT_Triangle_List),
@@ -102,5 +102,5 @@ const RenderOperation::StreamUnit& RenderOperation::GetStreamUnit( uint32_t inde
 	return VertexStreams[index];
 }
 
-} // Namespace Render
+
 } // Namespace RcEngine

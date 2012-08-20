@@ -1,11 +1,11 @@
 #include "OISInputModule.h"
 
-extern "C" void _InputExport dllStartPlugin(RcEngine::Core::IModule** pMoudle) 
+extern "C" void _InputExport dllStartPlugin(RcEngine::IModule** pMoudle) 
 {
-	*pMoudle = new RcEngine::Input::OISInputModule();
+	*pMoudle = new RcEngine::OISInputModule();
 }
 
-extern "C" void _InputExport dllStopPlugin(RcEngine::Core::IModule** pMoudle) 
+extern "C" void _InputExport dllStopPlugin(RcEngine::IModule** pMoudle) 
 {
 	delete (*pMoudle);
 }

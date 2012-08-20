@@ -4,7 +4,6 @@
 #include <Core/Prerequisites.h>
 
 namespace RcEngine {
-namespace Core {
 
 class _ApiExport IModule
 {
@@ -24,7 +23,6 @@ public:
 
 };
 
-} // Namespace Core
 } // Namespace RcEngine
 
 #endif // IModule_h__

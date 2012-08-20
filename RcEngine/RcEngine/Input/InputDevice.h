@@ -5,7 +5,7 @@
 #include "Math/Vector.h"
 
 namespace RcEngine{
-namespace Input{
+
 
 // ¼üÅÌ¶¯×÷
 enum KeyCode
@@ -203,9 +203,9 @@ public:
 	
 protected:
 	InputSystem* mInputSystem;
-	Math::Vector<int32_t, 2>  mCurrentPosition;
+	Vector<int32_t, 2>  mCurrentPosition;
 	/// Mouse movement since last frame.
-	Math::Vector<int32_t, 2>  mMouseMove;
+	Vector<int32_t, 2>  mMouseMove;
 	int32_t mButtons[2];
 	int32_t mIndex;
 
@@ -232,7 +232,7 @@ protected:
 	int32_t mIndex;
 };
 
-} // Namespace Input 
+
 } // Namespace RcEngine
 
 

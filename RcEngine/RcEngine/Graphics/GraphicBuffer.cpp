@@ -1,7 +1,7 @@
 #include <Graphics/GraphicBuffer.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 GraphicsBuffer::GraphicsBuffer(BufferUsage usage, uint32_t accessHint)
 	: mBufferUsage(usage), mAccessHint(accessHint)
@@ -29,5 +29,5 @@ uint32_t GraphicsBuffer::GetBufferSize() const
 	return mSizeInBytes;
 }
 
-} // Namespace Render
+
 } // Namespace RcEngine

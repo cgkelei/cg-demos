@@ -8,7 +8,6 @@
 
 
 namespace RcEngine {
-namespace Render {
 		
 /**
 * Camera controller. Controller provides camera movement and rotation control using keyboard and mouse.
@@ -58,7 +57,7 @@ protected:
 	void HandleRoatate(uint32_t action, int32_t value, float delta);
 
 protected:
-	Math::Quaternionf mCameraRot;
+	Quaternionf mCameraRot;
 	float mCameraYawAngle;
 	float mCameraPitchAngle;
 	float mCameraRollAngle;
@@ -74,10 +73,10 @@ public:
 
 	void Reset();
 	void SetWindowSize( int32_t windowWidth, int32_t windowHeight );
-	void SetCenterAndRadius( const Math::Vector2f& center, float radius );
+	void SetCenterAndRadius( const Vector2f& center, float radius );
 
-	Math::Vector3f GetConstraintAxis() const			    { return mConstraintAxis; }
-	void SetConstraintAxis( const Math::Vector3f& axis )    { mConstraintAxis = axis; mUseConstraint = true; }
+	Vector3f GetConstraintAxis() const			    { return mConstraintAxis; }
+	void SetConstraintAxis( const Vector3f& axis )    { mConstraintAxis = axis; mUseConstraint = true; }
 	void SetNoConstraintAxis( )								{ mUseConstraint = false; }
 	bool IsUsingConstraint() const							{ return mUseConstraint; }
 
@@ -87,33 +86,33 @@ public:
 
 	bool IsDragging() const { return mDrag; }
 
-	Math::Quaternionf GetRotation() const { return mQuatNow; }
+	Quaternionf GetRotation() const { return mQuatNow; }
 
 private:
-	Math::Vector3f ScreenToSphere( float screenX, float screenY );
+	Vector3f ScreenToSphere( float screenX, float screenY );
 
 private:
 			
 	int32_t mWindowWidth;		// arc ball's window width
 	int32_t mWindowHeight;		// arc ball's window height	
 
-	Math::Vector2f mCenter;		 // center of arc ball in screen coordinates
+	Vector2f mCenter;		 // center of arc ball in screen coordinates
 	float mRadius;              // arc ball's radius in screen coordinates
 	
 	float mRadiusTranslation;   // arc ball's radius for translating the target
 
 	bool mUseConstraint;
-	Math::Vector3f mConstraintAxis;
+	Vector3f mConstraintAxis;
 
 	bool mDrag;
 
-	Math::Quaternionf mQuatNow;
-	Math::Quaternionf mQuatDown;
+	Quaternionf mQuatNow;
+	Quaternionf mQuatDown;
 
-	Math::Vector2f mLastMousePoint;
+	Vector2f mLastMousePoint;
 
-	Math::Vector3f mDownPt;			// starting point of rotation arc on sphere
-	Math::Vector3f mCurrentPt;		// current point of rotation arc on sphere
+	Vector3f mDownPt;			// starting point of rotation arc on sphere
+	Vector3f mCurrentPt;		// current point of rotation arc on sphere
 
 
 };
@@ -143,13 +142,13 @@ public:
 	/**
 	 * Set arcball center and radius
 	 */
-	void SetCenterAndRadius( const Math::Vector2f& center, float radis );
+	void SetCenterAndRadius( const Vector2f& center, float radis );
 
 
 	/**
 	 * Get the world matrix of model
 	 */
-	Math::Matrix4f GetWorldMatrix() const	{ return mWorld; }
+	Matrix4f GetWorldMatrix() const	{ return mWorld; }
 
 protected:
 	void HandleModelView(uint32_t action, bool value, float delta);
@@ -158,11 +157,11 @@ protected:
 protected:
 	ArcBall mCameraArcBall;
 	ArcBall mModelArcBall;
-	Math::Quaternionf mCameraRot;
-	Math::Matrix4f mWorld; // world matrix of model
+	Quaternionf mCameraRot;
+	Matrix4f mWorld; // world matrix of model
 };
 
-} // Namespace Render
+
 } // Namespace RcEngine
 
 #endif // CameraControler_h__

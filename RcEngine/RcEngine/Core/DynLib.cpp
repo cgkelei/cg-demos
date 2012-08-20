@@ -2,7 +2,6 @@
 #include <Core/Utility.h>
 
 namespace RcEngine {
-namespace Core {
 
 DynLib::DynLib( const std::string& name )
 	:mName(name), m_hInst(0)
@@ -68,5 +67,4 @@ std::string DynLib::DynLibError()
 	return ret;
 }
 
-} // Namespace Core
 } // Namespace RcEngine

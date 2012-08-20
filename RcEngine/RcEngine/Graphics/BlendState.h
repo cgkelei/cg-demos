@@ -5,7 +5,7 @@
 #include <Graphics/GraphicsCommon.h>
 
 namespace RcEngine {
-namespace Render {
+
 class _ApiExport BlendStateDesc
 {
 public:
@@ -56,7 +56,6 @@ protected:
 	BlendStateDesc mDesc;
 };
 
-} // Namespace Render
 } // Namespace RcEngine
 
 #endif // BlendState_h__

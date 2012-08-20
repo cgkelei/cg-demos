@@ -3,27 +3,26 @@
 #include "Core/Context.h"
 
 namespace RcEngine{
-namespace Input {
 
-Input::InputDeviceType GetRawInputDevice(uint32_t key)
+InputDeviceType GetRawInputDevice(uint32_t key)
 {
-	if (key <= Input::KC_MediaSelect && key >= Input::KC_UnAssigned)
+	if (key <= KC_MediaSelect && key >= KC_UnAssigned)
 	{
-		return Input::IDT_Keyboard;
+		return IDT_Keyboard;
 	}
-	else if (key >= Input::MS_X && key <= Input::MS_Button7)
+	else if (key >= MS_X && key <= MS_Button7)
 	{
-		return Input::IDT_Mouse;
+		return IDT_Mouse;
 	}
 
-	return Input::IDT_Keyboard;
+	return IDT_Keyboard;
 }
 
 		
 InputSystem::InputSystem()
 	: mKeyboard(nullptr), mMouse(nullptr)
 {
-	Core::Context::GetSingleton().SetInputSystem(this);		
+	Context::GetSingleton().SetInputSystem(this);		
 }
 
 InputSystem::~InputSystem()
@@ -268,5 +267,4 @@ bool InputMaps::MapToRange( uint32_t axis, uint32_t& range ) const
 	return false;
 }*/
 
-}
 }

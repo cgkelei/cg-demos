@@ -17,9 +17,6 @@
 
 using namespace std;
 using namespace RcEngine;
-using namespace RcEngine::Math;
-using namespace RcEngine::Render;
-
 
 struct MaterialData;
 struct MeshPartData;
@@ -37,7 +34,6 @@ private:
 	void ProcessScene(const aiScene* scene);
 
 	shared_ptr<MaterialData> ProcessMaterial(aiMaterial* material);
-	shared_ptr<MeshPartData> ProcessMeshPart(aiMesh* mesh);
 
 	void ExportXML( OutModel& outModel);
 	void ExportBinary( OutModel& outModel );

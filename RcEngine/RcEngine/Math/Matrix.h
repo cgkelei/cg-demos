@@ -4,7 +4,7 @@
 #include <Math/Vector.h>
 
 namespace RcEngine{
-namespace Math {
+
 
 template<typename Real>
 class Matrix4
@@ -103,7 +103,7 @@ private:
 typedef Matrix4<float> Matrix4f;
 typedef Matrix4<double> Matrix4d;
 
-} // Namespace Math
+
 } // Namespace RcEngine
 
 #endif // _Matrix__H

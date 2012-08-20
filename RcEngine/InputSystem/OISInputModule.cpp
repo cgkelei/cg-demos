@@ -1,42 +1,39 @@
 #include "OISInputModule.h"
 
-namespace RcEngine
+namespace RcEngine {
+
+const static std::string ModuleName = "OIS Input System";
+
+OISInputModule::OISInputModule()
+	: mInputSystem(nullptr)
 {
-	namespace Input
-	{
-		const static std::string ModuleName = "OIS Input System";
 
-		OISInputModule::OISInputModule()
-			: mInputSystem(nullptr)
-		{
+}
 
-		}
+OISInputModule::~OISInputModule()
+{
 
-		OISInputModule::~OISInputModule()
-		{
+}
 
-		}
+const String& OISInputModule::GetName() const
+{
+	return ModuleName;
+}
 
-		const String& OISInputModule::GetName() const
-		{
-			return ModuleName;
-		}
+void OISInputModule::Initialise()
+{
+	mInputSystem = new OISInputSystem();
+}
 
-		void OISInputModule::Initialise()
-		{
-			mInputSystem = new OISInputSystem();
-		}
+void OISInputModule::Shutdown()
+{
+	delete mInputSystem;
+	mInputSystem = nullptr;
+}
 
-		void OISInputModule::Shutdown()
-		{
-			delete mInputSystem;
-			mInputSystem = nullptr;
-		}
+InputSystem* OISInputModule::GetInputSystem()
+{
+	return mInputSystem;
+}
 
-		InputSystem* OISInputModule::GetInputSystem()
-		{
-			return mInputSystem;
-		}
-
-	}
 }

@@ -176,11 +176,17 @@ Quaternion<Real> Quaternion<Real>::operator-( const Quaternion<Real>& rhs ) cons
 template<typename Real>
 Quaternion<Real> Quaternion<Real>::operator*( const Quaternion<Real>& rhs ) const
 {
+/*
+ w = w1*w2 - x1*x2 - y1*y2 - z1*z2
+ x = w1*x2 + x1*w2 + z1*y2 - y1*z2
+ y = w1*y2 + y1*w2 + x1*z2 - z1*x2
+ z = w1*z2 + z1*w2 + y1*x2 - x1*y2
+ */
 	return Quaternion<Real>(
-		mTuple[0]*rhs.mTuple[0] - mTuple[1]*rhs.mTuple[1] - mTuple[2]*rhs[2] - mTuple[3]*rhs.mTuple[3],
-		mTuple[0]*rhs.mTuple[1] + mTuple[1]*rhs.mTuple[0] + mTuple[2]*rhs[3] - mTuple[3]*rhs.mTuple[2],
-		mTuple[0]*rhs.mTuple[2] + mTuple[2]*rhs.mTuple[0] + mTuple[3]*rhs[1] - mTuple[1]*rhs.mTuple[3],
-		mTuple[0]*rhs.mTuple[3] + mTuple[3]*rhs.mTuple[0] + mTuple[1]*rhs[2] - mTuple[2]*rhs.mTuple[1] );
+		mTuple[0]*rhs.mTuple[0] - mTuple[1]*rhs.mTuple[1] - mTuple[2]*rhs.mTuple[2] - mTuple[3]*rhs.mTuple[3],
+		mTuple[0]*rhs.mTuple[1] + mTuple[1]*rhs.mTuple[0] + mTuple[3]*rhs.mTuple[2] - mTuple[2]*rhs.mTuple[3],
+		mTuple[0]*rhs.mTuple[2] + mTuple[2]*rhs.mTuple[0] + mTuple[1]*rhs.mTuple[3] - mTuple[3]*rhs.mTuple[1],
+		mTuple[0]*rhs.mTuple[3] + mTuple[3]*rhs.mTuple[0] + mTuple[2]*rhs.mTuple[1] - mTuple[1]*rhs.mTuple[2] );
 }
 
 template<typename Real>

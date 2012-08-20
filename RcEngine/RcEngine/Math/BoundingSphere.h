@@ -1,18 +1,11 @@
 #ifndef BoundingSphere_h__
 #define BoundingSphere_h__
 
+#include <Math/Math.h>
 #include <Math/Vector.h>
-#include <Math/BoundingBox.h>
 
 namespace RcEngine {
-namespace Math {
 
-enum ContainmentType 
-{
-	CT_Disjoint,
-	CT_Contains,
-	CT_Intersects
-};
 
 template<typename Real>
 class BoundingSphere
@@ -58,19 +51,9 @@ public:
 	ContainmentType Contains( const BoundingSphere<Real>& sphere );
 
 	/**
-	 * Determines whether contains the specified box.
-	 */
-	ContainmentType Contains( const BoundingBox<Real>& box );
-
-	/**
 	 * Determines whether contains the specified point.
 	 */
 	ContainmentType Contains( const Vector<Real,3>& point );
-
-	/**
-	 * Determines whether a sphere intersects the specified object.
-	 */
-	bool Intersects( const BoundingBox<Real>& box );
 
 	/**
 	 * Determines whether a sphere intersects the specified object.
@@ -81,17 +64,13 @@ public:
 public:
 	Vector<Real, 3> Center;
 	Real Radius;
+
+private:
 	bool Defined;
 };
 
 typedef BoundingSphere<float> BoundingSpheref;
 typedef BoundingSphere<double> BoundingSphered;
-
-/**
- * Create a new bounding sphere form a bounding box
- */
-template<typename Real>
-BoundingSphere<Real> FromBox( const BoundingBox<Real>& box );
 
 /**
  * Return a new bounding sphere merged  from two given bounding sphere 
@@ -101,7 +80,7 @@ BoundingSphere<Real> Merge(const BoundingSphere<Real>& sphere1,const BoundingSph
 
 #include "Math/BoundingSphere.inl"
 
-} // Namespace Math
+
 } // Namespace RcEngine
 
 #endif // BoundingSphere_h__

@@ -1,35 +1,33 @@
 #include "OISInputKeyboard.h"
 #include "OISInputSystem.h"
 
-namespace RcEngine
+namespace RcEngine {
+
+static String Name = String("OIS Keyboard");
+
+OISInputKeyboard::OISInputKeyboard( InputSystem* inputSystem )
+	: Keyboard(inputSystem)
 {
-	namespace Input
-	{
-		static String Name = String("OIS Keyboard");
+	assert(inputSystem);
+	OIS::InputManager* inputManager = (static_cast<OISInputSystem*>(mInputSystem))->GetInputManager();
+	mKeyboard = static_cast<OIS::Keyboard*>(inputManager->createInputObject(OIS::OISKeyboard, false));
+}
 
-		OISInputKeyboard::OISInputKeyboard( InputSystem* inputSystem )
-			: Keyboard(inputSystem)
-		{
-			assert(inputSystem);
-			OIS::InputManager* inputManager = (static_cast<OISInputSystem*>(mInputSystem))->GetInputManager();
-			mKeyboard = static_cast<OIS::Keyboard*>(inputManager->createInputObject(OIS::OISKeyboard, false));
-		}
+OISInputKeyboard::~OISInputKeyboard()
+{
 
-		OISInputKeyboard::~OISInputKeyboard()
-		{
+}
 
-		}
+const String& OISInputKeyboard::GetName() const
+{
+	return Name;
+}
 
-		const String& OISInputKeyboard::GetName() const
-		{
-			return Name;
-		}
+void OISInputKeyboard::Update( )
+{
+	mKeyboard->capture();
+	mIndex = !mIndex;
+	mKeyboard->copyKeyStates((char*)mKeyBuffer[mIndex]);
+}
 
-		void OISInputKeyboard::Update( )
-		{
-			mKeyboard->capture();
-			mIndex = !mIndex;
-			mKeyboard->copyKeyStates((char*)mKeyBuffer[mIndex]);
-		}
-	}
 }

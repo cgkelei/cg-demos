@@ -4,9 +4,8 @@
 #include <Core/IModule.h>
 
 namespace RcEngine {
-namespace Render {
 
-class _ApiExport IRenderModule : public Core::IModule
+class _ApiExport IRenderModule : public IModule
 {
 protected:
 	IRenderModule();
@@ -17,7 +16,7 @@ public:
 	virtual RenderDevice* GetRenderDevice() = 0;
 };
 
-} // Namespace Render
+
 } // Namespace RcEngine
 
 #endif // IRenderModule_h__

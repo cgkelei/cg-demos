@@ -300,169 +300,11 @@ void AssimpProcesser::ProcessScene( const aiScene* scene )
 {
 	OutModel model;
 	model.RootNode = mAIScene->mRootNode;
-	ExportModel(model, "Test.mdl");
+	ExportModel(model, "Test");
 	ExportBinary(model);
 	ExportXML(model);
 }
 
-shared_ptr<MeshPartData> AssimpProcesser::ProcessMeshPart( aiMesh* mesh )
-{
-	if (!mesh)
-	{
-		return nullptr;
-	}
-
-	shared_ptr<MeshPartData> meshPart( new MeshPartData() );
-
-	meshPart->Name = std::string(mesh->mName.C_Str());
-	meshPart->MaterialID = mesh->mMaterialIndex;
-
-	// process faces
-	uint16_t faceCount = mesh->mNumFaces;
-	meshPart->StartIndex = 0;
-	meshPart->IndexCount = mesh->mNumFaces * 3;		// only support triangle
-	
-	if ( meshPart->IndexCount < (std::numeric_limits<uint16_t>::max)() )
-	{
-		meshPart->IndexFormat = IBT_Bit16;
-	}
-	else
-	{
-		meshPart->IndexFormat = IBT_Bit32;
-	}
-	
-	meshPart->IndexData.resize(meshPart->IndexCount);
-	
-	for (unsigned int f = 0; f < mesh->mNumFaces; ++f)
-	{
-		aiFace face = mesh->mFaces[f];
-		assert(face.mNumIndices == 3);
-		meshPart->IndexData[ f*3 + 0] = face.mIndices[0];
-		meshPart->IndexData[ f*3 + 1] = face.mIndices[1];
-		meshPart->IndexData[ f*3 + 2] = face.mIndices[2];
-	}
-
-	bool bones = mesh->HasBones();
-
-	// Process vertices
-	vector<VertexElement> vertexElements;
-	unsigned int offset = 0;
-	if (mesh->HasPositions())
-	{
-		vertexElements.push_back(VertexElement(offset, VEF_Vector3, VEU_Position, 0));
-		offset += VertexElement::GetTypeSize(VEF_Vector3);
-	}
-
-	if (mesh->HasNormals())
-	{
-		vertexElements.push_back(VertexElement(offset, VEF_Vector3, VEU_Normal, 0));
-		offset += VertexElement::GetTypeSize(VEF_Vector3);
-	}
-
-	if (mesh->HasTangentsAndBitangents())
-	{
-		vertexElements.push_back(VertexElement(offset, VEF_Vector3, VEU_Tangent, 0));
-		offset += VertexElement::GetTypeSize(VEF_Vector3);
-
-		vertexElements.push_back(VertexElement(offset, VEF_Vector3, VEU_Binormal, 0));
-		offset += VertexElement::GetTypeSize(VEF_Vector3);
-	}
-
-	for (unsigned int i = 0; i < mesh->GetNumUVChannels(); ++i)
-	{
-		switch (mesh->mNumUVComponents[i])
-		{
-		case 1:
-			vertexElements.push_back(VertexElement(offset, VEF_Single, VEU_TextureCoordinate, i));
-			offset += VertexElement::GetTypeSize(VEF_Single);
-			break;
-		case 2:
-			vertexElements.push_back(VertexElement(offset, VEF_Vector2, VEU_TextureCoordinate, i));
-			offset += VertexElement::GetTypeSize(VEF_Vector2);
-			break;
-		case 3:
-			vertexElements.push_back(VertexElement(offset, VEF_Vector3, VEU_TextureCoordinate, i));
-			offset += VertexElement::GetTypeSize(VEF_Vector3);
-			break;
-		}
-	}
-
-	unsigned int vertexSize = offset;
-	
-	// bounding sphere
-	meshPart->BoundingSphere.Center = Vector3f(0.0f, 0.0f, 0.0f);
-	meshPart->BoundingSphere.Radius = 0.0f;
-
-	meshPart->VertexCount = mesh->mNumVertices;
-	meshPart->VertexData.resize(vertexSize * mesh->mNumVertices);
-
-	
-	for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
-	{
-		int baseOffset = vertexSize * i;
-		for (size_t ve = 0; ve < vertexElements.size(); ++ve)
-		{
-			const VertexElement& element = vertexElements[ve];
-			float* vertexPtr = (float*)(&meshPart->VertexData[0] + baseOffset + element.Offset);
-			switch(element.Usage)
-			{
-			case VEU_Position:
-				{
-					aiVector3D v = mesh->mVertices[i];
-					*(vertexPtr) = mesh->mVertices[i].x;
-					*(vertexPtr+1) = mesh->mVertices[i].y;
-					*(vertexPtr+2) = mesh->mVertices[i].z;
-
-					// bouding sphere
-				}	
-				break;
-			case VEU_Normal:
-				{
-					*(vertexPtr) = mesh->mNormals[i].x;
-					*(vertexPtr+1) = mesh->mNormals[i].y;
-					*(vertexPtr+2) = mesh->mNormals[i].z;
-				}
-				break;
-			case VEU_Tangent:
-				{
-					*(vertexPtr) = mesh->mTangents[i].x;
-					*(vertexPtr+1) = mesh->mTangents[i].y;
-					*(vertexPtr+2) = mesh->mTangents[i].z;
-				}			
-				break;
-			case VEU_Binormal:
-				{
-					*(vertexPtr) = mesh->mBitangents[i].x;
-					*(vertexPtr+1) = mesh->mBitangents[i].y;
-					*(vertexPtr+2) = mesh->mBitangents[i].z;
-				}			
-				break;
-			case VEU_TextureCoordinate:
-				{
-					switch(mesh->mNumUVComponents[element.UsageIndex])
-					{
-					case 3:
-						*(vertexPtr+2) = mesh->mTextureCoords[element.UsageIndex][i].z;
-					case 2:
-						*(vertexPtr+1) = mesh->mTextureCoords[element.UsageIndex][i].y;	
-					case 1:
-						*(vertexPtr) = mesh->mTextureCoords[element.UsageIndex][i].x;
-						break;
-					}
-				}
-			case VEU_BlendIndices:
-				break;
-			case VEU_BlendWeight:
-				break; 
-
-			default:
-				break;
-			}
-		}
-	}
-
-	return meshPart;
-}
 
 shared_ptr<MaterialData> AssimpProcesser::ProcessMaterial( aiMaterial* material )
 {
@@ -558,21 +400,35 @@ shared_ptr<MaterialData> AssimpProcesser::ProcessMaterial( aiMaterial* material 
 
 void AssimpProcesser::ExportXML(  OutModel& outModel )
 {
-	ofstream file("newTest.xml");
+	ofstream file(outModel.OutName + ".xml");
+
+	file << "<mesh name=\"" << outModel.OutName << "\">" << endl;
+
+	// write mesh bouding sphere
+	const Vector3f& meshCenter = outModel.MeshBoundingSphere.Center;
+	const float meshRadius = outModel.MeshBoundingSphere.Radius;
+	file << "\t<bounding x=\"" << meshCenter[0] << "\" y=\"" << meshCenter[1] << "\" z=\"" << meshCenter[2] << " radius=" << meshRadius << "\"/>\n";
+		
+
 	vector<shared_ptr<MeshPartData> >& subMeshes = outModel.MeshParts;
 	for (size_t i = 0; i < subMeshes.size(); ++i)
 	{
 		shared_ptr<MeshPartData> submesh = subMeshes[i];
 		
-		file << "<subMesh>" << endl;
+		file << "\t<subMesh name=\"" << submesh->Name << "\">\n";
+
+		// write bounding sphere
+		const Vector3f& center = submesh->BoundingSphere.Center;
+		const float radius = submesh->BoundingSphere.Radius;
+		file << "\t\t<bounding x=\"" << center[0] << "\" y=\"" << center[1] << "\" z=\"" << center[2] << " radius=" << radius << "\"/>\n";
 
 		// write each vertex element
 		const std::vector<VertexElement>& elements = submesh->VertexDeclaration->GetElements();
-		file << "\t<vertice vertexCount=\"" << submesh->VertexCount << "\" vertexSize=\"" << submesh->VertexDeclaration->GetVertexSize()<<"\"/>\n";
+		file << "\t\t<vertice vertexCount=\"" << submesh->VertexCount << "\" vertexSize=\"" << submesh->VertexDeclaration->GetVertexSize()<<"\"/>\n";
 
 		for (size_t i = 0; i < submesh->VertexCount; ++i)
 		{
-			file << "\t\t<vertex>\n";
+			file << "\t\t\t<vertex>\n";
 			int baseOffset = submesh->VertexDeclaration->GetVertexSize() * i;
 			for (auto iter = elements.begin(); iter != elements.end(); ++iter)
 			{
@@ -582,22 +438,22 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 				{
 				case VEU_Position:
 					{
-						file << "\t\t\t<position x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
+						file << "\t\t\t\t<position x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
 					}	
 					break;
 				case VEU_Normal:
 					{
-						file << "\t\t\t<normal x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
+						file << "\t\t\t\t<normal x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
 					}
 					break;
 				case VEU_Tangent:
 					{
-						file << "\t\t\t<tangent x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
+						file << "\t\t\t\t<tangent x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
 					}			
 					break;
 				case VEU_Binormal:
 					{
-						file << "\t\t\t<binormal x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
+						file << "\t\t\t\t<binormal x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
 					}			
 					break;
 				case VEU_TextureCoordinate:
@@ -605,13 +461,13 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 						switch(VertexElement::GetTypeCount(element.Type))
 						{
 						case 3:
-							file << "\t\t\t<texcoord u=\"" << vertexPtr[0] << "\" v=\"" << vertexPtr[1] << "\" r=\"" << vertexPtr[2] << "\"/>\n";
+							file << "\t\t\t\t<texcoord u=\"" << vertexPtr[0] << "\" v=\"" << vertexPtr[1] << "\" r=\"" << vertexPtr[2] << "\"/>\n";
 							break;
 						case 2:
-							file << "\t\t\t<texcoord u=\"" << vertexPtr[0] << "\" v=\"" << vertexPtr[1] << "\"/>\n";
+							file << "\t\t\t\t<texcoord u=\"" << vertexPtr[0] << "\" v=\"" << vertexPtr[1] << "\"/>\n";
 							break;
 						case 1:
-							file << "\t\t\t<texcoord u=\"" << vertexPtr[0] << "\"/>\n";
+							file << "\t\t\t\t<texcoord u=\"" << vertexPtr[0] << "\"/>\n";
 							break;
 						}
 					}
@@ -622,7 +478,7 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 						uint8_t* indexPtr = (uint8_t*)(vertexPtr + 4);
 						for (size_t k = 0; k < 4; ++k)
 						{
-							file << "\t\t\t<bone weight=\"" << weightPtr[k] << "\" index=\"" << (uint16_t)indexPtr[k] << "\"/>\n";
+							file << "\t\t\t\t<bone weight=\"" << weightPtr[k] << "\" index=\"" << (uint16_t)indexPtr[k] << "\"/>\n";
 						}	
 					}
 					break;	
@@ -630,11 +486,11 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 					break;
 				}
 			}
-			file << "\t\t</vertex>\n";
+			file << "\t\t\t</vertex>\n";
 		}
-		file << "\t<vertices/>\n";
+		file << "\t\t<vertices/>\n";
 
-		file << "\t<triangles triangleCount=\""<<submesh->IndexCount/3 << "\">\n";
+		file << "\t\t<triangles triangleCount=\""<<submesh->IndexCount/3 << "\">\n";
 		
 		uint32_t offset = 0;
 		for (size_t i = 0; i < submesh->IndexCount / 3; i+=3)
@@ -644,37 +500,55 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 			{
 				uint32_t* idx = (uint32_t*)( &submesh->IndexData[0] + offset);
 				offset += sizeof(uint32_t) * 3;
-				file << "\t\t<triangle a=\"" << idx[0] << "\" b=\"" << idx[1] << "\" c=\"" << idx[2] << "\"/>\n";
+				file << "\t\t\t<triangle a=\"" << idx[0] << "\" b=\"" << idx[1] << "\" c=\"" << idx[2] << "\"/>\n";
 			}else
 			{
 				uint16_t* idx = (uint16_t*)( &submesh->IndexData[0] + offset);
 				offset += sizeof(uint16_t) * 3;
-				file << "\t\t<triangle a=\"" << idx[0] << "\" b=\"" << idx[1] << "\" c=\"" << idx[2] << "\"/>\n";
+				file << "\t\t\t<triangle a=\"" << idx[0] << "\" b=\"" << idx[1] << "\" c=\"" << idx[2] << "\"/>\n";
 			}
 		}
-		file << "\t</triangles>\n";
-		file << "</submesh>\n";
+		file << "\t\t</triangles>\n";
+		file << "\t</submesh>\n";
 	}
 	
 }
 
 void AssimpProcesser::ExportBinary( OutModel& outModel )
 {
-	FileStream stream(outModel.OutName, FILE_WRITE);
+	FileStream stream(outModel.OutName + ".mdl", FILE_WRITE);
 
 	// write mesh name, for test
-	stream.WriteString("Test");
+	stream.WriteString(outModel.OutName);
+
+	// write mesh bounding sphere
+	Vector3f center = outModel.MeshBoundingSphere.Center;
+	float radius = outModel.MeshBoundingSphere.Radius;
+	stream.Write(&center, sizeof(Vector3f));
+	stream.WriteFloat(radius);
+
+	// write mesh parts count
 	stream.WriteUInt(outModel.MeshParts.size());
 
 	vector<shared_ptr<MeshPartData> >& subMeshes = outModel.MeshParts;
 	for (size_t i = 0; i < subMeshes.size(); ++i)
 	{
 		shared_ptr<MeshPartData> submesh = subMeshes[i];
-		stream.WriteString(submesh->Name);
+		
+		// write sub mesh name
+		stream.WriteString(submesh->Name);	
+
+		// write sub mesh bounding sphere
+		Vector3f center = submesh->BoundingSphere.Center;
+		float radius = submesh->BoundingSphere.Radius;
+		stream.Write(&center, sizeof(Vector3f));
+		stream.WriteFloat(radius);
+
+		// write vertex count and vertex size
 		stream.WriteUInt(submesh->VertexCount);
 		stream.WriteUInt(submesh->VertexDeclaration->GetVertexSize());
 
-		// write vertex declaration, element size
+		// write vertex declaration, elements count
 		stream.WriteUInt(submesh->VertexDeclaration->GetElementCount());
 
 		// write each vertex element
@@ -746,7 +620,7 @@ void AssimpProcesser::CollectBones( OutModel& outModel )
 			aiNode* boneNode = GetNode(boneName, mAIScene->mRootNode);
 			if (!boneNode)
 			{
-				ENGINE_EXCEPT(Core::Exception::ERR_INTERNAL_ERROR, "Couldn't find the scene node for Bone: " + boneName
+				ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Couldn't find the scene node for Bone: " + boneName
 					, "AssimpProcesser::CollectBones");
 			}
 
@@ -776,7 +650,7 @@ void AssimpProcesser::CollectBones( OutModel& outModel )
 			{
 				if (!commonParent || (*iter)->mParent != commonParent)
 				{
-					 ENGINE_EXCEPT(Core::Exception::ERR_INTERNAL_ERROR,
+					 ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR,
 						 "Skeleton with multiple root nodes found, not supported", "AssimpProcesser::CollectBones");
 				}
 			}
@@ -809,8 +683,6 @@ void AssimpProcesser::CollectBonesFinal( vector<aiNode*>& bones, const set<aiNod
 
 void AssimpProcesser::ExportModel( OutModel& outModel, const String& outName )
 {
-	using namespace RcEngine::Core;
-
 	outModel.OutName = outName;
 	CollectMeshes(outModel, outModel.RootNode);
 	CollectBones(outModel);
@@ -905,6 +777,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 		shared_ptr<VertexDeclaration> vertexDecl = GetVertexDeclaration(mesh);
 
 		shared_ptr<MeshPartData> meshPart(new MeshPartData);
+		meshPart->Name = String(mesh->mName.C_Str());
 
 		// Store index data
 		bool largeIndices = mesh->mNumVertices > 65535;
@@ -1057,6 +930,12 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 		outModel.MeshParts.push_back(meshPart);
 	}
 
+	// Merge all sub mesh's bouding sphere
+	for (size_t i = 0; i < outModel.MeshParts.size(); ++i)
+	{
+		outModel.MeshBoundingSphere.Merge( outModel.MeshParts[i]->BoundingSphere );
+	}
+
 	 // Build skeleton if necessary
 	if (outModel.Bones.size() && outModel.RootBone)
 	{
@@ -1092,6 +971,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 			newJoint.ParentIndex = i;
 			joints.push_back(newJoint);
 		}
+
 		// Set the bone hierarchy
 		for (size_t i = 1; i < outModel.Bones.size(); ++i)
 		{

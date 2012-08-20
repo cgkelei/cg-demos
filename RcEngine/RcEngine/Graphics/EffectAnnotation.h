@@ -3,25 +3,22 @@
 
 #include <Core/Prerequisites.h>
 
-namespace RcEngine
+namespace RcEngine {
+
+class _ApiExport EffectAnnotation
 {
-	namespace Render
-	{
-		class _ApiExport EffectAnnotation
-		{
-		public:
-			EffectAnnotation();
-			virtual~ EffectAnnotation();
+public:
+	EffectAnnotation();
+	virtual~ EffectAnnotation();
 
-			const String& GetAnnotationName() const		{ return mName; }
+	const String& GetAnnotationName() const		{ return mName; }
 
-		protected:
-			String mName;
-		};
+protected:
+	String mName;
+};
 
-		typedef vector<EffectAnnotation*> EffectAnnotationList;
-	}
+typedef vector<EffectAnnotation*> EffectAnnotationList;
+
 }
-
 
 #endif // EffectAnnotation_h__

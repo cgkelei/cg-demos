@@ -31,14 +31,14 @@ uint32_t FileStream::Read( void* dest, uint32_t size )
 {
 	if (mFileMode == FILE_WRITE)
 	{
-		ENGINE_EXCEPT(Core::Exception::ERR_RT_ASSERTION_FAILED, 
+		ENGINE_EXCEPT(Exception::ERR_RT_ASSERTION_FAILED, 
 			"File not opened for reading", "FileStream::Read( void*, uint32_t)");
 		return 0;
 	}
 
 	if (!mFileHandle)
 	{
-		ENGINE_EXCEPT(Core::Exception::ERR_RT_ASSERTION_FAILED, 
+		ENGINE_EXCEPT(Exception::ERR_RT_ASSERTION_FAILED, 
 			"File not open", "FileStream::Read( void*, uint32_t)");
 		return 0;
 	}
@@ -54,7 +54,7 @@ uint32_t FileStream::Read( void* dest, uint32_t size )
 	{
 		// Return to the position where the read began
 		fseek((FILE*)mFileHandle, mPosition, SEEK_SET);
-		ENGINE_EXCEPT(Core::Exception::ERR_INTERNAL_ERROR, 
+		ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, 
 			"Error while reading from file " + GetName(),"FileStream::Read( void*, uint32_t)");
 		return 0;
 	}
@@ -67,14 +67,14 @@ uint32_t FileStream::Write( const void* data, uint32_t size )
 {
 	if (mFileMode == FILE_READ)
 	{
-		ENGINE_EXCEPT(Core::Exception::ERR_CANNOT_WRITE_TO_FILE, 
+		ENGINE_EXCEPT(Exception::ERR_CANNOT_WRITE_TO_FILE, 
 			"File not opened for writing", "FileStream::Read( void*, uint32_t)");
 		return 0;
 	}
 
 	if (!mFileHandle)
 	{
-		ENGINE_EXCEPT(Core::Exception::ERR_RT_ASSERTION_FAILED, 
+		ENGINE_EXCEPT(Exception::ERR_RT_ASSERTION_FAILED, 
 			"File not open", "FileStream::Read( void*, uint32_t)");
 		return 0;
 	}
@@ -86,7 +86,7 @@ uint32_t FileStream::Write( const void* data, uint32_t size )
 	{
 		// Return to the position where the write began
 		fseek((FILE*)mFileHandle, mPosition, SEEK_SET);
-		ENGINE_EXCEPT(Core::Exception::ERR_CANNOT_WRITE_TO_FILE, 
+		ENGINE_EXCEPT(Exception::ERR_CANNOT_WRITE_TO_FILE, 
 			"Error while writing to file"+ GetName(), "FileStream::Read( void*, uint32_t)");
 		return 0;
 	}
@@ -106,7 +106,7 @@ uint32_t FileStream::Seek( uint32_t position )
 
 	if (!mFileHandle)
 	{
-		ENGINE_EXCEPT(Core::Exception::ERR_RT_ASSERTION_FAILED, 
+		ENGINE_EXCEPT(Exception::ERR_RT_ASSERTION_FAILED, 
 			"File not open", "FileStream::Read( void*, uint32_t)");
 		return 0;
 	}

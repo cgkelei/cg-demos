@@ -90,7 +90,7 @@ protected:
 
 	Timer mTimer;
 
-	Render::RenderSettings mSettings;
+	RenderSettings mSettings;
 
 	// in case multiple threads are used
 	volatile bool mIsRunning;

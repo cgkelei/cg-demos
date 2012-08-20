@@ -6,7 +6,6 @@
 #include <Graphics/PixelFormat.h>
 
 namespace RcEngine {
-namespace Render {
 
 class _ApiExport RenderView
 {
@@ -18,7 +17,7 @@ public:
 	uint32_t GetHeight() const { return mHeight; }
 	PixelFormat GetFormat() const  { return mFormat; }
 
-	virtual void ClearColor(const Math::ColorRGBA& clr) = 0;
+	virtual void ClearColor(const ColorRGBA& clr) = 0;
 	virtual void ClearDepth(float depth) = 0;
 	virtual void ClearDepthStencil(float depth, uint32_t stencil) = 0;
 
@@ -35,8 +34,6 @@ protected:
 
 };
 
-
-} // Namespace Render
 } // Namespace RcEngine
 
 

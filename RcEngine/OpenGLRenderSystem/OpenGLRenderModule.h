@@ -5,27 +5,25 @@
 #include <Graphics/IRenderModule.h>
 
 
-namespace RcEngine
-{
-	namespace Render
-	{
-		class _OpenGLExport OpenGLRenderModule : public IRenderModule
-		{
-		public:
-			OpenGLRenderModule(void);
-			~OpenGLRenderModule(void);
+namespace RcEngine {
 
-			const std::string& GetName() const ;
-			RenderDevice* GetRenderDevice();
+class _OpenGLExport OpenGLRenderModule : public IRenderModule
+{
+public:
+	OpenGLRenderModule(void);
+	~OpenGLRenderModule(void);
+
+	const std::string& GetName() const ;
+	RenderDevice* GetRenderDevice();
 	
-			void Initialise();
-			void Shutdown();
+	void Initialise();
+	void Shutdown();
 		
 
-		private:
-			RenderDevice* mRenderDevice;
-		};
-	}
+private:
+	RenderDevice* mRenderDevice;
+};
+
 }
 
 

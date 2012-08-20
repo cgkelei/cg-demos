@@ -7,7 +7,6 @@
 #include <Graphics/VertexElement.h>
 
 namespace RcEngine {
-namespace Render {
 
 #define Max_Vertex_Streams 8
 
@@ -152,7 +151,6 @@ protected:
 
 };
 
-} // Namespace Render
 } // Namespace RcEngine
 
 #endif // _VertexDeclaration__H

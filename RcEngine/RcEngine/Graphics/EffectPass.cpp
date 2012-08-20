@@ -1,7 +1,7 @@
 #include <Graphics/EffectPass.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 
 EffectPass::EffectPass()
@@ -41,5 +41,5 @@ EffectAnnotation* EffectPass::GetAnnotationByIndex( uint32_t index )
 	return nullptr;
 }
 
-} // Namespace Render
+
 } // Namespace RcEngine

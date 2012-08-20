@@ -4,26 +4,24 @@
 #include "OpenGLPrerequisites.h"
 #include <Graphics/Effect.h>
 
-namespace RcEngine
+namespace RcEngine {
+
+class _OpenGLExport OpenGLEffect : public Effect
 {
-	namespace Render
-	{
-		class _OpenGLExport OpenGLEffect : public Effect
-		{
-		public:
-			OpenGLEffect(const String& fileName, const String& name);
-			~OpenGLEffect();
+public:
+	OpenGLEffect(const String& fileName, const String& name);
+	~OpenGLEffect();
 
 
-		public:
-			static void ErrorHandler( CGcontext context, CGerror error, void* appdata );
-			static shared_ptr<OpenGLEffect> LoadEffectFromFile(const String& file, const String& name);
+public:
+	static void ErrorHandler( CGcontext context, CGerror error, void* appdata );
+	static shared_ptr<OpenGLEffect> LoadEffectFromFile(const String& file, const String& name);
 
-		private:
-			String mEffectFile;
-			CGeffect mCgEffect;
-		};
-	}
+private:
+	String mEffectFile;
+	CGeffect mCgEffect;
+};
+
 }
 
 

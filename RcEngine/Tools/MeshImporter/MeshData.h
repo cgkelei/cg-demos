@@ -9,9 +9,6 @@
 
 #include "MaterialData.h"
 
-using namespace RcEngine::Math;
-using namespace RcEngine::Render;
-
 
 struct MeshPartData
 {

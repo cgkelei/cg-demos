@@ -8,7 +8,7 @@
 #include <Math/ColorRGBA.h>
 
 namespace RcEngine {
-namespace Render {
+
 
 class _ApiExport FrameBuffer
 {
@@ -32,7 +32,7 @@ public:
 	bool IsDepthBuffered() const			{ return mIsDepthBuffered; }
 	bool IsDirty() const					{ return mDirty; }
 
-	virtual void Clear(uint32_t flags, Math::ColorRGBA& clr, float depth, uint32_t stencil) = 0;
+	virtual void Clear(uint32_t flags, ColorRGBA& clr, float depth, uint32_t stencil) = 0;
 	virtual void SwapBuffers() = 0;
 	virtual void Resize(uint32_t width, uint32_t height) = 0;
 
@@ -70,7 +70,7 @@ protected:
 	bool mDirty;
 };
 
-} // Namespace Render
+
 } // Namespace RcEngine
 
 #endif // FrameBuffer_h__
