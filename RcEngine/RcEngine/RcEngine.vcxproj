@@ -128,8 +128,8 @@
     <ClCompile Include="MainApp\Window.cpp" />
     <ClCompile Include="Math\Frustum.h" />
     <ClCompile Include="Math\ColorRGBA.cpp" />
-    <ClCompile Include="Math\Math.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
+    <ClCompile Include="Scene\SceneNode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\CompileConfig.h" />
@@ -205,7 +205,6 @@
     <None Include="Math\Plane.inl" />
     <None Include="Math\Quaternion.inl" />
     <None Include="Math\Vector.inl" />
-    <None Include="Scene\新建文本文档 - 副本 - 副本 (2).txt" />
     <None Include="Scene\新建文本文档 - 副本 - 副本 - 副本.txt" />
     <None Include="Scene\新建文本文档 - 副本 - 副本.txt" />
     <None Include="Scene\新建文本文档 - 副本.txt" />

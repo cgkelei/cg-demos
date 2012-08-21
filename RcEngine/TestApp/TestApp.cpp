@@ -21,13 +21,17 @@
 #include "MainApp/Window.h"
 #include "Input/InputSystem.h"
 #include "Input/InputDevice.h"
+#include "Scene/SceneNode.h"
 #include <D3DX10Math.h>
 
 #pragma comment(lib, "D3DX10.lib")
 
+SceneNode node;
+
 
 TestApp::TestApp(void)
 {
+	node.GetWorldRotation();
 }
 
 

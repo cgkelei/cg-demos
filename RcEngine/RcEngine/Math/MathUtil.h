@@ -118,9 +118,26 @@ template<typename Real>
 inline Matrix4<Real> 
 CreateTranslation(Real x, Real y, Real z);
 
+
+template<typename Real>
+inline Matrix4<Real> 
+CreateTransformMatrix( const Vector<Real, 3>& sacle, const Quaternion<Real>& rotation, const Vector<Real, 3>& translation );
+
 template<typename Real>
 inline void 
 MatrixDecompose(Vector<Real, 3>& sacle, Quaternion<Real>& rotation, Vector<Real, 3>& translation, const Matrix4<Real>& mat);
+
+template<typename Real>
+inline Matrix4<Real>
+RotationFromTransformMatrix( const Matrix4<Real>& transformMat);
+
+template<typename Real>
+inline Vector<Real,3>
+TranslationFromTransformMatrix( const Matrix4<Real>& transformMat);
+
+template<typename Real>
+inline Vector<Real,3>
+ScaleFromTransformMatrix( const Matrix4<Real>& transformMat);
 
 /**
  * Get euler angle from rotation matrix
