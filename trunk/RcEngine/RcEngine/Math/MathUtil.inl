@@ -369,6 +369,84 @@ Vector<Real, 3> Transform(const Vector<Real, 3>& vec, const Quaternion<Real>& qu
  	return Vector3f(result.X(), result.Y(), result.Z());
 }
 
+//---------------------------------------------------------------------------------------
+template<typename Real>
+Matrix4<Real> 
+CreateTransformMatrix( const Vector<Real, 3>& sacle, const Quaternion<Real>& rotation, const Vector<Real, 3>& translation )
+{
+	Matrix4<Real> result = QuaternionToRotationMatrix(rotation);
+
+	result.M11 *= sacle.X(); result.M12 *= sacle.X(); result.M13 *= sacle.X();
+	result.M21 *= sacle.Y(); result.M22 *= sacle.Y(); result.M23 *= sacle.Y();
+	result.M31 *= sacle.Z(); result.M32 *= sacle.Z(); result.M33 *= sacle.Z();
+
+	result.M41 = translation.X();
+	result.M42 = translation.X();
+	result.M43 = translation.X();
+
+	return result;
+}
+
+//----------------------------------------------------------------------------------------------------
+template<typename Real>
+inline Matrix4<Real>
+RotationFromTransformMatrix( const Matrix4<Real>& transformMat)
+{
+	Vector<Real,3> cols[] =
+	{
+		Vector<Real,3>(transformMat.M11, transformMat.M12, transformMat.M13),
+		Vector<Real,3>(transformMat.M21, transformMat.M22, transformMat.M23),
+		Vector<Real,3>(transformMat.M31, transformMat.M32, transformMat.M33)
+	};
+
+	Vector<Real,3> scale;
+	scale.X() = cols[0].Length();
+	scale.Y() = cols[1].Length();
+	scale.Z() = cols[2].Length();
+
+	if (scale.X() != 0)
+	{
+		cols[0] = cols[0] / scale.X();
+	}
+
+	if (scale.Y() != 0)
+	{
+		cols[1] = cols[1] / scale.Y();
+	}
+
+	if (scale.Z() != 0)
+	{
+		cols[2] = cols[2] / scale.Z();
+	}
+
+	return Matrix4<Real>(
+		cols[0].X(), cols[0].Y(), cols[0].Z(), (Real)0,
+		cols[1].X(), cols[1].Y(), cols[1].Z(), (Real)0,
+		cols[2].X(), cols[2].Y(), cols[2].Z(), (Real)0,
+		(Real)0,     (Real)0,     (Real)0,     (Real)1
+		);
+}
+
+//----------------------------------------------------------------------------------------------------
+template<typename Real>
+inline Vector<Real,3>
+TranslationFromTransformMatrix( const Matrix4<Real>& transformMat)
+{
+	return Vector<Real,3>(transformMat.M41, transformMat.M42, transformMat.M43);
+}
+
+//----------------------------------------------------------------------------------------------------
+template<typename Real>
+inline Vector<Real,3>
+ScaleFromTransformMatrix( const Matrix4<Real>& transformMat)
+{
+	return Vector<Real,3>(
+		std::sqrt(transformMat.M11 * transformMat.M11 + transformMat.M12 * transformMat.M12 + transformMat.M13 * transformMat.M13),
+		std::sqrt(transformMat.M21 * transformMat.M21 + transformMat.M22 * transformMat.M22 + transformMat.M23 * transformMat.M23),
+		std::sqrt(transformMat.M31 * transformMat.M31 + transformMat.M32 * transformMat.M32 + transformMat.M33 * transformMat.M33)
+		);
+}
+
 
 template<typename Real>
 inline void 

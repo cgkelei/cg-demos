@@ -144,9 +144,6 @@
     <ClCompile Include="Graphics\CameraControler.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Math\Math.cpp">
-      <Filter>Math</Filter>
-    </ClCompile>
     <ClCompile Include="IO\MemoryStream.cpp">
       <Filter>IO</Filter>
     </ClCompile>
@@ -175,6 +172,9 @@
       <Filter>Math</Filter>
     </ClCompile>
     <ClCompile Include="Scene\Scene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\SceneNode.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
   </ItemGroup>
@@ -395,9 +395,6 @@
       <Filter>Math</Filter>
     </None>
     <None Include="Scene\新建文本文档 - 副本 - 副本 - 副本.txt">
-      <Filter>Scene</Filter>
-    </None>
-    <None Include="Scene\新建文本文档 - 副本 - 副本 (2).txt">
       <Filter>Scene</Filter>
     </None>
     <None Include="Scene\新建文本文档 - 副本 - 副本.txt">
