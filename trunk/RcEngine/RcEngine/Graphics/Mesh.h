@@ -89,19 +89,18 @@ public:
 			
 
 	/**
-		* Set all mesh part to the same material
-		*/
+	 * Set all mesh part to the same material
+	 */
 	void SetMaterial(const shared_ptr<Material>& mat);
 
-	/**
-		* Set a material to the given mesh part
-		*/
-	void SetMaterial(size_t meshPartIndex, const shared_ptr<Material>& mat);
+	
+	void SetMaterial( size_t materialIndex, const shared_ptr<Material>& mat);
 
-	/** 
-		* Load a mesh from loader which contains the mesh data.
-		*/
-	//static shared_ptr<Mesh> LoadFrom(MeshContent* loader);
+	/**
+	 * Set a material to the given mesh part
+	 */
+	void SetMeshPartMaterial(size_t meshPartIndex, const shared_ptr<Material>& mat);
+
 
 	static shared_ptr<Mesh> Load(Stream& source);
 	static void Save(const shared_ptr<Mesh>& mesh, Stream& dest);

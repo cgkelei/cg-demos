@@ -7,12 +7,12 @@
 #include <Core/Context.h>
 #include <Core/Exception.h>
 
+#define InvalidMaterialID UINT32_MAX
 
 namespace RcEngine {
 
-
 MeshPart::MeshPart( const String& name, const shared_ptr<Mesh>& mesh )
-:mName(name), mParentMesh(mesh)
+:mName(name), mParentMesh(mesh), mMaterialID(InvalidMaterialID)
 {
 }
 
@@ -233,7 +233,13 @@ void Mesh::SetMaterial( const shared_ptr<Material>& mat )
 	}
 }
 
-void Mesh::SetMaterial( size_t meshPartIndex, const shared_ptr<Material>& mat )
+void Mesh::SetMaterial( size_t materialIndex, const shared_ptr<Material>& mat)
+{
+	assert(materialIndex < mMaterials.size());
+	mMaterials[materialIndex] = mat;
+}
+
+void Mesh::SetMeshPartMaterial( size_t meshPartIndex, const shared_ptr<Material>& mat )
 {
 	mMaterials.push_back(mat);
 	size_t matID = mMaterials.size() - 1;

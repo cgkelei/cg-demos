@@ -11,6 +11,8 @@ Vector<Real, Size>::Vector()
 template <class Real, int32_t Size>
 Vector<Real, Size>::Vector(Real fX, Real fY)
 {
+	static_assert(Size == 2, "Vector dimension error.");
+
 	mTuple[0] = fX;
 	mTuple[1] = fY;
 }
@@ -19,6 +21,8 @@ Vector<Real, Size>::Vector(Real fX, Real fY)
 template <class Real, int32_t Size>
 Vector<Real, Size>::Vector(Real fX, Real fY, Real fZ)
 {
+	static_assert(Size == 3, "Vector dimension error.");
+
 	mTuple[0] = fX;
 	mTuple[1] = fY;
 	mTuple[2] = fZ;
@@ -28,6 +32,8 @@ Vector<Real, Size>::Vector(Real fX, Real fY, Real fZ)
 template <class Real, int32_t Size>
 Vector<Real, Size>::Vector(Real fX, Real fY, Real fZ, Real fW)
 {
+	static_assert(Size == 4, "Vector dimension error.");
+
 	mTuple[0] = fX;
 	mTuple[1] = fY;
 	mTuple[2] = fZ;
@@ -115,6 +121,7 @@ Real& Vector<Real, Size>::X()
 template< typename Real, int32_t Size >
 Real Vector<Real, Size>::Y() const 
 {
+	static_assert(Size >= 2, "Vector dimension error.");
 	return mTuple[1];
 }
 
@@ -122,6 +129,7 @@ Real Vector<Real, Size>::Y() const
 template< typename Real, int32_t Size >
 Real& Vector<Real, Size>::Y()
 {
+	static_assert(Size >= 2, "Vector dimension error.");
 	return mTuple[1];
 }
 
@@ -129,6 +137,7 @@ Real& Vector<Real, Size>::Y()
 template< typename Real, int32_t Size >
 Real Vector<Real, Size>::Z() const 
 {
+	static_assert(Size >= 3, "Vector dimension error.");
 	return mTuple[2];
 }
 
@@ -136,6 +145,7 @@ Real Vector<Real, Size>::Z() const
 template< typename Real, int32_t Size >
 Real& Vector<Real, Size>::Z()
 {
+	static_assert(Size >= 3, "Vector dimension error.");
 	return mTuple[2];
 }
 
@@ -143,6 +153,7 @@ Real& Vector<Real, Size>::Z()
 template< typename Real, int32_t Size >
 Real Vector<Real, Size>::W() const 
 {
+	static_assert(Size >= 4, "Vector dimension error.");
 	return mTuple[3];
 }
 
@@ -150,6 +161,7 @@ Real Vector<Real, Size>::W() const
 template< typename Real, int32_t Size >
 Real& Vector<Real, Size>::W()
 {
+	static_assert(Size >= 4, "Vector dimension error.");
 	return mTuple[3];
 }
 
@@ -333,9 +345,9 @@ Real Vector<Real, Size>::Length() const
 
 //----------------------------------------------------------------------------
 template< typename Real, int32_t Size >
- Vector<Real, Size> Vector<Real, Size>::Zero() 
+const Vector<Real, Size>& Vector<Real, Size>::Zero() 
 {
-	static Vector<Real, Size> zero((Real)0);
+	static const Vector<Real, Size> zero((Real)0);
 	return zero;
 }
 

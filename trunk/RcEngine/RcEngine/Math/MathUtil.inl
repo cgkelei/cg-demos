@@ -874,3 +874,96 @@ BoundingSphere<Real> FromBox( const BoundingBox<Real>& box )
 }
 
 
+template<typename Real>
+BoundingBox<Real>
+Transform( const BoundingBox<Real>& box, const Matrix4<Real>& matrix )
+{
+	if (!box.Defined)
+	{
+		return box;
+	}
+
+	BoundingBox<Real> result;
+
+	const Vector<Real,3> oldMin = box.Min;
+	const Vector<Real,3> oldMax = box.Max;
+
+	Vector<Real,3> currentCorner;
+
+	// min min min
+	currentCorner = oldMin;
+	result.Merge( Transform(currentCorner, matrix) );
+
+	// min,min,max
+	currentCorner.Z() = oldMax.Z();
+	result.Merge( Transform(currentCorner, matrix) );
+
+	// min max max
+	currentCorner.Y() = oldMax.Y();
+	result.Merge( Transform(currentCorner, matrix) );
+
+	// min max min
+	currentCorner.Z() = oldMin.Z()
+	result.Merge( Transform(currentCorner, matrix) );
+
+	// max max min
+	currentCorner.X() = oldMax.X()
+	result.Merge( Transform(currentCorner, matrix) );
+
+	// max max max
+	currentCorner.Z() = oldMax.Z();
+	result.Merge( Transform(currentCorner, matrix) );
+
+	// max min max
+	currentCorner.Y() = oldMin.Y();
+	result.Merge( Transform(currentCorner, matrix) );
+
+	// max min min
+	currentCorner.Z() = oldMin.Z();
+	result.Merge( Transform(currentCorner, matrix) );
+
+	return result; 
+}
+
+template<typename Real>
+BoundingBox<Real>
+TransformAffine( const BoundingBox<Real>& box, const Matrix4<Real>& matrix )
+{
+	if (!box.Defined)
+	{
+		return box;
+	}
+
+	BoundingBox<Real> result;
+
+	Vector<Real,3> center = box.Center();
+	Vector<Real,3> halfSize = (box.Max - box.Min) * Real(0.5);
+
+	Vector<Real,3> newCenter = Transform(center, matrix);
+	Vector<Real,3> newHalfSize = Vector<Real,3>{
+		halfSize.X() * std::fabs(matrix.M11) + halfSize.Y() * std::fabs(matrix.M21) + halfSize.Z() * std::fabs(matrix.M31),
+			halfSize.X() * std::fabs(matrix.M12) + halfSize.Y() * std::fabs(matrix.M22) + halfSize.Z() * std::fabs(matrix.M32),
+			halfSize.X() * std::fabs(matrix.M13) + halfSize.Y() * std::fabs(matrix.M23) + halfSize.Z() * std::fabs(matrix.M33)
+	};
+
+	return BoundingBox<Real>( center - newHalfSize, newCenter +newHalfSize ); 
+}
+
+template<typename Real>
+BoundingSphere<Real>
+Transform( const BoundingSphere<Real>& sphere, const Matrix4<Real>& matrix )
+{
+	if (!sphere.Defined)
+	{
+		return sphere;
+	}
+
+	Vector<Real,3> scale = ScaleFromTransformMatrix(matrix);
+	Vector<Real,3> newCenter = Transform(sphere.Center, matrix);
+
+	Real newRadius = sphere.Radius * scale.X();
+	newRadius = (std::max)(newRadius, sphere.Radius * scale.Y());
+	newRadius = (std::max)(newRadius, sphere.Radius * scale.Z());
+
+	return BoundingSphere<Real>(newCenter, newRadius);
+}

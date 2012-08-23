@@ -1,153 +1,77 @@
 #ifndef SceneNode_h__
 #define SceneNode_h__
 
-
 #include <Core/Prerequisites.h>
-#include <Math/Vector.h>
-#include <Math/Quaternion.h>
-#include <Math/Matrix.h>
+#include <Scene/Node.h>
 #include <Math/BoundingSphere.h>
-#include <Math/BoundingBox.h>
 
 namespace RcEngine {
 
-
+class SceneObject;
 class SceneNodeVisitor;
 
-
-class _ApiExport SceneNode
+class _ApiExport SceneNode : public Node
 {
 public:
-	SceneNode();
+	SceneNode(SceneManager* scene, const String& name);
 	virtual ~SceneNode();
 
-	void SetName( const String& name )	{ mName = name; }
+	const BoundingSpheref& GetWorldBoundingShpere() const;
 
-	const BoundingSpheref& GetBoundingSphere() const { return mBoundingSphere; }
+	uint32_t GetNumAttachedObjects() const { return mAttachedObjects.size(); }
 
-	void SetPosition(const Vector3f& position);
+	void AttachObject( SceneObject* obj );
 
-	void SetRotation(const Quaternionf& rotation);
+	void DetachOject( SceneObject* obj );
 
-	void SetDirection(const Vector3f& direction);
-
-	void SetScale(const Vector3f& scale);
-
-	void SetTransform(const Vector3f& position, const Quaternionf& rotation);
-
-	void SetTransform(const Vector3f& position, const Quaternionf& rotation, const Vector3f& scale);
-
-	void SetWorldPosition(const Vector3f& position);
-
-	void SetWorldRotation(const Quaternionf& rotation);
-
-	void SetWorldDirection(const Vector3f& direction);
-
-	void SetWorldScale(const Vector3f& scale);
-
-	void SetWorldTransform(const Vector3f& position, const Quaternionf& rotation);
-
-	void SetWorldTransform(const Vector3f& position, const Quaternionf& rotation, const Vector3f& scale);
+	void DetachAllObject(); 
 
 	/**
-	 * Get local transform matrix relative to its parent 
+	 * Get an attached object by given name.
 	 */
-	Matrix4f GetLocalTransform() const;
-
-	/**
-	 * Get world position.
-	 */
-	Vector3f GetWorldPosition() const;
-
-	/**
-	 * Get world rotation.
-	 */
-	Quaternionf GetWorldRotation() const;
-	
-	/**
-	 * Get world direction.
-	 */
-	Vector3f GetWorldDirection() const;
-
-	/**
-	 * Get world scale.
-	 */
-	Vector3f GetWorldScale() const;
-
-	/**
-	 * Get world transform matrix.
-	 */
-	const Matrix4f& GetWorldTransform() const;
-
-	/** 
-	 * Get attached child node count.
-	 */
-	uint32_t GetNumChildren( bool recursive = false ) const;
-
-	/**
-	 * Attach a new child node.
-	 */
-	virtual void AttachChild( SceneNode* child );
-
-	/**
-	 * Detach a new child node.
-	 */
-	virtual void DetachChild( SceneNode* child );
-
-	/**
-	 * Detach all child node.
-	 */
-	void RemoveAllChildren();
-
-	void SetParent( SceneNode* parent );
-
-	SceneNode* GetParent() const { return mParent; }
-
-	Scene* GetScene() const	{ return mScene; }
-
-	/**
-	 * Creates an unnamed new SceneNode as a child of this node.
-	 */
-	SceneNode* CreateChildSceneNode( const Vector3f& translate,  const Quaternionf& rotate );
+	SceneObject* GetAttachedObject( const String& name );
 
 	/**
 	 * Creates an named new SceneNode as a child of this node.
 	 */
-	SceneNode* CreateChildSceneNode( const String& name, const Vector3f& translate,  const Quaternionf& rotate );
+	SceneNode* CreateChildSceneNode( const String& name, const Vector3f& translate = Vector3f::Zero(),  const Quaternionf& rotate = Quaternionf::Identity());
 
-	bool IsDirty() const { return mDirty; }
-	void MarkDirty();
+	/** 
+	 * Return the scene to which a node belongs.
+	 */
+	SceneManager* GetScene() const { return mScene; }
 
+	/**
+	 * Sets the scene to which a node belongs.
+	 */
+	void SetScene( SceneManager* scene );
 
+	
+protected:
+	virtual Node* CreateChildImpl( const String& name );
 
-private:
+	/**
+	 * Update world bound, this will merge a bound including all attached object 
+	 * and the bound of all child scene node.
+	 */
+	void UpdateWorldBounds() const;
 
-	void UpdateWorldTransform() const;
-	void UpdateWorldBound() const;
+	/**
+	 * This function will cause parent to recompute world bound. 
+	 */
+	void PropagateBoundToRoot();
 
+	void OnUpdate( float tick );
 
 protected:
 
-	Scene* mScene;
+	mutable BoundingSpheref mWorldBounds;
 
-	SceneNode* mParent;
+	SceneManager* mScene;
 
-	std::list<SceneNode*> mChildren;
-
-	String mName;
-
-	Vector3f mPosition;
-
-	Quaternionf mRotation;
-
-	Vector3f mScale;
-
-	mutable BoundingSpheref mBoundingSphere;
-
-	mutable Matrix4f mWorldTransform;
-
-	mutable bool mDirty;
+	std::vector<SceneObject*> mAttachedObjects;
 };
+
 
 }
 

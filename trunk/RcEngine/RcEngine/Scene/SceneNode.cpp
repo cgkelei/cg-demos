@@ -1,12 +1,16 @@
 #include <Scene/SceneNode.h>
-#include <Scene/Scene.h>
+#include <Scene/SceneManager.h>
+#include <Scene/SceneObject.h>
 #include <Math/MathUtil.h>
+#include <Core/Exception.h>
+
 
 namespace RcEngine {
 
-SceneNode::SceneNode()
+SceneNode::SceneNode( SceneManager* scene, const String& name )
+	: Node(name)
 {
-
+	SetScene(scene);
 }
 
 SceneNode::~SceneNode()
@@ -14,289 +18,104 @@ SceneNode::~SceneNode()
 
 }
 
-void SceneNode::AttachChild( SceneNode* child )
+void SceneNode::SetScene( SceneManager* scene )
 {
-	// Check for illegal or redundant parent assignment
-	if (!child || child == this || child->mParent == this)
-		return;
-
-	// Add first, then remove from old parent
-	mChildren.push_back(child);
-
-	if (child->mParent)
-		child->mParent->DetachChild(child);
-
-	// Add to the scene if not added yet
-	if (mScene && !child->mScene)
-		mScene->AddSceneNode(child);
-
-	// set new parent
-	child->SetParent(this);
-
-	//child->MarkDirty();
+	mScene = scene;
 }
 
-void SceneNode::DetachChild( SceneNode* child )
-{
-	// The child is not in our hierarchy.
-	if (!child || child->mParent != this)	
-		return;
 
-	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
+Node* SceneNode::CreateChildImpl( const String& name )
+{
+	assert(mScene);
+	return mScene->CreateSceneNode(name);
+}
+
+SceneNode* SceneNode::CreateChildSceneNode( const String& name, const Vector3f& translate, const Quaternionf& rotate )
+{
+	return static_cast<SceneNode*>( CreateChild(name, translate, rotate) );
+}
+
+void SceneNode::AttachObject( SceneObject* obj )
+{
+	if (obj->IsAttached())
 	{
-		if ( *iter == child )
-		{
-			mChildren.erase(iter);
-			break;
-		}
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS,  "Object already attached to a SceneNode", "SceneNode::attachObject");
 	}
 
-	child->mParent = nullptr;
-	child->MarkDirty();
+	mAttachedObjects.push_back(obj);
+	
+	obj->OnAttach(this);
 
-	Safe_Delete(child);
+	// update bounding
 }
 
-void SceneNode::RemoveAllChildren()
+void SceneNode::DetachOject( SceneObject* obj )
 {
-	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
+
+}
+
+void SceneNode::DetachAllObject()
+{
+
+}
+
+SceneObject* SceneNode::GetAttachedObject( const String& name )
+{
+	auto found = std::find_if(mAttachedObjects.begin(), mAttachedObjects.end(), [&name](SceneObject* obj){
+						return obj->GetName() == name;
+					});
+
+	if (found == mAttachedObjects.end())
 	{
-		Safe_Delete(*iter);
-		mChildren.erase(iter);	
+		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Attached movable object named " + name +
+			" does not exist.", "SceneNode::GetAttachedObject");
 	}
+
+	return *found;
 }
 
-void SceneNode::SetParent( SceneNode* parent )
-{
-
-}
-
-Matrix4f SceneNode::GetLocalTransform() const
-{
-	return CreateTransformMatrix(mScale, mRotation, mPosition);
-}
-
-Vector3f SceneNode::GetWorldPosition() const
-{
-	if (mDirty)
-		UpdateWorldTransform();
-
-	return TranslationFromTransformMatrix(mWorldTransform);
-}
-
-Quaternionf SceneNode::GetWorldRotation() const
-{
-	if (mDirty)
-		UpdateWorldTransform();
-
-	return QuaternionFromRotationMatrix( RotationFromTransformMatrix(mWorldTransform) );
-}
-
-Vector3f SceneNode::GetWorldDirection() const
-{
-	if (mDirty)
-		UpdateWorldTransform();
-
-	const Vector3f Froward(0.0f, 0.0f, 1.0f);
-	return Transform(Froward, RotationFromTransformMatrix(mWorldTransform));
-}
-
-Vector3f SceneNode::GetWorldScale() const
-{
-	if (mDirty)
-		UpdateWorldTransform();
-
-	return ScaleFromTransformMatrix(mWorldTransform);
-}
-
-const Matrix4f& SceneNode::GetWorldTransform() const
-{
-	if (mDirty)
-		UpdateWorldTransform();
-
-	return mWorldTransform;
-}
-
-void SceneNode::MarkDirty()
-{
-	mDirty = true;
-
-	// Mark child nodes
-	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
-	{
-		(*iter)->MarkDirty();
-	}
-}
-
-void SceneNode::UpdateWorldTransform() const
+void SceneNode::PropagateBoundToRoot()
 {
 	if (mParent)
 	{
-		if (mParent->IsDirty())
-			mParent->UpdateWorldTransform();
-
-		mWorldTransform = CreateTransformMatrix(mScale, mRotation, mPosition) * mParent->mWorldTransform;
+		UpdateWorldBounds();
+		PropagateBoundToRoot();
 	}
-	else
-	{
-		mWorldTransform = CreateTransformMatrix(mScale, mRotation, mPosition);
-	}
-
-	mDirty = true;
 }
 
-void SceneNode::UpdateWorldBound() const
+void SceneNode::UpdateWorldBounds() const
 {
+	mWorldBounds.SetNull();
+
+	for (auto iter = mAttachedObjects.begin(); iter != mAttachedObjects.end(); ++iter)
+	{
+		mWorldBounds.Merge((*iter)->GetWorldBoundingSphere());
+	}
+
 	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
 	{
-		SceneNode* child = (*iter);
-		if ( child->IsDirty() )
-		{
-			child->UpdateWorldBound();
-		}
-
-		mBoundingSphere.Merge(child->GetBoundingSphere());
+		SceneNode* childNode = static_cast<SceneNode*>(*iter);
+		mWorldBounds.Merge(childNode->GetWorldBoundingShpere());
 	}
 }
 
-void SceneNode::SetPosition( const Vector3f& position )
+void SceneNode::OnUpdate( float tick )
 {
-	mPosition = position;
-	if (mDirty)
-	{
-		MarkDirty();
-	}
-	
+
 }
 
-void SceneNode::SetRotation( const Quaternionf& rotation )
+const BoundingSpheref& SceneNode::GetWorldBoundingShpere() const
 {
-	mRotation = rotation;
-	if (mDirty)
+	if (mWorldBoundDirty)
 	{
-		MarkDirty();
-	}
-}
+		// Do not use mWorldTransform directly, it's may out of date.
+		const Matrix4f& worldMat = GetWorldTransform();
 
-void SceneNode::SetDirection( const Vector3f& direction )
-{
-	const Vector3f start(0.0f, 0.0f, 1.0f);		// forward direction
-	const Vector3f end = Normalize(direction);
-	
-	Vector3f axis = Cross( start, end );
-	float dot = Dot( start, end );
 
-	SetRotation( Quaternionf( dot, axis.X(), axis.Y(), axis.Z() ) );
-}
 
-void SceneNode::SetScale( const Vector3f& scale )
-{
-	mScale = scale;
-	if (mDirty)
-	{
-		MarkDirty();
-	}
-}
-
-void SceneNode::SetTransform( const Vector3f& position, const Quaternionf& rotation )
-{
-	mPosition = position;
-	mRotation = rotation;
-}
-
-void SceneNode::SetTransform( const Vector3f& position, const Quaternionf& rotation, const Vector3f& scale )
-{
-	mPosition = position;
-	mRotation = rotation;
-	mScale = scale;
-}
-
-void SceneNode::SetWorldPosition( const Vector3f& position )
-{
-	if (!mParent)
-	{
-		SetPosition(position);
-	}
-	else
-	{
-		Matrix4f parentWorldTransformInv = MatrixInverse( mParent->GetWorldTransform() );
-		SetPosition( Transform(position, parentWorldTransformInv) );
-	}
-}
-
-void SceneNode::SetWorldRotation( const Quaternionf& rotation )
-{
-	if (!mParent)
-	{
-		SetRotation(rotation);
-	} 
-	else
-	{
-		Quaternionf parentWorldRotInv = QuaternionInverse( mParent->GetWorldRotation() );
-		SetRotation(rotation * parentWorldRotInv);
-	}
-}
-
-void SceneNode::SetWorldDirection( const Vector3f& direction )
-{
-	Vector3f localDirection;
-
-	if (!mParent)
-	{
-		localDirection = direction;
-	} 
-	else
-	{
-		Matrix4f parentWorldTransformInv = MatrixInverse( mParent->GetWorldTransform() );
-		localDirection = Transform(direction, parentWorldTransformInv);
 	}
 
-	SetDirection(localDirection);
+	return mWorldBounds;
 }
-
-void SceneNode::SetWorldScale( const Vector3f& scale )
-{
-	if (!mParent)
-	{
-		SetScale(scale);
-	} 
-	else
-	{
-		Vector3f worldScale = mParent->GetWorldScale();
-		SetScale(Vector3f( scale.X() / worldScale.X(), scale.Y() / worldScale.Y(), scale.Z() / worldScale.Z()));
-	}
-}
-
-void SceneNode::SetWorldTransform( const Vector3f& position, const Quaternionf& rotation )
-{
-	SetWorldPosition(position);
-	SetWorldRotation(rotation);
-}
-
-void SceneNode::SetWorldTransform( const Vector3f& position, const Quaternionf& rotation, const Vector3f& scale )
-{
-	SetWorldPosition(position);
-	SetWorldRotation(rotation);
-	SetWorldScale(scale);
-}
-
-uint32_t SceneNode::GetNumChildren( bool recursive /*= false */ ) const
-{
-	if (!recursive)
-		return mChildren.size();
-	else
-	{
-		uint32_t count =  mChildren.size();
-		for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
-		{
-			count += (*iter)->GetNumChildren(true);
-		}
-		return count;
-	}
-	
-}
-
-
-
 
 }

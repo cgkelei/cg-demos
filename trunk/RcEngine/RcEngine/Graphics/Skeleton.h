@@ -2,20 +2,28 @@
 #define Skeleton_h__
 
 #include <Core/Prerequisites.h>
-#include <Math/Vector.h>
-#include <Math/Matrix.h>
-#include <Math/Quaternion.h>
+#include <Scene/Node.h>
 
 namespace RcEngine {
 
-struct _ApiExport Joint
-{
-	Joint();
+class Skeleton;
 
-		/// Bone name.
-	String Name;
-	/// Parent bone index.
-	uint32_t ParentIndex;
+class _ApiExport Joint : public Node
+{
+public:
+	Joint(Skeleton* skeleton, const String& name);
+
+
+	void SetSkeleton( Skeleton* skeleton );
+
+	Skeleton* GetSkeleton()	const { return mSkeleton; }
+
+protected:
+	Node* CreateChildImpl( const String& name );
+	void OnUpdate( float tick );
+
+	Skeleton* mSkeleton;
+
 	/// Reset position.
 	Vector3f InitialPosition;
 	/// Reset rotation.

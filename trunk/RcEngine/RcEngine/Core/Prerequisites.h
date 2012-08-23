@@ -118,8 +118,9 @@ class DepthStencilState;
 class RasterizerState;
 class BlendState;
 class SamplerState;
-class Scene;
+class SceneManager;
 class SceneNode;
+class Entity;
 
 
 

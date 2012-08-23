@@ -77,6 +77,8 @@ public:
 	Matrix4 GetTransposed() const;
 	void Transpose();
 	Real Determinant () const;
+
+	inline static const Matrix4& Identity();
 	
 public:
 
@@ -97,7 +99,7 @@ private:
 	int32_t CompareArrays (const Matrix4& rhs) const;
 		
 };
-	
+
 #include <Math/Matrix.inl>
 
 typedef Matrix4<float> Matrix4f;

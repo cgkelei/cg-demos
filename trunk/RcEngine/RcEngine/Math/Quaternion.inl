@@ -226,6 +226,13 @@ Quaternion<Real> Quaternion<Real>::operator/( float scalar ) const
 }
 
 template<typename Real>
+const Quaternion<Real>& Quaternion<Real>::Identity()
+{
+	static const Quaternion out(1, 0, 0, 0);
+	return out;
+}
+
+template<typename Real>
 bool Quaternion<Real>::operator!=( const Quaternion<Real>& rhs ) const
 {
 	return CompareArrays(rhs) != 0;
@@ -242,3 +249,5 @@ int Quaternion<Real>::CompareArrays( const Quaternion<Real>& rhs ) const
 {
 	return memcmp(mTuple,rhs.mTuple,4*sizeof(Real));
 }
+
+
