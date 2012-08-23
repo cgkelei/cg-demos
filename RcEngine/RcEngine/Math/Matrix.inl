@@ -592,3 +592,14 @@ Real Matrix4<Real>::Determinant() const
 	Real fDet = fA0*fB5-fA1*fB4+fA2*fB3+fA3*fB2-fA4*fB1+fA5*fB0;
 	return fDet;
 }
+
+template<typename Real>
+const Matrix4<Real>& Matrix4<Real>::Identity()
+{
+	static Matrix4<Real> out( Real(1), Real(0), Real(0), Real(0),
+							  Real(0), Real(1), Real(0), Real(0),
+							  Real(0), Real(0), Real(1), Real(0),
+							  Real(0), Real(0), Real(0), Real(1));
+	return out;
+}
+

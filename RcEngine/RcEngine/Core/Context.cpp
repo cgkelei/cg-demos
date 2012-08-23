@@ -2,6 +2,7 @@
 #include <MainApp/Application.h>
 #include <Graphics/RenderFactory.h>
 #include <Graphics/RenderDevice.h>
+#include <Scene/SceneManager.h>
 
 namespace RcEngine{
 
@@ -25,35 +26,6 @@ void Context::Init( std::string configFile )
 
 }
 
-RenderDevice& Context::GetRenderDevice()
-{
-	return *mRenderDevice;
-}
-
-RenderFactory& Context::GetRenderFactory()
-{
-	return *mRenderFactory;
-}
-
-RenderDevice* Context::GetRenderDevicePtr()
-{
-	return mRenderDevice;
-}
-
-RenderFactory* Context::GetRenderFactoryPtr()
-{
-	return mRenderFactory;
-}
-
-Application* Context::GetApplicationPtr()
-{
-	return mApplication;
-}
-
-Application& Context::GetApplication()
-{
-	return *mApplication;
-}
 
 void Context::SetRenderDevice( RenderDevice* device )
 {
@@ -75,15 +47,11 @@ void Context::SetInputSystem( InputSystem* input )
 	mInputSystem = input;
 }
 
-InputSystem* Context::GetInputSystemPtr()
+void Context::SetSceneManager( SceneManager* scene )
 {
-	return mInputSystem;
+	mSceneManager = scene;
 }
 
-InputSystem& Context::GetInputSystem()
-{
-	return *mInputSystem;
-}
 
 
 } // Namespace RcEngine

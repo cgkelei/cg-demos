@@ -36,6 +36,11 @@ public:
 	}
 
 	/**
+	 * Reset the bounding box to undefined.
+	 */
+	void SetNull()	{ Defined = false; }
+
+	/**
 	 * Merge a point
 	 */
 	void Merge( const Vector<Real, 3>& point );
@@ -64,8 +69,6 @@ public:
 public:
 	Vector<Real, 3> Center;
 	Real Radius;
-
-private:
 	bool Defined;
 };
 

@@ -18,27 +18,31 @@ public:
 	void Init(std::string configFile);
 
 	void SetRenderDevice(RenderDevice* device);
-	RenderDevice& GetRenderDevice();
-	RenderDevice* GetRenderDevicePtr();
+	RenderDevice& GetRenderDevice()							{ assert(mRenderDevice); return *mRenderDevice; }
+	RenderDevice* GetRenderDevicePtr()						{ assert(mRenderDevice); return mRenderDevice; }
 
 	void SetRenderFactory(RenderFactory* factory);
-	RenderFactory& GetRenderFactory();
-	RenderFactory* GetRenderFactoryPtr(); 
+	RenderFactory& GetRenderFactory()						{ assert(mRenderFactory); return *mRenderFactory; }
+	RenderFactory* GetRenderFactoryPtr()					{ assert(mRenderFactory); return mRenderFactory; }
 
 	void SetApplication(Application* app);
-	Application* GetApplicationPtr();
-	Application& GetApplication();
+	Application* GetApplicationPtr()						{ assert(mApplication); return mApplication; }
+	Application& GetApplication()							{ assert(mApplication); return *mApplication; }
 
 	void SetInputSystem(InputSystem* input);
-	InputSystem* GetInputSystemPtr();
-	InputSystem& GetInputSystem();
+	InputSystem* GetInputSystemPtr()						{ assert(mInputSystem); return mInputSystem; }
+	InputSystem& GetInputSystem()							{ assert(mInputSystem); return *mInputSystem; }
+
+	void SetSceneManager( SceneManager* scene );
+	SceneManager* GetSceneManagerPtr()						{ assert(mSceneManager); return mSceneManager; }
+	SceneManager& GetSceneManager()							{ assert(mSceneManager); return *mSceneManager; }
 
 
 private:
 	RenderDevice* mRenderDevice;
 	InputSystem* mInputSystem;
 	RenderFactory* mRenderFactory;
-
+	SceneManager* mSceneManager;
 	Application* mApplication;
 };
 

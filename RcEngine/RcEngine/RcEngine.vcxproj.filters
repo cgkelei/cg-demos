@@ -171,10 +171,19 @@
     <ClCompile Include="Math\Frustum.h">
       <Filter>Math</Filter>
     </ClCompile>
-    <ClCompile Include="Scene\Scene.cpp">
+    <ClCompile Include="Scene\SceneNode.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Scene\SceneNode.cpp">
+    <ClCompile Include="Scene\Node.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\SceneManager.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Entity.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\SceneObject.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
   </ItemGroup>
@@ -362,10 +371,22 @@
     <ClInclude Include="Math\BoundingBox.h">
       <Filter>Math</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\Scene.h">
+    <ClInclude Include="Scene\SceneNode.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\SceneNode.h">
+    <ClInclude Include="Scene\Node.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\SceneManager.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Entity.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Ray.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\SceneObject.h">
       <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
@@ -393,18 +414,6 @@
     </None>
     <None Include="Math\BoundingBox.inl">
       <Filter>Math</Filter>
-    </None>
-    <None Include="Scene\新建文本文档 - 副本 - 副本 - 副本.txt">
-      <Filter>Scene</Filter>
-    </None>
-    <None Include="Scene\新建文本文档 - 副本 - 副本.txt">
-      <Filter>Scene</Filter>
-    </None>
-    <None Include="Scene\新建文本文档 - 副本.txt">
-      <Filter>Scene</Filter>
-    </None>
-    <None Include="Scene\新建文本文档.txt">
-      <Filter>Scene</Filter>
     </None>
   </ItemGroup>
 </Project>

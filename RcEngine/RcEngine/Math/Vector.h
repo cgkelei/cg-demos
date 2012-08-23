@@ -77,7 +77,7 @@ public:
 	inline Real Dot(const Vector& rhs) const;
 	inline void Normalize ();
 
-	inline static Vector Zero();
+	inline static const Vector& Zero();
 
 private:
 	int32_t CompareArrays (const Vector& rhs) const;

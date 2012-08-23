@@ -24,35 +24,44 @@ void BoundingSphere<Real>::Merge( const Vector<Real, 3>& point )
 template<typename Real>
 void BoundingSphere<Real>::Merge( const BoundingSphere<Real>& sphere )
 {
-	if (!Defined)
+	// do nothing if the rhs sphere id undefined.
+	if (!sphere.Defined)
+	{
+		return;
+	}
+	// Otherwise if current null, just take rhs sphere
+	else if (!Defined)
 	{
 		Center = sphere.Center;
 		Radius = sphere.Radius;
 		Defined = true;
 		return;
 	}
-
-	Vector<Real, 3> offset = sphere.Center - Center;
-	Real distance = offset.Length();
-
-	// If sphere fits inside, do nothing
-	if (distance + sphere.Radius < Radius)
-		return;
-
-	// If we fit inside the other sphere, become it
-	if (distance + Radius < sphere.Radius)
+	// Otherwise merge
+	else
 	{
-		Center = sphere.Center;
-		Radius = sphere.Radius;
-		return;
+		Vector<Real, 3> offset = sphere.Center - Center;
+		Real distance = offset.Length();
+
+		// If sphere fits inside, do nothing
+		if (distance + sphere.Radius < Radius)
+			return;
+
+		// If we fit inside the other sphere, become it
+		if (distance + Radius < sphere.Radius)
+		{
+			Center = sphere.Center;
+			Radius = sphere.Radius;
+			return;
+		}
+
+		Vector<Real, 3> normalizedOffset = offset * ( Real(1) / distance );
+
+		Vector<Real, 3> min = Center - Radius * normalizedOffset;
+		Vector<Real, 3> max = sphere.Center + sphere.Radius * normalizedOffset;
+		Center = (min + max) * 0.5f;
+		Radius = (max - Center).Length();
 	}
-
-	Vector<Real, 3> normalizedOffset = offset * ( Real(1) / distance );
-
-	Vector<Real, 3> min = Center - Radius * normalizedOffset;
-	Vector<Real, 3> max = sphere.Center + sphere.Radius * normalizedOffset;
-	Center = (min + max) * 0.5f;
-	Radius = (max - Center).Length();
 }
 
 template<typename Real>

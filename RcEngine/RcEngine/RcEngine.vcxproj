@@ -128,7 +128,10 @@
     <ClCompile Include="MainApp\Window.cpp" />
     <ClCompile Include="Math\Frustum.h" />
     <ClCompile Include="Math\ColorRGBA.cpp" />
-    <ClCompile Include="Scene\Scene.cpp" />
+    <ClCompile Include="Scene\Entity.cpp" />
+    <ClCompile Include="Scene\SceneObject.cpp" />
+    <ClCompile Include="Scene\Node.cpp" />
+    <ClCompile Include="Scene\SceneManager.cpp" />
     <ClCompile Include="Scene\SceneNode.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -192,8 +195,12 @@
     <ClInclude Include="Math\Matrix.h" />
     <ClInclude Include="Math\Plane.h" />
     <ClInclude Include="Math\Quaternion.h" />
+    <ClInclude Include="Math\Ray.h" />
     <ClInclude Include="Math\Vector.h" />
-    <ClInclude Include="Scene\Scene.h" />
+    <ClInclude Include="Scene\Entity.h" />
+    <ClInclude Include="Scene\SceneObject.h" />
+    <ClInclude Include="Scene\Node.h" />
+    <ClInclude Include="Scene\SceneManager.h" />
     <ClInclude Include="Scene\SceneNode.h" />
   </ItemGroup>
   <ItemGroup>
@@ -205,10 +212,6 @@
     <None Include="Math\Plane.inl" />
     <None Include="Math\Quaternion.inl" />
     <None Include="Math\Vector.inl" />
-    <None Include="Scene\新建文本文档 - 副本 - 副本 - 副本.txt" />
-    <None Include="Scene\新建文本文档 - 副本 - 副本.txt" />
-    <None Include="Scene\新建文本文档 - 副本.txt" />
-    <None Include="Scene\新建文本文档.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

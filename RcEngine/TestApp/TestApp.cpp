@@ -22,16 +22,14 @@
 #include "Input/InputSystem.h"
 #include "Input/InputDevice.h"
 #include "Scene/SceneNode.h"
+#include "Scene/SceneManager.h"
 #include <D3DX10Math.h>
 
 #pragma comment(lib, "D3DX10.lib")
 
-SceneNode node;
-
 
 TestApp::TestApp(void)
 {
-	node.GetWorldRotation();
 }
 
 
@@ -59,18 +57,6 @@ void TestApp::Initialize()
 	Camera* camera = RcEngine::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
 	
 	Vector3f up(0, 1, 0);
-	//Vector3f eye(0, 10, 100);
-	//Vector3f target(0, 10, 0);
-
-	//Vector3f view = target - eye;
-	//view.Normalize();
-
-	//Vector3f right = Cross(up, view);
-	//right.Normalize();
-
-	//up = Cross(view, right);
-	//up.Normalize();
-
 	camera->SetViewParams(Vector3f(0, 0, 40), Vector3f(0, 0, 0), up);
 	//camera->SetViewParams(eye, target, up);
 	camera->SetProjectionParams(PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 1000.0f );
@@ -94,7 +80,16 @@ void TestApp::LoadContent()
 	//
 	//mDwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Test/Armor.material.xml");
 	mDwarf->SetMaterial(mDwarfMaterial);
+
+	new SceneManager;
+
+	SceneManager& sceneManager = Context::GetSingleton().GetSceneManager();
+
+	SceneNode* dwarfNode = sceneManager.GetRootSceneNode()->CreateChildSceneNode("dwarf");
+	SceneNode* dwarfChildOneNode = dwarfNode->CreateChildSceneNode("dwarf one");
+	SceneNode* dwarfChildTwoNode = dwarfNode->CreateChildSceneNode("dwarf two");
 }
+
 
 void TestApp::UnloadContent()
 {
@@ -138,8 +133,6 @@ void TestApp::Update( float deltaTime )
 	mDwarf->SetWorldMatrix( worldScale * world );
 
 }
-
-BoundingBoxf bf;
 
 int32_t main()
 {

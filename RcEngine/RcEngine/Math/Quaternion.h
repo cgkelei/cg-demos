@@ -42,6 +42,9 @@ public:
 	bool operator == (const Quaternion& rhs) const;
 	bool operator != (const Quaternion& rhs) const;
 
+	inline static const Quaternion& Identity();
+
+
 private:
 	// support for comparisons
 	int CompareArrays (const Quaternion& rhs) const;

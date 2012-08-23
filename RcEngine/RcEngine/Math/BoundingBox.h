@@ -35,6 +35,16 @@ public:
 	}
 
 	/**
+	 * Reset the bounding box to undefined.
+	 */
+	void SetNull()	{ Defined = false; }
+
+	/**
+	 * Return center of box.
+	 */
+	Vector<Real,3> Center() const { return (Min + Max) * Real(0.5); }
+
+	/**
 	 * Merge a point
 	 */
 	void Merge( const Vector<Real,3>& point );
@@ -63,8 +73,6 @@ public:
 public:
 	Vector<Real,3> Max;
 	Vector<Real,3> Min;
-
-private:
 	bool Defined;
 };
 

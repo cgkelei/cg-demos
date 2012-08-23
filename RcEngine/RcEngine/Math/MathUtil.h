@@ -167,6 +167,18 @@ template<typename Real>
 Vector<Real, 3> 
 TransformCoord(const Vector<Real, 3>& vec, const Matrix4<Real>& mat);
 
+template<typename Real>
+BoundingBox<Real>
+Transform( const BoundingBox<Real>& box, const Matrix4<Real>& matrix );
+
+template<typename Real>
+BoundingBox<Real>
+TransformAffine( const BoundingBox<Real>& box, const Matrix4<Real>& matrix );
+
+template<typename Real>
+BoundingSphere<Real>
+Transform( const BoundingSphere<Real>& sphere, const Matrix4<Real>& matrix );
+
 
 /************************************************************************/
 /* Quaternion                                                           */

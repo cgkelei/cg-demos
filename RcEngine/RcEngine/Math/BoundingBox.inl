@@ -20,21 +20,30 @@ void BoundingBox<Real>::Merge( const Vector<Real,3>& point )
 template<typename Real>
 void BoundingBox<Real>::Merge( const BoundingBox<Real>& box )
 {
-	if (!Defined)
+	// do nothing if the rhs box id undefined.
+	if (!box.Defined)
+	{
+		return;
+	}
+	// Otherwise if current null, just take rhs box
+	else if (!Defined)
 	{
 		Min = box.Min;
 		Max = box.Max;
 		Defined = true;
 		return;
 	}
+	// Otherwise merge
+	else
+	{
+		if (box.Min.X() < Min.X())	Min.X() = box.Min.X();
+		if (box.Min.Y() < Min.Y())	Min.Y() = box.Min.Y();
+		if (box.Min.Z() < Min.Z())	Min.X() = box.Min.Z();
 
-	if (box.Min.X() < Min.X())	Min.X() = box.Min.X();
-	if (box.Min.Y() < Min.Y())	Min.Y() = box.Min.Y();
-	if (box.Min.Z() < Min.Z())	Min.X() = box.Min.Z();
-
-	if (box.Max.X() > Max.X())	Max.X() = box.Max.X();
-	if (box.Max.Y() > Max.Y())	Max.Y() = box.Max.Y();
-	if (box.Max.Z() > Max.Z())	Max.X() = box.Max.Z();
+		if (box.Max.X() > Max.X())	Max.X() = box.Max.X();
+		if (box.Max.Y() > Max.Y())	Max.Y() = box.Max.Y();
+		if (box.Max.Z() > Max.Z())	Max.X() = box.Max.Z();
+	}
 }
 
 template<typename Real>
