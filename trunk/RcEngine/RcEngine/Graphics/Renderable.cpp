@@ -27,12 +27,6 @@ EffectTechnique* Renderable::GetTechnique() const
 	return GetMaterial()->GetCurrentTechnique();
 }
 
-void Renderable::AddToRenderQueue()
-{
-
-}
-
-
 void Renderable::Render()
 {
 	RenderDevice& device = Context::GetSingleton().GetRenderDevice();

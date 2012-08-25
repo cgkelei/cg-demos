@@ -235,19 +235,67 @@ const Quaternion<Real>& Quaternion<Real>::Identity()
 template<typename Real>
 bool Quaternion<Real>::operator!=( const Quaternion<Real>& rhs ) const
 {
-	return CompareArrays(rhs) != 0;
+	return memcmp(mTuple,rhs.mTuple,4*sizeof(Real)) != 0;
 }
 
 template<typename Real>
 bool Quaternion<Real>::operator==( const Quaternion<Real>& rhs ) const
 {
-	return CompareArrays(rhs) == 0;
+	return memcmp(mTuple,rhs.mTuple,4*sizeof(Real)) == 0;
 }
 
-template<typename Real>
-int Quaternion<Real>::CompareArrays( const Quaternion<Real>& rhs ) const
+//----------------------------------------------------------------------------
+template <typename Real>
+inline Real QuaternionLength(const Quaternion<Real>& quat)
 {
-	return memcmp(mTuple,rhs.mTuple,4*sizeof(Real));
+	return  sqrt(quat[0]*quat[0]+quat[1]*quat[1]+quat[2]*quat[2]+quat[3]*quat[3]);
 }
 
+//----------------------------------------------------------------------------------------------------
+template <typename Real>
+inline Real
+QuaternionDot(const Quaternion<Real>& quat)
+{
+	return quat[0]*quat[0]+quat[1]*quat[1]+quat[2]*quat[2]+quat[3]*quat[3];
+}
 
+//----------------------------------------------------------------------------------------------------
+template <typename Real>
+inline Quaternion<Real> 
+QuaternionNormalize(const Quaternion<Real>& quat)
+{
+	Real mag = sqrt(quat[0]*quat[0]+quat[1]*quat[1]+quat[2]*quat[2]+quat[3]*quat[3]);
+	Real oneOverMag = Real(1) / mag;	//ÔÝÊ±²»¼ì²é³ý0;
+	return Quaternion<Real>(quat[0]*oneOverMag, quat[1]*oneOverMag, 
+		quat[2]*oneOverMag, quat[3]*oneOverMag);
+}
+
+//----------------------------------------------------------------------------------------------------
+template <typename Real>
+inline Quaternion<Real> 
+QuaternionConjugate(const Quaternion<Real>& quat)
+{
+	return Quaternion<Real>(quat.W(), -quat.X(), -quat.Y(), -quat.Z());
+}
+
+//----------------------------------------------------------------------------------------------------
+template <typename Real>
+inline Quaternion<Real> 
+QuaternionMultiply(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2)
+{
+	return Quaternion<Real>(
+		quat1[0]*quat2[0] - quat1[1]*quat2[1] - quat1[2]*quat2[2] - quat1[3]*quat2[3],
+		quat1[0]*quat2[1] + quat1[1]*quat2[0] + quat1[2]*quat2[3] - quat1[3]*quat2[2],
+		quat1[0]*quat2[2] + quat1[2]*quat2[0] + quat1[3]*quat2[1] - quat1[1]*quat2[3],
+		quat1[0]*quat2[3] + quat1[3]*quat2[0] + quat1[1]*quat2[2] - quat1[2]*quat2[1] );
+
+}
+
+//----------------------------------------------------------------------------------------------------
+template <typename Real>
+inline Quaternion<Real> 
+QuaternionInverse(const Quaternion<Real>& quat)
+{
+	Real inv = Real(1) / QuaternionLength(quat);
+	return QuaternionConjugate(quat) * inv;
+}

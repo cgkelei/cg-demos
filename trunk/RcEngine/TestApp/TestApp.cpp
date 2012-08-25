@@ -22,6 +22,7 @@
 #include "Input/InputSystem.h"
 #include "Input/InputDevice.h"
 #include "Scene/SceneNode.h"
+#include "Scene/Entity.h"
 #include "Scene/SceneManager.h"
 #include <D3DX10Math.h>
 
@@ -59,7 +60,7 @@ void TestApp::Initialize()
 	Vector3f up(0, 1, 0);
 	camera->SetViewParams(Vector3f(0, 0, 40), Vector3f(0, 0, 0), up);
 	//camera->SetViewParams(eye, target, up);
-	camera->SetProjectionParams(PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 1000.0f );
+	camera->SetProjectionParams(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 1000.0f );
 
 	//mCameraControler = new FPSCameraControler;
 	mCameraControler = new ModelViewerCameraControler();
@@ -73,45 +74,42 @@ void TestApp::LoadContent()
 
 	// Load mesh
 	//RcEngine::FileStream modelSource("../Media/Mesh/Test/Test.mdl", RcEngine::FILE_READ);
-	RcEngine::FileStream modelSource("../Media/Mesh/Dwarf/Dwarf.mdl", RcEngine::FILE_READ);
-	mDwarf = Mesh::Load(modelSource);
+	//RcEngine::FileStream modelSource("../Media/Mesh/Dwarf/Dwarf.mdl", RcEngine::FILE_READ);
+	//mDwarf = Mesh::Load(modelSource);
+
+	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
+
+	SceneNode* dwarfNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
+	Entity* dwarfEntity = sceneManager->CreateEntity("Dwarf", "../Media/Mesh/Dwarf/Dwarf.mdl");
+	
 
 	mDwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Dwarf/Body.material.xml");
-	//
+	dwarfEntity->SetMaterial(mDwarfMaterial);
+
+	dwarfNode->AttachObject(dwarfEntity);
+
 	//mDwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Test/Armor.material.xml");
-	mDwarf->SetMaterial(mDwarfMaterial);
+	//mDwarf->SetMaterial(mDwarfMaterial);
 
-	new SceneManager;
-
-	SceneManager& sceneManager = Context::GetSingleton().GetSceneManager();
-
-	SceneNode* dwarfNode = sceneManager.GetRootSceneNode()->CreateChildSceneNode("dwarf");
-	SceneNode* dwarfChildOneNode = dwarfNode->CreateChildSceneNode("dwarf one");
-	SceneNode* dwarfChildTwoNode = dwarfNode->CreateChildSceneNode("dwarf two");
 }
 
 
 void TestApp::UnloadContent()
 {
-	
+
 }
 
 
 
 void TestApp::Render()
 {
-	RenderDevice* device = Context::GetSingleton().GetRenderDevicePtr();
+	//RenderDevice* device = Context::GetSingleton().GetRenderDevicePtr();
 
-	device->GetCurrentFrameBuffer()->Clear(CF_Color | CF_Depth |CF_Stencil, 
-		RcEngine::ColorRGBA(1.1f, 1.1f, 1.1f, 1.0f), 1.0f, 0);
+	//device->GetCurrentFrameBuffer()->Clear(CF_Color | CF_Depth |CF_Stencil, 
+	//	RcEngine::ColorRGBA(1.1f, 1.1f, 1.1f, 1.0f), 1.0f, 0);
 
 
-	for (uint32_t i = 0; i < mDwarf->GetMeshPartCount(); ++i)
-	{
-		mDwarf->GetMeshPart(i)->Render();
-	}
-
-	device->GetCurrentFrameBuffer()->SwapBuffers();
+	//device->GetCurrentFrameBuffer()->SwapBuffers();
 }
 
 
@@ -120,17 +118,25 @@ void TestApp::Update( float deltaTime )
 	static float degree = 0;
 	//degree += deltaTime * 90 ;
 
-	Quaternionf quat = QuaternionFromRotationYawPitchRoll( ToRadian(degree), 0.0f, 0.0f);
+	SceneNode* dwarfNode = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf");
+	Entity* dwarfEntity = static_cast<Entity*>( dwarfNode->GetAttachedObject("Dwarf") );
 
-	const Vector3f& center = mDwarf->GetBoundingSphere().Center;
-	float radius = mDwarf->GetBoundingSphere().Radius;
+	//Quaternionf quat = QuaternionFromRotationYawPitchRoll( Mathf::ToRadian(degree), 0.0f, 0.0f);
+
+	const Vector3f& center = dwarfEntity->GetBoundingSphere().Center;
+	float radius = dwarfEntity->GetBoundingSphere().Radius;
 
 	Matrix4f worldScale = CreateTranslation(-center.X(), -center.Y(), -center.Z());
-	//worldScale.MakeIdentity();
-	worldScale = worldScale * CreateScaling(10.0f / radius, 10.0f / radius, 10.0f / radius);
-	Matrix4f world = mCameraControler->GetWorldMatrix();
 
-	mDwarf->SetWorldMatrix( worldScale * world );
+	worldScale = worldScale * CreateScaling(10.0f / radius, 10.0f / radius, 10.0f / radius);
+	Matrix4f world = worldScale * mCameraControler->GetWorldMatrix();
+
+	Quaternionf quat;
+	Vector3f pos, scale;
+
+	MatrixDecompose(scale, quat, pos, world);
+
+	dwarfNode->SetWorldTransform(pos, quat, scale);
 
 }
 

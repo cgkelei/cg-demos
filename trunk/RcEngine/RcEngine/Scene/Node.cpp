@@ -5,14 +5,14 @@
 namespace RcEngine {
 
 Node::Node()
-	: mParent(nullptr), mDirty(false), 
+	: mParent(nullptr), mDirtyBits(NODE_DIRTY_ALL), 
 	mPosition(0.0f, 0.0f, 0.0f), mScale(1.0f, 1.0f, 1.0f), mRotation(1.0f, 0.0f, 0.0f, 0.0f)
 {
 
 }
 
 Node::Node( const String& name )
-	: mName(name), mParent(nullptr), mDirty(false), 
+	: mName(name), mParent(nullptr), mDirtyBits(NODE_DIRTY_ALL), 
 	  mPosition(0.0f, 0.0f, 0.0f), mScale(1.0f, 1.0f, 1.0f), mRotation(1.0f, 0.0f, 0.0f, 0.0f)
 {
 
@@ -26,57 +26,21 @@ Node::~Node()
 
 void Node::SetParent( Node* parent )
 {
-
+	mParent = parent;
 }
 
-void Node::MarkDirty()
-{
-	mDirty = true;
-
-	// Mark child nodes
-	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
-	{
-		(*iter)->MarkDirty();
-	}
-}
-
-void Node::UpdateWorldTransform() const
-{
-	if (mDirty)
-	{
-		if (mParent)
-		{
-			if (mParent->IsDirty())
-				mParent->UpdateWorldTransform();
-
-			mWorldTransform = CreateTransformMatrix(mScale, mRotation, mPosition) * mParent->mWorldTransform;
-		}
-		else
-		{
-			mWorldTransform = CreateTransformMatrix(mScale, mRotation, mPosition);
-		}
-
-		mDirty = false;
-	}
-}
 
 void Node::SetPosition( const Vector3f& position )
 {
 	mPosition = position;
-	if (mDirty)
-	{
-		MarkDirty();
-	}
+	TransformChanged();
 
 }
 
 void Node::SetRotation( const Quaternionf& rotation )
 {
 	mRotation = rotation;
-	if (mDirty)
-	{
-		MarkDirty();
-	}
+	TransformChanged();
 }
 
 void Node::SetDirection( const Vector3f& direction )
@@ -93,21 +57,14 @@ void Node::SetDirection( const Vector3f& direction )
 void Node::SetScale( const Vector3f& scale )
 {
 	mScale = scale;
-	if (mDirty)
-	{
-		MarkDirty();
-	}
+	TransformChanged();
 }
 
 void Node::SetTransform( const Vector3f& position, const Quaternionf& rotation )
 {
 	mPosition = position;
 	mRotation = rotation;
-
-	if (mDirty)
-	{
-		MarkDirty();
-	}
+	TransformChanged();
 }
 
 void Node::SetTransform( const Vector3f& position, const Quaternionf& rotation, const Vector3f& scale )
@@ -115,11 +72,7 @@ void Node::SetTransform( const Vector3f& position, const Quaternionf& rotation, 
 	mPosition = position;
 	mRotation = rotation;
 	mScale = scale;
-
-	if (mDirty)
-	{
-		MarkDirty();
-	}
+	TransformChanged();
 }
 
 Matrix4f Node::GetTransform() const
@@ -135,14 +88,14 @@ void Node::SetWorldPosition( const Vector3f& position )
 	}
 	else
 	{
-		Matrix4f parentWorldTransformInv = MatrixInverse( mParent->GetWorldTransform() );
+		Matrix4f parentWorldTransformInv = mParent->GetWorldTransform().Inverse();
 		SetPosition( Transform(position, parentWorldTransformInv) );
 	}
 }
 
 Vector3f Node::GetWorldPosition() const
 {
-	if (mDirty)
+	if (mDirtyBits & NODE_DIRTY_WORLD)
 		UpdateWorldTransform();
 
 	return TranslationFromTransformMatrix(mWorldTransform);
@@ -164,7 +117,7 @@ void Node::SetWorldRotation( const Quaternionf& rotation )
 
 Quaternionf Node::GetWorldRotation() const
 {
-	if (mDirty)
+	if (mDirtyBits & NODE_DIRTY_WORLD)
 		UpdateWorldTransform();
 
 	return QuaternionFromRotationMatrix( RotationFromTransformMatrix(mWorldTransform) );
@@ -180,7 +133,7 @@ void Node::SetWorldDirection( const Vector3f& direction )
 	} 
 	else
 	{
-		Matrix4f parentWorldTransformInv = MatrixInverse( mParent->GetWorldTransform() );
+		Matrix4f parentWorldTransformInv = mParent->GetWorldTransform().Inverse();
 		localDirection = Transform(direction, parentWorldTransformInv);
 	}
 
@@ -189,7 +142,7 @@ void Node::SetWorldDirection( const Vector3f& direction )
 
 Vector3f Node::GetWorldDirection() const
 {
-	if (mDirty)
+	if (mDirtyBits & NODE_DIRTY_WORLD)
 		UpdateWorldTransform();
 
 	const Vector3f Froward(0.0f, 0.0f, 1.0f);
@@ -211,10 +164,8 @@ void Node::SetWorldScale( const Vector3f& scale )
 
 Vector3f Node::GetWorldScale() const
 {
-	if (!mDirty)
-	{
+	if (mDirtyBits & NODE_DIRTY_WORLD)
 		UpdateWorldTransform();
-	}
 
 	return ScaleFromTransformMatrix(mWorldTransform);
 }
@@ -235,7 +186,7 @@ void Node::SetWorldTransform( const Vector3f& position, const Quaternionf& rotat
 
 const Matrix4f& Node::GetWorldTransform() const
 {
-	if (mDirty)
+	if (mDirtyBits & NODE_DIRTY_WORLD)
 		UpdateWorldTransform();
 
 	return mWorldTransform;
@@ -285,7 +236,7 @@ void Node::AttachChild( Node* child )
 	// set new parent
 	child->SetParent(this);
 
-	child->MarkDirty();
+	child->TransformChanged();
 
 	OnChildNodeAdded(child);
 }
@@ -302,7 +253,7 @@ void Node::DetachChild( Node* child )
 	{
 		mChildren.erase(found);
 		child->mParent = nullptr;
-		child->MarkDirty();
+		child->TransformChanged();
 	}
 
 	OnChildNodeRemoved(child);
@@ -314,7 +265,7 @@ void Node::DetachAllChildren()
 	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
 	{
 		(*iter)->SetParent(nullptr);
-		(*iter)->MarkDirty();
+		(*iter)->TransformChanged();
 		OnChildNodeRemoved(*iter);
 	}
 	mChildren.clear();
@@ -344,10 +295,63 @@ void Node::OnChildNodeRemoved( Node* node )
 
 }
 
-void Node::Update( float tick )
+void Node::UpdateWorldTransform() const
 {
-	UpdateWorldTransform();
-	OnUpdate(tick);
+	if (mDirtyBits & NODE_DIRTY_WORLD)
+	{
+		if (mParent)
+		{
+			mParent->UpdateWorldTransform();
+			mWorldTransform = CreateTransformMatrix(mScale, mRotation, mPosition) * mParent->mWorldTransform;
+		}
+		else
+		{
+			mWorldTransform = CreateTransformMatrix(mScale, mRotation, mPosition);
+		}
+
+		mDirtyBits &= ~NODE_DIRTY_WORLD;
+
+		// force children to update their world transform.
+		for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
+		{
+			(*iter)->UpdateWorldTransform();
+		}
+	}
+}
+
+void Node::MarkBoundDirty()
+{
+	// Mark ourself and our parent nodes as dirty
+	mDirtyBits |= NODE_DIRTY_BOUNDS;
+
+	// Mark our parent bounds as dirty as well
+	if (mParent)
+		mParent->MarkBoundDirty();
+}
+
+void Node::TransformChanged()
+{
+	// Our local transform was changed, so mark our world matrices dirty.
+	mDirtyBits |= NODE_DIRTY_WORLD;
+
+	// World bound changes too, it may also cause parent bound dirty
+	MarkBoundDirty();
+
+	// Children node transform will change too, this will not mark parent's dirty again.
+	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
+		(*iter)->MarkChildrenDirty();
+}
+
+void Node::MarkChildrenDirty()
+{
+	mDirtyBits |= NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS;
+
+	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
+		(*iter)->MarkChildrenDirty();
+}
+
+void Node::Update( )
+{
 }
 
 }

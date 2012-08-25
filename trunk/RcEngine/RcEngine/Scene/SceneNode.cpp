@@ -1,6 +1,7 @@
 #include <Scene/SceneNode.h>
 #include <Scene/SceneManager.h>
 #include <Scene/SceneObject.h>
+#include <Graphics/Camera.h>
 #include <Math/MathUtil.h>
 #include <Core/Exception.h>
 
@@ -46,7 +47,8 @@ void SceneNode::AttachObject( SceneObject* obj )
 	
 	obj->OnAttach(this);
 
-	// update bounding
+	// Mark bound dirty
+	MarkBoundDirty();
 }
 
 void SceneNode::DetachOject( SceneObject* obj )
@@ -74,48 +76,66 @@ SceneObject* SceneNode::GetAttachedObject( const String& name )
 	return *found;
 }
 
-void SceneNode::PropagateBoundToRoot()
-{
-	if (mParent)
-	{
-		UpdateWorldBounds();
-		PropagateBoundToRoot();
-	}
-}
-
 void SceneNode::UpdateWorldBounds() const
 {
-	mWorldBounds.SetNull();
-
-	for (auto iter = mAttachedObjects.begin(); iter != mAttachedObjects.end(); ++iter)
+	if (mDirtyBits & NODE_DIRTY_BOUNDS)
 	{
-		mWorldBounds.Merge((*iter)->GetWorldBoundingSphere());
+		mWorldBounds.SetNull();
+
+		/**
+		 * Merge all attached object's bound first, note that if object doesn't have bound,
+		 * the Merge operation doesn't have effect.
+		 */
+		for (auto iter = mAttachedObjects.begin(); iter != mAttachedObjects.end(); ++iter)
+		{
+			mWorldBounds.Merge((*iter)->GetWorldBoundingSphere());
+		}
+
+		for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
+		{
+			SceneNode* childNode = static_cast<SceneNode*>(*iter);
+			mWorldBounds.Merge(childNode->GetWorldBoundingShpere());
+		}
+
+		 mDirtyBits &= ~NODE_DIRTY_BOUNDS;
 	}
-
-	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
-	{
-		SceneNode* childNode = static_cast<SceneNode*>(*iter);
-		mWorldBounds.Merge(childNode->GetWorldBoundingShpere());
-	}
-}
-
-void SceneNode::OnUpdate( float tick )
-{
-
 }
 
 const BoundingSpheref& SceneNode::GetWorldBoundingShpere() const
 {
-	if (mWorldBoundDirty)
+	if (mDirtyBits & NODE_DIRTY_BOUNDS)
+		UpdateWorldBounds();
+	
+	return mWorldBounds;
+}
+
+void SceneNode::OnPostUpdate()
+{
+	// update world bound
+	UpdateWorldBounds();
+}
+
+void SceneNode::FindVisibleObjects( Camera* cam )
+{
+	if (!cam->Visible(mWorldBounds))
 	{
-		// Do not use mWorldTransform directly, it's may out of date.
-		const Matrix4f& worldMat = GetWorldTransform();
-
-
-
+		return;
 	}
 
-	return mWorldBounds;
+	for (auto iter = mAttachedObjects.begin(); iter != mAttachedObjects.end(); ++iter)
+	{
+		if ((*iter)->Renderable())
+		{
+			mScene->AddToRenderQueue(*iter);
+		}	
+	}
+
+	// recursively call children
+	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
+	{
+		SceneNode* child = static_cast<SceneNode*>(*iter);
+		child->FindVisibleObjects(cam);
+	}
 }
 
 }

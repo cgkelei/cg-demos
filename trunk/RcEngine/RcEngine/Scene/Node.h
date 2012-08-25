@@ -8,6 +8,13 @@
 
 namespace RcEngine {
 
+
+// Node dirty flags
+#define NODE_DIRTY_WORLD 1
+#define NODE_DIRTY_BOUNDS 2
+#define NODE_DIRTY_ALL (NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS)
+
+
 /**
  * Class representing a general-purpose node, has transform information, which is 
  * stored in local coordinated system relative to it's parent.
@@ -178,11 +185,22 @@ public:
 	 */
 	Node* GetParent() const { return mParent; }
 
-	bool IsDirty() const { return mDirty; }
-	
-	void MarkDirty();
+	/**
+	 * Update node, this will cause to recalculate world transform if node is dirty.
+	 */
+	void Update( );
 
-	void Update( float tick );
+	/**
+     * Called when the transform changes.
+     */
+	void TransformChanged();
+
+
+	/**
+	 * Mark node bound dirty, because if node bound dirty, all parent node 
+	 * bound is dirty too.
+	 */
+	void MarkBoundDirty();
 
 protected:
 
@@ -191,12 +209,18 @@ protected:
 	 */
 	virtual Node* CreateChildImpl( const String& name ) = 0;
 
-	virtual void OnUpdate( float tick ) = 0;
+	virtual void OnPreUpdate( )  { }
+	virtual void OnPostUpdate( ) { }
 
 	virtual void OnChildNodeAdded( Node* node ) ;
 	virtual void OnChildNodeRemoved( Node* node );
 
 	void UpdateWorldTransform() const;
+
+	/**
+	 * Mark children node dirty, including world transform and bound both.
+	 */
+	void MarkChildrenDirty();
 
 protected:
 
@@ -214,12 +238,7 @@ protected:
 
 	mutable Matrix4f mWorldTransform;
 
-	mutable bool mDirty;
-
-	/// Flag indicating that all children need to be updated
-	mutable bool mWorldTransformDirty;
-
-	mutable bool mWorldBoundDirty;
+	mutable uint8_t mDirtyBits;
 };
 
 }

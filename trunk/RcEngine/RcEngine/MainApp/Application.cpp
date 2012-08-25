@@ -5,6 +5,7 @@
 #include <Graphics/RenderFactory.h>
 #include <Graphics/FrameBuffer.h>
 #include <Graphics/Camera.h>
+#include <Scene/SceneManager.h>
 #include <Core/Exception.h>
 #include <Core/Context.h>
 #include <Core/XMLDom.h>
@@ -71,7 +72,10 @@ void Application::Tick()
 	mTimer.Tick();
 
 	if(!mAppPaused)
+	{
 		Update(mTimer.GetDeltaTime());
+		Context::GetSingleton().GetSceneManager().UpdateSceneGraph();
+	}
 	else
 		::Sleep(50);
 	
@@ -91,8 +95,20 @@ void Application::Tick()
 	}
 
 
-	Render();	
-		
+	/*Render();	*/
+	
+	
+	RenderDevice* device = Context::GetSingleton().GetRenderDevicePtr();
+	Camera* cam = device->GetCurrentFrameBuffer()->GetCamera();
+	Context::GetSingleton().GetSceneManager().UpdateRenderQueue(cam);
+
+	device->GetCurrentFrameBuffer()->Clear(CF_Color | CF_Depth |CF_Stencil, 
+		RcEngine::ColorRGBA(1.1f, 1.1f, 1.1f, 1.0f), 1.0f, 0);
+
+
+	Context::GetSingleton().GetSceneManager().RenderScene();
+
+	device->GetCurrentFrameBuffer()->SwapBuffers();
 }
 
 void Application::LoadAllModules()
@@ -102,6 +118,9 @@ void Application::LoadAllModules()
 
 	ModuleManager::GetSingleton().Load(MT_Input_OIS);
 	ModuleManager::GetSingleton().GetMoudleByType(MT_Input_OIS)->Initialise();
+
+
+	new SceneManager;
 }
 
 void Application::UnloadAllModules()

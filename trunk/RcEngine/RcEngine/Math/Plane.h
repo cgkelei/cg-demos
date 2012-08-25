@@ -3,17 +3,11 @@
 #define _Plane__H
 
 //  [8/24/2011 hustruan]
-
-#include <Math/MathUtil.h>
+#include <Math/Math.h>
+#include <Math/Vector.h>
 
 namespace RcEngine{
 
-
-// The plane is represented as Dot(N,X) = c where N is a unit-length
-// normal vector, c is the plane constant, and X is any point on the
-// plane.  The user must ensure that the normal vector satisfies this
-// condition.
-	
 enum PlaneSide
 {
 	No_Side,
@@ -22,38 +16,45 @@ enum PlaneSide
 	Both_Side
 };
 
+/** 
+ * The plane is represented as Dot(N,X) - Distance = 0 where N is a unit-length
+ * normal vector, Distance is the distance of the plane along its normal from the
+ * origin, and X is any point on the plane. 
+ */
 template< typename Real >
-class Plane3
+class Plane
 {
-
 public:
-	Plane3();
-	Plane3(const Plane3& rhs);
+	Plane();
+	Plane(const Plane& rhs);
 
 	// specify N and c directly
-	Plane3(const Vector<Real, 3>& rkNormal, Real fConstant);
+	Plane(const Vector<Real, 3>& nroaml, Real distance);
 
 	// N is specified, C = Dot(N,P) where P is on the plane
-	Plane3(const Vector<Real, 3>& rkNormal, const Vector<Real, 3>& rkP);
+	Plane(const Vector<Real, 3>& nroaml, const Vector<Real, 3>& point);
 		
-	// N = Cross(P1-P0,P2-P0)/Length(Cross(P1-P0,P2-P0)), C = Dot(N,P0) where
+	// N = Cross(P1-P0,P2-P0)/Length(Cross(P1-P0,P2-P0)), D = -Dot(N,P0) where
 	// P0, P1, P2 are points on the plane.
-	Plane3(const Vector<Real, 3>& rkPoint1, const Vector<Real, 3>& rkPoint2,
-		const Vector<Real, 3>& rkPoint3);
+	Plane(const Vector<Real, 3>& point1, const Vector<Real, 3>& point2, const Vector<Real, 3>& point3);
 
 	// assignment
-	Plane3& operator= (const Plane3& rkPlane);
+	Plane& operator= (const Plane& rhs);
 
-	PlaneSide WhichSide (const Vector<Real, 3>& rkPoint) const;
-	Real DistanceTo(const Vector<Real, 3>& rkQ) const;
+	PlaneSide WhichSide (const Vector<Real, 3>& point) const;
+
+	Real DistanceTo(const Vector<Real, 3>& point) const;
+
+	void Normalize(Real epsilon = Math<Real>::ZERO_TOLERANCE);
 		
+public:
 	Vector<Real, 3> Normal;
-	Real Constant;
+	Real Distance;
 };
 
 #include <Math/Plane.inl>
 
-typedef Plane3<float> Plane3f;
+typedef Plane<float> Planef;
 
 
 } // Namespace RcEngine

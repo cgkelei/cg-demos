@@ -9,7 +9,7 @@
 
 namespace RcEngine {
 
-class _ApiExport MeshPart : public Renderable
+class _ApiExport MeshPart
 {
 public:
 	MeshPart(const String& name, const shared_ptr<Mesh>& mesh);
@@ -17,8 +17,8 @@ public:
 
 	const String& GetName() const								{ return mName; }
 	const BoundingSpheref& GetBoundingSphere() const			{ return mBoundingSphere; }
-			
-	const shared_ptr<RenderOperation>& GetRenderOperation() const 	{ return mRenderOperation; }
+	
+	void GetRenderOperation( RenderOperation& op, uint32_t lodIndex );
 
 	uint32_t GetVertexCount() const				{ return mVertexCount; }
 	uint32_t GetPrimitiveCount() const			{ return mPrimitiveCount; }
@@ -37,10 +37,6 @@ public:
 	void SetIndexBuffer(const shared_ptr<GraphicsBuffer>& indexBuffer, IndexBufferType format);
 	const shared_ptr<GraphicsBuffer>& GetIndexBuffer()	const	{ return mIndexBuffer; }
 	IndexBufferType GetIndexFormat() const						{ return mIndexFormat;  }
-			
-	void GetWorldTransforms(Matrix4f* xform) const;
-	uint32_t GetWorldTransformsCount() const;
-
 
 public:
 	static shared_ptr<MeshPart> Load(const shared_ptr<Mesh>& mesh, Stream& source);
@@ -84,7 +80,7 @@ public:
 
 	const shared_ptr<Material>& GetMaterial(size_t i) const 	{ return mMaterials[i]; }
 
-	uint32_t GetMeshPartCount() const							{ return mMeshParts.size(); }
+	uint32_t GetNumMeshPart() const							{ return mMeshParts.size(); }
 	const shared_ptr<MeshPart>& GetMeshPart(size_t i) const		{ return mMeshParts[i]; }
 			
 

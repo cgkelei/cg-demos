@@ -3,6 +3,7 @@
 #define _Vector__H
 
 #include <cstdint>
+#include <math.h>
 #include <iostream>
 
 //  [8/22/2011 hustruan]
@@ -50,37 +51,27 @@ public:
 	inline Vector operator/ (Real fScalar) const;
 	inline Vector operator- () const;
 
-	friend Vector operator* (Real fScalar, const Vector<Real, Size>& rhs)
-	{
-		Vector<Real, Size> result;
-		for(int32_t i = 0; i < Size; i++)
-			result[i] =  fScalar * rhs[i];
-
-		return result;
-	}
-
 	// arithmetic updates
 	inline Vector& operator+= (const Vector& rhs);
 	inline Vector& operator-= (const Vector& rhs);
 	inline Vector& operator*= (Real fScalar);
 	inline Vector& operator/= (Real fScalar);
 
-
-
 	// comparison
 	bool operator== (const Vector& rhs) const;
 	bool operator!= (const Vector& rhs) const;
 
-	// vector operations
+	// vector operations, prefer to use non menber funtion version
 	inline Real Length () const;
-	inline Real SquaredLength () const;
-	inline Real Dot(const Vector& rhs) const;
+	inline Real LengthSquared () const;
+
+	// Normalize
 	inline void Normalize ();
 
+	// Zero Vector
 	inline static const Vector& Zero();
 
 private:
-	int32_t CompareArrays (const Vector& rhs) const;
 	Real mTuple[Size];
 };
 
@@ -88,6 +79,24 @@ private:
 template <class Real, int32_t Size>
 std::ostream& operator<< (std::ostream& rkOStr, const Vector<Real, Size>& rhs);
 
+template <class Real, int32_t Size>
+inline Vector<Real, Size> operator* (Real fScalar, const Vector<Real, Size>& rhs);
+
+template< typename Real, int32_t Size >
+inline Real Length( const Vector<Real, Size>& vec );
+
+template< typename Real, int32_t Size >
+inline Real LengthSquared( const Vector<Real, Size>& vec );
+
+template< typename Real, int32_t Size >
+inline Real Dot( const Vector<Real, Size>& lfs, const Vector<Real, Size>& rhs );
+
+template<typename Real>
+inline Vector<Real, 3> Cross( const Vector<Real, 3>& vec1, const Vector<Real, 3>& vec2 );
+
+
+template< typename Real, int32_t Size >
+inline Vector<Real, Size> Normalize(const Vector<Real, Size>& vec);
 
 #include <Math/Vector.inl>
 

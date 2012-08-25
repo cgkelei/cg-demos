@@ -155,8 +155,8 @@ void FPSCameraControler::Rotate( float yaw, float pitch, float roll )
 	mCameraYawAngle += yaw * 0.05f;
 	mCameraPitchAngle += pitch * 0.05f;
 
-	mCameraPitchAngle = (std::max)( -PI / 2.0f, mCameraPitchAngle );
-	mCameraPitchAngle = (std::min)( +PI / 2.0f, mCameraPitchAngle );
+	mCameraPitchAngle = (std::max)( -Mathf::PI / 2.0f, mCameraPitchAngle );
+	mCameraPitchAngle = (std::min)( +Mathf::PI / 2.0f, mCameraPitchAngle );
 
 	mCameraRot = QuaternionFromRotationYawPitchRoll(mCameraYawAngle, mCameraPitchAngle, 0.0f);
 
@@ -214,7 +214,7 @@ Vector3f ArcBall::ScreenToSphere( float screenX, float screenY )
 	result.Y() = -(screenY - mCenter.Y()) / mRadius;
 	result.Z() = 0.0f;
 	
-	float mag = result.SquaredLength();
+	float mag = LengthSquared(result);
 
 	if( mag > 1.0f )
 	{

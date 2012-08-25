@@ -44,13 +44,30 @@ public:
 
 	inline static const Quaternion& Identity();
 
-
 private:
-	// support for comparisons
-	int CompareArrays (const Quaternion& rhs) const;
-
 	Real mTuple[4];
 };
+
+template <typename Real>
+inline Real QuaternionLength(const Quaternion<Real>& quat);
+
+template <typename Real>
+inline Quaternion<Real>  QuaternionNormalize(const Quaternion<Real>& quat);
+
+template <typename Real>
+inline Real QuaternionDot(const Quaternion<Real>& quat);
+
+template <typename Real>
+inline Quaternion<Real> QuaternionConjugate(const Quaternion<Real>& quat);
+
+template <typename Real>
+inline Quaternion<Real> QuaternionMultiply(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2);
+
+template <typename Real>
+Quaternion<Real> QuaternionInverse(const Quaternion<Real>& quat);
+
+template <typename Real>
+inline Quaternion<Real> QuaternionSlerp(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2, Real t);
 
 #include <Math/Quaternion.inl>
 

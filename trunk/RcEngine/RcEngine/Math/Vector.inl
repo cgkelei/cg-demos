@@ -280,41 +280,33 @@ Vector<Real, Size>& Vector<Real, Size>::operator/=( Real fScalar)
 template< typename Real, int32_t Size >
 bool Vector<Real, Size>::operator==( const Vector<Real, Size>& rhs ) const
 {
-	 return CompareArrays(rhs) == 0;
+	 return memcmp(mTuple,rhs.mTuple,Size*sizeof(Real)) == 0;
 }
 
 //----------------------------------------------------------------------------
 template< typename Real, int32_t Size >
 bool Vector<Real, Size>::operator!=( const Vector<Real, Size>& rhs ) const
 {
-	 return CompareArrays(rhs) != 0;
+	 return memcmp(mTuple,rhs.mTuple,Size*sizeof(Real)) != 0;
 }
 
 //----------------------------------------------------------------------------
 template< typename Real, int32_t Size >
-int32_t Vector<Real, Size>::CompareArrays( const Vector<Real, Size>& rhs ) const
+inline Real Vector<Real, Size>::Length( ) const
 {
-	return memcmp(mTuple,rhs.mTuple,Size*sizeof(Real));
-}
-
-//----------------------------------------------------------------------------
-template< typename Real, int32_t Size >
-Real Vector<Real, Size>::SquaredLength() const
-{
-	Real result = (Real)0.0;
+	Real result = Real(0);
 	for(int32_t i = 0; i < Size; i++)
 		result +=  mTuple[i] * mTuple[i] ;
-	return result;
+	return sqrt(result);
 }
 
 //----------------------------------------------------------------------------
 template< typename Real, int32_t Size >
-Real Vector<Real, Size>::Dot( const Vector<Real, Size>& rhs ) const
+inline Real Vector<Real, Size>::LengthSquared( ) const
 {
-	Vector<Real, Size> result;
+	Real result = Real(0);
 	for(int32_t i = 0; i < Size; i++)
-		result[i] =  mTuple[i] * fScalar;
-
+		result +=  mTuple[i] * mTuple[i] ;
 	return result;
 }
 
@@ -322,25 +314,16 @@ Real Vector<Real, Size>::Dot( const Vector<Real, Size>& rhs ) const
 template< typename Real, int32_t Size >
 void Vector<Real, Size>::Normalize()
 {
-	Real fLength = SquaredLength();
+	Real fLength = LengthSquared();
 	if(fLength > (Real)0.0)
 	{
-		Real fInvScalar = ((Real)1.0)/ ((Real)sqrt((double)fLength));
+		Real fInvScalar = ((Real)1.0)/ (sqrt(fLength));
 
 		for(int32_t i = 0; i < Size; i++)
 			mTuple[i] *= fInvScalar;
 	}
 }
 
-//----------------------------------------------------------------------------
-template< typename Real, int32_t Size >
-Real Vector<Real, Size>::Length() const
-{
-	Real result = 0;
-	for(int32_t i = 0; i < Size; i++)
-		result +=  mTuple[i] * mTuple[i] ;
-	return (Real)sqrt((double)result);
-}
 
 
 //----------------------------------------------------------------------------
@@ -365,4 +348,59 @@ std::ostream& operator<< (std::ostream& rkOStr, const Vector<Real, Size>& rhs)
 		i++;
 	}
 	return rkOStr << std::endl;
+}
+
+template <class Real, int32_t Size>
+inline Vector<Real, Size> operator* (Real fScalar, const Vector<Real, Size>& rhs)
+{
+	Vector<Real, Size> result;
+	for(int32_t i = 0; i < Size; i++)
+		result[i] =  fScalar * rhs[i];
+
+	return result;
+}
+
+template< typename Real, int32_t Size >
+inline Real Length( const Vector<Real, Size>& vec )
+{
+	Real result = Real(0);
+	for(int32_t i = 0; i < Size; i++)
+		result +=  vec[i] * vec[i] ;
+	return sqrt(result);
+}
+
+template< typename Real, int32_t Size >
+inline Real LengthSquared( const Vector<Real, Size>& vec )
+{
+	Real result = Real(0);
+	for(int32_t i = 0; i < Size; i++)
+		result +=  vec[i] * vec[i] ;
+	return result;
+}
+
+template< typename Real, int32_t Size >
+inline Real Dot( const Vector<Real, Size>& lfs, const Vector<Real, Size>& rhs )
+{
+	Real result = Real(0);
+	for(int32_t i = 0; i < Size; i++)
+		result += lfs[i] * rhs[i];
+	return result;
+}
+
+template<typename Real>
+inline Vector<Real, 3>
+Cross( const Vector<Real, 3>& vec1, const Vector<Real, 3>& vec2 )
+{
+	return Vector<Real, 3>(
+		vec1.Y() * vec2.Z() - vec1.Z() * vec2.Y(),
+		vec1.Z() * vec2.X() - vec1.X() * vec2.Z(), 
+		vec1.X() * vec2.Y() - vec1.Y() * vec2.X());
+}
+
+template< typename Real, int32_t Size >
+inline Vector<Real, Size> Normalize(const Vector<Real, Size>& vec)
+{
+	Real fLength = LengthSquared(vec);
+	Real fInvScalar = ((Real)1.0)/ ((Real)sqrt((double)fLength));
+	return vec * fInvScalar;
 }

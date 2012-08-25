@@ -1,10 +1,10 @@
 #ifndef _Matrix__H
 #define _Matrix__H
 
+#include <Math/Math.h>
 #include <Math/Vector.h>
 
 namespace RcEngine{
-
 
 template<typename Real>
 class Matrix4
@@ -43,10 +43,6 @@ public:
 		
 	// assignment
 	inline Matrix4& operator= (const Matrix4& rhs);
-
-	// comparison
-	bool operator== (const Matrix4& rhs) const;
-	bool operator!= (const Matrix4& rhs) const;
 		
 	// arithmetic operations
 	inline Matrix4 operator+ (const Matrix4& rhs) const;
@@ -65,19 +61,11 @@ public:
 	// matrix times vector
 	inline Vector<Real, 4> operator* (const Vector<Real, 4>& rhs) const;   // dst = M * src
 
-	friend Vector<Real, 4> operator* (const Vector<Real, 4>& lhs, const Matrix4<Real>& rhs)
-	{
-		return Vector<Real, 4>(
-			lhs[0]*rhs.M11+lhs[1]*rhs.M21+lhs[2]*rhs.M31+lhs[3]*rhs.M41,
-			lhs[0]*rhs.M12+lhs[1]*rhs.M22+lhs[2]*rhs.M32+lhs[3]*rhs.M42,
-			lhs[0]*rhs.M13+lhs[1]*rhs.M23+lhs[2]*rhs.M33+lhs[3]*rhs.M43,
-			lhs[0]*rhs.M14+lhs[1]*rhs.M24+lhs[2]*rhs.M34+lhs[3]*rhs.M44);
-	}
-
-	Matrix4 GetTransposed() const;
-	void Transpose();
 	Real Determinant () const;
+	Matrix4 Transpose() const;
+	Matrix4 Inverse() const;
 
+	// return an identity matrix
 	inline static const Matrix4& Identity();
 	
 public:
@@ -92,13 +80,19 @@ public:
 			Real M31, M32, M33, M34;
 			Real M41, M42, M43, M44;
 		};
-	};
-
-private:
-	// support for comparisons
-	int32_t CompareArrays (const Matrix4& rhs) const;
-		
+	};		
 };
+
+template <typename Real>
+inline Matrix4<Real> operator* (Real scalar, const Matrix4<Real>& mat);
+
+// M * V^T
+template<typename Real>
+inline Vector<Real, 4> operator* (const Vector<Real, 4>& lhs, const Matrix4<Real>& rhs);
+
+// Compute inverse matrix
+template<typename Real>
+Matrix4<Real> MatrixInverse(const Matrix4<Real>& mat);
 
 #include <Math/Matrix.inl>
 
