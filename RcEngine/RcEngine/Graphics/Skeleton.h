@@ -20,7 +20,7 @@ public:
 
 protected:
 	Node* CreateChildImpl( const String& name );
-	void OnUpdate( float tick );
+	void OnUpdate( );
 
 	Skeleton* mSkeleton;
 

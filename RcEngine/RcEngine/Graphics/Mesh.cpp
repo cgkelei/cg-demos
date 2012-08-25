@@ -22,23 +22,6 @@ const shared_ptr<Material>& MeshPart::GetMaterial() const
 	return parent->GetMaterial(mMaterialID);
 }
 
-void MeshPart::GetWorldTransforms( Matrix4f* xform ) const
-{
-	uint32_t count = GetWorldTransformsCount();
-	/*for (uint32_t i = 0; i < count; ++i)
-	{
-
-	}*/
-
-	shared_ptr<Mesh> parent = mParentMesh.lock();
-	xform[0] = parent->GetWorldMatrix();
-
-}
-
-uint32_t MeshPart::GetWorldTransformsCount() const
-{
-	return 1;
-}
 
 void MeshPart::SetVertexBuffer( const shared_ptr<GraphicsBuffer>& vb, const shared_ptr<VertexDeclaration>& vd )
 {
@@ -189,15 +172,15 @@ shared_ptr<MeshPart> MeshPart::Load( const shared_ptr<Mesh>& mesh, Stream& sourc
 	meshPart->mStartIndex = 0;
 	meshPart->mIndexCount = indexCount;
 
-	// set render operation
-	meshPart->mRenderOperation->BaseVertexLocation = 0;
-	meshPart->mRenderOperation->UseIndex = true;
-	meshPart->mRenderOperation->IndexBuffer = meshPart->mIndexBuffer;
-	meshPart->mRenderOperation->BindVertexStream(meshPart->mVertexBuffer, meshPart->mVertexDecl);
-	meshPart->mRenderOperation->PrimitiveType = PT_Triangle_List;
-	meshPart->mRenderOperation->IndexType = indexFormat;
-	meshPart->mRenderOperation->StartIndexLocation = 0;
-	meshPart->mRenderOperation->StartVertexLocation = 0;
+	//// set render operation
+	//meshPart->mRenderOperation->BaseVertexLocation = 0;
+	//meshPart->mRenderOperation->UseIndex = true;
+	//meshPart->mRenderOperation->IndexBuffer = meshPart->mIndexBuffer;
+	//meshPart->mRenderOperation->BindVertexStream(meshPart->mVertexBuffer, meshPart->mVertexDecl);
+	//meshPart->mRenderOperation->PrimitiveType = PT_Triangle_List;
+	//meshPart->mRenderOperation->IndexType = indexFormat;
+	//meshPart->mRenderOperation->StartIndexLocation = 0;
+	//meshPart->mRenderOperation->StartVertexLocation = 0;
 
 	return meshPart;	
 }
@@ -206,6 +189,23 @@ MeshPart::~MeshPart()
 {
 long v = mVertexBuffer.use_count();
 GraphicsBuffer* bf = mVertexBuffer.get();
+}
+
+void MeshPart::GetRenderOperation( RenderOperation& op, uint32_t lodIndex )
+{
+	op.UseIndex = (mIndexCount != 0);
+
+	if (op.UseIndex)
+	{
+		op.IndexBuffer = mIndexBuffer;
+		op.IndexType = mIndexFormat;
+		op.StartIndexLocation = 0;
+	}
+
+	op.StartVertexLocation = 0;
+	op.BaseVertexLocation = 0;
+	op.BindVertexStream(mVertexBuffer, mVertexDecl);
+	op.PrimitiveType = PT_Triangle_List;
 }
 
 	

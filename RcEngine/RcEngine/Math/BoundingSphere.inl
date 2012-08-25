@@ -85,7 +85,7 @@ template<typename Real>
 ContainmentType BoundingSphere<Real>::Contains( const Vector<Real,3>& vector )
 {
 	Vector<Real, 3> offset = vector - Center;
-	Real distanceSquared = offset.SquaredLength();
+	Real distanceSquared = LengthSquared(offset);
 
 	if( distanceSquared >= (Radius * Radius) )
 		return CT_Disjoint;

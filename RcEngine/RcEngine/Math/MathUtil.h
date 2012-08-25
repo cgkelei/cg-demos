@@ -13,52 +13,6 @@
 
 namespace RcEngine{
 
-
-const float PI		= 3.141592f;			// PI
-const float RadianToDegree = 180.0f / PI;
-const float DegreeToRadian = PI / 180.0f;
-
-inline float ToDegree(float radian)	{ return radian * RadianToDegree;}
-inline float ToRadian(float degree)	{ return degree * DegreeToRadian; }
-
-/************************************************************************/
-/* Vector                                                               */
-/************************************************************************/
-template< typename Real, int32_t Size >
-inline typename  Real
-SquaredLength(const Vector<Real, Size>& vec);
-
-template< typename Real, int32_t Size >
-inline typename Real
-Length(const Vector<Real, Size>& vec);
-		
-template< typename Real, int32_t Size >
-inline  typename Real
-Dot( const Vector<Real, Size>& lhs, const Vector<Real, Size>& rhs );
-
-template< typename Real, int32_t Size >
-inline  Vector<Real, Size>
-Normalize(const Vector<Real, Size>& vec);
-
-template<typename Real>
-inline  Vector<Real, 3> 
-Cross(const Vector<Real, 3>& lhs, const Vector<Real, 3>& rhs);
-
-/************************************************************************/
-/* Plane                                                                */
-/************************************************************************/
-template< typename Real >
-inline Plane3<Real>
-Normalize(const Plane3<Real>& plane);
-
-	
-/************************************************************************/
-/* Matrix                                                               */
-/************************************************************************/
-template<typename Real>
-inline Matrix4<Real> 
-MatrixInverse(const Matrix4<Real>& mat);
-
 /************************************************************************/
 /* Transform Matrix                                                     */
 /************************************************************************/
@@ -184,28 +138,6 @@ Transform( const BoundingSphere<Real>& sphere, const Matrix4<Real>& matrix );
 /* Quaternion                                                           */
 /************************************************************************/
 template <typename Real>
-inline Real QuaternionLength(const Quaternion<Real>& quat);
-
-template <typename Real>
-inline Quaternion<Real> 
-QuaternionNormalize(const Quaternion<Real>& quat);
-
-template <typename Real>
-inline Real QuaternionDot(const Quaternion<Real>& quat);
-
-template <typename Real>
-inline Quaternion<Real> 
-QuaternionConjugate(const Quaternion<Real>& quat);
-
-template <typename Real>
-inline Quaternion<Real> 
-QuaternionMultiply(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2);
-
-template <typename Real>
-Quaternion<Real> 
-QuaternionInverse(const Quaternion<Real>& quat);
-
-template <typename Real>
 inline Quaternion<Real> 
 QuaternionFromRotationMatrix(const Matrix4<Real>& rotMat);
 
@@ -229,9 +161,6 @@ template <typename Real>
 inline void 
 QuaternionToRotationYawPitchRoll(Real& yaw, Real& pitch, Real& roll, const Quaternion<Real>& quat);
 
-template <typename Real>
-inline Quaternion<Real> 
-QuaternionSlerp(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2, Real t);
 
 /**
  * Create a new bounding box form a bounding sphere

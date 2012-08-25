@@ -2,6 +2,7 @@
 #define MovableObject_h__
 
 #include <Core/Prerequisites.h>
+#include <Math/Matrix.h>
 #include <Math/BoundingSphere.h>
 
 namespace RcEngine {
@@ -35,23 +36,32 @@ public:
 
 	virtual SceneObejctType GetSceneObjectType() const = 0;
 
+	virtual bool Renderable() const = 0;
 	/**
 	 * Return a undefined bounding sphere, subclass must overload
 	 * this function to return a real bounding sphere if it actually
 	 * have a bounding volume.
 	 */
 	virtual const BoundingSpheref& GetWorldBoundingSphere() const;
+	
+	/**
+	 * Get Local bounding sphere.
+	 */
+	virtual const BoundingSpheref& GetBoundingSphere() const;
+	
 
 	SceneNode* GetParentSceneNode() const { return mParent; }
+
+	const Matrix4f& GetWorldTransform() const;
 
 	bool IsVisible() const { return mVisible; }
 
 	void SetVisible( bool visible ) { mVisible = visible; }
 
-	bool IsAttached() const  {return mAttached; }
+	bool IsAttached() const  { return mParent != nullptr; }
 
-	virtual void OnAttach( SceneNode* node ) = 0;
-	virtual void OnDetach( SceneNode* node ) = 0;
+	virtual void OnAttach( SceneNode* node ) ;
+	virtual void OnDetach( SceneNode* node ) ;
 
 protected:
 	
@@ -65,7 +75,6 @@ protected:
 
 	bool mVisible;
 
-	bool mAttached;
 };
 
 }

@@ -2,7 +2,7 @@
 #define Camera_h__
 
 #include <Core/Prerequisites.h>
-#include <Math/MathUtil.h>
+#include <Math/Frustum.h>
 
 namespace RcEngine {
 
@@ -27,19 +27,26 @@ public:
 	const Matrix4f& GetViewMatrix() const;
 	const Matrix4f& GetProjectionMatrix() const;
 
+	const Frustumf& GetFrustum() const;
+
+	bool Visible( const BoundingSpheref& sphere );
+
 private:
-	Vector3f	mPosition;
-	Vector3f	mLookAt;
-	Vector3f	mUpVec;
-	Vector3f	mViewVec;
+	Vector3f mPosition;
+	Vector3f mLookAt;
+	Vector3f mUpVec;
+	Vector3f mViewVec;
 
-	float		mFieldOfView;
-	float		mAspect;
-	float		mNearPlane;
-	float		mFarPlane;
+	float mFieldOfView;
+	float mAspect;
+	float mNearPlane;
+	float mFarPlane;
 
-	Matrix4f	mViewMatrix;
-	Matrix4f	mProjectionMatrix;
+	Matrix4f mViewMatrix;
+	Matrix4f mProjectionMatrix;
+
+	mutable Frustumf mFrustum;
+	mutable bool mFrustumDirty;
 };
 
 } // Namespace RcEngine

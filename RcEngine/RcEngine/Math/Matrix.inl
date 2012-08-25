@@ -192,28 +192,6 @@ Matrix4<Real>& Matrix4<Real>::operator=( const Matrix4<Real>& rhs )
 	return *this;
 }
 
-
-//----------------------------------------------------------------------------
-template<typename Real>
-int32_t Matrix4<Real>::CompareArrays (const Matrix4<Real>& rhs) const
-{
-	return memcmp(Elements,rhs.Elements,16*sizeof(Real));
-}
-
-//----------------------------------------------------------------------------
-template<typename Real>
-bool Matrix4<Real>::operator==( const Matrix4<Real>& rhs ) const
-{
-	return CompareArrays(rhs) == 0;
-}
-
-//----------------------------------------------------------------------------
-template<typename Real>
-bool Matrix4<Real>::operator!=( const Matrix4<Real>& rhs ) const
-{
-	return CompareArrays(rhs) != 0;
-}
-
 //----------------------------------------------------------------------------
 template<typename Real>
 Matrix4<Real> Matrix4<Real>::operator+( const Matrix4<Real>& rhs ) const
@@ -539,7 +517,7 @@ Vector<Real, 4> Matrix4<Real>::operator*( const Vector<Real, 4>& rhs ) const
 
 //----------------------------------------------------------------------------
 template<typename Real>
-Matrix4<Real> Matrix4<Real>::GetTransposed() const
+Matrix4<Real> Matrix4<Real>::Transpose() const
 {
 	return Matrix4<Real>(
 		Elements[ 0],
@@ -558,18 +536,6 @@ Matrix4<Real> Matrix4<Real>::GetTransposed() const
 		Elements[ 7],
 		Elements[11],
 		Elements[15]);
-}
-
-//----------------------------------------------------------------------------
-template<typename Real>
-void Matrix4<Real>::Transpose()
-{
-	std::swap(M12, M21);
-	std::swap(M13, M31);
-	std::swap(M14, M41);
-	std::swap(M23, M32);
-	std::swap(M24, M42);
-	std::swap(M34, M43);
 
 }
 
@@ -593,6 +559,66 @@ Real Matrix4<Real>::Determinant() const
 	return fDet;
 }
 
+//----------------------------------------------------------------------------
+template<typename Real>
+Matrix4<Real> Matrix4<Real>::Inverse() const
+{
+	Real v0 = M31 * M42 - M32 * M41;
+	Real v1 = M31 * M43 - M33 * M41;
+	Real v2 = M31 * M44 - M34 * M41;
+	Real v3 = M32 * M43 - M33 * M42;
+	Real v4 = M32 * M44 - M34 * M42;
+	Real v5 = M33 * M44 - M34 * M43;
+
+	Real i11 = (v5 * M22 - v4 * M23 + v3 * M24);
+	Real i21 = -(v5 * M21 - v2 * M23 + v1 * M24);
+	Real i31 = (v4 * M21 - v2 * M22 + v0 * M24);
+	Real i41 = -(v3 * M21 - v1 * M22 + v0 * M23);
+
+	Real invDet = 1.0f / (i11 * M11 + i21 * M12 + i31 * M13 + i41 * M14);
+
+	i11 *= invDet;
+	i21 *= invDet;
+	i31 *= invDet;
+	i41 *= invDet;
+
+	Real i12 = -(v5 * M12 - v4 * M13 + v3 * M14) * invDet;
+	Real i22 = (v5 * M11 - v2 * M13 + v1 * M14) * invDet;
+	Real i32 = -(v4 * M11 - v2 * M12 + v0 * M14) * invDet;
+	Real i42 = (v3 * M11 - v1 * M12 + v0 * M13) * invDet;
+
+	v0 = M21 * M42 - M22 * M41;
+	v1 = M21 * M43 - M23 * M41;
+	v2 = M21 * M44 - M24 * M41;
+	v3 = M22 * M43 - M23 * M42;
+	v4 = M22 * M44 - M24 * M42;
+	v5 = M23 * M44 - M24 * M43;
+
+	Real i13 = (v5 * M12 - v4 * M13 + v3 * M14) * invDet;
+	Real i23 = -(v5 * M11 - v2 * M13 + v1 * M14) * invDet;
+	Real i33 = (v4 * M11 - v2 * M12 + v0 * M14) * invDet;
+	Real i43 = -(v3 * M11 - v1 * M12 + v0 * M13) * invDet;
+
+	v0 = M32 * M21 - M31 * M22;
+	v1 = M33 * M21 - M31 * M23;
+	v2 = M34 * M21 - M31 * M24;
+	v3 = M33 * M22 - M32 * M23;
+	v4 = M34 * M22 - M32 * M24;
+	v5 = M34 * M23 - M33 * M24;
+
+	Real i14 = -(v5 * M12 - v4 * M13 + v3 * M14) * invDet;
+	Real i24 = (v5 * M11 - v2 * M13 + v1 * M14) * invDet;
+	Real i34 = -(v4 * M11 - v2 * M12 + v0 * M14) * invDet;
+	Real i44 = (v3 * M11 - v1 * M12 + v0 * M13) * invDet;
+
+	return Matrix4<Real>(
+		i11, i12, i13, i14,
+		i21, i22, i23, i24,
+		i31, i32, i33, i34,
+		i41, i42, i43, i44);
+}
+
+//----------------------------------------------------------------------------
 template<typename Real>
 const Matrix4<Real>& Matrix4<Real>::Identity()
 {
@@ -603,3 +629,80 @@ const Matrix4<Real>& Matrix4<Real>::Identity()
 	return out;
 }
 
+//----------------------------------------------------------------------------
+template<typename Real>
+inline Vector<Real, 4> operator* (const Vector<Real, 4>& lhs, const Matrix4<Real>& rhs)
+{
+	return Vector<Real, 4>(
+		lhs[0]*rhs.M11+lhs[1]*rhs.M21+lhs[2]*rhs.M31+lhs[3]*rhs.M41,
+		lhs[0]*rhs.M12+lhs[1]*rhs.M22+lhs[2]*rhs.M32+lhs[3]*rhs.M42,
+		lhs[0]*rhs.M13+lhs[1]*rhs.M23+lhs[2]*rhs.M33+lhs[3]*rhs.M43,
+		lhs[0]*rhs.M14+lhs[1]*rhs.M24+lhs[2]*rhs.M34+lhs[3]*rhs.M44);
+}
+
+//----------------------------------------------------------------------------
+template <typename Real>
+inline Matrix4<Real> operator* (Real scalar, const Matrix4<Real>& mat)
+{
+	return mat * scalar;
+}
+
+//----------------------------------------------------------------------------
+template<typename Real>
+inline Matrix4<Real> 
+	MatrixInverse(const Matrix4<Real>& mat)
+{
+	Real v0 = mat.M31 * mat.M42 - mat.M32 * mat.M41;
+	Real v1 = mat.M31 * mat.M43 - mat.M33 * mat.M41;
+	Real v2 = mat.M31 * mat.M44 - mat.M34 * mat.M41;
+	Real v3 = mat.M32 * mat.M43 - mat.M33 * mat.M42;
+	Real v4 = mat.M32 * mat.M44 - mat.M34 * mat.M42;
+	Real v5 = mat.M33 * mat.M44 - mat.M34 * mat.M43;
+
+	Real i11 = (v5 * mat.M22 - v4 * mat.M23 + v3 * mat.M24);
+	Real i21 = -(v5 * mat.M21 - v2 * mat.M23 + v1 * mat.M24);
+	Real i31 = (v4 * mat.M21 - v2 * mat.M22 + v0 * mat.M24);
+	Real i41 = -(v3 * mat.M21 - v1 * mat.M22 + v0 * mat.M23);
+
+	Real invDet = 1.0f / (i11 * mat.M11 + i21 * mat.M12 + i31 * mat.M13 + i41 * mat.M14);
+
+	i11 *= invDet;
+	i21 *= invDet;
+	i31 *= invDet;
+	i41 *= invDet;
+
+	Real i12 = -(v5 * mat.M12 - v4 * mat.M13 + v3 * mat.M14) * invDet;
+	Real i22 = (v5 * mat.M11 - v2 * mat.M13 + v1 * mat.M14) * invDet;
+	Real i32 = -(v4 * mat.M11 - v2 * mat.M12 + v0 * mat.M14) * invDet;
+	Real i42 = (v3 * mat.M11 - v1 * mat.M12 + v0 * mat.M13) * invDet;
+
+	v0 = mat.M21 * mat.M42 - mat.M22 * mat.M41;
+	v1 = mat.M21 * mat.M43 - mat.M23 * mat.M41;
+	v2 = mat.M21 * mat.M44 - mat.M24 * mat.M41;
+	v3 = mat.M22 * mat.M43 - mat.M23 * mat.M42;
+	v4 = mat.M22 * mat.M44 - mat.M24 * mat.M42;
+	v5 = mat.M23 * mat.M44 - mat.M24 * mat.M43;
+
+	Real i13 = (v5 * mat.M12 - v4 * mat.M13 + v3 * mat.M14) * invDet;
+	Real i23 = -(v5 * mat.M11 - v2 * mat.M13 + v1 * mat.M14) * invDet;
+	Real i33 = (v4 * mat.M11 - v2 * mat.M12 + v0 * mat.M14) * invDet;
+	Real i43 = -(v3 * mat.M11 - v1 * mat.M12 + v0 * mat.M13) * invDet;
+
+	v0 = mat.M32 * mat.M21 - mat.M31 * mat.M22;
+	v1 = mat.M33 * mat.M21 - mat.M31 * mat.M23;
+	v2 = mat.M34 * mat.M21 - mat.M31 * mat.M24;
+	v3 = mat.M33 * mat.M22 - mat.M32 * mat.M23;
+	v4 = mat.M34 * mat.M22 - mat.M32 * mat.M24;
+	v5 = mat.M34 * mat.M23 - mat.M33 * mat.M24;
+
+	Real i14 = -(v5 * mat.M12 - v4 * mat.M13 + v3 * mat.M14) * invDet;
+	Real i24 = (v5 * mat.M11 - v2 * mat.M13 + v1 * mat.M14) * invDet;
+	Real i34 = -(v4 * mat.M11 - v2 * mat.M12 + v0 * mat.M14) * invDet;
+	Real i44 = (v3 * mat.M11 - v1 * mat.M12 + v0 * mat.M13) * invDet;
+
+	return Matrix4<Real>(
+		i11, i12, i13, i14,
+		i21, i22, i23, i24,
+		i31, i32, i33, i34,
+		i41, i42, i43, i44);
+}

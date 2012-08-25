@@ -46,6 +46,9 @@ public:
 	 */
 	void SetScene( SceneManager* scene );
 
+
+	void FindVisibleObjects( Camera* cam );
+
 	
 protected:
 	virtual Node* CreateChildImpl( const String& name );
@@ -56,12 +59,7 @@ protected:
 	 */
 	void UpdateWorldBounds() const;
 
-	/**
-	 * This function will cause parent to recompute world bound. 
-	 */
-	void PropagateBoundToRoot();
-
-	void OnUpdate( float tick );
+	void OnPostUpdate( );
 
 protected:
 

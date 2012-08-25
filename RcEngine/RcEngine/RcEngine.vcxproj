@@ -128,6 +128,7 @@
     <ClCompile Include="MainApp\Window.cpp" />
     <ClCompile Include="Math\Frustum.h" />
     <ClCompile Include="Math\ColorRGBA.cpp" />
+    <ClCompile Include="Math\Math.inl" />
     <ClCompile Include="Scene\Entity.cpp" />
     <ClCompile Include="Scene\SceneObject.cpp" />
     <ClCompile Include="Scene\Node.cpp" />
@@ -207,6 +208,7 @@
     <None Include="Math\BoundingBox.inl" />
     <None Include="Math\BoundingSphere.inl" />
     <None Include="Math\ColorRGBA.inl" />
+    <None Include="Math\Frustum.inl" />
     <None Include="Math\MathUtil.inl" />
     <None Include="Math\Matrix.inl" />
     <None Include="Math\Plane.inl" />

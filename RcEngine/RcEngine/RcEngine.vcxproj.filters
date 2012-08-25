@@ -186,6 +186,9 @@
     <ClCompile Include="Scene\SceneObject.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Math\Math.inl">
+      <Filter>Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainApp\Application.h">
@@ -413,6 +416,9 @@
       <Filter>Math</Filter>
     </None>
     <None Include="Math\BoundingBox.inl">
+      <Filter>Math</Filter>
+    </None>
+    <None Include="Math\Frustum.inl">
       <Filter>Math</Filter>
     </None>
   </ItemGroup>

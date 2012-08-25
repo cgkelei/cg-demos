@@ -19,7 +19,7 @@ void Joint::SetSkeleton( Skeleton* skeleton )
 
 }
 
-void Joint::OnUpdate( float tick )
+void Joint::OnUpdate( )
 {
 
 }
