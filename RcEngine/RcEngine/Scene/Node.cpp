@@ -6,14 +6,14 @@ namespace RcEngine {
 
 Node::Node()
 	: mParent(nullptr), mDirtyBits(NODE_DIRTY_ALL), 
-	mPosition(0.0f, 0.0f, 0.0f), mScale(1.0f, 1.0f, 1.0f), mRotation(1.0f, 0.0f, 0.0f, 0.0f)
+	mPosition(Vector3f::Zero()), mRotation(Quaternionf::Identity()), mScale(1.0f, 1.0f, 1.0f)
 {
 
 }
 
 Node::Node( const String& name )
 	: mName(name), mParent(nullptr), mDirtyBits(NODE_DIRTY_ALL), 
-	  mPosition(0.0f, 0.0f, 0.0f), mScale(1.0f, 1.0f, 1.0f), mRotation(1.0f, 0.0f, 0.0f, 0.0f)
+	  mPosition(Vector3f::Zero()), mRotation(Quaternionf::Identity()), mScale(1.0f, 1.0f, 1.0f)
 {
 
 }
@@ -30,11 +30,10 @@ void Node::SetParent( Node* parent )
 }
 
 
-void Node::SetPosition( const Vector3f& position )
+void Node::SetTranslation( const Vector3f& position )
 {
 	mPosition = position;
 	TransformChanged();
-
 }
 
 void Node::SetRotation( const Quaternionf& rotation )
@@ -84,12 +83,12 @@ void Node::SetWorldPosition( const Vector3f& position )
 {
 	if (!mParent)
 	{
-		SetPosition(position);
+		SetTranslation(position);
 	}
 	else
 	{
 		Matrix4f parentWorldTransformInv = mParent->GetWorldTransform().Inverse();
-		SetPosition( Transform(position, parentWorldTransformInv) );
+		SetTranslation( Transform(position, parentWorldTransformInv) );
 	}
 }
 
@@ -212,7 +211,7 @@ uint32_t Node::GetNumChildren( bool recursive /*= false */ ) const
 Node* Node::CreateChild( const String& name, const Vector3f& translate, const Quaternionf& rotate )
 {
 	Node* child = CreateChildImpl(name);
-	child->SetPosition(translate);
+	child->SetTranslation(translate);
 	child->SetRotation(rotate);
 
 	// Attach this child
@@ -301,6 +300,29 @@ void Node::UpdateWorldTransform() const
 	{
 		if (mParent)
 		{
+			Vector3f parentScale = mParent->GetWorldScale();
+			
+			// combine rotation
+			mWorldRotation = mRotation * mParent->GetWorldRotation();
+			
+			// combine scale
+			mWorldScale = Vector3f(mScale.X()*parentScale.X(), mScale.Y()*parentScale.Y(), mScale.Z()*parentScale.Z());
+			
+			// transform position along parent rotation
+			mWorldPosition = Transform(mPosition, mParent->GetWorldRotation());
+			mWorldPosition = Vector3f(mWorldPosition.X()*parentScale.X(), mWorldPosition.Y()*parentScale.Y(), mWorldPosition.Z()*parentScale.Z());
+			mWorldPosition = mWorldPosition + mParent->GetWorldPosition();
+		}
+		else
+		{
+			mWorldPosition = mPosition;
+			mWorldRotation = mRotation;
+			mWorldScale = mScale;
+		}
+
+
+		if (mParent)
+		{
 			mParent->UpdateWorldTransform();
 			mWorldTransform = CreateTransformMatrix(mScale, mRotation, mPosition) * mParent->mWorldTransform;
 		}
@@ -352,6 +374,64 @@ void Node::MarkChildrenDirty()
 
 void Node::Update( )
 {
+}
+
+void Node::Translate( const Vector3f& d, TransformSpace relativeTo /*= TS_Parent*/ )
+{
+	switch (relativeTo)
+	{
+	case TS_Local:
+		{
+			mPosition += Transform(d, mRotation);
+		}
+		break;
+	case TS_World:
+		{
+			if (!mParent)
+			{
+				mPosition += d;
+			}
+			else
+			{
+				Vector3f dInv = Transform(d, mParent->GetWorldRotation().Inverse());
+				Vector3f scale = mParent->GetWorldScale();
+				mPosition += Vector3f(dInv.X() / scale.X(), dInv.Y() / scale.Y(), dInv.Z() / scale.Z());
+			}
+		}
+		break;
+	case TS_Parent:
+		{
+			mPosition += d;
+		}
+		break;
+	}
+
+	TransformChanged();
+}
+
+void Node::Rotate( const Quaternionf& rot, TransformSpace relativeTo /*= TS_Parent */ )
+{
+	switch (relativeTo)
+	{
+	case TS_Local:
+		{
+			// ×ó³Ë£¬Local×îÏÈ³Ë
+			mRotation = rot * mRotation;
+		}
+		break;
+	case TS_World:
+		{
+			mRotation = GetWorldRotation() * rot * GetWorldRotation().Inverse() * mRotation;
+		}
+		break;
+	case TS_Parent:
+		{
+			mRotation = mRotation * rot;
+		}
+		break;
+	}
+
+	TransformChanged();
 }
 
 }

@@ -257,6 +257,11 @@ template<typename Real>
 Matrix4<Real> 
 CreateTransformMatrix( const Vector<Real, 3>& sacle, const Quaternion<Real>& rotation, const Vector<Real, 3>& translation )
 {
+	// Ordering:
+	//    1. Scale
+	//    2. Rotate
+	//    3. Translate
+
 	Matrix4<Real> result = QuaternionToRotationMatrix(rotation);
 
 	result.M11 *= sacle.X(); result.M12 *= sacle.X(); result.M13 *= sacle.X();

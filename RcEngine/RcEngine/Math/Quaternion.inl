@@ -226,6 +226,31 @@ Quaternion<Real> Quaternion<Real>::operator/( float scalar ) const
 }
 
 template<typename Real>
+Quaternion<Real> Quaternion<Real>::Inverse() const
+{
+	Real length = sqrt(mTuple[0]*mTuple[0]+mTuple[1]*mTuple[1]+mTuple[2]*mTuple[2]+mTuple[3]*mTuple[3]);
+	Real inv = Real(1) / length;
+	return Quaternion<Real>(W()* inv, -X()* inv, -Y()* inv, -Z()* inv);
+}
+
+template<typename Real>
+Quaternion<Real> Quaternion<Real>::Conjugate() const
+{
+	return Quaternion<Real>(W(), -X(), -Y(), -Z());
+}
+
+template<typename Real>
+void Quaternion<Real>::Normalize()
+{
+	Real mag = sqrt(quat[0]*quat[0]+quat[1]*quat[1]+quat[2]*quat[2]+quat[3]*quat[3]);
+	Real oneOverMag = Real(1) / mag;	//ÔÝÊ±²»¼ì²é³ý0;
+	mTuple[0] *= oneOverMag;
+	mTuple[1] *= oneOverMag;
+	mTuple[2] *= oneOverMag;
+	mTuple[3] *= oneOverMag;
+}
+
+template<typename Real>
 const Quaternion<Real>& Quaternion<Real>::Identity()
 {
 	static const Quaternion out(1, 0, 0, 0);

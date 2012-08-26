@@ -42,6 +42,12 @@ public:
 	bool operator == (const Quaternion& rhs) const;
 	bool operator != (const Quaternion& rhs) const;
 
+	// 
+	void Normalize();
+	Quaternion<Real> Conjugate() const;
+	Quaternion<Real> Inverse() const;
+
+
 	inline static const Quaternion& Identity();
 
 private:

@@ -18,12 +18,13 @@ enum SceneObejctType
 
 
 /**
- * Abstract class defining a scene object in a scene, referenced from Ogre.
- * Note that scene management use the same design concept whit Ogre. We try 
- * to decouple the struct(the scene graph) from its content.Unlike other engines
- * use complex inheritance hierarchy, subclass every type from scene node. We use
- * Composition, all node content data which can move is subclass scene object.
- * Like Entity, Camera, Light. A scene object can attach to a scene node.
+ * Base class for Objects in a scene graph, contained by scene nodes, referenced 
+ * from Ogre. Note that scene management use the same design concept whit Ogre. 
+ * We try to decouple the struct(the scene graph) from its content.Unlike other 
+ * engines use complex inheritance hierarchy, subclass every type from scene node.
+ * We use Composition, all node content data subclass scene object. Like Entity, 
+ * Camera, Light. The scene object itself does not hold SRT data, that is stored 
+ * in the parent scene node. 
  */
 class _ApiExport SceneObject
 {
