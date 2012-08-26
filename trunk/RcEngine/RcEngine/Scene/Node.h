@@ -23,6 +23,14 @@ namespace RcEngine {
  */
 class _ApiExport Node
 {
+public: 
+	enum TransformSpace
+	{
+		TS_Local,
+		TS_Parent,
+		TS_World
+	};
+
 public:
 	Node();
 	Node( const String& name );
@@ -37,16 +45,28 @@ public:
 	 * Get node name.
 	 */
 	const String& GetName() const { return mName; }
+
+
+	/**
+	 * Moves the node along the Cartesian axes.
+	 * TS_Local: Translate node from current position in local coordinate system along current rotated axes.
+	 * TS_World: Translate node from current position in world coordinate system along unrotated axes.
+	 */
+	void Translate( const Vector3f& d, TransformSpace relativeTo = TS_Parent );
+
+	void Rotate( const Quaternionf& rot, TransformSpace relativeTo = TS_Parent );
+
+
 	
 	/**
 	 * Set node local position relative to its parent.
 	 */
-	void SetPosition(const Vector3f& position);
+	void SetTranslation(const Vector3f& position);
 
 	/** 
 	 * Get node local position relative to its parent.
 	 */
-	const Vector3f& GetPosition() const { return mPosition; }
+	const Vector3f& GetTranslation() const { return mPosition; }
 
 	/**
 	 * Set node local rotation relative to its parent.
@@ -236,6 +256,16 @@ protected:
 
 	Vector3f mScale;
 
+	// Total combined scaling relative world (cached)
+	mutable Vector3f mWorldScale;
+
+	// Total combined rotation relative world (cached)
+	mutable Quaternionf mWorldRotation;
+
+	// Total combined position relative world (cached)
+	mutable Vector3f mWorldPosition;
+
+	// Total combined transform relative world (cached)
 	mutable Matrix4f mWorldTransform;
 
 	mutable uint8_t mDirtyBits;
