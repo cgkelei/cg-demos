@@ -199,12 +199,10 @@
     <ClInclude Include="Math\Ray.h" />
     <ClInclude Include="Math\Vector.h" />
     <ClInclude Include="Scene\Entity.h" />
-    <ClInclude Include="Scene\HierarchyNode.h" />
     <ClInclude Include="Scene\SceneObject.h" />
     <ClInclude Include="Scene\Node.h" />
     <ClInclude Include="Scene\SceneManager.h" />
     <ClInclude Include="Scene\SceneNode.h" />
-    <ClInclude Include="Scene\HierarchyNode.inl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Math\BoundingBox.inl" />

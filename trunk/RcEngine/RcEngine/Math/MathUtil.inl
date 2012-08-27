@@ -278,7 +278,7 @@ CreateTransformMatrix( const Vector<Real, 3>& sacle, const Quaternion<Real>& rot
 //----------------------------------------------------------------------------------------------------
 template<typename Real>
 inline Matrix4<Real>
-RotationFromTransformMatrix( const Matrix4<Real>& transformMat)
+RotationFromMatrix( const Matrix4<Real>& transformMat)
 {
 	Vector<Real,3> cols[] =
 	{
@@ -318,7 +318,7 @@ RotationFromTransformMatrix( const Matrix4<Real>& transformMat)
 //----------------------------------------------------------------------------------------------------
 template<typename Real>
 inline Vector<Real,3>
-TranslationFromTransformMatrix( const Matrix4<Real>& transformMat)
+TranslationFromMatrix( const Matrix4<Real>& transformMat)
 {
 	return Vector<Real,3>(transformMat.M41, transformMat.M42, transformMat.M43);
 }
@@ -326,7 +326,7 @@ TranslationFromTransformMatrix( const Matrix4<Real>& transformMat)
 //----------------------------------------------------------------------------------------------------
 template<typename Real>
 inline Vector<Real,3>
-ScaleFromTransformMatrix( const Matrix4<Real>& transformMat)
+ScaleFromMatrix( const Matrix4<Real>& transformMat)
 {
 	return Vector<Real,3>(
 		sqrt(transformMat.M11 * transformMat.M11 + transformMat.M12 * transformMat.M12 + transformMat.M13 * transformMat.M13),
@@ -801,7 +801,7 @@ Transform( const BoundingSphere<Real>& sphere, const Matrix4<Real>& matrix )
 		return sphere;
 	}
 
-	Vector<Real,3> scale = ScaleFromTransformMatrix(matrix);
+	Vector<Real,3> scale = ScaleFromMatrix(matrix);
 	Vector<Real,3> newCenter = Transform(sphere.Center, matrix);
 
 	Real newRadius = sphere.Radius * scale.X();

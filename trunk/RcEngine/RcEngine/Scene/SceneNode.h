@@ -65,10 +65,6 @@ protected:
 
 	mutable BoundingSpheref mWorldBounds;
 
-
-
-	Matrix4f mWorldTransform
-
 	SceneManager* mScene;
 
 

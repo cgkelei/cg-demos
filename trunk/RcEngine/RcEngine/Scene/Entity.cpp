@@ -45,11 +45,6 @@ void Entity::Initialize()
 		auto subMesh = mMesh->GetMeshPart(i);
 		mSubEntityList.push_back( new SubEntity(this, subMesh) );
 	}
-
-	if (mParent)
-	{
-		mParent->MarkBoundDirty();
-	}
 }
 
 void Entity::OnAttach( SceneNode* node )

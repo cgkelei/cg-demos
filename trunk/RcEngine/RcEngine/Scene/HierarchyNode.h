@@ -23,17 +23,19 @@ public:
 	const Vector3f& GetWorldScale() const;
 	const Vector3f& GetWorldTranslation() const;
 
+
+
 	NodeType* GetChild( const String& name );
 	NodeType* CreateChild();
 	void AttachChild( NodeType* node );
 	void DetachChild( NodeType* node );
 
+	NodeType* GetParent() const { return mParent; }
+
+
 protected:
 	void PropagateDirtyDown( uint32_t dirtyFlag );
 	void PropagateDirtyUp( uint32_t dirtyFlag );
-
-	virtual void OnAttach() {}
-	virtual void OnDetach() {}
 
 
 protected:
