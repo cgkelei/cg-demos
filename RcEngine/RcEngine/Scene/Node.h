@@ -61,12 +61,12 @@ public:
 	/**
 	 * Set node local position relative to its parent.
 	 */
-	void SetTranslation(const Vector3f& position);
+	void SetPosition(const Vector3f& position);
 
 	/** 
 	 * Get node local position relative to its parent.
 	 */
-	const Vector3f& GetTranslation() const { return mPosition; }
+	const Vector3f& GetPosition() const { return mPosition; }
 
 	/**
 	 * Set node local rotation relative to its parent.
@@ -87,11 +87,6 @@ public:
 	 * Get node local scale relative to its parent.
 	 */
 	const Vector3f& GetScale() const { return mScale; }
-
-	/**
-	 * Set node local direction relative to its parent.
-	 */
-	void SetDirection( const Vector3f& direction );
 
 	/**
 	 * Set node local transform relative to its parent.
@@ -129,25 +124,19 @@ public:
 	Quaternionf GetWorldRotation() const;
 
 	/**
-	 * Set world direction.
-	 */
-	void SetWorldDirection( const Vector3f& direction );
-
-	/**
 	 * Get world direction.
 	 */
 	Vector3f GetWorldDirection() const;
 
+	/**
+	 * Get world scale.
+	 */
+	Vector3f GetWorldScale() const;
 
 	/**
 	 * Set world transform matrix.
 	 */
 	void SetWorldTransform( const Vector3f& position, const Quaternionf& rotation );
-
-	/**
-	 * Set world transform matrix.
-	 */
-	void SetWorldTransform( const Vector3f& position, const Quaternionf& rotation, const Vector3f& scale );
 
 	/**
 	 * Get world transform matrix.
@@ -201,18 +190,6 @@ public:
 	 */
 	void Update( );
 
-	/**
-     * Called when the transform changes.
-     */
-	void TransformChanged();
-
-
-	/**
-	 * Mark node bound dirty, because if node bound dirty, all parent node 
-	 * bound is dirty too.
-	 */
-	void MarkBoundDirty();
-
 protected:
 
 	/**
@@ -228,10 +205,8 @@ protected:
 
 	void UpdateWorldTransform() const;
 
-	/**
-	 * Mark children node dirty, including world transform and bound both.
-	 */
-	void MarkChildrenDirty();
+	void PropagateDirtyDown( uint32_t dirtyFlag );
+	void PropagateDirtyUp( uint32_t dirtyFlag );
 
 protected:
 
@@ -242,21 +217,9 @@ protected:
 	String mName;
 
 	Vector3f mPosition;
-
 	Quaternionf mRotation;
-
 	Vector3f mScale;
 
-	// Total combined scaling relative world (cached)
-	mutable Vector3f mWorldScale;
-
-	// Total combined rotation relative world (cached)
-	mutable Quaternionf mWorldRotation;
-
-	// Total combined position relative world (cached)
-	mutable Vector3f mWorldPosition;
-
-	// Total combined transform relative world (cached)
 	mutable Matrix4f mWorldTransform;
 
 	mutable uint8_t mDirtyBits;

@@ -44,11 +44,11 @@ void SceneNode::AttachObject( SceneObject* obj )
 	}
 
 	mAttachedObjects.push_back(obj);
-	
-	obj->OnAttach(this);
 
-	// Mark bound dirty
-	MarkBoundDirty();
+	// since we have attach a scene object, bound may invalid.
+	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
+
+	obj->OnAttach(this);
 }
 
 void SceneNode::DetachOject( SceneObject* obj )

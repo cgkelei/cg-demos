@@ -30,40 +30,33 @@ void Node::SetParent( Node* parent )
 }
 
 
-void Node::SetTranslation( const Vector3f& position )
+void Node::SetPosition( const Vector3f& position )
 {
 	mPosition = position;
-	TransformChanged();
+	PropagateDirtyDown(NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS);
+	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
 }
 
 void Node::SetRotation( const Quaternionf& rotation )
 {
 	mRotation = rotation;
-	TransformChanged();
-}
-
-void Node::SetDirection( const Vector3f& direction )
-{
-	const Vector3f start(0.0f, 0.0f, 1.0f);		// forward direction
-	const Vector3f end = Normalize(direction);
-
-	Vector3f axis = Cross( start, end );
-	float dot = Dot( start, end );
-
-	SetRotation( Quaternionf( dot, axis.X(), axis.Y(), axis.Z() ) );
+	PropagateDirtyDown(NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS);
+	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
 }
 
 void Node::SetScale( const Vector3f& scale )
 {
 	mScale = scale;
-	TransformChanged();
+	PropagateDirtyDown(NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS);
+	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
 }
 
 void Node::SetTransform( const Vector3f& position, const Quaternionf& rotation )
 {
 	mPosition = position;
 	mRotation = rotation;
-	TransformChanged();
+	PropagateDirtyDown(NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS);
+	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
 }
 
 void Node::SetTransform( const Vector3f& position, const Quaternionf& rotation, const Vector3f& scale )
@@ -71,11 +64,13 @@ void Node::SetTransform( const Vector3f& position, const Quaternionf& rotation, 
 	mPosition = position;
 	mRotation = rotation;
 	mScale = scale;
-	TransformChanged();
+	PropagateDirtyDown(NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS);
+	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
 }
 
 Matrix4f Node::GetTransform() const
 {
+	// Order SRT
 	return CreateTransformMatrix(mScale, mRotation, mPosition);
 }
 
@@ -83,12 +78,13 @@ void Node::SetWorldPosition( const Vector3f& position )
 {
 	if (!mParent)
 	{
-		SetTranslation(position);
+		SetPosition(position);
 	}
 	else
 	{
+		// find the position in parent's local space
 		Matrix4f parentWorldTransformInv = mParent->GetWorldTransform().Inverse();
-		SetTranslation( Transform(position, parentWorldTransformInv) );
+		SetPosition( Transform(position, parentWorldTransformInv) );
 	}
 }
 
@@ -97,7 +93,7 @@ Vector3f Node::GetWorldPosition() const
 	if (mDirtyBits & NODE_DIRTY_WORLD)
 		UpdateWorldTransform();
 
-	return TranslationFromTransformMatrix(mWorldTransform);
+	return TranslationFromMatrix(mWorldTransform);
 }
 
 void Node::SetWorldRotation( const Quaternionf& rotation )
@@ -109,7 +105,7 @@ void Node::SetWorldRotation( const Quaternionf& rotation )
 	else
 	{
 		Quaternionf parentWorldRotInv = QuaternionInverse( mParent->GetWorldRotation() );
-		SetRotation(rotation * parentWorldRotInv);
+		SetRotation( rotation * parentWorldRotInv );
 	}
 }
 
@@ -119,24 +115,7 @@ Quaternionf Node::GetWorldRotation() const
 	if (mDirtyBits & NODE_DIRTY_WORLD)
 		UpdateWorldTransform();
 
-	return QuaternionFromRotationMatrix( RotationFromTransformMatrix(mWorldTransform) );
-}
-
-void Node::SetWorldDirection( const Vector3f& direction )
-{
-	Vector3f localDirection;
-
-	if (!mParent)
-	{
-		localDirection = direction;
-	} 
-	else
-	{
-		Matrix4f parentWorldTransformInv = mParent->GetWorldTransform().Inverse();
-		localDirection = Transform(direction, parentWorldTransformInv);
-	}
-
-	SetDirection(localDirection);
+	return QuaternionFromRotationMatrix( RotationFromMatrix(mWorldTransform) );
 }
 
 Vector3f Node::GetWorldDirection() const
@@ -145,20 +124,7 @@ Vector3f Node::GetWorldDirection() const
 		UpdateWorldTransform();
 
 	const Vector3f Froward(0.0f, 0.0f, 1.0f);
-	return Transform(Froward, RotationFromTransformMatrix(mWorldTransform));
-}
-
-void Node::SetWorldScale( const Vector3f& scale )
-{
-	if (!mParent)
-	{
-		SetScale(scale);
-	} 
-	else
-	{
-		Vector3f worldScale = mParent->GetWorldScale();
-		SetScale(Vector3f( scale.X() / worldScale.X(), scale.Y() / worldScale.Y(), scale.Z() / worldScale.Z()));
-	}
+	return Transform(Froward, RotationFromMatrix(mWorldTransform));
 }
 
 Vector3f Node::GetWorldScale() const
@@ -166,21 +132,29 @@ Vector3f Node::GetWorldScale() const
 	if (mDirtyBits & NODE_DIRTY_WORLD)
 		UpdateWorldTransform();
 
-	return ScaleFromTransformMatrix(mWorldTransform);
+	return ScaleFromMatrix(mWorldTransform);
 }
 
 
 void Node::SetWorldTransform( const Vector3f& position, const Quaternionf& rotation )
 {
-	SetWorldPosition(position);
-	SetWorldRotation(rotation);
-}
+	if (!mParent)
+	{
+		mPosition = position;
+		mRotation = rotation;
+	}
+	else
+	{
+		// find the position in parent's local space
+		Matrix4f parentWorldTransformInv = mParent->GetWorldTransform().Inverse();
+		SetPosition( Transform(position, parentWorldTransformInv) );
 
-void Node::SetWorldTransform( const Vector3f& position, const Quaternionf& rotation, const Vector3f& scale )
-{
-	SetWorldPosition(position);
-	SetWorldRotation(rotation);
-	SetWorldScale(scale);
+		Quaternionf parentWorldRotInv = QuaternionInverse( mParent->GetWorldRotation() );
+		SetRotation( rotation * parentWorldRotInv );
+	}
+
+	PropagateDirtyDown(NODE_DIRTY_BOUNDS | NODE_DIRTY_WORLD);
+	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
 }
 
 const Matrix4f& Node::GetWorldTransform() const
@@ -211,7 +185,7 @@ uint32_t Node::GetNumChildren( bool recursive /*= false */ ) const
 Node* Node::CreateChild( const String& name, const Vector3f& translate, const Quaternionf& rotate )
 {
 	Node* child = CreateChildImpl(name);
-	child->SetTranslation(translate);
+	child->SetPosition(translate);
 	child->SetRotation(rotate);
 
 	// Attach this child
@@ -235,7 +209,8 @@ void Node::AttachChild( Node* child )
 	// set new parent
 	child->SetParent(this);
 
-	child->TransformChanged();
+	PropagateDirtyDown(NODE_DIRTY_BOUNDS | NODE_DIRTY_WORLD);
+	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
 
 	OnChildNodeAdded(child);
 }
@@ -252,7 +227,7 @@ void Node::DetachChild( Node* child )
 	{
 		mChildren.erase(found);
 		child->mParent = nullptr;
-		child->TransformChanged();
+		child->PropagateDirtyUp(NODE_DIRTY_BOUNDS);
 	}
 
 	OnChildNodeRemoved(child);
@@ -264,7 +239,7 @@ void Node::DetachAllChildren()
 	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
 	{
 		(*iter)->SetParent(nullptr);
-		(*iter)->TransformChanged();
+		(*iter)->PropagateDirtyUp(NODE_DIRTY_BOUNDS);
 		OnChildNodeRemoved(*iter);
 	}
 	mChildren.clear();
@@ -300,29 +275,6 @@ void Node::UpdateWorldTransform() const
 	{
 		if (mParent)
 		{
-			Vector3f parentScale = mParent->GetWorldScale();
-			
-			// combine rotation
-			mWorldRotation = mRotation * mParent->GetWorldRotation();
-			
-			// combine scale
-			mWorldScale = Vector3f(mScale.X()*parentScale.X(), mScale.Y()*parentScale.Y(), mScale.Z()*parentScale.Z());
-			
-			// transform position along parent rotation
-			mWorldPosition = Transform(mPosition, mParent->GetWorldRotation());
-			mWorldPosition = Vector3f(mWorldPosition.X()*parentScale.X(), mWorldPosition.Y()*parentScale.Y(), mWorldPosition.Z()*parentScale.Z());
-			mWorldPosition = mWorldPosition + mParent->GetWorldPosition();
-		}
-		else
-		{
-			mWorldPosition = mPosition;
-			mWorldRotation = mRotation;
-			mWorldScale = mScale;
-		}
-
-
-		if (mParent)
-		{
 			mParent->UpdateWorldTransform();
 			mWorldTransform = CreateTransformMatrix(mScale, mRotation, mPosition) * mParent->mWorldTransform;
 		}
@@ -341,36 +293,6 @@ void Node::UpdateWorldTransform() const
 	}
 }
 
-void Node::MarkBoundDirty()
-{
-	// Mark ourself and our parent nodes as dirty
-	mDirtyBits |= NODE_DIRTY_BOUNDS;
-
-	// Mark our parent bounds as dirty as well
-	if (mParent)
-		mParent->MarkBoundDirty();
-}
-
-void Node::TransformChanged()
-{
-	// Our local transform was changed, so mark our world matrices dirty.
-	mDirtyBits |= NODE_DIRTY_WORLD;
-
-	// World bound changes too, it may also cause parent bound dirty
-	MarkBoundDirty();
-
-	// Children node transform will change too, this will not mark parent's dirty again.
-	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
-		(*iter)->MarkChildrenDirty();
-}
-
-void Node::MarkChildrenDirty()
-{
-	mDirtyBits |= NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS;
-
-	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
-		(*iter)->MarkChildrenDirty();
-}
 
 void Node::Update( )
 {
@@ -387,15 +309,15 @@ void Node::Translate( const Vector3f& d, TransformSpace relativeTo /*= TS_Parent
 		break;
 	case TS_World:
 		{
-			if (!mParent)
-			{
-				mPosition += d;
-			}
-			else
+			if (mParent)
 			{
 				Vector3f dInv = Transform(d, mParent->GetWorldRotation().Inverse());
 				Vector3f scale = mParent->GetWorldScale();
 				mPosition += Vector3f(dInv.X() / scale.X(), dInv.Y() / scale.Y(), dInv.Z() / scale.Z());
+			}
+			else
+			{
+				mPosition += d;
 			}
 		}
 		break;
@@ -406,7 +328,8 @@ void Node::Translate( const Vector3f& d, TransformSpace relativeTo /*= TS_Parent
 		break;
 	}
 
-	TransformChanged();
+	PropagateDirtyDown(NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS);
+	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
 }
 
 void Node::Rotate( const Quaternionf& rot, TransformSpace relativeTo /*= TS_Parent */ )
@@ -431,7 +354,26 @@ void Node::Rotate( const Quaternionf& rot, TransformSpace relativeTo /*= TS_Pare
 		break;
 	}
 
-	TransformChanged();
+	PropagateDirtyDown(NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS);
+	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
+}
+
+void Node::PropagateDirtyDown( uint32_t dirtyFlag )
+{
+	mDirtyBits |= dirtyFlag;
+	for (size_t i = 0; i < mChildren.size(); ++i)
+	{
+		mChildren[i]->PropagateDirtyDown(dirtyFlag);
+	}
+}
+
+void Node::PropagateDirtyUp( uint32_t dirtyFlag )
+{
+	mDirtyBits |= dirtyFlag;
+	if (mParent)
+	{
+		mParent->PropagateDirtyUp(dirtyFlag);
+	}
 }
 
 }

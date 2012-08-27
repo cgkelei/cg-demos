@@ -83,15 +83,15 @@ MatrixDecompose(Vector<Real, 3>& sacle, Quaternion<Real>& rotation, Vector<Real,
 
 template<typename Real>
 inline Matrix4<Real>
-RotationFromTransformMatrix( const Matrix4<Real>& transformMat);
+RotationFromMatrix( const Matrix4<Real>& transformMat );
 
 template<typename Real>
 inline Vector<Real,3>
-TranslationFromTransformMatrix( const Matrix4<Real>& transformMat);
+TranslationFromMatrix( const Matrix4<Real>& transformMat );
 
 template<typename Real>
 inline Vector<Real,3>
-ScaleFromTransformMatrix( const Matrix4<Real>& transformMat);
+ScaleFromMatrix( const Matrix4<Real>& transformMat );
 
 /**
  * Get euler angle from rotation matrix

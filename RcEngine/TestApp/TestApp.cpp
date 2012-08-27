@@ -72,25 +72,19 @@ void TestApp::LoadContent()
 {
 	RenderFactory* factory = RcEngine::Context::GetSingleton().GetRenderDevice().GetRenderFactory();
 
-	// Load mesh
-	//RcEngine::FileStream modelSource("../Media/Mesh/Test/Test.mdl", RcEngine::FILE_READ);
-	//RcEngine::FileStream modelSource("../Media/Mesh/Dwarf/Dwarf.mdl", RcEngine::FILE_READ);
-	//mDwarf = Mesh::Load(modelSource);
-
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
 
 	SceneNode* dwarfNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
 	Entity* dwarfEntity = sceneManager->CreateEntity("Dwarf", "../Media/Mesh/Dwarf/Dwarf.mdl");
-	
-
 	mDwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Dwarf/Body.material.xml");
 	dwarfEntity->SetMaterial(mDwarfMaterial);
 
+	const Vector3f& center = dwarfEntity->GetBoundingSphere().Center;
+	float radius = dwarfEntity->GetBoundingSphere().Radius;
+
 	dwarfNode->AttachObject(dwarfEntity);
-
-	//mDwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Test/Armor.material.xml");
-	//mDwarf->SetMaterial(mDwarfMaterial);
-
+	dwarfNode->Translate(-center, Node::TS_Local);
+	dwarfNode->SetScale(Vector3f(10.0f / radius, 10.0f / radius, 10.0f / radius));
 }
 
 
@@ -115,29 +109,9 @@ void TestApp::Render()
 
 void TestApp::Update( float deltaTime )
 {
-	static float degree = 0;
-	//degree += deltaTime * 90 ;
-
 	SceneNode* dwarfNode = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf");
-	Entity* dwarfEntity = static_cast<Entity*>( dwarfNode->GetAttachedObject("Dwarf") );
-
-	//Quaternionf quat = QuaternionFromRotationYawPitchRoll( Mathf::ToRadian(degree), 0.0f, 0.0f);
-
-	const Vector3f& center = dwarfEntity->GetBoundingSphere().Center;
-	float radius = dwarfEntity->GetBoundingSphere().Radius;
-
-	Matrix4f worldScale = CreateTranslation(-center.X(), -center.Y(), -center.Z());
-
-	worldScale = worldScale * CreateScaling(10.0f / radius, 10.0f / radius, 10.0f / radius);
-	Matrix4f world = worldScale * mCameraControler->GetWorldMatrix();
-
-	Quaternionf quat;
-	Vector3f pos, scale;
-
-	MatrixDecompose(scale, quat, pos, world);
-
-	dwarfNode->SetWorldTransform(pos, quat, scale);
-
+	//dwarfNode->Rotate(QuaternionFromRotationMatrix(mCameraControler->GetWorldMatrix()), Node::TS_Local);
+	dwarfNode->SetRotation(QuaternionFromRotationMatrix(mCameraControler->GetWorldMatrix()));
 }
 
 int32_t main()
