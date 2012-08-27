@@ -138,15 +138,6 @@ public:
 	 */
 	Vector3f GetWorldDirection() const;
 
-	/**
-	 * Set world scale.
-	 */
-	void SetWorldScale( const Vector3f& scale );
-
-	/**
-	 * Get world scale.
-	 */
-	Vector3f GetWorldScale() const;
 
 	/**
 	 * Set world transform matrix.

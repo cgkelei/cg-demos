@@ -392,6 +392,12 @@
     <ClInclude Include="Scene\SceneObject.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\HierarchyNode.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\HierarchyNode.inl">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Math\ColorRGBA.inl">
