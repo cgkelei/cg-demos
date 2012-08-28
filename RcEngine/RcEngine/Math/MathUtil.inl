@@ -269,8 +269,8 @@ CreateTransformMatrix( const Vector<Real, 3>& sacle, const Quaternion<Real>& rot
 	result.M31 *= sacle.Z(); result.M32 *= sacle.Z(); result.M33 *= sacle.Z();
 
 	result.M41 = translation.X();
-	result.M42 = translation.X();
-	result.M43 = translation.X();
+	result.M42 = translation.Y();
+	result.M43 = translation.Z();
 
 	return result;
 }
