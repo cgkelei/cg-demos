@@ -75,6 +75,8 @@ void TestApp::LoadContent()
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
 
 	SceneNode* dwarfNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
+	SceneNode* modelCenterNode = dwarfNode->CreateChildSceneNode("center");
+		
 	Entity* dwarfEntity = sceneManager->CreateEntity("Dwarf", "../Media/Mesh/Dwarf/Dwarf.mdl");
 	mDwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Dwarf/Body.material.xml");
 	dwarfEntity->SetMaterial(mDwarfMaterial);
@@ -82,8 +84,8 @@ void TestApp::LoadContent()
 	const Vector3f& center = dwarfEntity->GetBoundingSphere().Center;
 	float radius = dwarfEntity->GetBoundingSphere().Radius;
 
-	dwarfNode->AttachObject(dwarfEntity);
-	dwarfNode->Translate(-center, Node::TS_Local);
+	modelCenterNode->AttachObject(dwarfEntity);
+	modelCenterNode->Translate(-center, Node::TS_Local);
 	dwarfNode->SetScale(Vector3f(10.0f / radius, 10.0f / radius, 10.0f / radius));
 }
 
@@ -110,8 +112,12 @@ void TestApp::Render()
 void TestApp::Update( float deltaTime )
 {
 	SceneNode* dwarfNode = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf");
+	SceneNode* center = static_cast<SceneNode*>(dwarfNode->GetChild("center"));
 	//dwarfNode->Rotate(QuaternionFromRotationMatrix(mCameraControler->GetWorldMatrix()), Node::TS_Local);
 	dwarfNode->SetRotation(QuaternionFromRotationMatrix(mCameraControler->GetWorldMatrix()));
+
+	auto p = center->GetPosition();
+	auto s = center->GetWorldScale();
 }
 
 int32_t main()
