@@ -9,6 +9,7 @@
 namespace RcEngine {
 
 class SceneObject;
+class SkyBox;
 
 struct _ApiExport RenderQueueItem
 {
@@ -17,8 +18,10 @@ struct _ApiExport RenderQueueItem
 	float SortKey;
 
 	RenderQueueItem() {}
-	//RenderQueueItem( uint32_t type, Renderable* rd, float key ) : Type(type), Renderable(rd), SortKey(key) { }
+	RenderQueueItem( uint32_t type, class Renderable* rd, float key ) : Type(type), Renderable(rd), SortKey(key) { }
 };
+typedef vector<RenderQueueItem> RenderQueue;
+
 
 class _ApiExport SceneManager
 {
@@ -45,6 +48,12 @@ public:
 
 	Entity* CreateEntity( const String& name, const String& filePath );
 
+	SkyBox* CreateSkyBox( const shared_ptr<Texture>& frontTex, const shared_ptr<Texture>& backTex,
+		const shared_ptr<Texture>& leftTex, const shared_ptr<Texture>& rightTex, const shared_ptr<Texture>& topTex,
+		const shared_ptr<Texture>& bottomTex, float distance = 100.0f );
+
+	SkyBox* CreateSkyBox( const shared_ptr<Texture>& cubicTex, float distance = 100.0f );
+
 	void UpdateSceneGraph();
 
 	void UpdateRenderQueue( Camera* cam );
@@ -65,6 +74,7 @@ protected:
     vector<SceneNode*> mAllSceneNodes;
 
 	SceneNode* mSkyBoxNode;	
+	SkyBox* mSkyBox;
 
 	vector<Entity*> mEntityLists;
 

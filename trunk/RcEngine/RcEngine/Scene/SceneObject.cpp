@@ -60,4 +60,9 @@ void SceneObject::OnDetach( SceneNode* node )
 
 }
 
+void SceneObject::AddToRenderQueue( RenderQueue& renderQueue ) const
+{
+
+}
+
 }

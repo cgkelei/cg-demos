@@ -54,9 +54,6 @@ protected:
 	mutable BoundingSpheref mBoundingShere;
 	vector<Matrix4f> mBoneMatrices;
 	uint32_t mNumBoneMatrices;
-
-
-
 };
 
 class _ApiExport SubEntity : public Renderable

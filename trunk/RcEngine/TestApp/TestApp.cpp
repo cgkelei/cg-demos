@@ -24,6 +24,7 @@
 #include "Scene/SceneNode.h"
 #include "Scene/Entity.h"
 #include "Scene/SceneManager.h"
+#include "Graphics/Sky.h"
 #include <D3DX10Math.h>
 
 #pragma comment(lib, "D3DX10.lib")
@@ -36,21 +37,6 @@ TestApp::TestApp(void)
 
 TestApp::~TestApp(void)
 {
-}
-
-bool Equal(const D3DXMATRIX& mat1, const Matrix4f& mat2)
-{
-	for (size_t i = 0; i < 4; ++i)
-		for (size_t j = 0; j < 4; ++j)
-		{
-			if (mat1(i, j) != mat2(i,j))
-			{
-				float a = mat1(i, j);
-				float b = mat2(i,j);
-				return false;
-			}
-		}
-	return true;
 }
 
 void TestApp::Initialize()
@@ -70,8 +56,7 @@ void TestApp::Initialize()
 
 void TestApp::LoadContent()
 {
-	RenderFactory* factory = RcEngine::Context::GetSingleton().GetRenderDevice().GetRenderFactory();
-
+	RenderFactory* factory = RcEngine::Context::GetSingleton().GetRenderFactoryPtr();
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
 
 	SceneNode* dwarfNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
@@ -87,6 +72,18 @@ void TestApp::LoadContent()
 	modelCenterNode->AttachObject(dwarfEntity);
 	modelCenterNode->Translate(-center, Node::TS_Local);
 	dwarfNode->SetScale(Vector3f(10.0f / radius, 10.0f / radius, 10.0f / radius));
+
+	// Sky 
+
+	/*SkyBox* skyBox = sceneManager->CreateSkyBox(
+		factory->CreateTextureFromFile("../Media/Textures/Glass.dds", 0),
+		factory->CreateTextureFromFile("../Media/Textures/Glass.dds", 0),
+		factory->CreateTextureFromFile("../Media/Textures/Glass.dds", 0),
+		factory->CreateTextureFromFile("../Media/Textures/Glass.dds", 0),
+		factory->CreateTextureFromFile("../Media/Textures/Glass.dds", 0),
+		factory->CreateTextureFromFile("../Media/Textures/Glass.dds", 0));
+
+	sceneManager->GetRootSceneNode()->AttachObject(skyBox);*/
 }
 
 
@@ -100,24 +97,19 @@ void TestApp::UnloadContent()
 void TestApp::Render()
 {
 	//RenderDevice* device = Context::GetSingleton().GetRenderDevicePtr();
-
 	//device->GetCurrentFrameBuffer()->Clear(CF_Color | CF_Depth |CF_Stencil, 
 	//	RcEngine::ColorRGBA(1.1f, 1.1f, 1.1f, 1.0f), 1.0f, 0);
-
-
 	//device->GetCurrentFrameBuffer()->SwapBuffers();
 }
 
 
 void TestApp::Update( float deltaTime )
 {
-	SceneNode* dwarfNode = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf");
-	SceneNode* center = static_cast<SceneNode*>(dwarfNode->GetChild("center"));
-	//dwarfNode->Rotate(QuaternionFromRotationMatrix(mCameraControler->GetWorldMatrix()), Node::TS_Local);
-	dwarfNode->SetRotation(QuaternionFromRotationMatrix(mCameraControler->GetWorldMatrix()));
+	static float degree = 0;
+	degree += deltaTime * 1.0f;
 
-	auto p = center->GetPosition();
-	auto s = center->GetWorldScale();
+	SceneNode* dwarfNode = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf");
+	dwarfNode->SetRotation(QuaternionFromRotationMatrix(mCameraControler->GetWorldMatrix()));
 }
 
 int32_t main()

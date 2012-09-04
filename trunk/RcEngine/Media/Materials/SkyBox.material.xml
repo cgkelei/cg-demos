@@ -1,0 +1,1 @@
+<Material name="SkyBox">	<Parameter type="float4x4" name="WorldViewProj" semantic="WorldViewProjection" />	<Parameter type="texture2D" name="DiffuseMap" semantic="DiffuseMaterialMap" />	<Effect name="SkyBoxPlane" file="../Media/Effects/SkyBoxPlane.cgfx">		<Technique name="SkyBoxPlane" />	</Effect></Material>

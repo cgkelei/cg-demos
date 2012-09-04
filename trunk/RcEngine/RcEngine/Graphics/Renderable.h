@@ -18,19 +18,31 @@ class _ApiExport Renderable
 public:
 	Renderable();
 	virtual ~Renderable();
-			
-	virtual const String& GetName() const = 0;	
 
+	/**
+	 * Get material used to render it.
+	 */
 	virtual const shared_ptr<Material>& GetMaterial() const = 0;
 
-	/** This is to allow Renderables to use a chosen Technique if they wish,
+	/** This is to allow renderables to use a chosen Technique if they wish,
 	 * otherwise they will use the best Technique available for the Material they are using.
 	 */
 	virtual EffectTechnique* GetTechnique() const; 
 
+	/**
+	 * Get render operation, render operation contain all geometry data.
+	 */
 	virtual const shared_ptr<RenderOperation>& GetRenderOperation() const = 0;
 
+	/**
+	 * Get world transform matrix, note that it may more than one matrix 
+	 * if it is a bone mesh.
+	 */
 	virtual void GetWorldTransforms(Matrix4f* xform) const = 0;
+
+	/**
+	 * Get world transform matrix count.
+	 */
 	virtual uint32_t GetWorldTransformsCount() const = 0;
 
 	virtual void Render();
@@ -40,7 +52,6 @@ public:
 		
 protected:
 	shared_ptr<RenderOperation> mRenderOperation;
-
 };
 
 

@@ -47,24 +47,11 @@ void OpenGLRenderDevice::Release()
 	Safe_Delete(mRenderFactory);
 }
 
-void OpenGLRenderDevice::InitGlew()
-{
-	GLenum err = glewInit();
-	if (GLEW_OK != err)
-	{
-		String errMsg = reinterpret_cast<char const *>(glewGetErrorString(err));
-		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, errMsg, "OpenGLRenderDevice::InitGlew");
-	}
-}
-
 void OpenGLRenderDevice::CreateRenderWindow( const RenderSettings& settings )
 {
 	mRenderSettings = settings;
 
 	mScreenFrameBuffer = new OpenGLRenderWindow(settings);
-
-	// create a valid OpenGL rendering context and init glew
-	InitGlew();
 
 	mScreenFrameBuffer->Attach(ATT_Color0, 
 		new OpenGLScreenRenderTarget2DView(mScreenFrameBuffer->GetWidth(), mScreenFrameBuffer->GetHeight(), mScreenFrameBuffer->GetColorFormat()));
@@ -390,7 +377,7 @@ void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
 			uint16_t count = VertexElement::GetTypeCount(ve.Type);
 			GLenum type = OpenGLMapping::Mapping(ve.Type);
 			bool isNormalized = VertexElement::IsNormalized(ve.Type);
-			uint32_t offset = ve.Offset + op.BaseVertexLocation * vertexSize;
+			uint32_t offset = ve.Offset + op.StartVertexLocation * vertexSize;
 
 			glVertexAttribPointer(att, count, type, isNormalized, vertexSize, BUFFER_OFFSET(offset));
 			glEnableVertexAttribArray(att);

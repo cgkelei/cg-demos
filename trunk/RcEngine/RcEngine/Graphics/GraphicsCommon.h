@@ -502,7 +502,6 @@ enum EffectParameterUsage
 	 */
 	EPU_Light_Position,
 };
-
 } // RcEngine
 
 
