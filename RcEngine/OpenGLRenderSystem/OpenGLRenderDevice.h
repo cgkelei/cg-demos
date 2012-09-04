@@ -37,7 +37,6 @@ protected:
 	void DoBindFrameBuffer(FrameBuffer* fb);
 			
 private:
-	void InitGlew();
 	void BindVertexBufferOGL(const shared_ptr<GraphicsBuffer>& vertexBuffer );
 	void BindIndexBufferOGL(const shared_ptr<GraphicsBuffer>& indexBuffer);
 			

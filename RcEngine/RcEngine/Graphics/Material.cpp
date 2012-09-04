@@ -86,144 +86,189 @@ Material::Material(void)
 
 Material::~Material(void)
 {
-for(size_t i = 0; i < mCachedEffectParams.size(); ++i)
-{
-	Safe_Delete(mCachedEffectParams[i]);
-}
+	for(size_t i = 0; i < mCachedEffectParams.size(); ++i)
+	{
+		delete mCachedEffectParams[i];
+	}
+	mCachedEffectParams.clear();
 }
 
 void Material::ApplyMaterial()
 {
-Camera* camera = Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
+	Camera* camera = Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
 
-for(size_t i = 0; i < mCachedEffectParams.size(); ++i)
-{
-	MaterialParameter* param = mCachedEffectParams[i];
-	switch (param->Usage)
+	for(size_t i = 0; i < mCachedEffectParams.size(); ++i)
 	{
-	case EPU_ViewMatrix:
+		MaterialParameter* param = mCachedEffectParams[i];
+		switch (param->Usage)
 		{
-			param->EffectParam->SetValue(camera->GetViewMatrix());
-		}
-		break;
-	case EPU_ViewProjectionMatrix:
-		{
-			param->EffectParam->SetValue(camera->GetViewMatrix() * camera->GetProjectionMatrix());
-		}
-		break;
-	case EPU_Material_Ambient_Color:
-		{
-			param->EffectParam->SetValue(mAmbient);
-		}
-		break;
-	case EPU_Material_Diffuse_Color:
-		{
-			param->EffectParam->SetValue(mDiffuse);
-		}
-		break;
-	case EPU_Material_Specular_Color:
-		{
-			param->EffectParam->SetValue(mSpecular);
-		}
-		break;
-	case EPU_Material_Power:
-		{
-			param->EffectParam->SetValue(mPower);
-		}
-		break;
+		case EPU_ViewMatrix:
+			{
+				param->EffectParam->SetValue(camera->GetViewMatrix());
+			}
+			break;
+		case EPU_ViewProjectionMatrix:
+			{
+				param->EffectParam->SetValue(camera->GetViewMatrix() * camera->GetProjectionMatrix());
+			}
+			break;
+		case EPU_Material_Ambient_Color:
+			{
+				param->EffectParam->SetValue(mAmbient);
+			}
+			break;
+		case EPU_Material_Diffuse_Color:
+			{
+				param->EffectParam->SetValue(mDiffuse);
+			}
+			break;
+		case EPU_Material_Specular_Color:
+			{
+				param->EffectParam->SetValue(mSpecular);
+			}
+			break;
+		case EPU_Material_Power:
+			{
+				param->EffectParam->SetValue(mPower);
+			}
+			break;
 
-	case EPU_Material_Diffuse_Texture:
-		{
-			param->EffectParam->SetValue(mTextures[param->Name]);
-		}
-		break;
+		case EPU_Material_Diffuse_Texture:
+			{
+				param->EffectParam->SetValue(mTextures[param->Name]);
+			}
+			break;
 
-	default:
-		{
+		default:
+			{
 
+			}
 		}
 	}
-}
 }
 
 MaterialParameter* Material::GetCustomParameter( EffectParameterUsage usage )
 {
-for (size_t i = 0; i < mCachedEffectParams.size(); ++i)
-{
-	if (mCachedEffectParams[i]->Usage == usage)
+	for (size_t i = 0; i < mCachedEffectParams.size(); ++i)
 	{
-		return mCachedEffectParams[i];
+		if (mCachedEffectParams[i]->Usage == usage)
+		{
+			return mCachedEffectParams[i];
+		}
 	}
-}
 
 return nullptr;
 }
 
 MaterialParameter* Material::GetCustomParameter( const String& name )
 {
-for (size_t i = 0; i < mCachedEffectParams.size(); ++i)
-{
-	if (mCachedEffectParams[i]->Name == name)
+	for (size_t i = 0; i < mCachedEffectParams.size(); ++i)
 	{
-		return mCachedEffectParams[i];
+		if (mCachedEffectParams[i]->Name == name)
+		{
+			return mCachedEffectParams[i];
+		}
 	}
-}
 
-return nullptr;
+	return nullptr;
 }
 
 
 
 shared_ptr<Material> Material::LoadFrom( Stream& source )
 {
-RenderFactory&  factory = Context::GetSingleton().GetRenderFactory();
-shared_ptr<Material> material = std::make_shared<Material>();
+	RenderFactory&  factory = Context::GetSingleton().GetRenderFactory();
+	shared_ptr<Material> material = std::make_shared<Material>();
 
-XMLDoc doc;
-XMLNodePtr root = doc.Parse(source);
+	XMLDoc doc;
+	XMLNodePtr root = doc.Parse(source);
 
-// effect first
-XMLNodePtr effectNode = root->FirstNode("Effect");
-String effecName =  effectNode->AttributeString("name", "");
-String effectPath = effectNode->AttributeString("file", "");		
+	// material name 
+	material->mName = root->AttributeString("name", "");
 
-material->mEffect = factory.CreateEffectFromFile(effecName, effectPath);
-material->mCurrentTechnique = material->mEffect->GetTechniqueByIndex(0);
+	// effect first
+	XMLNodePtr effectNode = root->FirstNode("Effect");
+	String effecName =  effectNode->AttributeString("name", "");
+	String effectPath = effectNode->AttributeString("file", "");		
 
-for (XMLNodePtr paramNode = root->FirstNode(); paramNode; paramNode = paramNode->NextSibling())
-{
-	if (paramNode->NodeName() == "Parameter")
+	material->mEffect = factory.CreateEffectFromFile(effecName, effectPath);
+	material->mCurrentTechnique = material->mEffect->GetTechniqueByIndex(0);
+
+	for (XMLNodePtr paramNode = root->FirstNode(); paramNode; paramNode = paramNode->NextSibling())
 	{
-		MaterialParameter* parameter = new MaterialParameter;
-		parameter->Name = paramNode->AttributeString("name", "");
-		parameter->EffectParam = material->mEffect->GetParameterByName(parameter->Name);
-		parameter->Type = parameter->EffectParam->GetParameterType();
-		String semantic =  paramNode->AttributeString("semantic", "");
-		parameter->IsSemantic = semantic.length() > 0;
-
-		if (parameter->IsSemantic)
+		if (paramNode->NodeName() == "Parameter")
 		{
-			parameter->Usage = EffectParamsUsageDefs::GetInstance().GetUsageType(semantic);
-		}else
-		{
-			parameter->Usage = EPU_Unknown;
-		}
+			MaterialParameter* parameter = new MaterialParameter;
+			parameter->Name = paramNode->AttributeString("name", "");
+			parameter->EffectParam = material->mEffect->GetParameterByName(parameter->Name);
+			parameter->Type = parameter->EffectParam->GetParameterType();
+			String semantic =  paramNode->AttributeString("semantic", "");
+			parameter->IsSemantic = semantic.length() > 0;
 
-		String value = paramNode->AttributeString("value", "");		
-
-		if (parameter->Type == EPT_Sampler || parameter->Type == EPT_Texture2D ||
-			parameter->Type == EPT_TextureCUBE || parameter->Type == EPT_Texture3D )
-		{	
-			if (!value.empty())
+			if (parameter->IsSemantic)
 			{
-				material->mTextures[parameter->Name] = factory.CreateTextureFromFile(value, 0);
+				parameter->Usage = EffectParamsUsageDefs::GetInstance().GetUsageType(semantic);
+			}else
+			{
+				parameter->Usage = EPU_Unknown;
 			}
-		}	
-		material->mCachedEffectParams.push_back(parameter);
+
+			String value = paramNode->AttributeString("value", "");		
+
+			if (parameter->Type == EPT_Sampler || parameter->Type == EPT_Texture2D ||
+				parameter->Type == EPT_TextureCUBE || parameter->Type == EPT_Texture3D )
+			{	
+				if (!value.empty())
+				{
+					material->mTextures[parameter->Name] = factory.CreateTextureFromFile(value, 0);
+				}
+			}	
+			material->mCachedEffectParams.push_back(parameter);
+		}
 	}
+
+	return material;
 }
 
-return material;
+shared_ptr<Material> Material::Clone()
+{
+	shared_ptr<Material> retVal = std::make_shared<Material>();
+
+	*retVal = *this;
+	retVal->mName = mName + "Clone ";
+
+	/*String name = mName;
+
+	retVal->mAmbient = mEmissive;
+	retVal->mDiffuse = mDiffuse;
+	retVal->mSpecular = mSpecular;
+	retVal->mEmissive = mEmissive;
+	retVal->mPower = mPower;
+
+	retVal->mDepthStencilState = mDepthStencilState;
+	retVal->mBlendState = mBlendState;
+	retVal->mRasterizerState = mRasterizerState;
+
+	retVal->mEffect = mEffect;
+	retVal->mCurrentTechnique = mCurrentTechnique;
+
+	EffectTechnique* mCurrentTechnique;
+	vector<MaterialParameter*> mCachedEffectParams;*/
+
+	return retVal;
+}
+
+void Material::SetTexture( const String& texUint, const shared_ptr<Texture>& texture )
+{
+	auto found = mTextures.find(texUint);
+	if (found != mTextures.end())
+	{
+		found->second = texture;
+	}
+	else
+	{
+		mTextures.insert( std::make_pair(texUint, texture) );
+	}
 }
 
 

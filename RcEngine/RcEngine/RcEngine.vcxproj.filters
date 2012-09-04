@@ -99,9 +99,6 @@
     <ClCompile Include="Core\XMLDom.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\RenderJob.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\Mesh.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
@@ -188,6 +185,9 @@
     </ClCompile>
     <ClCompile Include="Math\Math.inl">
       <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Sky.cpp">
+      <Filter>Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -286,9 +286,6 @@
     </ClInclude>
     <ClInclude Include="Core\XMLDom.h">
       <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\RenderJob.h">
-      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\Renderable.h">
       <Filter>Graphics</Filter>
@@ -391,6 +388,9 @@
     </ClInclude>
     <ClInclude Include="Scene\SceneObject.h">
       <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Sky.h">
+      <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

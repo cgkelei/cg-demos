@@ -95,6 +95,7 @@ void RenderOperation::BindIndexStream( const shared_ptr<GraphicsBuffer>& buffer,
 {
 	IndexType = type;
 	IndexBuffer = buffer;
+	UseIndex = true;
 }
 
 const RenderOperation::StreamUnit& RenderOperation::GetStreamUnit( uint32_t index ) const

@@ -3,6 +3,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 #include <gl/glew.h>
+#include <GL/wglew.h>
 #include <gl/GL.h>
 #include <cg/cg.h>
 #include <cg/cgGL.h>

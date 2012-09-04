@@ -8,6 +8,7 @@
 #include <Graphics/GraphicBuffer.h>
 #include <Graphics/Effect.h>
 #include <Graphics/Camera.h>
+#include <Scene/SceneNode.h>
 #include <Core/Context.h>
 #include <Math/Vector.h>
 #include <Math/Matrix.h>
@@ -17,7 +18,7 @@ namespace RcEngine {
 
 	
 RenderableHelper::RenderableHelper( const String& name )
-	: mName(name)
+	: SceneObject(name)
 {
 
 }
@@ -27,13 +28,17 @@ RenderableHelper::~RenderableHelper()
 
 }
 
+void RenderableHelper::GetWorldTransforms( Matrix4f* xform ) const
+{
+	xform[0] = GetWorldTransform();
+}
 
 SimpleBox::SimpleBox(const String& name)
 	: RenderableHelper(name)
 {
 	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 
-	mMaterial = factory.CreateMaterialFromFile("SimpleMat", "../Media/Materials/SimpleMat.xml");
+	//mMaterial = factory.CreateMaterialFromFile("SimpleMat", "../Media/Materials/SimpleMat.xml");
 
 	Vector3f vertives[8] = 
 	{
@@ -61,24 +66,24 @@ SimpleBox::SimpleBox(const String& name)
 	vInitData.pData = vertives;
 	vInitData.rowPitch = sizeof(vertives);
 	vInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> vb = factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
+	mVertexBuffer= factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
 
 	VertexElement vdsc[] = {
 		VertexElement(0, VEF_Vector3,  VEU_Position, 0),
 	};
-	shared_ptr<VertexDeclaration> decla = factory.CreateVertexDeclaration(vdsc, 1);
+	mVertexDecl = factory.CreateVertexDeclaration(vdsc, 1);
 
 	ElementInitData iInitData;
 	iInitData.pData = indices;
 	iInitData.rowPitch = sizeof(indices);
 	iInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> ib = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
+	mIndexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
 
 
 	mRenderOperation->BaseVertexLocation = 0;
 	mRenderOperation->UseIndex = true;
-	mRenderOperation->IndexBuffer = ib;
-	mRenderOperation->BindVertexStream(vb, decla);
+	mRenderOperation->IndexBuffer = mIndexBuffer;
+	mRenderOperation->BindVertexStream(mVertexBuffer, mVertexDecl);
 	mRenderOperation->PrimitiveType = PT_Triangle_List;
 	mRenderOperation->IndexType = IBT_Bit16;
 	mRenderOperation->StartIndexLocation = 0;
@@ -90,10 +95,6 @@ SimpleBox::~SimpleBox()
 
 }
 
-const shared_ptr<RenderOperation>& SimpleBox::GetRenderOperation() const
-{
-	return mRenderOperation;
-}
 
 //------------------------------------------------------------------------------------------
 SimpleTexturedQuad::SimpleTexturedQuad(const String& name)
@@ -101,7 +102,7 @@ SimpleTexturedQuad::SimpleTexturedQuad(const String& name)
 {
 	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 
-	mMaterial = factory.CreateMaterialFromFile("SimpleTextured", "../Media/Materials/SimpleTextured.xml");
+	//mMaterial = factory.CreateMaterialFromFile("SimpleTextured", "../Media/Materials/SimpleTextured.xml");
 
 	struct PosNormalTexVertex
 	{
@@ -127,26 +128,26 @@ SimpleTexturedQuad::SimpleTexturedQuad(const String& name)
 	vInitData.pData = vertives;
 	vInitData.rowPitch = sizeof(vertives);
 	vInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> vb = factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
+	mVertexBuffer = factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
 
 	VertexElement vdsc[] = {
 		VertexElement(0, VEF_Vector3,  VEU_Position, 0),
 		VertexElement(12, VEF_Vector3,  VEU_Normal, 0),
 		VertexElement(24, VEF_Vector2,  VEU_TextureCoordinate, 0),
 	};
-	shared_ptr<VertexDeclaration> decla = factory.CreateVertexDeclaration(vdsc, 3);
+	mVertexDecl = factory.CreateVertexDeclaration(vdsc, 3);
 
 	ElementInitData iInitData;
 	iInitData.pData = indices;
 	iInitData.rowPitch = sizeof(indices);
 	iInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> ib = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
+	mIndexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
 
 
 	mRenderOperation->BaseVertexLocation = 0;
 	mRenderOperation->UseIndex = true;
-	mRenderOperation->IndexBuffer = ib;
-	mRenderOperation->BindVertexStream(vb, decla);
+	mRenderOperation->IndexBuffer = mIndexBuffer;
+	mRenderOperation->BindVertexStream(mVertexBuffer, mVertexDecl);
 	mRenderOperation->PrimitiveType = PT_Triangle_List;
 	mRenderOperation->IndexType = IBT_Bit16;
 	mRenderOperation->StartIndexLocation = 0;
@@ -156,11 +157,6 @@ SimpleTexturedQuad::SimpleTexturedQuad(const String& name)
 SimpleTexturedQuad::~SimpleTexturedQuad()
 {
 
-}
-
-const shared_ptr<RenderOperation>& SimpleTexturedQuad::GetRenderOperation() const
-{
-	return mRenderOperation;
 }
 
 } // Namespace RcEngine

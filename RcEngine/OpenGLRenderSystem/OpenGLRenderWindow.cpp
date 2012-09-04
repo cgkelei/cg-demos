@@ -1,6 +1,7 @@
 #include "OpenGLRenderWindow.h"
 #include "OpenGLRenderDevice.h"
 #include <Core/Context.h>
+#include <Core/Exception.h>
 #include <Core/Utility.h>
 #include <MainApp/Application.h>
 #include <MainApp/Window.h>
@@ -64,6 +65,14 @@ OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
 
 	mHrc = ::wglCreateContext(mHdc);
 	::wglMakeCurrent(mHdc, mHrc);
+	
+	// init glew
+	GLenum err = glewInit();
+	if (GLEW_OK != err)
+	{
+		String errMsg = reinterpret_cast<char const *>(glewGetErrorString(err));
+		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, errMsg, "OpenGLRenderDevice::InitGlew");
+	}
 
 	uint32_t sampleCount = settings.SampleCount;
 	if(sampleCount > 1)
@@ -71,9 +80,14 @@ OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
 
 	}
 
+	if (WGLEW_EXT_swap_control)
+	{
+		wglSwapIntervalEXT(settings.SyncInterval);
+	}
+
+
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
 
 	std::ostringstream oss;
 	oss << reinterpret_cast<char const *>(glGetString(GL_VENDOR)) << " "

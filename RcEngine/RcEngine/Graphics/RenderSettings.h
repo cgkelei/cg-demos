@@ -13,6 +13,7 @@ struct RenderSettings
 	uint32_t Width, Height;
 	PixelFormat ColorFormat;
 	PixelFormat DepthStencilFormat;
+	uint32_t SyncInterval;
 	uint32_t SampleCount, SampleQuality;
 };
 

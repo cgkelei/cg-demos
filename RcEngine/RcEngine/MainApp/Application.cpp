@@ -167,6 +167,7 @@ void Application::ReadConfiguration()
 	mSettings.SampleQuality = 0;
 	mSettings.ColorFormat = PF_R8G8B8A8;
 	mSettings.DepthStencilFormat = PF_Depth24Stencil8;
+	mSettings.SyncInterval = 0;
 
 }
 

@@ -28,9 +28,10 @@ shared_ptr<Material> RenderFactory::CreateMaterialFromFile( const String& matNam
 			ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, 
 				"Error: " + path + " not exits!", "RenderFactory::CreateMaterialFromFile");
 		}
-
 		mMaterialPool[matName] = Material::LoadFrom(file);
-	}	
+
+		//shared_ptr<Material> m = mMaterialPool[matName]->Clone();
+	}		
 	return mMaterialPool[matName];
 }
 

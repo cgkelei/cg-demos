@@ -165,6 +165,66 @@ const Matrix4f& Node::GetWorldTransform() const
 	return mWorldTransform;
 }
 
+void Node::Translate( const Vector3f& d, TransformSpace relativeTo /*= TS_Parent*/ )
+{
+	switch (relativeTo)
+	{
+	case TS_Local:
+		{
+			mPosition += Transform(d, mRotation);
+		}
+		break;
+	case TS_World:
+		{
+			if (mParent)
+			{
+				Vector3f dInv = Transform(d, mParent->GetWorldRotation().Inverse());
+				Vector3f scale = mParent->GetWorldScale();
+				mPosition += Vector3f(dInv.X() / scale.X(), dInv.Y() / scale.Y(), dInv.Z() / scale.Z());
+			}
+			else
+			{
+				mPosition += d;
+			}
+		}
+		break;
+	case TS_Parent:
+		{
+			mPosition += d;
+		}
+		break;
+	}
+
+	PropagateDirtyDown(NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS);
+	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
+}
+
+void Node::Rotate( const Quaternionf& rot, TransformSpace relativeTo /*= TS_Parent */ )
+{
+	switch (relativeTo)
+	{
+	case TS_Local:
+		{
+			// 左乘，Local最先乘
+			mRotation = rot * mRotation;
+		}
+		break;
+	case TS_World:
+		{
+			mRotation = GetWorldRotation() * rot * GetWorldRotation().Inverse() * mRotation;
+		}
+		break;
+	case TS_Parent:
+		{
+			mRotation = mRotation * rot;
+		}
+		break;
+	}
+
+	PropagateDirtyDown(NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS);
+	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
+}
+
 uint32_t Node::GetNumChildren( bool recursive /*= false */ ) const
 {
 	if (!recursive)
@@ -296,66 +356,6 @@ void Node::UpdateWorldTransform() const
 
 void Node::Update( )
 {
-}
-
-void Node::Translate( const Vector3f& d, TransformSpace relativeTo /*= TS_Parent*/ )
-{
-	switch (relativeTo)
-	{
-	case TS_Local:
-		{
-			mPosition += Transform(d, mRotation);
-		}
-		break;
-	case TS_World:
-		{
-			if (mParent)
-			{
-				Vector3f dInv = Transform(d, mParent->GetWorldRotation().Inverse());
-				Vector3f scale = mParent->GetWorldScale();
-				mPosition += Vector3f(dInv.X() / scale.X(), dInv.Y() / scale.Y(), dInv.Z() / scale.Z());
-			}
-			else
-			{
-				mPosition += d;
-			}
-		}
-		break;
-	case TS_Parent:
-		{
-			mPosition += d;
-		}
-		break;
-	}
-
-	PropagateDirtyDown(NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS);
-	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
-}
-
-void Node::Rotate( const Quaternionf& rot, TransformSpace relativeTo /*= TS_Parent */ )
-{
-	switch (relativeTo)
-	{
-	case TS_Local:
-		{
-			// 左乘，Local最先乘
-			mRotation = rot * mRotation;
-		}
-		break;
-	case TS_World:
-		{
-			mRotation = GetWorldRotation() * rot * GetWorldRotation().Inverse() * mRotation;
-		}
-		break;
-	case TS_Parent:
-		{
-			mRotation = mRotation * rot;
-		}
-		break;
-	}
-
-	PropagateDirtyDown(NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS);
-	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
 }
 
 void Node::PropagateDirtyDown( uint32_t dirtyFlag )

@@ -515,7 +515,7 @@ QuaternionToRotationMatrix(const Quaternion<Real>& rot)
 //----------------------------------------------------------------------------------------------------
 template <typename Real>
 inline Quaternion<Real> 
-QuaternionFromRotationAxis(const Vector<Real, 3>& axis, Real angleRadius)
+QuaternionFromRotationAxis(const Vector<Real, 3>& axis, Real angle)
 {
 	// assert:  axis[] is unit length
 	//

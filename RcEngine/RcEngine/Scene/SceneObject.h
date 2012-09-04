@@ -4,6 +4,7 @@
 #include <Core/Prerequisites.h>
 #include <Math/Matrix.h>
 #include <Math/BoundingSphere.h>
+#include <Scene/SceneManager.h>
 
 namespace RcEngine {
 
@@ -13,7 +14,8 @@ enum SceneObejctType
 	SOT_Entity,
 	SOT_Light,
 	SOT_Camera,
-	SOT_Particle
+	SOT_Particle,
+	SOT_Sky
 };
 
 
@@ -38,6 +40,7 @@ public:
 	virtual SceneObejctType GetSceneObjectType() const = 0;
 
 	virtual bool Renderable() const = 0;
+
 	/**
 	 * Return a undefined bounding sphere, subclass must overload
 	 * this function to return a real bounding sphere if it actually
@@ -49,8 +52,9 @@ public:
 	 * Get Local bounding sphere.
 	 */
 	virtual const BoundingSpheref& GetBoundingSphere() const;
-	
 
+	virtual void AddToRenderQueue( RenderQueue& renderQueue ) const;
+	
 	SceneNode* GetParentSceneNode() const { return mParent; }
 
 	const Matrix4f& GetWorldTransform() const;
@@ -73,6 +77,8 @@ protected:
 	SceneNode* mParent;
 
 	SceneManager* mSceneManger;
+
+	uint32_t mFlag;
 
 	bool mVisible;
 

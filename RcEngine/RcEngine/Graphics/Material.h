@@ -10,14 +10,12 @@ namespace RcEngine {
 	
 static const int32_t MaxMaterialTextures = 16;
 
-class _ApiExport MaterialParameter
+struct _ApiExport MaterialParameter
 {
-public:
 	EffectParameterType Type;
 	EffectParameterUsage Usage;
 	bool IsSemantic;
 	String Name;
-	EffectAnnotationList Annotations;
 	EffectParameter* EffectParam;
 };
 
@@ -38,8 +36,12 @@ public:
 	void SetAmbientColor(const ColorRGBA& ambient)		{ mAmbient = ambient; }
 	void SetDiffuseColor(const ColorRGBA& diffuse)		{ mDiffuse = diffuse; }
 	void SetSpecularColor(const ColorRGBA& specular)	{ mSpecular = specular; }
+
+	void SetTexture(const String& texUint, const shared_ptr<Texture>& texture);
 			
 	virtual void ApplyMaterial();
+
+	shared_ptr<Material> Clone();
 
 
 public:
