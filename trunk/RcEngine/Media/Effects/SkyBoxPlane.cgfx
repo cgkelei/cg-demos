@@ -1,4 +1,5 @@
-float4x4 WorldViewProj : WorldViewProjectionMatrix;
+float4x4 World : WorldMatrix;
+float4x4 ViewProj : ViewProjectionMatrix;
 
 sampler2D DiffuseMap = sampler_state {
 	MinFilter = Linear;
@@ -10,7 +11,7 @@ sampler2D DiffuseMap = sampler_state {
 struct VS_INPUT
 {
     float4 Position  : ATTR0;
-	float2 Tex       : ATTR2;
+	float2 Tex       : ATTR1;
 };
 
 struct VS_OUTPUT
@@ -24,9 +25,9 @@ VS_OUTPUT vmain( VS_INPUT vInput )
 {
     VS_OUTPUT vOutput;
 
-    vOutput.oPos = mul( vInput.Position,  WorldViewProj );
+    vOutput.oPos = mul( vInput.Position,  mul(World, ViewProj) );
 	
-	vOutput.oTex = vInput.Tex;
+	vOutput.oTex = float2(vInput.Tex.x, 1 - vInput.Tex.y);
 
     return vOutput;
 }
@@ -34,14 +35,18 @@ VS_OUTPUT vmain( VS_INPUT vInput )
 float4 pmain( VS_OUTPUT pInput ) : COLOR
 {
 	float3 diffuse = (float3)( tex2D(DiffuseMap, pInput.oTex)  );
-	return  float4( diffuse , 1);
+	return  float4(diffuse,  1);
 }
 
 technique SkyBoxPlane
 {
     pass p0
     {
-		CullFace = Front; 
+		CullFace = FrontAndBack ; 
+		//DepthMask = false;
+		//DepthTestEnable = false;
+		//DepthFunc = Always;
+		//FillMode = Wireframe;
         VertexProgram   = compile gp4vp vmain();
         FragmentProgram = compile gp4fp pmain();
     }
