@@ -4,6 +4,8 @@
 #include <Input/InputSystem.h>
 #include <Input/InputDevice.h>
 #include <Core/Context.h>
+#include <MainApp/Application.h>
+#include <MainApp/Window.h>
 
 namespace RcEngine {
 
@@ -134,20 +136,21 @@ void FPSCameraControler::HandleMove( uint32_t action, bool value, float delta)
 			break;
 		}
 	}
+
 }
 
 void FPSCameraControler::HandleRoatate( uint32_t action, int32_t value, float dt)
 {
 	if (action == TurnLeftRight)
 	{
-		Rotate(value * 10 * dt, 0 , 0);
+		Rotate(value * 10*dt, 0 , 0);
 	}
 	else if (action == TurnUpDown)
 	{
-		Rotate(0, value * 10* dt, 0);
+		Rotate(0, value *10* dt, 0);
 	}
 
-			
+	Context::GetSingleton().GetApplication().GetMainWindow()->ForceCursorToCenter();		
 }
 
 void FPSCameraControler::Rotate( float yaw, float pitch, float roll )

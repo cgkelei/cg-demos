@@ -95,7 +95,8 @@ Material::~Material(void)
 
 void Material::ApplyMaterial()
 {
-	Camera* camera = Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
+	RenderDevice* renderDevice = Context::GetSingleton().GetRenderDevicePtr();
+	Camera* camera = renderDevice->GetCurrentFrameBuffer()->GetCamera();
 
 	for(size_t i = 0; i < mCachedEffectParams.size(); ++i)
 	{
@@ -144,6 +145,11 @@ void Material::ApplyMaterial()
 
 			}
 		}
+	}
+
+	if (mDepthStencilState)
+	{
+		renderDevice->SetDepthStencilState(mDepthStencilState);
 	}
 }
 

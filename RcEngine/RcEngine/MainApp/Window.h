@@ -24,7 +24,7 @@ public:
 	void Reposition(int32_t left, int32_t top);
 	void ShowWindow();
 	void SetTitle(const String& title);
-
+	void ForceCursorToCenter();
 
 	// After Resize or reposition, this will compute new window size
 	void UpdateWindowSize();
