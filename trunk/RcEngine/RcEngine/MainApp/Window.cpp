@@ -258,4 +258,15 @@ void Window::UpdateWindowSize()
 	mHeight = rect.bottom - rect.top;
 }
 
+void Window::ForceCursorToCenter()
+{
+	POINT pt;
+	pt.x = mWidth >> 2;
+	pt.y = mHeight >> 2;
+
+	::ClientToScreen(mhWnd, &pt);
+	SetCursorPos(pt.x, pt.y);
+	ShowCursor(false);
+}
+
 } // Namespace RcEngine

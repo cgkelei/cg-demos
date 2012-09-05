@@ -28,7 +28,7 @@ public:
 	virtual void SetBlendState(const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask) = 0;
 	/*virtual void SetSamplerState(const shared_ptr<SamplerState>& state);*/
 	virtual void SetRasterizerState(const shared_ptr<RasterizerState>& state) = 0;
-	virtual void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef, uint16_t backStencilRef) = 0;
+	virtual void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0) = 0;
 
 	virtual void Create() = 0;
 	virtual void Release() = 0;

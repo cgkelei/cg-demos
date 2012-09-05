@@ -159,9 +159,9 @@ void Application::Window_Paint()
 void Application::ReadConfiguration()
 {
 	mSettings.Left = 100;
-	mSettings.Top = 100;
-	mSettings.Width = 640;
-	mSettings.Height = 480;
+	mSettings.Top = 50;
+	mSettings.Width = 1024;
+	mSettings.Height = 768;
 	mSettings.Fullscreen = false;
 	mSettings.SampleCount = 0;
 	mSettings.SampleQuality = 0;
