@@ -45,12 +45,11 @@ void TestApp::Initialize()
 	
 	Vector3f up(0, 1, 0);
 	camera->SetViewParams(Vector3f(0, 0, 40), Vector3f(0, 0, 0), up);
-	//camera->SetViewParams(eye, target, up);
-	camera->SetProjectionParams(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 1000.0f );
+	camera->SetProjectionParams(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 10000.0f );
 
-	//mCameraControler = new FPSCameraControler;
-	mCameraControler = new ModelViewerCameraControler();
-	mCameraControler->SetWindowSize(GetMainWindow()->GetWidth(), GetMainWindow()->GetHeight());
+	mCameraControler = new FPSCameraControler;
+	//mCameraControler = new ModelViewerCameraControler();
+	//mCameraControler->SetWindowSize(GetMainWindow()->GetWidth(), GetMainWindow()->GetHeight());
 	mCameraControler->AttachCamera(camera);
 }
 
@@ -75,15 +74,13 @@ void TestApp::LoadContent()
 
 	// Sky 
 
-	/*SkyBox* skyBox = sceneManager->CreateSkyBox(
-		factory->CreateTextureFromFile("../Media/Textures/Glass.dds", 0),
-		factory->CreateTextureFromFile("../Media/Textures/Glass.dds", 0),
-		factory->CreateTextureFromFile("../Media/Textures/Glass.dds", 0),
-		factory->CreateTextureFromFile("../Media/Textures/Glass.dds", 0),
-		factory->CreateTextureFromFile("../Media/Textures/Glass.dds", 0),
-		factory->CreateTextureFromFile("../Media/Textures/Glass.dds", 0));
-
-	sceneManager->GetRootSceneNode()->AttachObject(skyBox);*/
+	sceneManager->CreateSkyBox(
+		factory->CreateTextureFromFile("../Media/Textures/front.dds", 0),
+		factory->CreateTextureFromFile("../Media/Textures/back.dds", 0),
+		factory->CreateTextureFromFile("../Media/Textures/left.dds", 0),
+		factory->CreateTextureFromFile("../Media/Textures/right.dds", 0),
+		factory->CreateTextureFromFile("../Media/Textures/up.dds", 0),
+		factory->CreateTextureFromFile("../Media/Textures/down.dds", 0), 5000.0f);
 }
 
 
@@ -108,8 +105,8 @@ void TestApp::Update( float deltaTime )
 	static float degree = 0;
 	degree += deltaTime * 1.0f;
 
-	SceneNode* dwarfNode = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf");
-	dwarfNode->SetRotation(QuaternionFromRotationMatrix(mCameraControler->GetWorldMatrix()));
+	//SceneNode* dwarfNode = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf");
+	//dwarfNode->SetRotation(QuaternionFromRotationMatrix(mCameraControler->GetWorldMatrix()));
 }
 
 int32_t main()

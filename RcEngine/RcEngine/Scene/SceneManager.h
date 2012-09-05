@@ -48,11 +48,11 @@ public:
 
 	Entity* CreateEntity( const String& name, const String& filePath );
 
-	SkyBox* CreateSkyBox( const shared_ptr<Texture>& frontTex, const shared_ptr<Texture>& backTex,
+	void CreateSkyBox( const shared_ptr<Texture>& frontTex, const shared_ptr<Texture>& backTex,
 		const shared_ptr<Texture>& leftTex, const shared_ptr<Texture>& rightTex, const shared_ptr<Texture>& topTex,
 		const shared_ptr<Texture>& bottomTex, float distance = 100.0f );
 
-	SkyBox* CreateSkyBox( const shared_ptr<Texture>& cubicTex, float distance = 100.0f );
+	void CreateSkyBox( const shared_ptr<Texture>& cubicTex, float distance = 100.0f );
 
 	void UpdateSceneGraph();
 

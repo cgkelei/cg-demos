@@ -78,8 +78,11 @@ void SceneManager::UpdateRenderQueue( Camera* cam )
 	if (mSkyBoxNode)
 	{
 		mSkyBoxNode->SetPosition( cam->GetPosition() );
+		Matrix4f mat = mSkyBoxNode->GetWorldTransform();
 		mSkyBox->AddToRenderQueue(mRendeQueue);
 	}
+
+	
 }
 
 void SceneManager::UpdateSceneGraph( )
@@ -140,11 +143,11 @@ SceneNode* SceneManager::FindSceneNode( const String& name ) const
 }
 
 
-SkyBox* SceneManager::CreateSkyBox( const shared_ptr<Texture>& frontTex, const shared_ptr<Texture>& backTex, const shared_ptr<Texture>& leftTex, const shared_ptr<Texture>& rightTex, const shared_ptr<Texture>& topTex, const shared_ptr<Texture>& bottomTex, float distance /*= 100.0f */ )
+void SceneManager::CreateSkyBox( const shared_ptr<Texture>& frontTex, const shared_ptr<Texture>& backTex, const shared_ptr<Texture>& leftTex, const shared_ptr<Texture>& rightTex, const shared_ptr<Texture>& topTex, const shared_ptr<Texture>& bottomTex, float distance /*= 100.0f */ )
 {
 	if (mSkyBox)
 	{
-		delete mSkyBox;
+		Safe_Delete(mSkyBox);
 	}
 
 	if (!mSkyBoxNode)
@@ -157,35 +160,35 @@ SkyBox* SceneManager::CreateSkyBox( const shared_ptr<Texture>& frontTex, const s
 
 	shared_ptr<Material> frontPlaneMat = factory.CreateMaterialFromFile("SkyPlane", "../Media/Materials/SkyBox.material.xml");
 	shared_ptr<Material> backPlaneMat = frontPlaneMat->Clone();
-	/*shared_ptr<Material> leftPlaneMat = frontPlaneMat->Clone();
+	shared_ptr<Material> leftPlaneMat = frontPlaneMat->Clone();
 	shared_ptr<Material> rightPlaneMat = frontPlaneMat->Clone();
 	shared_ptr<Material> topPlaneMat = frontPlaneMat->Clone();
 	shared_ptr<Material> bottomPlaneMat = frontPlaneMat->Clone();
 
 	frontPlaneMat->SetTexture("DiffuseMap", frontTex);
-	mSkyBox->SetMaterial(SkyBox::Left, frontPlaneMat);
+	mSkyBox->SetMaterial(SkyBox::Front, frontPlaneMat);
 
 	backPlaneMat->SetTexture("DiffuseMap", backTex);
-	mSkyBox->SetMaterial(SkyBox::Left, backPlaneMat);
+	mSkyBox->SetMaterial(SkyBox::Back, backPlaneMat);
 
 	leftPlaneMat->SetTexture("DiffuseMap", leftTex);
 	mSkyBox->SetMaterial(SkyBox::Left, leftPlaneMat);
 
 	rightPlaneMat->SetTexture("DiffuseMap", rightTex);
-	mSkyBox->SetMaterial(SkyBox::Left, rightPlaneMat);
+	mSkyBox->SetMaterial(SkyBox::Right, rightPlaneMat);
 
 	topPlaneMat->SetTexture("DiffuseMap", topTex);
-	mSkyBox->SetMaterial(SkyBox::Left, topPlaneMat);
+	mSkyBox->SetMaterial(SkyBox::Up, topPlaneMat);
 
 	bottomPlaneMat->SetTexture("DiffuseMap", bottomTex);
-	mSkyBox->SetMaterial(SkyBox::Left, topPlaneMat);*/
+	mSkyBox->SetMaterial(SkyBox::Down, bottomPlaneMat);
 
-	return mSkyBox;
+	mSkyBoxNode->AttachObject(mSkyBox);
 }
 
-SkyBox* SceneManager::CreateSkyBox( const shared_ptr<Texture>& cubicTex, float distance /*= 100.0f */ )
+void SceneManager::CreateSkyBox( const shared_ptr<Texture>& cubicTex, float distance /*= 100.0f */ )
 {
-	return NULL;
+	
 }
 
 }

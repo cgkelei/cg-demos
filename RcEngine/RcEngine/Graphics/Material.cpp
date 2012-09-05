@@ -234,10 +234,9 @@ shared_ptr<Material> Material::Clone()
 {
 	shared_ptr<Material> retVal = std::make_shared<Material>();
 
-	*retVal = *this;
 	retVal->mName = mName + "Clone ";
 
-	/*String name = mName;
+	String name = mName;
 
 	retVal->mAmbient = mEmissive;
 	retVal->mDiffuse = mDiffuse;
@@ -251,9 +250,18 @@ shared_ptr<Material> Material::Clone()
 
 	retVal->mEffect = mEffect;
 	retVal->mCurrentTechnique = mCurrentTechnique;
+	retVal->mTextures = mTextures;
 
-	EffectTechnique* mCurrentTechnique;
-	vector<MaterialParameter*> mCachedEffectParams;*/
+	for (auto iter = mCachedEffectParams.begin(); iter != mCachedEffectParams.end(); ++iter)
+	{
+		MaterialParameter* param = new MaterialParameter;
+		param->EffectParam = (*iter)->EffectParam;
+		param->Usage = (*iter)->Usage;
+		param->IsSemantic = (*iter)->IsSemantic;
+		param->Name = (*iter)->Name;
+		param->Type = (*iter)->Type;
+		retVal->mCachedEffectParams.push_back(param);
+	}
 
 	return retVal;
 }

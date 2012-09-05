@@ -49,7 +49,7 @@ public:
 	
 	void GetWorldTransforms(Matrix4f* xform) const
 	{
-		mParent.GetWorldTransform();
+		xform[0] = mParent.GetWorldTransform();
 	}
 
 	uint32_t GetWorldTransformsCount() const
@@ -117,7 +117,7 @@ SkyBox::SkyBox( float size /*= 100.0f*/ , bool cube /*= false*/ )
 
 		size_t base;
 		// Front
-		base = SkyBox::Left * 4;
+		base = SkyBox::Front * 4;
 		vertices[base+0].Position = Vector3f( -size, -size, -size );
 		vertices[base+0].Tex = Vector2f(0.0f, 1.0f);
 		vertices[base+1].Position = Vector3f( size, -size, -size );
@@ -207,6 +207,16 @@ SkyBox::SkyBox( float size /*= 100.0f*/ , bool cube /*= false*/ )
 
 SkyBox::~SkyBox()
 {
+	for (size_t i = 0; i < MaxPlaneCount; ++i)
+	{
+		if (mSkyPlanes[i])
+			Safe_Delete(mSkyPlanes[i]);
+	}
+
+	if (mSkyCubeBox)
+	{
+		Safe_Delete(mSkyCubeBox);
+	}
 
 }
 

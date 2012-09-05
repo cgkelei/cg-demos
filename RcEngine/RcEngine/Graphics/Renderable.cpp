@@ -48,10 +48,10 @@ void Renderable::OnRenderBegin()
 	shared_ptr<Material> material = GetMaterial();
 
 	// Set world transform
-	EffectParameter* world = material->GetCustomParameter(EPU_WorldMatrix)->EffectParam;
+	MaterialParameter* world = material->GetCustomParameter(EPU_WorldMatrix);
 	if (world)
 	{
-		world->SetValue(matWorlds[0]);
+		world->EffectParam->SetValue(matWorlds[0]);
 	}
 
 				

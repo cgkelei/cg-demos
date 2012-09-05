@@ -80,7 +80,7 @@ public:
 
 	const shared_ptr<Material>& GetMaterial(size_t i) const 	{ return mMaterials[i]; }
 
-	uint32_t GetNumMeshPart() const							{ return mMeshParts.size(); }
+	uint32_t GetNumMeshPart() const								{ return mMeshParts.size(); }
 	const shared_ptr<MeshPart>& GetMeshPart(size_t i) const		{ return mMeshParts[i]; }
 			
 
