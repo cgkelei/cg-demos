@@ -1,0 +1,221 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E2D69818-CCCE-4983-A7BE-F9EDB882246A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>RcEngine</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <EmbedManifest>false</EmbedManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>./;../3rdParty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Program Files\NVIDIA Corporation\Cg\lib;../3rdParty/ois/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;RCENGINE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Core\DynLib.cpp" />
+    <ClCompile Include="Core\ModuleManager.cpp" />
+    <ClCompile Include="Core\Context.cpp" />
+    <ClCompile Include="Core\Exception.cpp" />
+    <ClCompile Include="Core\IModule.cpp" />
+    <ClCompile Include="Core\Timer.cpp" />
+    <ClCompile Include="Core\Utility.cpp" />
+    <ClCompile Include="Core\XMLDom.cpp" />
+    <ClCompile Include="Graphics\BlendState.cpp" />
+    <ClCompile Include="Graphics\Camera.cpp" />
+    <ClCompile Include="Graphics\CameraControler.cpp" />
+    <ClCompile Include="Graphics\DepthStencilState.cpp" />
+    <ClCompile Include="Graphics\Effect.cpp" />
+    <ClCompile Include="Graphics\EffectAnnotation.cpp" />
+    <ClCompile Include="Graphics\EffectPass.cpp" />
+    <ClCompile Include="Graphics\EffectTechnique.cpp" />
+    <ClCompile Include="Graphics\FrameBuffer.cpp" />
+    <ClCompile Include="Graphics\GraphicBuffer.cpp" />
+    <ClCompile Include="Graphics\IRenderModule.cpp" />
+    <ClCompile Include="Graphics\Material.cpp" />
+    <ClCompile Include="Graphics\EffectParameter.cpp" />
+    <ClCompile Include="Graphics\Mesh.cpp" />
+    <ClCompile Include="Graphics\Model.cpp" />
+    <ClCompile Include="Graphics\PixelFormat.cpp" />
+    <ClCompile Include="Graphics\Renderable.cpp" />
+    <ClCompile Include="Graphics\RenderDevice.cpp" />
+    <ClCompile Include="Graphics\RenderFactory.cpp" />
+    <ClCompile Include="Graphics\RenderOperation.cpp" />
+    <ClCompile Include="Graphics\RenderView.cpp" />
+    <ClCompile Include="Graphics\SamplerState.cpp" />
+    <ClCompile Include="Graphics\SimpleGeometry.cpp" />
+    <ClCompile Include="Graphics\Skeleton.cpp" />
+    <ClCompile Include="Graphics\Sky.cpp" />
+    <ClCompile Include="Graphics\Texture.cpp" />
+    <ClCompile Include="Graphics\VertexDeclaration.cpp" />
+    <ClCompile Include="Graphics\VertexElement.cpp" />
+    <ClCompile Include="Graphics\Viewport.cpp" />
+    <ClCompile Include="Input\InputDevice.cpp" />
+    <ClCompile Include="Input\InputModule.cpp" />
+    <ClCompile Include="Input\InputSystem.cpp" />
+    <ClCompile Include="IO\FileStream.cpp" />
+    <ClCompile Include="IO\MemoryStream.cpp" />
+    <ClCompile Include="IO\Stream.cpp" />
+    <ClCompile Include="IO\FileSystem.cpp" />
+    <ClCompile Include="MainApp\Application.cpp" />
+    <ClCompile Include="MainApp\Window.cpp" />
+    <ClCompile Include="Math\Frustum.h" />
+    <ClCompile Include="Math\ColorRGBA.cpp" />
+    <ClCompile Include="Math\Math.inl" />
+    <ClCompile Include="Scene\Entity.cpp" />
+    <ClCompile Include="Scene\SceneObject.cpp" />
+    <ClCompile Include="Scene\Node.cpp" />
+    <ClCompile Include="Scene\SceneManager.cpp" />
+    <ClCompile Include="Scene\SceneNode.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Core\CompileConfig.h" />
+    <ClInclude Include="Core\DynLib.h" />
+    <ClInclude Include="Core\ModuleManager.h" />
+    <ClInclude Include="Core\Context.h" />
+    <ClInclude Include="Core\Exception.h" />
+    <ClInclude Include="Core\IModule.h" />
+    <ClInclude Include="Core\Prerequisites.h" />
+    <ClInclude Include="Core\Singleton.h" />
+    <ClInclude Include="Core\Timer.h" />
+    <ClInclude Include="Core\Utility.h" />
+    <ClInclude Include="Core\XMLDom.h" />
+    <ClInclude Include="Graphics\BlendState.h" />
+    <ClInclude Include="Graphics\Camera.h" />
+    <ClInclude Include="Graphics\CameraControler.h" />
+    <ClInclude Include="Graphics\DepthStencilState.h" />
+    <ClInclude Include="Graphics\Effect.h" />
+    <ClInclude Include="Graphics\EffectAnnotation.h" />
+    <ClInclude Include="Graphics\EffectPass.h" />
+    <ClInclude Include="Graphics\EffectTechnique.h" />
+    <ClInclude Include="Graphics\FrameBuffer.h" />
+    <ClInclude Include="Graphics\GraphicBuffer.h" />
+    <ClInclude Include="Graphics\GraphicsCommon.h" />
+    <ClInclude Include="Graphics\IRenderModule.h" />
+    <ClInclude Include="Graphics\Material.h" />
+    <ClInclude Include="Graphics\EffectParameter.h" />
+    <ClInclude Include="Graphics\Mesh.h" />
+    <ClInclude Include="Graphics\Model.h" />
+    <ClInclude Include="Graphics\PixelFormat.h" />
+    <ClInclude Include="Graphics\RasterizerState.h" />
+    <ClInclude Include="Graphics\Renderable.h" />
+    <ClInclude Include="Graphics\RenderDevice.h" />
+    <ClInclude Include="Graphics\RenderFactory.h" />
+    <ClInclude Include="Graphics\RenderOperation.h" />
+    <ClInclude Include="Graphics\RenderSettings.h" />
+    <ClInclude Include="Graphics\RenderView.h" />
+    <ClInclude Include="Graphics\SamplerState.h" />
+    <ClInclude Include="Graphics\SimpleGeometry.h" />
+    <ClInclude Include="Graphics\Skeleton.h" />
+    <ClInclude Include="Graphics\Sky.h" />
+    <ClInclude Include="Graphics\Texture.h" />
+    <ClInclude Include="Graphics\VertexDeclaration.h" />
+    <ClInclude Include="Graphics\VertexElement.h" />
+    <ClInclude Include="Graphics\Viewport.h" />
+    <ClInclude Include="Input\InputDevice.h" />
+    <ClInclude Include="Input\InputModule.h" />
+    <ClInclude Include="Input\InputSystem.h" />
+    <ClInclude Include="IO\FileStream.h" />
+    <ClInclude Include="IO\MemoryStream.h" />
+    <ClInclude Include="IO\Stream.h" />
+    <ClInclude Include="IO\FileSystem.h" />
+    <ClInclude Include="MainApp\Application.h" />
+    <ClInclude Include="MainApp\Window.h" />
+    <ClInclude Include="Math\BoundingBox.h" />
+    <ClInclude Include="Math\BoundingSphere.h" />
+    <ClInclude Include="Math\ColorRGBA.h" />
+    <ClInclude Include="Math\Math.h" />
+    <ClInclude Include="Math\MathUtil.h" />
+    <ClInclude Include="Math\Matrix.h" />
+    <ClInclude Include="Math\Plane.h" />
+    <ClInclude Include="Math\Quaternion.h" />
+    <ClInclude Include="Math\Ray.h" />
+    <ClInclude Include="Math\Vector.h" />
+    <ClInclude Include="Scene\Entity.h" />
+    <ClInclude Include="Scene\SceneObject.h" />
+    <ClInclude Include="Scene\Node.h" />
+    <ClInclude Include="Scene\SceneManager.h" />
+    <ClInclude Include="Scene\SceneNode.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Math\BoundingBox.inl" />
+    <None Include="Math\BoundingSphere.inl" />
+    <None Include="Math\ColorRGBA.inl" />
+    <None Include="Math\Frustum.inl" />
+    <None Include="Math\MathUtil.inl" />
+    <None Include="Math\Matrix.inl" />
+    <None Include="Math\Plane.inl" />
+    <None Include="Math\Quaternion.inl" />
+    <None Include="Math\Vector.inl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
