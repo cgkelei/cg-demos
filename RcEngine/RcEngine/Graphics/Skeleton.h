@@ -18,12 +18,13 @@ public:
 
 	Skeleton* GetSkeleton()	const { return mSkeleton; }
 
-protected:
+private:
 	Node* CreateChildImpl( const String& name );
 	void OnUpdate( );
 
 	Skeleton* mSkeleton;
 
+public:
 	/// Reset position.
 	Vector3f InitialPosition;
 	/// Reset rotation.

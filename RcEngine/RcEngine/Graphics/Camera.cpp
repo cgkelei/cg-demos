@@ -65,6 +65,12 @@ const Frustumf& Camera::GetFrustum() const
 
 bool Camera::Visible( const BoundingSpheref& sphere )
 {
+	if (mFrustumDirty)
+	{
+		mFrustum.Update(mViewMatrix * mProjectionMatrix);
+		mFrustumDirty = false;
+	}
+
 	if (mFrustum.Contain(sphere) == CT_Disjoint)
 		return false;
 

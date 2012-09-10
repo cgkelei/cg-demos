@@ -17,11 +17,13 @@ FrameBuffer::~FrameBuffer(void)
 	{
 		if (mColorViews[i])
 		{
-			Safe_Delete(mColorViews[i]);
+			Detach(i);
 		}
 	}
+	mColorViews.clear();
 
-	Safe_Delete(mDepthStencilView);
+	if (mDepthStencilView)
+		Detach(ATT_DepthStencil);
 }
 
 RenderView* FrameBuffer::GetAttachedView( uint32_t att )
@@ -57,12 +59,11 @@ void FrameBuffer::Attach( uint32_t att, RenderView* view )
 		break;
 	default:
 		uint32_t index = att - ATT_Color0;
-		if(index < mColorViews.size())
+
+		// if it already has an render target attach it, detach if first. 
+		if(index < mColorViews.size() && mColorViews[index])
 		{
-			if(mColorViews[index])
-			{
-				Detach(att);
-			}
+			Detach(att);
 		}
 
 		if(mColorViews.size() < index + 1 )
@@ -120,8 +121,7 @@ void FrameBuffer::Detach( uint32_t att )
 		if(mColorViews[index])
 		{
 			mColorViews[index]->OnDetach(this, att);
-			delete mColorViews[index];
-			mColorViews[index] = NULL;
+			Safe_Delete(mColorViews[index]);
 		}
 	}
 

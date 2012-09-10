@@ -148,9 +148,14 @@ void Material::ApplyMaterial()
 	}
 
 	if (mDepthStencilState)
-	{
 		renderDevice->SetDepthStencilState(mDepthStencilState);
-	}
+
+	/*if (mBlendState)
+		renderDevice->SetBlendState(mBlendState);*/
+	
+	if (mRasterizerState)
+		renderDevice->SetRasterizerState(mRasterizerState);
+
 }
 
 MaterialParameter* Material::GetCustomParameter( EffectParameterUsage usage )

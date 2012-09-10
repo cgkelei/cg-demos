@@ -40,6 +40,14 @@ void OpenGLRenderDevice::Create()
 	mRenderFactory = new OpenGLRenderFactory();
 	Context::GetSingleton().SetRenderFactory(mRenderFactory);
 
+	DepthStencilStateDesc depthStencilDesc;
+	mCurrentDepthStencilState = mRenderFactory->CreateDepthStencilState(depthStencilDesc);
+
+	BlendStateDesc blendDesc;
+	mCurrentBlendState = mRenderFactory->CreateBlendState(blendDesc);
+
+	RasterizerStateDesc rasterDesc;
+	mCurrentRasterizerState = mRenderFactory->CreateRasterizerState(rasterDesc);
 }
 
 void OpenGLRenderDevice::Release()
