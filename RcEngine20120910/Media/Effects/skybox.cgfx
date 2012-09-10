@@ -1,0 +1,41 @@
+float4x4 WorldViewProj : WorldViewProjection;
+
+samplerCUBE cubemap;
+
+struct VS_INPUT
+{
+    float4 Position  : ATTR0;
+};
+
+struct VS_OUTPUT
+{
+    float4 oPos : POSITION;
+	float3 oTex : TEXCOORD0;	  
+};
+
+
+VS_OUTPUT vmain( VS_INPUT vInput )
+{
+    VS_OUTPUT vOutput;
+
+	vOutput.oPos = vInput.Position * WorldViewProj;
+	vOutput.oTex = (float3)vInput.Position;
+	
+    return vOutput;
+}
+
+float4 pmain( VS_OUTPUT pInput ) : COLOR
+{
+	float4 fragColor = texCUBE(cubemap, pInput.oTex);
+	return fragColor;
+}
+
+technique CubeMapSkyBox
+{
+    pass p0
+    {
+		DepthMask = false;
+        VertexProgram   = compile gp4vp vmain();
+        FragmentProgram = compile gp4fp pmain();
+    }
+}
