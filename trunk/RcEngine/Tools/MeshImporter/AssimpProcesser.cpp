@@ -767,7 +767,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 		Quaternionf rotAI;
 		GetPosRotScale(verteAI, positionAI, rotAI, scaleAI);
 
-		Matrix4f normalTransform = MatrixInverse(vertexTransform).GetTransposed();
+		Matrix4f normalTransform = MatrixInverse(vertexTransform).Transpose();
 
 		Vector3f scale, translation;
 		Quaternionf rot;
@@ -946,9 +946,6 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 		{
 			aiNode* boneNode = outModel.Bones[i];
 			String boneName(boneNode->mName.C_Str());
-
-			Joint newJoint;
-			newJoint.Name = boneName;
 
 			aiMatrix4x4 transform = boneNode->mTransformation;
 

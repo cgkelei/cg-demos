@@ -12,7 +12,6 @@
 #include "Graphics/Camera.h"
 #include "Graphics/CameraControler.h"
 #include "Graphics/SimpleGeometry.h"
-#include "Content/MeshContentLoader.h"
 #include "Math/ColorRGBA.h"
 #include "Math/MathUtil.h"
 #include "Core/Context.h"
@@ -57,23 +56,23 @@ void TestApp::LoadContent()
 {
 	RenderFactory* factory = RcEngine::Context::GetSingleton().GetRenderFactoryPtr();
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
+	
+	mDwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Dwarf/Body.material.xml");
+	Entity* dwarfEntity = sceneManager->CreateEntity("Dwarf", "../Media/Mesh/Dwarf/Dwarf.mdl");
+	Entity* dwarfEntity1 = sceneManager->CreateEntity("Dwarf", "../Media/Mesh/Dwarf/Dwarf.mdl");
+	dwarfEntity->SetMaterial(mDwarfMaterial);
+	dwarfEntity1->SetMaterial(mDwarfMaterial);
 
 	SceneNode* dwarfNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
-	SceneNode* modelCenterNode = dwarfNode->CreateChildSceneNode("center");
-		
-	Entity* dwarfEntity = sceneManager->CreateEntity("Dwarf", "../Media/Mesh/Dwarf/Dwarf.mdl");
-	mDwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Dwarf/Body.material.xml");
-	dwarfEntity->SetMaterial(mDwarfMaterial);
+	dwarfNode->SetPosition(Vector3f(10, 0, 0));
+	dwarfNode->AttachObject(dwarfEntity);
 
-	const Vector3f& center = dwarfEntity->GetBoundingSphere().Center;
-	float radius = dwarfEntity->GetBoundingSphere().Radius;
+	//SceneNode* dwarfNode1 = dwarfNode->CreateChildSceneNode("Dwarf1");
+	//dwarfNode1->SetPosition(Vector3f(0, 10, 0));
+	//dwarfNode1->AttachObject(dwarfEntity1);
 
-	modelCenterNode->AttachObject(dwarfEntity);
-	modelCenterNode->Translate(-center, Node::TS_Local);
-	dwarfNode->SetScale(Vector3f(10.0f / radius, 10.0f / radius, 10.0f / radius));
 
 	// Sky 
-
 	sceneManager->CreateSkyBox(
 		factory->CreateTextureFromFile("../Media/Textures/front.dds", 0),
 		factory->CreateTextureFromFile("../Media/Textures/back.dds", 0),
@@ -105,7 +104,11 @@ void TestApp::Update( float deltaTime )
 	static float degree = 0;
 	degree += deltaTime * 1.0f;
 
-	//SceneNode* dwarfNode = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf");
+	/*SceneNode* dwarfNode = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf");
+	SceneNode* dwarfNode1 = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf1");
+	
+	Vector3f pos = dwarfNode->GetWorldPosition();
+	Vector3f pos1 = dwarfNode1->GetWorldPosition();*/
 	//dwarfNode->SetRotation(QuaternionFromRotationMatrix(mCameraControler->GetWorldMatrix()));
 }
 

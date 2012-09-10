@@ -82,7 +82,7 @@ void Plane<Real>::Normalize( Real epsilon /*= Math<Real>::ZERO_TOLERANCE*/ )
 
 	if (length > epsilon)
 	{
-		Real invLength = Real(0) / length;
+		Real invLength = Real(1) / length;
 		Normal *= invLength;
 		Distance *= invLength;
 	}

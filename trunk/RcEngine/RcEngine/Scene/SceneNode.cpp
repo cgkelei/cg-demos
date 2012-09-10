@@ -117,7 +117,8 @@ void SceneNode::OnPostUpdate()
 
 void SceneNode::FindVisibleObjects( Camera* cam )
 {
-	if (!cam->Visible(mWorldBounds))
+	const BoundingSpheref& worldBound = GetWorldBoundingShpere();
+	if (!cam->Visible(GetWorldBoundingShpere()))
 	{
 		return;
 	}

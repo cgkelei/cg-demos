@@ -6,6 +6,10 @@
 #include <Graphics/GraphicsCommon.h>
 #include <Graphics/PixelFormat.h>
 #include <Graphics/VertexDeclaration.h>
+#include <Graphics/BlendState.h>
+#include <Graphics/DepthStencilState.h>
+#include <Graphics/RasterizerState.h>
+#include <Graphics/SamplerState.h>
 
 namespace RcEngine {
 
@@ -62,8 +66,27 @@ public:
 		*/
 	virtual shared_ptr<Effect> CreateEffectFromFile(const String& effectName, const String& effectFile) = 0;
 			
+	/**
+	 * Create an vertex declaration object to describe the input-buffer data.
+	 */
 	shared_ptr<VertexDeclaration> CreateVertexDeclaration(const std::vector<VertexElement>& elems);
 	shared_ptr<VertexDeclaration> CreateVertexDeclaration(VertexElement* elems, uint32_t count);
+
+
+	/**
+	 * Create a depth-stencil state object that encapsulates depth-stencil test information.
+	 */
+	shared_ptr<DepthStencilState> CreateDepthStencilState( const DepthStencilStateDesc& desc ); 
+	
+	/**
+	 * Create a blend-state object that encapsulates blend state.
+	 */
+	shared_ptr<BlendState> CreateBlendState( const BlendStateDesc& desc );
+
+	/**
+	 * Create a rasterizer state object that tells the rasterizer stage how to behave.
+	 */
+	shared_ptr<RasterizerState> CreateRasterizerState( const RasterizerStateDesc& desc );
 
 protected:
 	typedef unordered_map<String, shared_ptr<Effect> > EffectMap;
