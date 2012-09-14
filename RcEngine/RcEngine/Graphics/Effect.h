@@ -6,36 +6,39 @@
 #include <Graphics/EffectTechnique.h>
 #include <Graphics/EffectParameter.h>
 
-namespace RcEngine {
 
-		
-/**
-	* Defines an effect which can be applied during rendering.
-	* Use renderfactory to create effect. 
-	*/
+namespace RcEngine {	
+
+class EffectParameter;
+
 class _ApiExport Effect
 {
 public:
-	Effect(const String& name);
-	virtual ~Effect();
+	typedef std::map<String, EffectParameter*> EffectParameterMap;
 
-	const String& GetName() const	{ return mName; }
-	bool IsValid() const			{ return mValid; }
+public:
+	Effect();
+	~Effect();
 
-	vector<EffectTechnique*>& GetTechniques();
+	vector<EffectTechnique*>& GetTechniques()	{ return mTechniques; }
 	EffectTechnique* GetTechniqueByName(const String& techName);
 	EffectTechnique* GetTechniqueByIndex(uint32_t index);
 
 	EffectParameter* GetParameterByName(const String& paraName) const;
-	EffectParameter* GetParameterBySemantic(const String& semanticName) const;
-	EffectParameter* GetParameterByIndex(uint32_t index) const;
+
+
+	/**
+	 * Only used by sub render system shader parameter set internal.
+	 */
+	EffectParameter* AddShaderParameterInternal(const String& name, EffectParameterType type, bool array);
+
+public:
+	static shared_ptr<Effect> LoadFrom(Stream& source);
 
 protected:
 	String mName;
-	bool mValid;
-	EffectParameterCollection mParameters;
+	EffectParameterMap mParameters;
 	vector<EffectTechnique*> mTechniques;
-			
 };
 
 

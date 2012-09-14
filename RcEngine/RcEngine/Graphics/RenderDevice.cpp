@@ -58,5 +58,14 @@ namespace RcEngine {
 		DoRender(tech, op);
 	}
 
+	void RenderDevice::SetSamplerState( uint32_t unit, const shared_ptr<SamplerState>& state )
+	{
+		if (mCurrentSamplerStates[unit] != state)
+		{
+			mCurrentSamplerStates[unit] = state;
+			DoSetSamplerState(unit, state);
+		}
+	}
+
 
 } // Namespace RcEngine

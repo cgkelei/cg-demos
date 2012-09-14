@@ -29,8 +29,8 @@ public:
 	inline const Real* operator() () const;
 	inline Real* operator() () ;
 
-	inline const Real* operator[] (int32_t iRow) const;
-	inline Real* operator[] (int32_t iRow);
+	inline Real operator[] (int32_t index) const;
+	inline Real& operator[] (int32_t index);
 
 	inline Real operator() (int32_t iRow, int32_t iCol) const;
 	inline Real& operator() (int32_t iRow, int32_t iCol);
@@ -43,6 +43,10 @@ public:
 		
 	// assignment
 	inline Matrix4& operator= (const Matrix4& rhs);
+
+	// comparison
+	bool operator== (const Matrix4& rhs) const;
+	bool operator!= (const Matrix4& rhs) const;
 		
 	// arithmetic operations
 	inline Matrix4 operator+ (const Matrix4& rhs) const;

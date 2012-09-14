@@ -7,9 +7,8 @@
 namespace RcEngine {
 
 
-class _ApiExport DepthStencilStateDesc
+struct _ApiExport DepthStencilStateDesc
 {
-public:
 	DepthStencilStateDesc();
 
 	bool                       DepthEnable;
@@ -29,16 +28,10 @@ public:
 	StencilOperation		   BackStencilDepthFailOp;
 	StencilOperation		   BackStencilPassOp;
 	CompareFunction			   BackStencilFunc;
+	
+    friend bool operator< (const DepthStencilStateDesc& lhs, const DepthStencilStateDesc& rhs);
 };
 
-inline DepthStencilStateDesc::DepthStencilStateDesc()
-	: DepthEnable(true), DepthWriteMask(true), DepthFunc(CF_Less),
-	StencilEnable(true),StencilReadMask(0xFFFF), StencilWriteMask(0xFFFF), 
-	FrontStencilFailOp(SOP_Keep), FrontStencilDepthFailOp(SOP_Keep), FrontStencilPassOp(SOP_Keep), FrontStencilFunc(CF_AlwaysPass),
-	BackStencilFailOp(SOP_Keep), BackStencilDepthFailOp(SOP_Keep), BackStencilPassOp(SOP_Keep), BackStencilFunc(CF_AlwaysPass)
-{
-
-}
 
 class _ApiExport DepthStencilState
 {

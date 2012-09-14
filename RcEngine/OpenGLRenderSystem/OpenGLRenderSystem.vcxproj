@@ -60,7 +60,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Program Files\NVIDIA Corporation\Cg\lib;../3rdParty/nvImage/lib;../Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;cg.lib;cgGL.lib;nvImaged.lib;RcEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;nvImaged.lib;RcEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -83,10 +83,6 @@
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="OpenGLDepthStencilView.cpp" />
-    <ClCompile Include="OpenGLEffect.cpp" />
-    <ClCompile Include="OpenGLEffectParameter.cpp" />
-    <ClCompile Include="OpenGLEffectPass.cpp" />
-    <ClCompile Include="OpenGLEffectTechnique.cpp" />
     <ClCompile Include="OpenGLFrameBuffer.cpp" />
     <ClCompile Include="OpenGLGraphicBuffer.cpp" />
     <ClCompile Include="OpenGLGraphicCommon.cpp" />
@@ -96,6 +92,9 @@
     <ClCompile Include="OpenGLRenderTarget2DView.cpp" />
     <ClCompile Include="OpenGLRenderView.cpp" />
     <ClCompile Include="OpenGLRenderWindow.cpp" />
+    <ClCompile Include="OpenGLSampleStater.cpp" />
+    <ClCompile Include="OpenGLShader.cpp" />
+    <ClCompile Include="OpenGLShaderProgram.cpp" />
     <ClCompile Include="OpenGLTexture.cpp" />
     <ClCompile Include="OpenGLTexture1D.cpp" />
     <ClCompile Include="OpenGLTexture2D.cpp" />
@@ -103,10 +102,6 @@
     <ClCompile Include="OpenGLTextureCube.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="OpenGLEffect.h" />
-    <ClInclude Include="OpenGLEffectParameter.h" />
-    <ClInclude Include="OpenGLEffectPass.h" />
-    <ClInclude Include="OpenGLEffectTechnique.h" />
     <ClInclude Include="OpenGLFrameBuffer.h" />
     <ClInclude Include="OpenGLGraphicBuffer.h" />
     <ClInclude Include="OpenGLGraphicCommon.h" />
@@ -116,6 +111,9 @@
     <ClInclude Include="OpenGLRenderModule.h" />
     <ClInclude Include="OpenGLRenderView.h" />
     <ClInclude Include="OpenGLRenderWindow.h" />
+    <ClInclude Include="OpenGLSamplerState.h" />
+    <ClInclude Include="OpenGLShader.h" />
+    <ClInclude Include="OpenGLShaderProgram.h" />
     <ClInclude Include="OpenGLTexture.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

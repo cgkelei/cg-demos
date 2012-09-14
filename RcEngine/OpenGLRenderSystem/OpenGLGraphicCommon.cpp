@@ -396,7 +396,90 @@ GLenum OpenGLMapping::Mapping( StencilOperation sop )
 
 	default:
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported StencilOperation!", 
-			"OpenGLMapping::Mapping( StencilOperation sop )");
+			"OpenGLMapping::Mapping( StencilOperation )");
+	}
+}
+
+GLenum OpenGLMapping::Mapping( TextureAddressMode mode )
+{
+	switch (mode)
+	{
+	case TAM_Wrap:
+		return GL_REPEAT;
+	case TAM_Border:
+		return GL_CLAMP_TO_BORDER;
+	case TAM_Clamp:
+		return GL_CLAMP_TO_EDGE;
+	case TAM_Mirror:
+		return GL_MIRRORED_REPEAT;
+
+	default:
+		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported TextureAddressMode!", 
+			"OpenGLMapping::Mapping( TextureAddressMode )");
+	}
+}
+
+void OpenGLMapping::Mapping( GLenum& min, GLenum& mag, TextureFilter filter )
+{
+	switch(filter)
+	{
+	case TF_Min_Mag_Mip_Point:
+		{
+			min = GL_NEAREST;
+			mag = GL_NEAREST;
+		}
+		break;
+	case TF_Min_Mag_Point_Mip_Linear:
+		{
+			min = GL_NEAREST_MIPMAP_LINEAR;
+			mag = GL_NEAREST_MIPMAP_LINEAR;
+		}
+		break;
+	case TF_Min_Point_Mag_Linear_Mip_Point:
+		{
+			min = GL_NEAREST;
+			mag = GL_LINEAR_MIPMAP_NEAREST;
+		}
+		break;
+	case TF_Min_Point_Mag_Mip_Linear:
+		{
+			min = GL_NEAREST;
+			mag = GL_LINEAR_MIPMAP_LINEAR;
+		}
+		break;
+	case TF_Min_Linear_Mag_Mip_Point:
+		{
+			min = GL_LINEAR;
+			mag = GL_NEAREST_MIPMAP_NEAREST;
+		}
+		break;
+	case TF_Min_Linear_Mag_Point_Mip_Linear:
+		{
+			min = GL_LINEAR;
+			mag = GL_NEAREST_MIPMAP_LINEAR;
+		}
+		break;
+	case TF_Min_Mag_Linear_Mip_Point:
+		{
+			min = GL_LINEAR_MIPMAP_NEAREST;
+			mag = GL_LINEAR_MIPMAP_NEAREST;
+		}
+		break;
+	case TF_Min_Mag_Mip_Linear:
+		{
+			min = GL_LINEAR_MIPMAP_LINEAR;
+			mag = GL_LINEAR_MIPMAP_LINEAR;
+		}
+		break;
+	case TF_Anisotropic:
+		{
+			min = GL_NEAREST;
+			mag = GL_NEAREST;
+		}
+		break;
+	default:
+		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported Texture Filter", 
+			"OpenGLMapping::Mapping");
 	}
 }
 
@@ -709,6 +792,97 @@ PixelFormat OpenGLMapping::UnMapping( GLint internalformat, GLenum format, GLenu
 		// not supported
 		assert(false);
 		return PF_Unknown;
+	}
+}
+
+void OpenGLMapping::UnMapping( EffectParameterType& outType, GLenum glType )
+{
+	switch (glType)
+	{
+	case GL_FLOAT:
+		{
+			outType = EPT_Float;
+			break;
+		}
+	case GL_FLOAT_VEC2:
+		{
+			outType = EPT_Float2;
+			break;
+		}
+	case GL_FLOAT_VEC3:
+		{
+			outType = EPT_Float3;
+			break;
+		}
+	case GL_FLOAT_VEC4:
+		{
+			outType = EPT_Float4;
+			break;
+		}
+	case GL_INT:
+		{
+			outType = EPT_Int;
+			break;
+		}
+	case GL_INT_VEC2:
+		{
+			outType = EPT_Int2;
+			break;
+		}
+	case GL_INT_VEC3:
+		{
+			outType = EPT_Int3;
+			break;
+		}
+	case GL_INT_VEC4:
+		{
+			outType = EPT_Int4;
+			break;
+		}
+	case GL_BOOL:
+		{
+			outType = EPT_Boolean;
+			break;
+		}
+	case GL_FLOAT_MAT2:
+		{
+			outType = EPT_Matrix2x2;
+			break;
+		}
+	case GL_FLOAT_MAT3:
+		{
+			outType = EPT_Matrix3x3;
+			break;
+		}
+	case GL_FLOAT_MAT4:
+		{
+			outType = EPT_Matrix4x4;
+			break;
+		}
+	case GL_SAMPLER_1D:
+		{
+			outType = EPT_Texture1D;
+			break;
+		}
+	case GL_SAMPLER_2D:
+		{
+			outType = EPT_Texture2D;
+			break;
+		}
+	case GL_SAMPLER_3D:
+		{
+			outType = EPT_Texture3D;
+			break;
+		}
+	case GL_SAMPLER_CUBE:
+		{
+			outType = EPT_TextureCUBE;
+			break;
+		}
+
+	default:
+		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported Shader Parameter Type", 
+			"OpenGLMapping::UnMapping");
 	}
 }
 

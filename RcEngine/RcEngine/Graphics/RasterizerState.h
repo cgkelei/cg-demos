@@ -7,7 +7,7 @@
 namespace RcEngine {
 
 
-class _ApiExport RasterizerStateDesc
+struct _ApiExport RasterizerStateDesc
 {
 public:
 	RasterizerStateDesc();
@@ -20,15 +20,11 @@ public:
 	bool            DepthClipEnable;
 	bool            ScissorEnable;
 	bool            MultisampleEnable;
+
+	friend bool operator< (const RasterizerStateDesc& lhs, const RasterizerStateDesc& rhs);
 };
 
-inline RasterizerStateDesc::RasterizerStateDesc()
-	: PolygonFillMode(FM_Solid), PolygonCullMode(CM_Back), FrontCounterClockwise(false),
-		DepthBias(0.0f), SlopeScaledDepthBias(0.0f),
-		DepthClipEnable(true), ScissorEnable(false), MultisampleEnable(false)
-{
 
-}
 
 class _ApiExport RasterizerState
 {

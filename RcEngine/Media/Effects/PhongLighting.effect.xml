@@ -1,0 +1,62 @@
+<Effect name="PhongLighting">
+
+<Shader stage="Vertex" name="VS" entry="main">
+<![CDATA[
+
+#version 330
+	
+in vec3 Position;
+in vec2 Tex;
+
+out vec2 oTex;
+
+uniform mat4 WorldMatrix;
+uniform mat4 ViewMatrix;
+uniform mat4 ProjectionMatrix;
+
+void main(void)
+{
+	gl_Position = vec4(Position,1) * WorldMatrix * ViewMatrix * ProjectionMatrix;
+	oTex = Tex;
+}
+
+]]>
+</Shader>
+
+<Shader stage="Pixel" name="PS" entry="main">
+<![CDATA[
+
+#version 330
+
+in vec2 oTex;
+
+uniform sampler2D DiffuseMap; 
+
+void main()
+{
+	vec4 diffuse = texture(DiffuseMap, oTex);
+	gl_FragColor = diffuse;
+}
+
+]]>
+</Shader>
+
+<Technique name="PhongLight">
+	<Pass name="p0">
+		<State name="DepthEnable" value="false"/>
+		<State name="DepthFunc" value="NotEqual"/>
+		<State name="SrcBlend" index="0" value="One"/>
+		<State name="DestBlend" index="0" value="Zero"/>
+		<State name="FrontStencilFailOp" value="Zero"/>
+		<State name="BackStencilFailOp" value="Keep"/>
+		<State name="ColorWriteMask" index="0" r="true" g="false" b="true" a="false"/>
+		<VertexShader name="VS"/>
+		<PixelShader name="PS"/>
+	</Pass>
+</Technique>
+
+</Effect>
+	
+
+
+

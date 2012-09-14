@@ -2,34 +2,39 @@
 #define EffectPass_h__
 
 #include <Core/Prerequisites.h>
+#include <Math/ColorRGBA.h>
 #include <Graphics/EffectAnnotation.h>
 
 namespace RcEngine {
 
 
+class ShaderProgram;
+class Effect;
+
 class _ApiExport EffectPass
 {
+	friend class Effect;
+
 public:
 	EffectPass();
-	virtual ~EffectPass();
+	~EffectPass();
 
 	const String& GetPassName() const	{ return mName; }
 
-	EffectAnnotationList& GetAnnotations();
-	EffectAnnotation* GetAnnotationByName(const String& name);
-	EffectAnnotation* GetAnnotationByIndex(uint32_t index);
-
-	virtual bool BeginPass() = 0;
-	virtual void EndPass() = 0;
+	void BeginPass();
+	void EndPass();
 
 protected:
 	String mName;
 	bool mValid;
-	EffectAnnotationList mAnnotations;
-
+	shared_ptr<ShaderProgram> mShaderProgram;
+	shared_ptr<BlendState> mBlendState;
+	shared_ptr<DepthStencilState> mDepthStencilState;
+	shared_ptr<RasterizerState> mRasterizerState;
+	uint16_t mFrontStencilRef, mBackStencilRef;
+	ColorRGBA mBlendColor;
+	uint32_t mSampleMask;
 };
-
-typedef vector<EffectPass*> EffectPassList;
 
 
 } // Namespace RcEngine

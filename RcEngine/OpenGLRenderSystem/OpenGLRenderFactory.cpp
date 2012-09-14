@@ -2,9 +2,13 @@
 #include "OpenGLGraphicBuffer.h"
 #include "OpenGLRenderView.h"
 #include "OpenGLTexture.h"
-#include "OpenGLEffect.h"
+#include "OpenGLSamplerState.h"
+#include "OpenGLShader.h"
+#include "OpenGLShaderProgram.h"
 #include <Core/Exception.h>
-
+#include <Graphics/BlendState.h>
+#include <Graphics/DepthStencilState.h>
+#include <Graphics/RasterizerState.h>
 
 namespace RcEngine {
 
@@ -48,28 +52,25 @@ shared_ptr<GraphicsBuffer> OpenGLRenderFactory::CreateIndexBuffer( BufferUsage u
 	return std::make_shared<OpenGLGraphicsBuffer>(usage, accessHint, GL_ELEMENT_ARRAY_BUFFER, initData);
 }
 
-//RenderEffect* OpenGLRenderFactory::CreateEffectFromFile( const std::string& effectName, const std::string& effectFile )
-//{
-//	// first check if the file is valid
-//	/*if ( !fs::exists( effectFile ) || !fs::is_regular_file(effectFile) || fs::file_size(effectFile) == 0 )
-//	{
-//		std::cerr << "EffectManager::CreateEffectFromFile: Invalid file: \"" << effectFile << "\"" << std::endl;
-//		return Effect::InvalidEffect;
-//	}*/
+shared_ptr<DepthStencilState> OpenGLRenderFactory::CreateDepthStencilStateImpl( const DepthStencilStateDesc& desc )
+{
+	return std::make_shared<DepthStencilState>(desc);
+}
 
-//	//Effect* pEffect = NULL;
+shared_ptr<BlendState> OpenGLRenderFactory::CreateBlendStateImpl( const BlendStateDesc& desc )
+{
+	return std::make_shared<BlendState>(desc);
+}
 
-//	// Look for the effect with the same name in the effect map if it already exists
-//	EffectMap::iterator effectIter = mEffectPool.find( effectName );
-//	if(effectIter != mEffectPool.end())
-//		return effectIter->second;
-//   
-//	//Load a new effect.
-//	OpenGLRenderEffect* pEffect = new OpenGLRenderEffect( effectFile, effectName );
-//	mEffectPool.insert( EffectMap::value_type( effectName, pEffect ) );
-//	return pEffect;
-//}
+shared_ptr<RasterizerState> OpenGLRenderFactory::CreateRasterizerStateImpl( const RasterizerStateDesc& desc )
+{
+	return std::make_shared<RasterizerState>(desc);
+}
 
+shared_ptr<SamplerState> OpenGLRenderFactory::CreateSamplerStateImpl( const SamplerStateDesc& desc )
+{
+	return std::make_shared<OpenGLSamplerState>(desc);
+}
 
 shared_ptr<Texture> OpenGLRenderFactory::CreateTextureFromFile( const std::string& texFileName, uint32_t accessHint )
 {
@@ -171,14 +172,14 @@ RenderView* OpenGLRenderFactory::CreateDepthStencilView( Texture* texture, uint3
 	return 0;
 }
 
-shared_ptr<Effect> OpenGLRenderFactory::CreateEffectFromFile( const String& effectName, const String& effectFile )
+shared_ptr<Shader> OpenGLRenderFactory::CreateShader( ShaderType type )
 {
-	EffectMapIter find = mEffectPool.find(effectName);
-	if ( find == mEffectPool.end())
-	{
-		mEffectPool[effectName] = OpenGLEffect::LoadEffectFromFile(effectFile, effectName);
-	}	
-	return mEffectPool[effectName];
+	return std::make_shared<OpenGLShader>(type);
+}
+
+shared_ptr<ShaderProgram> OpenGLRenderFactory::CreateShaderProgram( Effect& effect )
+{
+	return std::make_shared<OpenGLShaderProgram>(effect);
 }
 
 }

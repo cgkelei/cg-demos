@@ -6,17 +6,12 @@
 
 namespace RcEngine {
 
-class _ApiExport BlendStateDesc
+struct _ApiExport BlendStateDesc
 {
 public:
 	struct RenderTargetBlendDesc
 	{
-		RenderTargetBlendDesc()
-			: BlendEnable(false), SrcBlend(ABF_One), DestBlend(ABF_Zero), BlendOp(BOP_Add),
-				SrcBlendAlpha(ABF_One), DestBlendAlpha(ABF_Zero), BlendOpAlpha(BOP_Add), RenderTargetWriteMask(CWM_All)
-		{
-
-		}
+		RenderTargetBlendDesc();
 				
 		bool				BlendEnable;
 		AlphaBlendFactor    SrcBlend;
@@ -25,21 +20,20 @@ public:
 		AlphaBlendFactor    SrcBlendAlpha;
 		AlphaBlendFactor    DestBlendAlpha;
 		BlendOperation		BlendOpAlpha;
-		uint8_t				RenderTargetWriteMask;
+		uint8_t				ColorWriteMask;
 	};
 
 public:
 	BlendStateDesc();
+	
 	bool AlphaToCoverageEnable;
 	bool IndependentBlendEnable;
 	RenderTargetBlendDesc RenderTarget[8];
+
+	friend bool operator< (const BlendStateDesc& lhs, const BlendStateDesc& rhs);
 };
 
-inline BlendStateDesc::BlendStateDesc()
-	: AlphaToCoverageEnable(false), IndependentBlendEnable(false)
-{
 
-}
 
 class _ApiExport BlendState
 {

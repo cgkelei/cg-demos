@@ -20,11 +20,14 @@ public:
 	static GLenum Mapping(AlphaBlendFactor factor);
 	static GLenum Mapping(CompareFunction cf);
 	static GLenum Mapping(StencilOperation sop);
+	static GLenum Mapping(TextureAddressMode mode);
+
+	static void Mapping(GLenum& min, GLenum& mag, TextureFilter filter);
 
 	// Reference glTexImage* function
 	static void Mapping(GLint& outInternalformat, GLenum& outFormat, GLenum& outType, PixelFormat inPixelFormat);
 	static PixelFormat UnMapping( GLint inInternalformat, GLenum inFormat, GLenum inType);
-
+	static void UnMapping(EffectParameterType& outType, GLenum glType);
 };
 
 }

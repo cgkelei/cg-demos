@@ -63,16 +63,13 @@
     <ClCompile Include="OpenGLRenderModule.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="OpenGLEffect.cpp">
+    <ClCompile Include="OpenGLSampleStater.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="OpenGLEffectPass.cpp">
+    <ClCompile Include="OpenGLShader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="OpenGLEffectTechnique.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="OpenGLEffectParameter.cpp">
+    <ClCompile Include="OpenGLShaderProgram.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -107,16 +104,13 @@
     <ClInclude Include="OpenGLRenderModule.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="OpenGLEffectParameter.h">
+    <ClInclude Include="OpenGLSamplerState.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="OpenGLEffect.h">
+    <ClInclude Include="OpenGLShader.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="OpenGLEffectPass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="OpenGLEffectTechnique.h">
+    <ClInclude Include="OpenGLShaderProgram.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

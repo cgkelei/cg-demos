@@ -49,10 +49,17 @@ public:
 
 	virtual shared_ptr<GraphicsBuffer> CreateIndexBuffer(BufferUsage usage, uint32_t accessHint, ElementInitData* initData);
 	
+	virtual shared_ptr<Shader> CreateShader(ShaderType type);
+	virtual shared_ptr<ShaderProgram> CreateShaderProgram(Effect& effect);
+	
+protected:
+	virtual shared_ptr<DepthStencilState> CreateDepthStencilStateImpl( const DepthStencilStateDesc& desc ); 
+	virtual shared_ptr<BlendState> CreateBlendStateImpl( const BlendStateDesc& desc );
+	virtual shared_ptr<RasterizerState> CreateRasterizerStateImpl( const RasterizerStateDesc& desc );
+	virtual shared_ptr<SamplerState> CreateSamplerStateImpl( const SamplerStateDesc& desc );
+	
 
-	virtual shared_ptr<Effect> CreateEffectFromFile(const String& effectName, const String& effectFile);
 
-	//virtual RenderEffect*  CreateEffectFromFile(const std::string& effectName, const std::string& effectFile);
 private:
 
 };

@@ -1,5 +1,6 @@
 #include <Graphics/RenderFactory.h>
 #include <Graphics/Material.h>
+#include <Graphics/Effect.h>
 #include <Graphics/VertexDeclaration.h>
 #include <IO/FileStream.h>
 #include <Core/Exception.h>
@@ -29,17 +30,72 @@ shared_ptr<VertexDeclaration> RenderFactory::CreateVertexDeclaration( const std:
 
 shared_ptr<DepthStencilState> RenderFactory::CreateDepthStencilState( const DepthStencilStateDesc& desc )
 {
-	return std::make_shared<DepthStencilState>(desc);
+	shared_ptr<DepthStencilState> retVal;
+
+	auto found = mDepthStecilStatePool.find(desc);
+	if (found == mDepthStecilStatePool.end())
+	{
+		retVal = CreateDepthStencilStateImpl(desc);
+		mDepthStecilStatePool.insert(std::make_pair(desc,retVal));
+	}
+	else
+	{
+		retVal = found->second;
+	}
+	return retVal;
 }
+	
 
 shared_ptr<BlendState> RenderFactory::CreateBlendState( const BlendStateDesc& desc )
 {
-	return std::make_shared<BlendState>(desc);
+	shared_ptr<BlendState> retVal;
+
+	auto found = mBlendStatePool.find(desc);
+	if (found == mBlendStatePool.end())
+	{
+		retVal = CreateBlendStateImpl(desc);
+		mBlendStatePool.insert(std::make_pair(desc,retVal));
+	}
+	else
+	{
+		retVal = found->second;
+	}
+	return retVal;
 }
+
 
 shared_ptr<RasterizerState> RenderFactory::CreateRasterizerState( const RasterizerStateDesc& desc )
 {
-	return std::make_shared<RasterizerState>(desc);
+	shared_ptr<RasterizerState> retVal;
+
+	auto found = mRasterizerStatePool.find(desc);
+	if (found == mRasterizerStatePool.end())
+	{
+		retVal = CreateRasterizerStateImpl(desc);
+		mRasterizerStatePool.insert(std::make_pair(desc,retVal));
+	}
+	else
+	{
+		retVal = found->second;
+	}
+	return retVal;
+}
+
+shared_ptr<SamplerState> RenderFactory::CreateSamplerState( const SamplerStateDesc& desc )
+{
+	shared_ptr<SamplerState> retVal;
+
+	/*auto found = mSamplerStatePool.find(desc);
+	if (found == mSamplerStatePool.end())
+	{
+		retVal = CreateSamplerStateImpl(desc);
+		mSamplerStatePool.insert(std::make_pair(desc,retVal));
+	}
+	else
+	{
+		retVal = found->second;
+	}*/
+	return retVal;
 }
 
 shared_ptr<Material> RenderFactory::CreateMaterialFromFile( const String& matName, const String& path )
@@ -58,6 +114,24 @@ shared_ptr<Material> RenderFactory::CreateMaterialFromFile( const String& matNam
 		//shared_ptr<Material> m = mMaterialPool[matName]->Clone();
 	}		
 	return mMaterialPool[matName];
+}
+
+shared_ptr<Effect> RenderFactory::CreateEffectFromFile(const String& effectName, const String& effectFile)
+{
+	auto found = mEffectPool.find(effectName);
+	if ( found == mEffectPool.end())
+	{
+		FileStream file;
+		if (!file.Open(effectFile, FILE_READ))
+		{
+			ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, 
+				"Error: " + effectFile + " not exits!", "RenderFactory::CreateMaterialFromFile");
+		}
+
+		mEffectPool[effectName] = Effect::LoadFrom(file);
+	}	
+
+	return mEffectPool[effectName];
 }
 
 } // Namespace RcEngine

@@ -202,7 +202,9 @@ enum AlphaBlendFactor
 	ABF_Dst_Color,
 	ABF_Inv_Src_Color,
 	ABF_Inv_Dst_Color,
-	ABF_Src_Alpha_Sat
+	ABF_Src_Alpha_Sat,
+	ABF_Blend_Factor,
+	ABF_Inv_Blend_Factor
 };
 
 enum CompareFunction
@@ -219,10 +221,10 @@ enum CompareFunction
 
 enum StencilOperation
 {
-	// Leave the stencil buffer unchanged
-	SOP_Keep,
 	// Set the stencil value to zero
 	SOP_Zero,
+	// Leave the stencil buffer unchanged
+	SOP_Keep,
 	// Set the stencil value to the reference value
 	SOP_Replace,
 	// Increase the stencil value by 1, clamping at the maximum value
@@ -502,6 +504,16 @@ enum EffectParameterUsage
 	 */
 	EPU_Light_Position,
 };
+
+
+enum ShaderType
+{
+	ST_Vertex,
+	ST_Pixel,
+	ST_Geomerty,
+	ST_Compute
+};
+
 } // RcEngine
 
 
