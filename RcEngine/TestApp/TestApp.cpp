@@ -68,9 +68,9 @@ void TestApp::LoadContent()
 	 dwarfNode->AttachObject(dwarfEntity);*/
 
 	 shared_ptr<Effect> effect = factory->CreateEffectFromFile("LightTextured", 
-	"../Media/Effects/LightTextured.effect.xml");
+		"../Media/Effects/LightTextured.effect.xml");
 
-	 auto i = effect->GetParameterByName("World");
+	 auto i = effect->GetParameterByName("DiffuseMap");
 	//SceneNode* dwarfNode1 = dwarfNode->CreateChildSceneNode("Dwarf1");
 	//dwarfNode1->SetPosition(Vector3f(0, 10, 0));
 	//dwarfNode1->AttachObject(dwarfEntity1);

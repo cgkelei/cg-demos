@@ -879,7 +879,16 @@ void OpenGLMapping::UnMapping( EffectParameterType& outType, GLenum glType )
 			outType = EPT_TextureCUBE;
 			break;
 		}
-
+	case GL_SAMPLER_1D_ARRAY:
+		{
+			outType = EPT_Texture1DArray;
+			break;
+		}
+	case GL_SAMPLER_2D_ARRAY:
+		{
+			outType = EPT_Texture2DArray;
+			break;
+		}
 	default:
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported Shader Parameter Type", 
 			"OpenGLMapping::UnMapping");

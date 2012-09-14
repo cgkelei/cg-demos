@@ -365,12 +365,6 @@ void OpenGLRenderDevice::SetDepthStencilState( const shared_ptr<DepthStencilStat
 	mCurrentBackStencilRef = backStencilRef;
 }
 
-void OpenGLRenderDevice::DoSetSamplerState(uint32_t unit, const shared_ptr<SamplerState>& state)
-{
-	shared_ptr<OpenGLSamplerState> sampler = std::static_pointer_cast<OpenGLSamplerState>(state);
-	glBindSampler(unit, sampler->GetSamplerObject());
-}
-
 void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
 {
 	RenderOperation::StreamSlots& streams = op.VertexStreams;
@@ -440,6 +434,17 @@ void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
 		}
 
 		pass->EndPass();
+	}
+}
+
+void OpenGLRenderDevice::SetSamplerState( ShaderType stage, uint32_t unit, const shared_ptr<SamplerState>& state )
+{
+	if (mCurrentSamplerStates[unit] != state)
+	{
+		mCurrentSamplerStates[unit] = state;
+
+		shared_ptr<OpenGLSamplerState> sampler = std::static_pointer_cast<OpenGLSamplerState>(state);
+		glBindSampler(unit, sampler->GetSamplerObject());
 	}
 }
 
