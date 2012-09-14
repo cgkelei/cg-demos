@@ -16,6 +16,7 @@ void EffectParameter::GetValue(Vector3f& value)    { throw std::exception(); }
 void EffectParameter::GetValue(vector<Vector3f>& value)    { throw std::exception(); }
 void EffectParameter::GetValue(Vector4f& value)    { throw std::exception(); }
 void EffectParameter::GetValue(vector<Vector4f>& value)    { throw std::exception(); }
+void EffectParameter::GetValue( TextureLayer& textureLayer ) { throw std::exception(); }
 
 
 void EffectParameter::SetValue(const bool& value)    { throw std::exception(); }
@@ -32,7 +33,6 @@ void EffectParameter::SetValue(const Vector3f& value)    { throw std::exception(
 void EffectParameter::SetValue(const vector<Vector3f>& value)    { throw std::exception(); }
 void EffectParameter::SetValue(const Vector4f& value)    { throw std::exception(); }
 void EffectParameter::SetValue(const vector<Vector4f>& value)    { throw std::exception(); }
-
-
+void EffectParameter::SetValue( const TextureLayer& textureLayer ) { throw std::exception(); }
 
 } // Namespace RcEngine

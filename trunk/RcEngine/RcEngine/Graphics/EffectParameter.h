@@ -11,6 +11,15 @@ namespace RcEngine {
 
 class EffectParameter;
 
+struct TextureLayer
+{
+	shared_ptr<Texture> Texture;
+	shared_ptr<SamplerState> Sampler;
+	ShaderType Stage;
+	uint32_t Unit;
+};
+
+
 class _ApiExport EffectParameter
 {
 public:
@@ -36,7 +45,8 @@ public:
 	virtual void GetValue(vector<Vector3f>& value);
 	virtual void GetValue(Vector4f& value);
 	virtual void GetValue(vector<Vector4f>& value);
-
+	virtual void GetValue(TextureLayer& value);
+	
 	virtual void SetValue(const bool& value);
 	virtual void SetValue(const vector<bool>& value);
 	virtual void SetValue(const float& value);
@@ -51,6 +61,7 @@ public:
 	virtual void SetValue(const vector<Vector3f>& value);
 	virtual void SetValue(const Vector4f& value);
 	virtual void SetValue(const vector<Vector4f>& value);
+	virtual void SetValue(const TextureLayer& value);
 
 	void ClearDirty() { mDirty = false; }
 	bool Dirty() const { return mDirty; }
@@ -59,8 +70,8 @@ protected:
 	bool mDirty;
 	String mName;
 	EffectParameterType mType;
+	bool mArray;
 };
-
 
 template< typename T>
 class _ApiExport EffectParameterNumberic : public EffectParameter
@@ -107,6 +118,34 @@ typedef EffectParameterNumberic<Vector4f> EffectParameterVector4;
 typedef EffectParameterNumberic< vector<Vector4f> > EffectParameterVector4Array;
 typedef EffectParameterNumberic<Matrix4f> EffectParameterMatrix;
 typedef EffectParameterNumberic< vector<Matrix4f> > EffectParameterMatrixArray;
+
+class _ApiExport EffectParameterTexture : public EffectParameter
+{
+public:
+	EffectParameterTexture(const String& name, EffectParameterType type)
+		: EffectParameter(name, type) { }
+	~EffectParameterTexture() { }
+
+	void GetValue(TextureLayer& value)
+	{
+		value = mTextureLayer;
+	}
+
+	void SetValue(const TextureLayer& value)
+	{
+		if (mTextureLayer.Texture != value.Texture ||
+			mTextureLayer.Stage != value.Stage ||
+			mTextureLayer.Unit != value.Unit ||
+			mTextureLayer.Sampler != value.Sampler)
+		{
+			mTextureLayer = value;
+			mDirty = true;
+		}
+	}
+
+private:
+	TextureLayer mTextureLayer;
+};
 
 
 

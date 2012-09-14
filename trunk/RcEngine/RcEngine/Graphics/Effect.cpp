@@ -140,17 +140,18 @@ EffectParameter* CreateEffectParameter( const String& name, EffectParameterType 
 			}
 		}
 		break;
-			//EPT_Texture1D,
-			//EPT_Texture2D,
-			//EPT_Texture3D,
-			//EPT_TextureCUBE,
-			//EPT_Texture1DArray,
-			//EPT_Texture2DArray,
-			//EPT_Texture3DArray,
-			//EPT_TextureCUBEArray,
-			//EPT_Sampler,
-			//EPT_Struct,
-			//EPT_Count*/
+	case EPT_Texture1D:
+	case EPT_Texture1DArray:
+	case EPT_Texture2D:
+	case EPT_Texture2DArray:
+	case EPT_Texture3D:
+	case EPT_Texture3DArray:
+	case EPT_TextureCUBE:
+	case EPT_TextureCUBEArray:
+		{
+			return new EffectParameterTexture(name, type);
+		}
+		break;
 	default:
 		return nullptr;
 	}

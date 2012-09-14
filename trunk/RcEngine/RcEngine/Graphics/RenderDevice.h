@@ -27,7 +27,7 @@ public:
 	void Render( EffectTechnique& tech, RenderOperation& op);
 	void Resize(uint32_t width, uint32_t height);
 
-	void SetSamplerState(uint32_t unit, const shared_ptr<SamplerState>& state);
+	virtual void SetSamplerState(ShaderType stage, uint32_t unit, const shared_ptr<SamplerState>& state) = 0;
 	virtual void SetBlendState(const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask) = 0;
 	virtual void SetRasterizerState(const shared_ptr<RasterizerState>& state) = 0;
 	virtual void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0) = 0;
@@ -42,7 +42,6 @@ public:
 protected:
 	virtual void DoBindFrameBuffer(FrameBuffer* fb) = 0;
 	virtual void DoRender( EffectTechnique& tech, RenderOperation& op) = 0;
-	virtual void DoSetSamplerState(uint32_t unit, const shared_ptr<SamplerState>& state) = 0;
 
 protected:
 	uint32_t mWidth, mHeight;
@@ -62,9 +61,6 @@ protected:
 	shared_ptr<BlendState> mCurrentBlendState;
 	shared_ptr<RasterizerState> mCurrentRasterizerState;
 	shared_ptr<DepthStencilState> mCurrentDepthStencilState;
-
-	shared_ptr<SamplerState> mCurrentSamplerStates[MaxSamplerCout];
-
 
 	ColorRGBA mCurrentBlendFactor;
 	uint32_t mCurrentSampleMask;

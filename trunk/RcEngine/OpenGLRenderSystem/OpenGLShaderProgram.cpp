@@ -1,9 +1,13 @@
 #include "OpenGLShaderProgram.h"
-#include "OpenGLShader.h"
 #include "OpenGLGraphicCommon.h"
+#include "OpenGLShader.h"
+#include "OpenGLTexture.h"
+#include "OpenGLSamplerState.h"
 #include <Graphics/Effect.h>
 #include <Graphics/EffectParameter.h>
+#include <Graphics/RenderDevice.h>
 #include <Core/Exception.h>
+#include <Core/Context.h>
 
 namespace RcEngine {
 
@@ -19,8 +23,12 @@ public:
 
 	void operator() ()
 	{
-		bool value; Param->GetValue(value);
-		glUniform1i(Location, value);
+		if (Param->Dirty())
+		{
+			bool value; Param->GetValue(value);
+			glUniform1i(Location, value);
+			Param->ClearDirty();
+		}
 	}
 
 private:
@@ -37,11 +45,15 @@ public:
 
 	void operator() ()
 	{
-		vector<bool> value; Param->GetValue(value);
-		if (!value.empty())
+		if (Param->Dirty())
 		{
-			vector<int32_t> tem(value.begin(), value.end());
-			glUniform1iv(Location, tem.size(), &tem[0]);
+			vector<bool> value; Param->GetValue(value);
+			if (!value.empty())
+			{
+				vector<int32_t> tem(value.begin(), value.end());
+				glUniform1iv(Location, tem.size(), &tem[0]);
+			}
+			Param->ClearDirty();
 		}
 
 	}
@@ -60,8 +72,12 @@ public:
 
 	void operator() ()
 	{
-		int32_t value; Param->GetValue(value);
-		glUniform1i(Location, value);
+		if (Param->Dirty())
+		{
+			int32_t value; Param->GetValue(value);
+			glUniform1i(Location, value);
+			Param->ClearDirty();
+		}
 	}
 
 private:
@@ -78,8 +94,12 @@ public:
 
 	void operator() ()
 	{
-		vector<int32_t> value; Param->GetValue(value);
-		glUniform1iv(Location, value.size(), &value[0]);
+		if (Param->Dirty())
+		{
+			vector<int32_t> value; Param->GetValue(value);
+			glUniform1iv(Location, value.size(), &value[0]);
+			Param->ClearDirty();
+		}
 	}
 
 private:
@@ -96,8 +116,12 @@ public:
 
 	void operator() ()
 	{
-		float value; Param->GetValue(value);
-		glUniform1f(Location, value);
+		if (Param->Dirty())
+		{
+			float value; Param->GetValue(value);
+			glUniform1f(Location, value);
+			Param->ClearDirty();
+		}
 	}
 
 private:
@@ -114,8 +138,12 @@ public:
 
 	void operator() ()
 	{
-		vector<float> value; Param->GetValue(value);
-		glUniform1fv(Location, value.size(), &value[0]);
+		if (Param->Dirty())
+		{
+			vector<float> value; Param->GetValue(value);
+			glUniform1fv(Location, value.size(), &value[0]);
+			Param->ClearDirty();
+		}
 	}
 
 private:
@@ -132,8 +160,12 @@ public:
 
 	void operator() ()
 	{
-		Vector2f value; Param->GetValue(value);
-		glUniform2f(Location, value.X(), value.Y());
+		if (Param->Dirty())
+		{
+			Vector2f value; Param->GetValue(value);
+			glUniform2f(Location, value.X(), value.Y());
+			Param->ClearDirty();
+		}
 	}
 
 private:
@@ -150,11 +182,15 @@ public:
 
 	void operator() ()
 	{
-		vector<Vector2f> value; Param->GetValue(value);
-		if (!value.empty())
+		if (Param->Dirty())
 		{
-			glUniform2fv(Location, value.size(), 
-				reinterpret_cast<float*>(&value[0][0]));
+			vector<Vector2f> value; Param->GetValue(value);
+			if (!value.empty())
+			{
+				glUniform2fv(Location, value.size(), 
+					reinterpret_cast<float*>(&value[0][0]));
+			}
+			Param->ClearDirty();
 		}
 	}
 
@@ -172,8 +208,12 @@ public:
 
 	void operator() ()
 	{
-		Vector3f value; Param->GetValue(value);
-		glUniform3f(Location, value[0], value[1], value[2]);
+		if (Param->Dirty())
+		{
+			Vector3f value; Param->GetValue(value);
+			glUniform3f(Location, value[0], value[1], value[2]);
+			Param->ClearDirty();
+		}
 	}
 
 private:
@@ -190,11 +230,15 @@ public:
 
 	void operator() ()
 	{
-		vector<Vector3f> value; Param->GetValue(value);
-		if (!value.empty())
+		if (Param->Dirty())
 		{
-			glUniform3fv(Location, value.size(), 
-				reinterpret_cast<float*>(&value[0][0]));
+			vector<Vector3f> value; Param->GetValue(value);
+			if (!value.empty())
+			{
+				glUniform3fv(Location, value.size(), 
+					reinterpret_cast<float*>(&value[0][0]));
+			}
+			Param->ClearDirty();
 		}
 	}
 
@@ -212,8 +256,12 @@ public:
 
 	void operator() ()
 	{
-		Vector4f value; Param->GetValue(value);
-		glUniform4f(Location, value[0], value[1], value[2], value[3]);
+		if (Param->Dirty())
+		{
+			Vector4f value; Param->GetValue(value);
+			glUniform4f(Location, value[0], value[1], value[2], value[3]);
+			Param->ClearDirty();
+		}
 	}
 
 private:
@@ -230,11 +278,15 @@ public:
 
 	void operator() ()
 	{
-		vector<Vector4f> value; Param->GetValue(value);
-		if (!value.empty())
+		if (Param->Dirty())
 		{
-			glUniform3fv(Location, value.size(), 
-				reinterpret_cast<float*>(&value[0][0]));
+			vector<Vector4f> value; Param->GetValue(value);
+			if (!value.empty())
+			{
+				glUniform3fv(Location, value.size(), 
+					reinterpret_cast<float*>(&value[0][0]));
+			}
+			Param->ClearDirty();
 		}
 	}
 
@@ -253,8 +305,12 @@ public:
 
 	void operator() ()
 	{
-		Matrix4f value; Param->GetValue(value);
-		glUniformMatrix4fv(Location, 1, false, &value[0]);
+		if (Param->Dirty())
+		{
+			Matrix4f value; Param->GetValue(value);
+			glUniformMatrix4fv(Location, 1, false, &value[0]);
+			Param->ClearDirty();
+		}
 	}
 
 private:
@@ -271,18 +327,54 @@ public:
 
 	void operator() ()
 	{
-		vector<Matrix4f> value; Param->GetValue(value);
-		if (!value.empty())
+		if (Param->Dirty())
 		{
-			glUniformMatrix4fv(Location, value.size(), false,
-				reinterpret_cast<float*>(&value[0][0]));
-		}
+			vector<Matrix4f> value; Param->GetValue(value);
+			if (!value.empty())
+			{
+				glUniformMatrix4fv(Location, value.size(), false,
+					reinterpret_cast<float*>(&value[0][0]));
+			}
+			Param->ClearDirty();
+		}	
 	}
 
 private:
 	GLint Location;
 	EffectParameter* Param;
 };
+
+// note that a texture object always need a sample state to sample it 
+template<>
+struct ShaderParameterSetHelper< TextureLayer >
+{
+public:
+	ShaderParameterSetHelper(GLint location, EffectParameter* param)
+		: Location(location), Param(param) { }
+
+	void operator() ()
+	{
+		if (Param->Dirty())
+		{
+			TextureLayer textureLayer; Param->GetValue(textureLayer);
+			shared_ptr<OpenGLTexture> textureOGL = std::static_pointer_cast<OpenGLTexture>(textureLayer.Texture);
+			
+			glActiveTexture(GL_TEXTURE0+textureLayer.Unit);
+			glBindTexture(textureOGL->GetOpenGLTextureTarget(), textureOGL->GetOpenGLTexture());
+			glUniform1ui(Location, textureOGL->GetOpenGLTexture());
+
+			RenderDevice& device = Context::GetSingleton().GetRenderDevice();
+			device.SetSamplerState(textureLayer.Stage, textureLayer.Unit, textureLayer.Sampler);
+
+			Param->ClearDirty();
+		}	
+	}
+
+private:
+	GLint Location;
+	EffectParameter* Param;
+};
+
 
 //////////////////////////////////////////////////////////////////////////
 OpenGLShaderProgram::OpenGLShaderProgram(Effect& effect)
@@ -495,15 +587,22 @@ void OpenGLShaderProgram::CaptureAllParameter()
 					}	
 				}
 				break;
+			case EPT_Texture1D:
+			case EPT_Texture1DArray:
 			case EPT_Texture2D:
+			case EPT_Texture2DArray:
+			case EPT_Texture3D:
+			case EPT_Texture3DArray:
+			case EPT_TextureCUBE:
+			case EPT_TextureCUBEArray:
 				{
 					if (isArray)
 					{
-
+						assert(false);
 					}
 					else
 					{
-
+						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<TextureLayer>(location, effectParam);
 					}
 				}
 				break;
