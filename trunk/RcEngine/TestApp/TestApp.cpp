@@ -57,29 +57,33 @@ void TestApp::LoadContent()
 	RenderFactory* factory = RcEngine::Context::GetSingleton().GetRenderFactoryPtr();
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
 	
-	mDwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Dwarf/Body.material.xml");
-	Entity* dwarfEntity = sceneManager->CreateEntity("Dwarf", "../Media/Mesh/Dwarf/Dwarf.mdl");
-	Entity* dwarfEntity1 = sceneManager->CreateEntity("Dwarf", "../Media/Mesh/Dwarf/Dwarf.mdl");
-	dwarfEntity->SetMaterial(mDwarfMaterial);
-	dwarfEntity1->SetMaterial(mDwarfMaterial);
+	/*DwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Dwarf/Body.material.xml");
+	 Entity* dwarfEntity = sceneManager->CreateEntity("Dwarf", "../Media/Mesh/Dwarf/Dwarf.mdl");
+	 Entity* dwarfEntity1 = sceneManager->CreateEntity("Dwarf", "../Media/Mesh/Dwarf/Dwarf.mdl");
+	 dwarfEntity->SetMaterial(mDwarfMaterial);
+	 dwarfEntity1->SetMaterial(mDwarfMaterial);
 
-	SceneNode* dwarfNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
-	dwarfNode->SetPosition(Vector3f(10, 0, 0));
-	dwarfNode->AttachObject(dwarfEntity);
+	 SceneNode* dwarfNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
+	 dwarfNode->SetPosition(Vector3f(10, 0, 0));
+	 dwarfNode->AttachObject(dwarfEntity);*/
 
+	 shared_ptr<Effect> effect = factory->CreateEffectFromFile("LightTextured", 
+	"../Media/Effects/LightTextured.effect.xml");
+
+	 auto i = effect->GetParameterByName("World");
 	//SceneNode* dwarfNode1 = dwarfNode->CreateChildSceneNode("Dwarf1");
 	//dwarfNode1->SetPosition(Vector3f(0, 10, 0));
 	//dwarfNode1->AttachObject(dwarfEntity1);
 
 
 	// Sky 
-	sceneManager->CreateSkyBox(
-		factory->CreateTextureFromFile("../Media/Textures/front.dds", 0),
-		factory->CreateTextureFromFile("../Media/Textures/back.dds", 0),
-		factory->CreateTextureFromFile("../Media/Textures/left.dds", 0),
-		factory->CreateTextureFromFile("../Media/Textures/right.dds", 0),
-		factory->CreateTextureFromFile("../Media/Textures/up.dds", 0),
-		factory->CreateTextureFromFile("../Media/Textures/down.dds", 0), 5000.0f);
+	/*sceneManager->CreateSkyBox(
+	factory->CreateTextureFromFile("../Media/Textures/front.dds", 0),
+	factory->CreateTextureFromFile("../Media/Textures/back.dds", 0),
+	factory->CreateTextureFromFile("../Media/Textures/left.dds", 0),
+	factory->CreateTextureFromFile("../Media/Textures/right.dds", 0),
+	factory->CreateTextureFromFile("../Media/Textures/up.dds", 0),
+	factory->CreateTextureFromFile("../Media/Textures/down.dds", 0), 5000.0f);*/
 }
 
 

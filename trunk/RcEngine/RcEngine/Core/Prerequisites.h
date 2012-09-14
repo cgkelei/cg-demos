@@ -23,6 +23,7 @@
 #include <unordered_set>
 #include <list>
 #include <string>
+#include <functional>
 #include <cassert>
 #include <iostream>
 #include <fstream>

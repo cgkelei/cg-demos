@@ -13,6 +13,9 @@
 
 namespace RcEngine {
 
+class RenderEffect;
+class Shader;
+class ShaderProgram;
 
 class _ApiExport RenderFactory
 {
@@ -53,19 +56,20 @@ public:
 	virtual RenderView* CreateDepthStencilView(Texture* texture, uint32_t arraySize, uint32_t level) = 0;
 			
 	/**
-		* Create a material from file, if the material is already loaded, use the loaded one.
-		* @param matName: material name which is uniquely identify the material.
-		* @param path: the material file location.
-		*/
+	 * Create a material from file, if the material is already loaded, use the loaded one.
+	 * @param matName: material name which is uniquely identify the material.
+	 * @param path: the material file location.
+	 */
 	shared_ptr<Material> CreateMaterialFromFile(const String& matName, const String& path);
 
 	/**
-		* Create a effect from file, if the effect is already loaded, use the loaded one.
-		* @param effectName: effect name which is uniquely identify the effect.
-		* @param effectFile: the effect file location.
-		*/
-	virtual shared_ptr<Effect> CreateEffectFromFile(const String& effectName, const String& effectFile) = 0;
+	 * Create a effect from file, if the effect is already loaded, use the loaded one.
+	 * @param effectName: effect name which is uniquely identify the effect.
+	 * @param effectFile: the effect file location.
+	 */
+	shared_ptr<Effect> CreateEffectFromFile(const String& effectName, const String& effectFile);
 			
+
 	/**
 	 * Create an vertex declaration object to describe the input-buffer data.
 	 */
@@ -88,12 +92,30 @@ public:
 	 */
 	shared_ptr<RasterizerState> CreateRasterizerState( const RasterizerStateDesc& desc );
 
+	shared_ptr<SamplerState> CreateSamplerState( const SamplerStateDesc& desc );
+
+	virtual shared_ptr<Shader> CreateShader(ShaderType type) = 0;
+	virtual shared_ptr<ShaderProgram> CreateShaderProgram(Effect& effect) = 0;
+
+protected:
+
+	virtual shared_ptr<DepthStencilState> CreateDepthStencilStateImpl( const DepthStencilStateDesc& desc ) = 0; 
+	virtual shared_ptr<BlendState> CreateBlendStateImpl( const BlendStateDesc& desc ) = 0;
+	virtual shared_ptr<RasterizerState> CreateRasterizerStateImpl( const RasterizerStateDesc& desc ) = 0;
+	virtual shared_ptr<SamplerState> CreateSamplerStateImpl( const SamplerStateDesc& desc ) = 0;
+
 protected:
 	typedef unordered_map<String, shared_ptr<Effect> > EffectMap;
 	typedef EffectMap::iterator EffectMapIter;
 
 	typedef unordered_map<String, shared_ptr<Material> > MaterialMap;
 	typedef MaterialMap::iterator MaterialMapIter;
+
+	std::map<DepthStencilStateDesc, shared_ptr<DepthStencilState> > mDepthStecilStatePool;
+	std::map<RasterizerStateDesc, shared_ptr<RasterizerState> > mRasterizerStatePool;
+	//std::map<SamplerStateDesc, shared_ptr<SamplerState> > mSamplerStatePool;
+	std::map<BlendStateDesc, shared_ptr<BlendState> > mBlendStatePool;
+
 
 	EffectMap mEffectPool;
 	MaterialMap mMaterialPool;

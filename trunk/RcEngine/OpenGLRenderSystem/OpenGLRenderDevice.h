@@ -27,6 +27,7 @@ public:
 	void SetBlendState(const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask);		
 	void SetRasterizerState(const shared_ptr<RasterizerState>& state);
 	void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef, uint16_t backStencilRef);
+	void SetSamplerState(uint32_t unit, const shared_ptr<SamplerState>& state);
 
 	void AdjustProjectionMatrix(Matrix4f& pOut);
 
@@ -35,12 +36,14 @@ public:
 
 protected:
 	void DoBindFrameBuffer(FrameBuffer* fb);
-			
+	void DoSetSamplerState(uint32_t unit, const shared_ptr<SamplerState>& state);
+
 private:
 	void BindVertexBufferOGL(const shared_ptr<GraphicsBuffer>& vertexBuffer );
 	void BindIndexBufferOGL(const shared_ptr<GraphicsBuffer>& indexBuffer);
 			
 private:
+	uint32_t mViewportTop, mViewportLeft, mViewportWidth, mViewportHeight;
 			
 };
 

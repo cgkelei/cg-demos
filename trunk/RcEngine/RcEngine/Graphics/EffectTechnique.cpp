@@ -2,7 +2,6 @@
 
 namespace RcEngine {
 
-
 EffectTechnique::EffectTechnique()
 {
 
@@ -10,28 +9,27 @@ EffectTechnique::EffectTechnique()
 
 EffectTechnique::~EffectTechnique()
 {
-
-}
-
-EffectPassList& EffectTechnique::GetPasses()
-{
-	return mPasses;
-}
-
-EffectPass*	EffectTechnique::GetPassByName(const String& name)
-{
-	EffectPassList::iterator iter = mPasses.begin();
-	while(iter != mPasses.end())
+	for (auto iter = mPasses.begin(); iter != mPasses.end(); ++iter)
 	{
-		if ((*iter)->GetPassName() == name)
-		{
-			return *iter;
-		}
+		delete *iter;
 	}
+	mPasses.clear();
+}
+
+EffectPass* EffectTechnique::GetPassByName( const String& name )
+{
+	auto found = std::find_if(mPasses.begin(), mPasses.end(), 
+		[&name](EffectPass* pass){ return pass->GetPassName() == name;} );
+
+	if (found != mPasses.end())
+	{
+		return *found;
+	}
+
 	return nullptr;
 }
 
-EffectPass* EffectTechnique::GetPassByIndex(uint32_t index)
+EffectPass* EffectTechnique::GetPassByIndex( uint32_t index )
 {
 	if (index >= 0 && index < mPasses.size())
 	{
@@ -39,33 +37,5 @@ EffectPass* EffectTechnique::GetPassByIndex(uint32_t index)
 	}
 	return nullptr;
 }
-
-EffectAnnotationList& EffectTechnique::GetAnnotations()
-{
-	return mAnnotations;
-}
-
-EffectAnnotation* EffectTechnique::GetAnnotationByName( const String& name )
-{
-	EffectAnnotationList::iterator iter = mAnnotations.begin();
-	while(iter != mAnnotations.end())
-	{
-		if ((*iter)->GetAnnotationName() == name)
-		{
-			return *iter;
-		}
-	}
-	return nullptr;
-}
-
-EffectAnnotation* EffectTechnique::GetAnnotationByIndex( uint32_t index )
-{
-	if (index >= 0 && index < mPasses.size())
-	{
-		return mAnnotations[index];
-	}
-	return nullptr;
-}
-
 
 } // Namespace RcEngine

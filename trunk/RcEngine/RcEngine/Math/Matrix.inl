@@ -90,7 +90,19 @@ void Matrix4<Real>::MakeZero()
 	Elements[14] = (Real)0.0;
 	Elements[15] = (Real)0.0;
 }
+//----------------------------------------------------------------------------
+template<typename Real>
+bool Matrix4<Real>::operator== (const Matrix4<Real>& rhs) const
+{
+	 return memcmp(Elements,rhs.Elements,16*sizeof(Real)) == 0;
+}
 
+//----------------------------------------------------------------------------
+template<typename Real>
+bool Matrix4<Real>::operator!= (const Matrix4<Real>& rhs) const
+{
+	 return memcmp(Elements,rhs.Elements,16*sizeof(Real)) != 0;
+}
 //----------------------------------------------------------------------------
 template<typename Real>
 const Real* Matrix4<Real>::operator()() const
@@ -107,16 +119,16 @@ Real* Matrix4<Real>::operator()()
 
 //----------------------------------------------------------------------------
 template<typename Real>
-const Real* Matrix4<Real>::operator[]( int32_t iRow ) const
+Real Matrix4<Real>::operator[]( int32_t index ) const
 {
-	return &Elements[4*iRow];
+	return Elements[index];
 }
 
 //----------------------------------------------------------------------------
 template<typename Real>
-Real* Matrix4<Real>::operator[]( int32_t iRow )
+Real& Matrix4<Real>::operator[]( int32_t index )
 {
-	return &Elements[4*iRow];
+	return Elements[index];
 }
 
 //----------------------------------------------------------------------------

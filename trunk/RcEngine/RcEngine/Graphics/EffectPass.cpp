@@ -1,8 +1,9 @@
 #include <Graphics/EffectPass.h>
+#include <Graphics/RenderDevice.h>
+#include <Graphics/ShaderProgram.h>
+#include <Core/Context.h>
 
 namespace RcEngine {
-
-
 
 EffectPass::EffectPass()
 {
@@ -14,32 +15,19 @@ EffectPass::~EffectPass()
 
 }
 
-EffectAnnotationList& EffectPass::GetAnnotations()
+void EffectPass::BeginPass()
 {
-	return mAnnotations;
+	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
+	
+	device.SetDepthStencilState(mDepthStencilState, mFrontStencilRef, mBackStencilRef);
+	device.SetBlendState(mBlendState, mBlendColor, mSampleMask);
+	device.SetRasterizerState(mRasterizerState);
+	mShaderProgram->Bind();
 }
 
-EffectAnnotation* EffectPass::GetAnnotationByName( const String& name )
+void EffectPass::EndPass()
 {
-	EffectAnnotationList::iterator iter = mAnnotations.begin();
-	while(iter != mAnnotations.end())
-	{
-		if ((*iter)->GetAnnotationName() == name)
-		{
-			return *iter;
-		}
-	}
-	return nullptr;
+	mShaderProgram->Unbind();
 }
-
-EffectAnnotation* EffectPass::GetAnnotationByIndex( uint32_t index )
-{
-	if (index >= 0 && index < mAnnotations.size())
-	{
-		return mAnnotations[index];
-	}
-	return nullptr;
-}
-
 
 } // Namespace RcEngine

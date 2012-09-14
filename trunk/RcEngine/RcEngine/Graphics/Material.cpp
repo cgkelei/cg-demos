@@ -115,17 +115,20 @@ void Material::ApplyMaterial()
 			break;
 		case EPU_Material_Ambient_Color:
 			{
-				param->EffectParam->SetValue(mAmbient);
+				Vector4f color(mAmbient.R(), mAmbient.G(), mAmbient.B(), mAmbient.A());
+				param->EffectParam->SetValue(color);
 			}
 			break;
 		case EPU_Material_Diffuse_Color:
 			{
-				param->EffectParam->SetValue(mDiffuse);
+				Vector4f color(mDiffuse.R(), mDiffuse.G(), mDiffuse.B(), mDiffuse.A());
+				param->EffectParam->SetValue(color);
 			}
 			break;
 		case EPU_Material_Specular_Color:
 			{
-				param->EffectParam->SetValue(mSpecular);
+				Vector4f color(mSpecular.R(), mSpecular.G(), mSpecular.B(), mSpecular.A());
+				param->EffectParam->SetValue(color);
 			}
 			break;
 		case EPU_Material_Power:
@@ -212,7 +215,7 @@ shared_ptr<Material> Material::LoadFrom( Stream& source )
 			MaterialParameter* parameter = new MaterialParameter;
 			parameter->Name = paramNode->AttributeString("name", "");
 			parameter->EffectParam = material->mEffect->GetParameterByName(parameter->Name);
-			parameter->Type = parameter->EffectParam->GetParameterType();
+			//parameter->Type = parameter->EffectParam->GetParameterType();
 			String semantic =  paramNode->AttributeString("semantic", "");
 			parameter->IsSemantic = semantic.length() > 0;
 

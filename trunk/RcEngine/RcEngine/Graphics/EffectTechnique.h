@@ -8,30 +8,28 @@
 
 namespace RcEngine {
 
+class EffectPass;
 
-class _ApiExport EffectTechnique
+class _ApiExport EffectTechnique 
 {
+	friend class Effect;
+
 public:
 	EffectTechnique();
-	virtual ~EffectTechnique();
+	~EffectTechnique();
 
-	const String& GetTechniqueName() const				{ return nName; }
+	const String& GetTechniqueName() const				{ return mName; }
 
 
-	EffectPassList& GetPasses();
-	EffectPass*	GetPassByName(const String& name);
+	vector<EffectPass*>& GetPasses()	{ return mPasses; }
+
+	EffectPass* GetPassByName(const String& name);
 	EffectPass* GetPassByIndex(uint32_t index);
 
-	EffectAnnotationList& GetAnnotations();
-	EffectAnnotation* GetAnnotationByName(const String& name);
-	EffectAnnotation* GetAnnotationByIndex(uint32_t index);
-
-
 protected:
-	String nName;
+	String mName;
 	bool mValid;
-	EffectPassList mPasses;
-	EffectAnnotationList mAnnotations;
+	vector<EffectPass*> mPasses;
 };
 
 

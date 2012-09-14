@@ -4,16 +4,14 @@
 #include "OpenGLFrameBuffer.h"
 #include "OpenGLRenderWindow.h"
 #include "OpenGLRenderView.h"
+#include "OpenGLSamplerState.h"
 #include "OpenGLTexture.h"
-#include "OpenGLEffect.h"
-#include "OpenGLEffectTechnique.h"
-#include "OpenGLEffectPass.h"
 #include <Graphics/Material.h>
+#include <Graphics/EffectTechnique.h>
+#include <Graphics/EffectPass.h>
 #include <Graphics/Viewport.h>
-#include <Graphics/RenderJob.h>
 #include <Graphics/BlendState.h>
 #include <Graphics/RasterizerState.h>
-#include <Graphics/SamplerState.h>
 #include <Graphics/DepthStencilState.h>
 #include <Graphics/BlendState.h>
 #include <Graphics/RenderOperation.h>
@@ -26,6 +24,7 @@
 namespace RcEngine {
 
 OpenGLRenderDevice::OpenGLRenderDevice()
+	: mViewportTop(0), mViewportLeft(0), mViewportWidth(0), mViewportHeight(0)
 {
 	
 }
@@ -94,11 +93,17 @@ void OpenGLRenderDevice::BindIndexBufferOGL( const shared_ptr<GraphicsBuffer>& i
 }
 
 void OpenGLRenderDevice::DoBindFrameBuffer( FrameBuffer* fb )
-{
-	OpenGLFrameBuffer* oglFrameBuffer = static_cast<OpenGLFrameBuffer*>(fb);
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, oglFrameBuffer->GetFrameBufferObject());
+{	
 	const Viewport& vp = fb->GetViewport();
-	glViewport(vp.Left, vp.Top, vp.Width, vp.Height);
+
+	if (vp.Left != mViewportLeft || vp.Top != mViewportTop || vp.Height !=mViewportHeight || vp.Width != mViewportWidth)
+	{
+		glViewport(vp.Left, vp.Top, vp.Width, vp.Height);
+		mViewportLeft = vp.Left;
+		mViewportTop = vp.Top;
+		mViewportHeight = vp.Height;
+		mViewportWidth = vp.Width;
+	}
 }
 
 void OpenGLRenderDevice::ToggleFullscreen( bool fs )
@@ -146,12 +151,12 @@ void OpenGLRenderDevice::SetBlendState( const shared_ptr<BlendState>& state, con
 					}
 				}
 
-				if (currDesc.RenderTarget[i].RenderTargetWriteMask != stateDesc.RenderTarget[i].RenderTargetWriteMask)
+				if (currDesc.RenderTarget[i].ColorWriteMask != stateDesc.RenderTarget[i].ColorWriteMask)
 				{
-					glColorMaskIndexedEXT(i, (stateDesc.RenderTarget[i].RenderTargetWriteMask & CWM_Red) != 0,
-						(stateDesc.RenderTarget[i].RenderTargetWriteMask & CWM_Green) != 0,
-						(stateDesc.RenderTarget[i].RenderTargetWriteMask & CWM_Blue) != 0,
-						(stateDesc.RenderTarget[i].RenderTargetWriteMask & CWM_Alpha) != 0 );
+					glColorMaskIndexedEXT(i, (stateDesc.RenderTarget[i].ColorWriteMask & CWM_Red) != 0,
+						(stateDesc.RenderTarget[i].ColorWriteMask & CWM_Green) != 0,
+						(stateDesc.RenderTarget[i].ColorWriteMask & CWM_Blue) != 0,
+						(stateDesc.RenderTarget[i].ColorWriteMask & CWM_Alpha) != 0 );
 				}
 
 			}
@@ -170,12 +175,12 @@ void OpenGLRenderDevice::SetBlendState( const shared_ptr<BlendState>& state, con
 				}
 			}
 
-			if (currDesc.RenderTarget[0].RenderTargetWriteMask != stateDesc.RenderTarget[0].RenderTargetWriteMask)
+			if (currDesc.RenderTarget[0].ColorWriteMask != stateDesc.RenderTarget[0].ColorWriteMask)
 			{
-				glColorMask( (stateDesc.RenderTarget[0].RenderTargetWriteMask & CWM_Red) != 0,
-					(stateDesc.RenderTarget[0].RenderTargetWriteMask & CWM_Green) != 0,
-					(stateDesc.RenderTarget[0].RenderTargetWriteMask & CWM_Blue) != 0,
-					(stateDesc.RenderTarget[0].RenderTargetWriteMask & CWM_Alpha) != 0 );
+				glColorMask( (stateDesc.RenderTarget[0].ColorWriteMask & CWM_Red) != 0,
+					(stateDesc.RenderTarget[0].ColorWriteMask & CWM_Green) != 0,
+					(stateDesc.RenderTarget[0].ColorWriteMask & CWM_Blue) != 0,
+					(stateDesc.RenderTarget[0].ColorWriteMask & CWM_Alpha) != 0 );
 			}
 		}
 				
@@ -317,9 +322,8 @@ void OpenGLRenderDevice::SetDepthStencilState( const shared_ptr<DepthStencilStat
 
 		if (currDesc.StencilWriteMask != stateDesc.StencilWriteMask)
 		{
-			glStencilMask(stateDesc.DepthWriteMask);
+			glStencilMask(stateDesc.StencilWriteMask);
 		}
-
 
 		if ((currDesc.FrontStencilFunc != stateDesc.FrontStencilFunc)
 			|| (mCurrentFrontStencilRef != frontStencilRef)
@@ -359,6 +363,12 @@ void OpenGLRenderDevice::SetDepthStencilState( const shared_ptr<DepthStencilStat
 	mCurrentDepthStencilState = state;
 	mCurrentFrontStencilRef = frontStencilRef;
 	mCurrentBackStencilRef = backStencilRef;
+}
+
+void OpenGLRenderDevice::DoSetSamplerState(uint32_t unit, const shared_ptr<SamplerState>& state)
+{
+	shared_ptr<OpenGLSamplerState> sampler = std::static_pointer_cast<OpenGLSamplerState>(state);
+	glBindSampler(unit, sampler->GetSamplerObject());
 }
 
 void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
@@ -415,22 +425,21 @@ void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
 	}
 
 	// get pass
-	EffectPassList passes= tech.GetPasses();
-	for(EffectPassList::iterator p = passes.begin(); p != passes.end(); ++p)
+	for(auto iter = tech.GetPasses().begin(); iter != tech.GetPasses().end(); ++iter)
 	{
-		if ( (*p)->BeginPass() )
+		EffectPass* pass = *iter;
+		pass->BeginPass();
+	
+		if (op.UseIndex)
 		{
-			if (op.UseIndex)
-			{
-				glDrawElements(OpenGLMapping::Mapping(op.PrimitiveType), op.GetIndicesCount(), indexType, indexOffset);	
-			}
-			else
-			{
-				glDrawArrays(OpenGLMapping::Mapping(op.PrimitiveType), op.StartVertexLocation, static_cast<GLsizei>(op.GetVertexCount()));
-			}
-
-			(*p)->EndPass();
+			glDrawElements(OpenGLMapping::Mapping(op.PrimitiveType), op.GetIndicesCount(), indexType, indexOffset);	
 		}
+		else
+		{
+			glDrawArrays(OpenGLMapping::Mapping(op.PrimitiveType), op.StartVertexLocation, static_cast<GLsizei>(op.GetVertexCount()));
+		}
+
+		pass->EndPass();
 	}
 }
 

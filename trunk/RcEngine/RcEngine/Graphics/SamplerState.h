@@ -7,10 +7,12 @@
 
 namespace RcEngine {
 
-class _ApiExport SamplerStateDesc
+struct _ApiExport SamplerStateDesc
 {
 public:
 	SamplerStateDesc();
+
+	ShaderType BindStage;
 
 	TextureFilter              Filter;
 	TextureAddressMode		   AddressU;
@@ -23,27 +25,19 @@ public:
 	float                      MaxLOD;
 
 	ColorRGBA			   BorderColor;	
+
+	friend bool operator< (const SamplerStateDesc& lhs, const SamplerStateDesc& rhs);
 };
 
-inline SamplerStateDesc::SamplerStateDesc()
-	: AddressU(TAM_Wrap), AddressV(TAM_Wrap), AddressW(TAM_Wrap), 
-	Filter(TF_Min_Mag_Mip_Point), BorderColor(0, 0, 0, 0),
-	MipMapLODBias(0),MinLOD(FLT_MIN), MaxLOD( FLT_MAX),
-	MaxAnisotropy(16), ComparisonFunc(CF_AlwaysFail)
-
-{
-			
-}
 
 
 class _ApiExport SamplerState
 {
 public:
 	SamplerState(const SamplerStateDesc& desc) 
-		: mDesc(desc)
-	{
+		: mDesc(desc) { }
 
-	}
+	virtual ~SamplerState() { }
 
 	const SamplerStateDesc& GetDesc( ) const				{ return mDesc; }
 
