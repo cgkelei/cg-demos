@@ -29,7 +29,7 @@ public:
 	virtual ~EffectParameter(void) { }
 
 	const String& GetName() const { return mName; }
-	EffectParameterType GetType() const  { return mType; }
+	EffectParameterType GetParameterType() const  { return mType; }
 
 	virtual void GetValue(bool& value);
 	virtual void GetValue(vector<bool>& value);

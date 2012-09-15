@@ -56,6 +56,7 @@ protected:
 	shared_ptr<DepthStencilState> mDepthStencilState;
 	shared_ptr<BlendState> mBlendState;
 	shared_ptr<RasterizerState> mRasterizerState;
+	unordered_map<String, shared_ptr<SamplerState> > mSamplerStates;
 
 	ColorRGBA mAmbient;
 	ColorRGBA mDiffuse;

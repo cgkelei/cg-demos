@@ -76,8 +76,24 @@ using std::vector;
 using std::unordered_map;
 using std::unordered_set;
 
-
 #define Safe_Delete(p) if(p) { delete p; p = NULL;}
+
+// for normal pointer 
+template<class Type, class SourceType>
+Type static_cast_checked(SourceType* item)
+{
+	assert(!item || dynamic_cast<Type>(item));
+	return static_cast<Type>(item);
+}
+
+// for shared_ptr
+template <class Ty, class Other>
+shared_ptr<Ty> static_pointer_cast_checked(const shared_ptr<Other>& sp)
+{
+	assert(!sp || std::dynamic_pointer_cast<Ty>(sp));
+	return std::static_pointer_cast<Ty>(sp);
+}
+
 
 namespace RcEngine {
 

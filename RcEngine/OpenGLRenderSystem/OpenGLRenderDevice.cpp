@@ -58,18 +58,18 @@ void OpenGLRenderDevice::CreateRenderWindow( const RenderSettings& settings )
 {
 	mRenderSettings = settings;
 
-	mScreenFrameBuffer = new OpenGLRenderWindow(settings);
-
+	mScreenFrameBuffer = std::make_shared<OpenGLRenderWindow>(settings);
+	
+	BindFrameBuffer(mScreenFrameBuffer);
+	
 	mScreenFrameBuffer->Attach(ATT_Color0, 
-		new OpenGLScreenRenderTarget2DView(mScreenFrameBuffer->GetWidth(), mScreenFrameBuffer->GetHeight(), mScreenFrameBuffer->GetColorFormat()));
+		std::make_shared<OpenGLScreenRenderTargetView2D>(mScreenFrameBuffer->GetWidth(), mScreenFrameBuffer->GetHeight(), mScreenFrameBuffer->GetColorFormat()));
 			
 	if(mScreenFrameBuffer->IsDepthBuffered())
 	{
 		mScreenFrameBuffer->Attach(ATT_DepthStencil,
-			new OpenGLScreenDepthStencilView(mScreenFrameBuffer->GetWidth(), mScreenFrameBuffer->GetHeight(), settings.DepthStencilFormat));
+			std::make_shared<OpenGLScreenDepthStencilView>(mScreenFrameBuffer->GetWidth(), mScreenFrameBuffer->GetHeight(), settings.DepthStencilFormat));
 	}
-		
-	BindFrameBuffer(mScreenFrameBuffer);
 }
 
 void OpenGLRenderDevice::AdjustProjectionMatrix( Matrix4f& pOut )
@@ -92,7 +92,7 @@ void OpenGLRenderDevice::BindIndexBufferOGL( const shared_ptr<GraphicsBuffer>& i
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pBuffer->GetBufferID());
 }
 
-void OpenGLRenderDevice::DoBindFrameBuffer( FrameBuffer* fb )
+void OpenGLRenderDevice::DoBindFrameBuffer( const shared_ptr<FrameBuffer>& fb )
 {	
 	const Viewport& vp = fb->GetViewport();
 

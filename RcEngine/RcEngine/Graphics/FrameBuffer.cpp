@@ -17,7 +17,7 @@ FrameBuffer::~FrameBuffer(void)
 	{
 		if (mColorViews[i])
 		{
-			Detach(i);
+			Detach((Attachment)(ATT_DepthStencil + i));
 		}
 	}
 	mColorViews.clear();
@@ -26,7 +26,7 @@ FrameBuffer::~FrameBuffer(void)
 		Detach(ATT_DepthStencil);
 }
 
-RenderView* FrameBuffer::GetAttachedView( uint32_t att )
+shared_ptr<RenderView> FrameBuffer::GetAttachedView( Attachment att )
 {
 	switch(att)
 	{
@@ -42,7 +42,7 @@ RenderView* FrameBuffer::GetAttachedView( uint32_t att )
 	}
 }
 
-void FrameBuffer::Attach( uint32_t att, RenderView* view )
+void FrameBuffer::Attach( Attachment att, const shared_ptr<RenderView>& view)
 {
 	switch(att)
 	{
@@ -58,53 +58,55 @@ void FrameBuffer::Attach( uint32_t att, RenderView* view )
 		}
 		break;
 	default:
-		uint32_t index = att - ATT_Color0;
-
-		// if it already has an render target attach it, detach if first. 
-		if(index < mColorViews.size() && mColorViews[index])
 		{
-			Detach(att);
-		}
+			uint32_t index = att - ATT_Color0;
 
-		if(mColorViews.size() < index + 1 )
-		{
-			mColorViews.resize(index + 1);
-		}
-
-		mColorViews[index] = view;
-
-		// Frame buffer中所有的render target的大小都一样，以最小的一个作为参考
-		size_t minColorView = index;
-		for(size_t i = 0; i < mColorViews.size(); ++i)
-		{
-			if(mColorViews[i])
+			// if it already has an render target attach it, detach if first. 
+			if(index < mColorViews.size() && mColorViews[index])
 			{
-				minColorView = i;
+				Detach(att);
 			}
-		}
 
-		if(minColorView == index)
-		{
-			mWidth = view->GetWidth();
-			mHeight = view->GetHeight();
-			mColorFormat = view->GetFormat();
+			if(mColorViews.size() < index + 1 )
+			{
+				mColorViews.resize(index + 1);
+			}
+
+			mColorViews[index] = view;
+
+			// Frame buffer中所有的render target的大小都一样，以最小的一个作为参考
+			size_t minColorView = index;
+			for(size_t i = 0; i < mColorViews.size(); ++i)
+			{
+				if(mColorViews[i])
+				{
+					minColorView = i;
+				}
+			}
+
+			if(minColorView == index)
+			{
+				mWidth = view->GetWidth();
+				mHeight = view->GetHeight();
+				mColorFormat = view->GetFormat();
+			}
 		}
 	}
 
 	mActice = true;
-	view->OnAttach(this, att);
+	view->OnAttach(*this, att);
 	mDirty = true;
 }
 
-void FrameBuffer::Detach( uint32_t att )
+void FrameBuffer::Detach( Attachment att )
 {
 	switch(att)
 	{
 	case ATT_DepthStencil:
 		if(mDepthStencilView)
 		{
-			mDepthStencilView->OnDetach(this, att);
-			Safe_Delete(mDepthStencilView);
+			mDepthStencilView->OnDetach(*this, att);
+			mDepthStencilView = nullptr;
 		}
 
 		mIsDepthBuffered = false;
@@ -120,8 +122,8 @@ void FrameBuffer::Detach( uint32_t att )
 
 		if(mColorViews[index])
 		{
-			mColorViews[index]->OnDetach(this, att);
-			Safe_Delete(mColorViews[index]);
+			mColorViews[index]->OnDetach(*this, att);
+			mColorViews[index] = nullptr;
 		}
 	}
 
@@ -131,17 +133,17 @@ void FrameBuffer::Detach( uint32_t att )
 
 void FrameBuffer::OnBind()
 {
-	for (size_t i = 0; i < mColorViews.size(); ++i)
+	/*for (size_t i = 0; i < mColorViews.size(); ++i)
 	{
-		if (mColorViews[i])
-		{
-			mColorViews[i]->OnBind(this, ATT_Color0 + i);
-		}
+	if (mColorViews[i])
+	{
+	mColorViews[i]->OnBind(this, ATT_Color0 + i);
+	}
 	}
 	if (mDepthStencilView)
 	{
-		mDepthStencilView->OnBind(this, ATT_DepthStencil);
-	}
+	mDepthStencilView->OnBind(this, ATT_DepthStencil);
+	}*/
 
 	// Do Render API specify set
 	DoBind();
@@ -154,17 +156,17 @@ void FrameBuffer::OnUnbind()
 	// Do Render API specify set
 	DoUnbind();
 
-	for (size_t i = 0; i < mColorViews.size(); ++i)
-	{
-		if (mColorViews[i])
-		{
-			mColorViews[i]->OnUnbind(this, ATT_Color0 + i);
-		}
-	}
-	if (mDepthStencilView)
-	{
-		mDepthStencilView->OnUnbind(this, ATT_DepthStencil);
-	}
+	//for (size_t i = 0; i < mColorViews.size(); ++i)
+	//{
+	//	if (mColorViews[i])
+	//	{
+	//		mColorViews[i]->OnUnbind(this, ATT_Color0 + i);
+	//	}
+	//}
+	//if (mDepthStencilView)
+	//{
+	//	mDepthStencilView->OnUnbind(this, ATT_DepthStencil);
+	//}
 }
 
 

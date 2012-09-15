@@ -66,7 +66,7 @@ void Application::Tick()
 {
 	if (mActice)
 	{
-		Context::GetSingleton().GetInputSystem().Update(mTimer.GetDeltaTime());
+	Context::GetSingleton().GetInputSystem().Update(mTimer.GetDeltaTime());
 	}
 
 	mTimer.Tick();
@@ -74,7 +74,7 @@ void Application::Tick()
 	if(!mAppPaused)
 	{
 		Update(mTimer.GetDeltaTime());
-		Context::GetSingleton().GetSceneManager().UpdateSceneGraph();
+		//Context::GetSingleton().GetSceneManager().UpdateSceneGraph();
 	}
 	else
 		::Sleep(50);
@@ -87,9 +87,10 @@ void Application::Tick()
 	if (mTimer.GetGameTime()-baseTime >= 1.0f)
 	{
 		float fps = (float)frameCount;
-		std::stringstream sss; 
+		/*std::stringstream sss; 
 		sss << "FPS: " << fps;
-		mMainWindow->SetTitle(sss.str());
+		mMainWindow->SetTitle(sss.str());*/
+		fprintf(stdout, "FPS: %4.2f\n", fps);
 		frameCount = 0;
 		baseTime += 1.0f;
 	}
@@ -99,14 +100,14 @@ void Application::Tick()
 	
 	
 	RenderDevice* device = Context::GetSingleton().GetRenderDevicePtr();
-	Camera* cam = device->GetCurrentFrameBuffer()->GetCamera();
-	Context::GetSingleton().GetSceneManager().UpdateRenderQueue(cam);
+	//Camera* cam = device->GetCurrentFrameBuffer()->GetCamera();
+	//Context::GetSingleton().GetSceneManager().UpdateRenderQueue(cam);
 
 	device->GetCurrentFrameBuffer()->Clear(CF_Color | CF_Depth |CF_Stencil, 
-		RcEngine::ColorRGBA(1.1f, 1.1f, 1.1f, 1.0f), 1.0f, 0);
+	RcEngine::ColorRGBA(1.0f, 0.1f, 1.0f, 1.0f), 1.0f, 0);
 
 
-	Context::GetSingleton().GetSceneManager().RenderScene();
+	//Context::GetSingleton().GetSceneManager().RenderScene();
 
 	device->GetCurrentFrameBuffer()->SwapBuffers();
 }
@@ -158,10 +159,10 @@ void Application::Window_Paint()
 
 void Application::ReadConfiguration()
 {
-	mSettings.Left = 100;
+	mSettings.Left = 400;
 	mSettings.Top = 50;
-	mSettings.Width = 1024;
-	mSettings.Height = 768;
+	mSettings.Width = 640;
+	mSettings.Height = 480;
 	mSettings.Fullscreen = false;
 	mSettings.SampleCount = 0;
 	mSettings.SampleQuality = 0;

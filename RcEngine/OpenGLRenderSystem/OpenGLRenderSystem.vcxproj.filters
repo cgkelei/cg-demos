@@ -36,9 +36,6 @@
     <ClCompile Include="OpenGLRenderFactory.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="OpenGLRenderTarget2DView.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="OpenGLRenderView.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -70,6 +67,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="OpenGLShaderProgram.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGLRenderTargetView.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
