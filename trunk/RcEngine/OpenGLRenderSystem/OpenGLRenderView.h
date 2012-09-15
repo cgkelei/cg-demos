@@ -17,22 +17,32 @@ public:
 	virtual void ClearColor(const ColorRGBA& clr);
 	virtual void ClearDepth(float depth);
 	virtual void ClearStencil(uint32_t stencil);
-	virtual void ClearDepthStencil(float depth, uint32_t stencil);
+	virtual void ClearDepthStencil(float depth, uint32_t stencil);	
 
-	virtual void OnAttached(FrameBuffer* fb, uint32_t att);
-	virtual void OnDetached(FrameBuffer* fb, uint32_t att);	
+	virtual void OnAttach(FrameBuffer& fb, Attachment attr);
+	virtual void OnDetach(FrameBuffer& fb, Attachment attr);
 
 protected:
 	void DoClear(GLbitfield flag, const ColorRGBA& clr, float depth, uint32_t stencil);
 
+protected:
+	Attachment mAttachment;
+	GLuint mFrameBufferID;
 };
 
-//////////////////////////////////////////////////////////////////////////
+
 class _OpenGLExport OpenGLDepthStencilView : public OpenGLRenderView
 {
 public:
+	/**
+	 * This construct will generate a new render buffer object, use as render target.
+	 */
 	OpenGLDepthStencilView(uint32_t width, uint32_t height, uint32_t sampleCount, uint32_t sampleQuality, PixelFormat format);
-	OpenGLDepthStencilView(Texture* tex, uint32_t arrIndex, uint32_t level);
+	
+	/**
+	 * This construct use a depth format texture as a render target.
+	 */
+	OpenGLDepthStencilView(Texture& texture, uint32_t arrIndex, uint32_t level);
 
 	~OpenGLDepthStencilView(void);
 
@@ -40,16 +50,18 @@ public:
 	void ClearStencil(uint32_t stencil);
 	void ClearDepthStencil(float depth, uint32_t stencil);
 
-	void OnAttach(FrameBuffer* fb, uint32_t index);
-	void OnDetach(FrameBuffer* fb, uint32_t index);	
+	void OnAttach(FrameBuffer& fb, Attachment attr);
+	void OnDetach(FrameBuffer& fb, Attachment attr);
 
 private:
-	GLuint mRenderBufferObject;
-	GLenum mTarget;
 	uint32_t mArrIndex;
 	uint32_t mLevel;
 	uint32_t mSampleCount, mSampleQuality;
-	OpenGLTexture2D* mDepthStencilTexture;
+
+	GLuint mRenderBufferID;
+	GLuint mTextureID;
+	GLenum mTextureTarget;
+
 };
 
 class _OpenGLExport OpenGLScreenDepthStencilView : public OpenGLRenderView
@@ -58,36 +70,41 @@ public:
 	OpenGLScreenDepthStencilView(uint32_t width, uint32_t height, PixelFormat fmt);
 	~OpenGLScreenDepthStencilView();
 
-	void OnAttach(FrameBuffer* fb, uint32_t index);
-	void OnDetach(FrameBuffer* fb, uint32_t index);	
+	void OnAttach(FrameBuffer& fb, Attachment attr);
+	void OnDetach(FrameBuffer& fb, Attachment attr);
+
+	void ClearDepth(float depth);
+	void ClearStencil(uint32_t stencil);
+	void ClearDepthStencil(float depth, uint32_t stencil);
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _OpenGLExport OpenGLRenderTarget2DView : public OpenGLRenderView
+class _OpenGLExport OpenGLRenderTargetView2D : public OpenGLRenderView
 {
 public:
-	OpenGLRenderTarget2DView(Texture* tex2d, uint32_t arrIndex, uint32_t level);
-	~OpenGLRenderTarget2DView();
+	OpenGLRenderTargetView2D(Texture& texture, uint32_t arrIndex, uint32_t level);
+	~OpenGLRenderTargetView2D();
 
 	void ClearColor(const ColorRGBA& clr);
 
-	virtual void OnAttach(FrameBuffer* fb, uint32_t att);
-	virtual void OnDetach(FrameBuffer* fb, uint32_t att);
+	void OnAttach(FrameBuffer& fb, Attachment attr);
+	void OnDetach(FrameBuffer& fb, Attachment attr);
 
 private:
-	OpenGLTexture2D* mTexture;
 	uint32_t mArrIndex;
 	uint32_t mLevel;
+	OpenGLTexture2D& mTextureOGL;
 };
 
-class _OpenGLExport OpenGLScreenRenderTarget2DView :  public OpenGLRenderView
+class _OpenGLExport OpenGLScreenRenderTargetView2D :  public OpenGLRenderView
 {
 public:
-	OpenGLScreenRenderTarget2DView(uint32_t width, uint32_t height, PixelFormat fmt);
-	~OpenGLScreenRenderTarget2DView();
+	OpenGLScreenRenderTargetView2D(uint32_t width, uint32_t height, PixelFormat fmt);
+	~OpenGLScreenRenderTargetView2D();
 	
-	void OnAttach(FrameBuffer* fb, uint32_t index);
-	void OnDetach(FrameBuffer* fb, uint32_t index);
+	void ClearColor(const ColorRGBA& clr);
+	void OnAttach(FrameBuffer& fb, Attachment attr);
+	void OnDetach(FrameBuffer& fb, Attachment attr);
 };
 
 }

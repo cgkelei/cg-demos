@@ -19,10 +19,10 @@ public:
 
 	RenderFactory* GetRenderFactory() const;
 
-	FrameBuffer* GetCurrentFrameBuffer() const	{ return mCurrentFrameBuffer; }
-	FrameBuffer* GetScreenFrameBuffer() const	{ return mScreenFrameBuffer; }
-			
-	void BindFrameBuffer(FrameBuffer* fb);
+	shared_ptr<FrameBuffer> GetCurrentFrameBuffer() const	{ return mCurrentFrameBuffer; }
+	shared_ptr<FrameBuffer> GetScreenFrameBuffer() const	{ return mScreenFrameBuffer; }
+
+	void BindFrameBuffer(const shared_ptr<FrameBuffer>& fb);
 
 	void Render( EffectTechnique& tech, RenderOperation& op);
 	void Resize(uint32_t width, uint32_t height);
@@ -32,6 +32,9 @@ public:
 	virtual void SetRasterizerState(const shared_ptr<RasterizerState>& state) = 0;
 	virtual void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0) = 0;
 
+	shared_ptr<DepthStencilState> GetCurrentDepthStencilState() const { return mCurrentDepthStencilState; }
+	shared_ptr<BlendState> GetCurrentBlendState() const { return mCurrentBlendState; }
+	
 	virtual void Create() = 0;
 	virtual void Release() = 0;
 	virtual void ToggleFullscreen(bool fs) = 0;
@@ -40,7 +43,7 @@ public:
 	virtual void AdjustProjectionMatrix(Matrix4f& pOut) = 0;
 
 protected:
-	virtual void DoBindFrameBuffer(FrameBuffer* fb) = 0;
+	virtual void DoBindFrameBuffer(const shared_ptr<FrameBuffer>& fb) = 0;
 	virtual void DoRender( EffectTechnique& tech, RenderOperation& op) = 0;
 
 protected:
@@ -51,8 +54,8 @@ protected:
 	uint32_t mDepthBits, mStencilBits;
 	bool mIsDepthBuffered;
 
-	FrameBuffer* mCurrentFrameBuffer;
-	FrameBuffer* mScreenFrameBuffer;
+	shared_ptr<FrameBuffer> mCurrentFrameBuffer;
+	shared_ptr<FrameBuffer> mScreenFrameBuffer;
 			
 	RenderSettings mRenderSettings;
 

@@ -89,7 +89,7 @@
     <ClCompile Include="OpenGLRenderDevice.cpp" />
     <ClCompile Include="OpenGLRenderFactory.cpp" />
     <ClCompile Include="OpenGLRenderModule.cpp" />
-    <ClCompile Include="OpenGLRenderTarget2DView.cpp" />
+    <ClCompile Include="OpenGLRenderTargetView.cpp" />
     <ClCompile Include="OpenGLRenderView.cpp" />
     <ClCompile Include="OpenGLRenderWindow.cpp" />
     <ClCompile Include="OpenGLSampleStater.cpp" />

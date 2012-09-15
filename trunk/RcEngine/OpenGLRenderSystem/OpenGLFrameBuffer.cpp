@@ -1,5 +1,6 @@
 #include "OpenGLFrameBuffer.h"
 #include "OpenGLRenderDevice.h"
+#include "OpenGLRenderView.h"
 #include <Core/Context.h>
 
 namespace RcEngine {
@@ -52,31 +53,24 @@ void OpenGLFrameBuffer::DoUnbind()
 
 void OpenGLFrameBuffer::Clear( uint32_t flags, ColorRGBA& clr, float depth, uint32_t stencil )
 {
-	RenderDevice* device = Context::GetSingleton().GetRenderDevicePtr();
-	//FrameBuffer* oldFrameBuffer = device->GetCurrentFrameBuffer();
+	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
 
-	device->BindFrameBuffer(this);
+	// frame buffer must binded before clear
+	shared_ptr<FrameBuffer> currentFrameBuffer = Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer();
+	assert( this == currentFrameBuffer.get());
 
-	GLbitfield ogl_flags = 0;
-	if (flags & CF_Color)
+	for (size_t i = 0; i < mColorViews.size(); ++i)
 	{
-		ogl_flags |= GL_COLOR_BUFFER_BIT;
-		glClearColor(clr.R(), clr.G(), clr.B(), clr.A());
-	}
-	if (flags & CF_Depth)
-	{
-		ogl_flags |= GL_DEPTH_BUFFER_BIT;
-		glClearDepth(depth);
-	}
-	if (flags & CF_Stencil)
-	{
-		ogl_flags |= GL_STENCIL_BUFFER_BIT;
-		glClearStencil(stencil);
+		if (mColorViews[i])
+		{
+			mColorViews[i]->ClearColor(clr);
+		}		
 	}
 
-	glClear(ogl_flags);
-
-	//device->BindFrameBuffer(oldFrameBuffer);
+	if (mDepthStencilView)
+	{
+		mDepthStencilView->ClearDepthStencil(depth, stencil);
+	}
 }
 
 void OpenGLFrameBuffer::SwapBuffers()

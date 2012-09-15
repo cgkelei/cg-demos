@@ -39,9 +39,8 @@ public:
 
 	// Views
 	//-------------------------------------------------------------------------------------------------------
-	virtual RenderView* Create2DRenderTargetView(Texture* texture, uint32_t arraySize, uint32_t level);
-
-	virtual RenderView* CreateDepthStencilView(Texture* texture, uint32_t arraySize, uint32_t level);
+	virtual shared_ptr<RenderView> CreateRenderTargetView2D(const shared_ptr<Texture>& texture, uint32_t arraySize, uint32_t level);
+	virtual shared_ptr<RenderView> CreateDepthStencilView(const shared_ptr<Texture>& texture, uint32_t arraySize, uint32_t level);
 
 			
 

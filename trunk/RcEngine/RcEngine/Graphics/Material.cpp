@@ -19,64 +19,113 @@ namespace RcEngine {
 class EffectParamsUsageDefs
 {
 public:
-EffectParamsUsageDefs()
-{
-	mDefs.insert(std::make_pair("WorldMatrix", EPU_WorldMatrix));
-	mDefs.insert(std::make_pair("ViewMatrix",  EPU_ViewMatrix));
-	mDefs.insert(std::make_pair("ProjectionMatrix", EPU_ProjectionMatrix));
-	mDefs.insert(std::make_pair("WorldViewMatrix", EPU_WorldViewMatrix));
-	mDefs.insert(std::make_pair("ViewProjectionMatrix", EPU_ViewProjectionMatrix));
-	mDefs.insert(std::make_pair("WorldViewProjection", EPU_WorldViewProjection));
-	mDefs.insert(std::make_pair("WorldInverseTranspose", EPU_WorldInverseTranspose));
-	mDefs.insert(std::make_pair("WorldMatrixInverse", EPU_WorldMatrixInverse));
-	mDefs.insert(std::make_pair("ViewMatrixInverse", EPU_ViewMatrixInverse));
-	mDefs.insert(std::make_pair("ProjectionMatrixInverse", EPU_ProjectionMatrixInverse));
-	mDefs.insert(std::make_pair("AmbientMaterialColor", EPU_Material_Ambient_Color));
-	mDefs.insert(std::make_pair("DiffuseMaterialColor", EPU_Material_Diffuse_Color));
-	mDefs.insert(std::make_pair("SpecularMaterialColor", EPU_Material_Specular_Color));
-	mDefs.insert(std::make_pair("PowerMaterial", EPU_Material_Power));
-	mDefs.insert(std::make_pair("EmissiveMaterialColor", EPU_Material_Emissive_Color));
-	mDefs.insert(std::make_pair("DiffuseMaterialMap", EPU_Material_Diffuse_Texture));
-	mDefs.insert(std::make_pair("SpecularMaterialMap", EPU_Material_Specular_Texture));
-	mDefs.insert(std::make_pair("NormalMaterialMap", EPU_Material_Normal_Texture));
-	mDefs.insert(std::make_pair("AmbientLight", EPU_Light_Ambient));
-	mDefs.insert(std::make_pair("DiffuseLight", EPU_Light_Diffuse));
-	mDefs.insert(std::make_pair("SpecularLight", EPU_Light_Specular));
-	mDefs.insert(std::make_pair("DirLight", EPU_Light_Dir));
-	mDefs.insert(std::make_pair("PositionLight", EPU_Light_Position));
-}
-
-~EffectParamsUsageDefs()
-{
-	Safe_Delete(msInstance);
-}
-
-static EffectParamsUsageDefs& GetInstance()
-{
-	if (!msInstance)
+	EffectParamsUsageDefs()
 	{
-		msInstance = new EffectParamsUsageDefs();
-	}
-	return *msInstance;
-}
-
-EffectParameterUsage GetUsageType(const String& str)
-{
-	unordered_map<String, EffectParameterUsage>::iterator iter = mDefs.find(str);
-	if (iter != mDefs.end())
-	{
-		return iter->second;
+		mDefs.insert(std::make_pair("WorldMatrix", EPU_WorldMatrix));
+		mDefs.insert(std::make_pair("ViewMatrix",  EPU_ViewMatrix));
+		mDefs.insert(std::make_pair("ProjectionMatrix", EPU_ProjectionMatrix));
+		mDefs.insert(std::make_pair("WorldViewMatrix", EPU_WorldViewMatrix));
+		mDefs.insert(std::make_pair("ViewProjectionMatrix", EPU_ViewProjectionMatrix));
+		mDefs.insert(std::make_pair("WorldViewProjection", EPU_WorldViewProjection));
+		mDefs.insert(std::make_pair("WorldInverseTranspose", EPU_WorldInverseTranspose));
+		mDefs.insert(std::make_pair("WorldMatrixInverse", EPU_WorldMatrixInverse));
+		mDefs.insert(std::make_pair("ViewMatrixInverse", EPU_ViewMatrixInverse));
+		mDefs.insert(std::make_pair("ProjectionMatrixInverse", EPU_ProjectionMatrixInverse));
+		mDefs.insert(std::make_pair("AmbientMaterialColor", EPU_Material_Ambient_Color));
+		mDefs.insert(std::make_pair("DiffuseMaterialColor", EPU_Material_Diffuse_Color));
+		mDefs.insert(std::make_pair("SpecularMaterialColor", EPU_Material_Specular_Color));
+		mDefs.insert(std::make_pair("PowerMaterial", EPU_Material_Power));
+		mDefs.insert(std::make_pair("EmissiveMaterialColor", EPU_Material_Emissive_Color));
+		mDefs.insert(std::make_pair("DiffuseMaterialMap", EPU_Material_Diffuse_Texture));
+		mDefs.insert(std::make_pair("SpecularMaterialMap", EPU_Material_Specular_Texture));
+		mDefs.insert(std::make_pair("NormalMaterialMap", EPU_Material_Normal_Texture));
+		mDefs.insert(std::make_pair("AmbientLight", EPU_Light_Ambient));
+		mDefs.insert(std::make_pair("DiffuseLight", EPU_Light_Diffuse));
+		mDefs.insert(std::make_pair("SpecularLight", EPU_Light_Specular));
+		mDefs.insert(std::make_pair("DirLight", EPU_Light_Dir));
+		mDefs.insert(std::make_pair("PositionLight", EPU_Light_Position));
 	}
 
-	return EPU_Unknown;
-}
+	~EffectParamsUsageDefs()
+	{
+	}
+
+	static EffectParamsUsageDefs& GetInstance()
+	{
+		static EffectParamsUsageDefs singleton;
+		return singleton;
+	}
+
+	EffectParameterUsage GetUsageType(const String& str)
+	{
+		unordered_map<String, EffectParameterUsage>::iterator iter = mDefs.find(str);
+		if (iter != mDefs.end())
+		{
+			return iter->second;
+		}
+
+		return EPU_Unknown;
+	}
 
 private:
-unordered_map<String, EffectParameterUsage> mDefs;
-static EffectParamsUsageDefs* msInstance;
+	unordered_map<String, EffectParameterUsage> mDefs;
 };
 
-EffectParamsUsageDefs* EffectParamsUsageDefs::msInstance;
+class SamplerDefs
+{
+public:
+	static SamplerDefs& GetSingleton() 
+	{
+		static SamplerDefs singleton;
+		return singleton;
+	}
+
+	uint32_t GetSamplerState(const String& name)
+	{
+		auto iter = mDefs.find(name);
+		if (iter != mDefs.end())
+		{
+			return iter->second;
+		}
+
+		return TF_Min_Mag_Mip_Point;
+	}
+
+private:
+	SamplerDefs()
+	{
+		mDefs.insert(std::make_pair("Min_Mag_Map_Point", TF_Min_Mag_Mip_Point));
+		mDefs.insert(std::make_pair("Min_Point_Map_Linear_Mip_Point", TF_Min_Mag_Point_Mip_Linear));
+		mDefs.insert(std::make_pair("Min_Point_Mag_Linear_Mip_Point", TF_Min_Point_Mag_Linear_Mip_Point));
+		mDefs.insert(std::make_pair("Min_Point_Mag_Mip_Linear", TF_Min_Point_Mag_Mip_Linear));
+		mDefs.insert(std::make_pair("Min_Linear_Mag_Mip_Point", TF_Min_Linear_Mag_Mip_Point));
+		mDefs.insert(std::make_pair("Min_Linear_Mag_Point_Mip_Linear", TF_Min_Linear_Mag_Point_Mip_Linear));
+		mDefs.insert(std::make_pair("Min_Mag_Linear_Mip_Point", TF_Min_Mag_Linear_Mip_Point));
+		mDefs.insert(std::make_pair("Min_Mag_Mip_Linear", TF_Min_Mag_Mip_Linear));
+		mDefs.insert(std::make_pair("Anisotropic", TF_Anisotropic));
+
+		mDefs.insert(std::make_pair("Wrap", TAM_Wrap));
+		mDefs.insert(std::make_pair("Mirror", TAM_Mirror));
+		mDefs.insert(std::make_pair("Clamp", TAM_Clamp));
+		mDefs.insert(std::make_pair("Border", TAM_Border));
+		mDefs.insert(std::make_pair("MirrorOnce", TAM_Mirror_Once));
+
+		mDefs.insert(std::make_pair("AlwaysFail", CF_AlwaysFail));
+		mDefs.insert(std::make_pair("AlwaysPass",  CF_AlwaysPass));
+		mDefs.insert(std::make_pair("Less", CF_Less));
+		mDefs.insert(std::make_pair("LessEqual", CF_LessEqual));
+		mDefs.insert(std::make_pair("Equal", CF_Equal));
+		mDefs.insert(std::make_pair("NotEqual", CF_NotEqual));
+		mDefs.insert(std::make_pair("GreaterEqual", CF_GreaterEqual));
+		mDefs.insert(std::make_pair("Greater", CF_Greater));
+
+		mDefs.insert(std::make_pair("VertexShader", ST_Vertex));
+		mDefs.insert(std::make_pair("PixelShader", ST_Pixel));
+	}
+
+private:
+	unordered_map<String, uint32_t> mDefs;
+};
 
 //--------------------------------------------------------------------------------------------------
 Material::Material(void)
@@ -203,42 +252,118 @@ shared_ptr<Material> Material::LoadFrom( Stream& source )
 	// effect first
 	XMLNodePtr effectNode = root->FirstNode("Effect");
 	String effecName =  effectNode->AttributeString("name", "");
-	String effectPath = effectNode->AttributeString("file", "");		
+	String effectPath = effectNode->AttributeString("file", "");
+
+	XMLNodePtr techNode = effectNode->FirstNode("Technique");
+	String techName = techNode->AttributeString("name", "");
 
 	material->mEffect = factory.CreateEffectFromFile(effecName, effectPath);
-	material->mCurrentTechnique = material->mEffect->GetTechniqueByIndex(0);
+	material->mCurrentTechnique = material->mEffect->GetTechniqueByName(techName);
 
-	for (XMLNodePtr paramNode = root->FirstNode(); paramNode; paramNode = paramNode->NextSibling())
+	for (XMLNodePtr samplerNode = root->FirstNode("Sampler"); samplerNode; samplerNode = samplerNode->NextSibling("Sampler"))
 	{
-		if (paramNode->NodeName() == "Parameter")
-		{
-			MaterialParameter* parameter = new MaterialParameter;
-			parameter->Name = paramNode->AttributeString("name", "");
-			parameter->EffectParam = material->mEffect->GetParameterByName(parameter->Name);
-			//parameter->Type = parameter->EffectParam->GetParameterType();
-			String semantic =  paramNode->AttributeString("semantic", "");
-			parameter->IsSemantic = semantic.length() > 0;
+		SamplerStateDesc desc;
+		
+		String samplerName = samplerNode->AttributeString("name", "");
 
-			if (parameter->IsSemantic)
+		for (XMLNodePtr stateNode = samplerNode->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+		{	
+			String stateName = stateNode->AttributeString("name", "");
+			if (stateName == "Filter")
 			{
-				parameter->Usage = EffectParamsUsageDefs::GetInstance().GetUsageType(semantic);
-			}else
-			{
-				parameter->Usage = EPU_Unknown;
+				String value = stateNode->Attribute("value")->ValueString();
+				desc.Filter = (TextureFilter)SamplerDefs::GetSingleton().GetSamplerState(value);
 			}
-
-			String value = paramNode->AttributeString("value", "");		
-
-			if (parameter->Type == EPT_Sampler || parameter->Type == EPT_Texture2D ||
-				parameter->Type == EPT_TextureCUBE || parameter->Type == EPT_Texture3D )
-			{	
-				if (!value.empty())
-				{
-					material->mTextures[parameter->Name] = factory.CreateTextureFromFile(value, 0);
-				}
-			}	
-			material->mCachedEffectParams.push_back(parameter);
+			else if (stateName == "AddressU")
+			{
+				String value = stateNode->Attribute("value")->ValueString();
+				desc.AddressU = (TextureAddressMode)SamplerDefs::GetSingleton().GetSamplerState(value);
+			}
+			else if (stateName == "AddressV")
+			{
+				String value = stateNode->Attribute("value")->ValueString();
+				desc.AddressV = (TextureAddressMode)SamplerDefs::GetSingleton().GetSamplerState(value);
+			}
+			else if (stateName == "AddressW")
+			{
+				String value = stateNode->Attribute("value")->ValueString();
+				desc.AddressW = (TextureAddressMode)SamplerDefs::GetSingleton().GetSamplerState(value);
+			}
+			else if (stateName == "MaxAnisotropy")
+			{
+				uint32_t value = stateNode->Attribute("value")->ValueUInt();
+				desc.MaxAnisotropy = value;
+			}
+			else if (stateName == "MinLod")
+			{
+				float value = stateNode->Attribute("value")->ValueFloat();
+				desc.MinLOD = value;
+			}
+			else if (stateName == "MaxLod")
+			{
+				float value = stateNode->Attribute("value")->ValueFloat();
+				desc.MaxLOD = value;
+			}
+			else if (stateName == "ComparisonFunc")
+			{
+				String value = stateNode->Attribute("value")->ValueString();
+				desc.ComparisonFunc = (CompareFunction)SamplerDefs::GetSingleton().GetSamplerState(value);
+			}
+			else if (stateName == "BorderColor")
+			{
+				float r = stateNode->Attribute("r")->ValueFloat();
+				float g = stateNode->Attribute("g")->ValueFloat();
+				float b = stateNode->Attribute("b")->ValueFloat();
+				float a = stateNode->Attribute("a")->ValueFloat();
+				desc.BorderColor = ColorRGBA(r,g,b,a);
+			}
+			else
+			{
+				ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Unknown sampler state: " + stateName, 
+					"Material::LoadFrom");
+			}
 		}
+		material->mSamplerStates.insert( std::make_pair(samplerName, factory.CreateSamplerState(desc)) );
+	}
+
+	for (XMLNodePtr paramNode = root->FirstNode("Parameter"); paramNode; paramNode = paramNode->NextSibling("Parameter"))
+	{
+		MaterialParameter* parameter = new MaterialParameter;
+		parameter->Name = paramNode->AttributeString("name", "");
+		parameter->EffectParam = material->mEffect->GetParameterByName(parameter->Name);
+		parameter->Type = parameter->EffectParam->GetParameterType();
+		String semantic =  paramNode->AttributeString("semantic", "");
+		parameter->IsSemantic = semantic.length() > 0;
+
+		if (parameter->IsSemantic)
+		{
+			parameter->Usage = EffectParamsUsageDefs::GetInstance().GetUsageType(semantic);
+		}else
+		{
+			parameter->Usage = EPU_Unknown;
+		}
+
+		String value = paramNode->AttributeString("value", "");		
+
+		// texture type
+		if (parameter->Type == EPT_Texture1D || parameter->Type == EPT_Texture2D ||
+			parameter->Type == EPT_TextureCUBE || parameter->Type == EPT_Texture3D ||
+			parameter->Type == EPT_Texture1DArray || parameter->Type == EPT_Texture2DArray ||
+			parameter->Type == EPT_Texture3DArray || parameter->Type == EPT_TextureCUBEArray)
+		{	
+			String stageValue = paramNode->Attribute("stage")->ValueString();
+			ShaderType stage = (ShaderType)SamplerDefs::GetSingleton().GetSamplerState(stageValue);
+
+			String samplerValue = paramNode->Attribute("sampler")->ValueString();
+			shared_ptr<SamplerState> sampler = (material->mSamplerStates)[samplerValue];
+
+
+			if (!value.empty())
+			{
+				material->mTextures[parameter->Name] = factory.CreateTextureFromFile(value, 0);
+			}
+		}	
+		material->mCachedEffectParams.push_back(parameter);
 	}
 
 	return material;

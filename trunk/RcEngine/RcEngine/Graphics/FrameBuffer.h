@@ -32,16 +32,24 @@ public:
 	bool IsDepthBuffered() const			{ return mIsDepthBuffered; }
 	bool IsDirty() const					{ return mDirty; }
 
+	/**
+	 * Clear all render target of the frame buffer.
+	 * note that before do clear, you need to bind the frame buffer as current device 
+	 * frame buffer first, it is user's responsibity.
+	 */
 	virtual void Clear(uint32_t flags, ColorRGBA& clr, float depth, uint32_t stencil) = 0;
+	
+	
 	virtual void SwapBuffers() = 0;
+	
 	virtual void Resize(uint32_t width, uint32_t height) = 0;
 
 	Camera* GetCamera() const			{ return mViewport.AttachCamera; }
 
-	RenderView* GetAttachedView(uint32_t att);
+	shared_ptr<RenderView> GetAttachedView(Attachment att);
 	 
-	void Attach(uint32_t att, RenderView* view);
-	void Detach(uint32_t att);
+	void Attach(Attachment att, const shared_ptr<RenderView>& view);
+	void Detach(Attachment att);
 
 	//Called when this frame buffer is binded
 	void OnBind();
@@ -61,8 +69,8 @@ protected:
 	uint32_t mDepthBits, mStencilBits;
 	uint32_t mColorDepth;
 
-	std::vector<RenderView*> mColorViews;
-	RenderView* mDepthStencilView;
+	vector<shared_ptr<RenderView> > mColorViews;
+	shared_ptr<RenderView> mDepthStencilView;
 
 	Viewport mViewport;
 

@@ -8,6 +8,11 @@ OpenGLTexture::OpenGLTexture( TextureType type, PixelFormat format, uint32_t arr
 {
 	mTextureArraySize = arraySize;
 
+	if ( (mTextureArraySize > 1) && !GLEW_EXT_texture_array)
+	{
+		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Texture Array is not supported!", "OpenGLTexture::OpenGLTexture");
+	}
+
 	switch(mType)
 	{
 	case TT_Texture1D:
@@ -21,7 +26,6 @@ OpenGLTexture::OpenGLTexture( TextureType type, PixelFormat format, uint32_t arr
 		break;
 	case  TT_TextureCube:
 		mTargetType = (mTextureArraySize > 1) ? GL_TEXTURE_CUBE_MAP_ARRAY : GL_TEXTURE_CUBE_MAP;
-
 		break;
 	default:
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Texture type not supported!", "OpenGLTexture::OpenGLTexture");

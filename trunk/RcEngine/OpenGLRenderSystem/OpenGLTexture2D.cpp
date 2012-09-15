@@ -8,6 +8,7 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 {
 	if( numMipMaps == 0 )
 	{
+		// calculate mip map levels
 		mMipMaps = 1;
 		uint32_t w = width;
 		uint32_t h = height;
@@ -26,6 +27,7 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 	mWidths.resize(mMipMaps);
 	mHeights.resize(mMipMaps);
 	{
+		// store every level width and height
 		uint32_t w = width;
 		uint32_t h = height;
 		for(uint32_t level = 0; level < mMipMaps; level++)
@@ -35,7 +37,7 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 			w = std::max<uint32_t>(1U, w / 2);
 			h = std::max<uint32_t>(1U, h / 2);
 		}
-	}
+	} 
 
 	uint32_t texelSize = PixelFormatUtils::GetNumElemBytes(mFormat);
 
@@ -44,15 +46,21 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 	GLenum gltype;
 	OpenGLMapping::Mapping(glinternalFormat, glformat, gltype, mFormat);
 
-	mTextureData.resize(mTextureArraySize * mMipMaps);
-
-
+	if (GLEW_ARB_pixel_buffer_object)
+	{
+		mPixelBuffers.resize(mTextureArraySize*mMipMaps);
+		glGenBuffers(static_cast<GLsizei>(mPixelBuffers.size()), &mPixelBuffers[0]);
+	}
+	else
+	{
+		mTextureData.resize(mTextureArraySize * mMipMaps);
+	}
+	
 	if(mSampleCount <= 1)
 	{
+		// not multiple sample 
 		glGenTextures(1, &mTextureID);
 		glBindTexture(mTargetType, mTextureID);
-		glTexParameteri(mTargetType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(mTargetType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(mTargetType, GL_TEXTURE_MAX_LEVEL, mMipMaps - 1);
 
 		for (uint32_t  arrIndex = 0; arrIndex < mTextureArraySize; ++ arrIndex)
@@ -62,12 +70,26 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 				uint32_t levelWidth = mWidths[level];
 				uint32_t levelHeight = mHeights[level];
 
+				if (!mPixelBuffers.empty())
+				{
+					glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, mPixelBuffers[arrIndex * mMipMaps + level]);
+				}
+
 				if (PixelFormatUtils::IsCompressed(mFormat))
 				{
 					int blockSize = (glinternalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16; 
 					uint32_t imageSize = ((levelWidth+3)/4)*((levelHeight+3)/4)*blockSize; 
-					// resize texture data for copy
-					mTextureData[arrIndex * mMipMaps + level].resize(imageSize);
+					
+					if (!mPixelBuffers.empty())
+					{
+						glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, imageSize, NULL, GL_STREAM_DRAW);
+						glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+					}
+					else
+					{
+						// resize texture data for copy
+						mTextureData[arrIndex * mMipMaps + level].resize(imageSize);
+					}
 
 					if (mTextureArraySize > 1)
 					{	
@@ -89,8 +111,17 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 				else
 				{
 					uint32_t imageSize = levelWidth * levelHeight * texelSize;
-					// resize texture data for copy
-					mTextureData[arrIndex * mMipMaps + level].resize(imageSize);
+
+					if (!mPixelBuffers.empty())
+					{
+						glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, imageSize, NULL, GL_STREAM_DRAW);
+						glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+					}
+					else
+					{
+						// resize texture data for copy
+						mTextureData[arrIndex * mMipMaps + level].resize(imageSize);
+					}				
 
 					if (mTextureArraySize > 1)
 					{

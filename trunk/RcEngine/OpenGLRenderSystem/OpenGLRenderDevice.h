@@ -35,7 +35,7 @@ public:
 	void DoRender( EffectTechnique& tech, RenderOperation& op);
 
 protected:
-	void DoBindFrameBuffer(FrameBuffer* fb);
+	void DoBindFrameBuffer( const shared_ptr<FrameBuffer>& fb );
 
 private:
 	void BindVertexBufferOGL(const shared_ptr<GraphicsBuffer>& vertexBuffer );

@@ -30,9 +30,10 @@ namespace RcEngine {
 		cam->SetProjectionParams(cam->GetFov(), (float)width/(float)height, cam->GetNearPlane(), cam->GetFarPlane());
 	}
 
-	void RenderDevice::BindFrameBuffer( FrameBuffer* fb )
+
+	void RenderDevice::BindFrameBuffer( const shared_ptr<FrameBuffer>& fb )
 	{
-		assert(fb != NULL);
+		assert(fb);
 
 		if( mCurrentFrameBuffer && (fb != mCurrentFrameBuffer) )
 		{	

@@ -46,10 +46,10 @@ void TestApp::Initialize()
 	camera->SetViewParams(Vector3f(0, 0, 40), Vector3f(0, 0, 0), up);
 	camera->SetProjectionParams(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 10000.0f );
 
-	mCameraControler = new FPSCameraControler;
+	//mCameraControler = new FPSCameraControler;
 	//mCameraControler = new ModelViewerCameraControler();
 	//mCameraControler->SetWindowSize(GetMainWindow()->GetWidth(), GetMainWindow()->GetHeight());
-	mCameraControler->AttachCamera(camera);
+	//mCameraControler->AttachCamera(camera);
 }
 
 void TestApp::LoadContent()
@@ -105,8 +105,8 @@ void TestApp::Render()
 
 void TestApp::Update( float deltaTime )
 {
-	static float degree = 0;
-	degree += deltaTime * 1.0f;
+	/*static float degree = 0;
+	degree += deltaTime * 1.0f;*/
 
 	/*SceneNode* dwarfNode = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf");
 	SceneNode* dwarfNode1 = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf1");

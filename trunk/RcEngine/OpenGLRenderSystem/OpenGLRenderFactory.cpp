@@ -161,15 +161,14 @@ shared_ptr<Texture> OpenGLRenderFactory::CreateTextureFromFile( const std::strin
 	ENGINE_EXCEPT(Exception::ERR_RT_ASSERTION_FAILED, "Unsupported Texture Format", "OpenGLRenderFactory::CreateTextureFromFile");
 }
 
-
-RenderView* OpenGLRenderFactory::Create2DRenderTargetView( Texture* texture, uint32_t arraySize, uint32_t level )
+shared_ptr<RenderView> OpenGLRenderFactory::CreateDepthStencilView( const shared_ptr<Texture>& texture, uint32_t arraySize, uint32_t level )
 {
-	return new OpenGLRenderTarget2DView(texture, arraySize, level);
+	return NULL;
 }
 
-RenderView* OpenGLRenderFactory::CreateDepthStencilView( Texture* texture, uint32_t arraySize, uint32_t level )
+shared_ptr<RenderView> OpenGLRenderFactory::CreateRenderTargetView2D( const shared_ptr<Texture>& texture, uint32_t arraySize, uint32_t level )
 {
-	return 0;
+	return NULL;
 }
 
 shared_ptr<Shader> OpenGLRenderFactory::CreateShader( ShaderType type )
@@ -181,5 +180,7 @@ shared_ptr<ShaderProgram> OpenGLRenderFactory::CreateShaderProgram( Effect& effe
 {
 	return std::make_shared<OpenGLShaderProgram>(effect);
 }
+
+
 
 }
