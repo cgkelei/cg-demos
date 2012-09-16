@@ -5,6 +5,7 @@
 #include <Math/ColorRGBA.h>
 #include <Graphics/GraphicsCommon.h>
 #include <Graphics/EffectAnnotation.h>
+#include <Graphics/EffectParameter.h>
 
 namespace RcEngine {
 	
@@ -64,9 +65,7 @@ protected:
 	ColorRGBA mEmissive;
 	float mPower;
 
-	//shared_ptr<Texture> mTextures[MaxMaterialTextures];
-	//unordered_map<int32_t, String> mTextureNames;
-	unordered_map<String, shared_ptr<Texture> > mTextures;
+	unordered_map<String, TextureLayer > mTextures;
 			
 };
 

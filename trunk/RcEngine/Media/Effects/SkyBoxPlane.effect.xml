@@ -1,0 +1,52 @@
+<Effect name="SkyBoxPlane">
+
+<Shader name="VS" stage="Vertex" entry="main">
+<![CDATA[
+
+#version 330
+
+in vec3 Position;
+in vec2 Tex;
+
+out vec2 oTex;
+
+uniform mat4 World;
+uniform mat4 ViewProj;
+
+void main()
+{
+	gl_Position = vec4(Position, 1.0) * World * ViewProj;
+	oTex = vec2(Tex.x, 1-Tex.y);
+}
+
+]]>
+</Shader>
+
+<Shader name="PS" stage="Pixel" entry="main">
+<![CDATA[
+
+#version 330
+
+in vec2 oTex;
+
+out vec4 FragColor;
+
+uniform sampler2D SkyPlaneMap;
+
+void main()
+{
+	vec4 diffuse = texture(SkyPlaneMap, oTex);
+	FragColor = diffuse;
+}
+
+]]>
+</Shader>
+
+<Technique name="SkyBoxPlane">
+	<Pass name="p0">
+		<VertexShader name="VS"/>
+		<PixelShader name="PS"/>
+	</Pass>
+</Technique>
+
+</Effect>

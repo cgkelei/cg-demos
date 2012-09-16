@@ -531,13 +531,24 @@ shared_ptr<Effect> Effect::LoadFrom( Stream& source )
 			if (stage == String("Vertex"))
 			{
 				shared_ptr<Shader> vertexShader = factory.CreateShader(ST_Vertex);
-				vertexShader->Compile(shaderSource);
+				
+				if( !vertexShader->Compile(shaderSource) )
+				{
+					std::cout << vertexShader->GetCompileInfo() << std::endl;
+					ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Vertex Shader:" + name  + " compile error!",
+						"Effect::LoadForm");
+				}
 				shaders.insert(std::make_pair(name, vertexShader));
 			}
 			else if (stage == String("Pixel"))
 			{
 				shared_ptr<Shader> pixelShader = factory.CreateShader(ST_Pixel);
-				pixelShader->Compile(shaderSource);
+				if( !pixelShader->Compile(shaderSource))
+				{
+					std::cout << pixelShader->GetCompileInfo() << std::endl;
+					ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Pixel shader:" + name  + " compile error!",
+						"Effect::LoadForm");
+				}
 				shaders.insert(std::make_pair(name, pixelShader));
 			}
 		}
@@ -564,6 +575,8 @@ shared_ptr<Effect> Effect::LoadFrom( Stream& source )
 				pass->mBlendColor, pass->mSampleMask, pass->mFrontStencilRef, pass->mBackStencilRef);
 
 			pass->mDepthStencilState = factory.CreateDepthStencilState(dsDesc);
+			pass->mBlendState = factory.CreateBlendState(blendDesc);
+			pass->mRasterizerState = factory.CreateRasterizerState(rasDesc);
 
 			shared_ptr<ShaderProgram> program = factory.CreateShaderProgram(*effect);
 

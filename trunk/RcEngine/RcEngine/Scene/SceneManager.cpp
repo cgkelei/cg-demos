@@ -81,8 +81,6 @@ void SceneManager::UpdateRenderQueue( Camera* cam )
 		Matrix4f mat = mSkyBoxNode->GetWorldTransform();
 		mSkyBox->AddToRenderQueue(mRendeQueue);
 	}
-
-	
 }
 
 void SceneManager::UpdateSceneGraph( )
@@ -115,6 +113,7 @@ void SceneManager::RenderScene()
 
 	for (size_t i = 0; i < mRendeQueue.size(); ++i)
 	{
+
 		mRendeQueue[i].Renderable->Render();
 	}
 }
@@ -152,7 +151,7 @@ void SceneManager::CreateSkyBox( const shared_ptr<Texture>& frontTex, const shar
 
 	if (!mSkyBoxNode)
 	{
-		mSkyBoxNode = static_cast<SceneNode*>(mSceneRoot->CreateChildSceneNode("SkyBox"));
+		mSkyBoxNode = static_cast<SceneNode*>(GetRootSceneNode()->CreateChildSceneNode("SkyBox"));
 	}
 
 	mSkyBox = new SkyBox(distance, false);
@@ -165,22 +164,22 @@ void SceneManager::CreateSkyBox( const shared_ptr<Texture>& frontTex, const shar
 	shared_ptr<Material> topPlaneMat = frontPlaneMat->Clone();
 	shared_ptr<Material> bottomPlaneMat = frontPlaneMat->Clone();
 
-	frontPlaneMat->SetTexture("DiffuseMap", frontTex);
+	frontPlaneMat->SetTexture("SkyPlaneMap", frontTex);
 	mSkyBox->SetMaterial(SkyBox::Front, frontPlaneMat);
 
-	backPlaneMat->SetTexture("DiffuseMap", backTex);
+	backPlaneMat->SetTexture("SkyPlaneMap", backTex);
 	mSkyBox->SetMaterial(SkyBox::Back, backPlaneMat);
 
-	leftPlaneMat->SetTexture("DiffuseMap", leftTex);
+	leftPlaneMat->SetTexture("SkyPlaneMap", leftTex);
 	mSkyBox->SetMaterial(SkyBox::Left, leftPlaneMat);
 
-	rightPlaneMat->SetTexture("DiffuseMap", rightTex);
+	rightPlaneMat->SetTexture("SkyPlaneMap", rightTex);
 	mSkyBox->SetMaterial(SkyBox::Right, rightPlaneMat);
 
-	topPlaneMat->SetTexture("DiffuseMap", topTex);
+	topPlaneMat->SetTexture("SkyPlaneMap", topTex);
 	mSkyBox->SetMaterial(SkyBox::Up, topPlaneMat);
 
-	bottomPlaneMat->SetTexture("DiffuseMap", bottomTex);
+	bottomPlaneMat->SetTexture("SkyPlaneMap", bottomTex);
 	mSkyBox->SetMaterial(SkyBox::Down, bottomPlaneMat);
 
 	mSkyBoxNode->AttachObject(mSkyBox);

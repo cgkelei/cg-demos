@@ -35,8 +35,6 @@ protected:
 		String Name;
 		EffectParameterType Type;
 		std::function<void()> ShaderParamSetFunc;
-		unsigned int TextureSamplerIndex;
-
 		EffectParameter* EffectParameter;
 	};
 	vector<ParameterBind> mParameterBinds;

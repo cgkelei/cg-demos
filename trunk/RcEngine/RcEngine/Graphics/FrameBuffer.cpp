@@ -5,7 +5,7 @@ namespace RcEngine {
 
 
 FrameBuffer::FrameBuffer(uint32_t width, uint32_t height,  bool offscreen /*= true*/ )
-	: mWidth(width), mHeight(height), mDepthStencilView(0), mDirty(false), mOffscreen(offscreen),
+	: mWidth(width), mHeight(height), mDepthStencilView(0), mDirty(true), mOffscreen(offscreen),
 	mViewport(0, 0, width, height)
 {
 			

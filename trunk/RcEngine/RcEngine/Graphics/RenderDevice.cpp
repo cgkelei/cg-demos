@@ -11,7 +11,6 @@
 
 namespace RcEngine {
 
-
 	RenderDevice::RenderDevice(void)
 		: mRenderFactory(0), mCurrentFrameBuffer(0), mScreenFrameBuffer(0)
 	{

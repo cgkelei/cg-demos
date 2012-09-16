@@ -102,7 +102,7 @@ SimpleTexturedQuad::SimpleTexturedQuad(const String& name)
 {
 	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 
-	//mMaterial = factory.CreateMaterialFromFile("SimpleTextured", "../Media/Materials/SimpleTextured.xml");
+	mMaterial = factory.CreateMaterialFromFile("SimpleTextured", "../Media/Materials/SimpleTextured.xml");
 
 	struct PosNormalTexVertex
 	{
@@ -152,6 +152,11 @@ SimpleTexturedQuad::SimpleTexturedQuad(const String& name)
 	mRenderOperation->IndexType = IBT_Bit16;
 	mRenderOperation->StartIndexLocation = 0;
 	mRenderOperation->StartVertexLocation = 0;
+}
+
+void SimpleTexturedQuad::SetDiffuseTexture( const shared_ptr<Texture>& diffuseMap )
+{
+	mMaterial->SetTexture("DiffuseMap", diffuseMap);
 }
 
 SimpleTexturedQuad::~SimpleTexturedQuad()

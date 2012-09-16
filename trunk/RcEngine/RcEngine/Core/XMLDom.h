@@ -111,7 +111,7 @@ public:
 
 	uint32_t ValueUInt()   const;
 	int32_t  ValueInt()    const;
-	float  ValueFlaot()  const;
+	float  ValueFloat()  const;
 	std::string ValueString() const;
 
 private:
