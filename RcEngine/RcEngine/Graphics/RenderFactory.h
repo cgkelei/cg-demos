@@ -92,6 +92,9 @@ public:
 	 */
 	shared_ptr<RasterizerState> CreateRasterizerState( const RasterizerStateDesc& desc );
 
+	/**
+	 * Create a sampler state object.
+	 */
 	shared_ptr<SamplerState> CreateSamplerState( const SamplerStateDesc& desc );
 
 	virtual shared_ptr<Shader> CreateShader(ShaderType type) = 0;
@@ -113,7 +116,7 @@ protected:
 
 	std::map<DepthStencilStateDesc, shared_ptr<DepthStencilState> > mDepthStecilStatePool;
 	std::map<RasterizerStateDesc, shared_ptr<RasterizerState> > mRasterizerStatePool;
-	//std::map<SamplerStateDesc, shared_ptr<SamplerState> > mSamplerStatePool;
+	std::map<SamplerStateDesc, shared_ptr<SamplerState> > mSamplerStatePool;
 	std::map<BlendStateDesc, shared_ptr<BlendState> > mBlendStatePool;
 
 

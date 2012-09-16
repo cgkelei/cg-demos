@@ -12,6 +12,7 @@
 #include <Core/Context.h>
 #include <Core/Exception.h>
 #include <Core/XMLDom.h>
+#include <Core/Utility.h>
 
 
 namespace RcEngine {
@@ -199,14 +200,14 @@ void Material::ApplyMaterial()
 		}
 	}
 
-	if (mDepthStencilState)
-		renderDevice->SetDepthStencilState(mDepthStencilState);
+		if (mDepthStencilState)
+			renderDevice->SetDepthStencilState(mDepthStencilState);
 
 	/*if (mBlendState)
 		renderDevice->SetBlendState(mBlendState);*/
 	
-	if (mRasterizerState)
-		renderDevice->SetRasterizerState(mRasterizerState);
+	/*if (mRasterizerState)
+		renderDevice->SetRasterizerState(mRasterizerState);*/
 
 }
 
@@ -328,9 +329,19 @@ shared_ptr<Material> Material::LoadFrom( Stream& source )
 
 	for (XMLNodePtr paramNode = root->FirstNode("Parameter"); paramNode; paramNode = paramNode->NextSibling("Parameter"))
 	{
+		String paramName =paramNode->Attribute("name")->ValueString();
+		EffectParameter* effectParam = material->mEffect->GetParameterByName(paramName);
+
+		if (!effectParam)
+		{
+			continue;
+			/*ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Material Parameter: " + parameter->Name + "doesn't exit in effect!",
+				"Material::LoadFrom");*/
+		}
+
 		MaterialParameter* parameter = new MaterialParameter;
-		parameter->Name = paramNode->AttributeString("name", "");
-		parameter->EffectParam = material->mEffect->GetParameterByName(parameter->Name);
+		parameter->Name = paramName;
+		parameter->EffectParam = effectParam;
 		parameter->Type = parameter->EffectParam->GetParameterType();
 		String semantic =  paramNode->AttributeString("semantic", "");
 		parameter->IsSemantic = semantic.length() > 0;
@@ -341,9 +352,7 @@ shared_ptr<Material> Material::LoadFrom( Stream& source )
 		}else
 		{
 			parameter->Usage = EPU_Unknown;
-		}
-
-		String value = paramNode->AttributeString("value", "");		
+		}	
 
 		// texture type
 		if (parameter->Type == EPT_Texture1D || parameter->Type == EPT_Texture2D ||
@@ -351,18 +360,81 @@ shared_ptr<Material> Material::LoadFrom( Stream& source )
 			parameter->Type == EPT_Texture1DArray || parameter->Type == EPT_Texture2DArray ||
 			parameter->Type == EPT_Texture3DArray || parameter->Type == EPT_TextureCUBEArray)
 		{	
+			TextureLayer layer;
+
 			String stageValue = paramNode->Attribute("stage")->ValueString();
-			ShaderType stage = (ShaderType)SamplerDefs::GetSingleton().GetSamplerState(stageValue);
+			layer.Stage = (ShaderType)SamplerDefs::GetSingleton().GetSamplerState(stageValue);
+			layer.TexUnit = paramNode->Attribute("texUnit")->ValueUInt();
 
 			String samplerValue = paramNode->Attribute("sampler")->ValueString();
-			shared_ptr<SamplerState> sampler = (material->mSamplerStates)[samplerValue];
+			auto found = material->mSamplerStates.find(samplerValue) ;
+			if (found == material->mSamplerStates.end())
+			{
+				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Sampler: " + samplerValue + "doesn't exit",
+					"Material::LoadFrom");
+			}
+			layer.Sampler = found->second;
 
+			String texFile = paramNode->AttributeString("value", "");
+			if (!texFile.empty())
+			{
+				layer.Texture = factory.CreateTextureFromFile(texFile, 0);
+			}
+			material->mTextures[parameter->Name] = layer;
+		}
 
+		// Material Color
+		if (parameter->Usage == EPU_Material_Ambient_Color)
+		{
+			String value = paramNode->AttributeString("value", "");
 			if (!value.empty())
 			{
-				material->mTextures[parameter->Name] = factory.CreateTextureFromFile(value, 0);
+				std::stringstream sss;
+				sss << value;
+				sss >> material->mAmbient.R() >> material->mAmbient.G() >> material->mAmbient.B() >> material->mAmbient.A();
+			}			
+		}
+		else if (parameter->Usage == EPU_Material_Diffuse_Color)
+		{
+			String value = paramNode->AttributeString("value", "");
+			if (!value.empty())
+			{
+				std::stringstream sss;
+				sss << value;
+				sss >> material->mDiffuse.R() >> material->mDiffuse.G() >> material->mDiffuse.B() >> material->mDiffuse.A();
+		
 			}
-		}	
+		}
+		else if (parameter->Usage == EPU_Material_Specular_Color)
+		{
+			String value = paramNode->AttributeString("value", "");
+			if (!value.empty())
+			{
+				std::stringstream sss;
+				sss << value;
+				sss >> material->mSpecular.R() >> material->mSpecular.G() >> material->mSpecular.B() >> material->mSpecular.A();
+			}
+		}
+		else if (parameter->Usage == EPU_Material_Emissive_Color)
+		{
+			String value = paramNode->AttributeString("value", "");
+			if (!value.empty())
+			{
+				std::stringstream sss;
+				sss << value;
+				sss >> material->mEmissive.R() >> material->mEmissive.G() >> material->mEmissive.B() >> material->mEmissive.A();
+			}
+		}
+		else if (parameter->Usage == EPU_Material_Power)
+		{
+			String value = paramNode->AttributeString("value", "");
+			if (!value.empty())
+			{
+				material->mPower = LexicalCast<float>(value);
+			}
+			
+		}
+			
 		material->mCachedEffectParams.push_back(parameter);
 	}
 
@@ -410,11 +482,11 @@ void Material::SetTexture( const String& texUint, const shared_ptr<Texture>& tex
 	auto found = mTextures.find(texUint);
 	if (found != mTextures.end())
 	{
-		found->second = texture;
+		found->second.Texture = texture;
 	}
 	else
 	{
-		mTextures.insert( std::make_pair(texUint, texture) );
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Texture Unit: "+texUint +"doesn't exit!", "Material::SetTexture");
 	}
 }
 

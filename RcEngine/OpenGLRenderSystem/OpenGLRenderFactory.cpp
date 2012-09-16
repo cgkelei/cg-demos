@@ -140,8 +140,7 @@ shared_ptr<Texture> OpenGLRenderFactory::CreateTextureFromFile( const std::strin
 				imageData[face*numMipmaps+level].pData = image.getLevel(level, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face);
 				imageData[face*numMipmaps+level].rowPitch = image.getImageSize(level);
 				imageData[face*numMipmaps+level].slicePitch = 0;
-			}
-			
+			}	
 		}
 	}
 

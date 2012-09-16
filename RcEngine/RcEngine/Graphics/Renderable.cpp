@@ -30,6 +30,7 @@ EffectTechnique* Renderable::GetTechnique() const
 void Renderable::Render()
 {
 	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
+	shared_ptr<Material> mat = GetMaterial();
 	EffectTechnique* technique = GetTechnique();
 			
 	OnRenderBegin();

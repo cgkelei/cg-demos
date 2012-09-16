@@ -85,7 +85,7 @@ shared_ptr<SamplerState> RenderFactory::CreateSamplerState( const SamplerStateDe
 {
 	shared_ptr<SamplerState> retVal;
 
-	/*auto found = mSamplerStatePool.find(desc);
+	auto found = mSamplerStatePool.find(desc);
 	if (found == mSamplerStatePool.end())
 	{
 		retVal = CreateSamplerStateImpl(desc);
@@ -94,7 +94,7 @@ shared_ptr<SamplerState> RenderFactory::CreateSamplerState( const SamplerStateDe
 	else
 	{
 		retVal = found->second;
-	}*/
+	}
 	return retVal;
 }
 

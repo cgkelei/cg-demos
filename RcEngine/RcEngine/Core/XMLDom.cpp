@@ -393,7 +393,7 @@ int32_t XMLNode::ValueInt() const
 	return LexicalCast<int32_t>(ValueString());
 }
 
-float XMLNode::ValueFlaot() const
+float XMLNode::ValueFloat() const
 {
 	return LexicalCast<float>(ValueString());
 }

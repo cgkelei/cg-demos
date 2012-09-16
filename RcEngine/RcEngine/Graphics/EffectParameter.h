@@ -16,7 +16,7 @@ struct TextureLayer
 	shared_ptr<Texture> Texture;
 	shared_ptr<SamplerState> Sampler;
 	ShaderType Stage;
-	uint32_t Unit;
+	uint32_t TexUnit;
 };
 
 
@@ -135,7 +135,7 @@ public:
 	{
 		if (mTextureLayer.Texture != value.Texture ||
 			mTextureLayer.Stage != value.Stage ||
-			mTextureLayer.Unit != value.Unit ||
+			mTextureLayer.TexUnit != value.TexUnit ||
 			mTextureLayer.Sampler != value.Sampler)
 		{
 			mTextureLayer = value;

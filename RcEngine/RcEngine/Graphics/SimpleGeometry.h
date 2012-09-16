@@ -23,7 +23,7 @@ public:
 	const shared_ptr<Material>& GetMaterial() const				  { return mMaterial; }
 	uint32_t GetWorldTransformsCount() const					  { return 1; }
 	void GetWorldTransforms(Matrix4f* xform) const;
-
+	bool Renderable() const	{ return true; }
 	void SetMaterial( const shared_ptr<Material>& mat )			{ mMaterial = mat; }
 
 protected:
@@ -47,6 +47,8 @@ class _ApiExport SimpleTexturedQuad : public RenderableHelper
 public:
 	SimpleTexturedQuad(const String& name);
 	~SimpleTexturedQuad();
+
+	void SetDiffuseTexture( const shared_ptr<Texture>& diffuseMap );
 
 protected:
 	shared_ptr<GraphicsBuffer> mVertexBuffer;

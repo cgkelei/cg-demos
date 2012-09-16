@@ -308,7 +308,9 @@ public:
 		if (Param->Dirty())
 		{
 			Matrix4f value; Param->GetValue(value);
-			glUniformMatrix4fv(Location, 1, false, &value[0]);
+
+			// we know that glsl matrix is column major, so we need transpose out matrix.
+			glUniformMatrix4fv(Location, 1, true, &value[0]);
 			Param->ClearDirty();
 		}
 	}
@@ -332,7 +334,7 @@ public:
 			vector<Matrix4f> value; Param->GetValue(value);
 			if (!value.empty())
 			{
-				glUniformMatrix4fv(Location, value.size(), false,
+				glUniformMatrix4fv(Location, value.size(), true,
 					reinterpret_cast<float*>(&value[0][0]));
 			}
 			Param->ClearDirty();
@@ -359,12 +361,12 @@ public:
 			TextureLayer textureLayer; Param->GetValue(textureLayer);
 			shared_ptr<OpenGLTexture> textureOGL = std::static_pointer_cast<OpenGLTexture>(textureLayer.Texture);
 			
-			glActiveTexture(GL_TEXTURE0+textureLayer.Unit);
+			glActiveTexture(GL_TEXTURE0+textureLayer.TexUnit);
 			glBindTexture(textureOGL->GetOpenGLTextureTarget(), textureOGL->GetOpenGLTexture());
 			glUniform1ui(Location, textureOGL->GetOpenGLTexture());
 
 			RenderDevice& device = Context::GetSingleton().GetRenderDevice();
-			device.SetSamplerState(textureLayer.Stage, textureLayer.Unit, textureLayer.Sampler);
+			device.SetSamplerState(textureLayer.Stage, textureLayer.TexUnit, textureLayer.Sampler);
 
 			Param->ClearDirty();
 		}	
@@ -391,6 +393,11 @@ OpenGLShaderProgram::~OpenGLShaderProgram()
 void OpenGLShaderProgram::Bind()
 {
 	glUseProgram(mOGLProgramObject);
+
+	for (auto iter = mParameterBinds.begin(); iter != mParameterBinds.end(); ++iter)
+	{
+		(iter->ShaderParamSetFunc)();
+	}
 }
 
 void OpenGLShaderProgram::Unbind()
