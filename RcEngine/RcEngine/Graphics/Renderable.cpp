@@ -12,7 +12,6 @@ namespace RcEngine {
 
 
 Renderable::Renderable()
-	: mRenderOperation( new RenderOperation )
 {
 
 }

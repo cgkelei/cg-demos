@@ -15,7 +15,6 @@ namespace {
 
 using namespace RcEngine;
 
-
 EffectParameter* CreateEffectParameter( const String& name, EffectParameterType type, bool array)
 {
 	switch(type)
@@ -423,8 +422,6 @@ void CollectRenderStates(XMLNodePtr passNode, DepthStencilStateDesc& dsDesc, Ble
 		}
 	}
 }
-
-
 
 }
 

@@ -356,20 +356,21 @@ public:
 
 	void operator() ()
 	{
-		if (Param->Dirty())
-		{
-			TextureLayer textureLayer; Param->GetValue(textureLayer);
-			shared_ptr<OpenGLTexture> textureOGL = std::static_pointer_cast<OpenGLTexture>(textureLayer.Texture);
-			
-			glActiveTexture(GL_TEXTURE0+textureLayer.TexUnit);
-			glBindTexture(textureOGL->GetOpenGLTextureTarget(), textureOGL->GetOpenGLTexture());
-			glUniform1ui(Location, textureOGL->GetOpenGLTexture());
+		TextureLayer textureLayer; Param->GetValue(textureLayer);
+		shared_ptr<OpenGLTexture> textureOGL = std::static_pointer_cast<OpenGLTexture>(textureLayer.Texture);
 
+		if (Param->Dirty())
+		{	
 			RenderDevice& device = Context::GetSingleton().GetRenderDevice();
 			device.SetSamplerState(textureLayer.Stage, textureLayer.TexUnit, textureLayer.Sampler);
-
+		
 			Param->ClearDirty();
-		}	
+		}
+		
+		glUniform1ui(Location, textureLayer.TexUnit);
+
+		glActiveTexture(GL_TEXTURE0+textureLayer.TexUnit);
+		glBindTexture(textureOGL->GetOpenGLTextureTarget(), textureOGL->GetOpenGLTexture());
 	}
 
 private:

@@ -49,9 +49,6 @@ public:
 
 	virtual void OnRenderBegin();
 	virtual void OnRenderEnd();
-		
-protected:
-	shared_ptr<RenderOperation> mRenderOperation;
 };
 
 
