@@ -2,6 +2,7 @@
 #include <Scene/SceneNode.h>
 #include <Scene/SceneManager.h>
 #include <Graphics/Mesh.h>
+#include <Graphics/RenderOperation.h>
 #include <Graphics/Material.h>
 #include <Core/Context.h>
 #include <Core/Exception.h>
@@ -78,7 +79,7 @@ void Entity::SetMaterial( const shared_ptr<Material>& mat )
 
 //------------------------------------------------------------------------------------------------------
 SubEntity::SubEntity( Entity* parent, const shared_ptr<MeshPart>& meshPart )
-	: mMeshPart(meshPart), mParent(parent)
+	: mMeshPart(meshPart), mParent(parent), mRenderOperation(new RenderOperation)
 {
 
 }

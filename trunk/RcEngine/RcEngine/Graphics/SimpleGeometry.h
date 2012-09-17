@@ -28,6 +28,7 @@ public:
 
 protected:
 	shared_ptr<Material> mMaterial;
+	shared_ptr<RenderOperation> mRenderOperation;
 };
 
 class _ApiExport SimpleBox : public RenderableHelper

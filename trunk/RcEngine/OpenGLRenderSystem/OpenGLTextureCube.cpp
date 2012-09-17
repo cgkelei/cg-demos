@@ -46,8 +46,6 @@ OpenGLTextureCube::OpenGLTextureCube( PixelFormat format, uint32_t arraySize, ui
 
 	glGenTextures(1, &mTextureID);
 	glBindTexture(mTargetType, mTextureID);
-	glTexParameteri(mTargetType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(mTargetType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(mTargetType, GL_TEXTURE_MAX_LEVEL, mMipMaps - 1);
 
 	for (uint32_t  arrIndex = 0; arrIndex < mTextureArraySize; ++ arrIndex)
@@ -57,17 +55,50 @@ OpenGLTextureCube::OpenGLTextureCube( PixelFormat format, uint32_t arraySize, ui
 			for(uint32_t face = 0; face < 6; ++ face)
 			{
 				uint32_t levelSize= mSizes[level];
+
 				if (PixelFormatUtils::IsCompressed(mFormat))
 				{
-					ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Currently Unsupported Compressed Texture Format",
-						"OpenGLTexture1D::OpenGLTexture1D");
+					int blockSize = (glinternalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16; 
+					uint32_t imageSize = ((levelSize+3)/4)*((levelSize+3)/4)*blockSize; 
+
+					uint32_t imageIndex =  arrIndex*mMipMaps*6 + face*mMipMaps + level;
+
+					if (!mPixelBuffers.empty())
+					{
+						glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, imageSize, NULL, GL_STREAM_DRAW);
+						glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+					}
+					else
+					{
+						// resize texture data for copy
+						mTextureData[imageIndex].resize(imageSize);
+					}
+
+					if (mTextureArraySize > 1)
+					{	
+						if (0 == arrIndex)
+						{
+							glCompressedTexImage3D(mTargetType, level, glinternalFormat, levelSize, levelSize, mTextureArraySize,
+								0, imageSize, NULL);
+						}
+						glCompressedTexSubImage3D(mTargetType, level, 0, 0, arrIndex, levelSize, levelSize, 1, glinternalFormat, 
+							imageSize, (NULL == initData) ? NULL : initData[imageIndex].pData);
+
+					}
+					else
+					{
+						glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat, levelSize, levelSize, 0,
+							imageSize, (NULL == initData) ? NULL : initData[imageIndex].pData);
+					}
+
+
 				}
 				else
 				{
 					uint32_t imageSize = levelSize * levelSize * texelSize;
+					
 					uint32_t imageIndex =  arrIndex*mMipMaps*6 + face*mMipMaps + level;
 					mTextureData[imageIndex].resize(imageSize);
-
 
 					if(mTextureArraySize > 1)
 					{

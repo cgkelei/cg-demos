@@ -77,6 +77,7 @@ public:
 protected:
 	Entity* mParent;
 	shared_ptr<MeshPart> mMeshPart;
+	shared_ptr<RenderOperation> mRenderOperation;
 };
 
 }

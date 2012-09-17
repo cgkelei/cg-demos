@@ -31,11 +31,11 @@ public:
 
 	bool Renderable() const	{ return true; }
 
-	/**
-	 * Set each sky plane material.
-	 */
-	void SetMaterial( SkyBoxPlane plane, const shared_ptr<Material>& mat );
-	
+	///**
+	// * Set each sky plane material.
+	// */
+	//void SetMaterial( SkyBoxPlane plane, const shared_ptr<Material>& mat );
+	//
 	/**
 	 * Set cubic sky box material.
 	 */
@@ -48,10 +48,9 @@ private:
 	shared_ptr<GraphicsBuffer> mVertexBuffer;
 	shared_ptr<GraphicsBuffer> mIndexBuffer;
 	shared_ptr<VertexDeclaration> mVertexDecl;
-	shared_ptr<Material> mMaterials[MaxPlaneCount];
-	shared_ptr<Material> mMaterialCubeMap;
+	shared_ptr<Material> mMaterial;
 
-	SkyPlane* mSkyPlanes[MaxPlaneCount];
+	SkyPlane* mSkyPlanes;
 	SkyBoxCube* mSkyCubeBox;
 
 	friend class SkyPlane;

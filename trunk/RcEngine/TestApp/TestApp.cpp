@@ -74,13 +74,15 @@ void TestApp::LoadContent()
 
 
 	// Sky 
-	  sceneManager->CreateSkyBox(
+	/*sceneManager->CreateSkyBox(
 		factory->CreateTextureFromFile("../Media/Textures/front.dds", 0),
 		factory->CreateTextureFromFile("../Media/Textures/back.dds", 0),
 		factory->CreateTextureFromFile("../Media/Textures/left.dds", 0),
 		factory->CreateTextureFromFile("../Media/Textures/right.dds", 0),
 		factory->CreateTextureFromFile("../Media/Textures/up.dds", 0),
-		factory->CreateTextureFromFile("../Media/Textures/down.dds", 0), 5000.0f);
+		factory->CreateTextureFromFile("../Media/Textures/down.dds", 0), 5000.0f);*/
+
+	sceneManager->CreateSkyBox(factory->CreateTextureFromFile("../Media/Textures/grassenvmap1024.dds", 0), 5000.0f); 
 }
 
 
