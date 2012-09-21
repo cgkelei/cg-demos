@@ -73,16 +73,20 @@ void TestApp::LoadContent()
 	dwarfNode->SetScale( Vector3f(10.0f / spehre.Radius, 10.0f / spehre.Radius, 10.0f / spehre.Radius) );
 
 
-	// Sky 
-	/*sceneManager->CreateSkyBox(
-		factory->CreateTextureFromFile("../Media/Textures/front.dds", 0),
-		factory->CreateTextureFromFile("../Media/Textures/back.dds", 0),
-		factory->CreateTextureFromFile("../Media/Textures/left.dds", 0),
-		factory->CreateTextureFromFile("../Media/Textures/right.dds", 0),
-		factory->CreateTextureFromFile("../Media/Textures/up.dds", 0),
-		factory->CreateTextureFromFile("../Media/Textures/down.dds", 0), 5000.0f);*/
+	vector<String> skyTextures;
+	skyTextures.push_back( String("../Media/Textures/left.dds"));
+	skyTextures.push_back( String("../Media/Textures/right.dds"));
+	skyTextures.push_back( String("../Media/Textures/up.dds"));
+	skyTextures.push_back( String("../Media/Textures/down.dds"));
+	skyTextures.push_back( String("../Media/Textures/front.dds"));
+	skyTextures.push_back( String("../Media/Textures/back.dds"));
 
-	sceneManager->CreateSkyBox(factory->CreateTextureFromFile("../Media/Textures/grassenvmap1024.dds", 0), 5000.0f); 
+	auto texture = factory->CreateTextureArrayFromFile(skyTextures);
+
+	// Sky 
+	//sceneManager->CreateSkyBox(texture, false);
+	sceneManager->CreateSkyBox(factory->CreateTextureFromFile("../Media/Textures/MeadowTrail.dds", 0));
+	//sceneManager->CreateSkyBox(factory->CreateTextureFromFile("../Media/Textures/grassenvmap1024.dds", 0), 5000.0f); 
 }
 
 

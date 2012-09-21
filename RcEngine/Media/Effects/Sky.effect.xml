@@ -6,9 +6,9 @@
 #version 330
 
 in vec3 Position;
-in vec2 Tex;
+in vec3 Tex;
 
-out vec2 oTex;
+out vec3 oTex;
 
 uniform mat4 World;
 uniform mat4 ViewProj;
@@ -16,7 +16,7 @@ uniform mat4 ViewProj;
 void main()
 {
 	gl_Position = vec4(Position, 1.0) * World * ViewProj;
-	oTex = vec2(Tex.x, 1-Tex.y);
+	oTex = vec3(Tex.x, 1-Tex.y, Tex.z);
 }
 
 ]]>
@@ -26,16 +26,18 @@ void main()
 <![CDATA[
 
 #version 330
+#extension GL_EXT_gpu_shader4 : enable 
 
-in vec2 oTex;
+in vec3 oTex;
 
 out vec4 FragColor;
 
-uniform sampler2D SkyPlaneMap;
+uniform sampler2DArray SkyPlaneMaps;
 
 void main()
 {
-	vec4 diffuse = texture(SkyPlaneMap, oTex);
+	vec3 tex = vec3(oTex.xy, floor(oTex.z));
+	vec4 diffuse = texture(SkyPlaneMaps, oTex);
 	FragColor = diffuse;
 }
 

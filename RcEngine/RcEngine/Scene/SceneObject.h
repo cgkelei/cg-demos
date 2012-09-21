@@ -8,7 +8,6 @@
 
 namespace RcEngine {
 
-
 enum SceneObejctType
 {
 	SOT_Entity,
@@ -18,6 +17,11 @@ enum SceneObejctType
 	SOT_Sky
 };
 
+
+//enum SceneObjectFlags
+//{
+//	SOF_
+//};
 
 /**
  * Base class for Objects in a scene graph, contained by scene nodes, referenced 

@@ -9,6 +9,8 @@
 
 namespace RcEngine {
 
+class Skeleton;
+
 class _ApiExport MeshPart
 {
 public:
@@ -75,9 +77,6 @@ public:
 	const String& GetName() const								{ return mName; }
 	const BoundingSpheref& GetBoundingSphere() const			{ return mBoundingSphere; }
 
-	const Matrix4f& GetWorldMatrix() const						{ return mWorld; }
-	void SetWorldMatrix(const Matrix4f& mat)					{ mWorld = mat; }
-
 	const shared_ptr<Material>& GetMaterial(size_t i) const 	{ return mMaterials[i]; }
 
 	uint32_t GetNumMeshPart() const								{ return mMeshParts.size(); }
@@ -111,8 +110,9 @@ private:
 
 	vector<shared_ptr<MeshPart> > mMeshParts;  
 	vector<shared_ptr<Material> > mMaterials;
+	
+	shared_ptr<Skeleton> mSkeleton;
 
-	Matrix4f mWorld;
 };
 
 

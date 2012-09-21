@@ -11,8 +11,8 @@ Node::Node()
 
 }
 
-Node::Node( const String& name )
-	: mName(name), mParent(nullptr), mDirtyBits(NODE_DIRTY_ALL), 
+Node::Node( const String& name, Node* parent )
+	: mName(name), mParent(parent), mDirtyBits(NODE_DIRTY_ALL), 
 	  mPosition(Vector3f::Zero()), mRotation(Quaternionf::Identity()), mScale(1.0f, 1.0f, 1.0f)
 {
 

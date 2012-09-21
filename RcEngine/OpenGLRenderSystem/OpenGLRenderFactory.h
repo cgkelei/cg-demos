@@ -36,6 +36,7 @@ public:
 
 	virtual shared_ptr<Texture> CreateTextureFromFile(const std::string& texFileName, uint32_t accessHint);
 
+	virtual shared_ptr<Texture> CreateTextureArrayFromFile( const vector<String>& textures, uint32_t accessHint = 0);
 
 	// Views
 	//-------------------------------------------------------------------------------------------------------

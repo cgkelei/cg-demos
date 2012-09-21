@@ -100,6 +100,16 @@ protected:
 
 typedef EffectParameterNumberic<bool> EffectParameterBool;
 typedef EffectParameterNumberic< vector<bool> > EffectParameterBoolArray;
+
+typedef EffectParameterNumberic<uint32_t> EffectParameterUInt;
+typedef EffectParameterNumberic< vector<uint32_t> > EffectParameterUIntArray;
+typedef EffectParameterNumberic< Vector<uint32_t, 2> > EffectParameterUInt2;
+typedef EffectParameterNumberic< vector<Vector<uint32_t, 2> > > EffectParameterUInt2Array;
+typedef EffectParameterNumberic< Vector<uint32_t, 3> > EffectParameterUInt3;
+typedef EffectParameterNumberic< vector<Vector<uint32_t, 3> > > EffectParameterUInt3Array;
+typedef EffectParameterNumberic< Vector<uint32_t, 4> > EffectParameterUInt4;
+typedef EffectParameterNumberic< vector<Vector<uint32_t, 4> > > EffectParameterUInt4Array;
+
 typedef EffectParameterNumberic<int32_t> EffectParameterInt;
 typedef EffectParameterNumberic< vector<int32_t> > EffectParameterIntArray;
 typedef EffectParameterNumberic< Vector<int32_t, 2> > EffectParameterInt2;
@@ -108,6 +118,7 @@ typedef EffectParameterNumberic< Vector<int32_t, 3> > EffectParameterInt3;
 typedef EffectParameterNumberic< vector<Vector<int32_t, 3> > > EffectParameterInt3Array;
 typedef EffectParameterNumberic< Vector<int32_t, 4> > EffectParameterInt4;
 typedef EffectParameterNumberic< vector<Vector<int32_t, 4> > > EffectParameterInt4Array;
+
 typedef EffectParameterNumberic<float> EffectParameterFloat;
 typedef EffectParameterNumberic< vector<float> > EffectParameterFloatArray;
 typedef EffectParameterNumberic<Vector2f> EffectParameterVector2;
@@ -116,6 +127,7 @@ typedef EffectParameterNumberic<Vector3f> EffectParameterVector3;
 typedef EffectParameterNumberic< vector<Vector3f> > EffectParameterVector3Array;
 typedef EffectParameterNumberic<Vector4f> EffectParameterVector4;
 typedef EffectParameterNumberic< vector<Vector4f> > EffectParameterVector4Array;
+
 typedef EffectParameterNumberic<Matrix4f> EffectParameterMatrix;
 typedef EffectParameterNumberic< vector<Matrix4f> > EffectParameterMatrixArray;
 

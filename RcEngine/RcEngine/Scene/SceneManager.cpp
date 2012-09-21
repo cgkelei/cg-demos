@@ -78,8 +78,7 @@ void SceneManager::UpdateRenderQueue( Camera* cam )
 	if (mSkyBoxNode)
 	{
 		mSkyBoxNode->SetPosition( cam->GetPosition() );
-		Matrix4f mat = mSkyBoxNode->GetWorldTransform();
-		mSkyBox->AddToRenderQueue(mRendeQueue);
+		mRendeQueue.push_back( RenderQueueItem(SOT_Sky, mSkyBox, 0) );
 	}
 }
 
@@ -107,16 +106,6 @@ void SceneManager::AddToRenderQueue( SceneObject* sceneObject )
 	}
 }
 
-void SceneManager::RenderScene()
-{
-	//RenderDevice* device = Context::GetSingleton().GetRenderDevice();
-
-	for (size_t i = 0; i < mRendeQueue.size(); ++i)
-	{
-
-		mRendeQueue[i].Renderable->Render();
-	}
-}
 
 Entity* SceneManager::CreateEntity( const String& name, const String& filePath )
 {
@@ -141,8 +130,7 @@ SceneNode* SceneManager::FindSceneNode( const String& name ) const
 	return nullptr;
 }
 
-
-void SceneManager::CreateSkyBox( const shared_ptr<Texture>& frontTex, const shared_ptr<Texture>& backTex, const shared_ptr<Texture>& leftTex, const shared_ptr<Texture>& rightTex, const shared_ptr<Texture>& topTex, const shared_ptr<Texture>& bottomTex, float distance /*= 100.0f */ )
+void SceneManager::CreateSkyBox( const shared_ptr<Texture>& texture, bool cubemap /*= true*/, float distance /*= 100.0f */ )
 {
 	if (mSkyBox)
 	{
@@ -154,58 +142,29 @@ void SceneManager::CreateSkyBox( const shared_ptr<Texture>& frontTex, const shar
 		mSkyBoxNode = static_cast<SceneNode*>(GetRootSceneNode()->CreateChildSceneNode("SkyBox"));
 	}
 
-	mSkyBox = new SkyBox(distance, false);
-	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 
-	shared_ptr<Material> frontPlaneMat = factory.CreateMaterialFromFile("SkyNormal", "../Media/Materials/SkyNormal.material.xml");
-	shared_ptr<Material> backPlaneMat = frontPlaneMat->Clone();
-	shared_ptr<Material> leftPlaneMat = frontPlaneMat->Clone();
-	shared_ptr<Material> rightPlaneMat = frontPlaneMat->Clone();
-	shared_ptr<Material> topPlaneMat = frontPlaneMat->Clone();
-	shared_ptr<Material> bottomPlaneMat = frontPlaneMat->Clone();
+	mSkyBox = new Sky(distance, cubemap);
 
-	frontPlaneMat->SetTexture("SkyPlaneMap", frontTex);
-	mSkyBox->SetMaterial(SkyBox::Front, frontPlaneMat);
-
-	backPlaneMat->SetTexture("SkyPlaneMap", backTex);
-	mSkyBox->SetMaterial(SkyBox::Back, backPlaneMat);
-
-	leftPlaneMat->SetTexture("SkyPlaneMap", leftTex);
-	mSkyBox->SetMaterial(SkyBox::Left, leftPlaneMat);
-
-	rightPlaneMat->SetTexture("SkyPlaneMap", rightTex);
-	mSkyBox->SetMaterial(SkyBox::Right, rightPlaneMat);
-
-	topPlaneMat->SetTexture("SkyPlaneMap", topTex);
-	mSkyBox->SetMaterial(SkyBox::Up, topPlaneMat);
-
-	bottomPlaneMat->SetTexture("SkyPlaneMap", bottomTex);
-	mSkyBox->SetMaterial(SkyBox::Down, bottomPlaneMat);
+	if (cubemap)
+	{
+		mSkyBox->GetMaterial()->SetTexture("SkyCubeMap", texture);
+	}
+	else
+	{
+		mSkyBox->GetMaterial()->SetTexture("SkyPlaneMaps", texture);
+	}
+	
 
 	mSkyBoxNode->AttachObject(mSkyBox);
 }
 
-void SceneManager::CreateSkyBox( const shared_ptr<Texture>& cubicTex, float distance /*= 100.0f */ )
+void SceneManager::RenderScene()
 {
-	if (mSkyBox)
+	for (auto iter = mRendeQueue.begin(); iter != mRendeQueue.end(); ++iter)
 	{
-		Safe_Delete(mSkyBox);
+		RenderQueueItem& item = *iter;
+		item.Renderable->Render();
 	}
-
-	if (!mSkyBoxNode)
-	{
-		mSkyBoxNode = static_cast<SceneNode*>(GetRootSceneNode()->CreateChildSceneNode("SkyBox"));
-	}
-
-	mSkyBox = new SkyBox(distance, true);
-	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
-
-	shared_ptr<Material> cubeMapMat = factory.CreateMaterialFromFile("SkyCubeMap", "../Media/Materials/SkyCubeMap.material.xml");
-	cubeMapMat->SetTexture("SkyCubeMap", cubicTex);
-	mSkyBox->SetMaterial(cubeMapMat);
-	
-
-	mSkyBoxNode->AttachObject(mSkyBox);
 }
 
 }
