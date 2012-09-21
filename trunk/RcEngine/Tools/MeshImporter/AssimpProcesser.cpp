@@ -19,6 +19,12 @@
 
 struct OutModel
 {
+	OutModel() 
+		: RootBone(NULL), RootNode(NULL), TotalVertices(0), TotalIndices(0) 
+	{
+
+	}
+
 	String OutName;
 	vector<aiMesh*> Meshes;
 	vector<aiNode*> MeshNodes;
@@ -124,11 +130,13 @@ uint32_t GetBoneIndex(const OutModel& model, const aiString& boneName)
 	return (numeric_limits<uint32_t>::max)();
 }
 
-aiMatrix4x4 GetDerivedTransform(aiNode* node, aiNode* rootNode, aiMatrix4x4 transform)
+aiMatrix4x4 GetDerivedTransform( aiMatrix4x4 transform, aiNode* node, aiNode* rootNode )
 {
 	while(node && node != rootNode)
 	{
+		// get parent node
 		node = node->mParent;
+
 		if (node)
 			transform = node->mTransformation * transform;
 		
@@ -136,12 +144,17 @@ aiMatrix4x4 GetDerivedTransform(aiNode* node, aiNode* rootNode, aiMatrix4x4 tran
 	return transform;
 }
 
+aiMatrix4x4 GetDerivedTransform(aiNode* node, aiNode* rootNode)
+{
+	return GetDerivedTransform(node->mTransformation, node, rootNode);
+}
+
 aiMatrix4x4 GetMeshBakingTransform(aiNode* meshNode, aiNode* meshRootNode)
 {
 	if (meshNode == meshRootNode)
 		return aiMatrix4x4();
 	else
-		return GetDerivedTransform(meshNode, meshRootNode, meshNode->mTransformation);
+		return GetDerivedTransform(meshNode, meshRootNode);
 }
 
 aiMatrix4x4 GetOffsetMatrix(const OutModel& model, const String& boneName)
@@ -299,9 +312,12 @@ bool AssimpProcesser::Process( const char* filePath )
 void AssimpProcesser::ProcessScene( const aiScene* scene )
 {
 	OutModel model;
+
+	// if user don't specify model root node, use assimp root scene node 
 	model.RootNode = mAIScene->mRootNode;
+
 	ExportModel(model, "Test");
-	ExportBinary(model);
+	//ExportBinary(model);
 	ExportXML(model);
 }
 
@@ -409,6 +425,34 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 	const float meshRadius = outModel.MeshBoundingSphere.Radius;
 	file << "\t<bounding x=\"" << meshCenter[0] << "\" y=\"" << meshCenter[1] << "\" z=\"" << meshCenter[2] << " radius=" << meshRadius << "\"/>\n";
 		
+	vector<Bone*> bones = outModel.Skeleton->GetBones();
+
+	file << "\t<bones boneCount=\"" << bones.size() << "\">" << std::endl;
+	for (size_t i = 0; i < bones.size(); ++i)
+	{
+		Bone* bone = bones[i];
+		const String& boneName = bone->GetName();
+		String parentName;
+		if (bone->GetParent())
+		{
+			parentName = bone->GetParent()->GetName();
+		}
+		else
+		{
+			parentName = "";
+		}
+		file << "\t\t<bone name=\"" << boneName << "\" parent=\"" << parentName <<  "\">" << std::endl;
+		
+		Vector3f pos = bone->GetPosition();
+		Vector3f scale = bone->GetScale();
+		Quaternionf quat = bone->GetRotation();
+		file << "\t\t\t<bindPosition x=\"" << pos[0] << "\" y=\"" << pos[1] << "\" z=\"" << pos[2] << "\"/>\n";
+		file << "\t\t\t<bindRotation w=\"" << quat.W() << "\" x=\"" << quat.X() << "\" y=\"" << quat.Y() << " z=" << quat.Z() << "\"/>\n";
+		file << "\t\t\t<bindScale x=\"" << scale[0] << "\" y=\"" << scale[1] << "\" z=\"" << scale[2]  << "\"/>\n";
+		file << "\t\t</bone>" << std::endl; 
+	}
+	file << "\t</bones>" << std::endl;
+
 
 	vector<shared_ptr<MeshPartData> >& subMeshes = outModel.MeshParts;
 	for (size_t i = 0; i < subMeshes.size(); ++i)
@@ -761,11 +805,11 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 		Matrix4f vertexTransform = FromAIMatrix(
 			GetMeshBakingTransform(outModel.MeshNodes[i], outModel.RootNode) );
 		
-		aiMatrix4x4 verteAI = GetMeshBakingTransform(outModel.MeshNodes[i], outModel.RootNode );
+		aiMatrix4x4 vertexAI = GetMeshBakingTransform(outModel.MeshNodes[i], outModel.RootNode );
 		
 		Vector3f scaleAI, positionAI;
 		Quaternionf rotAI;
-		GetPosRotScale(verteAI, positionAI, rotAI, scaleAI);
+		GetPosRotScale(vertexAI, positionAI, rotAI, scaleAI);
 
 		Matrix4f normalTransform = MatrixInverse(vertexTransform).Transpose();
 
@@ -839,7 +883,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 						// So even without the skeleton, the mesh can render with unskin mesh.
 						Vector3f vertex = Transform( FromAIVector(mesh->mVertices[i]), vertexTransform );				
 
-						aiVector3D v = verteAI *  mesh->mVertices[i];
+						aiVector3D v = vertexAI *  mesh->mVertices[i];
 						
 						*(vertexPtr) = vertex.X();
 						*(vertexPtr+1) = vertex.Y();
@@ -940,44 +984,50 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 	if (outModel.Bones.size() && outModel.RootBone)
 	{
 		shared_ptr<Skeleton> skeleton(new Skeleton);
-		vector<Joint>& joints = skeleton->GetJoints();
-
+		vector<Bone*>& bones = skeleton->GetBones();
+		
 		for (size_t i = 0; i < outModel.Bones.size(); ++i)
 		{
 			aiNode* boneNode = outModel.Bones[i];
 			String boneName(boneNode->mName.C_Str());
+
+			Bone* bone = new Bone(boneName);
+
+			/*std::cout << boneName << std::endl;*/
 
 			aiMatrix4x4 transform = boneNode->mTransformation;
 
 			// Make the root bone transform relative to the model's root node, if it is not already
 		    // This will put the mesh in model coordinate system.
 			if (boneNode == outModel.RootBone)
-				transform = GetDerivedTransform(boneNode, outModel.RootNode, boneNode->mTransformation);
-
-			Matrix4f trans = FromAIMatrix(transform);
-
-			MatrixDecompose(newJoint.InitialScale, newJoint.InitialRotation, newJoint.InitialPosition, trans);
-
+				transform = GetDerivedTransform(boneNode, outModel.RootNode);
 
 			Vector3f scale, position;
 			Quaternionf rot;
 			GetPosRotScale(transform, position, rot, scale);
+				
+			bone->SetPosition(position);
+			bone->SetRotation(rot);
+			bone->SetScale(scale);
 
 			// Get offset information if exists
-			newJoint.OffsetMatrix = FromAIMatrix(GetOffsetMatrix(outModel, boneName));
-			newJoint.ParentIndex = i;
-			joints.push_back(newJoint);
+			/*newJoint.OffsetMatrix = FromAIMatrix(GetOffsetMatrix(outModel, boneName));*/
+			//newJoint.ParentIndex = i;
+			//joints.push_back(newJoint);
+			bones.push_back(bone);
 		}
 
 		// Set the bone hierarchy
 		for (size_t i = 1; i < outModel.Bones.size(); ++i)
 		{
 			String parentName(outModel.Bones[i]->mParent->mName.C_Str());
-			for (size_t j = 0; j < joints.size(); ++j)
+			
+			for (size_t j = 0; j < bones.size(); ++j)
 			{
-				if (joints[j].Name == parentName)
+				if (bones[j]->GetName() == parentName)
 				{
-					joints[i].ParentIndex = j;
+					std::cout << bones[i]->GetName() << "   Parent:" << parentName << std::endl;
+					bones[i]->SetParent(bones[j]);
 					break;
 				}
 			}

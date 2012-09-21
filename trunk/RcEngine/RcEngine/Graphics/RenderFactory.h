@@ -41,9 +41,10 @@ public:
 		uint32_t arraySize, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality,
 		uint32_t accessHint, ElementInitData* initData) = 0;
 
-	virtual shared_ptr<Texture> CreateTextureFromFile(const std::string& texFileName, uint32_t accessHint) = 0;
+	virtual shared_ptr<Texture> CreateTextureFromFile(const std::string& texFileName, uint32_t accessHint = 0) = 0;
 
-
+	virtual shared_ptr<Texture> CreateTextureArrayFromFile( const vector<String>& textures, uint32_t accessHint = 0) = 0;
+	
 	// Buffers
 	//-------------------------------------------------------------------------------------------------------
 	virtual shared_ptr<GraphicsBuffer> CreateVertexBuffer(BufferUsage usage, uint32_t accessHint, ElementInitData* initData) = 0;

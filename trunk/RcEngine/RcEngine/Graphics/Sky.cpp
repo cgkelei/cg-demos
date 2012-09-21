@@ -6,6 +6,7 @@
 #include <Graphics/RenderOperation.h>
 #include <Graphics/VertexDeclaration.h>
 #include <Graphics/SimpleGeometry.h>
+#include <Graphics/Material.h>
 #include <Core/Context.h>
 
 namespace {
@@ -15,6 +16,9 @@ using namespace RcEngine;
 typedef vector<Vector3f> VertexList;
 typedef vector<uint32_t> IndexList;
 
+static const char* SkyBoxPlaneName[Sky::MaxPlaneCount] = {
+	"FrontPlane", "BackPlane", "LeftPlane", "RightPlane", "TopPlane", "BottomPlane"
+};
 
 void Subdivide(VertexList& vertices, IndexList& indices)
 {
@@ -118,16 +122,6 @@ void BuildGeometrySphere(uint32_t numSubdivisions, float radius, VertexList& ver
 	}
 }
 
-}
-
-
-namespace RcEngine {
-
-static const char* SkyBoxPlaneName[SkyBox::MaxPlaneCount] = {
-	"FrontPlane", "BackPlane", "LeftPlane", "RightPlane", "TopPlane", "BottomPlane"
-};
-
-
 struct SkyPlaneVertex
 {
 	Vector3f Position;
@@ -137,248 +131,191 @@ struct SkyPlaneVertex
 	SkyPlaneVertex( const Vector3f& pos, const Vector3f& tex ) : Position(pos), Tex(tex) {}
 };
 
-class SkyPlane : public Renderable
-{
-public:
-	SkyPlane(SkyBox& sky, SkyBox::SkyBoxPlane which)
-		:mParent(sky), mPlaneType(which), mRenderOperation(new RenderOperation)
-	{
-		mRenderOperation->BindVertexStream(mParent.mVertexBuffer, mParent.mVertexDecl);
-		mRenderOperation->StartVertexLocation = mPlaneType * 4;
-		mRenderOperation->BindIndexStream(mParent.mIndexBuffer, IBT_Bit16);
-		mRenderOperation->StartIndexLocation = 0;
-		mRenderOperation->PrimitiveType = PT_Triangle_List;
-	}
-
-	const shared_ptr<Material>& GetMaterial() const
-	{
-		return mParent.mMaterials[mPlaneType];
-	}
-
-	const shared_ptr<RenderOperation>& GetRenderOperation() const
-	{
-		return mRenderOperation;
-	}
-	
-	void GetWorldTransforms(Matrix4f* xform) const
-	{
-		xform[0] = mParent.GetWorldTransform();
-	}
-
-	uint32_t GetWorldTransformsCount() const
-	{
-		return 1;
-	}
-
-private:
-	SkyBox& mParent;
-	SkyBox::SkyBoxPlane mPlaneType;
-	shared_ptr<RenderOperation> mRenderOperation;
-};
+}
 
 
-class SkyBoxCube : public Renderable
-{
-public:
-	SkyBoxCube( SkyBox& sky ) : mParent(sky), mRenderOperation(new RenderOperation)
-	{
-		mRenderOperation->BindVertexStream(mParent.mVertexBuffer, mParent.mVertexDecl);
-		mRenderOperation->StartVertexLocation = 0;
-		mRenderOperation->BindIndexStream(mParent.mIndexBuffer, IBT_Bit32);
-		mRenderOperation->StartIndexLocation = 0;
-		mRenderOperation->PrimitiveType = PT_Triangle_List;
-	}
-
-	const shared_ptr<Material>& GetMaterial() const
-	{
-		return mParent.mMaterial;
-	}
-
-	const shared_ptr<RenderOperation>& GetRenderOperation() const
-	{
-		return mRenderOperation;
-	}
-	
-	void GetWorldTransforms(Matrix4f* xform) const
-	{
-		xform[0] = mParent.GetWorldTransform();
-	}
-	uint32_t GetWorldTransformsCount() const
-	{
-		return 1;
-	}
-
-private:
-	SkyBox& mParent;
-	shared_ptr<RenderOperation> mRenderOperation;
-};
+namespace RcEngine {
 
 //---------------------------------------------------------------------------
-SkyBox::SkyBox( float size /*= 100.0f*/ , bool cube /*= false*/ )
-	: SceneObject("Sky Box"), mCubeMapSky(cube), mSkyCubeBox(nullptr)
+Sky::Sky( float size  , bool cube /*= false*/ )
+	: SceneObject("Sky Box"), mCubeMapSky(cube), mRenderOperation(new RenderOperation)
 {
-	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
-	
 	if (!cube)
 	{
-		// Create vertex declaration
-		VertexElement vertexElems[] = {
-			VertexElement(0, VEF_Vector3, VEU_Position),
-			VertexElement(sizeof(Vector3f), VEF_Vector3, VEU_TextureCoordinate)
-		};
-		mVertexDecl = factory.CreateVertexDeclaration(vertexElems, 2);
-
-		SkyPlaneVertex vertices[MaxPlaneCount*4];
-
-		size_t base;
-		// Front
-		base = SkyBox::Front * 4;
-		vertices[base+0].Position = Vector3f( -size, -size, -size );
-		vertices[base+0].Tex = Vector3f(0.0f, 1.0f, 0.0f);
-		vertices[base+1].Position = Vector3f( size, -size, -size );
-		vertices[base+1].Tex = Vector3f(1.0f, 1.0f, 0.0f);
-		vertices[base+2].Position = Vector3f( size, size, -size );
-		vertices[base+2].Tex = Vector3f(1.0f, 0.0f, 0.0f);
-		vertices[base+3].Position = Vector3f( -size, size, -size );
-		vertices[base+3].Tex = Vector3f(0.0f, 0.0f, 0.0f);
-
-		// Back
-		base = SkyBox::Back * 4;
-		vertices[base+0].Position = Vector3f( size, -size, size );
-		vertices[base+0].Tex = Vector3f(0.0f, 1.0f, 1.0f);
-		vertices[base+1].Position = Vector3f( -size, -size, size );
-		vertices[base+1].Tex = Vector3f(1.0f, 1.0f, 1.0f);
-		vertices[base+2].Position = Vector3f( -size, size, size );
-		vertices[base+2].Tex = Vector3f(1.0f, 0.0f, 1.0f);
-		vertices[base+3].Position = Vector3f( size, size, size );
-		vertices[base+3].Tex = Vector3f(0.0f, 0.0f, 1.0f);
-
-		// Left
-		base = SkyBox::Left * 4;
-		vertices[base+0].Position = Vector3f( -size, -size, size );
-		vertices[base+0].Tex = Vector3f(0.0f, 1.0f, 2.0f);
-		vertices[base+1].Position = Vector3f( -size, -size, -size );
-		vertices[base+1].Tex = Vector3f(1.0f, 1.0f, 2.0f);
-		vertices[base+2].Position = Vector3f( -size, size, -size );
-		vertices[base+2].Tex = Vector3f(1.0f, 0.0f, 2.0f);
-		vertices[base+3].Position = Vector3f( -size, size, size );
-		vertices[base+3].Tex = Vector3f(0.0f, 0.0f, 2.0f);
-
-		// Right
-		base = SkyBox::Right * 4;
-		vertices[base+0].Position = Vector3f( size, -size, -size );
-		vertices[base+0].Tex = Vector3f(0.0f, 1.0f, 3.0f);
-		vertices[base+1].Position = Vector3f( size, -size, size );
-		vertices[base+1].Tex = Vector3f(1.0f, 1.0f, 3.0f);
-		vertices[base+2].Position = Vector3f( size, size, size );
-		vertices[base+2].Tex = Vector3f(1.0f, 0.0f, 3.0f);
-		vertices[base+3].Position = Vector3f( size, size, -size );
-		vertices[base+3].Tex = Vector3f(0.0f, 0.0f, 3.0f);
-
-		// Up
-		base = SkyBox::Up * 4;
-		vertices[base+0].Position = Vector3f( -size, size, -size );
-		vertices[base+0].Tex = Vector3f(0.0f, 1.0f, 4.0f);
-		vertices[base+1].Position = Vector3f( size, size, -size );
-		vertices[base+1].Tex = Vector3f(1.0f, 1.0f, 4.0f);
-		vertices[base+2].Position = Vector3f( size, size, size );
-		vertices[base+2].Tex = Vector3f(1.0f, 0.0f, 4.0f);
-		vertices[base+3].Position = Vector3f( -size, size, size );
-		vertices[base+3].Tex = Vector3f(0.0f, 0.0f, 4.0f);
-
-		// Down
-		base = SkyBox::Down * 4;
-		vertices[base+0].Position = Vector3f( -size, -size, size );
-		vertices[base+0].Tex = Vector3f(0.0f, 1.0f, 5.0f);
-		vertices[base+1].Position = Vector3f( size, -size, size );
-		vertices[base+1].Tex = Vector3f(1.0f, 1.0f, 5.0f);
-		vertices[base+2].Position = Vector3f( size, -size, -size );
-		vertices[base+2].Tex = Vector3f(1.0f, 0.0f, 5.0f);
-		vertices[base+3].Position = Vector3f( -size, -size, -size );
-		vertices[base+3].Tex = Vector3f(0.0f, 0.0f, 5.0f);
-
-		ElementInitData vInitData;
-		vInitData.pData = vertices;
-		vInitData.rowPitch = sizeof(vertices);
-		mVertexBuffer = factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
-
-		uint16_t indices[6] = { 0, 1, 3, 3, 1, 2 };
-		ElementInitData iInitData;
-		iInitData.pData = indices;
-		iInitData.rowPitch = sizeof(indices);
-		mIndexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
-
+		InitializeSkyBox(size);	
 	}
 	else
 	{
-		// Create vertex declaration
-		VertexElement vertexElems[] = {
-			VertexElement(0, VEF_Vector3, VEU_Position),
-		};
-		mVertexDecl = factory.CreateVertexDeclaration(vertexElems, 1);
-
-		std::vector<Vector3f> vertices;
-		std::vector<uint32_t> indices;
-		BuildGeometrySphere(2, size, vertices, indices);
-
-		for(size_t i = 0; i < vertices.size(); ++i)
-		{
-			// Scale on y-axis to turn into an ellipsoid to make a flatter Sky surface
-			vertices[i] = 0.5f*vertices[i];
-		}
-
-		ElementInitData vInitData;
-		vInitData.pData = &vertices[0];
-		vInitData.rowPitch = sizeof(Vector3f) * vertices.size();
-		mVertexBuffer = factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
-
-		ElementInitData iInitData;
-		iInitData.pData = &indices[0];
-		iInitData.rowPitch = sizeof(uint32_t) * indices.size();
-		mIndexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
-
-		mSkyCubeBox = new SkyBoxCube(*this);
+		InitializeSkyCubeMap(size);
 	}
-	
+
+	// init render operation
+	mRenderOperation->BindVertexStream(mVertexBuffer, mVertexDecl);
+	mRenderOperation->StartVertexLocation = 0;
+	mRenderOperation->BindIndexStream(mIndexBuffer, IBT_Bit32);
+	mRenderOperation->StartIndexLocation = 0;
+	mRenderOperation->PrimitiveType = PT_Triangle_List;
 }
 
-SkyBox::~SkyBox()
+Sky::~Sky()
 {
-	for (size_t i = 0; i < MaxPlaneCount; ++i)
-	{
-		if (mSkyPlanes[i])
-			Safe_Delete(mSkyPlanes[i]);
-	}
-
-	if (mSkyCubeBox)
-	{
-		Safe_Delete(mSkyCubeBox);
-	}
 
 }
 
-//void SkyBox::SetMaterial( SkyBoxPlane plane, const shared_ptr<Material>& mat )
-//{
-//	mMaterials[plane] = mat;
-//}
-
-void SkyBox::SetMaterial( const shared_ptr<Material>& mat )
+void Sky::SetMaterial( const shared_ptr<Material>& mat )
 {
 	mMaterial = mat;
 }
 
-void SkyBox::AddToRenderQueue( RenderQueue& renderQueue ) const
+uint32_t Sky::GetWorldTransformsCount() const
 {
-	if(!mCubeMapSky)
-	{
-		for (size_t i = 0; i < MaxPlaneCount; ++i)
-		{
-			renderQueue.push_back( RenderQueueItem(SOT_Sky, mSkyPlanes[i], 0) );
-		}
-	}
-	else
-	{
-		renderQueue.push_back( RenderQueueItem(SOT_Sky, mSkyCubeBox, 0) );
-	}
+	return 1;
 }
+
+void Sky::GetWorldTransforms( Matrix4f* xform ) const
+{
+	xform[0] = GetWorldTransform();
+}
+
+void Sky::InitializeSkyBox(float size)
+{
+	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
+
+	// Create vertex declaration
+	VertexElement vertexElems[] = {
+		VertexElement(0, VEF_Vector3, VEU_Position),
+		VertexElement(sizeof(Vector3f), VEF_Vector3, VEU_TextureCoordinate)
+	};
+
+	mVertexDecl = factory.CreateVertexDeclaration(vertexElems, 2);
+
+	SkyPlaneVertex vertices[Sky::MaxPlaneCount*4];
+
+	size_t base;
+	
+	// Left
+	base = Sky::Left * 4;
+	vertices[base+0].Position = Vector3f( -size, -size, size );
+	vertices[base+0].Tex = Vector3f(0.0f, 1.0f, float(Sky::Left));
+	vertices[base+1].Position = Vector3f( -size, -size, -size );
+	vertices[base+1].Tex = Vector3f(1.0f, 1.0f, float(Sky::Left));
+	vertices[base+2].Position = Vector3f( -size, size, -size );
+	vertices[base+2].Tex = Vector3f(1.0f, 0.0f, float(Sky::Left));
+	vertices[base+3].Position = Vector3f( -size, size, size );
+	vertices[base+3].Tex = Vector3f(0.0f, 0.0f, float(Sky::Left));
+
+	// Right
+	base = Sky::Right * 4;
+	vertices[base+0].Position = Vector3f( size, -size, -size );
+	vertices[base+0].Tex = Vector3f(0.0f, 1.0f, float(Sky::Right));
+	vertices[base+1].Position = Vector3f( size, -size, size );
+	vertices[base+1].Tex = Vector3f(1.0f, 1.0f, float(Sky::Right));
+	vertices[base+2].Position = Vector3f( size, size, size );
+	vertices[base+2].Tex = Vector3f(1.0f, 0.0f, float(Sky::Right));
+	vertices[base+3].Position = Vector3f( size, size, -size );
+	vertices[base+3].Tex = Vector3f(0.0f, 0.0f, float(Sky::Right));
+
+	// Up
+	base = Sky::Up * 4;
+	vertices[base+0].Position = Vector3f( -size, size, -size );
+	vertices[base+0].Tex = Vector3f(0.0f, 1.0f, float(Sky::Up));
+	vertices[base+1].Position = Vector3f( size, size, -size );
+	vertices[base+1].Tex = Vector3f(1.0f, 1.0f, float(Sky::Up));
+	vertices[base+2].Position = Vector3f( size, size, size );
+	vertices[base+2].Tex = Vector3f(1.0f, 0.0f, float(Sky::Up));
+	vertices[base+3].Position = Vector3f( -size, size, size );
+	vertices[base+3].Tex = Vector3f(0.0f, 0.0f, float(Sky::Up));
+
+	// Down
+	base = Sky::Down * 4;
+	vertices[base+0].Position = Vector3f( -size, -size, size );
+	vertices[base+0].Tex = Vector3f(0.0f, 1.0f, float(Sky::Down));
+	vertices[base+1].Position = Vector3f( size, -size, size );
+	vertices[base+1].Tex = Vector3f(1.0f, 1.0f, float(Sky::Down));
+	vertices[base+2].Position = Vector3f( size, -size, -size );
+	vertices[base+2].Tex = Vector3f(1.0f, 0.0f, float(Sky::Down));
+	vertices[base+3].Position = Vector3f( -size, -size, -size );
+	vertices[base+3].Tex = Vector3f(0.0f, 0.0f, float(Sky::Down));
+
+	// Front
+	base = Sky::Front * 4;
+	vertices[base+0].Position = Vector3f( -size, -size, -size );
+	vertices[base+0].Tex = Vector3f(0.0f, 1.0f, float(Sky::Front));
+	vertices[base+1].Position = Vector3f( size, -size, -size );
+	vertices[base+1].Tex = Vector3f(1.0f, 1.0f, float(Sky::Front));
+	vertices[base+2].Position = Vector3f( size, size, -size );
+	vertices[base+2].Tex = Vector3f(1.0f, 0.0f, float(Sky::Front));
+	vertices[base+3].Position = Vector3f( -size, size, -size );
+	vertices[base+3].Tex = Vector3f(0.0f, 0.0f, float(Sky::Front));
+
+	// Back
+	base = Sky::Back * 4;
+	vertices[base+0].Position = Vector3f( size, -size, size );
+	vertices[base+0].Tex = Vector3f(0.0f, 1.0f, float(Sky::Back));
+	vertices[base+1].Position = Vector3f( -size, -size, size );
+	vertices[base+1].Tex = Vector3f(1.0f, 1.0f, float(Sky::Back));
+	vertices[base+2].Position = Vector3f( -size, size, size );
+	vertices[base+2].Tex = Vector3f(1.0f, 0.0f, float(Sky::Back));
+	vertices[base+3].Position = Vector3f( size, size, size );
+	vertices[base+3].Tex = Vector3f(0.0f, 0.0f, float(Sky::Back));
+
+	ElementInitData vInitData;
+	vInitData.pData = vertices;
+	vInitData.rowPitch = sizeof(vertices);
+	mVertexBuffer = factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
+
+	uint32_t indices[36];
+	for (size_t i = 0; i < 6; ++i)
+	{
+		indices[i*6+0] = 0 + i*4;
+		indices[i*6+1] = 1+ i*4;
+		indices[i*6+2] = 3+ i*4;
+		indices[i*6+3] = 3+ i*4;
+		indices[i*6+4] = 1+ i*4;
+		indices[i*6+5] = 2+ i*4;
+	}
+
+	ElementInitData iInitData;
+	iInitData.pData = indices;
+	iInitData.rowPitch = sizeof(indices);
+	mIndexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
+
+	// Load material
+	mMaterial = factory.CreateMaterialFromFile("SkyNormal", "../Media/Materials/SkyNormal.material.xml");
+}
+
+void Sky::InitializeSkyCubeMap(float size)
+{
+	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
+
+	// Create vertex declaration
+	VertexElement vertexElems[] = {
+		VertexElement(0, VEF_Vector3, VEU_Position),
+	};
+	mVertexDecl = factory.CreateVertexDeclaration(vertexElems, 1);
+
+	std::vector<Vector3f> vertices;
+	std::vector<uint32_t> indices;
+	BuildGeometrySphere(2, size, vertices, indices);
+
+	for(size_t i = 0; i < vertices.size(); ++i)
+	{
+		// Scale on y-axis to turn into an ellipsoid to make a flatter Sky surface
+		vertices[i] = 0.5f*vertices[i];
+	}
+
+	ElementInitData vInitData;
+	vInitData.pData = &vertices[0];
+	vInitData.rowPitch = sizeof(Vector3f) * vertices.size();
+	mVertexBuffer = factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
+
+	ElementInitData iInitData;
+	iInitData.pData = &indices[0];
+	iInitData.rowPitch = sizeof(uint32_t) * indices.size();
+	mIndexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
+
+	// Load material
+	mMaterial = factory.CreateMaterialFromFile("SkyCubeMap", "../Media/Materials/SkyCubeMap.material.xml");
+}
+
 }

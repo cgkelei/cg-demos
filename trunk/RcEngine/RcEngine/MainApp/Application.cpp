@@ -110,6 +110,7 @@ void Application::Tick()
 	currentFrameBuffer->Clear(CF_Color | CF_Depth |CF_Stencil, RcEngine::ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, 0);
 
 
+	
 	Context::GetSingleton().GetSceneManager().RenderScene();
 
 	currentFrameBuffer->SwapBuffers();
@@ -164,8 +165,8 @@ void Application::ReadConfiguration()
 {
 	mSettings.Left = 40;
 	mSettings.Top = 40;
-	mSettings.Width = 1024;
-	mSettings.Height = 800;
+	mSettings.Width = 800;
+	mSettings.Height = 600;
 	mSettings.Fullscreen = false;
 	mSettings.SampleCount = 0;
 	mSettings.SampleQuality = 0;

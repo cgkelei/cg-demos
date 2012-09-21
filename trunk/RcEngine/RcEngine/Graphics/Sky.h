@@ -3,58 +3,54 @@
 
 #include <Core/Prerequisites.h>
 #include <Scene/SceneObject.h>
+#include <Graphics/Renderable.h>
 
 namespace RcEngine {
 
-class SkyPlane;
-class SkyBoxCube;
-
-class _ApiExport SkyBox : public SceneObject
+class _ApiExport Sky : public SceneObject, public Renderable
 {
 public:
 	enum SkyBoxPlane
 	{
-		Front = 0,
-		Back,
-		Left,
+		Left = 0,
 		Right,
 		Up,
 		Down,
+		Front,
+		Back,
 		MaxPlaneCount
 	};
 
 public:
-	SkyBox( float size = 100.0f,  bool cube = false );
-	~SkyBox();
+	Sky( float size,  bool cube = false );
+	~Sky();
 
 	SceneObejctType GetSceneObjectType() const  { return SOT_Sky; }
 
 	bool Renderable() const	{ return true; }
 
-	///**
-	// * Set each sky plane material.
-	// */
-	//void SetMaterial( SkyBoxPlane plane, const shared_ptr<Material>& mat );
-	//
-	/**
-	 * Set cubic sky box material.
-	 */
+	const shared_ptr<Material>& GetMaterial() const	{ return mMaterial; }
+
+	const shared_ptr<RenderOperation>& GetRenderOperation() const	{ return mRenderOperation; }
+
+	uint32_t GetWorldTransformsCount() const;
+	void GetWorldTransforms(Matrix4f* xform) const;
+	
 	void SetMaterial( const shared_ptr<Material>& mat );
 
-	void AddToRenderQueue( RenderQueue& renderQueue ) const;
+private:
+	void InitializeSkyBox(float size);
+	void InitializeSkyCubeMap(float size);
 
 private:
 	bool mCubeMapSky;
+	
 	shared_ptr<GraphicsBuffer> mVertexBuffer;
 	shared_ptr<GraphicsBuffer> mIndexBuffer;
 	shared_ptr<VertexDeclaration> mVertexDecl;
 	shared_ptr<Material> mMaterial;
 
-	SkyPlane* mSkyPlanes;
-	SkyBoxCube* mSkyCubeBox;
-
-	friend class SkyPlane;
-	friend class SkyBoxCube;
+	shared_ptr<RenderOperation> mRenderOperation;
 };
 
 

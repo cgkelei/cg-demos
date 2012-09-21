@@ -33,7 +33,7 @@ public:
 
 public:
 	Node();
-	Node( const String& name );
+	Node( const String& name, Node* parent = 0 );
 	virtual ~Node();
 
 	/**

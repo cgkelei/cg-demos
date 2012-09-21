@@ -48,11 +48,11 @@ OpenGLTextureCube::OpenGLTextureCube( PixelFormat format, uint32_t arraySize, ui
 	glBindTexture(mTargetType, mTextureID);
 	glTexParameteri(mTargetType, GL_TEXTURE_MAX_LEVEL, mMipMaps - 1);
 
-	for (uint32_t  arrIndex = 0; arrIndex < mTextureArraySize; ++ arrIndex)
+	for (uint32_t arrIndex = 0; arrIndex < mTextureArraySize; ++arrIndex)
 	{
-		for (uint32_t level = 0; level < mMipMaps; ++ level)
+		for(uint32_t face = 0; face < 6; ++face)
 		{
-			for(uint32_t face = 0; face < 6; ++ face)
+			for (uint32_t level = 0; level < mMipMaps; ++level)
 			{
 				uint32_t levelSize= mSizes[level];
 
@@ -87,6 +87,7 @@ OpenGLTextureCube::OpenGLTextureCube( PixelFormat format, uint32_t arraySize, ui
 					}
 					else
 					{
+						
 						glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat, levelSize, levelSize, 0,
 							imageSize, (NULL == initData) ? NULL : initData[imageIndex].pData);
 					}
@@ -96,8 +97,8 @@ OpenGLTextureCube::OpenGLTextureCube( PixelFormat format, uint32_t arraySize, ui
 				else
 				{
 					uint32_t imageSize = levelSize * levelSize * texelSize;
-					
-					uint32_t imageIndex =  arrIndex*mMipMaps*6 + face*mMipMaps + level;
+
+					uint32_t imageIndex =  arrIndex * mMipMaps * 6 + face * mMipMaps + level;
 					mTextureData[imageIndex].resize(imageSize);
 
 					if(mTextureArraySize > 1)
@@ -107,17 +108,14 @@ OpenGLTextureCube::OpenGLTextureCube( PixelFormat format, uint32_t arraySize, ui
 					}
 					else
 					{
-						glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat, size, size, 0, glformat, gltype,
+						ElementInitData id = initData[imageIndex];
+						glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat, levelSize, levelSize, 0, glformat, gltype,
 							(NULL == initData) ? NULL : initData[imageIndex].pData);
 					}
-
-
-				}
+				}	
 			}
 		}
 	}
-
-
 }
 
 

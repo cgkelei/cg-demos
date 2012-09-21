@@ -819,6 +819,26 @@ void OpenGLMapping::UnMapping( EffectParameterType& outType, GLenum glType )
 			outType = EPT_Float4;
 			break;
 		}
+	case GL_UNSIGNED_INT:
+		{
+			outType = EPT_Uint;
+			break;
+		}
+	case GL_UNSIGNED_INT_VEC2:
+		{
+			outType = EPT_Uint2;
+			break;
+		}
+	case GL_UNSIGNED_INT_VEC3:
+		{
+			outType = EPT_Uint3;
+			break;
+		}
+	case GL_UNSIGNED_INT_VEC4:
+		{
+			outType = EPT_Uint4;
+			break;
+		}
 	case GL_INT:
 		{
 			outType = EPT_Int;

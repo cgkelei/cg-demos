@@ -4,6 +4,7 @@
 #include <Graphics/Material.h>
 #include <Graphics/RenderFactory.h>
 #include <Graphics/RenderJob.h>
+#include <Graphics/Skeleton.h>
 #include <Core/Context.h>
 #include <Core/Exception.h>
 
@@ -172,16 +173,6 @@ shared_ptr<MeshPart> MeshPart::Load( const shared_ptr<Mesh>& mesh, Stream& sourc
 	meshPart->mStartIndex = 0;
 	meshPart->mIndexCount = indexCount;
 
-	//// set render operation
-	//meshPart->mRenderOperation->BaseVertexLocation = 0;
-	//meshPart->mRenderOperation->UseIndex = true;
-	//meshPart->mRenderOperation->IndexBuffer = meshPart->mIndexBuffer;
-	//meshPart->mRenderOperation->BindVertexStream(meshPart->mVertexBuffer, meshPart->mVertexDecl);
-	//meshPart->mRenderOperation->PrimitiveType = PT_Triangle_List;
-	//meshPart->mRenderOperation->IndexType = indexFormat;
-	//meshPart->mRenderOperation->StartIndexLocation = 0;
-	//meshPart->mRenderOperation->StartVertexLocation = 0;
-
 	return meshPart;	
 }
 
@@ -260,6 +251,9 @@ shared_ptr<Mesh> Mesh::Load( Stream& source )
 	source.Read(&center, sizeof(Vector3f));
 	radius = source.ReadFloat();
 	mesh->mBoundingSphere = BoundingSpheref(center, radius);
+
+	// read bones
+	
 
 	uint32_t subMeshCount = source.ReadUInt();
 	for (uint32_t i = 0 ; i < subMeshCount; ++i)

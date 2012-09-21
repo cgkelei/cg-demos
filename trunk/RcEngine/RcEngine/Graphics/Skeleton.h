@@ -8,31 +8,22 @@ namespace RcEngine {
 
 class Skeleton;
 
-class _ApiExport Joint : public Node
+class _ApiExport Bone : public Node
 {
 public:
-	Joint(Skeleton* skeleton, const String& name);
+	Bone( const String& name, Bone* parent = 0 );
 
-
-	void SetSkeleton( Skeleton* skeleton );
-
-	Skeleton* GetSkeleton()	const { return mSkeleton; }
+protected:
+	virtual Node* CreateChildImpl( const String& name ) { return 0; }
 
 private:
-	Node* CreateChildImpl( const String& name );
 	void OnUpdate( );
-
-	Skeleton* mSkeleton;
+	
 
 public:
-	/// Reset position.
-	Vector3f InitialPosition;
-	/// Reset rotation.
-	Quaternionf InitialRotation;
-	/// Reset scale.
-	Vector3f InitialScale;
-	/// Offset matrix.
-	Matrix4f OffsetMatrix;
+	Vector3f mBindDerivedPosition;
+	Vector3f mBindDerivedScale;
+	Quaternionf mBindDerivedRotation;
 };
 
 class _ApiExport Skeleton
@@ -41,10 +32,22 @@ public:
 	Skeleton();
 	~Skeleton();
 
-	vector<Joint>& GetJoints() { return mJoints; }
+	void Update( float delta );
+
+	Bone* GetRootBone();
+	Bone* GetBone( const String& name );
+	Bone* GetBone( uint32_t index );
+
+	vector<Bone*>& GetBones() { return mBones; }
+
+	static shared_ptr<Skeleton> LoadFrom( Stream& source );
 
 private:
-	vector<Joint> mJoints;
+	
+	vector<Bone*> mBones;
+
+	int32_t mRootBoneIndex;
+
 };
 
 } // Namespace RcEngine
