@@ -39,6 +39,23 @@ struct OutModel
 	shared_ptr<Skeleton> Skeleton;
 };
 
+void ValidateOffsetMatrix( OutModel& outModel );
+
+
+String XMLFromVector3(const Vector3f& vec)
+{
+	std::stringstream sss;
+	sss << "x=\"" << vec.X() << "\" y=\"" << vec.Y() << "\" z=\"" << vec.Z() << "\"";
+	return  sss.str();
+}
+
+String XMLFromQuaternion(const Quaternionf& quat)
+{
+	std::stringstream sss;
+	sss << "w=\"" << quat.W() << "\" x=\"" << quat.X() << "\" y=\"" << quat.Y() << "\" z=\"" << quat.Z() << "\"";
+	return  sss.str();
+}
+
 
 Vector3f Transform(const Vector3f& vec, const Matrix4f& mat)
 {
@@ -84,41 +101,12 @@ Vector3f FromAIVector(const aiVector3D& vec)
 	 return Vector3f(vec.x, vec.y, vec.z);
 }
 
-void GetPosRotScale(const aiMatrix4x4& transform, Vector3f& pos, Quaternionf& rot, Vector3f& scale)
+Quaternionf FromAIQuaternion(const aiQuaternion& quat)
 {
-	aiVector3D aiPos;
-	aiQuaternion aiRot;
-	aiVector3D aiScale;
-	transform.Decompose(aiScale, aiRot, aiPos);
-	pos = FromAIVector(aiPos);
-	rot.X() = aiRot.x; rot.Y() = aiRot.y;rot.Z() = aiRot.z;rot.W() = aiRot.w;
-	scale = FromAIVector(aiScale);
+	return Quaternionf(quat.w, quat.x, quat.y, quat.z);
 }
 
-
-aiNode* GetNode(const String& name, aiNode* node)
-{
-	if (!node)
-		return nullptr;
-	
-	if (String(node->mName.C_Str()) == name)
-	{
-		return node;
-	}
-
-	for (uint32_t i = 0; i < node->mNumChildren; ++i)
-	{
-		aiNode* found = GetNode(name, node->mChildren[i]);
-		if (found)
-		{
-			return found;
-		}
-	}
-
-	return nullptr;
-}
-
-uint32_t GetBoneIndex(const OutModel& model, const aiString& boneName)
+int32_t GetBoneIndex(const OutModel& model, const aiString& boneName)
 {
 	for (size_t i = 0; i < model.Bones.size(); ++i)
 	{
@@ -127,7 +115,7 @@ uint32_t GetBoneIndex(const OutModel& model, const aiString& boneName)
 			return i;
 		}
 	}
-	return (numeric_limits<uint32_t>::max)();
+	return -1;
 }
 
 aiMatrix4x4 GetDerivedTransform( aiMatrix4x4 transform, aiNode* node, aiNode* rootNode )
@@ -171,6 +159,11 @@ aiMatrix4x4 GetOffsetMatrix(const OutModel& model, const String& boneName)
 			{
 				aiMatrix4x4 offset = bone->mOffsetMatrix;
 
+				aiNode* node = model.RootNode->FindNode(bone->mName);
+
+				aiMatrix4x4 derivedMat = meshNode->mTransformation * GetDerivedTransform(node, model.RootBone);
+				derivedMat.Inverse();
+
 				/* Note that the all mesh vertex has been baked into the same coordinate system which
 				 * is defined by the root node, called model space. So offset matrix must first transform
 				 * vertex from model space to mesh space, then transform mesh space to bone space in bind pose
@@ -179,7 +172,7 @@ aiMatrix4x4 GetOffsetMatrix(const OutModel& model, const String& boneName)
 				 */
 				aiMatrix4x4 nodeDerivedInverse = GetMeshBakingTransform(meshNode, model.RootNode);
 				nodeDerivedInverse.Inverse();
-				offset *= nodeDerivedInverse;
+				offset = offset * nodeDerivedInverse;
 				return offset;
 			}
 		}
@@ -254,8 +247,8 @@ void GetBlendData(OutModel& model, aiMesh* mesh, vector<uint32_t>& boneMappings,
 	for (size_t i = 0; i < mesh->mNumBones; ++i)
 	{
 		aiBone* bone = mesh->mBones[i];
-		uint32_t boneIndex = GetBoneIndex(model, bone->mName);
-		if (boneIndex == (numeric_limits<uint32_t>::max)())
+		int32_t boneIndex = GetBoneIndex(model, bone->mName);
+		if (boneIndex == -1)
 		{
 			//ErrorExit("Bone " + boneName + " not found");
 			continue;
@@ -295,7 +288,7 @@ bool AssimpProcesser::Process( const char* filePath )
 	Assimp::Importer importer;
 	
 	mAIScene = const_cast<aiScene*>( importer.ReadFile(filePath, aiProcess_Triangulate |
-		aiProcess_RemoveRedundantMaterials | aiProcess_OptimizeMeshes | aiProcess_FlipUVs) );
+		aiProcess_RemoveRedundantMaterials | aiProcess_OptimizeMeshes | aiProcess_FlipUVs | aiProcess_ConvertToLeftHanded) );
 	
 	if(!mAIScene)
 	{
@@ -317,7 +310,7 @@ void AssimpProcesser::ProcessScene( const aiScene* scene )
 	model.RootNode = mAIScene->mRootNode;
 
 	ExportModel(model, "Test");
-	//ExportBinary(model);
+	ExportBinary(model);
 	ExportXML(model);
 }
 
@@ -661,7 +654,8 @@ void AssimpProcesser::CollectBones( OutModel& outModel )
 		{
 			aiBone* bone = mesh->mBones[j];
 			String boneName(bone->mName.C_Str());
-			aiNode* boneNode = GetNode(boneName, mAIScene->mRootNode);
+			aiNode* boneNode = mAIScene->mRootNode->FindNode(bone->mName);
+
 			if (!boneNode)
 			{
 				ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Couldn't find the scene node for Bone: " + boneName
@@ -710,6 +704,8 @@ void AssimpProcesser::CollectBones( OutModel& outModel )
 
 	outModel.RootBone = *rootNodes.begin();
 	CollectBonesFinal(outModel.Bones, necessary, outModel.RootBone);
+	for (size_t i = 0; i < outModel.Bones.size(); ++i)
+		std::cout << "Bone:" << outModel.Bones[i]->mName.C_Str() << std::endl;
 }
 
 void AssimpProcesser::CollectBonesFinal( vector<aiNode*>& bones, const set<aiNode*>& necessary, aiNode* node )
@@ -731,55 +727,6 @@ void AssimpProcesser::ExportModel( OutModel& outModel, const String& outName )
 	CollectMeshes(outModel, outModel.RootNode);
 	CollectBones(outModel);
 	BuildAndSaveModel(outModel);
-
-	/*XMLDoc file;
-	XMLNodePtr root = file.AllocateNode(XML_Node_Element, "Joints");*/
-	//ofstream stream("Joint.xml", std::ios::out);
-
-	//auto help1 = [](const Vector3f& vec) -> string{
-	//	stringstream sss;
-	//	sss << "x=\"" << vec.X() << "\" y=\"" << vec.Y() << "\" z=\"" << vec.Z() << "\"" ;
-	//	return sss.str();
-	//};
-
-	//auto help2 = [](const Quaternionf& quat) -> string{
-	//	stringstream sss;
-	//	sss << "w=\"" << quat.W() << "\" x=\"" << quat.X() << "\" y=\"" << quat.Y() << "\" z=\"" << quat.Z() << "\"" ;
-	//	return sss.str();
-	//};
-
-	//vector<Joint> joints = outModel.Skeleton->GetJoints();
-	//stream << "<Joints>" << endl;
-	//for (size_t i = 0; i < joints.size(); ++i)
-	//{
-	//	/*XMLNodePtr jointNode = file.AllocateNode(XML_Node_Element, "Joint");
-	//	jointNode->AppendAttribute( file.AllocateAttributeString("name", joints[i].Name) );
-	//	jointNode->AppendAttribute( file.AllocateAttributeUInt("parent", joints[i].ParentIndex) );
-	//	XMLNodePtr bindPosNode = file.AllocateNode(XML_Node_Element, "bindPostion");
-	//	bindPosNode->AppendAttribute(file.AllocateAttributeFloat("x", joints[i].InitialPosition.X()));
-	//	bindPosNode->AppendAttribute(file.AllocateAttributeFloat("y", joints[i].InitialPosition.Y()));
-	//	bindPosNode->AppendAttribute(file.AllocateAttributeFloat("z", joints[i].InitialPosition.Z()));
-	//	XMLNodePtr bindRotationNode = file.AllocateNode(XML_Node_Element, "bindRotation");
-	//	bindRotationNode->AppendAttribute(file.AllocateAttributeFloat("w", joints[i].InitialRotation.W()));
-	//	bindRotationNode->AppendAttribute(file.AllocateAttributeFloat("x", joints[i].InitialRotation.X()));
-	//	bindRotationNode->AppendAttribute(file.AllocateAttributeFloat("y", joints[i].InitialRotation.Y()));
-	//	bindRotationNode->AppendAttribute(file.AllocateAttributeFloat("z", joints[i].InitialRotation.Z()));*/
-	//
-	//	/*	jointNode->AppendNode(bindPosNode);
-	//	jointNode->AppendNode(bindRotationNode);
-	//	root->AppendNode(jointNode);*/
-
-	//	stream << "<joint name=\"" << joints[i].Name << "\" parent=\"" << joints[i].ParentIndex << "\">" << endl;
-	//	stream << "\t<bindPosition " + help1(joints[i].InitialPosition) + ">" << endl; 
-	//	stream << "\t<bindRotation " + help2(joints[i].InitialRotation) + ">" << endl; 
-	//	stream << "</joint>" << endl;
-
-	//}
-	//stream << "</Joints>" << endl;
-	//stream.close();
-	//file.RootNode(root);
-
-	
 }
 
 void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
@@ -802,21 +749,13 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 		BoundingSpheref sphere; 
 
 		// Get the world transform of the mesh for baking into the vertices
-		Matrix4f vertexTransform = FromAIMatrix(
-			GetMeshBakingTransform(outModel.MeshNodes[i], outModel.RootNode) );
-		
-		aiMatrix4x4 vertexAI = GetMeshBakingTransform(outModel.MeshNodes[i], outModel.RootNode );
-		
-		Vector3f scaleAI, positionAI;
-		Quaternionf rotAI;
-		GetPosRotScale(vertexAI, positionAI, rotAI, scaleAI);
+		aiMatrix4x4 vertexTransformAI ;//= GetMeshBakingTransform(outModel.MeshNodes[i], outModel.RootNode );
+		aiMatrix4x4 normalTransformAI = vertexTransformAI.Inverse().Transpose();
 
-		Matrix4f normalTransform = MatrixInverse(vertexTransform).Transpose();
+		aiVector3D translationAI, scaleAI;
+		aiQuaternion rotationAI;
+		vertexTransformAI.Decompose(scaleAI, rotationAI, translationAI);
 
-		Vector3f scale, translation;
-		Quaternionf rot;
-		MatrixDecompose(scale, rot, translation, vertexTransform);
-		
 		aiMesh* mesh = outModel.Meshes[i];
 		shared_ptr<VertexDeclaration> vertexDecl = GetVertexDeclaration(mesh);
 
@@ -880,10 +819,8 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 				case VEU_Position:
 					{
 						// Bake the mesh vertex in model space defined by the root node
-						// So even without the skeleton, the mesh can render with unskin mesh.
-						Vector3f vertex = Transform( FromAIVector(mesh->mVertices[i]), vertexTransform );				
-
-						aiVector3D v = vertexAI *  mesh->mVertices[i];
+						// So even without the skeleton, the mesh can render with unskin mesh.				
+						Vector3f vertex = FromAIVector( vertexTransformAI *  mesh->mVertices[i] );
 						
 						*(vertexPtr) = vertex.X();
 						*(vertexPtr+1) = vertex.Y();
@@ -895,7 +832,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 					break;
 				case VEU_Normal:
 					{
-						Vector3f normal = Transform( FromAIVector(mesh->mNormals[i]), normalTransform);
+						Vector3f normal = FromAIVector( normalTransformAI * mesh->mNormals[i] );
 						*(vertexPtr) = normal.X();
 						*(vertexPtr+1) = normal.Y();
 						*(vertexPtr+2) = normal.Z();
@@ -903,7 +840,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 					break;
 				case VEU_Tangent:
 					{
-						Vector3f tangent = Transform( FromAIVector(mesh->mTangents[i]), normalTransform);
+						Vector3f tangent = FromAIVector(normalTransformAI * mesh->mTangents[i]);
 						*(vertexPtr) = tangent.X();
 						*(vertexPtr+1) = tangent.Y();
 						*(vertexPtr+2) = tangent.Z();
@@ -911,7 +848,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 					break;
 				case VEU_Binormal:
 					{
-						Vector3f bitangent = Transform( FromAIVector(mesh->mBitangents[i]), normalTransform);
+						Vector3f bitangent = FromAIVector(normalTransformAI * mesh->mBitangents[i]);
 						*(vertexPtr) = bitangent.X();
 						*(vertexPtr+1) = bitangent.Y();
 						*(vertexPtr+2) = bitangent.Z();
@@ -985,7 +922,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 	{
 		shared_ptr<Skeleton> skeleton(new Skeleton);
 		vector<Bone*>& bones = skeleton->GetBones();
-		
+	
 		for (size_t i = 0; i < outModel.Bones.size(); ++i)
 		{
 			aiNode* boneNode = outModel.Bones[i];
@@ -1002,18 +939,20 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 			if (boneNode == outModel.RootBone)
 				transform = GetDerivedTransform(boneNode, outModel.RootNode);
 
-			Vector3f scale, position;
-			Quaternionf rot;
-			GetPosRotScale(transform, position, rot, scale);
+			aiVector3D scale, position;
+			aiQuaternion rot;
+			transform.Decompose(scale, rot, position);
 				
-			bone->SetPosition(position);
-			bone->SetRotation(rot);
-			bone->SetScale(scale);
+			Quaternionf quat = FromAIQuaternion(rot);
+			float yaw, roll, pitch;
+			QuaternionToRotationYawPitchRoll(yaw, pitch, roll, quat);
+
+			bone->SetPosition( FromAIVector(position) );
+			bone->SetRotation( FromAIQuaternion(rot) );
+			bone->SetScale( FromAIVector(scale) );
 
 			// Get offset information if exists
-			/*newJoint.OffsetMatrix = FromAIMatrix(GetOffsetMatrix(outModel, boneName));*/
-			//newJoint.ParentIndex = i;
-			//joints.push_back(newJoint);
+			aiMatrix4x4 offsetMatrix = GetOffsetMatrix(outModel, boneName);
 			bones.push_back(bone);
 		}
 
@@ -1026,7 +965,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 			{
 				if (bones[j]->GetName() == parentName)
 				{
-					std::cout << bones[i]->GetName() << "   Parent:" << parentName << std::endl;
+					//std::cout << bones[i]->GetName() << "   Parent:" << parentName << std::endl;
 					bones[i]->SetParent(bones[j]);
 					break;
 				}
@@ -1034,5 +973,29 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 		}
 
 		outModel.Skeleton = skeleton;
+	}
+
+	ValidateOffsetMatrix(outModel);
+}
+
+
+void ValidateOffsetMatrix( OutModel& outModel ) 
+{
+	vector<Bone*>& bones = outModel.Skeleton->GetBones();
+
+	for (size_t i = 0; i < bones.size(); ++i)
+	{
+		Bone* bone = bones[i];
+		
+		Matrix4f derivedTransform = bone->GetWorldTransform();
+
+		aiNode* node = outModel.RootNode->FindNode(bone->GetName().c_str());
+		
+		aiMatrix4x4 derivedTransformInverse = GetOffsetMatrix(outModel, bone->GetName());
+		derivedTransformInverse.Inverse();
+
+		Matrix4f test = FromAIMatrix(derivedTransformInverse);
+		
+		int a = 0;
 	}
 }

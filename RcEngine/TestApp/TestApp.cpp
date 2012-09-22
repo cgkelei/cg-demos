@@ -59,7 +59,7 @@ void TestApp::LoadContent()
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
 	
 	mDwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Dwarf/Body.material.xml");
-	Entity* dwarfEntity = sceneManager->CreateEntity("Dwarf", "../Media/Mesh/Dwarf/Dwarf.mdl");
+	Entity* dwarfEntity = sceneManager->CreateEntity("Dwarf", "../Media/Mesh/Dwarf/Test.mdl");
 	dwarfEntity->SetMaterial(mDwarfMaterial);
 
 	SceneNode* dwarfNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
@@ -67,13 +67,13 @@ void TestApp::LoadContent()
 
 
 	BoundingSpheref spehre = dwarfEntity->GetBoundingSphere();
-	SceneNode* centerNode = dwarfNode->CreateChildSceneNode("Center", -spehre.Center);
-	centerNode->AttachObject(dwarfEntity);
+	//SceneNode* centerNode = dwarfNode->CreateChildSceneNode("Center", -spehre.Center);
+	/*centerNode->AttachObject(dwarfEntity);*/
 
 	dwarfNode->SetScale( Vector3f(10.0f / spehre.Radius, 10.0f / spehre.Radius, 10.0f / spehre.Radius) );
+	dwarfNode->AttachObject(dwarfEntity);
 
-
-	vector<String> skyTextures;
+	/*vector<String> skyTextures;
 	skyTextures.push_back( String("../Media/Textures/left.dds"));
 	skyTextures.push_back( String("../Media/Textures/right.dds"));
 	skyTextures.push_back( String("../Media/Textures/up.dds"));
@@ -81,11 +81,11 @@ void TestApp::LoadContent()
 	skyTextures.push_back( String("../Media/Textures/front.dds"));
 	skyTextures.push_back( String("../Media/Textures/back.dds"));
 
-	auto texture = factory->CreateTextureArrayFromFile(skyTextures);
+	auto texture = factory->CreateTextureArrayFromFile(skyTextures);*/
 
 	// Sky 
 	//sceneManager->CreateSkyBox(texture, false);
-	sceneManager->CreateSkyBox(factory->CreateTextureFromFile("../Media/Textures/MeadowTrail.dds", 0));
+	//sceneManager->CreateSkyBox(factory->CreateTextureFromFile("../Media/Textures/MeadowTrail.dds", 0));
 	//sceneManager->CreateSkyBox(factory->CreateTextureFromFile("../Media/Textures/grassenvmap1024.dds", 0), 5000.0f); 
 }
 
