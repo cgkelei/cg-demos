@@ -49,6 +49,9 @@ private:
 
 	void BuildAndSaveModel(OutModel& outModel);
 
+	void BuildSkeleton(OutModel& model);
+
+
 private:
 	aiScene* mAIScene;
 

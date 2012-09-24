@@ -4,8 +4,8 @@
 
 namespace RcEngine {
 
-Bone::Bone( const String& name, Bone* parent )
-	: Node(name, parent)
+Bone::Bone( const String& name, uint32_t boneID, Bone* parent )
+	: Node(name, parent), mBoneIndex(boneID)
 {
 
 }
@@ -74,7 +74,7 @@ shared_ptr<Skeleton> Skeleton::LoadFrom( Stream& source )
 			parent = nullptr;
 		}
 
-		Bone* bone = new Bone(boneName, parent);
+		Bone* bone = new Bone(boneName, i, parent);
 
 		Vector3f bindPos;
 		source.Read(&bindPos,sizeof(Vector3f));

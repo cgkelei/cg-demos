@@ -11,7 +11,9 @@ class Skeleton;
 class _ApiExport Bone : public Node
 {
 public:
-	Bone( const String& name, Bone* parent = 0 );
+	Bone( const String& name, uint32_t boneIndex, Bone* parent = 0 );
+
+	uint32_t GetBoneIndex() const { return mBoneIndex; }
 
 protected:
 	virtual Node* CreateChildImpl( const String& name ) { return 0; }
@@ -20,7 +22,10 @@ private:
 	void OnUpdate( );
 	
 
-public:
+private:
+
+	uint32_t mBoneIndex;
+
 	Vector3f mBindDerivedPosition;
 	Vector3f mBindDerivedScale;
 	Quaternionf mBindDerivedRotation;
