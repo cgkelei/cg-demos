@@ -10,6 +10,7 @@
 
 #include "Core/Prerequisites.h"
 #include "Graphics/GraphicsCommon.h"
+#include "Graphics/Skeleton.h"
 #include "Math/ColorRGBA.h"
 #include "Math/MathUtil.h"
 
@@ -20,7 +21,28 @@ using namespace RcEngine;
 
 struct MaterialData;
 struct MeshPartData;
-struct OutModel;
+
+struct OutModel
+{
+	OutModel() 
+		: RootBone(NULL), RootNode(NULL), TotalVertices(0), TotalIndices(0) 
+	{
+
+	}
+
+	String OutName;
+	vector<aiMesh*> Meshes;
+	vector<aiNode*> MeshNodes;
+	vector<aiNode*> Bones;
+	vector<aiAnimation*> Animations;
+	aiNode* RootNode;
+	aiNode* RootBone;
+	uint32_t TotalVertices;
+	uint32_t TotalIndices;
+	vector<shared_ptr<MeshPartData> > MeshParts;
+	BoundingSpheref MeshBoundingSphere;
+	shared_ptr<Skeleton> Skeleton;
+};
 
 class AssimpProcesser
 {
@@ -35,6 +57,8 @@ private:
 
 	shared_ptr<MaterialData> ProcessMaterial(aiMaterial* material);
 
+	void ProcessAnimations();
+
 	void ExportXML( OutModel& outModel);
 	void ExportBinary( OutModel& outModel );
 	void GetBoundingBox(const aiScene* scene, aiVector3D* min, aiVector3D* max);
@@ -43,11 +67,14 @@ private:
 	void ExportModel( OutModel& outModel, const String& outName );
 
 private:
+	void CollectMaterials();
 	void CollectMeshes(OutModel& outModel, aiNode* rootNode);
 	void CollectBones(OutModel& outModel);
 	void CollectBonesFinal(vector<aiNode*>& bones, const set<aiNode*>& necessary, aiNode* node);
+	void CollectAnimations(OutModel& model, aiScene* scene);
 
 	void BuildAndSaveModel(OutModel& outModel);
+	void BuildAndSaveAnimations(OutModel& model);
 
 	void BuildSkeleton(OutModel& model);
 
@@ -58,4 +85,6 @@ private:
 	String mName;
 	vector<shared_ptr<MaterialData> > mMaterials;
 	vector<shared_ptr<MeshPartData> > mMeshParts;
+
+	OutModel mModel;
 };

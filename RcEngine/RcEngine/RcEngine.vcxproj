@@ -90,6 +90,7 @@
     <ClCompile Include="Core\XMLDom.cpp" />
     <ClCompile Include="Graphics\Animation.cpp" />
     <ClCompile Include="Graphics\AnimationController.cpp" />
+    <ClCompile Include="Graphics\AnimationState.cpp" />
     <ClCompile Include="Graphics\BlendState.cpp" />
     <ClCompile Include="Graphics\Camera.cpp" />
     <ClCompile Include="Graphics\CameraControler.cpp" />
@@ -155,6 +156,7 @@
     <ClInclude Include="Core\XMLDom.h" />
     <ClInclude Include="Graphics\Animation.h" />
     <ClInclude Include="Graphics\AnimationController.h" />
+    <ClInclude Include="Graphics\AnimationState.h" />
     <ClInclude Include="Graphics\BlendState.h" />
     <ClInclude Include="Graphics\Camera.h" />
     <ClInclude Include="Graphics\CameraControler.h" />

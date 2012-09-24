@@ -1,6 +1,7 @@
 #include "AssimpProcesser.h"
 #include "Graphics/VertexDeclaration.h"
 #include "Graphics/RenderFactory.h"
+#include "Graphics/Animation.h"
 #include "Graphics/Skeleton.h"
 #include "Math/ColorRGBA.h"
 #include "Math/Matrix.h"
@@ -16,28 +17,6 @@
 
 #pragma comment(lib, "assimp.lib")
 
-
-struct OutModel
-{
-	OutModel() 
-		: RootBone(NULL), RootNode(NULL), TotalVertices(0), TotalIndices(0) 
-	{
-
-	}
-
-	String OutName;
-	vector<aiMesh*> Meshes;
-	vector<aiNode*> MeshNodes;
-	vector<aiNode*> Bones;
-	vector<aiAnimation*> Animations;
-	aiNode* RootNode;
-	aiNode* RootBone;
-	uint32_t TotalVertices;
-	uint32_t TotalIndices;
-	vector<shared_ptr<MeshPartData> > MeshParts;
-	BoundingSpheref MeshBoundingSphere;
-	shared_ptr<Skeleton> Skeleton;
-};
 
 void ValidateOffsetMatrix( OutModel& outModel );
 
@@ -104,6 +83,11 @@ Vector3f FromAIVector(const aiVector3D& vec)
 Quaternionf FromAIQuaternion(const aiQuaternion& quat)
 {
 	return Quaternionf(quat.w, quat.x, quat.y, quat.z);
+}
+
+String FromAIString(const aiString& str)
+{
+	return String(str.C_Str());
 }
 
 int32_t GetBoneIndex(const OutModel& model, const aiString& boneName)
@@ -306,14 +290,10 @@ bool AssimpProcesser::Process( const char* filePath )
 
 void AssimpProcesser::ProcessScene( const aiScene* scene )
 {
-	OutModel model;
-
 	// if user don't specify model root node, use assimp root scene node 
-	model.RootNode = mAIScene->mRootNode;
+	mModel.RootNode = mAIScene->mRootNode;
 
-	ExportModel(model, "Test");
-	ExportBinary(model);
-	ExportXML(model);
+	ExportModel(mModel, "Test");
 }
 
 
@@ -727,12 +707,45 @@ void AssimpProcesser::CollectBonesFinal( vector<aiNode*>& bones, const set<aiNod
 	}
 }
 
+void AssimpProcesser::CollectAnimations( OutModel& model, aiScene* scene )
+{
+	for (size_t i = 0; i < scene->mNumAnimations; ++i)
+	{
+		aiAnimation* anim = scene->mAnimations[i];
+
+		for (size_t j = 0; j < anim->mNumChannels; ++j)
+		{
+			aiNodeAnim* channel = anim->mChannels[j];
+			aiString boneName = channel->mNodeName;
+
+			auto found = std::find_if(model.Bones.begin(), model.Bones.end(),
+				[&boneName](aiNode* bone) {return boneName == bone->mName;} );
+
+			if (found != model.Bones.end())
+			{
+				model.Animations.push_back(anim);
+			}
+		}
+	}
+}
+
 void AssimpProcesser::ExportModel( OutModel& outModel, const String& outName )
 {
 	outModel.OutName = outName;
 	CollectMeshes(outModel, outModel.RootNode);
+	CollectMaterials();
 	CollectBones(outModel);
+
 	BuildAndSaveModel(outModel);
+
+	if (mAIScene->HasAnimations())
+	{
+		CollectAnimations(outModel, mAIScene);
+		BuildAndSaveAnimations(outModel);
+	}
+
+	ExportBinary(mModel);
+	ExportXML(mModel);
 }
 
 void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
@@ -947,7 +960,6 @@ aiMatrix4x4 GetBoneOffset(OutModel& model, aiString name)
 		for (size_t j = 0; j < mesh->mNumBones; ++j)
 		{
 			aiBone* bone = mesh->mBones[j];
-			std::cout << bone->mName.C_Str() << std::endl;
 			if (name == bone->mName)
 			{
 				return bone->mOffsetMatrix;
@@ -1018,11 +1030,49 @@ void AssimpProcesser::BuildSkeleton( OutModel& outModel )
 		outModel.Skeleton = skeleton;
 	}
 
-	ValidateOffsetMatrix(outModel);
+	//ValidateOffsetMatrix(outModel);
 }
 
+void AssimpProcesser::BuildAndSaveAnimations( OutModel& model )
+{
+	for (size_t anim = 0; anim < model.Animations.size(); ++anim)
+	{
+		aiAnimation* animation = model.Animations[anim];
+		
+		String animName = FromAIString(animation->mName);
+
+		if (animName.empty())
+		{
+			stringstream sss;
+			sss << anim + 1;
+			animName = "Anim" + sss.str();
+		}
+		
+		float secondsPerTick = 1.0f / (float)animation->mTicksPerSecond;
+		float length = (float)animation->mDuration * secondsPerTick;
+
+		shared_ptr<AnimationClip> animationClip;
+		for (size_t channel = 0; channel < animation->mNumChannels; ++channel)
+		{
+			AnimationTrack animationTrack;
+
+			/*aiNodeAnim* channel = animation->mChannels[channel];
+			String channelName = FromAIString(channel->mNodeName);
+			Bone* bone = model.Skeleton->GetBone(channelName);*/
 
 
+		}
+
+	}
+}
+
+void AssimpProcesser::CollectMaterials()
+{	
+	for (size_t i = 0; i < mAIScene->mNumMaterials; ++i)
+	{
+		mMaterials.push_back( ProcessMaterial(mAIScene->mMaterials[i]) );
+	}
+}
 
 void ValidateOffsetMatrix( OutModel& outModel ) 
 {

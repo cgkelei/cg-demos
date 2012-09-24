@@ -5,7 +5,7 @@ int main(int argc, char** argv)
 {
 	AssimpProcesser processer;
 	//processer.Process("media/Dwarves/dwarf-lod0_rotating_hand.X");
-	processer.Process("media/ninja.mesh.xml");
-	//processer.Process("media/tiny_4anim.x");
+	//processer.Process("media/ninja.mesh.xml");
+	processer.Process("media/dude.dae");
 	return 0;
 }
