@@ -146,7 +146,7 @@ aiMatrix4x4 GetMeshBakingTransform(aiNode* meshNode, aiNode* meshRootNode)
 }
 
 aiMatrix4x4 GetOffsetMatrix(const OutModel& model, const String& boneName)
-{
+ {
 	for (size_t i = 0; i < model.Meshes.size(); ++i)
 	{
 		aiMesh* mesh = model.Meshes[i];
@@ -246,23 +246,25 @@ void GetBlendData(OutModel& model, aiMesh* mesh, vector<uint32_t>& boneMappings,
 
 	for (size_t i = 0; i < mesh->mNumBones; ++i)
 	{
-		aiBone* bone = mesh->mBones[i];
-		int32_t boneIndex = GetBoneIndex(model, bone->mName);
-		if (boneIndex == -1)
+		aiBone* boneAI = mesh->mBones[i];
+		String boneName = String( boneAI->mName.C_Str() );
+		Bone* bone = model.Skeleton->GetBone(boneName);
+		
+		if (!bone)
 		{
-			//ErrorExit("Bone " + boneName + " not found");
-			continue;
+			ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Bone:" + boneName + " not found!", "GetBlendData");
 		}
 		
-		for (size_t j = 0; j < bone->mNumWeights; ++j)
+
+		for (size_t j = 0; j < boneAI->mNumWeights; ++j)
 		{
-			uint32_t vertexID = bone->mWeights[j].mVertexId;
-			float weight = bone->mWeights[j].mWeight;
-			blendIndices[vertexID].push_back(boneIndex);
+			uint32_t vertexID = boneAI->mWeights[j].mVertexId;
+			float weight = boneAI->mWeights[j].mWeight;
+			blendIndices[vertexID].push_back(bone->GetBoneIndex());
 			blendWeights[vertexID].push_back(weight);
 			if (blendWeights[vertexID].size() > 4)
 			{
-				//ErrorExit("More than 4 bone influences on vertex");
+				ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Per vertex bones limit less than 4", "GetBlendData");
 			}
 		}
 		
@@ -288,7 +290,7 @@ bool AssimpProcesser::Process( const char* filePath )
 	Assimp::Importer importer;
 	
 	mAIScene = const_cast<aiScene*>( importer.ReadFile(filePath, aiProcess_Triangulate |
-		aiProcess_RemoveRedundantMaterials | aiProcess_OptimizeMeshes | aiProcess_FlipUVs | aiProcess_ConvertToLeftHanded) );
+		aiProcess_RemoveRedundantMaterials | aiProcess_OptimizeMeshes | aiProcess_FlipUVs ) );
 	
 	if(!mAIScene)
 	{
@@ -417,36 +419,38 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 	const Vector3f& meshCenter = outModel.MeshBoundingSphere.Center;
 	const float meshRadius = outModel.MeshBoundingSphere.Radius;
 	file << "\t<bounding x=\"" << meshCenter[0] << "\" y=\"" << meshCenter[1] << "\" z=\"" << meshCenter[2] << " radius=" << meshRadius << "\"/>\n";
-		
-	vector<Bone*> bones = outModel.Skeleton->GetBones();
-
-	file << "\t<bones boneCount=\"" << bones.size() << "\">" << std::endl;
-	for (size_t i = 0; i < bones.size(); ++i)
+	
+	
+	if (outModel.Bones.size())
 	{
-		Bone* bone = bones[i];
-		const String& boneName = bone->GetName();
-		String parentName;
-		if (bone->GetParent())
+		vector<Bone*> bones = outModel.Skeleton->GetBones();
+		file << "\t<bones boneCount=\"" << bones.size() << "\">" << std::endl;
+		for (size_t i = 0; i < bones.size(); ++i)
 		{
-			parentName = bone->GetParent()->GetName();
+			Bone* bone = bones[i];
+			const String& boneName = bone->GetName();
+			String parentName;
+			if (bone->GetParent())
+			{
+				parentName = bone->GetParent()->GetName();
+			}
+			else
+			{
+				parentName = "";
+			}
+			file << "\t\t<bone name=\"" << boneName << "\" parent=\"" << parentName <<  "\">" << std::endl;
+
+			Vector3f pos = bone->GetPosition();
+			Vector3f scale = bone->GetScale();
+			Quaternionf quat = bone->GetRotation();
+			file << "\t\t\t<bindPosition x=\"" << pos[0] << "\" y=\"" << pos[1] << "\" z=\"" << pos[2] << "\"/>\n";
+			file << "\t\t\t<bindRotation w=\"" << quat.W() << "\" x=\"" << quat.X() << "\" y=\"" << quat.Y() << " z=" << quat.Z() << "\"/>\n";
+			file << "\t\t\t<bindScale x=\"" << scale[0] << "\" y=\"" << scale[1] << "\" z=\"" << scale[2]  << "\"/>\n";
+			file << "\t\t</bone>" << std::endl; 
 		}
-		else
-		{
-			parentName = "";
-		}
-		file << "\t\t<bone name=\"" << boneName << "\" parent=\"" << parentName <<  "\">" << std::endl;
-		
-		Vector3f pos = bone->GetPosition();
-		Vector3f scale = bone->GetScale();
-		Quaternionf quat = bone->GetRotation();
-		file << "\t\t\t<bindPosition x=\"" << pos[0] << "\" y=\"" << pos[1] << "\" z=\"" << pos[2] << "\"/>\n";
-		file << "\t\t\t<bindRotation w=\"" << quat.W() << "\" x=\"" << quat.X() << "\" y=\"" << quat.Y() << " z=" << quat.Z() << "\"/>\n";
-		file << "\t\t\t<bindScale x=\"" << scale[0] << "\" y=\"" << scale[1] << "\" z=\"" << scale[2]  << "\"/>\n";
-		file << "\t\t</bone>" << std::endl; 
+		file << "\t</bones>" << std::endl;
 	}
-	file << "\t</bones>" << std::endl;
-
-
+	
 	vector<shared_ptr<MeshPartData> >& subMeshes = outModel.MeshParts;
 	for (size_t i = 0; i < subMeshes.size(); ++i)
 	{
@@ -629,7 +633,7 @@ void AssimpProcesser::CollectMeshes( OutModel& outModel, aiNode* node )
 		outModel.Meshes.push_back(mesh);
 		outModel.MeshNodes.push_back(node);
 		outModel.TotalVertices += mesh->mNumVertices;
-		outModel.TotalVertices += mesh->mNumFaces * 3;
+		outModel.TotalIndices += mesh->mNumFaces * 3;
 	}
 
 	for (uint32_t i = 0; i < node->mNumChildren; ++i)
@@ -648,7 +652,7 @@ void AssimpProcesser::CollectBones( OutModel& outModel )
 		aiMesh* mesh = outModel.Meshes[i];
 		aiNode* meshNode = outModel.MeshNodes[i];
 		aiNode* meshParentNode = meshNode->mParent;
-		aiNode* rootNode;
+		
 
 		for (size_t j = 0; j < mesh->mNumBones; ++j)
 		{
@@ -663,8 +667,9 @@ void AssimpProcesser::CollectBones( OutModel& outModel )
 			}
 
 			necessary.insert(boneNode);
-			rootNode = boneNode;
 
+			// flag this node and all parents of this node as needed, until we reach the node holding the mesh, or the parent.
+			aiNode* rootNode = boneNode;
 			while(true)
 			{
 				boneNode = boneNode->mParent;
@@ -704,8 +709,9 @@ void AssimpProcesser::CollectBones( OutModel& outModel )
 
 	outModel.RootBone = *rootNodes.begin();
 	CollectBonesFinal(outModel.Bones, necessary, outModel.RootBone);
-	for (size_t i = 0; i < outModel.Bones.size(); ++i)
-		std::cout << "Bone:" << outModel.Bones[i]->mName.C_Str() << std::endl;
+
+	//for (size_t i = 0; i < outModel.Bones.size(); ++i)
+	//	std::cout << "Bone:" << outModel.Bones[i]->mName.C_Str() << std::endl;
 }
 
 void AssimpProcesser::CollectBonesFinal( vector<aiNode*>& bones, const set<aiNode*>& necessary, aiNode* node )
@@ -744,22 +750,36 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 		return;
 	}
 
+	// animated model
+	if (!outModel.Bones.empty())
+	{
+		BuildSkeleton(outModel);
+	}
+
 	for (size_t i = 0; i < outModel.Meshes.size(); ++i)
 	{
 		BoundingSpheref sphere; 
 
+		aiMesh* mesh = outModel.Meshes[i];
+		aiNode* meshNode = outModel.MeshNodes[i];
+
+		// if animated all submeshes must have bone weights
+		if (outModel.Bones.size() && !mesh->HasBones())
+		{
+			ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Animated all submeshes must have bone weights", "AssimpProcesser::BuildAndSaveModel");
+		}
+
 		// Get the world transform of the mesh for baking into the vertices
-		aiMatrix4x4 vertexTransformAI ;//= GetMeshBakingTransform(outModel.MeshNodes[i], outModel.RootNode );
+		aiMatrix4x4 vertexTransformAI = GetMeshBakingTransform(meshNode, outModel.RootNode);
 		aiMatrix4x4 normalTransformAI = vertexTransformAI.Inverse().Transpose();
 
 		aiVector3D translationAI, scaleAI;
 		aiQuaternion rotationAI;
 		vertexTransformAI.Decompose(scaleAI, rotationAI, translationAI);
 
-		aiMesh* mesh = outModel.Meshes[i];
+		shared_ptr<MeshPartData> meshPart(new MeshPartData);
 		shared_ptr<VertexDeclaration> vertexDecl = GetVertexDeclaration(mesh);
 
-		shared_ptr<MeshPartData> meshPart(new MeshPartData);
 		meshPart->Name = String(mesh->mName.C_Str());
 
 		// Store index data
@@ -798,6 +818,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 		// Store vertex data
 		meshPart->VertexData.resize( vertexDecl->GetVertexSize() * mesh->mNumVertices );
 
+		// assign per vertex bone info
 		vector<vector<uint8_t> > blendIndices;
 		vector<vector<float> > blendWeights;
 		vector<uint32_t> boneMappings;
@@ -916,33 +937,55 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 	{
 		outModel.MeshBoundingSphere.Merge( outModel.MeshParts[i]->BoundingSphere );
 	}
+}
 
-	 // Build skeleton if necessary
+aiMatrix4x4 GetBoneOffset(OutModel& model, aiString name)
+{
+	for(size_t i = 0; i < model.Meshes.size(); ++i)
+	{
+		aiMesh* mesh = model.Meshes[i];
+		for (size_t j = 0; j < mesh->mNumBones; ++j)
+		{
+			aiBone* bone = mesh->mBones[j];
+			std::cout << bone->mName.C_Str() << std::endl;
+			if (name == bone->mName)
+			{
+				return bone->mOffsetMatrix;
+			}
+		}
+	}
+	return aiMatrix4x4();
+}
+
+void AssimpProcesser::BuildSkeleton( OutModel& outModel )
+{
+	// Build skeleton if necessary
 	if (outModel.Bones.size() && outModel.RootBone)
 	{
 		shared_ptr<Skeleton> skeleton(new Skeleton);
 		vector<Bone*>& bones = skeleton->GetBones();
-	
+
 		for (size_t i = 0; i < outModel.Bones.size(); ++i)
 		{
 			aiNode* boneNode = outModel.Bones[i];
 			String boneName(boneNode->mName.C_Str());
 
-			Bone* bone = new Bone(boneName);
-
-			/*std::cout << boneName << std::endl;*/
+			Bone* bone = new Bone(boneName, i);
 
 			aiMatrix4x4 transform = boneNode->mTransformation;
 
 			// Make the root bone transform relative to the model's root node, if it is not already
-		    // This will put the mesh in model coordinate system.
+			// This will put the mesh in model coordinate system.
 			if (boneNode == outModel.RootBone)
 				transform = GetDerivedTransform(boneNode, outModel.RootNode);
 
 			aiVector3D scale, position;
 			aiQuaternion rot;
 			transform.Decompose(scale, rot, position);
-				
+
+			transform = GetBoneOffset(outModel, aiString(boneNode->mName.C_Str())); 
+			transform.Decompose(scale, rot, position);
+
 			Quaternionf quat = FromAIQuaternion(rot);
 			float yaw, roll, pitch;
 			QuaternionToRotationYawPitchRoll(yaw, pitch, roll, quat);
@@ -960,7 +1003,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 		for (size_t i = 1; i < outModel.Bones.size(); ++i)
 		{
 			String parentName(outModel.Bones[i]->mParent->mName.C_Str());
-			
+
 			for (size_t j = 0; j < bones.size(); ++j)
 			{
 				if (bones[j]->GetName() == parentName)
@@ -979,6 +1022,8 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 }
 
 
+
+
 void ValidateOffsetMatrix( OutModel& outModel ) 
 {
 	vector<Bone*>& bones = outModel.Skeleton->GetBones();
@@ -988,11 +1033,18 @@ void ValidateOffsetMatrix( OutModel& outModel )
 		Bone* bone = bones[i];
 		
 		Matrix4f derivedTransform = bone->GetWorldTransform();
-
-		aiNode* node = outModel.RootNode->FindNode(bone->GetName().c_str());
 		
+		aiNode* node = outModel.RootNode->FindNode(bone->GetName().c_str());
+		aiMatrix4x4 mat = GetDerivedTransform(node, outModel.RootNode->FindNode("Scene_Root"));
+		mat.Transpose();
+
+		aiMatrix4x4 offset = GetBoneOffset(outModel, aiString(bone->GetName().c_str()));
+		offset.Inverse();
+		offset.Transpose();
+
 		aiMatrix4x4 derivedTransformInverse = GetOffsetMatrix(outModel, bone->GetName());
 		derivedTransformInverse.Inverse();
+		derivedTransformInverse.Transpose();
 
 		Matrix4f test = FromAIMatrix(derivedTransformInverse);
 		

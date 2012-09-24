@@ -47,9 +47,9 @@ void TestApp::Initialize()
 	camera->SetViewParams(Vector3f(0, 0, 40), Vector3f(0, 0, 0), up);
 	camera->SetProjectionParams(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 10000.0f );
 
-	mCameraControler = new FPSCameraControler;
-	//mCameraControler = new ModelViewerCameraControler();
-	//mCameraControler->SetWindowSize(GetMainWindow()->GetWidth(), GetMainWindow()->GetHeight());
+	//mCameraControler = new FPSCameraControler;
+	mCameraControler = new ModelViewerCameraControler();
+	mCameraControler->SetWindowSize(GetMainWindow()->GetWidth(), GetMainWindow()->GetHeight());
 	mCameraControler->AttachCamera(camera);
 }
 
@@ -59,19 +59,21 @@ void TestApp::LoadContent()
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
 	
 	mDwarfMaterial = factory->CreateMaterialFromFile("Body", "../Media/Mesh/Dwarf/Body.material.xml");
-	Entity* dwarfEntity = sceneManager->CreateEntity("Dwarf", "../Media/Mesh/Dwarf/Test.mdl");
+	//Entity* dwarfEntity = sceneManager->CreateEntity("Dwarf", "../Media/Mesh/Dwarf/Test.mdl");
+	
+	Entity* dwarfEntity = sceneManager->CreateEntity("Dwarf", "E:/Code/RcEngine/Tools/MeshImporter/Test.mdl");
 	dwarfEntity->SetMaterial(mDwarfMaterial);
 
 	SceneNode* dwarfNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
 	dwarfNode->SetPosition(Vector3f(0, 0, 0));
 
-
 	BoundingSpheref spehre = dwarfEntity->GetBoundingSphere();
-	//SceneNode* centerNode = dwarfNode->CreateChildSceneNode("Center", -spehre.Center);
-	/*centerNode->AttachObject(dwarfEntity);*/
-
 	dwarfNode->SetScale( Vector3f(10.0f / spehre.Radius, 10.0f / spehre.Radius, 10.0f / spehre.Radius) );
-	dwarfNode->AttachObject(dwarfEntity);
+	//dwarfNode->AttachObject(dwarfEntity);
+
+
+	SceneNode* centerNode = dwarfNode->CreateChildSceneNode("Center", -spehre.Center);
+	centerNode->AttachObject(dwarfEntity);
 
 	/*vector<String> skyTextures;
 	skyTextures.push_back( String("../Media/Textures/left.dds"));
@@ -111,9 +113,8 @@ void TestApp::Update( float deltaTime )
 	/*static float degree = 0;
 	degree += deltaTime * 1.0f;*/
 
-	//SceneNode* dwarfNode = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf");
-
-	//dwarfNode->SetRotation(QuaternionFromRotationMatrix(mCameraControler->GetWorldMatrix()));
+	SceneNode* dwarfNode = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf");
+	dwarfNode->SetRotation(QuaternionFromRotationMatrix(mCameraControler->GetWorldMatrix()));
 }
 
 

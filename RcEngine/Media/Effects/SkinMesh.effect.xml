@@ -1,0 +1,48 @@
+<Effect name="SkinMesh">
+
+<Shader name="SkinVS" stage="Vertex" entry="main">
+<![CDATA[
+#version 330
+
+in vec3 Position;
+in vec3 Normal;
+in vec3 Tex;
+in vec4 Weights;
+in int4 BlendIndices;
+
+out vec3 oNormal;
+out vec2 oTex;
+
+const int MAX_MATRICES = 35;
+
+uniform mat4 WorldMatrices[MAX_MATRICES];
+uniform mat4 ViewProj;
+
+uniform int NumBones;
+
+void main()
+{
+	vec4 position = 0.0f;
+	vec4 normal = 0.0f; 
+	float lastWeight = 0.0f;
+
+	for(int iBone = 0; i < NumBones-1; ++i)
+	{
+		position += Weights[i] * vec4(Position, 1.0) * WorldMatrices[BlendIndices[i]];
+		normal += Weights[i] * vec4(Normal, 0.0) * WorldMatrices[BlendIndices[i]];
+		lastWeight += Weights[i];
+	}
+
+	lastWeight = 1.0f - lastWeight;
+	
+	position += lastWeight * vec4(Position, 1.0) * WorldMatrices[BlendIndices[NumBones-1]];
+	normal += lastWeight * vec4(Normal, 0.0) * WorldMatrices[BlendIndices[NumBones-1]];
+
+	position.w = 1.0f
+	normal.w = 0.0f;
+
+	oNormal = vec3(normal);
+	oTex = Tex;
+
+	gl_Position = position * ViewProj;
+}
