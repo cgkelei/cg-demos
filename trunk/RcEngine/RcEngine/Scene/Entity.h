@@ -4,7 +4,7 @@
 #include <Core/Prerequisites.h>
 #include <Scene/SceneObject.h>
 #include <Graphics/Renderable.h>
-
+#include <Graphics/Skeleton.h>
 
 namespace RcEngine {
 
@@ -34,13 +34,13 @@ public:
 	uint32_t GetNumSubEntities() const { return mSubEntityList.size(); }
 
 	SubEntity* GetSubEntity( uint32_t index ) const { return mSubEntityList[index]; }
-	
-	/**
-	 * Sets the material to use for the whole of this entity.
-	 */
-	void SetMaterial( const shared_ptr<Material>& mat );
 
-	bool HasSkeleton() const	{ return false; }
+	bool HasSkeleton() const;
+	
+	//Test
+	Vector3f GetWorldPosition( const String& bone );
+	float GetBoneRadius(const String& bone);
+	shared_ptr<Skeleton> GetSkeleton();
 
 	void OnAttach( SceneNode* node );
 	void OnDetach( SceneNode* node );

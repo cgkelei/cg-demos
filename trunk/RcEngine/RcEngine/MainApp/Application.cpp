@@ -107,9 +107,8 @@ void Application::Tick()
 	shared_ptr<FrameBuffer> currentFrameBuffer = device->GetCurrentFrameBuffer();
 	device->BindFrameBuffer(currentFrameBuffer);
 
-	currentFrameBuffer->Clear(CF_Color | CF_Depth |CF_Stencil, RcEngine::ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, 0);
-
-
+	float clr = (float)169/255;
+	currentFrameBuffer->Clear(CF_Color | CF_Depth |CF_Stencil, RcEngine::ColorRGBA(clr, clr, clr, 1.0f), 1.0f, 0);
 	
 	Context::GetSingleton().GetSceneManager().RenderScene();
 

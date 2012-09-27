@@ -26,7 +26,7 @@ public:
 
 	void SetBlendState(const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask);		
 	void SetRasterizerState(const shared_ptr<RasterizerState>& state);
-	void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef, uint16_t backStencilRef);
+	void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0);
 	void SetSamplerState(ShaderType stage, uint32_t unit, const shared_ptr<SamplerState>& state);
 
 	void AdjustProjectionMatrix(Matrix4f& pOut);

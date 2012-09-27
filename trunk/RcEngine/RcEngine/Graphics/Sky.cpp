@@ -183,8 +183,8 @@ void Sky::InitializeSkyBox(float size)
 
 	// Create vertex declaration
 	VertexElement vertexElems[] = {
-		VertexElement(0, VEF_Vector3, VEU_Position),
-		VertexElement(sizeof(Vector3f), VEF_Vector3, VEU_TextureCoordinate)
+		VertexElement(0, VEF_Float3, VEU_Position),
+		VertexElement(sizeof(Vector3f), VEF_Float3, VEU_TextureCoordinate)
 	};
 
 	mVertexDecl = factory.CreateVertexDeclaration(vertexElems, 2);
@@ -290,7 +290,7 @@ void Sky::InitializeSkyCubeMap(float size)
 
 	// Create vertex declaration
 	VertexElement vertexElems[] = {
-		VertexElement(0, VEF_Vector3, VEU_Position),
+		VertexElement(0, VEF_Float3, VEU_Position),
 	};
 	mVertexDecl = factory.CreateVertexDeclaration(vertexElems, 1);
 

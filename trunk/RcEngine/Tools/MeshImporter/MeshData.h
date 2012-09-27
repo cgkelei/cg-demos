@@ -10,36 +10,6 @@
 #include "MaterialData.h"
 
 
-struct MeshPartData
-{
-	String Name;
-	uint32_t MaterialID;
-
-	IndexBufferType IndexFormat;
-
-	uint32_t StartIndex;
-	uint32_t IndexCount;
-
-	uint32_t VertexCount;
-	uint32_t StartVertex;
-
-
-	shared_ptr<VertexDeclaration> VertexDeclaration;
-
-	BoundingSpheref BoundingSphere;
-
-	vector<char> IndexData;
-	vector<char> VertexData;
-};
-
-struct MeshData
-{
-	String Name;
-	BoundingSpheref BoundingSphere;
-
-	vector<shared_ptr<MeshPartData> > Materials;
-	vector<shared_ptr<MeshPartData> > MeshParts;
-};
 
 
 #endif // MeshData_h__

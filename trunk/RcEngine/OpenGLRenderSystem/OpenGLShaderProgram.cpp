@@ -467,6 +467,32 @@ void OpenGLShaderProgram::Release()
 
 void OpenGLShaderProgram::CaptureAllParameter()
 {
+	GLint activeAttribs;
+	glGetProgramiv(mOGLProgramObject, GL_ACTIVE_ATTRIBUTES, &activeAttribs);
+	if (activeAttribs > 0)
+	{
+		GLint maxLength;
+		glGetProgramiv(mOGLProgramObject, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxLength);
+		vector<char> maxName(maxLength);
+		
+		GLint length;
+		GLint attibSize;
+		GLenum attibType;
+		unsigned int samplerIndex = 0;	
+
+		for (GLint i = 0; i < activeAttribs; ++i)
+		{
+			glGetActiveAttrib(mOGLProgramObject, i, maxLength, &length, &attibSize, &attibType, &maxName[0]);
+			String actualName(&maxName[0], length);
+			int a = 0;
+		}
+		GLint pos = glGetAttribLocation(mOGLProgramObject, "Position");
+		GLint norm = glGetAttribLocation(mOGLProgramObject, "Normal");
+		GLint tex = glGetAttribLocation(mOGLProgramObject, "Tex");
+		GLint weight = glGetAttribLocation(mOGLProgramObject, "BlendWeights");
+		GLint indices = glGetAttribLocation(mOGLProgramObject, "BlendIndices");
+	}
+
 	// Query and store uniforms from the program.
 	GLint activeUniforms;
 	glGetProgramiv(mOGLProgramObject, GL_ACTIVE_UNIFORMS, &activeUniforms);

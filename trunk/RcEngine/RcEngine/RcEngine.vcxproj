@@ -89,6 +89,7 @@
     <ClCompile Include="Core\Utility.cpp" />
     <ClCompile Include="Core\XMLDom.cpp" />
     <ClCompile Include="Graphics\Animation.cpp" />
+    <ClCompile Include="Graphics\AnimationClip.cpp" />
     <ClCompile Include="Graphics\AnimationController.cpp" />
     <ClCompile Include="Graphics\AnimationState.cpp" />
     <ClCompile Include="Graphics\BlendState.cpp" />
@@ -155,6 +156,7 @@
     <ClInclude Include="Core\Utility.h" />
     <ClInclude Include="Core\XMLDom.h" />
     <ClInclude Include="Graphics\Animation.h" />
+    <ClInclude Include="Graphics\AnimationClip.h" />
     <ClInclude Include="Graphics\AnimationController.h" />
     <ClInclude Include="Graphics\AnimationState.h" />
     <ClInclude Include="Graphics\BlendState.h" />

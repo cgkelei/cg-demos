@@ -10,6 +10,7 @@
 namespace RcEngine {
 
 class Skeleton;
+class Animation;
 
 class _ApiExport MeshPart
 {
@@ -81,7 +82,8 @@ public:
 
 	uint32_t GetNumMeshPart() const								{ return mMeshParts.size(); }
 	const shared_ptr<MeshPart>& GetMeshPart(size_t i) const		{ return mMeshParts[i]; }
-			
+	
+	shared_ptr<Skeleton> GetSkeleton() const { return mSkeleton; }
 
 	/**
 	 * Set all mesh part to the same material
@@ -96,7 +98,16 @@ public:
 	 */
 	void SetMeshPartMaterial(size_t meshPartIndex, const shared_ptr<Material>& mat);
 
+	bool HasAnimation() const;
 
+	shared_ptr<Animation> GetAnimation() const { return mAnimation; }
+
+	void MarkAnimationDirty();
+
+
+	void UpdateSkin();
+
+public:
 	static shared_ptr<Mesh> Load(Stream& source);
 	static void Save(const shared_ptr<Mesh>& mesh, Stream& dest);
 
@@ -113,6 +124,9 @@ private:
 	
 	shared_ptr<Skeleton> mSkeleton;
 
+	shared_ptr<Animation> mAnimation;
+
+	vector<Matrix4f> mSkinMatrices;
 };
 
 

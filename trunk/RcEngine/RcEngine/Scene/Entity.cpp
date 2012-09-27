@@ -72,10 +72,29 @@ const BoundingSpheref& Entity::GetBoundingSphere() const
 	return mMesh->GetBoundingSphere();
 }
 
-void Entity::SetMaterial( const shared_ptr<Material>& mat )
+
+Vector3f Entity::GetWorldPosition( const String& bone )
 {
-	mMesh->SetMaterial(mat);
+	shared_ptr<Skeleton> skeleton = mMesh->GetSkeleton();
+	return skeleton->GetBone(bone)->GetWorldPosition();
 }
+
+float Entity::GetBoneRadius( const String& bone )
+{
+	shared_ptr<Skeleton> skeleton = mMesh->GetSkeleton();
+	return skeleton->GetBone(bone)->mRadius;
+}
+
+bool Entity::HasSkeleton() const
+{
+	return mMesh->HasAnimation();
+}
+
+shared_ptr<Skeleton> Entity::GetSkeleton()
+{
+	return mMesh->GetSkeleton();
+}
+
 
 //------------------------------------------------------------------------------------------------------
 SubEntity::SubEntity( Entity* parent, const shared_ptr<MeshPart>& meshPart )

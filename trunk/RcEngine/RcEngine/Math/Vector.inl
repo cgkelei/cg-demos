@@ -404,3 +404,16 @@ inline Vector<Real, Size> Normalize(const Vector<Real, Size>& vec)
 	Real fInvScalar = ((Real)1.0)/ ((Real)sqrt((double)fLength));
 	return vec * fInvScalar;
 }
+
+template< typename Real, int32_t Size >
+inline Vector<Real, Size> Lerp(const Vector<Real, Size>& vec1, const Vector<Real, Size>& vec2, float s)
+{
+	Vector<Real, Size> retVal;
+
+	for (uint32_t i = 0; i < Size; ++i)
+	{
+		retVal[i] = vec1[i] + (vec2[i] - vec1[i]) * s;
+	}
+
+	return retVal;
+}

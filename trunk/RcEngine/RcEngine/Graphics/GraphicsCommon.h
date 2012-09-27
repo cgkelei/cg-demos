@@ -7,62 +7,23 @@ namespace RcEngine {
 
 enum VertexElementFormat
 {
-	/** Single-component, 32-bit floating-point, expanded to (float, 0, 0, 1).
-	*/
-	VEF_Single = 0,
-
-	/** Two-component, 32-bit floating-point, expanded to (float, Float32 value, 0, 1).
-	*/
-	VEF_Vector2 = 1,
-		
-	/* Three-component, 32-bit floating point, expanded to (float, float, float, 1).
-	*/
-	VEF_Vector3 = 2,
-		
-	/** Four-component, 32-bit floating point, expanded to (float, float, float, float).
-	*/
-	VEF_Vector4 = 3,
-		
-	/** Four-component, packed, unsigned byte, mapped to 0 to 1 range. 
-	* Input is in Int32 format (ARGB) expanded to (R, G, B, A).
-	*/
-	VEF_Color = 4,  
-		
-	/**¡¡Four-component, unsigned byte.
-	*/
-	VEF_UByte4 = 5,
-		
-	/** Two-component, signed short expanded to (value, value, 0, 1).
-	*/
-	VEF_Short2 = 6,
-		
-	/** Four-component, signed short expanded to (value, value, value, value).
-	*/
-	VEF_Short4 = 7,
-		
-	/** Normalized, two-component, signed short, expanded to 
-	* (first short/32767.0, second short/32767.0, 0, 1). 
-	* This type is valid for vertex shader version 2.0 or higher.
-	*/
-	VEF_NormalizedShort2 = 8,
-		
-	/** Normalized, four-component, signed short, expanded to 
-	*  (first short/32767.0, second short/32767.0, third short/32767.0, fourth short/32767.0).
-	* This type is valid for vertex shader version 2.0 or higher.
-	*/
-	VEF_NormalizedShort4 = 9,
-
-	/** Two-component, 16-bit floating point expanded to (value, value, value, value). 
-	* This type is valid for vertex shader version 2.0 or higher.
-	*/
-	VEF_HalfVector2 = 10,
-
-	/** Four-component, 16-bit floating-point expanded to (value, value, value, value). 
-	* This type is valid for vertex shader version 2.0 or higher.
-	*/
-	VEF_HalfVector4 = 11,
-
-	VEF_Count = 12
+	VEF_Float = 0,
+	VEF_Float2,
+	VEF_Float3,
+	VEF_Float4,
+	VEF_Int,
+	VEF_Int2,
+	VEF_Int3,
+	VEF_Int4,
+	VEF_UInt,
+	VEF_UInt2,
+	VEF_UInt3,
+	VEF_UInt4,
+	VEF_Bool,
+	VEF_Bool2,
+	VEF_Bool3,
+	VEF_Bool4,
+	VEF_Count
 };
 
 

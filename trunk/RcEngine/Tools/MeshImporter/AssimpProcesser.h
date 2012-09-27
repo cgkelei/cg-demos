@@ -19,8 +19,52 @@
 using namespace std;
 using namespace RcEngine;
 
-struct MaterialData;
-struct MeshPartData;
+static const uint32_t MAT_AMBIENT_COLOR = 0x1; 
+static const uint32_t MAT_DIFFUSE_COLOR = 0x2; 
+static const uint32_t MAT_SPECULAR_COLOR = 0x4; 
+static const uint32_t MAT_EMISSIVE_COLOR = 0x8; 
+static const uint32_t MAT_POWER_COLOR = 0x10; 
+
+struct MaterialData
+{
+	MaterialData() 
+		: MaterialFlags(0) { }
+
+	String Name;
+	ColorRGBA Ambient;
+	ColorRGBA Diffuse;
+	ColorRGBA Specular;
+	ColorRGBA Emissive;
+	float Power;
+
+	uint32_t MaterialFlags;
+
+	unordered_map<String, String> Textures;
+};
+
+struct MeshPartData
+{
+	String Name;
+	uint32_t MaterialID;
+
+	IndexBufferType IndexFormat;
+
+	uint32_t StartIndex;
+	uint32_t IndexCount;
+
+	uint32_t VertexCount;
+	uint32_t StartVertex;
+
+	shared_ptr<VertexDeclaration> VertexDeclaration;
+
+	BoundingSpheref BoundingSphere;
+
+	vector<char> IndexData;
+	vector<char> VertexData;
+};
+
+
+
 
 struct OutModel
 {
@@ -35,11 +79,14 @@ struct OutModel
 	vector<aiNode*> MeshNodes;
 	vector<aiNode*> Bones;
 	vector<aiAnimation*> Animations;
+	vector<BoundingSpheref> BoneSpheres;
 	aiNode* RootNode;
 	aiNode* RootBone;
 	uint32_t TotalVertices;
 	uint32_t TotalIndices;
 	vector<shared_ptr<MeshPartData> > MeshParts;
+	unordered_map<uint32_t, uint32_t> MaterialIndexMap;
+	vector<shared_ptr<MaterialData> > Materials;
 	BoundingSpheref MeshBoundingSphere;
 	shared_ptr<Skeleton> Skeleton;
 };
@@ -75,6 +122,7 @@ private:
 
 	void BuildAndSaveModel(OutModel& outModel);
 	void BuildAndSaveAnimations(OutModel& model);
+	void BuildBoneCollisions();
 
 	void BuildSkeleton(OutModel& model);
 
@@ -83,8 +131,6 @@ private:
 	aiScene* mAIScene;
 
 	String mName;
-	vector<shared_ptr<MaterialData> > mMaterials;
-	vector<shared_ptr<MeshPartData> > mMeshParts;
-
+	
 	OutModel mModel;
 };

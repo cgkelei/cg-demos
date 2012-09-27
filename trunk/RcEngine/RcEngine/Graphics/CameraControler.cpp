@@ -143,11 +143,11 @@ void FPSCameraControler::HandleRoatate( uint32_t action, int32_t value, float dt
 {
 	if (action == TurnLeftRight)
 	{
-		Rotate(value * 10*dt, 0 , 0);
+		Rotate(value * 10 * dt, 0 , 0);
 	}
 	else if (action == TurnUpDown)
 	{
-		Rotate(0, value *10* dt, 0);
+		Rotate(0, value *10 * dt, 0);
 	}
 
 	Context::GetSingleton().GetApplication().GetMainWindow()->ForceCursorToCenter();		

@@ -17,27 +17,32 @@ GLenum OpenGLMapping::Mapping( VertexElementFormat format )
 {
 	switch(format)
 	{
-	case VEF_Single:
-	case VEF_Vector2:
-	case VEF_Vector3:
-	case VEF_Vector4:
+	case VEF_Float:
+	case VEF_Float2:
+	case VEF_Float3:
+	case VEF_Float4:
 		return GL_FLOAT;
 
 
-	case VEF_Short2:
-	case VEF_Short4:
-	case VEF_NormalizedShort2:
-	case VEF_NormalizedShort4:
-		return GL_SHORT;
+	case VEF_Int:
+	case VEF_Int2:
+	case VEF_Int3:
+	case VEF_Int4:
+		return GL_INT;
 
 
-	case VEF_UByte4:
-		return GL_UNSIGNED_BYTE;
+	case VEF_UInt:
+	case VEF_UInt2:
+	case VEF_UInt3:
+	case VEF_UInt4:
+		return GL_UNSIGNED_INT;
 
 
-	case VEF_HalfVector2:
-	case VEF_HalfVector4:
-		return GL_FLOAT;
+	case VEF_Bool:
+	case VEF_Bool2:
+	case VEF_Bool3:
+	case VEF_Bool4:
+		return GL_BOOL;
 
 	}
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported vertex format", "OpenGLGraphicCommon::Mapping");
