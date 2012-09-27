@@ -91,12 +91,17 @@ inline Real LengthSquared( const Vector<Real, Size>& vec );
 template< typename Real, int32_t Size >
 inline Real Dot( const Vector<Real, Size>& lfs, const Vector<Real, Size>& rhs );
 
+template< typename Real, int32_t Size >
+inline Vector<Real, Size> Normalize(const Vector<Real, Size>& vec);
+
+template< typename Real, int32_t Size >
+inline Vector<Real, Size> Lerp(const Vector<Real, Size>& vec1, const Vector<Real, Size>& vec2, float s);
+
 template<typename Real>
 inline Vector<Real, 3> Cross( const Vector<Real, 3>& vec1, const Vector<Real, 3>& vec2 );
 
 
-template< typename Real, int32_t Size >
-inline Vector<Real, Size> Normalize(const Vector<Real, Size>& vec);
+
 
 #include <Math/Vector.inl>
 

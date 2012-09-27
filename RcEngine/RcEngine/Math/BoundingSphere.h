@@ -17,7 +17,7 @@ public:
 		: Center(center), Radius(radius), Defined(true) {}
 
 	BoundingSphere(const BoundingSphere<Real>& rhs)
-		: Center(rhs.Center), Radius(rhs.Radius), Defined(true) {}
+		: Center(rhs.Center), Radius(rhs.Radius), Defined(rhs.Defined) {}
 
 	BoundingSphere& operator = (const BoundingSphere<Real>& rhs)
 	{

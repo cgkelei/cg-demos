@@ -95,7 +95,8 @@ shared_ptr<MeshPart> MeshPart::Load( const shared_ptr<Mesh>& mesh, Stream& sourc
 	// result meshpart
 	shared_ptr<MeshPart> meshPart( new MeshPart(name, mesh) );
 
-	//String matName = source.ReadString();
+	// read material index
+	meshPart->mMaterialID = source.ReadUInt();
 
 	// read bounding sphere
 	Vector3f center;
@@ -178,8 +179,7 @@ shared_ptr<MeshPart> MeshPart::Load( const shared_ptr<Mesh>& mesh, Stream& sourc
 
 MeshPart::~MeshPart()
 {
-long v = mVertexBuffer.use_count();
-GraphicsBuffer* bf = mVertexBuffer.get();
+
 }
 
 void MeshPart::GetRenderOperation( RenderOperation& op, uint32_t lodIndex )
@@ -205,7 +205,7 @@ void MeshPart::GetRenderOperation( RenderOperation& op, uint32_t lodIndex )
 Mesh::Mesh( const String& name )
 : mName(name)
 {
-
+	mSkeleton = nullptr;
 }
 
 Mesh::~Mesh()
@@ -240,6 +240,9 @@ void Mesh::SetMeshPartMaterial( size_t meshPartIndex, const shared_ptr<Material>
 
 shared_ptr<Mesh> Mesh::Load( Stream& source )
 {
+	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
+
+	// read mesh name
 	String meshName = source.ReadString();
 
 	// result mesh
@@ -252,16 +255,31 @@ shared_ptr<Mesh> Mesh::Load( Stream& source )
 	radius = source.ReadFloat();
 	mesh->mBoundingSphere = BoundingSpheref(center, radius);
 
-	// read bones
-	
+	// read material
+	uint32_t materialCount = source.ReadUInt();
+	vector<String> materials(materialCount);
+	for (size_t i = 0; i < materialCount; ++i)
+	{
+		String materialFile = source.ReadString();
+		String materialName = materialFile.substr(0, materialFile.find('.'));
+		String materialPath = "../Media/Mesh/Dwarf/" + materialFile;
+		shared_ptr<Material> material = factory.CreateMaterialFromFile(materialName, materialPath);
+		mesh->mMaterials.push_back(material);
+	}
 
+	// read mesh part
 	uint32_t subMeshCount = source.ReadUInt();
 	for (uint32_t i = 0 ; i < subMeshCount; ++i)
 	{
 		shared_ptr<MeshPart> subMesh = MeshPart::Load(mesh, source);
 		mesh->mMeshParts.push_back(subMesh);
 	}
+	
+	// read bones
+	//mesh->mSkeleton = Skeleton::LoadFrom(source);
+	//mesh->mSkinMatrices.resize(mesh->mSkeleton->GetBoneCount());
 
+	// read animation
 	return mesh;
 }
 
@@ -277,6 +295,28 @@ void Mesh::Save( const shared_ptr<Mesh>& mesh, Stream& dest )
 	for (auto iter = mesh->mMeshParts.begin(); iter != mesh->mMeshParts.end(); ++iter)
 	{
 		MeshPart::Save((*iter), dest);
+	}
+}
+
+void Mesh::MarkAnimationDirty()
+{
+
+}
+
+bool Mesh::HasAnimation() const
+{
+	return mSkeleton != nullptr && mAnimation != nullptr;
+}
+
+void Mesh::UpdateSkin()
+{
+	// Note: the model's world transform will be baked in the skin matrices
+	const vector<Bone*>& bones = mSkeleton->GetBones();
+
+	for (size_t i = 0; i < bones.size(); ++i)
+	{
+		Bone* bone = bones[i];
+		mSkinMatrices[i] = bone->GetOffsetMatrix() * bone->GetWorldTransform();
 	}
 }
 

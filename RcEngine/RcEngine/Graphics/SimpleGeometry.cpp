@@ -69,7 +69,7 @@ SimpleBox::SimpleBox(const String& name)
 	mVertexBuffer= factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
 
 	VertexElement vdsc[] = {
-		VertexElement(0, VEF_Vector3,  VEU_Position, 0),
+		VertexElement(0, VEF_Float3,  VEU_Position, 0),
 	};
 	mVertexDecl = factory.CreateVertexDeclaration(vdsc, 1);
 
@@ -131,9 +131,9 @@ SimpleTexturedQuad::SimpleTexturedQuad(const String& name)
 	mVertexBuffer = factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
 
 	VertexElement vdsc[] = {
-		VertexElement(0, VEF_Vector3,  VEU_Position, 0),
-		VertexElement(12, VEF_Vector3,  VEU_Normal, 0),
-		VertexElement(24, VEF_Vector2,  VEU_TextureCoordinate, 0),
+		VertexElement(0, VEF_Float3,  VEU_Position, 0),
+		VertexElement(12, VEF_Float3,  VEU_Normal, 0),
+		VertexElement(24, VEF_Float2,  VEU_TextureCoordinate, 0),
 	};
 	mVertexDecl = factory.CreateVertexDeclaration(vdsc, 3);
 

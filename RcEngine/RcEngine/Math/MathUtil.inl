@@ -657,45 +657,6 @@ QuaternionToRotationYawPitchRoll(Real& yaw, Real& pitch, Real& roll, const Quate
 	//}
 }
 
-//----------------------------------------------------------------------------------------------------
-template <typename Real>
-inline Quaternion<Real> 
-QuaternionSlerp(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2, Real t)
-{
-	// 用点乘计算两四元素夹角的cos值
-	Real cosOmega = quat1[0]*quat2[0] + quat1[1]*quat2[1] + quat1[2]*quat2[2] + quat1[3]*quat2[3];
-	
-	Real dir = Real(1);
-
-	//如果点乘为负，则反转一个四元素以取得短的4D弧
-	if( cosOmega < Real(0) )
-	{
-		dir = Real(-1);
-		cosOmega = -cosOmega;
-	}
-	
-	Real scale1, scale2;
-
-	// 检查是否过于接近以避免除零
-	if( cosOmega < 1 - numeric_limits<Real>::epsilon() )
-	{
-		Real omega = acos(cosOmega);
-		Real oneOverSinOmega = Real(1) / sin(omega);
-
-		scale1 = sin( (Real(1) - t)*omega ) * oneOverSinOmega;
-		scale2 = sin(t * omega) * oneOverSinOmega;
-	}
-	else
-	{
-		//非常近，线性插值
-		scale1 = Real(1) - t;
-		scale2 = t;
-	}
-
-	return quat1 * scale1 + quat2 *  dir * scale2;
-}
-
-
 //////////////////////////////////////////////////////////////////////////
 template<typename Real>
 BoundingBox<Real> FromSphere( const BoundingSphere<Real>& sphere )

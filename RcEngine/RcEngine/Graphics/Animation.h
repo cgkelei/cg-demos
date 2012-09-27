@@ -2,52 +2,54 @@
 #define Animation_h__
 
 #include <Core/Prerequisites.h>
-#include <Math/Vector.h>
-#include <Math/Quaternion.h>
 
 namespace RcEngine {
 
-
-struct _ApiExport KeyFrame
-{
-	//KeyFrame() { }
-
-	// The time offset from the start of the animation to this keyframe.
-	float Time;
-
-	Vector3f Translation;
-	Quaternionf Rotation;
-	Vector3f Scale;
-};
-
-struct _ApiExport AnimationTrack
-{
-	AnimationTrack() {}
-	~AnimationTrack() {} 
-
-	// Bone name
-	String Name;
-	vector<KeyFrame> KeyFrames;
-};
-
-struct _ApiExport AnimationClip
-{	
-	float Duration;
-	vector< AnimationTrack > AnimationTracks;
-};
+class AnimationClip;
+class AnimationController;
+class AnimationState;
+class Bone;
 
 class _ApiExport Animation
 {
+	friend class AnimationState;
+
 public:
-	Animation();
+	Animation(Mesh& mesh);
+	~Animation();
 
-	void AddClip( const String& clipName, const shared_ptr<AnimationClip> clip );
-	void RemoveClip( const String& clipName );
+	bool IsPlaying( const String& clip );
 
-	shared_ptr<Animation> LoadFrom(Stream& source);
+	void Play( const String& clip = "");
+	void CrossFade( const String& clip );
+	
+	void Stop();
+	void Stop( const String& clip );
+
+	void Sample();
+
+	AnimationClip* GetClip( const String& clip ) const;
+
+	AnimationState* AddClip( AnimationClip* clip );
+
+
+	/**
+	 * Set the mesh which use this animation.
+	 */
+	void SetMesh( const shared_ptr<Mesh>& mesh );
+
+public:
+	static shared_ptr<Animation> LoadFrom(Mesh& parentMesh, Stream& source);
 
 private:
-	unordered_map<String, shared_ptr<AnimationClip> > mAnimationClips;
+	Mesh& mParentMesh;
+
+	AnimationController* mController; 
+	AnimationClip* mDefaultClip;
+	vector<AnimationClip*> mAnimationClips;	
+
+	// Mapping of animation track indices to bones.
+	unordered_map<String, Bone*> mAnimateTargets;
 };
 
 

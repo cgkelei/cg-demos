@@ -38,15 +38,6 @@ void OpenGLRenderDevice::Create()
 {
 	mRenderFactory = new OpenGLRenderFactory();
 	Context::GetSingleton().SetRenderFactory(mRenderFactory);
-
-	DepthStencilStateDesc depthStencilDesc;
-	mCurrentDepthStencilState = mRenderFactory->CreateDepthStencilState(depthStencilDesc);
-
-	BlendStateDesc blendDesc;
-	mCurrentBlendState = mRenderFactory->CreateBlendState(blendDesc);
-
-	RasterizerStateDesc rasterDesc;
-	mCurrentRasterizerState = mRenderFactory->CreateRasterizerState(rasterDesc);
 }
 
 void OpenGLRenderDevice::Release()
@@ -70,6 +61,25 @@ void OpenGLRenderDevice::CreateRenderWindow( const RenderSettings& settings )
 		mScreenFrameBuffer->Attach(ATT_DepthStencil,
 			std::make_shared<OpenGLScreenDepthStencilView>(mScreenFrameBuffer->GetWidth(), mScreenFrameBuffer->GetHeight(), settings.DepthStencilFormat));
 	}
+
+	//Create default render state
+	// Set default render state
+	mCurrentDepthStencilState = mRenderFactory->CreateDepthStencilState(DepthStencilStateDesc());
+
+	BlendStateDesc blendDesc;
+	mCurrentBlendState = mRenderFactory->CreateBlendState(blendDesc);
+
+	RasterizerStateDesc rasterDesc;
+	mCurrentRasterizerState = mRenderFactory->CreateRasterizerState(rasterDesc);
+
+	// do little hard code
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_STENCIL_TEST);
+	glDisable(GL_BLEND);
+	glEnable(GL_TEXTURE_1D);
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_TEXTURE_3D);
+	glEnable(GL_TEXTURE_CUBE_MAP);
 }
 
 void OpenGLRenderDevice::AdjustProjectionMatrix( Matrix4f& pOut )
@@ -368,8 +378,6 @@ void OpenGLRenderDevice::SetDepthStencilState( const shared_ptr<DepthStencilStat
 void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
 {
 	RenderOperation::StreamSlots& streams = op.VertexStreams;
-
-	glEnable(GL_DEPTH_TEST);
 
 	// bind vertex streams
 	for (size_t i = 0; i < streams.size(); ++i)

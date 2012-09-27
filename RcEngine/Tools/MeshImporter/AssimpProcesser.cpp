@@ -12,19 +12,57 @@
 #include "Core/Exception.h"
 #include "IO/FileStream.h"
 #include "Core/XMLDom.h"
-#include "MaterialData.h"
-#include "MeshData.h"
+#include "Core/Utility.h"
+
 
 #pragma comment(lib, "assimp.lib")
 
 
-void ValidateOffsetMatrix( OutModel& outModel );
+bool operator == (const MaterialData& lrhs, const MaterialData& rhs)
+{
+	if (lrhs.MaterialFlags != rhs.MaterialFlags)
+	{
+		return false; 
+	}
+
+	if (lrhs.Ambient != rhs.Ambient || 
+		lrhs.Diffuse != rhs.Diffuse || lrhs.Specular != rhs.Specular || 
+		lrhs.Emissive != rhs.Emissive || lrhs.Power != rhs.Power)
+	{
+		return false;
+	}
+
+	if (lrhs.Textures.size() != rhs.Textures.size())
+	{
+		return false;
+	}
+
+	for (auto iter = lrhs.Textures.begin(); iter != lrhs.Textures.end(); ++iter)
+	{
+		const String& key = iter->first;
+
+		auto found = rhs.Textures.find(key);
+		if ( found == rhs.Textures.end() || found->second != iter->second )
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
 
 
 String XMLFromVector3(const Vector3f& vec)
 {
 	std::stringstream sss;
 	sss << "x=\"" << vec.X() << "\" y=\"" << vec.Y() << "\" z=\"" << vec.Z() << "\"";
+	return  sss.str();
+}
+
+String XMLFromColorRGBA(const ColorRGBA& color)
+{
+	std::stringstream sss;
+	sss << "r=\"" << color.R() << "\" g=\"" << color.G() << "\" b=\"" << color.B() << "\" a=\"" << color.A() <<  "\"";
 	return  sss.str();
 }
 
@@ -170,23 +208,23 @@ shared_ptr<VertexDeclaration> GetVertexDeclaration(aiMesh* mesh)
 	unsigned int offset = 0;
 	if (mesh->HasPositions())
 	{
-		vertexElements.push_back(VertexElement(offset, VEF_Vector3, VEU_Position, 0));
-		offset += VertexElement::GetTypeSize(VEF_Vector3);
+		vertexElements.push_back(VertexElement(offset, VEF_Float3, VEU_Position, 0));
+		offset += VertexElement::GetTypeSize(VEF_Float3);
 	}
 
 	if (mesh->HasNormals())
 	{
-		vertexElements.push_back(VertexElement(offset, VEF_Vector3, VEU_Normal, 0));
-		offset += VertexElement::GetTypeSize(VEF_Vector3);
+		vertexElements.push_back(VertexElement(offset, VEF_Float3, VEU_Normal, 0));
+		offset += VertexElement::GetTypeSize(VEF_Float3);
 	}
 
 	if (mesh->HasTangentsAndBitangents())
 	{
-		vertexElements.push_back(VertexElement(offset, VEF_Vector3, VEU_Tangent, 0));
-		offset += VertexElement::GetTypeSize(VEF_Vector3);
+		vertexElements.push_back(VertexElement(offset, VEF_Float3, VEU_Tangent, 0));
+		offset += VertexElement::GetTypeSize(VEF_Float3);
 
-		vertexElements.push_back(VertexElement(offset, VEF_Vector3, VEU_Binormal, 0));
-		offset += VertexElement::GetTypeSize(VEF_Vector3);
+		vertexElements.push_back(VertexElement(offset, VEF_Float3, VEU_Binormal, 0));
+		offset += VertexElement::GetTypeSize(VEF_Float3);
 	}
 
 	for (unsigned int i = 0; i < mesh->GetNumUVChannels(); ++i)
@@ -194,27 +232,27 @@ shared_ptr<VertexDeclaration> GetVertexDeclaration(aiMesh* mesh)
 		switch (mesh->mNumUVComponents[i])
 		{
 		case 1:
-			vertexElements.push_back(VertexElement(offset, VEF_Single, VEU_TextureCoordinate, i));
-			offset += VertexElement::GetTypeSize(VEF_Single);
+			vertexElements.push_back(VertexElement(offset, VEF_Float, VEU_TextureCoordinate, i));
+			offset += VertexElement::GetTypeSize(VEF_Float);
 			break;
 		case 2:
-			vertexElements.push_back(VertexElement(offset, VEF_Vector2, VEU_TextureCoordinate, i));
-			offset += VertexElement::GetTypeSize(VEF_Vector2);
+			vertexElements.push_back(VertexElement(offset, VEF_Float2, VEU_TextureCoordinate, i));
+			offset += VertexElement::GetTypeSize(VEF_Float2);
 			break;
 		case 3:
-			vertexElements.push_back(VertexElement(offset, VEF_Vector3, VEU_TextureCoordinate, i));
-			offset += VertexElement::GetTypeSize(VEF_Vector3);
+			vertexElements.push_back(VertexElement(offset, VEF_Float3, VEU_TextureCoordinate, i));
+			offset += VertexElement::GetTypeSize(VEF_Float3);
 			break;
 		}
 	}
 
 	if (mesh->HasBones())
 	{
-		vertexElements.push_back(VertexElement(offset, VEF_Vector4, VEU_BlendWeight, 0));
-		offset += VertexElement::GetTypeSize(VEF_Vector4);
+		vertexElements.push_back(VertexElement(offset, VEF_Float4, VEU_BlendWeight, 0));
+		offset += VertexElement::GetTypeSize(VEF_Float4);
 
-		vertexElements.push_back(VertexElement(offset, VEF_UByte4, VEU_BlendIndices, 0));
-		offset += VertexElement::GetTypeSize(VEF_UByte4);
+		vertexElements.push_back(VertexElement(offset, VEF_UInt4, VEU_BlendIndices, 0));
+		offset += VertexElement::GetTypeSize(VEF_UInt4);
 	}
 
 	shared_ptr<VertexDeclaration> vd ( new VertexDeclaration(vertexElements) );
@@ -274,7 +312,7 @@ bool AssimpProcesser::Process( const char* filePath )
 	Assimp::Importer importer;
 	
 	mAIScene = const_cast<aiScene*>( importer.ReadFile(filePath, aiProcess_Triangulate |
-		aiProcess_RemoveRedundantMaterials | aiProcess_OptimizeMeshes | aiProcess_FlipUVs ) );
+		aiProcess_RemoveRedundantMaterials  /*| aiProcess_FlipUVs*/) );
 	
 	if(!mAIScene)
 	{
@@ -314,31 +352,45 @@ shared_ptr<MaterialData> AssimpProcesser::ProcessMaterial( aiMaterial* material 
 		{
 			aiString name;
 			material->Get(AI_MATKEY_NAME,name);
-			materialData->Name = string(name.C_Str());
+			String matName = string(name.C_Str());
+			/*if (matName.size())
+			{
+				size_t split = matName.find_last_of('\\');
+				if (split != string::npos)
+				{
+					matName = mName.substr(split);
+				}
+			}*/
+			materialData->Name = matName;
 		}
 		else if (prop->mKey == aiString("$clr.ambient"))
 		{
 			aiColor3D color (0.f,0.f,0.f);
 			material->Get(AI_MATKEY_COLOR_AMBIENT,color);
 			materialData->Ambient = ColorRGBA(color.r, color.g, color.b, 1.0f);
+			materialData->MaterialFlags |= MAT_AMBIENT_COLOR;
+
 		}
 		else if (prop->mKey == aiString("$clr.diffuse"))
 		{
 			aiColor3D color (0.f,0.f,0.f);
 			material->Get(AI_MATKEY_COLOR_DIFFUSE,color);
 			materialData->Diffuse = ColorRGBA(color.r, color.g, color.b, 1.0f);
+			materialData->MaterialFlags |= MAT_DIFFUSE_COLOR;
 		}
 		else if (prop->mKey == aiString("$clr.specular"))
 		{
 			aiColor3D color (0.f,0.f,0.f);
 			material->Get(AI_MATKEY_COLOR_SPECULAR,color);
 			materialData->Diffuse = ColorRGBA(color.r, color.g, color.b, 1.0f);
+			materialData->MaterialFlags |= MAT_SPECULAR_COLOR;
 		}
 		else if (prop->mKey == aiString("$mat.shininess"))
 		{
 			float shininess;
 			material->Get(AI_MATKEY_SHININESS,shininess);
 			materialData->Power = shininess;
+			materialData->MaterialFlags |= MAT_POWER_COLOR;
 		}
 		else if (prop->mKey == aiString("$tex.file"))
 		{
@@ -399,9 +451,8 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 	const Vector3f& meshCenter = outModel.MeshBoundingSphere.Center;
 	const float meshRadius = outModel.MeshBoundingSphere.Radius;
 	file << "\t<bounding x=\"" << meshCenter[0] << "\" y=\"" << meshCenter[1] << "\" z=\"" << meshCenter[2] << " radius=" << meshRadius << "\"/>\n";
-	
-	
-	if (outModel.Bones.size())
+		
+	/*if (outModel.Bones.size())
 	{
 		vector<Bone*> bones = outModel.Skeleton->GetBones();
 		file << "\t<bones boneCount=\"" << bones.size() << "\">" << std::endl;
@@ -429,14 +480,59 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 			file << "\t\t</bone>" << std::endl; 
 		}
 		file << "\t</bones>" << std::endl;
+	}*/
+	
+	if (outModel.Materials.size())
+	{
+		file << "\t<materials count=\"" << outModel.Materials.size() << "\">" << std::endl;
+		for (size_t i = 0; i < outModel.Materials.size(); ++i)
+		{
+			shared_ptr<MaterialData> material = outModel.Materials[i];
+
+			file << "\t\t<materials name=\""  << material->Name << "\">\n";
+
+			if (material->MaterialFlags & MAT_AMBIENT_COLOR)
+			{
+				file << "\t\t\t<ambiemtColor " << XMLFromColorRGBA(material->Ambient) << "/>\n";
+			}
+
+			if (material->MaterialFlags & MAT_DIFFUSE_COLOR)
+			{
+				file << "\t\t\t<diffuseColor " << XMLFromColorRGBA(material->Diffuse) << "/>\n";
+			}
+
+			if (material->MaterialFlags & MAT_SPECULAR_COLOR)
+			{
+				file << "\t\t\t<apecularColor " << XMLFromColorRGBA(material->Specular) << "/>\n";
+			}
+
+			if (material->MaterialFlags & MAT_EMISSIVE_COLOR)
+			{
+				file << "\t\t\t<emissiveColor " << XMLFromColorRGBA(material->Emissive) << "/>\n";
+			}
+
+			if (material->MaterialFlags & MAT_POWER_COLOR)
+			{
+				file << "\t\t\t<ambiemtColor power=\"" << material->Power << "\"/>\n";
+			}
+
+			for (auto iter = material->Textures.begin(); iter != material->Textures.end(); ++iter)
+			{
+				String texType = iter->first;
+				String value = iter->second;
+
+				file << "\t\t\t<texture type=\"" << texType << "\"" << " value=\"" << value << "\"/>\n";
+			}
+		}
 	}
 	
+
 	vector<shared_ptr<MeshPartData> >& subMeshes = outModel.MeshParts;
 	for (size_t i = 0; i < subMeshes.size(); ++i)
 	{
 		shared_ptr<MeshPartData> submesh = subMeshes[i];
 		
-		file << "\t<subMesh name=\"" << submesh->Name << "\">\n";
+		file << "\t<subMesh name=\"" << submesh->Name << "\" material=\"" << outModel.MaterialIndexMap[submesh->MaterialID] << "\">\n";
 
 		// write bounding sphere
 		const Vector3f& center = submesh->BoundingSphere.Center;
@@ -548,6 +644,29 @@ void AssimpProcesser::ExportBinary( OutModel& outModel )
 	stream.Write(&center, sizeof(Vector3f));
 	stream.WriteFloat(radius);
 
+	// write material
+	stream.WriteUInt(outModel.Materials.size());
+	if (outModel.Materials.size())
+	{
+		for (size_t i = 0; i < outModel.Materials.size(); ++i)
+		{
+			shared_ptr<MaterialData> material = outModel.Materials[i];
+
+			String matName;
+			if (material->Name.empty())
+			{
+				int a = 0;
+			}
+			else
+			{
+				matName = material->Name + ".material.xml";
+			}
+
+			// write name
+			stream.WriteString(matName);
+		}
+	}
+
 	// write mesh parts count
 	stream.WriteUInt(outModel.MeshParts.size());
 
@@ -558,6 +677,9 @@ void AssimpProcesser::ExportBinary( OutModel& outModel )
 		
 		// write sub mesh name
 		stream.WriteString(submesh->Name);	
+
+		// write material index
+		stream.WriteUInt(outModel.MaterialIndexMap[submesh->MaterialID]);
 
 		// write sub mesh bounding sphere
 		Vector3f center = submesh->BoundingSphere.Center;
@@ -593,6 +715,41 @@ void AssimpProcesser::ExportBinary( OutModel& outModel )
 		stream.Write(&submesh->IndexData[0], sizeof(char) * submesh->IndexData.size());
 	}
 
+	//if (outModel.Bones.empty())
+	//{
+	//	stream.WriteUInt(0);
+	//}
+	//else
+	//{
+	//	vector<Bone*> bones = outModel.Skeleton->GetBones();
+	//	stream.WriteUInt(bones.size());
+	//	for (size_t i = 0; i < bones.size(); ++i)
+	//	{
+	//		Bone* bone = bones[i];
+
+	//		Vector3f pos = bone->GetPosition();
+	//		Quaternionf rot = bone->GetRotation();
+	//		Vector3f scale = bone->GetScale();
+
+	//		Bone* parent = static_cast_checked<Bone*>( bone->GetParent() );
+	//		String parentName = parent ? parent->GetName() : String("");
+
+	//		stream.WriteString(bone->GetName());
+	//		stream.WriteString(parentName);
+	//		stream.Write(&pos, sizeof(Vector3f));
+	//		stream.Write(&rot, sizeof(Quaternionf));
+	//		stream.Write(&scale, sizeof(Vector3f));
+
+	//		// sphere radius
+	//		float radius = mModel.BoneSpheres[i].Radius;
+	//		if (!mModel.BoneSpheres[i].Defined)
+	//		{
+	//			radius = 5;
+	//		}
+	//		stream.WriteFloat(radius);
+	//	}
+	//}
+	
 	stream.Close();
 }
 
@@ -689,9 +846,6 @@ void AssimpProcesser::CollectBones( OutModel& outModel )
 
 	outModel.RootBone = *rootNodes.begin();
 	CollectBonesFinal(outModel.Bones, necessary, outModel.RootBone);
-
-	//for (size_t i = 0; i < outModel.Bones.size(); ++i)
-	//	std::cout << "Bone:" << outModel.Bones[i]->mName.C_Str() << std::endl;
 }
 
 void AssimpProcesser::CollectBonesFinal( vector<aiNode*>& bones, const set<aiNode*>& necessary, aiNode* node )
@@ -732,17 +886,21 @@ void AssimpProcesser::CollectAnimations( OutModel& model, aiScene* scene )
 void AssimpProcesser::ExportModel( OutModel& outModel, const String& outName )
 {
 	outModel.OutName = outName;
-	CollectMeshes(outModel, outModel.RootNode);
+	
 	CollectMaterials();
+
+	CollectMeshes(outModel, outModel.RootNode);
+	
 	CollectBones(outModel);
 
 	BuildAndSaveModel(outModel);
 
-	if (mAIScene->HasAnimations())
+	/*if (mAIScene->HasAnimations())
 	{
 		CollectAnimations(outModel, mAIScene);
 		BuildAndSaveAnimations(outModel);
-	}
+		BuildBoneCollisions();
+	}*/
 
 	ExportBinary(mModel);
 	ExportXML(mModel);
@@ -794,6 +952,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 		shared_ptr<VertexDeclaration> vertexDecl = GetVertexDeclaration(mesh);
 
 		meshPart->Name = String(mesh->mName.C_Str());
+		meshPart->MaterialID = mesh->mMaterialIndex;
 
 		// Store index data
 		bool largeIndices = mesh->mNumVertices > 65535;
@@ -975,7 +1134,7 @@ void AssimpProcesser::BuildSkeleton( OutModel& outModel )
 	if (outModel.Bones.size() && outModel.RootBone)
 	{
 		shared_ptr<Skeleton> skeleton(new Skeleton);
-		vector<Bone*>& bones = skeleton->GetBones();
+		vector<Bone*>& bones = skeleton->GetBonesModified();
 
 		for (size_t i = 0; i < outModel.Bones.size(); ++i)
 		{
@@ -993,9 +1152,6 @@ void AssimpProcesser::BuildSkeleton( OutModel& outModel )
 
 			aiVector3D scale, position;
 			aiQuaternion rot;
-			transform.Decompose(scale, rot, position);
-
-			transform = GetBoneOffset(outModel, aiString(boneNode->mName.C_Str())); 
 			transform.Decompose(scale, rot, position);
 
 			Quaternionf quat = FromAIQuaternion(rot);
@@ -1021,7 +1177,7 @@ void AssimpProcesser::BuildSkeleton( OutModel& outModel )
 				if (bones[j]->GetName() == parentName)
 				{
 					//std::cout << bones[i]->GetName() << "   Parent:" << parentName << std::endl;
-					bones[i]->SetParent(bones[j]);
+					bones[j]->AttachChild( bones[i] );
 					break;
 				}
 			}
@@ -1035,48 +1191,95 @@ void AssimpProcesser::BuildSkeleton( OutModel& outModel )
 
 void AssimpProcesser::BuildAndSaveAnimations( OutModel& model )
 {
-	for (size_t anim = 0; anim < model.Animations.size(); ++anim)
-	{
-		aiAnimation* animation = model.Animations[anim];
-		
-		String animName = FromAIString(animation->mName);
+	//for (size_t anim = 0; anim < model.Animations.size(); ++anim)
+	//{
+	//	aiAnimation* animation = model.Animations[anim];
+	//	
+	//	String animName = FromAIString(animation->mName);
 
-		if (animName.empty())
-		{
-			stringstream sss;
-			sss << anim + 1;
-			animName = "Anim" + sss.str();
-		}
-		
-		float secondsPerTick = 1.0f / (float)animation->mTicksPerSecond;
-		float length = (float)animation->mDuration * secondsPerTick;
+	//	if (animName.empty())
+	//	{
+	//		stringstream sss;
+	//		sss << anim + 1;
+	//		animName = "Anim" + sss.str();
+	//	}
+	//	
+	//	float secondsPerTick = 1.0f / (float)animation->mTicksPerSecond;
+	//	float length = (float)animation->mDuration * secondsPerTick;
 
-		shared_ptr<AnimationClip> animationClip;
-		for (size_t channel = 0; channel < animation->mNumChannels; ++channel)
-		{
-			AnimationTrack animationTrack;
+	//	shared_ptr<AnimationClip> animationClip;
+	//	for (size_t channel = 0; channel < animation->mNumChannels; ++channel)
+	//	{
+	//		AnimationTrack animationTrack;
 
-			/*aiNodeAnim* channel = animation->mChannels[channel];
-			String channelName = FromAIString(channel->mNodeName);
-			Bone* bone = model.Skeleton->GetBone(channelName);*/
+	//		/*aiNodeAnim* channel = animation->mChannels[channel];
+	//		String channelName = FromAIString(channel->mNodeName);
+	//		Bone* bone = model.Skeleton->GetBone(channelName);*/
+	//	}
 
-
-		}
-
-	}
+	//}
 }
 
 void AssimpProcesser::CollectMaterials()
 {	
 	for (size_t i = 0; i < mAIScene->mNumMaterials; ++i)
 	{
-		mMaterials.push_back( ProcessMaterial(mAIScene->mMaterials[i]) );
+		shared_ptr<MaterialData> material = ProcessMaterial(mAIScene->mMaterials[i]);
+		
+		bool redundant = false;
+	
+		size_t index = mModel.Materials.size();
+
+		for (size_t j = 0; j < mModel.Materials.size(); ++j)
+		{
+			if (*material == *mModel.Materials[j])
+			{
+				redundant = true;
+				index = j;
+				break;
+			}
+		}
+		
+		mModel.MaterialIndexMap.insert(std::make_pair(i, index));
+
+		if (!redundant)
+		{
+			material->Name += LexicalCast<String>(index);
+			mModel.Materials.push_back(material);
+		}
+	}
+}
+
+void AssimpProcesser::BuildBoneCollisions()
+{
+	mModel.BoneSpheres.resize(mModel.Bones.size());
+	for (unsigned i = 0; i < mModel.Meshes.size(); ++i)
+	{
+		aiMesh* mesh = mModel.Meshes[i];
+		for (unsigned j = 0; j < mesh->mNumBones; ++j)
+		{
+			aiBone* bone = mesh->mBones[j];
+			unsigned boneIndex = GetBoneIndex(mModel, bone->mName);
+			if (boneIndex == -1)
+				continue;
+			aiNode* boneNode = mModel.Bones[boneIndex];
+			for (unsigned k = 0; k < bone->mNumWeights; ++k)
+			{
+				float weight = bone->mWeights[k].mWeight;
+				if (weight > 0.33f)
+				{
+					aiVector3D vertexBoneSpace = bone->mOffsetMatrix * mesh->mVertices[bone->mWeights[k].mVertexId];
+					Vector3f vertex = FromAIVector(vertexBoneSpace);
+					mModel.BoneSpheres[boneIndex].Merge(vertex);
+				}
+			}
+		}
 	}
 }
 
 void ValidateOffsetMatrix( OutModel& outModel ) 
 {
-	vector<Bone*>& bones = outModel.Skeleton->GetBones();
+	/*vector<Bone*>& bones = outModel.Skeleton->GetBones();
 
 	for (size_t i = 0; i < bones.size(); ++i)
 	{
@@ -1099,5 +1302,5 @@ void ValidateOffsetMatrix( OutModel& outModel )
 		Matrix4f test = FromAIMatrix(derivedTransformInverse);
 		
 		int a = 0;
-	}
+	}*/
 }

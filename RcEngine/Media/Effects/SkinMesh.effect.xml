@@ -6,9 +6,9 @@
 
 in vec3 Position;
 in vec3 Normal;
-in vec3 Tex;
+in vec2 Tex;
 in vec4 Weights;
-in int4 BlendIndices;
+in uvec4 BlendIndices;
 
 out vec3 oNormal;
 out vec2 oTex;
@@ -22,27 +22,101 @@ uniform int NumBones;
 
 void main()
 {
-	vec4 position = 0.0f;
-	vec4 normal = 0.0f; 
+	vec4 pos = vec4(0.0f);
+	vec4 norm = vec4(0.0f);
 	float lastWeight = 0.0f;
 
-	for(int iBone = 0; i < NumBones-1; ++i)
+	for(int i = 0; i < MAX_MATRICES-1; ++i)
 	{
-		position += Weights[i] * vec4(Position, 1.0) * WorldMatrices[BlendIndices[i]];
-		normal += Weights[i] * vec4(Normal, 0.0) * WorldMatrices[BlendIndices[i]];
+		pos += Weights[i] * vec4(Position, 1.0) * WorldMatrices[BlendIndices[i]];
+		norm += Weights[i] * vec4(Normal, 0.0) * WorldMatrices[BlendIndices[i]];
 		lastWeight += Weights[i];
 	}
 
 	lastWeight = 1.0f - lastWeight;
 	
-	position += lastWeight * vec4(Position, 1.0) * WorldMatrices[BlendIndices[NumBones-1]];
-	normal += lastWeight * vec4(Normal, 0.0) * WorldMatrices[BlendIndices[NumBones-1]];
+	pos += lastWeight * vec4(Position, 1.0) * WorldMatrices[BlendIndices[NumBones-1]];
+	norm += lastWeight * vec4(Normal, 0.0) * WorldMatrices[BlendIndices[NumBones-1]];
 
-	position.w = 1.0f
-	normal.w = 0.0f;
+	pos.w = 1.0f;
+	norm.w = 0.0f;
 
-	oNormal = vec3(normal);
+	oNormal = vec3(norm);
 	oTex = Tex;
 
-	gl_Position = position * ViewProj;
+	gl_Position = pos * ViewProj;
 }
+]]>
+</Shader>
+
+<Shader name="SkinVSimple" stage="Vertex" entry="main">
+<![CDATA[
+#version 330
+
+in vec3 Position;
+in vec3 Normal;
+in vec2 Tex;
+in vec4 BlendWeights;
+in uvec4 BlendIndices;
+
+out vec3 oNormal;
+out vec2 oTex;
+out vec3 oLightDir;
+
+
+uniform mat4 World;
+uniform mat4 ViewProj;
+
+vec3 LightPos = vec3(100, 100, 100);
+
+void main()
+{
+	vec4 worldPos = vec4(Position, 1.0) * World ;
+	
+	oNormal = Normal * mat3(World);
+	
+	//vec4 test = vec4(BlendWeights.x * BlendIndices.x, BlendWeights.y * BlendIndices.y, BlendWeights.z * BlendIndices.z, BlendWeights.w * BlendIndices.w);
+	oLightDir = LightPos - vec3(worldPos);// - vec3(test);
+	oTex = Tex;
+	
+	gl_Position = worldPos * ViewProj;
+}
+]]>
+</Shader>
+
+<Shader name="PS" stage="Pixel" entry="main">
+<![CDATA[
+
+#version 330
+
+in vec3 oNormal;
+in vec2 oTex;
+in vec3 oLightDir;
+
+out vec4 FragColor;
+
+uniform sampler2D DiffuseMap; 
+	
+void main()
+{
+	vec3 normal = normalize(oNormal);
+	vec3 light = normalize(oLightDir);
+	
+	vec3 diffuse = vec3( texture(DiffuseMap, oTex) );
+	
+	float diffuseFactor = max( dot(normal, light), 0);
+	
+	FragColor = vec4( diffuse * diffuseFactor,  1.0);
+}
+
+]]>
+</Shader>
+
+<Technique name="PhongLight">
+	<Pass name="p0">
+		<VertexShader name="SkinVSimple"/>
+		<PixelShader name="PS"/>
+	</Pass>
+</Technique>
+
+</Effect>

@@ -279,9 +279,9 @@ inline Real QuaternionLength(const Quaternion<Real>& quat)
 //----------------------------------------------------------------------------------------------------
 template <typename Real>
 inline Real
-QuaternionDot(const Quaternion<Real>& quat)
+QuaternionDot(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2)
 {
-	return quat[0]*quat[0]+quat[1]*quat[1]+quat[2]*quat[2]+quat[3]*quat[3];
+	return quat1[0]*quat2[0]+quat1[1]*quat2[1]+quat1[2]*quat2[2]+quat1[3]*quat2[3];
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -323,4 +323,38 @@ QuaternionInverse(const Quaternion<Real>& quat)
 {
 	Real inv = Real(1) / QuaternionLength(quat);
 	return QuaternionConjugate(quat) * inv;
+}
+
+template <typename Real>
+inline Quaternion<Real> QuaternionSlerp(const Quaternion<Real>& quat1, const Quaternion<Real>& quat2, Real t)
+{
+	// 用点乘计算两四元素夹角的cos值
+	Real cosAngle = QuaternionDot(quat1, quat2);
+
+	//如果点乘为负，则反转一个四元素以取得短的4D弧
+	Real dir = Real(1);
+	if (cosAngle < Real(0))
+	{
+		cosAngle = -cosAngle;
+		dir = -dir;
+	}
+
+	Real k1, k2;
+
+	// 检查他们是否过于接近以避免除零
+	if ( cosAngle > Real(1) - std::numeric_limits<Real>::epsilon() )
+	{
+		// 非常接近，即线性插值
+		k1 = Real(1) - t;
+		k2 = t;
+	}
+	else
+	{
+		Real angle = std::acos(cosAngle);
+		Real oneOverSinAngle = Real(1) / std::sin(angle);
+		k1 = std::sin((Real(1) - t) * angle) * oneOverSinAngle;
+		k2 = std::sin(t * angle) * oneOverSinAngle;
+	}
+
+	return quat1 * k1 + quat2 * k2 * dir;
 }

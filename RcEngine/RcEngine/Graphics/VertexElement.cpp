@@ -16,68 +16,84 @@ uint32_t VertexElement::GetTypeSize( VertexElementFormat etype )
 {
 	switch(etype)
 	{
-	case VEF_Color:
-		return sizeof(uint32_t);
-
-	case VEF_Single:
+	case VEF_Float:
 		return sizeof(float);
 
-	case VEF_Vector2:
+	case VEF_Float2:
 		return sizeof(float)*2;
 
-	case VEF_Vector3:
+	case VEF_Float3:
 		return sizeof(float)*3;
 
-	case VEF_Vector4:
+	case VEF_Float4:
 		return sizeof(float)*4;
 
-	case VEF_Short2:
-		return sizeof(short)*2;
+	case VEF_Int:
+		return sizeof(int32_t);
 
-	case VEF_Short4:
-		return sizeof(short)*4;
+	case VEF_Int2:
+		return sizeof(int32_t)*2;
 
-	case VEF_UByte4:
-		return sizeof(unsigned char)*4;
+	case VEF_Int3:
+		return sizeof(int32_t)*3;
 
-	case VEF_NormalizedShort2:
-		return  sizeof(short)*2;
+	case VEF_Int4:
+		return sizeof(int32_t)*4;
 
-	case VEF_NormalizedShort4:
-		return sizeof(short)*4;
+	case VEF_UInt:
+		return sizeof(uint32_t);
 
-	case VEF_HalfVector2:
-		return sizeof(float);
+	case VEF_UInt2:
+		return sizeof(uint32_t)*2;
 
-	case VEF_HalfVector4:
-		return sizeof(float) * 2;
+	case VEF_UInt3:
+		return sizeof(uint32_t)*3;
+
+	case VEF_UInt4:
+		return sizeof(uint32_t)*4;
+
+	case VEF_Bool:
+		return sizeof(bool);
+
+	case VEF_Bool2:
+		return sizeof(bool)*2;
+
+	case VEF_Bool3:
+		return sizeof(bool)*3;
+
+	case VEF_Bool4:
+		return sizeof(bool)*4;
 	}
-	return 0;
+
+	ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid type", "VertexElement::GetTypeSize");
 }
 
 uint16_t VertexElement::GetTypeCount( VertexElementFormat etype )
 {
 	switch(etype)
 	{
-	case VEF_Color:
+	case VEF_Float:
+	case VEF_Int:
+	case VEF_UInt:
+	case VEF_Bool:
 		return 1;
 
-	case VEF_Single:
-		return 1;
-
-	case VEF_Vector2:
-	case VEF_Short2:
-	case VEF_NormalizedShort2:
-	case VEF_HalfVector2:
+	case VEF_Float2:
+	case VEF_Int2:
+	case VEF_UInt2:
+	case VEF_Bool2:
 		return 2;
 
-	case VEF_Vector3:
+	case VEF_UInt3:
+	case VEF_Float3:
+	case VEF_Int3:
+	case VEF_Bool3:
 		return 3;
 
-	case VEF_Vector4:
-	case VEF_Short4:
-	case VEF_UByte4:
-	case VEF_NormalizedShort4:
+	case VEF_Float4:
+	case VEF_Int4:
+	case VEF_Bool4:
+	case VEF_UInt4:
 		return 4;
 	}
 	ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid type", 
@@ -86,15 +102,7 @@ uint16_t VertexElement::GetTypeCount( VertexElementFormat etype )
 
 bool VertexElement::IsNormalized( VertexElementFormat etype )
 {
-	switch(etype)
-	{
-	case VEF_NormalizedShort2:
-	case VEF_NormalizedShort4:
-		return true;
-
-	default:
-		return false;
-	}
+	return false;
 }
 
 

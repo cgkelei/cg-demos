@@ -15,6 +15,9 @@ public:
 
 	uint32_t GetBoneIndex() const { return mBoneIndex; }
 
+	Matrix4f GetOffsetMatrix() const;
+
+
 protected:
 	virtual Node* CreateChildImpl( const String& name ) { return 0; }
 
@@ -22,9 +25,12 @@ private:
 	void OnUpdate( );
 	
 
+public:
+	float mRadius;
 private:
 
 	uint32_t mBoneIndex;
+	
 
 	Vector3f mBindDerivedPosition;
 	Vector3f mBindDerivedScale;
@@ -39,13 +45,18 @@ public:
 
 	void Update( float delta );
 
+	uint32_t GetBoneCount() const { return mBones.size(); }
+
 	Bone* GetRootBone();
 	Bone* GetBone( const String& name );
 	Bone* GetBone( uint32_t index );
 
-	vector<Bone*>& GetBones() { return mBones; }
+	const vector<Bone*>& GetBones() const { return mBones; }
+	vector<Bone*>& GetBonesModified() { return mBones; }
 
+public:
 	static shared_ptr<Skeleton> LoadFrom( Stream& source );
+	static shared_ptr<Skeleton> LoadFrom( Stream& source, int a  );
 
 private:
 	

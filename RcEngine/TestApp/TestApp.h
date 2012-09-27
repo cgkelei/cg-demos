@@ -34,7 +34,7 @@ private:
 	shared_ptr<Mesh> mDwarf;
 	shared_ptr<Material> mDwarfMaterial;
 	
-	//FPSCameraControler* mCameraControler;
-	ModelViewerCameraControler* mCameraControler;
+	FPSCameraControler* mCameraControler;
+	//ModelViewerCameraControler* mCameraControler;
 };
 
