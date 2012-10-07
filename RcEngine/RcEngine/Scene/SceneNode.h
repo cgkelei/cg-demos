@@ -16,6 +16,9 @@ public:
 	SceneNode(SceneManager* scene, const String& name);
 	virtual ~SceneNode();
 
+	/**
+	 * Get world bound sphere, if it is dirty, update it
+	 */
 	const BoundingSpheref& GetWorldBoundingShpere() const;
 
 	uint32_t GetNumAttachedObjects() const { return mAttachedObjects.size(); }
@@ -59,7 +62,7 @@ protected:
 	 */
 	void UpdateWorldBounds() const;
 
-	void OnPostUpdate( );
+	void OnPostUpdate() {}
 
 protected:
 

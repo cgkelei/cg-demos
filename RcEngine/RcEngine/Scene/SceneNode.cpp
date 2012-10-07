@@ -83,9 +83,9 @@ void SceneNode::UpdateWorldBounds() const
 		mWorldBounds.SetNull();
 
 		/**
-		 * Merge all attached object's bound first, note that if object doesn't have bound,
-		 * the Merge operation doesn't have effect.
-		 */
+			* Merge all attached object's bound first, note that if object doesn't have bound,
+			* the Merge operation doesn't have effect.
+			*/
 		for (auto iter = mAttachedObjects.begin(); iter != mAttachedObjects.end(); ++iter)
 		{
 			mWorldBounds.Merge((*iter)->GetWorldBoundingSphere());
@@ -97,7 +97,7 @@ void SceneNode::UpdateWorldBounds() const
 			mWorldBounds.Merge(childNode->GetWorldBoundingShpere());
 		}
 
-		 mDirtyBits &= ~NODE_DIRTY_BOUNDS;
+		mDirtyBits &= ~NODE_DIRTY_BOUNDS;
 	}
 }
 
@@ -105,14 +105,8 @@ const BoundingSpheref& SceneNode::GetWorldBoundingShpere() const
 {
 	if (mDirtyBits & NODE_DIRTY_BOUNDS)
 		UpdateWorldBounds();
-	
-	return mWorldBounds;
-}
 
-void SceneNode::OnPostUpdate()
-{
-	// update world bound
-	UpdateWorldBounds();
+	return mWorldBounds;
 }
 
 void SceneNode::FindVisibleObjects( Camera* cam )
@@ -127,7 +121,7 @@ void SceneNode::FindVisibleObjects( Camera* cam )
 	{
 		if ((*iter)->Renderable())
 		{
-			mScene->AddToRenderQueue(*iter);
+			(*iter)->UpdateRenderQueue(mScene->GetRenderQueue(), cam);
 		}	
 	}
 

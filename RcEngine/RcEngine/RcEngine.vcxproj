@@ -106,6 +106,7 @@
     <ClCompile Include="Graphics\Material.cpp" />
     <ClCompile Include="Graphics\EffectParameter.cpp" />
     <ClCompile Include="Graphics\Mesh.cpp" />
+    <ClCompile Include="Graphics\MeshPart.cpp" />
     <ClCompile Include="Graphics\Model.cpp" />
     <ClCompile Include="Graphics\Pipeline.cpp" />
     <ClCompile Include="Graphics\PixelFormat.cpp" />
@@ -130,6 +131,7 @@
     <ClCompile Include="Input\InputSystem.cpp" />
     <ClCompile Include="IO\FileStream.cpp" />
     <ClCompile Include="IO\MemoryStream.cpp" />
+    <ClCompile Include="IO\PathUtil.cpp" />
     <ClCompile Include="IO\Stream.cpp" />
     <ClCompile Include="IO\FileSystem.cpp" />
     <ClCompile Include="MainApp\Application.cpp" />
@@ -137,11 +139,14 @@
     <ClCompile Include="Math\Frustum.h" />
     <ClCompile Include="Math\ColorRGBA.cpp" />
     <ClCompile Include="Math\Math.inl" />
+    <ClCompile Include="Resource\Resource.cpp" />
+    <ClCompile Include="Resource\ResourceManage.cpp" />
     <ClCompile Include="Scene\Entity.cpp" />
     <ClCompile Include="Scene\SceneObject.cpp" />
     <ClCompile Include="Scene\Node.cpp" />
     <ClCompile Include="Scene\SceneManager.cpp" />
     <ClCompile Include="Scene\SceneNode.cpp" />
+    <ClCompile Include="Scene\SubEntity.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\CompileConfig.h" />
@@ -174,6 +179,7 @@
     <ClInclude Include="Graphics\Material.h" />
     <ClInclude Include="Graphics\EffectParameter.h" />
     <ClInclude Include="Graphics\Mesh.h" />
+    <ClInclude Include="Graphics\MeshPart.h" />
     <ClInclude Include="Graphics\Model.h" />
     <ClInclude Include="Graphics\Pipeline.h" />
     <ClInclude Include="Graphics\PixelFormat.h" />
@@ -199,6 +205,7 @@
     <ClInclude Include="Input\InputSystem.h" />
     <ClInclude Include="IO\FileStream.h" />
     <ClInclude Include="IO\MemoryStream.h" />
+    <ClInclude Include="IO\PathUtil.h" />
     <ClInclude Include="IO\Stream.h" />
     <ClInclude Include="IO\FileSystem.h" />
     <ClInclude Include="MainApp\Application.h" />
@@ -213,11 +220,14 @@
     <ClInclude Include="Math\Quaternion.h" />
     <ClInclude Include="Math\Ray.h" />
     <ClInclude Include="Math\Vector.h" />
+    <ClInclude Include="Resource\Resource.h" />
+    <ClInclude Include="Resource\ResourceManager.h" />
     <ClInclude Include="Scene\Entity.h" />
     <ClInclude Include="Scene\SceneObject.h" />
     <ClInclude Include="Scene\Node.h" />
     <ClInclude Include="Scene\SceneManager.h" />
     <ClInclude Include="Scene\SceneNode.h" />
+    <ClInclude Include="Scene\SubEntity.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Math\BoundingBox.inl" />

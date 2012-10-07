@@ -17,11 +17,7 @@ enum SceneObejctType
 	SOT_Sky
 };
 
-
-//enum SceneObjectFlags
-//{
-//	SOF_
-//};
+class Node;
 
 /**
  * Base class for Objects in a scene graph, contained by scene nodes, referenced 
@@ -57,9 +53,12 @@ public:
 	 */
 	virtual const BoundingSpheref& GetBoundingSphere() const;
 
-	virtual void AddToRenderQueue( RenderQueue& renderQueue ) const;
+	/**
+	 * Called when scene manger update render queue.
+	 */
+	virtual void UpdateRenderQueue( RenderQueue& renderQueue, Camera* cam );
 	
-	SceneNode* GetParentSceneNode() const { return mParent; }
+	Node* GetParentNode() const { return mParentNode; }
 
 	const Matrix4f& GetWorldTransform() const;
 
@@ -67,10 +66,10 @@ public:
 
 	void SetVisible( bool visible ) { mVisible = visible; }
 
-	bool IsAttached() const  { return mParent != nullptr; }
+	bool IsAttached() const  { return mParentNode != nullptr; }
 
-	virtual void OnAttach( SceneNode* node ) ;
-	virtual void OnDetach( SceneNode* node ) ;
+	virtual void OnAttach( Node* node ) ;
+	virtual void OnDetach( Node* node ) ;
 
 protected:
 	
@@ -78,14 +77,14 @@ protected:
 
 	BoundingSpheref mBoundingSphere;
 
-	SceneNode* mParent;
+	Node* mParentNode;
 
 	SceneManager* mSceneManger;
 
 	uint32_t mFlag;
 
 	bool mVisible;
-
+	 
 };
 
 }

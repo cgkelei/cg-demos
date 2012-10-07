@@ -8,14 +8,20 @@
 #include <Graphics/Mesh.h>
 #include <Graphics/Camera.h>
 #include <Graphics/Sky.h>
+#include <Graphics/AnimationController.h>
 #include <Core/Exception.h>
 #include <Core/Context.h>
 #include <IO/FileStream.h>
+#include <IO/FileSystem.h>
+#include <Resource/ResourceManager.h>
+#include <Scene/SubEntity.h>
+
 
 namespace RcEngine {
 
 SceneManager::SceneManager()
-	: mSceneRoot(nullptr), mSkyBox(nullptr), mSkyBoxNode(nullptr)
+	: mSceneRoot(nullptr), mSkyBox(nullptr), mSkyBoxNode(nullptr),
+	 mAnimationController(new AnimationController)
 {
 	Context::GetSingleton().SetSceneManager(this);
 }
@@ -82,37 +88,23 @@ void SceneManager::UpdateRenderQueue( Camera* cam )
 	}
 }
 
-void SceneManager::UpdateSceneGraph( )
+void SceneManager::UpdateSceneGraph( float delta )
 {
+	mAnimationController->Update(delta);
 	GetRootSceneNode()->Update();
 }
 
-void SceneManager::AddToRenderQueue( SceneObject* sceneObject )
+
+Entity* SceneManager::CreateEntity( const String& entityName, const String& meshName, const String& groupName )
 {
-	assert(sceneObject->Renderable() == true);
+	Entity* entity;
 
-	if (sceneObject->GetSceneObjectType() == SOT_Entity)
-	{
-		Entity* entity = static_cast<Entity*>(sceneObject);
+	shared_ptr<Mesh> mesh = std::static_pointer_cast<Mesh>(
+		ResourceManager::GetSingleton().GetResourceByName(ResourceTypes::Mesh, meshName, groupName));
 
-		for (uint32_t i = 0;  i < entity->GetNumSubEntities();  ++i)
-		{
-			RenderQueueItem item;
-			item.Type = SOT_Entity;
-			item.SortKey = 0;
-			item.Renderable = entity->GetSubEntity(i);
-			mRendeQueue.push_back( item );
-		}
-	}
-}
+	mesh->Load();
 
-
-Entity* SceneManager::CreateEntity( const String& name, const String& filePath )
-{
-	FileStream modelSource(filePath, RcEngine::FILE_READ);
-	
-	Entity* entity = new Entity(name, Mesh::Load(modelSource));
-
+	entity = new Entity(entityName, mesh);
 	mEntityLists.push_back(entity);
 
 	return entity;
@@ -165,6 +157,11 @@ void SceneManager::RenderScene()
 		RenderQueueItem& item = *iter;
 		item.Renderable->Render();
 	}
+}
+
+AnimationController* SceneManager::GetAnimationController() const
+{
+	return mAnimationController;
 }
 
 }

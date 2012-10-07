@@ -356,9 +356,37 @@ void Node::UpdateWorldTransform() const
 	}
 }
 
-
 void Node::Update( )
 {
+	if (! (mDirtyBits & NODE_DIRTY_WORLD) )
+	{
+		return;
+	}
+
+	OnPreUpdate();
+
+	// Calculate absolute matrix
+
+	if (mParent)
+	{
+		mParent->UpdateWorldTransform();
+		mWorldTransform = CreateTransformMatrix(mScale, mRotation, mPosition) * mParent->mWorldTransform;
+	}
+	else
+	{
+		mWorldTransform = CreateTransformMatrix(mScale, mRotation, mPosition);
+	}
+
+	OnPostUpdate();
+
+	// clear dirty
+	mDirtyBits &= ~NODE_DIRTY_WORLD;
+	
+	// Visit children
+	for( size_t i = 0; i < mChildren.size(); ++i)
+	{
+		mChildren[i]->Update();
+	}	
 }
 
 void Node::PropagateDirtyDown( uint32_t dirtyFlag )
@@ -377,6 +405,11 @@ void Node::PropagateDirtyUp( uint32_t dirtyFlag )
 	{
 		mParent->PropagateDirtyUp(dirtyFlag);
 	}
+}
+
+void Node::NeedUpdate()
+{
+
 }
 
 }
