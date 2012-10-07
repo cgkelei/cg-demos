@@ -3,21 +3,20 @@
 
 #include <Core/Prerequisites.h>
 #include <Graphics/GraphicsCommon.h>
-#include <Graphics/EffectTechnique.h>
-#include <Graphics/EffectParameter.h>
+#include <Resource/Resource.h>
 
 
 namespace RcEngine {	
 
 class EffectParameter;
 
-class _ApiExport Effect
+class _ApiExport Effect : public Resource
 {
 public:
 	typedef std::map<String, EffectParameter*> EffectParameterMap;
 
 public:
-	Effect();
+	Effect(uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	~Effect();
 
 	vector<EffectTechnique*>& GetTechniques()	{ return mTechniques; }
@@ -32,11 +31,16 @@ public:
 	 */
 	EffectParameter* AddShaderParameterInternal(const String& name, EffectParameterType type, bool array);
 
+protected:
+	void LoadImpl();
+	void UnloadImpl();
+
+
 public:
-	static shared_ptr<Effect> LoadFrom(Stream& source);
+	static shared_ptr<Resource> FactoryFunc(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 
 protected:
-	String mName;
+	String mEffectName;
 	EffectParameterMap mParameters;
 	vector<EffectTechnique*> mTechniques;
 };

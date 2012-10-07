@@ -41,24 +41,30 @@ void Renderable::OnRenderBegin()
 {
 	// Get world transforms
 	uint32_t matCounts = GetWorldTransformsCount();
-	Matrix4f* matWorlds = new Matrix4f[matCounts];
-	GetWorldTransforms(matWorlds);
+	vector<Matrix4f> matWorlds(matCounts);
+	GetWorldTransforms(&matWorlds[0]);
 
 	// Get material 
 	shared_ptr<Material> material = GetMaterial();
 
 	// Set world transform
 	MaterialParameter* world = material->GetCustomParameter(EPU_WorldMatrix);
+	
 	if (world)
 	{
-		world->EffectParam->SetValue(matWorlds[0]);
+		if (matCounts == 1)
+		{
+			world->EffectParam->SetValue(matWorlds[0]);
+		}
+		else
+		{
+			world->EffectParam->SetValue(matWorlds);
+		}	
 	}
 
 				
 	// Setup other material parameter
 	material->ApplyMaterial();
-
-	delete[] matWorlds;
 }
 
 void Renderable::OnRenderEnd()

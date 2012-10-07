@@ -61,14 +61,14 @@ public:
 	 * @param matName: material name which is uniquely identify the material.
 	 * @param path: the material file location.
 	 */
-	shared_ptr<Material> CreateMaterialFromFile(const String& matName, const String& path);
+	//shared_ptr<Material> CreateMaterialFromFile(const String& matName, const String& path);
 
 	/**
 	 * Create a effect from file, if the effect is already loaded, use the loaded one.
 	 * @param effectName: effect name which is uniquely identify the effect.
 	 * @param effectFile: the effect file location.
 	 */
-	shared_ptr<Effect> CreateEffectFromFile(const String& effectName, const String& effectFile);
+	//shared_ptr<Effect> CreateEffectFromFile(const String& effectName, const String& effectFile);
 			
 
 	/**

@@ -8,6 +8,7 @@
 #include <Graphics/SimpleGeometry.h>
 #include <Graphics/Material.h>
 #include <Core/Context.h>
+#include <IO/FileSystem.h>
 
 namespace {
 
@@ -281,7 +282,7 @@ void Sky::InitializeSkyBox(float size)
 	mIndexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
 
 	// Load material
-	mMaterial = factory.CreateMaterialFromFile("SkyNormal", "../Media/Materials/SkyNormal.material.xml");
+	//mMaterial = factory.CreateMaterialFromFile("SkyNormal", "../Media/Materials/SkyNormal.material.xml");
 }
 
 void Sky::InitializeSkyCubeMap(float size)
@@ -315,7 +316,8 @@ void Sky::InitializeSkyCubeMap(float size)
 	mIndexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
 
 	// Load material
-	mMaterial = factory.CreateMaterialFromFile("SkyCubeMap", "../Media/Materials/SkyCubeMap.material.xml");
+	String skyMatPath = FileSystem::GetSingleton().Locate("SkyCubeMap.material.xml");
+	//mMaterial = factory.CreateMaterialFromFile("SkyCubeMap", skyMatPath);
 }
 
 }

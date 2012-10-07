@@ -1,16 +1,224 @@
 #include <Graphics/Animation.h>
 #include <Graphics/AnimationClip.h>
 #include <Graphics/AnimationState.h>
+#include <Graphics/AnimationController.h>
 #include <Graphics/Skeleton.h>
 #include <Graphics/Mesh.h>
+#include <Scene/SceneManager.h>
 #include <IO/FileStream.h>
+#include <Core/Context.h>
+#include <Core/Exception.h>
 
 namespace RcEngine {
 
-Animation::Animation( Mesh& mesh )
-	: mParentMesh(mesh)
+AnimationPlayer::AnimationPlayer( )
 {
-	shared_ptr<Skeleton> skeleton = mesh.GetSkeleton();
+	mController = Context::GetSingleton().GetSceneManager().GetAnimationController();
+}
+
+AnimationPlayer::~AnimationPlayer()
+{
+	for (auto iter = mAnimationStates.begin(); iter != mAnimationStates.end(); ++iter)
+	{
+		delete iter->second;
+	}
+	mAnimationStates.clear();
+}
+
+AnimationState* AnimationPlayer::GetClip( const String& clipName ) const
+{
+	auto found = mAnimationStates.find(clipName);
+
+	if (found == mAnimationStates.end())
+		return nullptr;
+
+	return found->second;
+}
+
+
+AnimationState* AnimationPlayer::AddClip( const shared_ptr<AnimationClip>& clip )
+{
+	auto found = mAnimationStates.find(clip->GetClipName());
+
+	if (found != mAnimationStates.end())
+	{
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Same animation clip exits", "Animation::AddClip");
+	}
+
+	AnimationState* newClipState = new AnimationState(*this, clip);
+	mAnimationStates.insert( std::make_pair(clip->GetClipName(),  newClipState) );
+
+	return newClipState;
+}
+
+void AnimationPlayer::StopAll()
+{
+	for (auto iter = mAnimationStates.begin(); iter != mAnimationStates.end(); ++iter)
+	{
+		AnimationState* clipState = iter->second;
+
+		if (clipState->IsClipStateBitSet(AnimationState::Clip_Is_Playing_Bit))
+		{
+			// Mark the clip to removed from the AnimationController.
+			clipState->SetClipStateBit(AnimationState::Clip_Is_End_Bit);
+		}
+	}
+}
+
+void AnimationPlayer::PlayClip( const String& clipName )
+{
+	auto found = mAnimationStates.find(clipName);
+
+	if (found == mAnimationStates.end())
+	{
+		return;
+	}
+
+	AnimationState* clipState = found->second;
+
+	if (clipState->IsClipStateBitSet(AnimationState::Clip_Is_Playing_Bit))
+	{
+		if (clipState->IsClipStateBitSet(AnimationState::Clip_Is_Pause_Bit))
+		{
+			clipState->ResetClipStateBit(AnimationState::Clip_Is_Pause_Bit);
+		}
+	}
+	else
+	{
+		clipState->SetClipStateBit(AnimationState::Clip_Is_Playing_Bit);
+
+		// add to controller
+		mController->Schedule(clipState);
+	}
+}
+
+void AnimationPlayer::PauseClip( const String& clipName )
+{
+	auto found = mAnimationStates.find(clipName);
+
+	if (found == mAnimationStates.end())
+	{
+		return;
+	}
+
+	AnimationState* clipState = found->second;
+
+	if (clipState->IsClipStateBitSet(AnimationState::Clip_Is_Playing_Bit) &&
+		!clipState->IsClipStateBitSet(AnimationState::Clip_Is_End_Bit))
+	{
+		clipState->SetClipStateBit(AnimationState::Clip_Is_Pause_Bit);
+	}
+}
+
+void AnimationPlayer::ResumeClip( const String& clipName )
+{
+	auto found = mAnimationStates.find(clipName);
+
+	if (found == mAnimationStates.end())
+	{
+		return;
+	}
+
+	AnimationState* clipState = found->second;
+
+	if (clipState->IsClipStateBitSet(AnimationState::Clip_Is_Pause_Bit))
+	{
+		clipState->SetClipStateBit(AnimationState::Clip_Is_Playing_Bit);
+	}
+}
+
+bool AnimationPlayer::IsPlaying( const String& clipName ) const
+{
+	auto found = mAnimationStates.find(clipName);
+
+	if (found == mAnimationStates.end())
+	{
+		return false;
+	}
+
+	AnimationState* clipState = found->second;
+
+	return clipState->IsClipStateBitSet(AnimationState::Clip_Is_Playing_Bit);
+}
+
+void AnimationPlayer::StopClip( const String& clipName )
+{
+	auto found = mAnimationStates.find(clipName);
+
+	if (found == mAnimationStates.end())
+	{
+		return;
+	}
+
+	AnimationState* clipState = found->second;
+
+	if (clipState->IsClipStateBitSet(AnimationState::Clip_Is_Playing_Bit))
+	{
+		// Mark the clip to removed from the AnimationController.
+		clipState->SetClipStateBit(AnimationState::Clip_Is_End_Bit);
+	}
+}
+
+//shared_ptr<Animation> RcEngine::Animation::LoadFrom( Mesh& parentMesh, Stream& source )
+//{
+//	// read clips in this animation
+//	uint32_t numClips = source.ReadUInt();
+//
+//	if (numClips == 0)
+//		return nullptr;
+//
+//
+//	shared_ptr<Animation> animation = std::make_shared<Animation>(parentMesh);
+//
+//	for (uint32_t clip = 0; clip < numClips; ++clip)
+//	{
+//		AnimationClip* animClip = new AnimationClip;
+//
+//		animClip->mName = source.ReadString(); 
+//		animClip->mLength = source.ReadFloat();
+//
+//		// read track count
+//		uint32_t numTracks = source.ReadUInt();
+//		animClip->mAnimationTracks.resize(numTracks);
+//
+//		for (uint32_t track = 0; track < numTracks; ++track)
+//		{
+//			String trackName = source.ReadString(); 
+//
+//			// this will add a new track if it doesn't exit
+//			AnimationClip::AnimationTrack& animTrack = animClip->mAnimationTracks[track];
+//
+//			// read key frame count
+//			animTrack.Name = trackName;
+//			size_t numKeyframes = source.ReadUInt();
+//			animTrack.KeyFrames.resize(numKeyframes);
+//
+//			for (uint32_t key = 0; key < numKeyframes; ++key)
+//			{
+//				AnimationClip::KeyFrame& animKey = animTrack.KeyFrames[key];
+//
+//				animKey.Time = source.ReadFloat();
+//
+//				source.Read(&animKey.Translation, sizeof(Vector3f));
+//				source.Read(&animKey.Rotation, sizeof(Quaternionf));
+//				source.Read(&animKey.Scale, sizeof(Vector3f));
+//			}
+//		}
+//
+//		animation->AddClip(animClip);
+//	}
+//
+//	// set first clip as default clip
+//	animation->mDefaultClip = animation->mAnimationClips[0];
+//
+//	return animation;
+//}
+
+
+
+SkinnedAnimationPlayer::SkinnedAnimationPlayer( const shared_ptr<Skeleton>& skeleton )
+{
+	assert(skeleton != nullptr);
 
 	vector<Bone*> bones = skeleton->GetBones();
 	for (auto iter = bones.begin(); iter != bones.end(); ++iter)
@@ -20,85 +228,38 @@ Animation::Animation( Mesh& mesh )
 	}
 }
 
-Animation::~Animation()
+
+void SkinnedAnimationPlayer::CrossFade( const String& fadeClip, float fadeLength )
 {
-	for (size_t i = 0; i < mAnimationClips.size(); ++i)
-	{
-		Safe_Delete(mAnimationClips[i]);
-	}
-	mDefaultClip = nullptr;
-}
+	//AnimationState* fadeClipState;
 
-AnimationClip* Animation::GetClip( const String& clipName ) const
-{
-	auto found = std::find_if(mAnimationClips.begin(), mAnimationClips.end(), [&clipName] (AnimationClip* clip)
-					{
-						return clipName == clip->mName;
-					});
-	if (found == mAnimationClips.end())
-		return nullptr;
+	//auto found = mAnimationStates.find(fadeClip);
+	//assert(found != mAnimationStates.end());
+	//fadeClipState = found->second;
 
-	return *found;
-}
 
-AnimationState* Animation::AddClip( AnimationClip* clip )
-{
-	AnimationState* state = new AnimationState(*this, clip);
-	
-	mAnimationClips.push_back(clip);
+	//if (!fadeClipState->IsClipStateBitSet(AnimationState::Clip_Is_Fading_Bit) &&
+	//	!mCurrentClipState->IsClipStateBitSet(AnimationState::Clip_Is_Fading_Bit))
+	//{
+	//	// if the given clip is not fading, do fading	
+	//	fadeClipState->BlendWeight = 0.0f;
+	//	fadeClipState->SetClipStateBit( AnimationState::Clip_Is_FadeIn_Started_Bit | AnimationState::Clip_Is_Fading_Bit );
 
-	return state;
-}
+	//	mCurrentClipState->FadeLength = fadeLength;
+	//	mCurrentClipState->ResetCrossFadeTime();
 
-shared_ptr<Animation> RcEngine::Animation::LoadFrom( Mesh& parentMesh, Stream& source )
-{
-	shared_ptr<Animation> animation = std::make_shared<Animation>(parentMesh);
+	//	mCurrentClipState->SetClipStateBit( AnimationState::Clip_Is_FadeOut_Started_Bit | AnimationState::Clip_Is_Fading_Bit );
 
-	// read clips in this animation
-	uint32_t numClips = source.ReadUInt();
+	//	// If this clip is currently not playing, we should start playing it.
+	//	if (!mCurrentClipState->IsClipStateBitSet(AnimationState::Clip_Is_Playing_Bit))
+	//	{
+	//		PlayClip(mCurrentClipState->GetName());
+	//	}
 
-	for (uint32_t clip = 0; clip < numClips; ++clip)
-	{
-		AnimationClip* animClip = new AnimationClip;
+	//	// Start playing the cross fade clip.
+	//	PlayClip(fadeClip);
 
-		animClip->mName = source.ReadString(); 
-		animClip->mLength = source.ReadFloat();
-
-		// read track count
-		uint32_t numTracks = source.ReadUInt();
-		animClip->mAnimationTracks.resize(numTracks);
-
-		for (uint32_t track = 0; track < numTracks; ++track)
-		{
-			String trackName = source.ReadString(); 
-
-			// this will add a new track if it doesn't exit
-			AnimationClip::AnimationTrack& animTrack = animClip->mAnimationTracks[track];
-
-			// read key frame count
-			animTrack.Name = trackName;
-			size_t numKeyframes = source.ReadUInt();
-			animTrack.KeyFrames.resize(numKeyframes);
-
-			for (uint32_t key = 0; key < numKeyframes; ++key)
-			{
-				AnimationClip::KeyFrame& animKey = animTrack.KeyFrames[key];
-
-				animKey.Time = source.ReadFloat();
-
-				source.Read(&animKey.Translation, sizeof(Vector3f));
-				source.Read(&animKey.Rotation, sizeof(Quaternionf));
-				source.Read(&animKey.Scale, sizeof(Vector3f));
-			}
-		}
-
-		animation->AddClip(animClip);
-	}
-
-	// set first clip as default clip
-	animation->mDefaultClip = animation->mAnimationClips[0];
-
-	return animation;
+	//}
 }
 
 
