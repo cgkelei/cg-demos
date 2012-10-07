@@ -190,6 +190,8 @@ public:
 	 */
 	void Update( );
 
+	void NeedUpdate();
+
 protected:
 
 	/**

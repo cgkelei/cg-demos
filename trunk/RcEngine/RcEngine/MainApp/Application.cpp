@@ -11,24 +11,44 @@
 #include <Core/XMLDom.h>
 #include <Core/IModule.h>
 #include <Core/ModuleManager.h>
+#include <Resource/ResourceManager.h>
 #include <Input/InputSystem.h>
+#include <Input/InputDevice.h>
+#include <IO/FileSystem.h>
+#include <IO/FileStream.h>
+#include <Graphics/Material.h>
+#include <Graphics/Effect.h>
+#include <Graphics/Texture.h>
+#include <Graphics/AnimationClip.h>
+#include <Graphics/Mesh.h>
 
 namespace RcEngine {
 
-Application::Application( void )
-	: mIsRunning(false), mAppPaused(false)
+Application::Application( const String& config )
+	: mIsRunning(false), mAppPaused(false), mConfigFile(config)
 {
-	mConfigFile = "Config.xml";
 	Context::Initialize();
 	ModuleManager::Initialize();
+	FileSystem::Initialize();
+	ResourceManager::Initialize();
+
+	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Mesh, "Mesh", Mesh::FactoryFunc);
+	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Material, "Material", Material::FactoryFunc);
+	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Effect, "Effect", Effect::FactoryFunc);
+	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Animation, "Animation",AnimationClip::FactoryFunc);
+	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Texture, "Texture", TextureResource::FactoryFunc);
+
+	ReadConfiguration();
 
 	Context::GetSingleton().SetApplication(this);
 }
 
 Application::~Application( void )
 {
+	ResourceManager::Finalize();
 	ModuleManager::Finalize();
 	Context::Finalize();
+	FileSystem::Finalize();
 }
 
 void Application::RunGame()
@@ -43,7 +63,7 @@ void Application::RunGame()
 
 	MSG msg;
 	ZeroMemory( &msg, sizeof( msg ) );
-	while( msg.message != WM_QUIT)
+	while( msg.message != WM_QUIT && mIsRunning)
 	{   
 		if( PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE ) )
 		{
@@ -60,59 +80,61 @@ void Application::RunGame()
 	UnloadContent();
 }
 
-
-
 void Application::Tick()
 {
-	if (mActice)
-	{
-	Context::GetSingleton().GetInputSystem().Update(mTimer.GetDeltaTime());
-	}
+	InputSystem& inputSystem = Context::GetSingleton().GetInputSystem();
+	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
+	RenderDevice& renderDevice = Context::GetSingleton().GetRenderDevice();
 
 	mTimer.Tick();
 
-	if(!mAppPaused)
+	if (mActice)
 	{
+		inputSystem.Update(mTimer.GetDeltaTime());
+		if (inputSystem.GetKeyboard()->KeyPress(KC_Escape))
+		{
+			mIsRunning  = false;
+			return;
+		}
+	}
+
+	if(!mAppPaused)
+	{	
 		Update(mTimer.GetDeltaTime());
-		Context::GetSingleton().GetSceneManager().UpdateSceneGraph();
+
+		shared_ptr<FrameBuffer> currentFrameBuffer = renderDevice.GetCurrentFrameBuffer();
+		renderDevice.BindFrameBuffer(currentFrameBuffer);
+
+		// update scene graph
+		sceneMan.UpdateSceneGraph(mTimer.GetDeltaTime());
+		sceneMan.UpdateRenderQueue(currentFrameBuffer->GetCamera());
+
+		static int frameCount = 0;
+		static float baseTime = 0;
+
+		frameCount++;
+
+		if (mTimer.GetGameTime()-baseTime >= 1.0f)
+		{
+			float fps = (float)frameCount;
+			std::stringstream sss; 
+			sss << "FPS: " << fps;
+			mMainWindow->SetTitle(sss.str());
+			frameCount = 0;
+			baseTime += 1.0f;
+		}
+		
+
+		float clr = (float)169/255;
+		currentFrameBuffer->Clear(CF_Color | CF_Depth |CF_Stencil, RcEngine::ColorRGBA(clr, clr, clr, 1.0f), 1.0f, 0);
+
+		Context::GetSingleton().GetSceneManager().RenderScene();
+
+		currentFrameBuffer->SwapBuffers();
 	}
 	else
 		::Sleep(50);
 	
-	static int frameCount = 0;
-	static float baseTime = 0;
-
-	frameCount++;
-
-	if (mTimer.GetGameTime()-baseTime >= 1.0f)
-	{
-		float fps = (float)frameCount;
-		std::stringstream sss; 
-		sss << "FPS: " << fps;
-		mMainWindow->SetTitle(sss.str());
-		//fprintf(stdout, "FPS: %4.2f\n", fps);
-		frameCount = 0;
-		baseTime += 1.0f;
-	}
-
-
-	/*Render();	*/
-	
-	
-	RenderDevice* device = Context::GetSingleton().GetRenderDevicePtr();
-	Camera* cam = device->GetCurrentFrameBuffer()->GetCamera();
-	Context::GetSingleton().GetSceneManager().UpdateRenderQueue(cam);
-
-
-	shared_ptr<FrameBuffer> currentFrameBuffer = device->GetCurrentFrameBuffer();
-	device->BindFrameBuffer(currentFrameBuffer);
-
-	float clr = (float)169/255;
-	currentFrameBuffer->Clear(CF_Color | CF_Depth |CF_Stencil, RcEngine::ColorRGBA(clr, clr, clr, 1.0f), 1.0f, 0);
-	
-	Context::GetSingleton().GetSceneManager().RenderScene();
-
-	currentFrameBuffer->SwapBuffers();
 }
 
 void Application::LoadAllModules()
@@ -122,7 +144,6 @@ void Application::LoadAllModules()
 
 	ModuleManager::GetSingleton().Load(MT_Input_OIS);
 	ModuleManager::GetSingleton().GetMoudleByType(MT_Input_OIS)->Initialise();
-
 
 	new SceneManager;
 }
@@ -162,24 +183,58 @@ void Application::Window_Paint()
 
 void Application::ReadConfiguration()
 {
-	mSettings.Left = 40;
-	mSettings.Top = 40;
-	mSettings.Width = 800;
-	mSettings.Height = 600;
-	mSettings.Fullscreen = false;
-	mSettings.SampleCount = 0;
-	mSettings.SampleQuality = 0;
+	FileStream config;
+	if ( !config.Open(mConfigFile) )
+	{
+		std::cout << "App config file " + mConfigFile + " doesn't found!" << std::endl;
+		ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, "App config file " + mConfigFile + " doesn't found!", "Application::ReadConfiguration");
+	}
+
+	
+	XMLDoc xmlConfig;
+	XMLNodePtr appNode = xmlConfig.Parse(config);
+
+	mAppTitle = appNode->Attribute("Title")->ValueString();
+
+	XMLNodePtr graphicNode = appNode->FirstNode("Graphics");
+
+	mSettings.Left = graphicNode->Attribute("Left")->ValueInt();
+	mSettings.Top = graphicNode->Attribute("Top")->ValueInt();
+	mSettings.Width = graphicNode->Attribute("Width")->ValueUInt();
+	mSettings.Height = graphicNode->Attribute("Height")->ValueUInt();
+	mSettings.Fullscreen = graphicNode->Attribute("FullScreen")->ValueInt() != 0;
+
+	XMLNodePtr sampleNode = graphicNode->FirstNode("Sample");
+	if (sampleNode)
+	{
+		mSettings.SampleCount = sampleNode->Attribute("Count")->ValueUInt();
+		mSettings.SampleQuality = sampleNode->Attribute("Quality")->ValueUInt();
+	}
+
+	XMLNodePtr syncNode = graphicNode->FirstNode("SyncInterval");
+	if (syncNode)
+	{
+		mSettings.SyncInterval = syncNode->Attribute("Interval")->ValueUInt();
+	}
+	
 	mSettings.ColorFormat = PF_R8G8B8A8;
 	mSettings.DepthStencilFormat = PF_Depth24Stencil8;
-	mSettings.SyncInterval = 0;
 
+	XMLNodePtr resNode = appNode->FirstNode("Resource");
+	for (XMLNodePtr groupNode = resNode->FirstNode("Group"); groupNode; groupNode = groupNode->NextSibling("Group"))
+	{
+		String groupName = groupNode->Attribute("Name")->ValueString();
+		for (XMLNodePtr pathNode = groupNode->FirstNode("Path"); pathNode; pathNode = pathNode->NextSibling("Path"))
+		{
+			String pathName = pathNode->Attribute("Name")->ValueString();
+			ResourceManager::GetSingleton().AddResourceGroup(groupName);
+			FileSystem::GetSingleton().RegisterPath(pathName, groupName);
+		}
+	}
 }
 
 void Application::Create()
 {
-	// todo move this to context
-	ReadConfiguration();
-
 	// Create main window
 	mMainWindow = new Window("RcEngine", mSettings);
 	mMainWindow->UserResizedEvent.bind(this, &Application::Window_UserResized);

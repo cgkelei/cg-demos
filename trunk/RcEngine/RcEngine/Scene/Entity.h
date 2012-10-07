@@ -9,6 +9,8 @@
 namespace RcEngine {
 
 class SubEntity;
+class AnimationPlayer;
+class SkinnedAnimationPlayer;
 
 /** 
  * Defines an instance of a discrete, scene object based on a Mesh
@@ -21,64 +23,62 @@ public:
 	Entity( const String& name, const shared_ptr<Mesh>& mesh );
 	~Entity();
 
-	virtual bool Renderable() const		{ return true; }
+	bool Renderable() const											{ return true; }
 
-	SceneObejctType GetSceneObjectType() const	{ return SOT_Entity; }
+	SceneObejctType GetSceneObjectType() const						{ return SOT_Entity; }
 
 	const BoundingSpheref& GetWorldBoundingSphere() const;
 
 	const BoundingSpheref& GetBoundingSphere() const;
 
-	const shared_ptr<Mesh>& GetMesh() const { return mMesh; }
+	const shared_ptr<Mesh>& GetMesh() const							{ return mMesh; }
 
-	uint32_t GetNumSubEntities() const { return mSubEntityList.size(); }
+	uint32_t GetNumSubEntities() const								{ return mSubEntityList.size(); }
 
-	SubEntity* GetSubEntity( uint32_t index ) const { return mSubEntityList[index]; }
+	SubEntity* GetSubEntity( uint32_t index ) const					{ return mSubEntityList[index]; }
+
+	void SetDisplaySkeleton(bool display)							{ mDisplaySkeleton = display; }
+
+	bool GetDisplaySkeleton(void) const								{ return mDisplaySkeleton; }
 
 	bool HasSkeleton() const;
-	
-	//Test
-	Vector3f GetWorldPosition( const String& bone );
-	float GetBoneRadius(const String& bone);
 	shared_ptr<Skeleton> GetSkeleton();
 
-	void OnAttach( SceneNode* node );
-	void OnDetach( SceneNode* node );
+	bool HasAnimation() const;
+	AnimationPlayer* GetAnimationPlayer() const;
+
+	void OnAttach( Node* node );
+	void OnDetach( Node* node );
+
+	void UpdateRenderQueue( RenderQueue& renderQueue, Camera* cam );
+
+	Bone* AttachObjectToBone (const String &boneName, SceneObject* sceneObj, const Quaternionf& offsetOrientation= Quaternionf::Identity(), const Vector3f & offsetPosition = Vector3f::Zero());
 
 protected:
 	void Initialize();
+	void UpdateAnimation();
 
 protected:
 	shared_ptr<Mesh> mMesh;
+	shared_ptr<Skeleton> mSkeleton;
+	
 	vector<SubEntity*> mSubEntityList;
+
+	unordered_map<String, SceneObject*> mChildAttachedObjects;
+	
+
+	bool mDisplaySkeleton;
+
 	mutable BoundingSpheref mBoundingShere;
-	vector<Matrix4f> mBoneMatrices;
+
+	vector<Matrix4f> mBoneWorldMatrices;
+	vector<Matrix4f> mSkinMatrices;
 	uint32_t mNumBoneMatrices;
+
+	SkinnedAnimationPlayer* mAnimationPlayer;
+
 };
 
-class _ApiExport SubEntity : public Renderable
-{
-public:
-	SubEntity( Entity* parent, const shared_ptr<MeshPart>& meshPart );
-	~SubEntity();
-
-	const String& GetName() const ;
-
-	const shared_ptr<Material>& GetMaterial() const;
-	void SetMaterial( const shared_ptr<Material>& mat );
-
-	EffectTechnique* GetTechnique() const; 
-
-	const shared_ptr<RenderOperation>& GetRenderOperation() const;
-
-	void GetWorldTransforms(Matrix4f* xform) const;
-	uint32_t GetWorldTransformsCount() const;
-
-protected:
-	Entity* mParent;
-	shared_ptr<MeshPart> mMeshPart;
-	shared_ptr<RenderOperation> mRenderOperation;
-};
 
 }
 

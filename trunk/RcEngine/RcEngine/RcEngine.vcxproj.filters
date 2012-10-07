@@ -25,6 +25,9 @@
     <Filter Include="Scene">
       <UniqueIdentifier>{1bd2210f-27b8-46b3-969a-9538e14fce07}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{9b8fed1c-f375-46c0-9d04-48c21837b186}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainApp\Application.cpp">
@@ -212,6 +215,21 @@
     </ClCompile>
     <ClCompile Include="Graphics\AnimationClip.cpp">
       <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\PathUtil.cpp">
+      <Filter>IO</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\MeshPart.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\Resource.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\ResourceManage.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\SubEntity.cpp">
+      <Filter>Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -436,6 +454,21 @@
     </ClInclude>
     <ClInclude Include="Graphics\AnimationClip.h">
       <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="IO\PathUtil.h">
+      <Filter>IO</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\MeshPart.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource\Resource.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource\ResourceManager.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\SubEntity.h">
+      <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

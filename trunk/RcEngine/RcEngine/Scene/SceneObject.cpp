@@ -8,13 +8,13 @@ namespace RcEngine {
 static const BoundingSpheref UnDefineBoundingSphere;
 
 SceneObject::SceneObject()
-	: mParent(nullptr)
+	: mParentNode(nullptr)
 {
 
 }
 
 SceneObject::SceneObject( const String& name )
-	: mParent(nullptr), mName(name)
+	: mParentNode(nullptr), mName(name)
 {
 
 }
@@ -38,9 +38,9 @@ const BoundingSpheref& SceneObject::GetBoundingSphere() const
 
 const Matrix4f& SceneObject::GetWorldTransform() const
 {
-	if (mParent)
+	if (mParentNode)
 	{
-		return mParent->GetWorldTransform();
+		return mParentNode->GetWorldTransform();
 	}
 	else
 	{
@@ -48,19 +48,19 @@ const Matrix4f& SceneObject::GetWorldTransform() const
 	}
 }
 
-void SceneObject::OnAttach( SceneNode* node )
+void SceneObject::OnAttach( Node* node )
 {
-	assert(!mParent || !node);
-	mParent = node;
+	assert(!mParentNode || !node);
+	mParentNode = node;
+}
+
+void SceneObject::OnDetach( Node* node )
+{
+
 }
 
 
-void SceneObject::OnDetach( SceneNode* node )
-{
-
-}
-
-void SceneObject::AddToRenderQueue( RenderQueue& renderQueue ) const
+void SceneObject::UpdateRenderQueue( RenderQueue& renderQueue, Camera* cam )
 {
 
 }

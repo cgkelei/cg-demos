@@ -12,7 +12,7 @@ class Window;
 class _ApiExport Application
 {
 public:
-	Application(void);
+	Application(const String& config);
 	virtual ~Application(void);
 
 	/**
@@ -91,6 +91,8 @@ protected:
 	Timer mTimer;
 
 	RenderSettings mSettings;
+
+	String mAppTitle;
 
 	// in case multiple threads are used
 	volatile bool mIsRunning;

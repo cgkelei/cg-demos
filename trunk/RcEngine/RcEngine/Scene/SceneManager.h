@@ -46,26 +46,25 @@ public:
 	 */
 	void DestroySceneNode( SceneNode* node );
 
-	Entity* CreateEntity( const String& name, const String& filePath );
+	Entity* CreateEntity( const String& entityName, const String& meshName, const String& groupName );
 
 	void CreateSkyBox( const shared_ptr<Texture>& texture, bool cubemap = true, float distance = 100.0f );
 
 	/**
 	 * Update all scene graph node and transform.
 	 */
-	void UpdateSceneGraph();
+	void UpdateSceneGraph(float delta);
 
 	/**
 	 * Update render queue, and remove scene node outside of the camera frustum.
 	 */
 	void UpdateRenderQueue( Camera* cam );
 
-	
-	void AddToRenderQueue( SceneObject* so );
-
 	void RenderScene();
 	
-	vector<RenderQueueItem>& GetRenderableQueue() { return mRendeQueue; }
+	vector<RenderQueueItem>& GetRenderQueue() { return mRendeQueue; }
+
+	AnimationController* GetAnimationController() const;
 
 protected:
 	virtual SceneNode* CreateSceneNodeImpl( const String& name );
@@ -74,6 +73,8 @@ protected:
 
 	/// Root scene node
 	SceneNode* mSceneRoot;
+
+	AnimationController* mAnimationController;
 
 	/// Keep track of all scene node
     vector<SceneNode*> mAllSceneNodes;

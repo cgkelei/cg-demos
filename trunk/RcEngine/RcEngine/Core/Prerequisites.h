@@ -46,6 +46,8 @@
 #include <rapidxml/rapidxml_print.hpp>
 #include <FastDelegate/FastDelegate.h>
 #include <FastDelegate/FastDelegateBind.h>
+#include <TinyThread/source/tinythread.h>
+#include <TinyThread/source/fast_mutex.h>
 
 typedef fastdelegate::FastDelegate0<> EventHandler;
 typedef fastdelegate::FastDelegate1<bool*, void> CancellableEventHandler;
@@ -75,6 +77,8 @@ using std::weak_ptr;
 using std::vector;
 using std::unordered_map;
 using std::unordered_set;
+using namespace tthread;
+
 
 #define Safe_Delete(p) if(p) { delete p; p = NULL;}
 
@@ -109,6 +113,8 @@ class XMLAttribute;
 typedef shared_ptr<XMLNode> XMLNodePtr;
 typedef shared_ptr<XMLAttribute> XMLAttributePtr;
 
+class Resource;
+class ResourceManager;
 class InputSystem;
 struct RenderSettings;
 class RenderDevice;
@@ -138,7 +144,10 @@ class SamplerState;
 class SceneManager;
 class SceneNode;
 class Entity;
-
+class AnimationPlayer;
+class AnimationState;
+class AnimationClip;
+class AnimationController;
 
 
 } // Namespace RcEngine
