@@ -4,15 +4,13 @@
 #include <Core/Prerequisites.h>
 #include <Math/Vector.h>
 #include <Math/Quaternion.h>
+#include <Resource/Resource.h>
 
 namespace RcEngine {
 
-class AnimationState;
-class Bone;
-
-class _ApiExport AnimationClip
+class _ApiExport AnimationClip : public Resource
 {
-	friend class Animation;
+	friend class AnimationPlayer;
 	friend class AnimationState;
 
 	struct _ApiExport KeyFrame
@@ -35,30 +33,28 @@ class _ApiExport AnimationClip
 	};
 
 public:
-	AnimationClip();
+	AnimationClip(uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group );
 	~AnimationClip();
 
-	const String& GetName() const { return mName; }
+	const String& GetClipName() const { return mClipName; }
 
 	/**
 	 * Get AnimationClip's duration in seconds
 	 */
 	float GetLength() const { return mLength; }
-	
-	/**
-	 * Get frame rate at which keyframes are sampled.
-	 */
-	float GetFrameRate() const;
 
-	AnimationState* GetAnimationState() const { return mAnimationState; }
-	void SetAnimationState( AnimationState* state );
 
-private:
-	String mName;
+protected:
+	void LoadImpl();
+	void UnloadImpl();
+
+public:
+	static shared_ptr<Resource> FactoryFunc(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
+
+private:	
 	float mLength;
+	String mClipName;
 	vector<AnimationTrack> mAnimationTracks;
-
-	AnimationState* mAnimationState;
 };
 
 

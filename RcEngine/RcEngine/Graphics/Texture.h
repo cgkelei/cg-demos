@@ -5,6 +5,7 @@
 #include <Core/Prerequisites.h>
 #include <Graphics/GraphicsCommon.h>
 #include <Graphics/PixelFormat.h>
+#include <Resource/Resource.h>
 
 namespace RcEngine {
 
@@ -52,6 +53,28 @@ protected:
 	uint32_t mAccessHint;
 	PixelFormat mFormat;
 	TextureType mType;
+};
+
+
+class TextureResource : public Resource
+{
+public:
+	TextureResource(uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
+	~TextureResource();
+
+
+	const shared_ptr<Texture> GetTexture() const { return mTexture; }
+
+public:
+	static shared_ptr<Resource> FactoryFunc(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
+
+protected:
+	void LoadImpl();
+	void UnloadImpl();
+	
+private:
+	shared_ptr<Texture> mTexture;
+
 };
 
 } // Namespace RcEngine

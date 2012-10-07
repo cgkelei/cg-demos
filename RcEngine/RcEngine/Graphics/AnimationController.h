@@ -5,10 +5,11 @@
 
 namespace RcEngine {
 
-class AnimationClip;
 
 class _ApiExport AnimationController
 {
+	friend class AnimationPlayer;
+
 public:
 	enum State
 	{
@@ -27,6 +28,9 @@ public:
 
 	void Update(float elapsedTime);
 
+	void Unschedule(AnimationState* clipState);
+	void Schedule(AnimationState* clipState);
+
 	void Pause();
 	void Resume();
 
@@ -34,7 +38,7 @@ private:
 	State mState;
 
 	// A list of running AnimationClips.
-	std::list<AnimationClip*> mRunningClips;     
+	std::list<AnimationState*> mRunningClips;     
 };
 
 }

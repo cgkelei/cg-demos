@@ -98,40 +98,4 @@ shared_ptr<SamplerState> RenderFactory::CreateSamplerState( const SamplerStateDe
 	return retVal;
 }
 
-shared_ptr<Material> RenderFactory::CreateMaterialFromFile( const String& matName, const String& path )
-{
-	MaterialMapIter find = mMaterialPool.find(matName);
-	if ( find == mMaterialPool.end())
-	{
-		FileStream file;
-		if (!file.Open(path, FILE_READ))
-		{
-			ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, 
-				"Error: " + path + " not exits!", "RenderFactory::CreateMaterialFromFile");
-		}
-		mMaterialPool[matName] = Material::LoadFrom(file);
-
-		//shared_ptr<Material> m = mMaterialPool[matName]->Clone();
-	}		
-	return mMaterialPool[matName];
-}
-
-shared_ptr<Effect> RenderFactory::CreateEffectFromFile(const String& effectName, const String& effectFile)
-{
-	auto found = mEffectPool.find(effectName);
-	if ( found == mEffectPool.end())
-	{
-		FileStream file;
-		if (!file.Open(effectFile, FILE_READ))
-		{
-			ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, 
-				"Error: " + effectFile + " not exits!", "RenderFactory::CreateMaterialFromFile");
-		}
-
-		mEffectPool[effectName] = Effect::LoadFrom(file);
-	}	
-
-	return mEffectPool[effectName];
-}
-
 } // Namespace RcEngine

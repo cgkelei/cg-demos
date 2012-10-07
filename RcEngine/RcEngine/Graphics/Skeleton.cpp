@@ -1,6 +1,8 @@
 #include <Graphics/Skeleton.h>
 #include <IO/FileStream.h>
 #include <Core/XMLDom.h>
+#include <Scene/Entity.h>
+#include <Math/MathUtil.h>
 
 namespace RcEngine {
 
@@ -10,10 +12,26 @@ Bone::Bone( const String& name, uint32_t boneID, Bone* parent )
 
 }
 
-Matrix4f Bone::GetOffsetMatrix() const
+
+void Bone::CalculateBindPose()
 {
-	return Matrix4f();
+	Matrix4f bindPose = GetWorldTransform();
+	mOffsetMatrix = bindPose.Inverse();
 }
+
+//void Bone::SetParentEntity( Entity* ent )
+//{
+//	// a bone can only belong to on entity
+//	if (mParentEntity != nullptr)
+//	{
+//		assert(mParentEntity == ent);
+//	}
+//}
+//
+//Entity* Bone::GetParentParentEntity() const
+//{
+//	return mParentEntity;
+//}
 
 
 Skeleton::Skeleton()
@@ -28,10 +46,7 @@ Skeleton::~Skeleton()
 
 Bone* Skeleton::GetRootBone()
 {
-	if (mRootBoneIndex == -1)
-		return nullptr;
-
-	return mBones[mRootBoneIndex];
+	return mBones[0];
 }
 
 Bone* Skeleton::GetBone( const String& name )
@@ -93,7 +108,7 @@ shared_ptr<Skeleton> Skeleton::LoadFrom( Stream& source )
 		source.Read(&bindScale,sizeof(Vector3f));
 		bone->SetScale(bindScale);
 
-		bone->mRadius = source.ReadFloat();
+		bone->CalculateBindPose();
 
 		skeleton->mBones[i] = bone;	
 	}
@@ -101,55 +116,20 @@ shared_ptr<Skeleton> Skeleton::LoadFrom( Stream& source )
 	return skeleton;
 }
 
-shared_ptr<Skeleton> Skeleton::LoadFrom( Stream& source, int a )
+shared_ptr<Skeleton> Skeleton::Clone()
 {
-	XMLDoc doc;
-	XMLNodePtr root = doc.Parse(source);
-
 	shared_ptr<Skeleton> skeleton = std::make_shared<Skeleton>();
-	
-	int i = 0;
-	for (XMLNodePtr node = root->FirstNode("Bone"); node; node = node->NextSibling("Bone"))
+
+	skeleton->mBones.resize(mBones.size());
+	for (size_t iBone = 0; iBone < mBones.size(); ++iBone)
 	{
-		String name = node->AttributeString("name", "");
-		int parentIndex = node->AttributeInt("parent", -1);
-
-		Vector3f pos, scale;
-		Quaternionf rot;
-
-		pos.X() = node->FirstNode("BindPosition")->AttributeFloat("x", 0);
-		pos.Y() = node->FirstNode("BindPosition")->AttributeFloat("y", 0);
-		pos.Z() = node->FirstNode("BindPosition")->AttributeFloat("z", 0);
-
-		scale.X() = node->FirstNode("BindScale")->AttributeFloat("x", 0);
-		scale.Y() = node->FirstNode("BindScale")->AttributeFloat("y", 0);
-		scale.Z() = node->FirstNode("BindScale")->AttributeFloat("z", 0);
-
-		rot.X() = node->FirstNode("BindRotation")->AttributeFloat("x", 0);
-		rot.Y() = node->FirstNode("BindRotation")->AttributeFloat("y", 0);
-		rot.Z() = node->FirstNode("BindRotation")->AttributeFloat("z", 0);
-		rot.W() = node->FirstNode("BindRotation")->AttributeFloat("w", 0);
-
-		Bone* parent;
-		if (parentIndex == -1)
-		{
-			parent = nullptr;
-		}
-		else
-		{
-			parent = skeleton->GetBone(parentIndex);
-		}
-
-		Bone* bone = new Bone(name, i++, parent);
-
-		
-		bone->SetPosition(pos);
-		bone->SetRotation(rot);
-		bone->SetScale(scale);
-
-		bone->mRadius = 0;
-
-		skeleton->mBones.push_back(bone);		
+		Bone* parentBone = (iBone == 0) ? nullptr : skeleton->mBones[(static_cast<Bone*>(mBones[iBone]->GetParent()))->GetBoneIndex()];
+		Bone* newBone =  new Bone( mBones[iBone]->GetName(), iBone,  parentBone);
+		newBone->SetPosition(mBones[iBone]->GetPosition());
+		newBone->SetRotation(mBones[iBone]->GetRotation());
+		newBone->SetScale(mBones[iBone]->GetScale());
+		newBone->CalculateBindPose();
+		skeleton->mBones[iBone] = newBone;
 	}
 
 	return skeleton;

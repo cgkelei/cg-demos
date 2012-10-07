@@ -15,8 +15,12 @@ public:
 
 	uint32_t GetBoneIndex() const { return mBoneIndex; }
 
-	Matrix4f GetOffsetMatrix() const;
+	const Matrix4f& GetOffsetMatrix() const { return mOffsetMatrix; }
 
+	void CalculateBindPose();	
+
+	//void SetParentEntity(Entity* ent);
+	//Entity* GetParentParentEntity() const;
 
 protected:
 	virtual Node* CreateChildImpl( const String& name ) { return 0; }
@@ -24,17 +28,10 @@ protected:
 private:
 	void OnUpdate( );
 	
-
-public:
-	float mRadius;
 private:
-
+	//Entity* mParentEntity;
 	uint32_t mBoneIndex;
-	
-
-	Vector3f mBindDerivedPosition;
-	Vector3f mBindDerivedScale;
-	Quaternionf mBindDerivedRotation;
+	Matrix4f mOffsetMatrix;
 };
 
 class _ApiExport Skeleton
@@ -54,16 +51,13 @@ public:
 	const vector<Bone*>& GetBones() const { return mBones; }
 	vector<Bone*>& GetBonesModified() { return mBones; }
 
+	shared_ptr<Skeleton> Clone();
+
 public:
 	static shared_ptr<Skeleton> LoadFrom( Stream& source );
-	static shared_ptr<Skeleton> LoadFrom( Stream& source, int a  );
 
 private:
-	
 	vector<Bone*> mBones;
-
-	int32_t mRootBoneIndex;
-
 };
 
 } // Namespace RcEngine

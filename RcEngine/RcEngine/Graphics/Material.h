@@ -6,6 +6,7 @@
 #include <Graphics/GraphicsCommon.h>
 #include <Graphics/EffectAnnotation.h>
 #include <Graphics/EffectParameter.h>
+#include <Resource/Resource.h>
 
 namespace RcEngine {
 	
@@ -20,10 +21,10 @@ struct _ApiExport MaterialParameter
 	EffectParameter* EffectParam;
 };
 
-class _ApiExport Material 
+class _ApiExport Material : public Resource
 {
 public:
-	Material(void);
+	Material(uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group );
 	virtual ~Material(void);
 
 	const String& GetName() const						{ return mName; }
@@ -44,12 +45,18 @@ public:
 
 	shared_ptr<Material> Clone();
 
+protected:
+
+	void LoadImpl();
+    void UnloadImpl();
 
 public:
-	static shared_ptr<Material> LoadFrom(Stream& source);
+	static shared_ptr<Resource> FactoryFunc(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 
-protected:			
-	String mName;
+protected:	
+	
+	String mMaterialName;
+
 	shared_ptr<Effect> mEffect;
 	EffectTechnique* mCurrentTechnique;
 	vector<MaterialParameter*> mCachedEffectParams;

@@ -13,6 +13,8 @@
 #include <Core/Exception.h>
 #include <Core/XMLDom.h>
 #include <Core/Utility.h>
+#include <IO/FileSystem.h>
+#include <Resource/ResourceManager.h>
 
 
 namespace RcEngine {
@@ -129,7 +131,8 @@ private:
 };
 
 //--------------------------------------------------------------------------------------------------
-Material::Material(void)
+Material::Material(uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
+	: Resource(resType, creator, handle, name, group)
 {
 }
 
@@ -239,27 +242,296 @@ MaterialParameter* Material::GetCustomParameter( const String& name )
 
 
 
-shared_ptr<Material> Material::LoadFrom( Stream& source )
+//shared_ptr<Material> Material::LoadFrom( Stream& source )
+//{
+//	RenderFactory&  factory = Context::GetSingleton().GetRenderFactory();
+//	shared_ptr<Material> material = std::make_shared<Material>();
+//
+//	XMLDoc doc;
+//	XMLNodePtr root = doc.Parse(source);
+//
+//	// material name 
+//	material->mName = root->AttributeString("name", "");
+//
+//	// effect first
+//	XMLNodePtr effectNode = root->FirstNode("Effect");
+//	String effecName =  effectNode->AttributeString("name", "");
+//	String effectPath = effectNode->AttributeString("file", "");
+//
+//	XMLNodePtr techNode = effectNode->FirstNode("Technique");
+//	String techName = techNode->AttributeString("name", "");
+//
+//	String effectFullPath = FileSystem::GetSingleton().Locate(effectPath);
+//	material->mEffect = factory.CreateEffectFromFile(effecName, effectFullPath);
+//	material->mCurrentTechnique = material->mEffect->GetTechniqueByName(techName);
+//
+//	for (XMLNodePtr samplerNode = root->FirstNode("Sampler"); samplerNode; samplerNode = samplerNode->NextSibling("Sampler"))
+//	{
+//		SamplerStateDesc desc;
+//		
+//		String samplerName = samplerNode->AttributeString("name", "");
+//
+//		for (XMLNodePtr stateNode = samplerNode->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+//		{	
+//			String stateName = stateNode->AttributeString("name", "");
+//			if (stateName == "Filter")
+//			{
+//				String value = stateNode->Attribute("value")->ValueString();
+//				desc.Filter = (TextureFilter)SamplerDefs::GetSingleton().GetSamplerState(value);
+//			}
+//			else if (stateName == "AddressU")
+//			{
+//				String value = stateNode->Attribute("value")->ValueString();
+//				desc.AddressU = (TextureAddressMode)SamplerDefs::GetSingleton().GetSamplerState(value);
+//			}
+//			else if (stateName == "AddressV")
+//			{
+//				String value = stateNode->Attribute("value")->ValueString();
+//				desc.AddressV = (TextureAddressMode)SamplerDefs::GetSingleton().GetSamplerState(value);
+//			}
+//			else if (stateName == "AddressW")
+//			{
+//				String value = stateNode->Attribute("value")->ValueString();
+//				desc.AddressW = (TextureAddressMode)SamplerDefs::GetSingleton().GetSamplerState(value);
+//			}
+//			else if (stateName == "MaxAnisotropy")
+//			{
+//				uint32_t value = stateNode->Attribute("value")->ValueUInt();
+//				desc.MaxAnisotropy = value;
+//			}
+//			else if (stateName == "MinLod")
+//			{
+//				float value = stateNode->Attribute("value")->ValueFloat();
+//				desc.MinLOD = value;
+//			}
+//			else if (stateName == "MaxLod")
+//			{
+//				float value = stateNode->Attribute("value")->ValueFloat();
+//				desc.MaxLOD = value;
+//			}
+//			else if (stateName == "ComparisonFunc")
+//			{
+//				String value = stateNode->Attribute("value")->ValueString();
+//				desc.ComparisonFunc = (CompareFunction)SamplerDefs::GetSingleton().GetSamplerState(value);
+//			}
+//			else if (stateName == "BorderColor")
+//			{
+//				float r = stateNode->Attribute("r")->ValueFloat();
+//				float g = stateNode->Attribute("g")->ValueFloat();
+//				float b = stateNode->Attribute("b")->ValueFloat();
+//				float a = stateNode->Attribute("a")->ValueFloat();
+//				desc.BorderColor = ColorRGBA(r,g,b,a);
+//			}
+//			else
+//			{
+//				ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Unknown sampler state: " + stateName, 
+//					"Material::LoadFrom");
+//			}
+//		}
+//		material->mSamplerStates.insert( std::make_pair(samplerName, factory.CreateSamplerState(desc)) );
+//	}
+//
+//	for (XMLNodePtr paramNode = root->FirstNode("Parameter"); paramNode; paramNode = paramNode->NextSibling("Parameter"))
+//	{
+//		String paramName =paramNode->Attribute("name")->ValueString();
+//		EffectParameter* effectParam = material->mEffect->GetParameterByName(paramName);
+//
+//		if (!effectParam)
+//		{
+//			continue;
+//			/*ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Material Parameter: " + parameter->Name + "doesn't exit in effect!",
+//				"Material::LoadFrom");*/
+//		}
+//
+//		MaterialParameter* parameter = new MaterialParameter;
+//		parameter->Name = paramName;
+//		parameter->EffectParam = effectParam;
+//		parameter->Type = parameter->EffectParam->GetParameterType();
+//		String semantic =  paramNode->AttributeString("semantic", "");
+//		parameter->IsSemantic = semantic.length() > 0;
+//
+//		if (parameter->IsSemantic)
+//		{
+//			parameter->Usage = EffectParamsUsageDefs::GetInstance().GetUsageType(semantic);
+//		}else
+//		{
+//			parameter->Usage = EPU_Unknown;
+//		}	
+//
+//		// texture type
+//		if (parameter->Type == EPT_Texture1D || parameter->Type == EPT_Texture2D ||
+//			parameter->Type == EPT_TextureCUBE || parameter->Type == EPT_Texture3D ||
+//			parameter->Type == EPT_Texture1DArray || parameter->Type == EPT_Texture2DArray ||
+//			parameter->Type == EPT_Texture3DArray || parameter->Type == EPT_TextureCUBEArray)
+//		{	
+//			TextureLayer layer;
+//
+//			String stageValue = paramNode->Attribute("stage")->ValueString();
+//			layer.Stage = (ShaderType)SamplerDefs::GetSingleton().GetSamplerState(stageValue);
+//			layer.TexUnit = paramNode->Attribute("texUnit")->ValueUInt();
+//
+//			String samplerValue = paramNode->Attribute("sampler")->ValueString();
+//			auto found = material->mSamplerStates.find(samplerValue) ;
+//			if (found == material->mSamplerStates.end())
+//			{
+//				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Sampler: " + samplerValue + "doesn't exit",
+//					"Material::LoadFrom");
+//			}
+//			layer.Sampler = found->second;
+//
+//			String texFile = paramNode->AttributeString("value", "");
+//			if (!texFile.empty())
+//			{
+//				String texFullPath = FileSystem::GetSingleton().Locate(texFile);
+//				layer.Texture = factory.CreateTextureFromFile(texFullPath, 0);
+//			}
+//			material->mTextures[parameter->Name] = layer;
+//		}
+//
+//		// Material Color
+//		if (parameter->Usage == EPU_Material_Ambient_Color)
+//		{
+//			String value = paramNode->AttributeString("value", "");
+//			if (!value.empty())
+//			{
+//				std::stringstream sss;
+//				sss << value;
+//				sss >> material->mAmbient.R() >> material->mAmbient.G() >> material->mAmbient.B() >> material->mAmbient.A();
+//			}			
+//		}
+//		else if (parameter->Usage == EPU_Material_Diffuse_Color)
+//		{
+//			String value = paramNode->AttributeString("value", "");
+//			if (!value.empty())
+//			{
+//				std::stringstream sss;
+//				sss << value;
+//				sss >> material->mDiffuse.R() >> material->mDiffuse.G() >> material->mDiffuse.B() >> material->mDiffuse.A();
+//		
+//			}
+//		}
+//		else if (parameter->Usage == EPU_Material_Specular_Color)
+//		{
+//			String value = paramNode->AttributeString("value", "");
+//			if (!value.empty())
+//			{
+//				std::stringstream sss;
+//				sss << value;
+//				sss >> material->mSpecular.R() >> material->mSpecular.G() >> material->mSpecular.B() >> material->mSpecular.A();
+//			}
+//		}
+//		else if (parameter->Usage == EPU_Material_Emissive_Color)
+//		{
+//			String value = paramNode->AttributeString("value", "");
+//			if (!value.empty())
+//			{
+//				std::stringstream sss;
+//				sss << value;
+//				sss >> material->mEmissive.R() >> material->mEmissive.G() >> material->mEmissive.B() >> material->mEmissive.A();
+//			}
+//		}
+//		else if (parameter->Usage == EPU_Material_Power)
+//		{
+//			String value = paramNode->AttributeString("value", "");
+//			if (!value.empty())
+//			{
+//				material->mPower = LexicalCast<float>(value);
+//			}
+//			
+//		}
+//			
+//		material->mCachedEffectParams.push_back(parameter);
+//	}
+//
+//	return material;
+//}
+
+shared_ptr<Material> Material::Clone()
 {
-	RenderFactory&  factory = Context::GetSingleton().GetRenderFactory();
-	shared_ptr<Material> material = std::make_shared<Material>();
+	/*shared_ptr<Material> retVal = std::make_shared<Material>();
+
+	retVal->mName = mName + "Clone ";
+
+	String name = mName;
+
+	retVal->mAmbient = mEmissive;
+	retVal->mDiffuse = mDiffuse;
+	retVal->mSpecular = mSpecular;
+	retVal->mEmissive = mEmissive;
+	retVal->mPower = mPower;
+
+	retVal->mDepthStencilState = mDepthStencilState;
+	retVal->mBlendState = mBlendState;
+	retVal->mRasterizerState = mRasterizerState;
+
+	retVal->mEffect = mEffect;
+	retVal->mCurrentTechnique = mCurrentTechnique;
+	retVal->mTextures = mTextures;
+
+	for (auto iter = mCachedEffectParams.begin(); iter != mCachedEffectParams.end(); ++iter)
+	{
+	MaterialParameter* param = new MaterialParameter;
+	param->EffectParam = (*iter)->EffectParam;
+	param->Usage = (*iter)->Usage;
+	param->IsSemantic = (*iter)->IsSemantic;
+	param->Name = (*iter)->Name;
+	param->Type = (*iter)->Type;
+	retVal->mCachedEffectParams.push_back(param);
+	}*/
+
+	return nullptr;
+}
+
+void Material::SetTexture( const String& texUint, const shared_ptr<Texture>& texture )
+{
+	auto found = mTextures.find(texUint);
+	if (found != mTextures.end())
+	{
+		found->second.Texture = texture;
+	}
+	else
+	{
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Texture Unit: "+texUint +"doesn't exit!", "Material::SetTexture");
+	}
+}
+
+void Material::LoadImpl()
+{
+	FileSystem& fileSystem = FileSystem::GetSingleton();
+	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
+	ResourceManager& resMan = ResourceManager::GetSingleton();
+
+	shared_ptr<Stream> matStream = fileSystem.OpenStream(mName, mGroup);
+	Stream& source = *matStream;	
 
 	XMLDoc doc;
 	XMLNodePtr root = doc.Parse(source);
 
 	// material name 
-	material->mName = root->AttributeString("name", "");
+	mMaterialName = root->AttributeString("name", "");
 
 	// effect first
 	XMLNodePtr effectNode = root->FirstNode("Effect");
 	String effecName =  effectNode->AttributeString("name", "");
-	String effectPath = effectNode->AttributeString("file", "");
 
 	XMLNodePtr techNode = effectNode->FirstNode("Technique");
 	String techName = techNode->AttributeString("name", "");
 
-	material->mEffect = factory.CreateEffectFromFile(effecName, effectPath);
-	material->mCurrentTechnique = material->mEffect->GetTechniqueByName(techName);
+	String effectResGroup;
+	// Test if a effect exits in group as material
+	if( fileSystem.Exits(effecName, mGroup) )
+	{
+		effectResGroup = mGroup;
+	}
+	else
+	{
+		// use engine group
+		effectResGroup = "General";
+	}
+	
+	mEffect = std::static_pointer_cast<Effect>( resMan.GetResourceByName(ResourceTypes::Effect, effecName, effectResGroup) );
+	mEffect->Load();
+	mCurrentTechnique = mEffect->GetTechniqueByName(techName);
 
 	for (XMLNodePtr samplerNode = root->FirstNode("Sampler"); samplerNode; samplerNode = samplerNode->NextSibling("Sampler"))
 	{
@@ -324,13 +596,13 @@ shared_ptr<Material> Material::LoadFrom( Stream& source )
 					"Material::LoadFrom");
 			}
 		}
-		material->mSamplerStates.insert( std::make_pair(samplerName, factory.CreateSamplerState(desc)) );
+		mSamplerStates.insert( std::make_pair(samplerName, factory.CreateSamplerState(desc)) );
 	}
 
 	for (XMLNodePtr paramNode = root->FirstNode("Parameter"); paramNode; paramNode = paramNode->NextSibling("Parameter"))
 	{
 		String paramName =paramNode->Attribute("name")->ValueString();
-		EffectParameter* effectParam = material->mEffect->GetParameterByName(paramName);
+		EffectParameter* effectParam = mEffect->GetParameterByName(paramName);
 
 		if (!effectParam)
 		{
@@ -367,8 +639,8 @@ shared_ptr<Material> Material::LoadFrom( Stream& source )
 			layer.TexUnit = paramNode->Attribute("texUnit")->ValueUInt();
 
 			String samplerValue = paramNode->Attribute("sampler")->ValueString();
-			auto found = material->mSamplerStates.find(samplerValue) ;
-			if (found == material->mSamplerStates.end())
+			auto found = mSamplerStates.find(samplerValue) ;
+			if (found == mSamplerStates.end())
 			{
 				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Sampler: " + samplerValue + "doesn't exit",
 					"Material::LoadFrom");
@@ -378,9 +650,17 @@ shared_ptr<Material> Material::LoadFrom( Stream& source )
 			String texFile = paramNode->AttributeString("value", "");
 			if (!texFile.empty())
 			{
-				layer.Texture = factory.CreateTextureFromFile(texFile, 0);
+				/*String texFullPath = FileSystem::GetSingleton().Locate(texFile);
+				layer.Texture = factory.CreateTextureFromFile(texFullPath, 0);*/
+
+				shared_ptr<TextureResource> textureRes = std::static_pointer_cast<TextureResource>(
+					resMan.GetResourceByName(ResourceTypes::Texture, texFile, mGroup));
+				textureRes->Load();
+
+				layer.Texture = textureRes->GetTexture();
+
 			}
-			material->mTextures[parameter->Name] = layer;
+			mTextures[parameter->Name] = layer;
 		}
 
 		// Material Color
@@ -391,7 +671,7 @@ shared_ptr<Material> Material::LoadFrom( Stream& source )
 			{
 				std::stringstream sss;
 				sss << value;
-				sss >> material->mAmbient.R() >> material->mAmbient.G() >> material->mAmbient.B() >> material->mAmbient.A();
+				sss >> mAmbient.R() >> mAmbient.G() >> mAmbient.B() >> mAmbient.A();
 			}			
 		}
 		else if (parameter->Usage == EPU_Material_Diffuse_Color)
@@ -401,7 +681,7 @@ shared_ptr<Material> Material::LoadFrom( Stream& source )
 			{
 				std::stringstream sss;
 				sss << value;
-				sss >> material->mDiffuse.R() >> material->mDiffuse.G() >> material->mDiffuse.B() >> material->mDiffuse.A();
+				sss >> mDiffuse.R() >> mDiffuse.G() >> mDiffuse.B() >> mDiffuse.A();
 		
 			}
 		}
@@ -412,7 +692,7 @@ shared_ptr<Material> Material::LoadFrom( Stream& source )
 			{
 				std::stringstream sss;
 				sss << value;
-				sss >> material->mSpecular.R() >> material->mSpecular.G() >> material->mSpecular.B() >> material->mSpecular.A();
+				sss >> mSpecular.R() >> mSpecular.G() >> mSpecular.B() >> mSpecular.A();
 			}
 		}
 		else if (parameter->Usage == EPU_Material_Emissive_Color)
@@ -422,7 +702,7 @@ shared_ptr<Material> Material::LoadFrom( Stream& source )
 			{
 				std::stringstream sss;
 				sss << value;
-				sss >> material->mEmissive.R() >> material->mEmissive.G() >> material->mEmissive.B() >> material->mEmissive.A();
+				sss >> mEmissive.R() >> mEmissive.G() >> mEmissive.B() >> mEmissive.A();
 			}
 		}
 		else if (parameter->Usage == EPU_Material_Power)
@@ -430,65 +710,25 @@ shared_ptr<Material> Material::LoadFrom( Stream& source )
 			String value = paramNode->AttributeString("value", "");
 			if (!value.empty())
 			{
-				material->mPower = LexicalCast<float>(value);
+				mPower = LexicalCast<float>(value);
 			}
 			
 		}
 			
-		material->mCachedEffectParams.push_back(parameter);
+		mCachedEffectParams.push_back(parameter);
 	}
-
-	return material;
 }
 
-shared_ptr<Material> Material::Clone()
+void Material::UnloadImpl()
 {
-	shared_ptr<Material> retVal = std::make_shared<Material>();
 
-	retVal->mName = mName + "Clone ";
-
-	String name = mName;
-
-	retVal->mAmbient = mEmissive;
-	retVal->mDiffuse = mDiffuse;
-	retVal->mSpecular = mSpecular;
-	retVal->mEmissive = mEmissive;
-	retVal->mPower = mPower;
-
-	retVal->mDepthStencilState = mDepthStencilState;
-	retVal->mBlendState = mBlendState;
-	retVal->mRasterizerState = mRasterizerState;
-
-	retVal->mEffect = mEffect;
-	retVal->mCurrentTechnique = mCurrentTechnique;
-	retVal->mTextures = mTextures;
-
-	for (auto iter = mCachedEffectParams.begin(); iter != mCachedEffectParams.end(); ++iter)
-	{
-		MaterialParameter* param = new MaterialParameter;
-		param->EffectParam = (*iter)->EffectParam;
-		param->Usage = (*iter)->Usage;
-		param->IsSemantic = (*iter)->IsSemantic;
-		param->Name = (*iter)->Name;
-		param->Type = (*iter)->Type;
-		retVal->mCachedEffectParams.push_back(param);
-	}
-
-	return retVal;
 }
 
-void Material::SetTexture( const String& texUint, const shared_ptr<Texture>& texture )
+shared_ptr<Resource> Material::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 {
-	auto found = mTextures.find(texUint);
-	if (found != mTextures.end())
-	{
-		found->second.Texture = texture;
-	}
-	else
-	{
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Texture Unit: "+texUint +"doesn't exit!", "Material::SetTexture");
-	}
+	return std::make_shared<Material>(ResourceTypes::Material, creator, handle, name, group);
 }
+
 
 
 } // Namespace RcEngine

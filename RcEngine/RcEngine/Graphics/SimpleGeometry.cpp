@@ -102,7 +102,7 @@ SimpleTexturedQuad::SimpleTexturedQuad(const String& name)
 {
 	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 
-	mMaterial = factory.CreateMaterialFromFile("SimpleTextured", "../Media/Materials/SimpleTextured.xml");
+	/*mMaterial = factory.CreateMaterialFromFile("SimpleTextured", "../Media/Materials/SimpleTextured.xml");*/
 
 	struct PosNormalTexVertex
 	{

@@ -5,53 +5,65 @@
 
 namespace RcEngine {
 
-class AnimationClip;
-class AnimationController;
-class AnimationState;
 class Bone;
+class Skeleton;
 
-class _ApiExport Animation
+class _ApiExport AnimationPlayer
 {
 	friend class AnimationState;
 
 public:
-	Animation(Mesh& mesh);
-	~Animation();
+	AnimationPlayer();
+	~AnimationPlayer();
 
-	bool IsPlaying( const String& clip );
+	bool IsPlaying(const String& clipName) const;
 
-	void Play( const String& clip = "");
-	void CrossFade( const String& clip );
-	
-	void Stop();
-	void Stop( const String& clip );
-
-	void Sample();
-
-	AnimationClip* GetClip( const String& clip ) const;
-
-	AnimationState* AddClip( AnimationClip* clip );
+	void PlayClip(const String& clipName);
+	void PauseClip(const String& clipName);
+	void ResumeClip(const String& clipName);
+	void StopClip(const String& clipName);
+	void StopAll();
 
 
-	/**
-	 * Set the mesh which use this animation.
-	 */
-	void SetMesh( const shared_ptr<Mesh>& mesh );
+	AnimationState* GetClip( const String& clip ) const;
+	const unordered_map<String, AnimationState*>& GetAllClip() const { return mAnimationStates; }
+
+	AnimationState* AddClip( const shared_ptr<AnimationClip>& clip );
+
+
+	EventHandler& EventCompleted() { return mEventCompleted; }
+
+	AnimationController* GetAnimationController() const { return mController; }
 
 public:
-	static shared_ptr<Animation> LoadFrom(Mesh& parentMesh, Stream& source);
+	static shared_ptr<AnimationPlayer> LoadFrom(Mesh& parentMesh, Stream& source);
 
-private:
-	Mesh& mParentMesh;
+
+protected:
+
+	EventHandler mEventCompleted;
 
 	AnimationController* mController; 
-	AnimationClip* mDefaultClip;
-	vector<AnimationClip*> mAnimationClips;	
 
-	// Mapping of animation track indices to bones.
+	AnimationState* mCurrentClipState;
+
+	unordered_map<String, AnimationState*> mAnimationStates;
+
 	unordered_map<String, Bone*> mAnimateTargets;
 };
 
+
+class _ApiExport SkinnedAnimationPlayer : public AnimationPlayer
+{
+public:
+	SkinnedAnimationPlayer(const shared_ptr<Skeleton>& skeleton);
+	~SkinnedAnimationPlayer();
+
+	void CrossFade( const String& fadeClip, float fadeLength );
+
+private:
+	
+};
 
 }
 

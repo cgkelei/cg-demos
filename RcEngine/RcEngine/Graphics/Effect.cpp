@@ -2,8 +2,10 @@
 #include <Graphics/EffectTechnique.h>
 #include <Graphics/EffectPass.h>
 #include <Graphics/ShaderProgram.h>
+#include <Graphics/EffectParameter.h>
 #include <Graphics/RenderFactory.h>
 #include <Graphics/Shader.h>
+#include <Resource/ResourceManager.h>
 #include <Core/Context.h>
 #include <Core/Exception.h>
 #include <Core/Utility.h>
@@ -428,7 +430,8 @@ void CollectRenderStates(XMLNodePtr passNode, DepthStencilStateDesc& dsDesc, Ble
 
 namespace RcEngine {
 
-Effect::Effect()
+Effect::Effect(uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
+	: Resource(resType, creator, handle, name, group)
 {
 
 }
@@ -496,18 +499,19 @@ EffectParameter* Effect::AddShaderParameterInternal(const String& name, EffectPa
 	return effectParam;
 }
 
-//----------------------------------------------------------------------------------------------------
-
-shared_ptr<Effect> Effect::LoadFrom( Stream& source )
+void Effect::LoadImpl()
 {
-	shared_ptr<Effect> effect = std::make_shared<Effect>();
+	FileSystem& fileSystem = FileSystem::GetSingleton();
 	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
+
+	shared_ptr<Stream> effectStream = fileSystem.OpenStream(mName, mGroup);
+	Stream& source = *effectStream;	
 
 	XMLDoc doc;
 	XMLNodePtr root = doc.Parse(source);
 
 	// effect name 
-	effect->mName = root->AttributeString("name", "");
+	mName = root->AttributeString("name", "");
 
 	// store all shader this effect will use
 	unordered_map<String, shared_ptr<Shader> > shaders;
@@ -528,7 +532,7 @@ shared_ptr<Effect> Effect::LoadFrom( Stream& source )
 			if (stage == String("Vertex"))
 			{
 				shared_ptr<Shader> vertexShader = factory.CreateShader(ST_Vertex);
-				
+
 				if( !vertexShader->Compile(shaderSource) )
 				{
 					std::cout << vertexShader->GetCompileInfo() << std::endl;
@@ -575,7 +579,7 @@ shared_ptr<Effect> Effect::LoadFrom( Stream& source )
 			pass->mBlendState = factory.CreateBlendState(blendDesc);
 			pass->mRasterizerState = factory.CreateRasterizerState(rasDesc);
 
-			shared_ptr<ShaderProgram> program = factory.CreateShaderProgram(*effect);
+			shared_ptr<ShaderProgram> program = factory.CreateShaderProgram(*this);
 
 			XMLNodePtr vertexNode = passNode->FirstNode("VertexShader");
 			String vertexName = vertexNode->AttributeString("name", "");
@@ -587,16 +591,32 @@ shared_ptr<Effect> Effect::LoadFrom( Stream& source )
 
 			program->AttachShader(vertexShader);
 			program->AttachShader(pixelShader);
-			program->LinkProgram();
+
+			if (!program->LinkProgram())
+			{
+				std::cout << program->GetLinkInfo() << std::endl;
+				ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Effect error!",
+					"Effect::LoadForm");
+			}
+
 
 			pass->mShaderProgram = program;
 			technique->mPasses.push_back(pass);
 		}
 
-		effect->mTechniques.push_back(technique);
+		mTechniques.push_back(technique);
 	}
+}
 
-	return effect;
+void Effect::UnloadImpl()
+{
+
+}
+
+
+shared_ptr<Resource> Effect::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
+{
+	return std::make_shared<Effect>(ResourceTypes::Effect, creator,handle, name, group);
 }
 
 
