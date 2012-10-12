@@ -103,6 +103,34 @@ public:
 		size_t Index;	// keep track index in vertices
 	};
 
+	struct AnimationClipData
+	{
+		struct  KeyFrame
+		{
+			// The time offset from the start of the animation to this keyframe.
+			float Time;
+
+			Vector3f Translation;
+			Quaternionf Rotation;
+			Vector3f Scale;
+		};
+
+		struct  AnimationTrack
+		{
+			// Bone name
+			String Name;
+			vector<KeyFrame> KeyFrames;
+		};
+
+		float Duration;
+
+		vector<AnimationTrack> mAnimationTracks;
+	};
+
+	struct AnimationData
+	{
+		unordered_map<String, AnimationClipData> AnimationClips;
+	};
 
 	struct MeshPartData
 	{
@@ -119,9 +147,12 @@ public:
 
 	struct MeshData
 	{
+		MeshData() : MeshSkeleton(nullptr) {}
+
 		String Name;
 		BoundingSpheref Bound;
 		vector<shared_ptr<MeshPartData> > MeshParts;
+		shared_ptr<Skeleton> MeshSkeleton;
 	};
 
 public:
@@ -138,12 +169,14 @@ public:
 	void ProcessNode(FbxNode* pNode, FbxNodeAttribute::EType attributeType);
 	void ProcessSkeleton(FbxNode* pNode);
 	void ProcessMesh(FbxNode* pNode);
-	void ProcessBoneWeights(FbxMesh* pMesh, std::vector<BoneWeights>& meshBoneWeights);
-	void ProcessAnimations(FbxScene* fbxScene);
+	shared_ptr<Skeleton> ProcessBoneWeights(FbxMesh* pMesh, std::vector<BoneWeights>& meshBoneWeights);
+	
+	void ProcessAnimation(FbxAnimStack* pStack, FbxNode* pNode, double fFrameRate, double fStart, double fStop);
 
+	void CollectAnimations(FbxScene* fbxScene);
 	void CollectMeshes(FbxScene* fbxScene);
 	void CollectMaterials(FbxScene* fbxScene);
-	void CollectBones(FbxScene* fbxScene);
+	void CollectSkeletons(FbxScene* fbxScene);
 
 	void BuildAndSaveXML();
 	void BuildAndSaveBinary();	
@@ -153,10 +186,10 @@ private:
 	FbxScene* mFBXScene;
 	bool mQuietMode;
 
-	shared_ptr<Skeleton> mSkeleton;
+	unordered_map<String, shared_ptr<Skeleton>> mSkeletons;
+	unordered_map<String, AnimationData> mAnimations;
 
 	vector<MaterialData> mMaterials;
 	vector<shared_ptr<MeshData> > mSceneMeshes;
-	
 };
 
