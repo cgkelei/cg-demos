@@ -37,6 +37,12 @@ enum XMLNodeType
 /* Class XMLDocument represents a root of the DOM hierarchy.                                                                     */
 /************************************************************************/
 
+class XMLNode;
+class XMLAttribute;
+
+typedef shared_ptr<XMLNode> XMLNodePtr;
+typedef shared_ptr<XMLAttribute> XMLAttributePtr;
+
 class _ApiExport XMLDoc
 {
 public:
@@ -54,7 +60,7 @@ public:
 	void RootNode( const XMLNodePtr& newNode );
 
 private:
-	shared_ptr<rapidxml::xml_document<> > mDocument;
+	rapidxml::xml_document<> mDocument;
 	XMLNodePtr mRoot;
 	std::vector<char> mXMLSrc; // must read xml file in memory
 };
@@ -65,9 +71,8 @@ class _ApiExport XMLNode
 
 public:
 	explicit XMLNode( rapidxml::xml_node<>* node);
-	XMLNode( rapidxml::xml_document<>* doc, XMLNodeType type, const std::string& name );
 
-	const std::string& NodeName() const;
+	std::string NodeName() const;
 	XMLNodeType   NodeType() const;
 
 	XMLNodePtr GetParent();
@@ -116,7 +121,6 @@ public:
 
 private:
 	rapidxml::xml_node<>* mNode;
-	std::string mName;
 };
 
 class _ApiExport XMLAttribute
@@ -126,9 +130,8 @@ class _ApiExport XMLAttribute
 
 public:
 	explicit XMLAttribute( rapidxml::xml_attribute<>* attr );
-	XMLAttribute( rapidxml::xml_document<>* doc, const std::string& name, const std::string& value );
 
-	const std::string& Name() const;
+	std::string Name() const;
 			
 	XMLAttributePtr PrevAttribute( const std::string& name ) const;
 	XMLAttributePtr NextAttribute( const std::string& name ) const;
@@ -142,8 +145,6 @@ public:
 
 private:
 	rapidxml::xml_attribute<>* mAttribute;
-	std::string mName;
-	std::string mValue;
 };
 
 

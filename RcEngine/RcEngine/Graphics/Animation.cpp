@@ -159,63 +159,6 @@ void AnimationPlayer::StopClip( const String& clipName )
 	}
 }
 
-//shared_ptr<Animation> RcEngine::Animation::LoadFrom( Mesh& parentMesh, Stream& source )
-//{
-//	// read clips in this animation
-//	uint32_t numClips = source.ReadUInt();
-//
-//	if (numClips == 0)
-//		return nullptr;
-//
-//
-//	shared_ptr<Animation> animation = std::make_shared<Animation>(parentMesh);
-//
-//	for (uint32_t clip = 0; clip < numClips; ++clip)
-//	{
-//		AnimationClip* animClip = new AnimationClip;
-//
-//		animClip->mName = source.ReadString(); 
-//		animClip->mLength = source.ReadFloat();
-//
-//		// read track count
-//		uint32_t numTracks = source.ReadUInt();
-//		animClip->mAnimationTracks.resize(numTracks);
-//
-//		for (uint32_t track = 0; track < numTracks; ++track)
-//		{
-//			String trackName = source.ReadString(); 
-//
-//			// this will add a new track if it doesn't exit
-//			AnimationClip::AnimationTrack& animTrack = animClip->mAnimationTracks[track];
-//
-//			// read key frame count
-//			animTrack.Name = trackName;
-//			size_t numKeyframes = source.ReadUInt();
-//			animTrack.KeyFrames.resize(numKeyframes);
-//
-//			for (uint32_t key = 0; key < numKeyframes; ++key)
-//			{
-//				AnimationClip::KeyFrame& animKey = animTrack.KeyFrames[key];
-//
-//				animKey.Time = source.ReadFloat();
-//
-//				source.Read(&animKey.Translation, sizeof(Vector3f));
-//				source.Read(&animKey.Rotation, sizeof(Quaternionf));
-//				source.Read(&animKey.Scale, sizeof(Vector3f));
-//			}
-//		}
-//
-//		animation->AddClip(animClip);
-//	}
-//
-//	// set first clip as default clip
-//	animation->mDefaultClip = animation->mAnimationClips[0];
-//
-//	return animation;
-//}
-
-
-
 SkinnedAnimationPlayer::SkinnedAnimationPlayer( const shared_ptr<Skeleton>& skeleton )
 {
 	assert(skeleton != nullptr);

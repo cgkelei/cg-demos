@@ -112,10 +112,10 @@ const BoundingSpheref& SceneNode::GetWorldBoundingShpere() const
 void SceneNode::FindVisibleObjects( Camera* cam )
 {
 	const BoundingSpheref& worldBound = GetWorldBoundingShpere();
-	if (!cam->Visible(GetWorldBoundingShpere()))
+	/*if (!cam->Visible(GetWorldBoundingShpere()))
 	{
 		return;
-	}
+	}*/
 
 	for (auto iter = mAttachedObjects.begin(); iter != mAttachedObjects.end(); ++iter)
 	{

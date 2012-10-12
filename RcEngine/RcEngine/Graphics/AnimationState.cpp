@@ -104,18 +104,6 @@ void AnimationState::Apply()
 
 			bone->SetScale( Lerp(bone->GetScale(),
 			Lerp(keyframe.Scale, nextKeyframe.Scale, t), BlendWeight) );
-
-			//float timeInterval = nextKeyframe.Time - keyframe.Time;
-			//if (timeInterval < 0.0f)
-			//	timeInterval += mClip->GetLength();
-			//float t = timeInterval > 0.0f ? (mTime - keyframe.Time) / timeInterval : 1.0f;
-		
-			//bone->SetPosition( keyframe.Translation);
-
-			//bone->SetRotation( keyframe.Rotation );
-
-			//bone->SetScale( Lerp(bone->GetScale(),
-			//Lerp(keyframe.Scale, nextKeyframe.Scale, t), BlendWeight) );
 		}
 	}
 }
@@ -230,8 +218,6 @@ bool AnimationState::Update( float delta )
 			
         }
 	}
-
-	//Apply();
 
 	return true;
 }

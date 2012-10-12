@@ -28,6 +28,11 @@ public:
 	static void Mapping(GLint& outInternalformat, GLenum& outFormat, GLenum& outType, PixelFormat inPixelFormat);
 	static PixelFormat UnMapping( GLint inInternalformat, GLenum inFormat, GLenum inType);
 	static void UnMapping(EffectParameterType& outType, GLenum glType);
+
+	/**
+	 * Return if the opengl type is interger.
+	 */
+	static bool IsIntegerType(GLenum type);
 };
 
 }

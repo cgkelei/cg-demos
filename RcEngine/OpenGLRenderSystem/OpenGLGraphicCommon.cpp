@@ -920,4 +920,23 @@ void OpenGLMapping::UnMapping( EffectParameterType& outType, GLenum glType )
 	}
 }
 
+bool OpenGLMapping::IsIntegerType( GLenum type )
+{
+	switch(type)
+	{
+	case GL_BYTE:
+	case GL_UNSIGNED_BYTE:
+	case GL_SHORT:
+	case GL_UNSIGNED_SHORT:
+	case GL_INT:
+	case GL_UNSIGNED_INT:
+		return true;
+
+	default:
+		return false;
+	}
+
+	return false;
+}
+
 }

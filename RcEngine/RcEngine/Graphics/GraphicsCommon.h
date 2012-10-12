@@ -56,14 +56,14 @@ enum VertexElementUsage
 	/**  Texture coordinates
 	*/
 	VEU_TextureCoordinate = 7,
-
-	/** Vertex binormal data.
-	*/
-	VEU_Binormal = 8,
 		
 	/** Vertex tangent data.
 	*/
 	VEU_Tangent = 9,	
+
+	/** Vertex binormal data.
+	*/
+	VEU_Binormal = 8,
 };
 
 enum TextureMapAccess
