@@ -91,7 +91,7 @@ shared_ptr<VertexDeclaration> GetVertexDeclaration(uint32_t vertexFlag)
 	return std::make_shared<VertexDeclaration>(elements);
 }
 
-void CorrectMaterialName(String& matName)
+void CorrectName(String& matName)
 {
 	std::replace(matName.begin(), matName.end(), ':', '_');
 }
@@ -111,8 +111,18 @@ Vector2f FbxToVector2f(const FbxVector2& fbx)
 	return Vector2f(float(fbx[0]), float(fbx[1]));
 }
 
+
+
 Matrix4f MatrixFromFbxAMatrix(const FbxAMatrix& fbxMatrix)
 {
+	FbxVector4 translation = fbxMatrix.GetT();
+	FbxVector4 scale = fbxMatrix.GetS();
+	FbxQuaternion rotation = fbxMatrix.GetQ();
+
+	return CreateTransformMatrix(Vector3f((float)scale[0], (float)scale[1], (float)scale[2]), 
+		Quaternionf((float)rotation[3], (float)rotation[0], (float)rotation[1], (float)rotation[2]),
+		Vector3f((float)translation[0], (float)translation[1], (float)translation[2]));
+
 	FbxVector4 r1 = fbxMatrix.GetRow(0);
 	FbxVector4 r2 = fbxMatrix.GetRow(1);
 	FbxVector4 r3 = fbxMatrix.GetRow(2);
@@ -165,6 +175,109 @@ bool GetMaterialTexture(const FbxSurfaceMaterial *pMaterial, const char *pProper
 	}
 
 	return true;
+}
+
+FbxNode* GetBoneRoot(FbxNode* boneNode)
+{
+	assert(boneNode &&
+		boneNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton);
+
+	String name = boneNode->GetName();
+	FbxNode* parentNode = boneNode->GetParent();
+	FbxNodeAttribute* pParentNodeAttribute = parentNode->GetNodeAttribute();
+
+	while(parentNode &&  pParentNodeAttribute && pParentNodeAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+	{
+		boneNode = parentNode;
+		parentNode = parentNode->GetParent();
+		pParentNodeAttribute = parentNode->GetNodeAttribute();
+	}
+
+	return boneNode;
+}
+
+// Get the matrix of the given pose
+FbxAMatrix GetPoseMatrix(FbxPose* pPose, int pNodeIndex)
+{
+	FbxAMatrix lPoseMatrix;
+	FbxMatrix lMatrix = pPose->GetMatrix(pNodeIndex);
+
+	memcpy((double*)lPoseMatrix, (double*)lMatrix, sizeof(lMatrix.mData));
+
+	return lPoseMatrix;
+}
+
+// Get the global position of the node for the current pose.
+// If the specified node is not part of the pose or no pose is specified, get its
+// global position at the current time.
+FbxAMatrix GetGlobalPosition(FbxNode* pNode, const FbxTime& pTime, FbxPose* pPose = NULL, FbxAMatrix* pParentGlobalPosition = NULL)
+{
+	FbxAMatrix lGlobalPosition;
+	bool        lPositionFound = false;
+
+	if (pPose)
+	{
+		int lNodeIndex = pPose->Find(pNode);
+
+		if (lNodeIndex > -1)
+		{
+			// The bind pose is always a global matrix.
+			// If we have a rest pose, we need to check if it is
+			// stored in global or local space.
+			if (pPose->IsBindPose() || !pPose->IsLocalMatrix(lNodeIndex))
+			{
+				lGlobalPosition = GetPoseMatrix(pPose, lNodeIndex);
+			}
+			else
+			{
+				// We have a local matrix, we need to convert it to
+				// a global space matrix.
+				FbxAMatrix lParentGlobalPosition;
+
+				if (pParentGlobalPosition)
+				{
+					lParentGlobalPosition = *pParentGlobalPosition;
+				}
+				else
+				{
+					if (pNode->GetParent())
+					{
+						lParentGlobalPosition = GetGlobalPosition(pNode->GetParent(), pTime, pPose);
+					}
+				}
+
+				FbxAMatrix lLocalPosition = GetPoseMatrix(pPose, lNodeIndex);
+				lGlobalPosition = lParentGlobalPosition * lLocalPosition;
+			}
+
+			lPositionFound = true;
+		}
+	}
+
+	if (!lPositionFound)
+	{
+		// There is no pose entry for that node, get the current global position instead.
+
+		// Ideally this would use parent global position and local position to compute the global position.
+		// Unfortunately the equation 
+		//    lGlobalPosition = pParentGlobalPosition * lLocalPosition
+		// does not hold when inheritance type is other than "Parent" (RSrs).
+		// To compute the parent rotation and scaling is tricky in the RrSs and Rrs cases.
+		lGlobalPosition = pNode->EvaluateGlobalTransform(pTime);
+	}
+
+	return lGlobalPosition;
+}
+
+
+// Get the geometry offset to a node. It is never inherited by the children.
+FbxAMatrix GetGeometry(FbxNode* pNode)
+{
+	const FbxVector4 lT = pNode->GetGeometricTranslation(FbxNode::eSourcePivot);
+	const FbxVector4 lR = pNode->GetGeometricRotation(FbxNode::eSourcePivot);
+	const FbxVector4 lS = pNode->GetGeometricScaling(FbxNode::eSourcePivot);
+
+	return FbxAMatrix(lT, lR, lS);
 }
 
 }
@@ -226,7 +339,7 @@ void FbxProcesser::BoneWeights::Normalize()
 
 
 FbxProcesser::FbxProcesser(void)
-	: mFBXScene(nullptr), mFBXSdkManager(nullptr)
+	: mFBXScene(nullptr), mFBXSdkManager(nullptr), mQuietMode(false)
 {
 }
 
@@ -401,8 +514,9 @@ bool FbxProcesser::LoadScene( const char* filename )
 void FbxProcesser::ProcessScene( FbxScene* fbxScene )
 {
 	CollectMaterials(mFBXScene);
-	CollectBones(mFBXScene);
+	CollectSkeletons(mFBXScene);
 	CollectMeshes(mFBXScene);
+	CollectAnimations(mFBXScene);
 }
 
 void FbxProcesser::RunCommand( const vector<String>& arguments )
@@ -448,6 +562,11 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 	if (!pMesh)
 	{
 		return;
+	}
+
+	if (!mQuietMode)
+	{
+		FBXSDK_printf("Process mesh: %s\n", pNode->GetName());
 	}
 
 	if (!pMesh->IsTriangleMesh())
@@ -538,21 +657,21 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 		}
 	}
 
+	// build mesh data
+	shared_ptr<MeshData> mesh = std::make_shared<MeshData>();
+
+	// read name
+	mesh->Name = pNode->GetName();
+	CorrectName(mesh->Name);
+
 	std::vector<BoneWeights> meshBoneWeights;
-	
 	if (lHasSkin)
 	{
 		meshBoneWeights.resize(pMesh->GetControlPointsCount());
 		// Deform the vertex array with the skin deformer.
-		ProcessBoneWeights(pMesh, meshBoneWeights);
+		mesh->MeshSkeleton  = ProcessBoneWeights(pMesh, meshBoneWeights);
 	}
 
-
-	// build mesh data
-	shared_ptr<MeshData> mesh = std::make_shared<MeshData>();
-	
-	// read name
-	mesh->Name = pNode->GetName();
 
 	for (size_t mi = 0; mi < polysByMaterial.size(); ++mi)
 	{
@@ -568,7 +687,7 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 
 		// material name
 		meshPart->MaterialName = useDefaultMat ? "DefaultMaterial" : pNode->GetMaterial(mi)->GetName();
-		CorrectMaterialName(meshPart->MaterialName);
+		CorrectName(meshPart->MaterialName);
 
 		uint32_t vertexFlag = 0;
 		
@@ -744,26 +863,31 @@ void FbxProcesser::ProcessSkeleton( FbxNode* pNode )
 		return;
 	}
 
-	if (!mSkeleton)
+	FbxNode* skeletonRoot = GetBoneRoot(pNode);
+	if (skeletonRoot)
 	{
-		mSkeleton = std::make_shared<Skeleton>();
+		if( mSkeletons.find(skeletonRoot->GetName()) == mSkeletons.end())
+		{
+			mSkeletons[skeletonRoot->GetName()] = std::make_shared<Skeleton>();
+		}
 	}
+
+	shared_ptr<Skeleton> skeleton = mSkeletons[skeletonRoot->GetName()];
 
 	Bone* parentBone = nullptr;
 	
 	FbxNode* pParentNode = pNode->GetParent();
 	if (pParentNode)
 	{
-		parentBone = mSkeleton->GetBone(pParentNode->GetName());
+		parentBone = skeleton->GetBone(pParentNode->GetName());
 	}
 
-	mSkeleton->AddBone(pNode->GetName(), parentBone);
+	skeleton->AddBone(pNode->GetName(), parentBone);
 }
 
-void FbxProcesser::ProcessBoneWeights( FbxMesh* pMesh, std::vector<BoneWeights>& meshBoneWeights )
+shared_ptr<Skeleton>  FbxProcesser::ProcessBoneWeights( FbxMesh* pMesh, std::vector<BoneWeights>& meshBoneWeights )
 {
-	if( !mSkeleton )
-		return;
+	shared_ptr<Skeleton> meshSkeleton = nullptr;
 
 	for( int i = 0; i < pMesh->GetDeformerCount(); ++i )
 	{
@@ -795,7 +919,21 @@ void FbxProcesser::ProcessBoneWeights( FbxMesh* pMesh, std::vector<BoneWeights>&
 				if( !pLinkNode )
 					continue;
 
-				Bone* skeletonBone = mSkeleton->GetBone(pLinkNode->GetName());
+				// find which skeleton this mesh is skin to
+
+				if (!meshSkeleton)
+				{
+					FbxNode* skeletonRoot = GetBoneRoot(pLinkNode);
+					meshSkeleton = mSkeletons[skeletonRoot->GetName()];
+					
+					if (!meshSkeleton)
+					{
+						FBXSDK_printf("Mesh %s supposed to have a skeleton with root name %s, but not found!", pMesh->GetNode()->GetName(), skeletonRoot->GetName());
+						assert(false);
+					}
+				}
+
+				Bone* skeletonBone = meshSkeleton->GetBone(pLinkNode->GetName());
 				Bone* parentBone = (Bone*)skeletonBone->GetParent();
 
 				if (!skeletonBone)
@@ -808,11 +946,14 @@ void FbxProcesser::ProcessBoneWeights( FbxMesh* pMesh, std::vector<BoneWeights>&
 				pFBXCluster->GetTransformMatrix(matClusterTransformMatrix);
 				pFBXCluster->GetTransformLinkMatrix(matClusterLinkTransformMatrix);
 
-				FbxAMatrix matInvBindPose = matClusterTransformMatrix * matClusterLinkTransformMatrix.Inverse();
+				/*FbxAMatrix matInvBindPose = matClusterTransformMatrix * matClusterLinkTransformMatrix.Inverse();
+				Matrix4f matBindPose = MatrixFromFbxAMatrix(matInvBindPose.Inverse());*/
 
 
-				Matrix4f matBindPose = MatrixFromFbxAMatrix(matInvBindPose.Inverse());
-
+				Matrix4f rcClusterTransformMatrix = MatrixFromFbxAMatrix(matClusterTransformMatrix);
+				Matrix4f rcClusterLinkTransformMatrix = MatrixFromFbxAMatrix(matClusterLinkTransformMatrix);
+				Matrix4f matBindPose = rcClusterLinkTransformMatrix * rcClusterTransformMatrix.Inverse();
+	
 				if (parentBone)
 				{
 					Matrix4f paretTrans = parentBone->GetWorldTransform();
@@ -826,9 +967,6 @@ void FbxProcesser::ProcessBoneWeights( FbxMesh* pMesh, std::vector<BoneWeights>&
 
 				skeletonBone->SetTransform(pos, rot, scale);
 			
-				/*skeletonBone->SetBindPoseTransform(KFbxXMatrixToD3DXMATRIX(matClusterLinkTransformMatrix));
-				pSkeletonBone->SetBoneReferenceTransform(KFbxXMatrixToD3DXMATRIX(matClusterTransformMatrix));*/
-
 				int* indices = pFBXCluster->GetControlPointIndices();
 				double* weights = pFBXCluster->GetControlPointWeights();
 
@@ -840,10 +978,17 @@ void FbxProcesser::ProcessBoneWeights( FbxMesh* pMesh, std::vector<BoneWeights>&
 			}
 		}
 	}
+
+	return meshSkeleton;
 }
 
 void FbxProcesser::CollectMaterials( FbxScene* pScene )
 { 
+	if (!mQuietMode)
+	{
+		FBXSDK_printf("Collect materials.\n");
+	}
+
 	for( int i = 0; i < pScene->GetMaterialCount(); ++i )
 	{
 		FbxSurfaceMaterial* pSurfaceMaterial = pScene->GetMaterial(i);
@@ -900,7 +1045,7 @@ void FbxProcesser::CollectMaterials( FbxScene* pScene )
 						if (pFileTexture)
 						{
 							 String filepath =  pFileTexture->GetFileName();
-							 std::cout << FbxLayerElement::sTextureChannelNames[textureLayerIndex] << ": " << filepath << std::endl;
+							// std::cout << FbxLayerElement::sTextureChannelNames[textureLayerIndex] << ": " << filepath << std::endl;
 						}
 						
 					}  
@@ -920,13 +1065,22 @@ void FbxProcesser::CollectMaterials( FbxScene* pScene )
 	}
 }
 
-void FbxProcesser::CollectBones( FbxScene* fbxScene )
+void FbxProcesser::CollectSkeletons( FbxScene* fbxScene )
 {
+	if (!mQuietMode)
+	{
+		FBXSDK_printf("Process skeletons.\n");
+	}
 	ProcessNode(fbxScene->GetRootNode(), FbxNodeAttribute::eSkeleton);
 }
 
 void FbxProcesser::CollectMeshes( FbxScene* fbxScene )
 {
+	if (!mQuietMode)
+	{
+		FBXSDK_printf("Collect meshes.\n");
+	}
+
 	ProcessNode(fbxScene->GetRootNode(), FbxNodeAttribute::eMesh);
 }
 
@@ -935,6 +1089,11 @@ void FbxProcesser::BuildAndSaveXML( )
 	for (size_t mi = 0; mi < mSceneMeshes.size(); ++mi)
 	{
 		MeshData& mesh  = *(mSceneMeshes[mi]);
+
+		if(!mQuietMode)
+		{
+			FBXSDK_printf("output xml mesh: %s.\n", mesh.Name.c_str());
+		}
 
 		XMLDoc meshxml;
 
@@ -953,43 +1112,46 @@ void FbxProcesser::BuildAndSaveXML( )
 		meshNode->AppendNode(meshBoundNode);
 
 		// mesh skeleton
-		XMLNodePtr meshSkeletonNode = meshxml.AllocateNode(XML_Node_Element, "skeleton");
-		meshSkeletonNode->AppendAttribute(meshxml.AllocateAttributeUInt("boneCount", mSkeleton->GetBoneCount()));
-		vector<Bone*>& bones = mSkeleton->GetBonesModified();
-		for (size_t iBone = 0; iBone < bones.size(); ++iBone)
+		if (mesh.MeshSkeleton)
 		{
-			Bone* parentBone = static_cast<Bone*>(bones[iBone]->GetParent());
-			
-			XMLNodePtr boneNode = meshxml.AllocateNode(XML_Node_Element, "bone");
-			boneNode->AppendAttribute(meshxml.AllocateAttributeString("name", bones[iBone]->GetName()));
-			boneNode->AppendAttribute(meshxml.AllocateAttributeString("name", parentBone ? parentBone->GetName() : ""));
-			meshSkeletonNode->AppendNode(boneNode);
+			XMLNodePtr meshSkeletonNode = meshxml.AllocateNode(XML_Node_Element, "skeleton");
+			meshSkeletonNode->AppendAttribute(meshxml.AllocateAttributeUInt("boneCount", mesh.MeshSkeleton->GetBoneCount()));
+			vector<Bone*>& bones = mesh.MeshSkeleton->GetBonesModified();
+			for (size_t iBone = 0; iBone < bones.size(); ++iBone)
+			{
+				Bone* parentBone = static_cast<Bone*>(bones[iBone]->GetParent());
 
-			Vector3f pos = bones[iBone]->GetPosition();
-			Vector3f scale = bones[iBone]->GetScale();
-			Quaternionf rot = bones[iBone]->GetRotation();
+				XMLNodePtr boneNode = meshxml.AllocateNode(XML_Node_Element, "bone");
+				boneNode->AppendAttribute(meshxml.AllocateAttributeString("name", bones[iBone]->GetName()));
+				boneNode->AppendAttribute(meshxml.AllocateAttributeString("name", parentBone ? parentBone->GetName() : ""));
+				meshSkeletonNode->AppendNode(boneNode);
 
-			XMLNodePtr posNode = meshxml.AllocateNode(XML_Node_Element, "bindPosition");
-			posNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", pos.X()));
-			posNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", pos.Y()));
-			posNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", pos.Z()));
-			boneNode->AppendNode(posNode);
+				Vector3f pos = bones[iBone]->GetPosition();
+				Vector3f scale = bones[iBone]->GetScale();
+				Quaternionf rot = bones[iBone]->GetRotation();
 
-			XMLNodePtr rotNode = meshxml.AllocateNode(XML_Node_Element, "bindRotation");
-			rotNode->AppendAttribute(meshxml.AllocateAttributeFloat("w", rot.W()));
-			rotNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", rot.X()));
-			rotNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", rot.Y()));
-			rotNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", rot.Z()));
-			boneNode->AppendNode(rotNode);
+				XMLNodePtr posNode = meshxml.AllocateNode(XML_Node_Element, "bindPosition");
+				posNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", pos.X()));
+				posNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", pos.Y()));
+				posNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", pos.Z()));
+				boneNode->AppendNode(posNode);
 
-			XMLNodePtr scaleNode = meshxml.AllocateNode(XML_Node_Element, "bindScale");
-			scaleNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", scale.X()));
-			scaleNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", scale.Y()));
-			scaleNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", scale.Z()));
-			boneNode->AppendNode(scaleNode);
+				XMLNodePtr rotNode = meshxml.AllocateNode(XML_Node_Element, "bindRotation");
+				rotNode->AppendAttribute(meshxml.AllocateAttributeFloat("w", rot.W()));
+				rotNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", rot.X()));
+				rotNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", rot.Y()));
+				rotNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", rot.Z()));
+				boneNode->AppendNode(rotNode);
+
+				XMLNodePtr scaleNode = meshxml.AllocateNode(XML_Node_Element, "bindScale");
+				scaleNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", scale.X()));
+				scaleNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", scale.Y()));
+				scaleNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", scale.Z()));
+				boneNode->AppendNode(scaleNode);
+			}
+			meshNode->AppendNode(meshSkeletonNode);
 		}
-		meshNode->AppendNode(meshSkeletonNode);
-
+		
 		for (size_t mpi = 0; mpi < mesh.MeshParts.size(); ++mpi)
 		{
 			MeshPartData& meshPart = *(mesh.MeshParts[mpi]);
@@ -1104,6 +1266,70 @@ void FbxProcesser::BuildAndSaveXML( )
 				triangleNode->AppendAttribute(meshxml.AllocateAttributeUInt("c", meshPart.Indices[3*tri+2]));
 				trianglesNode->AppendNode(triangleNode);
 			}			
+		}
+
+		if (mesh.MeshSkeleton)
+		{
+			auto animationIter = mAnimations.find(mesh.MeshSkeleton->GetRootBone()->GetName());
+
+			if (animationIter != mAnimations.end())
+			{
+				AnimationData& animationData = animationIter->second;
+
+				XMLNodePtr animationNode = meshxml.AllocateNode(XML_Node_Element, "animation");
+				animationNode->AppendAttribute(meshxml.AllocateAttributeUInt("clipCount", animationData.AnimationClips.size()));
+				meshNode->AppendNode(animationNode);
+
+				for (auto iter = animationData.AnimationClips.begin(); iter != animationData.AnimationClips.end(); ++iter)
+				{
+					AnimationClipData& clipData = iter->second;
+
+					XMLNodePtr clipNode = meshxml.AllocateNode(XML_Node_Element, "clip");
+					clipNode->AppendAttribute(meshxml.AllocateAttributeString("name", iter->first));
+					clipNode->AppendAttribute(meshxml.AllocateAttributeUInt("track", clipData.mAnimationTracks.size()));
+					animationNode->AppendNode(clipNode);
+
+					for (size_t iTrack = 0; iTrack < clipData.mAnimationTracks.size(); ++iTrack)
+					{
+						AnimationClipData::AnimationTrack& track =  clipData.mAnimationTracks[iTrack];
+
+						XMLNodePtr trackNode = meshxml.AllocateNode(XML_Node_Element, "track");
+						trackNode->AppendAttribute(meshxml.AllocateAttributeString("bone", track.Name));
+						trackNode->AppendAttribute(meshxml.AllocateAttributeUInt("keys", track.KeyFrames.size()));
+						clipNode->AppendNode(trackNode);
+
+						for (size_t iKey = 0; iKey < track.KeyFrames.size(); ++iKey)
+						{
+							XMLNodePtr keyNode = meshxml.AllocateNode(XML_Node_Element, "keyframe");
+							keyNode->AppendAttribute(meshxml.AllocateAttributeFloat("time", track.KeyFrames[iKey].Time));
+							trackNode->AppendNode(keyNode);
+
+							Vector3f pos = track.KeyFrames[iKey].Translation;
+							Vector3f scale = track.KeyFrames[iKey].Scale;
+							Quaternionf rot = track.KeyFrames[iKey].Rotation;
+
+							XMLNodePtr posNode = meshxml.AllocateNode(XML_Node_Element, "position");
+							posNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", pos.X()));
+							posNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", pos.Y()));
+							posNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", pos.Z()));
+							keyNode->AppendNode(posNode);
+
+							XMLNodePtr rotNode = meshxml.AllocateNode(XML_Node_Element, "rotation");
+							rotNode->AppendAttribute(meshxml.AllocateAttributeFloat("w", rot.W()));
+							rotNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", rot.X()));
+							rotNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", rot.Y()));
+							rotNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", rot.Z()));
+							keyNode->AppendNode(rotNode);
+
+							XMLNodePtr scaleNode = meshxml.AllocateNode(XML_Node_Element, "scale");
+							scaleNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", scale.X()));
+							scaleNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", scale.Y()));
+							scaleNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", scale.Z()));
+							keyNode->AppendNode(scaleNode);
+						}
+					}
+				}
+			}
 		}
 
 		std::ofstream xmlFile(mesh.Name + ".mesh.xml");
@@ -1251,9 +1477,10 @@ void FbxProcesser::BuildAndSaveBinary( )
 			}
 		}
 
-		if (mSkeleton && mSkeleton->GetBoneCount())
+		// write bone count
+		if (mesh.MeshSkeleton && mesh.MeshSkeleton->GetBoneCount())
 		{
-			auto& bones = mSkeleton->GetBones();
+			auto& bones = mesh.MeshSkeleton->GetBones();
 			stream.WriteUInt(bones.size());
 			for (size_t iBone = 0; iBone < bones.size(); ++iBone)
 			{
@@ -1284,36 +1511,197 @@ void FbxProcesser::BuildAndSaveBinary( )
 			stream.WriteUInt(0);
 		}
 
-		//// no animation
-		//stream.WriteUInt(0);
 
-		stream.WriteUInt(1);
+		// write animation clips
+		if (mesh.MeshSkeleton)
+		{
+			auto animationIter = mAnimations.find(mesh.MeshSkeleton->GetRootBone()->GetName());
+
+			if (animationIter != mAnimations.end())
+			{
+				AnimationData& animationData = animationIter->second;
+
+				stream.WriteUInt(animationData.AnimationClips.size());
+
+				// animtion clip are write to each animation file
+				for (auto clipIter = animationData.AnimationClips.begin(); clipIter != animationData.AnimationClips.end(); ++clipIter)
+				{
+					String clipName = clipIter->first + ".anim";
+					AnimationClipData& clip = clipIter->second;
+
+					// write clip file in mesh 
+					stream.WriteString(clipName);
+
+					FileStream clipStream;
+					clipStream.Open(clipName, FILE_WRITE);
+
+					clipStream.WriteString(clipIter->first);
+					clipStream.WriteFloat(clip.Duration);
+					clipStream.WriteUInt(clip.mAnimationTracks.size());
+
+					
+					for (auto trackIter = clip.mAnimationTracks.begin(); trackIter != clip.mAnimationTracks.end(); ++trackIter)
+					{
+						AnimationClipData::AnimationTrack& track = *trackIter;
+
+						// write track name
+						clipStream.WriteString(track.Name);
+						// write track key frame count
+						clipStream.WriteUInt(track.KeyFrames.size());
+
+						for (auto keyIter = track.KeyFrames.begin(); keyIter != track.KeyFrames.end(); ++keyIter)
+						{
+							// write key time
+							clipStream.WriteFloat(keyIter->Time);
+
+							clipStream.Write(&keyIter->Translation, sizeof(Vector3f));
+							clipStream.Write(&keyIter->Rotation, sizeof(Quaternionf));
+							clipStream.Write(&keyIter->Scale, sizeof(Vector3f));
+						}
+					}
+
+					clipStream.Close();
+				}
+			}
+			else
+			{
+				stream.WriteUInt(0);
+			}
+		}
+		else
+		{
+			stream.WriteUInt(0);
+		}
+
+
+		
 		stream.WriteString("dudeWalk.anim");
 		
 		stream.Close();
 	}
 }
 
-void FbxProcesser::ProcessAnimations( FbxScene* fbxScene )
+void FbxProcesser::CollectAnimations( FbxScene* pScene )
 {
+	FbxNode* pRootNode = pScene->GetRootNode();
+	
+	if (!pRootNode)
+		return;
 
+	double frameRate = FbxTime::GetFrameRate(pScene->GetGlobalSettings().GetTimeMode());
+
+	for (int i = 0; i < pScene->GetSrcObjectCount<FbxAnimStack>(); i++)
+	{
+		FbxAnimStack* lAnimStack = pScene->GetSrcObject<FbxAnimStack>(i);
+		
+		FbxString takeName = lAnimStack->GetName();
+
+		if (takeName != FbxString("Default"))
+		{
+			FbxTakeInfo* lCurrentTakeInfo = pScene->GetTakeInfo(takeName);
+
+			pScene->ActiveAnimStackName.Set(takeName);
+
+			FbxTime KStart;
+			FbxTime KStop;
+			
+			if (lCurrentTakeInfo)
+			{
+				KStart = lCurrentTakeInfo->mLocalTimeSpan.GetStart();
+				KStop = lCurrentTakeInfo->mLocalTimeSpan.GetStop();
+			}
+			else
+			{
+				// Take the time line value
+				FbxTimeSpan lTimeLineTimeSpan;
+				pScene->GetGlobalSettings().GetTimelineDefaultTimeSpan(lTimeLineTimeSpan);
+
+				KStart = lTimeLineTimeSpan.GetStart();
+				KStop  = lTimeLineTimeSpan.GetStop();
+			}
+
+			double fStart = KStart.GetSecondDouble();
+			double fStop = KStop.GetSecondDouble();
+
+			//int num_frames = (int)(lTimeLineTimeSpan.GetDuration().GetMilliSeconds() * frameRate / 1000 + 0.5f);
+
+			if( fStart < fStop )
+			{
+				ProcessAnimation(lAnimStack, pRootNode, frameRate, fStart, fStop);
+			}
+		}
+	}
+}
+
+void FbxProcesser::ProcessAnimation( FbxAnimStack* pStack, FbxNode* pNode, double fFrameRate, double fStart, double fStop )
+{
+	FbxNodeAttribute* pNodeAttribute = pNode->GetNodeAttribute();
+	if (pNodeAttribute)
+	{
+		if (pNodeAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+		{
+			FbxNode* skeletonRoot = GetBoneRoot(pNode);
+			
+			AnimationClipData& clip = mAnimations[skeletonRoot->GetName()].AnimationClips[pStack->GetName()];
+			shared_ptr<Skeleton> skeleton = mSkeletons[skeletonRoot->GetName()];
+				
+			if( skeleton )
+			{
+				Bone* pBone = skeleton->GetBone(pNode->GetName());	
+				
+				if( pBone )
+				{	
+					AnimationClipData::AnimationTrack track;
+					track.Name = pNode->GetName();
+
+					double fTime = 0;
+					while( fTime <= fStop )
+					{
+						FbxTime takeTime;
+						takeTime.SetSecondDouble(fTime);
+
+						FbxAMatrix offset = GetGeometry(pNode);
+
+						FbxAMatrix matAbsoluteTransform = GetGlobalPosition(pNode, takeTime);
+
+						FbxAMatrix matParentAbsoluteTransform = GetGlobalPosition(pNode->GetParent(), takeTime);
+						FbxAMatrix matLocalTrasform =  matParentAbsoluteTransform.Inverse() * matAbsoluteTransform;
+
+						FbxQuaternion quat = matLocalTrasform.GetQ();
+						FbxVector4 trans = matLocalTrasform.GetT();
+						FbxVector4 scale = matLocalTrasform.GetS();
+
+						AnimationClipData::KeyFrame keyframe;
+						keyframe.Rotation = Quaternionf((float)quat[3], (float)quat[0], (float)quat[1], (float)quat[2]);
+						keyframe.Scale = FbxToVector3f(scale);
+						keyframe.Translation = FbxToVector3f(trans);
+						keyframe.Time = (float)fTime;
+
+						track.KeyFrames.push_back(keyframe);
+
+						fTime += 1.0f/fFrameRate;
+					}
+
+					clip.Duration = (float)(fTime-1.0f/fFrameRate);
+					clip.mAnimationTracks.push_back(track);
+				}		
+			}
+		}
+	}
+
+	for( int i = 0; i < pNode->GetChildCount(); ++i )
+	{
+		ProcessAnimation(pStack, pNode->GetChild(i), fFrameRate, fStart, fStop);
+	}
 }
 
 int main()
 {
-	//FbxProcesser::BoneWeights test;
-
-	//test.AddBoneWeight(1, 0.353f);
-	//test.AddBoneWeight(3, 0.453f);
-	//test.AddBoneWeight(2, 0.153f);
-	//test.AddBoneWeight(2, 0.113f);
-	//test.AddBoneWeight(2, 0.013f);
-	//test.Normalize();
 
 	FbxProcesser fbxProcesser;
 	fbxProcesser.Initialize();
 
-	if (fbxProcesser.LoadScene("dude.FBX"))
+	if (fbxProcesser.LoadScene("test.FBX"))
 	{
 		fbxProcesser.ProcessScene(0);
 		fbxProcesser.BuildAndSaveXML();
