@@ -139,9 +139,11 @@ void Entity::UpdateRenderQueue( RenderQueue& renderQueue, Camera* cam )
 	{
 		SubEntity* subEntity = *iter;
 		BoundingSpheref subWorldBoud = Transform(subEntity->GetBoundingSphere(), mParentNode->GetWorldTransform());
-		
-		if(cam->Visible(subWorldBoud))
-		{
+
+		// tode  mesh part world bounding has some bugs.
+
+		/*if(cam->Visible(subWorldBoud))
+		{*/
 			RenderQueueItem item;
 			item.Renderable = subEntity;
 			item.Type = SOT_Entity;
@@ -150,7 +152,7 @@ void Entity::UpdateRenderQueue( RenderQueue& renderQueue, Camera* cam )
 			item.SortKey = 0.0f;
 
 			renderQueue.push_back(item);
-		}
+		//}
 	}
 
 	// Update animation 

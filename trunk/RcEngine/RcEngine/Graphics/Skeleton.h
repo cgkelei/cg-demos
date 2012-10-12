@@ -19,9 +19,6 @@ public:
 
 	void CalculateBindPose();	
 
-	//void SetParentEntity(Entity* ent);
-	//Entity* GetParentParentEntity() const;
-
 protected:
 	virtual Node* CreateChildImpl( const String& name ) { return 0; }
 
@@ -29,7 +26,6 @@ private:
 	void OnUpdate( );
 	
 private:
-	//Entity* mParentEntity;
 	uint32_t mBoneIndex;
 	Matrix4f mOffsetMatrix;
 };
@@ -47,6 +43,8 @@ public:
 	Bone* GetRootBone();
 	Bone* GetBone( const String& name );
 	Bone* GetBone( uint32_t index );
+
+	Bone* AddBone(const String& name, Bone* parent);
 
 	const vector<Bone*>& GetBones() const { return mBones; }
 	vector<Bone*>& GetBonesModified() { return mBones; }

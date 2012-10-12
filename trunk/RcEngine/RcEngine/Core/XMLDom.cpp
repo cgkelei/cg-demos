@@ -58,7 +58,6 @@ XMLNodeType UnMapToRapidxml(rapidxml::node_type type)
 
 
 XMLDoc::XMLDoc()
-	: mDocument(std::make_shared<rapidxml::xml_document<> >())
 {
 
 }
@@ -70,21 +69,24 @@ XMLNodePtr XMLDoc::Parse( Stream& source )
 	source.Read(&mXMLSrc[0], size);
 	mXMLSrc[size] = '\0';
 
-	mDocument->parse<0>(&mXMLSrc[0]);
-	mRoot = std::make_shared<XMLNode>(mDocument->first_node());
+	mDocument.parse<0>(&mXMLSrc[0]);
+	mRoot = std::make_shared<XMLNode>(mDocument.first_node());
 
 	return mRoot;
 }
 
 void XMLDoc::Print( std::ostream& os )
 {
-	os << "<?xml version=\"1.0\"?>" << std::endl; 
-	os << *static_cast<rapidxml::xml_document<>*>(mDocument.get());
+	//os << "<?xml version=\"1.0\"?>" << std::endl; 
+	os << mDocument;
 }
 
 XMLNodePtr XMLDoc::AllocateNode( XMLNodeType type, const std::string& name )
 {
-	return std::make_shared<XMLNode>(mDocument.get(), type, name);
+	rapidxml::xml_node<>* node = mDocument.allocate_node(MapToRapidxml(type),
+		mDocument.allocate_string(name.c_str(), name.length()), 0, name.length());
+
+	return std::make_shared<XMLNode>(node);
 }
 
 XMLAttributePtr XMLDoc::AllocateAttributeInt( const std::string& name, int32_t value )
@@ -104,36 +106,34 @@ XMLAttributePtr XMLDoc::AllocateAttributeFloat(const std::string& name, float va
 
 XMLAttributePtr XMLDoc::AllocateAttributeString(const std::string& name, const std::string& value)
 {
-	return std::make_shared<XMLAttribute>(mDocument.get(), name, value);
+	/*rapidxml::xml_attribute<>* attr = mDocument.allocate_attribute(
+	mDocument.allocate_string(name.c_str(), name.length()),
+	mDocument.allocate_string(value.c_str(), value.length()));*/
+	
+	const char* attrName = mDocument.allocate_string(name.c_str(), name.length());
+	const char* attrValue = mDocument.allocate_string(value.c_str(), value.length());
+
+	rapidxml::xml_attribute<>* attr = mDocument.allocate_attribute(attrName, attrValue, name.length(), value.length());
+
+	return std::make_shared<XMLAttribute>(attr);
 }
 
 void XMLDoc::RootNode( const XMLNodePtr& newNode )
 {
-	mDocument->remove_all_nodes();
-	mDocument->append_node(newNode->mNode);
+	mDocument.remove_all_nodes();
+	mDocument.append_node(newNode->mNode);
 	mRoot = newNode;
 }
-
-
 
 XMLNode::XMLNode( rapidxml::xml_node<>* node )
 	: mNode(node)
 {
-	if(mNode)
-	{
-		mName = std::string(mNode->name(), mNode->name_size()); 
-	}
 }
 
-XMLNode::XMLNode( rapidxml::xml_document<>* doc, XMLNodeType type, const std::string& name )
+std::string XMLNode::NodeName() const
 {
-	rapidxml::node_type xtype = MapToRapidxml(type);
-	mNode = doc->allocate_node(MapToRapidxml(type), name.c_str());
-}
-
-const std::string& XMLNode::NodeName() const
-{
-	return mName;
+	assert(mNode);
+	return std::string(mNode->name(), mNode->name_size());
 }
 
 XMLNodeType XMLNode::NodeType() const
@@ -418,23 +418,12 @@ XMLNodePtr XMLNode::GetParent()
 XMLAttribute::XMLAttribute( rapidxml::xml_attribute<>* attr )
 	: mAttribute(attr)
 {
-	if(mAttribute)
-	{
-		mName = std::string(mAttribute->name(), mAttribute->name_size());
-		mValue = std::string(mAttribute->value(), mAttribute->value_size());
-	}
 }
 
-
-XMLAttribute::XMLAttribute( rapidxml::xml_document<>* doc, const std::string& name, const std::string& value )
-	: mName(name), mValue(value)
+std::string XMLAttribute::Name() const
 {
-	mAttribute = doc->allocate_attribute(name.c_str(), value.c_str());
-}
-
-const std::string& XMLAttribute::Name() const
-{
-	return mName;
+	assert(mAttribute);
+	return std::string(mAttribute->name(), mAttribute->name_size());
 }
 
 XMLAttributePtr XMLAttribute::PrevAttribute( const std::string& name ) const
@@ -483,22 +472,22 @@ XMLAttributePtr XMLAttribute::NextAttribute() const
 
 uint32_t XMLAttribute::ValueUInt() const
 {
-	return LexicalCast<uint32_t>(mValue);	
+	return LexicalCast<uint32_t>(ValueString());	
 }
 
 int32_t  XMLAttribute::ValueInt()    const
 {
-	return LexicalCast<int32_t>(mValue);
+	return LexicalCast<int32_t>(ValueString());
 }
 
 float  XMLAttribute::ValueFloat()  const
 {
-	return LexicalCast<float>(mValue);
+	return LexicalCast<float>(ValueString());
 }
 
 std::string XMLAttribute::ValueString() const
 {
-	return mValue;
+	return std::string(mAttribute->value(), mAttribute->value_size());
 }
 
 

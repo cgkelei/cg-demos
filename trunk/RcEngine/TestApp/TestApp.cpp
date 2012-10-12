@@ -13,11 +13,14 @@
 #include "Graphics/CameraControler.h"
 #include "Graphics/SimpleGeometry.h"
 #include "Graphics/Animation.h"
+#include "Graphics/AnimationClip.h"
+#include "Graphics/AnimationState.h"
 #include "Math/ColorRGBA.h"
 #include "Math/MathUtil.h"
 #include "Core/Context.h"
 #include "Math/BoundingSphere.h"
 #include "IO/FileStream.h"
+#include "IO/FileSystem.h"
 #include "MainApp/Window.h"
 #include "Input/InputSystem.h"
 #include "Input/InputDevice.h"
@@ -26,15 +29,17 @@
 #include "Scene/SceneManager.h"
 #include "Graphics/Sky.h"
 #include "Graphics/SimpleGeometry.h"
+#include "Resource/ResourceManager.h"
 #include <D3DX10Math.h>
 #include "Core/XMLDom.h"
-
 
 #pragma comment(lib, "D3DX10.lib")
 
 
-TestApp::TestApp(void)
+TestApp::TestApp( const String& config )
+	:Application(config)
 {
+
 }
 
 
@@ -47,7 +52,7 @@ void TestApp::Initialize()
 	Camera* camera = RcEngine::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
 	
 	Vector3f up(0, 1, 0);
-	camera->SetViewParams(Vector3f(0, 0, 200), Vector3f(0, 0, 0), up);
+	camera->SetViewParams(Vector3f(0, 100, 400), Vector3f(0, 100, 0), up);
 	camera->SetProjectionParams(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 10000.0f );
 
 	mCameraControler = new FPSCameraControler;
@@ -61,133 +66,63 @@ void TestApp::LoadContent()
 	RenderFactory* factory = RcEngine::Context::GetSingleton().GetRenderFactoryPtr();
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
 	
+	ResourceManager::GetSingleton().AddResource(ResourceTypes::Mesh, "him.mesh", "Custom");
+	ResourceManager::GetSingleton().AddResource(ResourceTypes::Mesh, "Teapot.mesh", "Custom");
+
+
+	ResourceManager::GetSingleton().LoadAllFromDisk();
+
+	/*Entity* teapotEntity = sceneManager->CreateEntity("teapot", "Teapot.mesh",  "Custom");
+	SceneNode* teapotNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("teapot");
+	teapotNode->AttachObject(teapotEntity);*/
+
 	
-	Entity* dwarfEntity = sceneManager->CreateEntity("dwarf", "../Media/Mesh/Dwarf/Dwarf.mdl");
+	/*Entity* dwarfEntity = sceneManager->CreateEntity("dwarf", "him.mesh",  "Custom");
 	SceneNode* dwarfNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
 	dwarfNode->SetPosition(Vector3f(0, 0, 0));
 	dwarfNode->SetScale(Vector3f(50, 50, 50));
-	dwarfNode->AttachObject(dwarfEntity);
-
-	/*FileStream animationFile;
-	animationFile.Open("E:/dude.anim", FILE_READ);
-	shared_ptr<Animation> animation = Animation::LoadFrom(animationFile);*/
+	dwarfNode->AttachObject(dwarfEntity);*/
 
 	
-	/*Entity* dudeEntity = sceneManager->CreateEntity("Dude", "../Media/Mesh/Dude/Dude.mdl");
+	Entity* dudeEntity = sceneManager->CreateEntity("Dude", "him.mesh",  "Custom");
 	SceneNode* dudeNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
 	dudeNode->SetPosition(Vector3f(0, 0, 0));
-	dudeNode->AttachObject(dudeEntity);*/
-	
-	
-	//shared_ptr<Material> wireMat = factory->CreateMaterialFromFile("WireFrame", "../Media/Materials/WireFrame.material.xml");
-
-	//Entity* dwarfEntity1 = sceneManager->CreateEntity("Dwarf1", "E:/Code/RcEngine/Tools/MeshImporter/Dude.mdl");
-	//dwarfEntity1->SetMaterial(mDwarfMaterial);
-
-	//SceneNode* dwarfNode1 = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf1");
-	//dwarfNode1->SetPosition(Vector3f(50, 0, 0));
-	//dwarfNode1->AttachObject(dwarfEntity1);
-
-	//Entity* dwarfEntity2 = sceneManager->CreateEntity("Dwarf2", "E:/Code/RcEngine/Tools/MeshImporter/Dude.mdl");
-	//dwarfEntity2->SetMaterial(mDwarfMaterial);
-
-	//SceneNode* dwarfNode2 = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf1");
-	//dwarfNode2->SetPosition(Vector3f(-50, 0, 0));
-	//dwarfNode2->AttachObject(dwarfEntity2);
+	dudeNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(180.0f), 0.0f, 0.0f));
+	dudeNode->AttachObject(dudeEntity);
 
 
-	//Entity* plane = sceneManager->CreateEntity("Plane", "../Media/Mesh/Dwarf/Plane.mdl");;
-	//plane->SetMaterial(wireMat);
-	//SceneNode* planeNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Plane");
-	//planeNode->AttachObject(plane);
+	AnimationPlayer* animPlayer = dudeEntity->GetAnimationPlayer();
+	AnimationState* takeClip = animPlayer->GetClip("Take 001");
+	takeClip->WrapMode = AnimationState::Wrap_Loop;
 
-	//Entity* teapot = sceneManager->CreateEntity("Plane", "../Media/Mesh/Dwarf/Teapot.mdl");;
-	//teapot->SetMaterial(mDwarfMaterial);
-	//SceneNode* teapotNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Plane", Vector3f(-50, 0, 0));
-	//teapotNode->AttachObject(teapot);
-
-	//BoundingSpheref sphere = dwarfEntity->GetBoundingSphere();
-	//float radus = sphere.Radius;
-
-	//Entity* modelSphereEntity = sceneManager->CreateEntity("ModelBoudningSphere", "E:/Code/RcEngine/Tools/MeshImporter/sphere.mdl");
-	//modelSphereEntity->SetMaterial(wireMat);
-	//float loacalRadius = modelSphereEntity->GetBoundingSphere().Radius;
-	//SceneNode* modelSphere = sceneManager->GetRootSceneNode()->CreateChildSceneNode("ModelBoudningSphere");
-	//modelSphere->SetPosition(sphere.Center);
-	//modelSphere->SetScale(Vector3f(sphere.Radius/loacalRadius, sphere.Radius/loacalRadius, sphere.Radius/loacalRadius));
-	//modelSphere->AttachObject(modelSphereEntity);
-		
-
-	/*shared_ptr<Skeleton> skeleton = dwarfEntity->GetSkeleton();
-	vector<Bone*> bones = skeleton->GetBones();
-
-	Matrix4f world = bones[1]->GetWorldTransform();*/
-
-	//FileStream fisle;
-	//fisle.Open("Skeleton.xml", FILE_READ);
-	//shared_ptr<Skeleton> skeleton = Skeleton::LoadFrom(fisle, 0);
+	animPlayer->PlayClip("Take 001");
 
 
-	//FileStream file;
-	//file.Open("CollisionSpheres.xml", FILE_READ);
-	//XMLDoc collisions;
-	//XMLNodePtr root = collisions.Parse(file);
-	//XMLNodePtr content = root->FirstNode("Asset");
-
-	//for (XMLNodePtr item = content->FirstNode("Item"); item; item = item->NextSibling("Item"))
-	//{
-	//	String boneName = item->FirstNode("BoneName")->ValueString();
-	//	float radius = item->FirstNode("Radius")->ValueFloat();
-
-	//	float offset = 0;
-	//	XMLNodePtr offsetNode = item->FirstNode("Offset");
-	//	if (offsetNode)
-	//	{
-	//		offset = offsetNode->ValueFloat();
-	//	}
+	/*Entity* dudeEntity1 = sceneManager->CreateEntity("Dude1", "dude.mdl",  "Custom");
+	SceneNode* dudeNode1 = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dude1");
+	dudeNode1->SetPosition(Vector3f(100, 0, 0));
+	dudeNode1->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(180.0f), 0.0f, 0.0f));
+	dudeNode1->AttachObject(dudeEntity1);
 
 
-	//	Vector3f center = Vector3f(offset, 0, 0);
-	//	BoundingSpheref sphere =  BoundingSpheref(center, radius);
+	AnimationPlayer* animPlayer1 = dudeEntity1->GetAnimationPlayer();
+	AnimationState* takeClip1 = animPlayer1->GetClip("Take 001");
+	takeClip1->WrapMode = AnimationState::Wrap_Loop;
 
-	//	// Transform the BoundingSphere by its parent bone matrix,
-	//	// and store the result into the boundingSpheres array.
-	//	Bone* bone = skeleton->GetBone(boneName);
+	animPlayer1->PlayClip("Take 001");*/
 
-	//	Matrix4f trans = bone->GetWorldTransform();
-	//	sphere = Transform(sphere, trans);
-
-	//	Entity* entity = sceneManager->CreateEntity("Dwarf", "E:/Code/RcEngine/Tools/MeshImporter/sphere.mdl");
-	//	entity->SetMaterial(wireMat);
-	//	SceneNode* node = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Bounding");
-	//	node->SetScale(sphere.Radius/2);
-	//	node->SetPosition(sphere.Center);
-	//	node->AttachObject(entity);
-	//}
-
-	//for (size_t i = 0; i < 3/*bones.size()*/; ++i)
-	//{
-
-	//	Vector3f pos = skeleton->GetBone(i)->GetWorldPosition();
-	//	float radius = skeleton->GetBone(i)->mRadius;
-	//	String name = skeleton->GetBone(i)->GetName();
-	//	
-	//	Entity* entity = sceneManager->CreateEntity("Dwarf", "E:/Code/RcEngine/Tools/MeshImporter/sphere.mdl");
-	//	entity->SetMaterial(wireMat);
-	//	SceneNode* node = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Bounding", pos);
-
-	//	node->SetScale(Vector3f(2, 2, 2));
-
-	//	node->AttachObject(entity);
-	//}
-
-	//BoundingSpheref spehre = dwarfEntity->GetBoundingSphere();
-	//dwarfNode->SetScale( Vector3f(10.0f / spehre.Radius, 10.0f / spehre.Radius, 10.0f / spehre.Radius) );
-	//dwarfNode->AttachObject(dwarfEntity);
+	//Entity* tinyEntity = sceneManager->CreateEntity("dance", "dance.mdl");
+	//SceneNode* tinyNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("dance");
+	////tinyNode->SetScale(Vector3f(0.3, 0.3, 0.3));
+	//tinyNode->SetRotation(QuaternionFromRotationYawPitchRoll(0.0f, Mathf::ToRadian(-90.0f), 0.0f));
+	//tinyNode->AttachObject(tinyEntity);
 
 
-	//SceneNode* centerNode = dwarfNode->CreateChildSceneNode("Center", -spehre.Center);
-	//centerNode->AttachObject(dwarfEntity);
+	//shared_ptr<Animation> animPlayer = tinyEntity->GetAnimationPlayer();
+	//AnimationClip* takeClip = animPlayer->GetClip("Take 001");
+	//takeClip->GetAnimationState()->SetAnimationWrapMode(AnimationState::Wrap_Loop);
+	//takeClip->Play();
+
 
 	/*vector<String> skyTextures;
 	skyTextures.push_back( String("../Media/Textures/left.dds"));
@@ -199,9 +134,11 @@ void TestApp::LoadContent()
 
 	auto texture = factory->CreateTextureArrayFromFile(skyTextures);*/
 
+	String skyTexPath = FileSystem::GetSingleton().Locate("MeadowTrail.dds");
+
 	// Sky 
 	//sceneManager->CreateSkyBox(texture, false);
-	//sceneManager->CreateSkyBox(factory->CreateTextureFromFile("../Media/Textures/MeadowTrail.dds", 0));
+	//sceneManager->CreateSkyBox(factory->CreateTextureFromFile(skyTexPath, 0));
 	//sceneManager->CreateSkyBox(factory->CreateTextureFromFile("../Media/Textures/grassenvmap1024.dds", 0), 5000.0f); 
 }
 
@@ -234,7 +171,7 @@ void TestApp::Update( float deltaTime )
 
 int32_t main()
 {
-	TestApp app;
+	TestApp app("Config.xml");
 	app.Create();
 	app.RunGame();
 	app.Release();

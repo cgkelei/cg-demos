@@ -12,7 +12,7 @@ using namespace RcEngine;
 class TestApp : public RcEngine::Application
 {
 public:
-	TestApp(void);
+	TestApp(const String& config);
 	~TestApp(void);
 
 protected:

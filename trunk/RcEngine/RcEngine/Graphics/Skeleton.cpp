@@ -12,26 +12,11 @@ Bone::Bone( const String& name, uint32_t boneID, Bone* parent )
 
 }
 
-
 void Bone::CalculateBindPose()
 {
 	Matrix4f bindPose = GetWorldTransform();
 	mOffsetMatrix = bindPose.Inverse();
 }
-
-//void Bone::SetParentEntity( Entity* ent )
-//{
-//	// a bone can only belong to on entity
-//	if (mParentEntity != nullptr)
-//	{
-//		assert(mParentEntity == ent);
-//	}
-//}
-//
-//Entity* Bone::GetParentParentEntity() const
-//{
-//	return mParentEntity;
-//}
 
 
 Skeleton::Skeleton()
@@ -133,6 +118,13 @@ shared_ptr<Skeleton> Skeleton::Clone()
 	}
 
 	return skeleton;
+}
+
+Bone* Skeleton::AddBone( const String& name, Bone* parent )
+{
+	Bone* bone = new Bone(name, mBones.size(), parent);
+	mBones.push_back(bone);
+	return bone;
 }
 
 } // Namespace RcEngine

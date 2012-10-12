@@ -10,6 +10,7 @@ namespace RcEngine {
 
 class _ApiExport AnimationClip : public Resource
 {
+public:
 	friend class AnimationPlayer;
 	friend class AnimationState;
 

@@ -36,6 +36,11 @@ void Mesh::LoadImpl()
 	shared_ptr<Stream> streamPtr = fileSystem.OpenStream(mName, mGroup);
 	Stream& source = *streamPtr;
 
+	const uint32_t MeshId = ('M' << 24) | ('E' << 16) | ('S' << 8) | ('H');
+
+	uint32_t header = source.ReadUInt();
+	assert(header == MeshId);
+
 	// read mesh name
 	String meshName = source.ReadString();
 

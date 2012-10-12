@@ -6,6 +6,7 @@
 #include "OpenGLRenderView.h"
 #include "OpenGLSamplerState.h"
 #include "OpenGLTexture.h"
+#include "OpenGLGraphicCommon.h"
 #include <Graphics/Material.h>
 #include <Graphics/EffectTechnique.h>
 #include <Graphics/EffectPass.h>
@@ -399,11 +400,18 @@ void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
 			bool isNormalized = VertexElement::IsNormalized(ve.Type);
 			uint32_t offset = ve.Offset + op.StartVertexLocation * vertexSize;
 
-			glVertexAttribPointer(att, count, type, isNormalized, vertexSize, BUFFER_OFFSET(offset));
 			glEnableVertexAttribArray(att);
+
+			if (OpenGLMapping::IsIntegerType(type))
+			{
+				glVertexAttribIPointer(att, count, type, vertexSize, BUFFER_OFFSET(offset));	
+			}
+			else
+			{
+				glVertexAttribPointer(att, count, type, isNormalized, vertexSize, BUFFER_OFFSET(offset));	
+			}
 		}
 	}
-
 
 	// bind index buffer
 	GLenum indexType = GL_UNSIGNED_SHORT;
