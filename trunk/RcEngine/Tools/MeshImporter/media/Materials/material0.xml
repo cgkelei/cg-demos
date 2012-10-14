@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<material>
-	<technique name="Techniques/Diff.xml" />
-	<texture unit="diffuse" name="Textures/DwarfHead.dds" />
-	<parameter name="MatDiffColor" value="1 1 1 1" />
-	<parameter name="MatSpecProperties" value="0 1" />
-</material>
