@@ -100,6 +100,7 @@
     <ClCompile Include="Graphics\EffectAnnotation.cpp" />
     <ClCompile Include="Graphics\EffectPass.cpp" />
     <ClCompile Include="Graphics\EffectTechnique.cpp" />
+    <ClCompile Include="Graphics\Font.cpp" />
     <ClCompile Include="Graphics\FrameBuffer.cpp" />
     <ClCompile Include="Graphics\GraphicBuffer.cpp" />
     <ClCompile Include="Graphics\IRenderModule.cpp" />
@@ -107,7 +108,6 @@
     <ClCompile Include="Graphics\EffectParameter.cpp" />
     <ClCompile Include="Graphics\Mesh.cpp" />
     <ClCompile Include="Graphics\MeshPart.cpp" />
-    <ClCompile Include="Graphics\Model.cpp" />
     <ClCompile Include="Graphics\Pipeline.cpp" />
     <ClCompile Include="Graphics\PixelFormat.cpp" />
     <ClCompile Include="Graphics\RasterizerState.cpp" />
@@ -122,6 +122,7 @@
     <ClCompile Include="Graphics\SimpleGeometry.cpp" />
     <ClCompile Include="Graphics\Skeleton.cpp" />
     <ClCompile Include="Graphics\Sky.cpp" />
+    <ClCompile Include="Graphics\SpriteBatch.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Graphics\VertexDeclaration.cpp" />
     <ClCompile Include="Graphics\VertexElement.cpp" />
@@ -172,6 +173,7 @@
     <ClInclude Include="Graphics\EffectAnnotation.h" />
     <ClInclude Include="Graphics\EffectPass.h" />
     <ClInclude Include="Graphics\EffectTechnique.h" />
+    <ClInclude Include="Graphics\Font.h" />
     <ClInclude Include="Graphics\FrameBuffer.h" />
     <ClInclude Include="Graphics\GraphicBuffer.h" />
     <ClInclude Include="Graphics\GraphicsCommon.h" />
@@ -180,7 +182,6 @@
     <ClInclude Include="Graphics\EffectParameter.h" />
     <ClInclude Include="Graphics\Mesh.h" />
     <ClInclude Include="Graphics\MeshPart.h" />
-    <ClInclude Include="Graphics\Model.h" />
     <ClInclude Include="Graphics\Pipeline.h" />
     <ClInclude Include="Graphics\PixelFormat.h" />
     <ClInclude Include="Graphics\RasterizerState.h" />
@@ -196,6 +197,7 @@
     <ClInclude Include="Graphics\SimpleGeometry.h" />
     <ClInclude Include="Graphics\Skeleton.h" />
     <ClInclude Include="Graphics\Sky.h" />
+    <ClInclude Include="Graphics\SpriteBatch.h" />
     <ClInclude Include="Graphics\Texture.h" />
     <ClInclude Include="Graphics\VertexDeclaration.h" />
     <ClInclude Include="Graphics\VertexElement.h" />
@@ -219,6 +221,7 @@
     <ClInclude Include="Math\Plane.h" />
     <ClInclude Include="Math\Quaternion.h" />
     <ClInclude Include="Math\Ray.h" />
+    <ClInclude Include="Math\Rectangle.h" />
     <ClInclude Include="Math\Vector.h" />
     <ClInclude Include="Resource\Resource.h" />
     <ClInclude Include="Resource\ResourceManager.h" />
@@ -238,6 +241,7 @@
     <None Include="Math\Matrix.inl" />
     <None Include="Math\Plane.inl" />
     <None Include="Math\Quaternion.inl" />
+    <None Include="Math\Rectangle.inl" />
     <None Include="Math\Vector.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

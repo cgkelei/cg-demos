@@ -14,10 +14,27 @@ namespace RcEngine {
 
 class Resource;
 
-struct _ApiExport ResourceGroup
+class _ApiExport ResourceManager : public Singleton<ResourceManager>
 {
-	ResourceGroup() :
-		MemoryBudget(0),
+public:
+	SINGLETON_DECL_HEADER(ResourceManager);
+
+public:
+	typedef void (*ResTypeInitializationFunc)();
+	typedef void (*ResTypeReleaseFunc)();
+	typedef shared_ptr<Resource> (*ResTypeFactoryFunc)( ResourceManager*, ResourceHandle, const String&, const String&);
+
+	struct ResourceRegEntry
+	{
+		String					   TypeString;
+		ResTypeFactoryFunc         FactoryFunc;  // Factory to create resource object
+	};
+
+
+	struct _ApiExport ResourceGroup
+	{
+		ResourceGroup() :
+	MemoryBudget(0),
 		MemoryUse(0)
 	{
 	}
@@ -26,24 +43,8 @@ struct _ApiExport ResourceGroup
 
 	unsigned MemoryUse;
 	unordered_map<String, shared_ptr<Resource> > Resources;
-};
+	};
 
-
-typedef void (*ResTypeInitializationFunc)();
-typedef void (*ResTypeReleaseFunc)();
-typedef shared_ptr<Resource> (*ResTypeFactoryFunc)( ResourceManager*, ResourceHandle, const String&, const String&);
-
-struct ResourceRegEntry
-{
-	String					   TypeString;
-	ResTypeFactoryFunc         FactoryFunc;  // Factory to create resource object
-};
-
-
-class _ApiExport ResourceManager : public Singleton<ResourceManager>
-{
-public:
-	SINGLETON_DECL_HEADER(ResourceManager);
 
 public:
 	ResourceManager();
@@ -65,9 +66,9 @@ protected:
 
 protected:	
 	uint32_t mNextHandle;
-	std::map< int, ResourceRegEntry >  mRegistry;  // Registry of resource types
-	unordered_map<String, ResourceGroup > mResourcesWithGroup;
+	std::map< int, ResourceRegEntry >  mRegistry;  // Registry of resource type
 	std::map<ResourceHandle, shared_ptr<Resource> > mResourcesByHandle;
+	unordered_map<String, ResourceGroup > mResourcesWithGroup;
 	
 };
 
