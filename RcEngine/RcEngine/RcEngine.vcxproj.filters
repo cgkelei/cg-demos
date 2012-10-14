@@ -114,9 +114,6 @@
     <ClCompile Include="Graphics\SamplerState.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\Model.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\Material.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
@@ -230,6 +227,12 @@
     </ClCompile>
     <ClCompile Include="Scene\SubEntity.cpp">
       <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Font.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\SpriteBatch.cpp">
+      <Filter>Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -350,9 +353,6 @@
     <ClInclude Include="Graphics\SamplerState.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\Model.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\Material.h">
       <Filter>Graphics</Filter>
     </ClInclude>
@@ -470,6 +470,15 @@
     <ClInclude Include="Scene\SubEntity.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\Font.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\SpriteBatch.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Rectangle.h">
+      <Filter>Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Math\ColorRGBA.inl">
@@ -497,6 +506,9 @@
       <Filter>Math</Filter>
     </None>
     <None Include="Math\Frustum.inl">
+      <Filter>Math</Filter>
+    </None>
+    <None Include="Math\Rectangle.inl">
       <Filter>Math</Filter>
     </None>
   </ItemGroup>

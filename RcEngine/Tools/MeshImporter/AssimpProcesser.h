@@ -45,7 +45,7 @@ struct MaterialData
 struct MeshPartData
 {
 	String Name;
-	uint32_t MaterialID;
+	String MaterialName;
 
 	IndexBufferType IndexFormat;
 
@@ -85,7 +85,6 @@ struct OutModel
 	uint32_t TotalVertices;
 	uint32_t TotalIndices;
 	vector<shared_ptr<MeshPartData> > MeshParts;
-	unordered_map<uint32_t, uint32_t> MaterialIndexMap;
 	vector<shared_ptr<MaterialData> > Materials;
 	BoundingSpheref MeshBoundingSphere;
 	shared_ptr<Skeleton> Skeleton;
@@ -97,7 +96,7 @@ public:
 	AssimpProcesser(void);
 	~AssimpProcesser(void);
 
-	bool Process(const char* filePath);
+	bool Process(const char* filePath, const char* skeleton, const vector<String>& clips);
 
 private:
 	void ProcessScene(const aiScene* scene);
@@ -129,7 +128,9 @@ private:
 
 private:
 	aiScene* mAIScene;
-
+	String mSkeletonFile;
+	String mFilename;
+	vector<String> mAnimationClips;
 	String mName;
 	
 	OutModel mModel;

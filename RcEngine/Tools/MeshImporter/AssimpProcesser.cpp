@@ -13,6 +13,7 @@
 #include "IO/FileStream.h"
 #include "Core/XMLDom.h"
 #include "Core/Utility.h"
+#include "IO/PathUtil.h"
 
 
 #pragma comment(lib, "assimp.lib")
@@ -286,7 +287,12 @@ void GetBlendData(OutModel& model, aiMesh* mesh, vector<uint32_t>& boneMappings,
 			blendWeights[vertexID].push_back(weight);
 			if (blendWeights[vertexID].size() > 4)
 			{
-				ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Per vertex bones limit less than 4", "GetBlendData");
+				auto minIter = std::min_element(blendWeights[vertexID].begin(), blendWeights[vertexID].begin() + 4);
+				float minWeight = *minIter;
+				size_t minIndex = std::distance(blendWeights[vertexID].begin(), minIter);
+				*minIter += weight;
+				break;;
+				//ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Per vertex bones limit less than 4", "GetBlendData");
 			}
 		}
 		
@@ -307,13 +313,17 @@ AssimpProcesser::~AssimpProcesser(void)
 {
 }
 
-bool AssimpProcesser::Process( const char* filePath )
+bool AssimpProcesser::Process( const char* filePath, const char* skeleton /*= ""*/, const vector<String>& clips )
 {
+	mSkeletonFile = skeleton;
+	mAnimationClips = clips;
+	mFilename = filePath;
+
 	Assimp::Importer importer;
-	
+
 	mAIScene = const_cast<aiScene*>( importer.ReadFile(filePath, aiProcess_Triangulate |
 		aiProcess_RemoveRedundantMaterials  /*| aiProcess_FlipUVs*/) );
-	
+
 	if(!mAIScene)
 	{
 		// Error
@@ -331,7 +341,8 @@ void AssimpProcesser::ProcessScene( const aiScene* scene )
 	// if user don't specify model root node, use assimp root scene node 
 	mModel.RootNode = mAIScene->mRootNode;
 
-	ExportModel(mModel, "Test");
+	String outputName = PathUtil::GetFileName(mFilename);
+	ExportModel(mModel, outputName);
 }
 
 
@@ -461,7 +472,7 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 			Bone* bone = bones[i];
 			const String& boneName = bone->GetName();
 			String parentName;
-			if (bone->GetParent())
+			if (bone->etParent())
 			{
 				parentName = bone->GetParent()->GetName();
 			}
@@ -482,7 +493,7 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 		file << "\t</bones>" << std::endl;
 	}*/
 	
-	if (outModel.Materials.size())
+	/*if (outModel.Materials.size())
 	{
 		file << "\t<materials count=\"" << outModel.Materials.size() << "\">" << std::endl;
 		for (size_t i = 0; i < outModel.Materials.size(); ++i)
@@ -524,7 +535,7 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 				file << "\t\t\t<texture type=\"" << texType << "\"" << " value=\"" << value << "\"/>\n";
 			}
 		}
-	}
+	}*/
 	
 
 	vector<shared_ptr<MeshPartData> >& subMeshes = outModel.MeshParts;
@@ -532,7 +543,7 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 	{
 		shared_ptr<MeshPartData> submesh = subMeshes[i];
 		
-		file << "\t<subMesh name=\"" << submesh->Name << "\" material=\"" << outModel.MaterialIndexMap[submesh->MaterialID] << "\">\n";
+		file << "\t<subMesh name=\"" << submesh->Name << "\" material=\"" << submesh->MaterialName << "\">\n";
 
 		// write bounding sphere
 		const Vector3f& center = submesh->BoundingSphere.Center;
@@ -591,11 +602,10 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 					break;
 				case VEU_BlendWeight:
 					{
-						float* weightPtr = vertexPtr;
-						uint8_t* indexPtr = (uint8_t*)(vertexPtr + 4);
+						uint32_t* indexPtr = (uint32_t*)(vertexPtr + 4);
 						for (size_t k = 0; k < 4; ++k)
 						{
-							file << "\t\t\t\t<bone weight=\"" << weightPtr[k] << "\" index=\"" << (uint16_t)indexPtr[k] << "\"/>\n";
+							file << "\t\t\t\t<bone weight=\"" << vertexPtr[k] << "\" index=\"" << indexPtr[k] << "\"/>\n";
 						}	
 					}
 					break;	
@@ -628,12 +638,27 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 		file << "\t\t</triangles>\n";
 		file << "\t</submesh>\n";
 	}
+
+	if (mAIScene->HasAnimations())
+	{
+		size_t animSize = mAnimationClips.size();
+		file << "\t\t<animations count=\"" << animSize << "\">\n";
+		for (size_t i = 0; i < animSize; ++i)
+		{
+			file << "\t\t\t<clip name=\"" << mAnimationClips[i] << "\"/>\n";
+		}
+		file << "\t\t</animations>\n";
+	}
 	
 }
 
 void AssimpProcesser::ExportBinary( OutModel& outModel )
 {
+	const uint32_t MeshId = ('M' << 24) | ('E' << 16) | ('S' << 8) | ('H');
+
 	FileStream stream(outModel.OutName + ".mdl", FILE_WRITE);
+
+	stream.WriteUInt(MeshId);
 
 	// write mesh name, for test
 	stream.WriteString(outModel.OutName);
@@ -645,27 +670,27 @@ void AssimpProcesser::ExportBinary( OutModel& outModel )
 	stream.WriteFloat(radius);
 
 	// write material
-	stream.WriteUInt(outModel.Materials.size());
-	if (outModel.Materials.size())
-	{
-		for (size_t i = 0; i < outModel.Materials.size(); ++i)
-		{
-			shared_ptr<MaterialData> material = outModel.Materials[i];
+	//stream.WriteUInt(outModel.Materials.size());
+	//if (outModel.Materials.size())
+	//{
+	//	for (size_t i = 0; i < outModel.Materials.size(); ++i)
+	//	{
+	//		shared_ptr<MaterialData> material = outModel.Materials[i];
 
-			String matName;
-			if (material->Name.empty())
-			{
-				int a = 0;
-			}
-			else
-			{
-				matName = material->Name + ".material.xml";
-			}
+	//		String matName;
+	//		if (material->Name.empty())
+	//		{
+	//			int a = 0;
+	//		}
+	//		else
+	//		{
+	//			matName = material->Name + ".material.xml";
+	//		}
 
-			// write name
-			stream.WriteString(matName);
-		}
-	}
+	//		// write name
+	//		stream.WriteString(matName);
+	//	}
+	//}
 
 	// write mesh parts count
 	stream.WriteUInt(outModel.MeshParts.size());
@@ -679,7 +704,7 @@ void AssimpProcesser::ExportBinary( OutModel& outModel )
 		stream.WriteString(submesh->Name);	
 
 		// write material index
-		stream.WriteUInt(outModel.MaterialIndexMap[submesh->MaterialID]);
+		stream.WriteString(submesh->MaterialName + ".material.xml");
 
 		// write sub mesh bounding sphere
 		Vector3f center = submesh->BoundingSphere.Center;
@@ -713,6 +738,34 @@ void AssimpProcesser::ExportBinary( OutModel& outModel )
 		stream.WriteUInt(submesh->IndexCount);
 		stream.WriteUInt(submesh->IndexFormat);
 		stream.Write(&submesh->IndexData[0], sizeof(char) * submesh->IndexData.size());
+	}
+
+	if (outModel.Bones.empty())
+	{
+		stream.WriteUInt(0);
+	}
+	else
+	{
+		FileStream skeleton;
+		skeleton.Open(mSkeletonFile);
+		uint32_t size = skeleton.GetSize();
+		vector<char> skeletonData(size);
+		skeleton.Read(&skeletonData[0], size);
+		stream.Write(&skeletonData[0], size);
+		skeleton.Close();
+	}
+
+	if (mAIScene->HasAnimations())
+	{
+		size_t animSize = mAnimationClips.size();
+		stream.WriteUInt(animSize);
+		for (size_t i = 0; i < animSize; ++i)
+		{
+			stream.WriteString(mAnimationClips[i]);
+		}
+	}else
+	{
+		stream.WriteUInt(0);
 	}
 
 	//if (outModel.Bones.empty())
@@ -888,19 +941,19 @@ void AssimpProcesser::ExportModel( OutModel& outModel, const String& outName )
 	outModel.OutName = outName;
 	
 	CollectMaterials();
-
-	CollectMeshes(outModel, outModel.RootNode);
 	
+	CollectMeshes(outModel, outModel.RootNode);
+
 	CollectBones(outModel);
 
 	BuildAndSaveModel(outModel);
 
-	/*if (mAIScene->HasAnimations())
+	if (mAIScene->HasAnimations())
 	{
 		CollectAnimations(outModel, mAIScene);
-		BuildAndSaveAnimations(outModel);
-		BuildBoneCollisions();
-	}*/
+		/*BuildAndSaveAnimations(outModel);
+		BuildBoneCollisions();*/
+	}
 
 	ExportBinary(mModel);
 	ExportXML(mModel);
@@ -937,7 +990,8 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 		// if animated all submeshes must have bone weights
 		if (outModel.Bones.size() && !mesh->HasBones())
 		{
-			ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Animated all submeshes must have bone weights", "AssimpProcesser::BuildAndSaveModel");
+			continue;
+			//ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Animated all submeshes must have bone weights", "AssimpProcesser::BuildAndSaveModel");
 		}
 
 		// Get the world transform of the mesh for baking into the vertices
@@ -952,7 +1006,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 		shared_ptr<VertexDeclaration> vertexDecl = GetVertexDeclaration(mesh);
 
 		meshPart->Name = String(mesh->mName.C_Str());
-		meshPart->MaterialID = mesh->mMaterialIndex;
+		meshPart->MaterialName = outModel.Materials[mesh->mMaterialIndex]->Name;
 
 		// Store index data
 		bool largeIndices = mesh->mNumVertices > 65535;
@@ -998,6 +1052,8 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 		{
 			GetBlendData(outModel, mesh, boneMappings, blendIndices, blendWeights);
 		}
+
+		size_t vs = vertexDecl->GetVertexSize();
 
 		const vector<VertexElement>& vertexElements = vertexDecl->GetElements();
 		for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
@@ -1077,12 +1133,12 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 					break;
 				case VEU_BlendIndices:
 					{
-						uint8_t* destBytes = (uint8_t*)vertexPtr;
+						uint32_t* destBytes = (uint32_t*)vertexPtr;
 						for (uint32_t j = 0; j < 4; ++j)
 						{
 							if (j < blendIndices[i].size())
 							{
-								uint16_t index =  blendIndices[i][j];
+								uint32_t index =  blendIndices[i][j];
 								*destBytes++ = blendIndices[i][j];
 							}
 							else
@@ -1191,62 +1247,18 @@ void AssimpProcesser::BuildSkeleton( OutModel& outModel )
 
 void AssimpProcesser::BuildAndSaveAnimations( OutModel& model )
 {
-	//for (size_t anim = 0; anim < model.Animations.size(); ++anim)
-	//{
-	//	aiAnimation* animation = model.Animations[anim];
-	//	
-	//	String animName = FromAIString(animation->mName);
 
-	//	if (animName.empty())
-	//	{
-	//		stringstream sss;
-	//		sss << anim + 1;
-	//		animName = "Anim" + sss.str();
-	//	}
-	//	
-	//	float secondsPerTick = 1.0f / (float)animation->mTicksPerSecond;
-	//	float length = (float)animation->mDuration * secondsPerTick;
-
-	//	shared_ptr<AnimationClip> animationClip;
-	//	for (size_t channel = 0; channel < animation->mNumChannels; ++channel)
-	//	{
-	//		AnimationTrack animationTrack;
-
-	//		/*aiNodeAnim* channel = animation->mChannels[channel];
-	//		String channelName = FromAIString(channel->mNodeName);
-	//		Bone* bone = model.Skeleton->GetBone(channelName);*/
-	//	}
-
-	//}
 }
 
 void AssimpProcesser::CollectMaterials()
 {	
+	std::set<String> matNames;
+
 	for (size_t i = 0; i < mAIScene->mNumMaterials; ++i)
 	{
 		shared_ptr<MaterialData> material = ProcessMaterial(mAIScene->mMaterials[i]);
 		
-		bool redundant = false;
-	
-		size_t index = mModel.Materials.size();
-
-		for (size_t j = 0; j < mModel.Materials.size(); ++j)
-		{
-			if (*material == *mModel.Materials[j])
-			{
-				redundant = true;
-				index = j;
-				break;
-			}
-		}
-		
-		mModel.MaterialIndexMap.insert(std::make_pair(i, index));
-
-		if (!redundant)
-		{
-			material->Name += LexicalCast<String>(index);
-			mModel.Materials.push_back(material);
-		}
+		mModel.Materials.push_back(material);
 	}
 }
 
