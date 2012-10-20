@@ -21,6 +21,8 @@ OpenGLFrameBuffer::OpenGLFrameBuffer( uint32_t width, uint32_t height, bool offs
 
 RcEngine::OpenGLFrameBuffer::~OpenGLFrameBuffer()
 {
+	DetachAll();
+
 	if(mFrameBufferObject != 0)
 		glDeleteFramebuffersEXT(1, &mFrameBufferObject);
 }
@@ -28,21 +30,17 @@ RcEngine::OpenGLFrameBuffer::~OpenGLFrameBuffer()
 void OpenGLFrameBuffer::DoBind()
 {
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferObject);
-	assert(GL_FRAMEBUFFER_COMPLETE_EXT == glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
-
-	if (mFrameBufferObject != 0)
+	
+	if (mFrameBufferObject != 0 && mColorViews.size())
 	{
+		assert(GL_FRAMEBUFFER_COMPLETE_EXT == glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
+
 		std::vector<GLenum> targets(mColorViews.size());
 		for (size_t i = 0; i < mColorViews.size(); ++ i)
 		{
 			targets[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0_EXT + i);
 		}
 		glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
-	}
-	else
-	{
-		GLenum targets[] = { GL_BACK };
-		glDrawBuffers(1, &targets[0]);
 	}
 }
 

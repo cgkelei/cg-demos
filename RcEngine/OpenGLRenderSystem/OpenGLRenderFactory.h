@@ -40,10 +40,11 @@ public:
 
 	// Views
 	//-------------------------------------------------------------------------------------------------------
-	virtual shared_ptr<RenderView> CreateRenderTargetView2D(const shared_ptr<Texture>& texture, uint32_t arraySize, uint32_t level);
-	virtual shared_ptr<RenderView> CreateDepthStencilView(const shared_ptr<Texture>& texture, uint32_t arraySize, uint32_t level);
+	virtual shared_ptr<RenderView> CreateRenderTargetView2D(const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level);
+	virtual shared_ptr<RenderView> CreateDepthStencilView(const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level);
 
-			
+	
+	virtual shared_ptr<FrameBuffer> CreateFrameBuffer(uint32_t width, uint32_t height);
 
 	virtual shared_ptr<GraphicsBuffer> CreateVertexBuffer(BufferUsage usage, uint32_t accessHint, ElementInitData* initData);
 

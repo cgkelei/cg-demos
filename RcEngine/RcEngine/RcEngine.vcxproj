@@ -113,6 +113,7 @@
     <ClCompile Include="Graphics\RasterizerState.cpp" />
     <ClCompile Include="Graphics\Renderable.cpp" />
     <ClCompile Include="Graphics\RenderDevice.cpp" />
+    <ClCompile Include="Graphics\Renderer.cpp" />
     <ClCompile Include="Graphics\RenderFactory.cpp" />
     <ClCompile Include="Graphics\RenderOperation.cpp" />
     <ClCompile Include="Graphics\RenderView.cpp" />
@@ -143,6 +144,7 @@
     <ClCompile Include="Resource\Resource.cpp" />
     <ClCompile Include="Resource\ResourceManage.cpp" />
     <ClCompile Include="Scene\Entity.cpp" />
+    <ClCompile Include="Scene\Light.cpp" />
     <ClCompile Include="Scene\SceneObject.cpp" />
     <ClCompile Include="Scene\Node.cpp" />
     <ClCompile Include="Scene\SceneManager.cpp" />
@@ -187,6 +189,7 @@
     <ClInclude Include="Graphics\RasterizerState.h" />
     <ClInclude Include="Graphics\Renderable.h" />
     <ClInclude Include="Graphics\RenderDevice.h" />
+    <ClInclude Include="Graphics\Renderer.h" />
     <ClInclude Include="Graphics\RenderFactory.h" />
     <ClInclude Include="Graphics\RenderOperation.h" />
     <ClInclude Include="Graphics\RenderSettings.h" />
@@ -226,6 +229,7 @@
     <ClInclude Include="Resource\Resource.h" />
     <ClInclude Include="Resource\ResourceManager.h" />
     <ClInclude Include="Scene\Entity.h" />
+    <ClInclude Include="Scene\Light.h" />
     <ClInclude Include="Scene\SceneObject.h" />
     <ClInclude Include="Scene\Node.h" />
     <ClInclude Include="Scene\SceneManager.h" />

@@ -475,6 +475,14 @@ enum ShaderType
 	ST_Compute
 };
 
+enum RenderOrder
+{
+	RO_None,
+	RO_FrontToBack,
+	RO_BackToFront,
+	RO_StateChange,
+};
+
 } // RcEngine
 
 

@@ -3,7 +3,6 @@
 
 namespace RcEngine {
 
-
 FrameBuffer::FrameBuffer(uint32_t width, uint32_t height,  bool offscreen /*= true*/ )
 	: mWidth(width), mHeight(height), mDepthStencilView(0), mDirty(true), mOffscreen(offscreen),
 	mViewport(0, 0, width, height)
@@ -13,17 +12,7 @@ FrameBuffer::FrameBuffer(uint32_t width, uint32_t height,  bool offscreen /*= tr
 
 FrameBuffer::~FrameBuffer(void)
 {
-	for (size_t i = 0; i < mColorViews.size(); ++i)
-	{
-		if (mColorViews[i])
-		{
-			Detach((Attachment)(ATT_DepthStencil + i));
-		}
-	}
-	mColorViews.clear();
-
-	if (mDepthStencilView)
-		Detach(ATT_DepthStencil);
+	
 }
 
 shared_ptr<RenderView> FrameBuffer::GetAttachedView( Attachment att )
@@ -133,18 +122,6 @@ void FrameBuffer::Detach( Attachment att )
 
 void FrameBuffer::OnBind()
 {
-	/*for (size_t i = 0; i < mColorViews.size(); ++i)
-	{
-	if (mColorViews[i])
-	{
-	mColorViews[i]->OnBind(this, ATT_Color0 + i);
-	}
-	}
-	if (mDepthStencilView)
-	{
-	mDepthStencilView->OnBind(this, ATT_DepthStencil);
-	}*/
-
 	// Do Render API specify set
 	DoBind();
 
@@ -155,18 +132,21 @@ void FrameBuffer::OnUnbind()
 {
 	// Do Render API specify set
 	DoUnbind();
+}
 
-	//for (size_t i = 0; i < mColorViews.size(); ++i)
-	//{
-	//	if (mColorViews[i])
-	//	{
-	//		mColorViews[i]->OnUnbind(this, ATT_Color0 + i);
-	//	}
-	//}
-	//if (mDepthStencilView)
-	//{
-	//	mDepthStencilView->OnUnbind(this, ATT_DepthStencil);
-	//}
+void FrameBuffer::DetachAll()
+{
+	for (size_t i = 0; i < mColorViews.size(); ++i)
+	{
+		if (mColorViews[i])
+		{
+			Detach((Attachment)(ATT_DepthStencil + i));
+		}
+	}
+	mColorViews.clear();
+
+	if (mDepthStencilView)
+		Detach(ATT_DepthStencil);
 }
 
 

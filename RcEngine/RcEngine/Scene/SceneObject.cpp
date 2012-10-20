@@ -7,13 +7,8 @@ namespace RcEngine {
 // undefined bounding sphere
 static const BoundingSpheref UnDefineBoundingSphere;
 
-SceneObject::SceneObject()
-	: mParentNode(nullptr)
-{
 
-}
-
-SceneObject::SceneObject( const String& name )
+SceneObject::SceneObject( const String& name)
 	: mParentNode(nullptr), mName(name)
 {
 

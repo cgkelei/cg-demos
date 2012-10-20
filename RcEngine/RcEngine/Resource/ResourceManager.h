@@ -33,16 +33,12 @@ public:
 
 	struct _ApiExport ResourceGroup
 	{
-		ResourceGroup() :
-	MemoryBudget(0),
-		MemoryUse(0)
-	{
-	}
+		ResourceGroup() : MemoryBudget(0), MemoryUse(0) {}
 
-	unsigned MemoryBudget;
+		unsigned MemoryBudget;
 
-	unsigned MemoryUse;
-	unordered_map<String, shared_ptr<Resource> > Resources;
+		unsigned MemoryUse;
+		unordered_map<String, shared_ptr<Resource> > Resources;
 	};
 
 

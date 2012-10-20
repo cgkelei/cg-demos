@@ -5,6 +5,7 @@
 #include "OpenGLSamplerState.h"
 #include "OpenGLShader.h"
 #include "OpenGLShaderProgram.h"
+#include "OpenGLFrameBuffer.h"
 #include <Core/Exception.h>
 #include <Graphics/BlendState.h>
 #include <Graphics/DepthStencilState.h>
@@ -276,14 +277,14 @@ shared_ptr<Texture> OpenGLRenderFactory::CreateTextureArrayFromFile( const vecto
 }
 
 
-shared_ptr<RenderView> OpenGLRenderFactory::CreateDepthStencilView( const shared_ptr<Texture>& texture, uint32_t arraySize, uint32_t level )
+shared_ptr<RenderView> OpenGLRenderFactory::CreateDepthStencilView( const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level )
 {
-	return NULL;
+	return std::make_shared<OpenGLDepthStencilView>(*texture, arrayIndex, level);
 }
 
-shared_ptr<RenderView> OpenGLRenderFactory::CreateRenderTargetView2D( const shared_ptr<Texture>& texture, uint32_t arraySize, uint32_t level )
+shared_ptr<RenderView> OpenGLRenderFactory::CreateRenderTargetView2D( const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level )
 {
-	return NULL;
+	return std::make_shared<OpenGLRenderTargetView2D>(*texture, arrayIndex, level);
 }
 
 shared_ptr<Shader> OpenGLRenderFactory::CreateShader( ShaderType type )
@@ -294,6 +295,11 @@ shared_ptr<Shader> OpenGLRenderFactory::CreateShader( ShaderType type )
 shared_ptr<ShaderProgram> OpenGLRenderFactory::CreateShaderProgram( Effect& effect )
 {
 	return std::make_shared<OpenGLShaderProgram>(effect);
+}
+
+shared_ptr<FrameBuffer> OpenGLRenderFactory::CreateFrameBuffer( uint32_t width, uint32_t height )
+{
+	return std::make_shared<OpenGLFrameBuffer>(width, height, true);
 }
 
 

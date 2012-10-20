@@ -704,5 +704,20 @@ bool PixelFormatUtils::IsStencil( PixelFormat format )
 	return false;
 }
 
+PixelFormat PixelFormatUtils::GetPixelFormat( const String& value )
+{
+	String full = "PF_" + value;
+
+	for (size_t i = 0; i < PF_Count; ++i)
+	{
+		if (String(_pixelFormats[i].name) == full)
+		{
+			return PixelFormat(PF_Unknown + i);
+		}
+	}
+	
+	ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Unsupported pixel format" + value, "PixelFormatUtils::GetPixelFormat");
+}
+
 
 } // Namespace RcEngineRcEngine

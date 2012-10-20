@@ -65,12 +65,15 @@ void TestApp::LoadContent()
 {
 	RenderFactory* factory = RcEngine::Context::GetSingleton().GetRenderFactoryPtr();
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
+	ResourceManager& resMan = ResourceManager::GetSingleton();
 	
-	ResourceManager::GetSingleton().AddResource(ResourceTypes::Mesh, "him.mesh", "Custom");
-	ResourceManager::GetSingleton().AddResource(ResourceTypes::Mesh, "Teapot.mesh", "Custom");
+	resMan.AddResource(ResourceTypes::Mesh, "him.mesh", "Custom");
+	resMan.AddResource(ResourceTypes::Mesh, "Teapot.mesh", "Custom");
+	resMan.AddResource(ResourceTypes::Pipeline, "DeferredLighting.pipeline.xml", "General");
 
+	resMan.LoadAllFromDisk();
 
-	ResourceManager::GetSingleton().LoadAllFromDisk();
+	//shared_ptr<Resource> re = ResourceManager::GetSingleton().GetResourceByHandle()
 
 	/*Entity* teapotEntity = sceneManager->CreateEntity("teapot", "Teapot.mesh",  "Custom");
 	SceneNode* teapotNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("teapot");

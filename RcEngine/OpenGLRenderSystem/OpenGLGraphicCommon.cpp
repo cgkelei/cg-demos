@@ -266,6 +266,31 @@ void OpenGLMapping::Mapping( GLint& outInternalformat, GLenum& outFormat, GLenum
 	case PF_DXT5:
 		outInternalformat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 		break;
+
+	case PF_Depth16:
+		outInternalformat = GL_DEPTH_COMPONENT16;
+		outFormat = GL_DEPTH_COMPONENT;
+		outType = GL_UNSIGNED_SHORT;
+		break;
+
+	case PF_Depth24Stencil8:
+		if (GLEW_EXT_packed_depth_stencil)
+		{
+			outInternalformat = GL_DEPTH24_STENCIL8_EXT;
+			outFormat = GL_DEPTH_STENCIL_EXT;
+			outType = GL_UNSIGNED_INT_24_8_EXT;
+		}
+		else
+		{
+			ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported render texture:" + PixelFormatUtils::GetFormatName(PF_Depth24Stencil8), "OpenGLMapping::Mapping");
+		}
+		break;
+
+	case PF_Depth32:
+		outInternalformat = GL_DEPTH_COMPONENT32F;
+		outFormat = GL_DEPTH_COMPONENT;
+		outType = GL_FLOAT;
+		break;	
 	
 	default:
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported Pixel Format!", 
