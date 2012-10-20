@@ -10,14 +10,13 @@ namespace RcEngine {
 
 enum SceneObejctType
 {
-	SOT_Entity,
+	SOT_Entity = 0,
 	SOT_Light,
 	SOT_Camera,
 	SOT_Particle,
-	SOT_Sky
+	SOT_Sky, 
+	SOT_Count
 };
-
-class Node;
 
 /**
  * Base class for Objects in a scene graph, contained by scene nodes, referenced 
@@ -31,15 +30,14 @@ class Node;
 class _ApiExport SceneObject
 {
 public:
-	SceneObject();
 	SceneObject( const String& name );
 	virtual ~SceneObject();
 
 	const String& GetName() const { return mName; }
 
-	virtual SceneObejctType GetSceneObjectType() const = 0;
+	SceneObejctType GetSceneObjectType() const { return mType; }
 
-	virtual bool Renderable() const = 0;
+	bool Renderable() const	{ return mRenderable; }
 
 	/**
 	 * Return a undefined bounding sphere, subclass must overload
@@ -75,11 +73,13 @@ protected:
 	
 	String mName;
 
+	SceneObejctType mType;
+
+	bool mRenderable;
+
 	BoundingSpheref mBoundingSphere;
 
 	Node* mParentNode;
-
-	SceneManager* mSceneManger;
 
 	uint32_t mFlag;
 

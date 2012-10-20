@@ -11,53 +11,53 @@
 
 namespace RcEngine {
 
-	RenderDevice::RenderDevice(void)
-		: mRenderFactory(nullptr), mCurrentFrameBuffer(nullptr), mScreenFrameBuffer(nullptr),
-		  mCurrentBlendState(nullptr), mCurrentRasterizerState(nullptr), mCurrentDepthStencilState(nullptr),
-		  mCurrentFrontStencilRef(0), mCurrentBackStencilRef(0)
-	{
-		Context::GetSingleton().SetRenderDevice(this);
+RenderDevice::RenderDevice(void)
+	: mRenderFactory(nullptr), mCurrentFrameBuffer(nullptr), mScreenFrameBuffer(nullptr),
+		mCurrentBlendState(nullptr), mCurrentRasterizerState(nullptr), mCurrentDepthStencilState(nullptr),
+		mCurrentFrontStencilRef(0), mCurrentBackStencilRef(0)
+{
+	Context::GetSingleton().SetRenderDevice(this);
+}
+
+RenderDevice::~RenderDevice(void)
+{
+}
+
+void RenderDevice::Resize( uint32_t width, uint32_t height )
+{
+	mScreenFrameBuffer->Resize(width, height);
+
+	Camera* cam = GetCurrentFrameBuffer()->GetCamera();
+	cam->SetProjectionParams(cam->GetFov(), (float)width/(float)height, cam->GetNearPlane(), cam->GetFarPlane());
+}
+
+
+void RenderDevice::BindFrameBuffer( const shared_ptr<FrameBuffer>& fb )
+{
+	assert(fb);
+
+	if( mCurrentFrameBuffer && (fb != mCurrentFrameBuffer) )
+	{	
+		mCurrentFrameBuffer->OnUnbind();
 	}
 
-	RenderDevice::~RenderDevice(void)
+	mCurrentFrameBuffer = fb; 
+
+	if(mCurrentFrameBuffer->IsDirty())
 	{
+		mCurrentFrameBuffer->OnBind();
+		DoBindFrameBuffer(mCurrentFrameBuffer);
 	}
+}
 
-	void RenderDevice::Resize( uint32_t width, uint32_t height )
-	{
-		mScreenFrameBuffer->Resize(width, height);
+RenderFactory* RenderDevice::GetRenderFactory() const
+{
+	return mRenderFactory;
+}
 
-		Camera* cam = GetCurrentFrameBuffer()->GetCamera();
-		cam->SetProjectionParams(cam->GetFov(), (float)width/(float)height, cam->GetNearPlane(), cam->GetFarPlane());
-	}
-
-
-	void RenderDevice::BindFrameBuffer( const shared_ptr<FrameBuffer>& fb )
-	{
-		assert(fb);
-
-		if( mCurrentFrameBuffer && (fb != mCurrentFrameBuffer) )
-		{	
-			mCurrentFrameBuffer->OnUnbind();
-		}
-
-		mCurrentFrameBuffer = fb; 
-
-		if(mCurrentFrameBuffer->IsDirty())
-		{
-			mCurrentFrameBuffer->OnBind();
-			DoBindFrameBuffer(mCurrentFrameBuffer);
-		}
-	}
-
-	RenderFactory* RenderDevice::GetRenderFactory() const
-	{
-		return mRenderFactory;
-	}
-
-	void RenderDevice::Render( EffectTechnique& tech, RenderOperation& op )
-	{
-		DoRender(tech, op);
-	}
+void RenderDevice::Render( EffectTechnique& tech, RenderOperation& op )
+{
+	DoRender(tech, op);
+}
 
 } // Namespace RcEngine

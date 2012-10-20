@@ -23,10 +23,6 @@ public:
 	Entity( const String& name, const shared_ptr<Mesh>& mesh );
 	~Entity();
 
-	bool Renderable() const											{ return true; }
-
-	SceneObejctType GetSceneObjectType() const						{ return SOT_Entity; }
-
 	const BoundingSpheref& GetWorldBoundingSphere() const;
 
 	const BoundingSpheref& GetBoundingSphere() const;
@@ -66,7 +62,6 @@ protected:
 
 	unordered_map<String, SceneObject*> mChildAttachedObjects;
 	
-
 	bool mDisplaySkeleton;
 
 	mutable BoundingSpheref mBoundingShere;
@@ -76,7 +71,6 @@ protected:
 	uint32_t mNumBoneMatrices;
 
 	SkinnedAnimationPlayer* mAnimationPlayer;
-
 };
 
 

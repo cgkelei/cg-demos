@@ -22,6 +22,9 @@ Entity::Entity( const String& name, const shared_ptr<Mesh>& mesh )
 	: SceneObject(name), mNumBoneMatrices(0), mMesh(mesh),
 	mSkeleton( mesh->GetSkeleton() ? mesh->GetSkeleton()->Clone() : 0 )
 {
+	mType = SOT_Entity;
+	mRenderable = true;
+
 	Initialize();
 }
 

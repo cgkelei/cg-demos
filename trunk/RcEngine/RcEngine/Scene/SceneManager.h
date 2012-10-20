@@ -8,8 +8,8 @@
 
 namespace RcEngine {
 
-class SceneObject;
 class Sky;
+class SceneObject;
 
 struct _ApiExport RenderQueueItem
 {
@@ -47,6 +47,10 @@ public:
 	void DestroySceneNode( SceneNode* node );
 
 	Entity* CreateEntity( const String& entityName, const String& meshName, const String& groupName );
+	Entity* FindEntity(const String& entityName);
+	
+	Light* CreateLight(const String& lightName);
+	Light* FindLight(const String& lightName);
 
 	void CreateSkyBox( const shared_ptr<Texture>& texture, bool cubemap = true, float distance = 100.0f );
 
@@ -82,7 +86,7 @@ protected:
 	SceneNode* mSkyBoxNode;	
 	Sky* mSkyBox;
 
-	vector<Entity*> mEntityLists;
+	unordered_map<String, SceneObject*> mSceneObjects;
 
 	vector< RenderQueueItem > mRendeQueue;
 };

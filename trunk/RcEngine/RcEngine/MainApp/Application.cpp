@@ -21,6 +21,7 @@
 #include <Graphics/Texture.h>
 #include <Graphics/AnimationClip.h>
 #include <Graphics/Mesh.h>
+#include <Graphics/Pipeline.h>
 
 namespace RcEngine {
 
@@ -37,6 +38,7 @@ Application::Application( const String& config )
 	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Effect, "Effect", Effect::FactoryFunc);
 	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Animation, "Animation",AnimationClip::FactoryFunc);
 	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Texture, "Texture", TextureResource::FactoryFunc);
+	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Pipeline, "Pipeline", Pipeline::FactoryFunc);
 
 	ReadConfiguration();
 
@@ -103,7 +105,7 @@ void Application::Tick()
 		Update(mTimer.GetDeltaTime());
 
 		shared_ptr<FrameBuffer> currentFrameBuffer = renderDevice.GetCurrentFrameBuffer();
-		renderDevice.BindFrameBuffer(currentFrameBuffer);
+		//renderDevice.BindFrameBuffer(currentFrameBuffer);
 
 		// update scene graph
 		sceneMan.UpdateSceneGraph(mTimer.GetDeltaTime());
@@ -203,6 +205,8 @@ void Application::ReadConfiguration()
 	mSettings.Width = graphicNode->Attribute("Width")->ValueUInt();
 	mSettings.Height = graphicNode->Attribute("Height")->ValueUInt();
 	mSettings.Fullscreen = graphicNode->Attribute("FullScreen")->ValueInt() != 0;
+	mSettings.ColorFormat = PixelFormatUtils::GetPixelFormat(graphicNode->Attribute("ColorForamt")->ValueString());
+	mSettings.DepthStencilFormat = PixelFormatUtils::GetPixelFormat(graphicNode->Attribute("DepthStencilFormat")->ValueString());
 
 	XMLNodePtr sampleNode = graphicNode->FirstNode("Sample");
 	if (sampleNode)
@@ -217,8 +221,7 @@ void Application::ReadConfiguration()
 		mSettings.SyncInterval = syncNode->Attribute("Interval")->ValueUInt();
 	}
 	
-	mSettings.ColorFormat = PF_R8G8B8A8;
-	mSettings.DepthStencilFormat = PF_Depth24Stencil8;
+	
 
 	XMLNodePtr resNode = appNode->FirstNode("Resource");
 	for (XMLNodePtr groupNode = resNode->FirstNode("Group"); groupNode; groupNode = groupNode->NextSibling("Group"))

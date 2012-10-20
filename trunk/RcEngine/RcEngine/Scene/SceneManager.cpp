@@ -15,7 +15,7 @@
 #include <IO/FileSystem.h>
 #include <Resource/ResourceManager.h>
 #include <Scene/SubEntity.h>
-
+#include <Scene/Light.h>
 
 namespace RcEngine {
 
@@ -99,13 +99,18 @@ Entity* SceneManager::CreateEntity( const String& entityName, const String& mesh
 {
 	Entity* entity;
 
+	if (mSceneObjects.find(entityName) != mSceneObjects.end())
+	{
+		ENGINE_EXCEPT(Exception::ERR_DUPLICATE_ITEM, "Scene Object with name " +entityName+" already exits", "SceneManager::CreateLight");
+	}
+
 	shared_ptr<Mesh> mesh = std::static_pointer_cast<Mesh>(
 		ResourceManager::GetSingleton().GetResourceByName(ResourceTypes::Mesh, meshName, groupName));
 
 	mesh->Load();
 
 	entity = new Entity(entityName, mesh);
-	mEntityLists.push_back(entity);
+	mSceneObjects.insert(std::make_pair(entityName, entity));
 
 	return entity;
 }
@@ -162,6 +167,53 @@ void SceneManager::RenderScene()
 AnimationController* SceneManager::GetAnimationController() const
 {
 	return mAnimationController;
+}
+
+Light* SceneManager::CreateLight( const String& name)
+{
+	if (mSceneObjects.find(name) != mSceneObjects.end())
+	{
+		ENGINE_EXCEPT(Exception::ERR_DUPLICATE_ITEM, "Scene Object with name " +name+" already exits", "SceneManager::CreateLight");
+	}
+
+	Light* light = new Light(name);
+	mSceneObjects.insert(std::make_pair(name, light));
+
+	return light;
+}
+
+Entity* SceneManager::FindEntity( const String& entityName )
+{
+	Entity* retVal = nullptr;
+
+	auto found = mSceneObjects.find(entityName);
+
+	if (found != mSceneObjects.end())
+	{
+		if (found->second->GetSceneObjectType() == SOT_Entity)
+		{
+			retVal = static_cast<Entity*>(found->second);
+		}
+	}
+
+	return retVal;
+}
+
+Light* SceneManager::FindLight( const String& lightName )
+{
+	Light* retVal = nullptr;
+
+	auto found = mSceneObjects.find(lightName);
+
+	if (found != mSceneObjects.end())
+	{
+		if (found->second->GetSceneObjectType() == SOT_Light)
+		{
+			retVal = static_cast<Light*>(found->second);
+		}
+	}
+
+	return retVal;
 }
 
 }

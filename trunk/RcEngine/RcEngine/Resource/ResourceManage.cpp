@@ -67,6 +67,10 @@ ResourceHandle ResourceManager::AddResource( uint32_t type, const String& name, 
 		{
 			retVal = resIter->second->GetResourceHandle();; 
 		}
+		else
+		{
+			retVal = AddNonExitingResouce(type, name, group);
+		}
 	}
 	else
 	{

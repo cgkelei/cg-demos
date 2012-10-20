@@ -288,6 +288,8 @@ public:
 	static bool IsLuminance(PixelFormat format);
 
 	static void GetNumDepthStencilBits(PixelFormat format, uint32_t& depth, uint32_t& stencil);
+
+	static PixelFormat GetPixelFormat(const String& value);
 		
 };
 

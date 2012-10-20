@@ -44,7 +44,7 @@ OpenGLDepthStencilView::OpenGLDepthStencilView( Texture& texture, uint32_t arrIn
 			"OpenGLDepthStencilView::OpenGLDepthStencilView");
 	}
 
-	if(PixelFormatUtils::IsDepthStencil(texture.GetTextureFormat()))
+	if(!PixelFormatUtils::IsDepthStencil(texture.GetTextureFormat()))
 	{
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Texture Type Error, Only Depth Texture Needed",
 			"OpenGLDepthStencilView::OpenGLDepthStencilView");
@@ -115,7 +115,7 @@ void OpenGLDepthStencilView::OnAttach(FrameBuffer& fb, Attachment attr)
 void OpenGLDepthStencilView::OnDetach(FrameBuffer& fb, Attachment attr)
 {
 	assert(attr == ATT_DepthStencil);
-	OpenGLRenderView::OnAttach(fb, attr);
+	OpenGLRenderView::OnDetach(fb, attr);
 
 	if(mLevel < 0)
 	{
