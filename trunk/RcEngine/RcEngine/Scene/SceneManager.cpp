@@ -20,15 +20,17 @@
 namespace RcEngine {
 
 SceneManager::SceneManager()
-	: mSceneRoot(nullptr), mSkyBox(nullptr), mSkyBoxNode(nullptr),
-	 mAnimationController(new AnimationController)
+	: mSkyBox(nullptr), mSkyBoxNode(nullptr), mAnimationController(new AnimationController)
 {
 	Context::GetSingleton().SetSceneManager(this);
+
+	RegisterType(SOT_Entity, "Entity Type", nullptr, nullptr, Entity::FactoryFunc);
+	RegisterType(SOT_Light, "Light Type", nullptr, nullptr, Light::FactoryFunc);
 }
 
 SceneManager::~SceneManager()
 {
-
+	ClearScene();
 }
 
 SceneNode* SceneManager::CreateSceneNode( const String& name )
@@ -38,7 +40,6 @@ SceneNode* SceneManager::CreateSceneNode( const String& name )
 	return node;
 }
 
-
 SceneNode* SceneManager::CreateSceneNodeImpl( const String& name )
 {
 	return new SceneNode(this, name);
@@ -46,13 +47,26 @@ SceneNode* SceneManager::CreateSceneNodeImpl( const String& name )
 
 SceneNode* SceneManager::GetRootSceneNode()
 {
-	if (!mSceneRoot)
+	SceneNode* root;
+
+	if (mAllSceneNodes.empty())
 	{
-		mSceneRoot = CreateSceneNodeImpl("SceneRoot");
+		root = CreateSceneNodeImpl("SceneRoot");
+		mAllSceneNodes.push_back(root);
+	}
+	else
+	{
+		root = mAllSceneNodes[0];
 	}
 
-	return mSceneRoot;
+	return root;
 }
+
+AnimationController* SceneManager::GetAnimationController() const
+{
+	return mAnimationController;
+}
+
 
 void SceneManager::DestroySceneNode( SceneNode* node )
 {
@@ -75,10 +89,10 @@ void SceneManager::DestroySceneNode( SceneNode* node )
 	mAllSceneNodes.erase(found);
 }
 
-void SceneManager::UpdateRenderQueue( Camera* cam )
+void SceneManager::UpdateRenderQueue(Camera* cam, RenderOrder order)
 {
 	mRendeQueue.clear();
-	GetRootSceneNode()->FindVisibleObjects(cam);
+	GetRootSceneNode()->OnUpdateRenderQueues(cam, order);
 
 	// Update skynode same with camera positon, add sky box to render queue
 	if (mSkyBoxNode)
@@ -88,30 +102,37 @@ void SceneManager::UpdateRenderQueue( Camera* cam )
 	}
 }
 
+
 void SceneManager::UpdateSceneGraph( float delta )
 {
+	// update anination controller first 
 	mAnimationController->Update(delta);
+
+	// update scene node transform
 	GetRootSceneNode()->Update();
 }
 
 
 Entity* SceneManager::CreateEntity( const String& entityName, const String& meshName, const String& groupName )
 {
-	Entity* entity;
-
-	if (mSceneObjects.find(entityName) != mSceneObjects.end())
+	auto found = mRegistry.find(SOT_Entity);
+	if (found == mRegistry.end())
 	{
-		ENGINE_EXCEPT(Exception::ERR_DUPLICATE_ITEM, "Scene Object with name " +entityName+" already exits", "SceneManager::CreateLight");
+		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Entity type haven't Registed", "SceneManager::CreateEntity");
 	}
 
-	shared_ptr<Mesh> mesh = std::static_pointer_cast<Mesh>(
-		ResourceManager::GetSingleton().GetResourceByName(ResourceTypes::Mesh, meshName, groupName));
+	/*if (mSceneObjects.find(entityName) != mSceneObjects.end())
+	{
+	ENGINE_EXCEPT(Exception::ERR_DUPLICATE_ITEM, "Scene Object with name " +entityName+" already exits", "SceneManager::CreateLight");
+	}*/
 
-	mesh->Load();
+	NameValuePairList params;
+	params["ResourceGroup"] = groupName;
+	params["Mesh"] = meshName;
 
-	entity = new Entity(entityName, mesh);
-	mSceneObjects.insert(std::make_pair(entityName, entity));
-
+	Entity* entity = static_cast<Entity*>((found->second.factoryFunc)(entityName, &params));
+	mSceneObjectCollections[SOT_Entity].push_back(entity);
+	
 	return entity;
 }
 
@@ -164,56 +185,59 @@ void SceneManager::RenderScene()
 	}
 }
 
-AnimationController* SceneManager::GetAnimationController() const
-{
-	return mAnimationController;
-}
-
 Light* SceneManager::CreateLight( const String& name)
 {
-	if (mSceneObjects.find(name) != mSceneObjects.end())
+	auto found = mRegistry.find(SOT_Light);
+	if (found == mRegistry.end())
 	{
-		ENGINE_EXCEPT(Exception::ERR_DUPLICATE_ITEM, "Scene Object with name " +name+" already exits", "SceneManager::CreateLight");
+		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Light type haven't Registed", "SceneManager::CreateEntity");
 	}
 
-	Light* light = new Light(name);
-	mSceneObjects.insert(std::make_pair(name, light));
+	/*if (mSceneObjects.find(name) != mSceneObjects.end())
+	{
+		ENGINE_EXCEPT(Exception::ERR_DUPLICATE_ITEM, "Scene Object with name " +name+" already exits", "SceneManager::CreateLight");
+	}*/
+
+	Light* light = static_cast<Light*>((found->second.factoryFunc)(name, nullptr));
+	mSceneObjectCollections[SOT_Light].push_back(light);
 
 	return light;
 }
 
-Entity* SceneManager::FindEntity( const String& entityName )
+
+void SceneManager::ClearScene()
 {
-	Entity* retVal = nullptr;
+	Safe_Delete(mAnimationController);
 
-	auto found = mSceneObjects.find(entityName);
-
-	if (found != mSceneObjects.end())
+	for (auto iter = mAllSceneNodes.begin(); iter != mAllSceneNodes.end(); ++iter)
 	{
-		if (found->second->GetSceneObjectType() == SOT_Entity)
+		Safe_Delete(*iter);
+	}
+	mAllSceneNodes.clear();
+
+	for (auto iIter = mSceneObjectCollections.begin(); iIter != mSceneObjectCollections.end(); ++iIter)
+	{
+		for (auto jIter = iIter->second.begin(); jIter != iIter->second.end(); ++jIter)
 		{
-			retVal = static_cast<Entity*>(found->second);
+			Safe_Delete(*jIter);
 		}
 	}
-
-	return retVal;
+	mSceneObjectCollections.clear();
 }
 
-Light* SceneManager::FindLight( const String& lightName )
+void SceneManager::RegisterType( uint32_t type, const String& typeString, ResTypeInitializationFunc inf, ResTypeReleaseFunc rf, ResTypeFactoryFunc ff )
 {
-	Light* retVal = nullptr;
+	SceneObjectRegEntry entry;
+	entry.typeString = typeString;
+	entry.initializationFunc = inf;
+	entry.releaseFunc = rf;
+	entry.factoryFunc = ff;
+	mRegistry[type] = entry;
 
-	auto found = mSceneObjects.find(lightName);
-
-	if (found != mSceneObjects.end())
-	{
-		if (found->second->GetSceneObjectType() == SOT_Light)
-		{
-			retVal = static_cast<Light*>(found->second);
-		}
-	}
-
-	return retVal;
+	// Initialize resource type
+	if( inf != 0 ) (*inf)();
 }
+
+
 
 }

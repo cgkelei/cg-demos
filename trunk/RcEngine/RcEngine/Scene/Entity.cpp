@@ -33,24 +33,6 @@ Entity::~Entity()
 
 }
 
-const BoundingSpheref& Entity::GetWorldBoundingSphere() const
-{
-	if (!mParentNode)
-	{
-		ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Entity:" + mName + " Haven't attach to a scene node yet, world bound not exits",
-			"Entity::GetWorldBoundingSphere");
-	}
-
-	if (!mMesh)
-	{
-		ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Entity:" + mName + " doesn't load a mesh yet",
-			"Entity::GetWorldBoundingSphere");
-	}
-
-	mBoundingShere = Transform(mMesh->GetBoundingSphere(), mParentNode->GetWorldTransform());
-
-	return mBoundingShere;
-}
 
 void Entity::Initialize()
 {
@@ -104,7 +86,27 @@ void Entity::OnDetach( Node* node )
 }
 
 
-const BoundingSpheref& Entity::GetBoundingSphere() const
+const BoundingBoxf& Entity::GetWorldBoundingBox() const
+{
+	if (!mParentNode)
+	{
+		ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Entity:" + mName + " Haven't attach to a scene node yet, world bound not exits",
+			"Entity::GetWorldBoundingSphere");
+	}
+
+	if (!mMesh)
+	{
+		ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Entity:" + mName + " doesn't load a mesh yet",
+			"Entity::GetWorldBoundingSphere");
+	}
+
+	mWorldBoundingBox = Transform(mMesh->GetBoundingBox(), mParentNode->GetWorldTransform());
+
+	return mWorldBoundingBox;
+}
+
+
+const BoundingBoxf& Entity::GetLocalBoundingBox() const
 {
 	if (!mMesh)
 	{
@@ -112,7 +114,7 @@ const BoundingSpheref& Entity::GetBoundingSphere() const
 			"Entity::GetWorldBoundingSphere");
 	}
 
-	return mMesh->GetBoundingSphere();
+	return mMesh->GetBoundingBox();
 }
 
 bool Entity::HasSkeleton() const
@@ -135,18 +137,35 @@ AnimationPlayer* Entity::GetAnimationPlayer() const
 	return mAnimationPlayer;
 }
 
-void Entity::UpdateRenderQueue( RenderQueue& renderQueue, Camera* cam )
+void Entity::OnUpdateRenderQueue(RenderQueue& renderQueue, Camera* camera, RenderOrder order)
 {
 	// Add each visible SubEntity to the queue
 	for (auto iter= mSubEntityList.begin(); iter != mSubEntityList.end(); ++iter)
 	{
 		SubEntity* subEntity = *iter;
-		BoundingSpheref subWorldBoud = Transform(subEntity->GetBoundingSphere(), mParentNode->GetWorldTransform());
+		BoundingBoxf subWorldBoud = Transform(subEntity->GetBoundingBox(), mParentNode->GetWorldTransform());
 
 		// tode  mesh part world bounding has some bugs.
 
 		/*if(cam->Visible(subWorldBoud))
 		{*/
+
+			float sortKey = 0;
+
+			switch( order )
+			{
+			case RO_StateChange:
+				sortKey = (float)subEntity->GetMaterial()->GetResourceHandle();
+				break;
+			case RO_FrontToBack:
+				sortKey = NearestDistToAABB( camera->GetPosition(), subWorldBoud.Min, subWorldBoud.Max);
+				break;
+			case RO_BackToFront:
+				sortKey = -NearestDistToAABB( camera->GetPosition(), subWorldBoud.Min, subWorldBoud.Max);
+				break;
+			}
+
+
 			RenderQueueItem item;
 			item.Renderable = subEntity;
 			item.Type = SOT_Entity;
@@ -167,7 +186,7 @@ void Entity::UpdateRenderQueue( RenderQueue& renderQueue, Camera* cam )
 		{
 			SceneObject* child = iter->second;
 
-			bool visible = cam->Visible(child->GetWorldBoundingSphere());
+			bool visible = camera->Visible(child->GetWorldBoundingBox());
 
 			if (visible)
 			{
@@ -186,7 +205,7 @@ void Entity::UpdateRenderQueue( RenderQueue& renderQueue, Camera* cam )
 
 			if (visible)
 			{
-				child->UpdateRenderQueue(renderQueue, cam);
+				child->OnUpdateRenderQueue(renderQueue, camera, order);
 			}   
 		}
 	}
@@ -278,6 +297,41 @@ Bone* Entity::AttachObjectToBone( const String &boneName, SceneObject* sceneObj,
 */
 	return bone;
 }
+
+
+SceneObject* Entity::FactoryFunc( const String& name, const NameValuePairList* params)
+{
+	// must have mesh parameter
+	shared_ptr<Mesh> pMesh;
+
+	if (params != 0)
+	{
+		String groupName = "General";
+
+		auto found = params->find("ResourceGroup");
+		if (found != params->end())
+		{
+			groupName = found->second;
+		}
+
+		found = params->find("Mesh");
+		if (found != params->end())
+		{
+			// Get mesh (load if required)
+			pMesh = std::static_pointer_cast<Mesh>(
+				ResourceManager::GetSingleton().GetResourceByName(ResourceTypes::Mesh, found->second, groupName));	
+		}
+	}
+
+	if (!pMesh)
+	{
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Create entity failed.", "Entity::FactoryFunc");
+	}
+
+	return new Entity(name, pMesh);
+}
+
+
 
 
 

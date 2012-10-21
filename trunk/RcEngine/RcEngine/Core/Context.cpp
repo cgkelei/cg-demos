@@ -18,7 +18,7 @@ Context::Context()
 
 Context::~Context()
 {
-
+	//Safe_Delete(mInputSystem);
 }
 
 void Context::Init( std::string configFile )

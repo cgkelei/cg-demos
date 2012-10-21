@@ -3,7 +3,8 @@
 
 #include <Core/Prerequisites.h>
 #include <Scene/Node.h>
-#include <Math/BoundingSphere.h>
+#include <Math/BoundingBox.h>
+#include <Graphics/GraphicsCommon.h>
 
 namespace RcEngine {
 
@@ -17,17 +18,16 @@ public:
 	virtual ~SceneNode();
 
 	/**
-	 * Get world bound sphere, if it is dirty, update it
+	 * Get the world bounding box of this scene node, camera can cull if box out view frustum.
 	 */
-	const BoundingSpheref& GetWorldBoundingShpere() const;
+	const BoundingBoxf& GetWorldBoundingBox() const;
 
-	uint32_t GetNumAttachedObjects() const { return mAttachedObjects.size(); }
-
+	
 	void AttachObject( SceneObject* obj );
-
 	void DetachOject( SceneObject* obj );
-
 	void DetachAllObject(); 
+
+	uint32_t GetNumAttachedObjects() const;
 
 	/**
 	 * Get an attached object by given name.
@@ -49,9 +49,10 @@ public:
 	 */
 	void SetScene( SceneManager* scene );
 
-
-	void FindVisibleObjects( Camera* cam );
-
+	/**
+	 * Called when scene manager render queue update.
+	 */
+	void OnUpdateRenderQueues(Camera* camera,  RenderOrder order);
 	
 protected:
 	virtual Node* CreateChildImpl( const String& name );
@@ -66,10 +67,9 @@ protected:
 
 protected:
 
-	mutable BoundingSpheref mWorldBounds;
+	mutable BoundingBoxf mWorldBounds;
 
 	SceneManager* mScene;
-
 
 	std::vector<SceneObject*> mAttachedObjects;
 };

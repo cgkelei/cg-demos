@@ -68,7 +68,7 @@ void TestApp::LoadContent()
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 	
 	resMan.AddResource(ResourceTypes::Mesh, "him.mesh", "Custom");
-	resMan.AddResource(ResourceTypes::Mesh, "Teapot.mesh", "Custom");
+	//resMan.AddResource(ResourceTypes::Mesh, "Teapot.mesh", "Custom");
 	resMan.AddResource(ResourceTypes::Pipeline, "DeferredLighting.pipeline.xml", "General");
 
 	resMan.LoadAllFromDisk();

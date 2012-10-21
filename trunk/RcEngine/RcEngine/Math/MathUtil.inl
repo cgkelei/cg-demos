@@ -707,11 +707,11 @@ Transform( const BoundingBox<Real>& box, const Matrix4<Real>& matrix )
 	result.Merge( Transform(currentCorner, matrix) );
 
 	// min max min
-	currentCorner.Z() = oldMin.Z()
+	currentCorner.Z() = oldMin.Z();
 	result.Merge( Transform(currentCorner, matrix) );
 
 	// max max min
-	currentCorner.X() = oldMax.X()
+	currentCorner.X() = oldMax.X();
 	result.Merge( Transform(currentCorner, matrix) );
 
 	// max max max
@@ -770,4 +770,18 @@ Transform( const BoundingSphere<Real>& sphere, const Matrix4<Real>& matrix )
 	newRadius = (std::max)(newRadius, sphere.Radius * scale.Z());
 
 	return BoundingSphere<Real>(newCenter, newRadius);
+}
+
+template<typename Real>
+Real NearestDistToAABB( const Vector<Real, 3>& pos, const Vector<Real, 3>& mins, const Vector<Real, 3>& maxs )
+{
+	const Vector<Real, 3> center = (mins + maxs) * Real(0.5);
+	const Vector<Real, 3> extent = (maxs - mins) * Real(0.5);
+
+	Vector<Real, 3> nearestVec;
+	nearestVec.X() = (std::max)( Real(0), fabs( pos.X() - center.X() ) - extent.X() );
+	nearestVec.Y() = (std::max)( Real(0), fabs( pos.Y() - center.Y() ) - extent.Y() );
+	nearestVec.Z() = (std::max)( Real(0), fabs( pos.Z() - center.Z() ) - extent.Z() );
+
+	return nearestVec.Length();
 }

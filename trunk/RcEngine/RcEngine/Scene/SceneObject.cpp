@@ -5,7 +5,7 @@
 namespace RcEngine {
 
 // undefined bounding sphere
-static const BoundingSpheref UnDefineBoundingSphere;
+static const BoundingBoxf UnDefineBoundingBox;
 
 
 SceneObject::SceneObject( const String& name)
@@ -19,15 +19,9 @@ SceneObject::~SceneObject()
 
 }
 
-const BoundingSpheref& SceneObject::GetWorldBoundingSphere() const
+const BoundingBoxf& SceneObject::GetWorldBoundingBox() const
 {
-	return UnDefineBoundingSphere;
-}
-
-
-const BoundingSpheref& SceneObject::GetBoundingSphere() const
-{
-	return UnDefineBoundingSphere;
+	return UnDefineBoundingBox;
 }
 
 
@@ -55,9 +49,11 @@ void SceneObject::OnDetach( Node* node )
 }
 
 
-void SceneObject::UpdateRenderQueue( RenderQueue& renderQueue, Camera* cam )
+void SceneObject::OnUpdateRenderQueue( RenderQueue& renderQueue, Camera* cam, RenderOrder order )
 {
 
 }
+
+
 
 }

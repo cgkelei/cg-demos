@@ -77,4 +77,18 @@ bool Camera::Visible( const BoundingSpheref& sphere )
 	return true;
 }
 
+bool Camera::Visible( const BoundingBoxf& box )
+{
+	if (mFrustumDirty)
+	{
+		mFrustum.Update(mViewMatrix * mProjectionMatrix);
+		mFrustumDirty = false;
+	}
+
+	if (mFrustum.Contain(box) == CT_Disjoint)
+		return false;
+
+	return true;
+}
+
 } // Namespace RcEngine

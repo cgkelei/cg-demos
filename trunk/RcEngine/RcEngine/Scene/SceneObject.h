@@ -2,9 +2,11 @@
 #define MovableObject_h__
 
 #include <Core/Prerequisites.h>
-#include <Math/Matrix.h>
-#include <Math/BoundingSphere.h>
+#include <Graphics/GraphicsCommon.h>
 #include <Scene/SceneManager.h>
+#include <Math/BoundingBox.h>
+#include <Math/Matrix.h>
+
 
 namespace RcEngine {
 
@@ -44,21 +46,16 @@ public:
 	 * this function to return a real bounding sphere if it actually
 	 * have a bounding volume.
 	 */
-	virtual const BoundingSpheref& GetWorldBoundingSphere() const;
-	
-	/**
-	 * Get Local bounding sphere.
-	 */
-	virtual const BoundingSpheref& GetBoundingSphere() const;
+	virtual const BoundingBoxf& GetWorldBoundingBox() const;
+
+	const Matrix4f& GetWorldTransform() const;
 
 	/**
 	 * Called when scene manger update render queue.
 	 */
-	virtual void UpdateRenderQueue( RenderQueue& renderQueue, Camera* cam );
+	virtual void OnUpdateRenderQueue( RenderQueue& renderQueue, Camera* cam, RenderOrder order );
 	
 	Node* GetParentNode() const { return mParentNode; }
-
-	const Matrix4f& GetWorldTransform() const;
 
 	bool IsVisible() const { return mVisible; }
 
@@ -77,7 +74,7 @@ protected:
 
 	bool mRenderable;
 
-	BoundingSpheref mBoundingSphere;
+	BoundingBoxf mBoundingBox;
 
 	Node* mParentNode;
 

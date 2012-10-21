@@ -676,7 +676,7 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 	for (size_t mi = 0; mi < polysByMaterial.size(); ++mi)
 	{
 		shared_ptr<MeshPartData> meshPart = std::make_shared<MeshPartData>();
-		BoundingSpheref sphere;
+		BoundingBoxf boundingBox;
 		
 		// mesh part name
 		meshPart->Name = pNode->GetName();
@@ -737,7 +737,7 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 				vertex.Position = FbxToVector3f(pMesh->GetControlPointAt(ctrlPointIndex));
 				vertexFlag |= Vertex::ePosition;
 
-				sphere.Merge(vertex.Position);
+				boundingBox.Merge(vertex.Position);
 
 
 				if (vertexFlag & Vertex::eBlendWeight)
@@ -846,7 +846,7 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 
 				meshPart->Indices.push_back(index);
 			}
-			meshPart->Bound = sphere;
+			meshPart->Bound = boundingBox;
 		}
 		mesh->Bound.Merge(meshPart->Bound);
 		mesh->MeshParts.push_back(meshPart);
@@ -1105,10 +1105,19 @@ void FbxProcesser::BuildAndSaveXML( )
 		
 		// mesh bounding
 		XMLNodePtr meshBoundNode = meshxml.AllocateNode(XML_Node_Element, "bounding");
-		meshBoundNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", mesh.Bound.Center.X()));
-		meshBoundNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", mesh.Bound.Center.Y()));
-		meshBoundNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", mesh.Bound.Center.Z()));
-		meshBoundNode->AppendAttribute(meshxml.AllocateAttributeFloat("radius", mesh.Bound.Radius));
+
+		XMLNodePtr meshBoundMinNode = meshxml.AllocateNode(XML_Node_Element, "min");
+		meshBoundMinNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", mesh.Bound.Min.X()));
+		meshBoundMinNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", mesh.Bound.Min.Y()));
+		meshBoundMinNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", mesh.Bound.Min.Z()));
+		meshBoundNode->AppendNode(meshBoundMinNode);
+
+		XMLNodePtr meshBoundMaxNode = meshxml.AllocateNode(XML_Node_Element, "max");
+		meshBoundMaxNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", mesh.Bound.Max.X()));
+		meshBoundMaxNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", mesh.Bound.Max.Y()));
+		meshBoundMaxNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", mesh.Bound.Max.Z()));
+		meshBoundNode->AppendNode(meshBoundMaxNode);
+
 		meshNode->AppendNode(meshBoundNode);
 
 		// mesh skeleton
@@ -1164,12 +1173,23 @@ void FbxProcesser::BuildAndSaveXML( )
 			// add to mesh
 			meshNode->AppendNode(meshPartNode);
 
+			//  bounding
 			XMLNodePtr boundNode = meshxml.AllocateNode(XML_Node_Element, "bounding");
-			boundNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", meshPart.Bound.Center.X()));
-			boundNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", meshPart.Bound.Center.Y()));
-			boundNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", meshPart.Bound.Center.Z()));
-			boundNode->AppendAttribute(meshxml.AllocateAttributeFloat("radius", meshPart.Bound.Radius));
+
+			XMLNodePtr boundMinNode = meshxml.AllocateNode(XML_Node_Element, "min");
+			boundMinNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", meshPart.Bound.Min.X()));
+			boundMinNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", meshPart.Bound.Min.Y()));
+			boundMinNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", meshPart.Bound.Min.Z()));
+			boundNode->AppendNode(boundMinNode);
+
+			XMLNodePtr boundMaxNode = meshxml.AllocateNode(XML_Node_Element, "max");
+			boundMaxNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", meshPart.Bound.Max.X()));
+			boundMaxNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", meshPart.Bound.Max.Y()));
+			boundMaxNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", meshPart.Bound.Max.Z()));
+			boundNode->AppendNode(boundMaxNode);
+
 			meshPartNode->AppendNode(boundNode);
+
 
 			XMLNodePtr verticesNode = meshxml.AllocateNode(XML_Node_Element, "vertices");
 			XMLAttributePtr verticesCountAttr = meshxml.AllocateAttributeUInt("verticesCount", meshPart.Vertices.size());
@@ -1355,9 +1375,9 @@ void FbxProcesser::BuildAndSaveBinary( )
 		// write mesh name
 		stream.WriteString(mesh.Name);
 
-		// write mesh bounding sphere
-		stream.Write(&mesh.Bound.Center, sizeof(Vector3f));
-		stream.WriteFloat(mesh.Bound.Radius);
+		// write mesh bounding box
+		stream.Write(&mesh.Bound.Min, sizeof(Vector3f));
+		stream.Write(&mesh.Bound.Max, sizeof(Vector3f));
 
 		// write mesh part count
 		stream.WriteUInt(mesh.MeshParts.size());
@@ -1375,8 +1395,8 @@ void FbxProcesser::BuildAndSaveBinary( )
 			stream.WriteString(meshPart.MaterialName + ".material.xml");
 
 			// write sub mesh bounding sphere
-			stream.Write(&meshPart.Bound.Center, sizeof(Vector3f));
-			stream.WriteFloat(meshPart.Bound.Radius);
+			stream.Write(&meshPart.Bound.Min, sizeof(Vector3f));
+			stream.Write(&meshPart.Bound.Max, sizeof(Vector3f));
 
 			// write vertex count and vertex size
 			stream.WriteUInt(meshPart.Vertices.size());
@@ -1511,7 +1531,6 @@ void FbxProcesser::BuildAndSaveBinary( )
 			stream.WriteUInt(0);
 		}
 
-
 		// write animation clips
 		if (mesh.MeshSkeleton)
 		{
@@ -1572,10 +1591,6 @@ void FbxProcesser::BuildAndSaveBinary( )
 		{
 			stream.WriteUInt(0);
 		}
-
-
-		
-		stream.WriteString("dudeWalk.anim");
 		
 		stream.Close();
 	}
@@ -1701,7 +1716,7 @@ int main()
 	FbxProcesser fbxProcesser;
 	fbxProcesser.Initialize();
 
-	if (fbxProcesser.LoadScene("test.FBX"))
+	if (fbxProcesser.LoadScene("dude.FBX"))
 	{
 		fbxProcesser.ProcessScene(0);
 		fbxProcesser.BuildAndSaveXML();

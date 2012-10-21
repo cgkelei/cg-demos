@@ -43,12 +43,11 @@ void MeshPart::Load(  Stream& source )
 	// read material name
 	mMaterialName = source.ReadString(); 
 
-	// read bounding sphere
-	Vector3f center;
-	float radius;
-	source.Read(&center, sizeof(Vector3f));
-	radius = source.ReadFloat();
-	mBoundingSphere = BoundingSpheref(center, radius);
+	// read bounding box
+	Vector3f min, max;
+	source.Read(&min, sizeof(Vector3f));
+	source.Read(&max, sizeof(Vector3f));
+	mBoundingBox = BoundingBoxf(min, max);
 
 	// read vertex count
 	uint32_t vertexCount = source.ReadUInt();

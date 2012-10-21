@@ -79,6 +79,9 @@ using std::unordered_map;
 using std::unordered_set;
 using namespace tthread;
 
+/// Name / value parameter pair (first = name, second = value)
+typedef std::map<String, String> NameValuePairList;
+
 
 #define Safe_Delete(p) if(p) { delete p; p = NULL;}
 
@@ -101,17 +104,13 @@ shared_ptr<Ty> static_pointer_cast_checked(const shared_ptr<Other>& sp)
 
 namespace RcEngine {
 
-class Application;
 class Window;
 class Stream;
 class Timer;
-class Exception;
 class IModule;
-
 class Resource;
 class ResourceManager;
 class InputSystem;
-struct RenderSettings;
 class RenderDevice;
 class RenderFactory;
 class RenderView;
@@ -121,12 +120,12 @@ class GraphicsBuffer;
 class VertexDeclaration;
 class Camera;
 class Renderable;
-
 class Mesh;
 class MeshPart;
 class Model;
 class Material;
 class Pipeline;
+class Renderer;
 class Effect;
 class EffectParameter;
 class EffectTechnique;

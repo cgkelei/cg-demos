@@ -75,3 +75,27 @@ ContainmentType Frustum<Real>::Contain( const BoundingSphere<Real>& sphere )
 
 	return allInside ? CT_Contains : CT_Intersects;
 }
+
+template<typename Real>
+ContainmentType Frustum<Real>::Contain( const BoundingBox<Real>& box )
+{
+	Vector<Real,3> center = box.Center();
+	Vector<Real,3> half = center - box.Min;
+	bool allInside = true;
+
+	for (unsigned i = 0; i < 6; ++i)
+	{
+		Vector<Real,3> absNormal = Vector<Real,3>( fabs(Planes[i].Normal.X()), 
+			fabs(Planes[i].Normal.Y()), fabs(Planes[i].Normal.Z()) );
+
+		Real singedDist = Planes[i].DistanceTo(center);
+		Real extent = Dot(absNormal, half);
+
+		if (singedDist < -extent)
+			return CT_Disjoint;
+		else if (singedDist < extent)
+			allInside = false;
+	}
+	return allInside ? CT_Contains : CT_Intersects;
+}
+

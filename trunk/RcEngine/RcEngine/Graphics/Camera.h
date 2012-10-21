@@ -30,6 +30,7 @@ public:
 	const Frustumf& GetFrustum() const;
 
 	bool Visible( const BoundingSpheref& sphere );
+	bool Visible( const BoundingBoxf& box );
 
 private:
 	Vector3f mPosition;

@@ -33,6 +33,9 @@ Application::Application( const String& config )
 	FileSystem::Initialize();
 	ResourceManager::Initialize();
 
+	// todo add sub scene manager
+	new SceneManager;
+
 	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Mesh, "Mesh", Mesh::FactoryFunc);
 	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Material, "Material", Material::FactoryFunc);
 	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Effect, "Effect", Effect::FactoryFunc);
@@ -47,10 +50,13 @@ Application::Application( const String& config )
 
 Application::~Application( void )
 {
+	// todo, move to dll unload
+	delete Context::GetSingleton().GetSceneManagerPtr();
+
 	ResourceManager::Finalize();
 	ModuleManager::Finalize();
-	Context::Finalize();
 	FileSystem::Finalize();
+	Context::Finalize();
 }
 
 void Application::RunGame()
@@ -109,7 +115,7 @@ void Application::Tick()
 
 		// update scene graph
 		sceneMan.UpdateSceneGraph(mTimer.GetDeltaTime());
-		sceneMan.UpdateRenderQueue(currentFrameBuffer->GetCamera());
+		sceneMan.UpdateRenderQueue(currentFrameBuffer->GetCamera(), RO_FrontToBack);
 
 		static int frameCount = 0;
 		static float baseTime = 0;
@@ -146,8 +152,6 @@ void Application::LoadAllModules()
 
 	ModuleManager::GetSingleton().Load(MT_Input_OIS);
 	ModuleManager::GetSingleton().GetMoudleByType(MT_Input_OIS)->Initialise();
-
-	new SceneManager;
 }
 
 void Application::UnloadAllModules()

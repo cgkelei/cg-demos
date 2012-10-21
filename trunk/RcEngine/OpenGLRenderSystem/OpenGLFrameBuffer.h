@@ -17,7 +17,6 @@ public:
 	virtual void DoUnbind();
 
 	virtual void Resize(uint32_t width, uint32_t height);
-	virtual void Clear(uint32_t flags, ColorRGBA& clr, float depth, uint32_t stencil);
 	virtual void SwapBuffers();
 
 	GLuint GetFrameBufferObject() const { return mFrameBufferObject; }

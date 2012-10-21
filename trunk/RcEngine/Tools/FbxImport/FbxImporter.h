@@ -137,7 +137,7 @@ public:
 		String Name;
 		String MaterialName;
 
-		BoundingSpheref Bound;
+		BoundingBoxf Bound;
 
 		vector<uint32_t> Indices;
 		vector<Vertex> Vertices;
@@ -150,7 +150,7 @@ public:
 		MeshData() : MeshSkeleton(nullptr) {}
 
 		String Name;
-		BoundingSpheref Bound;
+		BoundingBoxf Bound;
 		vector<shared_ptr<MeshPartData> > MeshParts;
 		shared_ptr<Skeleton> MeshSkeleton;
 	};

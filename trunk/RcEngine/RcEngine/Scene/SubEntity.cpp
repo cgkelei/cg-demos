@@ -89,9 +89,9 @@ const shared_ptr<RenderOperation>& SubEntity::GetRenderOperation() const
 	return mRenderOperation;
 }
 
-const BoundingSpheref& SubEntity::GetBoundingSphere() const
+const BoundingBoxf& SubEntity::GetBoundingBox() const
 {
-	return mMeshPart->GetBoundingSphere();
+	return mMeshPart->GetBoundingBox();
 }
 
 

@@ -16,27 +16,15 @@ enum PlaneSide
 	Both_Side
 };
 
-/** 
- * The plane is represented as Dot(N,X) - Distance = 0 where N is a unit-length
- * normal vector, Distance is the distance of the plane along its normal from the
- * origin, and X is any point on the plane. 
- */
 template< typename Real >
 class Plane
 {
 public:
 	Plane();
-	Plane(const Plane& rhs);
-
-	// specify N and c directly
 	Plane(const Vector<Real, 3>& nroaml, Real distance);
-
-	// N is specified, C = Dot(N,P) where P is on the plane
-	Plane(const Vector<Real, 3>& nroaml, const Vector<Real, 3>& point);
-		
-	// N = Cross(P1-P0,P2-P0)/Length(Cross(P1-P0,P2-P0)), D = -Dot(N,P0) where
-	// P0, P1, P2 are points on the plane.
+	Plane(const Vector<Real, 3>& nroaml, const Vector<Real, 3>& point);	
 	Plane(const Vector<Real, 3>& point1, const Vector<Real, 3>& point2, const Vector<Real, 3>& point3);
+	Plane(const Plane& rhs);
 
 	// assignment
 	Plane& operator= (const Plane& rhs);

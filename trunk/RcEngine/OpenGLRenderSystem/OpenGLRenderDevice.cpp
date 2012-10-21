@@ -33,6 +33,7 @@ OpenGLRenderDevice::OpenGLRenderDevice()
 
 OpenGLRenderDevice::~OpenGLRenderDevice(void)
 {
+	Safe_Delete(mRenderFactory);
 }
 
 void OpenGLRenderDevice::Create()

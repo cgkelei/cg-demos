@@ -3,7 +3,7 @@
 
 #include <Core/Prerequisites.h>
 #include <Graphics/GraphicsCommon.h>
-#include <Math/BoundingSphere.h>
+#include <Math/BoundingBox.h>
 #include <Math/Matrix.h>
 #include <Resource/Resource.h>
 
@@ -29,7 +29,7 @@ public:
 	virtual ~Mesh();
 
 	const String& GetName() const								{ return mName; }
-	const BoundingSpheref& GetBoundingSphere() const			{ return mBoundingSphere; }
+	const BoundingBoxf& GetBoundingBox() const			    { return mBoundingBox; }
 
 
 	uint32_t GetNumMeshPart() const								{ return mMeshParts.size(); }
@@ -52,7 +52,7 @@ public:
 
 private:
 			
-	BoundingSpheref mBoundingSphere;
+	BoundingBoxf mBoundingBox;
 
 	uint32_t mPrimitiveCount;
 	uint32_t mVertexCount;

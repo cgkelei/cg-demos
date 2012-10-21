@@ -5,6 +5,7 @@
 
 #include <Core/Prerequisites.h>
 #include <Graphics/Renderable.h>
+#include <Graphics/GraphicsCommon.h>
 
 namespace RcEngine {
 
@@ -26,15 +27,32 @@ typedef vector<RenderQueueItem> RenderQueue;
 class _ApiExport SceneManager
 {
 public:
+	typedef void (*ResTypeInitializationFunc)();
+	typedef void (*ResTypeReleaseFunc)();
+	typedef SceneObject* (*ResTypeFactoryFunc)( const String& name, const NameValuePairList* params);
+
+	struct SceneObjectRegEntry
+	{
+		String					   typeString;
+		ResTypeInitializationFunc  initializationFunc;  // Called when type is registered
+		ResTypeReleaseFunc         releaseFunc;  // Called when type is unregistered
+		ResTypeFactoryFunc         factoryFunc;  // Factory to create resource object
+	};
+
+public:
 	SceneManager();
 	virtual ~SceneManager();
+
+	/**
+	 * Register a scene object type.
+	 */
+	void RegisterType(uint32_t type, const String& typeString, ResTypeInitializationFunc inf,
+		ResTypeReleaseFunc rf, ResTypeFactoryFunc ff );
 
 	/**
 	 * Get root scene node. if not created, create it.
 	 */
 	SceneNode* GetRootSceneNode();
-
-	SceneNode* FindSceneNode( const String& name ) const;
 
 	/**
 	 * Create a new scene node, this will track the node in scene manager.
@@ -46,11 +64,11 @@ public:
 	 */
 	void DestroySceneNode( SceneNode* node );
 
+
+	SceneNode* FindSceneNode( const String& name ) const;
+
 	Entity* CreateEntity( const String& entityName, const String& meshName, const String& groupName );
-	Entity* FindEntity(const String& entityName);
-	
-	Light* CreateLight(const String& lightName);
-	Light* FindLight(const String& lightName);
+	Light* CreateLight( const String& name);
 
 	void CreateSkyBox( const shared_ptr<Texture>& texture, bool cubemap = true, float distance = 100.0f );
 
@@ -62,7 +80,8 @@ public:
 	/**
 	 * Update render queue, and remove scene node outside of the camera frustum.
 	 */
-	void UpdateRenderQueue( Camera* cam );
+	void UpdateRenderQueue(Camera* cam, RenderOrder order);
+
 
 	void RenderScene();
 	
@@ -71,22 +90,26 @@ public:
 	AnimationController* GetAnimationController() const;
 
 protected:
+	void ClearScene();
 	virtual SceneNode* CreateSceneNodeImpl( const String& name );
 
 protected:
 
-	/// Root scene node
-	SceneNode* mSceneRoot;
+	std::map< uint32_t, SceneObjectRegEntry >  mRegistry;  // Registry of scene object types
+
+	std::map< uint32_t, std::vector<SceneObject*> > mSceneObjectCollections;
+
 
 	AnimationController* mAnimationController;
 
 	/// Keep track of all scene node
-    vector<SceneNode*> mAllSceneNodes;
+    vector<SceneNode*> mAllSceneNodes;		// [0] is root node
+
+	vector<Light*> mSceneLights;
+
 
 	SceneNode* mSkyBoxNode;	
 	Sky* mSkyBox;
-
-	unordered_map<String, SceneObject*> mSceneObjects;
 
 	vector< RenderQueueItem > mRendeQueue;
 };
