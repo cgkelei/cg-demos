@@ -6,7 +6,11 @@
 namespace RcEngine {
 
 Light::Light( const String& name )
-	: SceneObject(name), mDerivedTransformDirty(false)
+	: SceneObject(name), mLightType(LT_Point), mLightPosition(Vector3f::Zero()),
+	  mLightDirection(Vector3f(0, 0, 1)), mLightDiffuse(ColorRGBA::White), mLightSpecular(ColorRGBA::Black),
+	  mSpotOuter(Mathf::ToRadian(40.0f)), mSpotInner(Mathf::ToRadian(30.0f)), mSpotFalloff(1.0f), mRange(100000), mAttenuationConst(1.0f),
+	  mAttenuationLinear(0.0f), mAttenuationQuad(0.0f), mDerivedPosition(Vector3f::Zero()), 
+	  mDerivedDirection(Vector3f(0, 0, 1)), mDerivedTransformDirty(false)
 {
 	mType = SOT_Light;
 	mRenderable = false;
@@ -119,6 +123,11 @@ void Light::UpdateTransform() const
 
 		mDerivedTransformDirty = false;
 	}
+}
+
+SceneObject* Light::FactoryFunc( const String& name, const NameValuePairList* params )
+{
+	return new Light(name);
 }
 
 

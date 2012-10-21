@@ -3,8 +3,11 @@
 
 #include <Core/Prerequisites.h>
 #include <Graphics/GraphicsCommon.h>
+#include <Graphics/FrameBuffer.h>
 
 namespace RcEngine {
+
+class FrameBuffer;
 
 class _ApiExport Renderer
 {
@@ -21,8 +24,7 @@ private:
 	void DrawRenderable(Camera* camera, const String& tech, const String& matClass, RenderOrder order);
 
 private:
-
-
+	shared_ptr<FrameBuffer> mCurrentFrameBuffer;
 };
 
 

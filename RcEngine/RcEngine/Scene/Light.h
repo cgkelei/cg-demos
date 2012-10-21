@@ -52,6 +52,9 @@ public:
 private:
 	void UpdateTransform() const;
 
+public:
+	static SceneObject* FactoryFunc(const String& name, const NameValuePairList* params);
+
 protected:
 	LightType mLightType;
 	ColorRGBA mLightDiffuse;

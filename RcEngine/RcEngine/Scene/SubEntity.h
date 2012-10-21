@@ -3,6 +3,7 @@
 
 #include <Core/Prerequisites.h>
 #include <Graphics/Renderable.h>
+#include <Math/BoundingBox.h>
 
 namespace RcEngine {
 
@@ -12,7 +13,7 @@ public:
 	SubEntity( Entity* parent, const shared_ptr<MeshPart>& meshPart );
 	~SubEntity();
 
-	const BoundingSpheref& GetBoundingSphere() const;
+	const BoundingBoxf& GetBoundingBox() const;
 
 	const String& GetName() const ;
 

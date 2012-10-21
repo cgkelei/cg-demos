@@ -6,6 +6,8 @@
 
 namespace RcEngine {
 
+struct RenderSettings;
+
 class _OpenGLExport OpenGLRenderWindow : public OpenGLFrameBuffer
 {
 public:

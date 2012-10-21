@@ -1,5 +1,7 @@
 #include <Graphics/FrameBuffer.h>
 #include <Graphics/RenderView.h>
+#include <Graphics/RenderDevice.h>
+#include <Core/Context.h>
 
 namespace RcEngine {
 
@@ -14,6 +16,7 @@ FrameBuffer::~FrameBuffer(void)
 {
 	
 }
+
 
 shared_ptr<RenderView> FrameBuffer::GetAttachedView( Attachment att )
 {
@@ -147,6 +150,28 @@ void FrameBuffer::DetachAll()
 
 	if (mDepthStencilView)
 		Detach(ATT_DepthStencil);
+}
+
+void FrameBuffer::Clear( uint32_t flags, ColorRGBA& clr, float depth, uint32_t stencil )
+{
+	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
+
+	// frame buffer must binded before clear
+	shared_ptr<FrameBuffer> currentFrameBuffer = Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer();
+	assert( this == currentFrameBuffer.get());
+
+	for (size_t i = 0; i < mColorViews.size(); ++i)
+	{
+		if (mColorViews[i])
+		{
+			mColorViews[i]->ClearColor(clr);
+		}		
+	}
+
+	if (mDepthStencilView)
+	{
+		mDepthStencilView->ClearDepthStencil(depth, stencil);
+	}
 }
 
 

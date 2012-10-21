@@ -2,6 +2,9 @@
 #include <Resource/Resource.h>
 #include <Graphics/PixelFormat.h>
 #include <Graphics/GraphicsCommon.h>
+#include <Graphics/Texture.h>
+#include <Graphics/Material.h>
+#include <Math/ColorRGBA.h>
 
 namespace RcEngine {
 
@@ -15,6 +18,7 @@ public:
 	int32_t GetParamInt() const { return mValueBasic.ValueInt; }
 	uint32_t GetParamUInt() const { return mValueBasic.ValueUInt; }
 	const String& GetParamString() const { return mValueString; }
+	const ColorRGBA& GetParamColor() const { return mValueColor; }
 	const shared_ptr<Resource> GetResource() const { return mValueResource; }
 	
 private:
@@ -28,11 +32,14 @@ private:
 
 	BasicType mValueBasic;
 	String mValueString;
+	ColorRGBA mValueColor;
 	shared_ptr<Resource> mValueResource;
 };
 
 class _ApiExport Pipeline : public Resource
 {
+	friend class Renderer;
+
 public:
 	struct RenderTargetDesc
 	{
@@ -57,9 +64,8 @@ public:
 	enum CommandFlag
 	{
 		BindFrameBuffer,
-		UnbindFrameBuffer,
 		ClearFrameBuffer,
-
+		SwapBuffer,
 		DrawGeometry,
 		DrawOverlays,
 		DrawQuad,
@@ -95,6 +101,7 @@ public:
 
 	shared_ptr<FrameBuffer> GetFrameBuffer(const String& name);
 	shared_ptr<Texture> GetRenderTexture(const String& frameName, Attachment attach);
+
 
 
 public:

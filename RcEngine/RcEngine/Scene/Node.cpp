@@ -23,7 +23,12 @@ Node::Node( const String& name, Node* parent )
 
 Node::~Node()
 {
+	DetachAllChildren();
 
+	if (mParent)
+	{
+		mParent->DetachChild(this);
+	}
 }
 
 

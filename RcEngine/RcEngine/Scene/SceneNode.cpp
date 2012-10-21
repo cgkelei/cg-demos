@@ -1,6 +1,7 @@
 #include <Scene/SceneNode.h>
 #include <Scene/SceneManager.h>
 #include <Scene/SceneObject.h>
+#include <Scene/Light.h>
 #include <Graphics/Camera.h>
 #include <Math/MathUtil.h>
 #include <Core/Exception.h>
@@ -16,7 +17,11 @@ SceneNode::SceneNode( SceneManager* scene, const String& name )
 
 SceneNode::~SceneNode()
 {
-
+	for ( auto iter = mAttachedObjects.begin(); iter != mAttachedObjects.end(); ++iter )
+	{
+		(*iter)->OnDetach(this);
+	}
+	mAttachedObjects.clear();
 }
 
 void SceneNode::SetScene( SceneManager* scene )
@@ -53,12 +58,27 @@ void SceneNode::AttachObject( SceneObject* obj )
 
 void SceneNode::DetachOject( SceneObject* obj )
 {
+	auto found = std::find(mAttachedObjects.begin(), mAttachedObjects.end(), obj);
+	if (found != mAttachedObjects.end())
+	{
+		obj->OnDetach(this);
+		mAttachedObjects.erase(found);
 
+		// since we have detach a scene object, bound may invalid.
+		PropagateDirtyUp(NODE_DIRTY_BOUNDS);
+	}
 }
 
 void SceneNode::DetachAllObject()
 {
+	for ( auto iter = mAttachedObjects.begin(); iter != mAttachedObjects.end(); ++iter )
+	{
+		(*iter)->OnDetach(this);
+	}
+	mAttachedObjects.clear();
 
+	// Make sure bounds get updated (must go right to the top)
+	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
 }
 
 SceneObject* SceneNode::GetAttachedObject( const String& name )
@@ -83,45 +103,49 @@ void SceneNode::UpdateWorldBounds() const
 		mWorldBounds.SetNull();
 
 		/**
-			* Merge all attached object's bound first, note that if object doesn't have bound,
-			* the Merge operation doesn't have effect.
-			*/
+		 * Merge all attached object's bound first, note that if object doesn't have bound,
+		 * the Merge operation doesn't have effect.
+		 */
 		for (auto iter = mAttachedObjects.begin(); iter != mAttachedObjects.end(); ++iter)
 		{
-			mWorldBounds.Merge((*iter)->GetWorldBoundingSphere());
+			mWorldBounds.Merge((*iter)->GetWorldBoundingBox());
 		}
 
 		for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
 		{
 			SceneNode* childNode = static_cast<SceneNode*>(*iter);
-			mWorldBounds.Merge(childNode->GetWorldBoundingShpere());
+			mWorldBounds.Merge(childNode->GetWorldBoundingBox());
 		}
 
 		mDirtyBits &= ~NODE_DIRTY_BOUNDS;
 	}
 }
 
-const BoundingSpheref& SceneNode::GetWorldBoundingShpere() const
+const BoundingBoxf& SceneNode::GetWorldBoundingBox() const
 {
-	if (mDirtyBits & NODE_DIRTY_BOUNDS)
-		UpdateWorldBounds();
-
+	UpdateWorldBounds();
 	return mWorldBounds;
 }
 
-void SceneNode::FindVisibleObjects( Camera* cam )
+uint32_t SceneNode::GetNumAttachedObjects() const
 {
-	const BoundingSpheref& worldBound = GetWorldBoundingShpere();
-	/*if (!cam->Visible(GetWorldBoundingShpere()))
+	return mAttachedObjects.size();
+}
+
+void SceneNode::OnUpdateRenderQueues(Camera* camera,  RenderOrder order)
+{
+	const BoundingBoxf& worldBound = GetWorldBoundingBox();
+	
+	if (!camera->Visible(GetWorldBoundingBox()))
 	{
 		return;
-	}*/
+	}
 
 	for (auto iter = mAttachedObjects.begin(); iter != mAttachedObjects.end(); ++iter)
 	{
 		if ((*iter)->Renderable())
 		{
-			(*iter)->UpdateRenderQueue(mScene->GetRenderQueue(), cam);
+			(*iter)->OnUpdateRenderQueue(mScene->GetRenderQueue(), camera, order);
 		}	
 	}
 
@@ -129,7 +153,7 @@ void SceneNode::FindVisibleObjects( Camera* cam )
 	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
 	{
 		SceneNode* child = static_cast<SceneNode*>(*iter);
-		child->FindVisibleObjects(cam);
+		child->OnUpdateRenderQueues(camera, order);
 	}
 }
 

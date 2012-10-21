@@ -6,6 +6,8 @@
 
 namespace RcEngine{
 
+class Application;
+
 class _ApiExport Context : public Singleton<Context>
 {
 public:

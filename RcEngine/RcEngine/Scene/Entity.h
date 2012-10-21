@@ -22,10 +22,9 @@ class _ApiExport Entity : public SceneObject
 public:
 	Entity( const String& name, const shared_ptr<Mesh>& mesh );
 	~Entity();
-
-	const BoundingSpheref& GetWorldBoundingSphere() const;
-
-	const BoundingSpheref& GetBoundingSphere() const;
+	
+	const BoundingBoxf& GetWorldBoundingBox() const;
+	const BoundingBoxf& GetLocalBoundingBox() const;
 
 	const shared_ptr<Mesh>& GetMesh() const							{ return mMesh; }
 
@@ -46,13 +45,17 @@ public:
 	void OnAttach( Node* node );
 	void OnDetach( Node* node );
 
-	void UpdateRenderQueue( RenderQueue& renderQueue, Camera* cam );
+	void OnUpdateRenderQueue(RenderQueue& renderQueue, Camera* cam, RenderOrder order);
 
 	Bone* AttachObjectToBone (const String &boneName, SceneObject* sceneObj, const Quaternionf& offsetOrientation= Quaternionf::Identity(), const Vector3f & offsetPosition = Vector3f::Zero());
 
 protected:
 	void Initialize();
 	void UpdateAnimation();
+
+
+public:
+	static SceneObject* FactoryFunc(const String& name, const NameValuePairList* params);
 
 protected:
 	shared_ptr<Mesh> mMesh;
@@ -64,7 +67,7 @@ protected:
 	
 	bool mDisplaySkeleton;
 
-	mutable BoundingSpheref mBoundingShere;
+	mutable BoundingBoxf mWorldBoundingBox;
 
 	vector<Matrix4f> mBoneWorldMatrices;
 	vector<Matrix4f> mSkinMatrices;

@@ -174,7 +174,15 @@ BoundingBox<Real> FromSphere( const BoundingSphere<Real>& sphere );
 template<typename Real>
 BoundingSphere<Real> FromBox( const BoundingBox<Real>& box );
 
+
+/** 
+ * Get distance the world aabb box.
+ */
+template<typename Real>
+inline Real NearestDistToAABB( const Vector<Real, 3>& pos, const Vector<Real, 3>& mins, const Vector<Real, 3>& maxs );
+
 #include <Math/MathUtil.inl>
+
 
 
 } // Namespace RcEngine

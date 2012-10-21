@@ -44,12 +44,11 @@ void Mesh::LoadImpl()
 	// read mesh name
 	String meshName = source.ReadString();
 
-	// read bounding sphere
-	Vector3f center;
-	float radius;
-	source.Read(&center, sizeof(Vector3f));
-	radius = source.ReadFloat();
-	mBoundingSphere = BoundingSpheref(center, radius);
+	// read bounding box
+	Vector3f min, max;
+	source.Read(&min, sizeof(Vector3f));
+	source.Read(&max, sizeof(Vector3f));
+	mBoundingBox = BoundingBoxf(min, max);
 
 	// read mesh part
 	uint32_t subMeshCount = source.ReadUInt();

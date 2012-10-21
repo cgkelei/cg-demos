@@ -4,6 +4,7 @@
 #include <Math/Plane.h>
 #include <Math/Matrix.h>
 #include <Math/BoundingSphere.h>
+#include <Math/BoundingBox.h>
 
 namespace RcEngine {
 
@@ -33,8 +34,12 @@ public:
 	 */
 	ContainmentType Contain( const BoundingSphere<Real>& sphere ); 
 
+	ContainmentType Contain( const BoundingBox<Real>& box ); 
+
 public:
 	Plane<Real> Planes[6];
+	Vector<Real,3>  mOrigin;
+	Vector<Real,3>  mCorner[8];  // Corner points
 };
 
 typedef Frustum<float> Frustumf;

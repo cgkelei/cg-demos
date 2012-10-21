@@ -3,7 +3,7 @@
 
 #include <Core/Prerequisites.h>
 #include <Graphics/GraphicsCommon.h>
-#include <Math/BoundingSphere.h>
+#include <Math/BoundingBox.h>
 
 namespace RcEngine {
 
@@ -16,7 +16,7 @@ public:
 	~MeshPart();
 
 	const String& GetName() const								{ return mName; }
-	const BoundingSpheref& GetBoundingSphere() const			{ return mBoundingSphere; }
+	const BoundingBoxf& GetBoundingBox() const			    { return mBoundingBox; }
 
 	void GetRenderOperation( RenderOperation& op, uint32_t lodIndex );
 
@@ -51,7 +51,7 @@ private:
 	shared_ptr<GraphicsBuffer> mIndexBuffer;
 	IndexBufferType			   mIndexFormat;
 
-	BoundingSpheref mBoundingSphere;
+	BoundingBoxf mBoundingBox;
 
 	uint32_t mPrimitiveCount; // Only support triangle
 
