@@ -17,6 +17,15 @@ namespace {
 
 using namespace RcEngine;
 
+struct ShaderStage
+{
+	String Name;
+	String Entry;
+	String Stage;
+	String Source;
+	vector<String> Includes;
+};
+
 EffectParameter* CreateEffectParameter( const String& name, EffectParameterType type, bool array)
 {
 	switch(type)
@@ -157,7 +166,6 @@ EffectParameter* CreateEffectParameter( const String& name, EffectParameterType 
 		return nullptr;
 	}
 }
-
 
 bool StringToBool(const String& str)
 {
@@ -425,6 +433,64 @@ void CollectRenderStates(XMLNodePtr passNode, DepthStencilStateDesc& dsDesc, Ble
 	}
 }
 
+shared_ptr<Shader> CompileShader(const ShaderStage& shaderStage, const vector<String>& defines, const vector<String>& values)
+{
+	shared_ptr<Shader> retVal;
+
+	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
+
+	ShaderType shaderType;
+	if (shaderStage.Stage == String("Vertex"))
+	{
+		shaderType = ST_Vertex;		
+	}
+	else if (shaderStage.Stage == String("Pixel"))
+	{
+		shaderType = ST_Pixel;
+	}
+	else if (shaderStage.Stage == String("Geometry"))
+	{
+		shaderType = ST_Geomerty;
+	}
+
+	retVal = factory.CreateShader(shaderType);
+
+	//add include 
+	for (size_t i = 0; i < shaderStage.Includes.size(); ++i)
+	{
+		retVal->AddInclude(shaderStage.Includes[i]);
+	}
+
+	// add macro
+	for (size_t i = 0; i < defines.size(); ++i)
+	{
+		retVal->AddDefine(defines[i], values[i]);
+	}
+
+	
+	if( !retVal->Compile(shaderStage.Source, shaderStage.Entry))
+	{
+		std::cout << "shader:" + shaderStage.Name << std::endl;
+		std::cout << retVal->GetCompileInfo() << std::endl;
+		ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "shader:" + shaderStage.Name  + " compile error!",
+			"Effect::LoadForm");
+	}
+
+
+	return retVal;
+}
+
+void CollectShaderMacro(const XMLNodePtr& node, vector<String>& defines, vector<String>& values)
+{
+	for (XMLNodePtr macroNode = node->FirstNode("Macro"); macroNode; macroNode = macroNode->NextSibling("Macro"))
+	{
+		String name = macroNode->Attribute("name")->ValueString();	
+		String value = macroNode->AttributeString("value", "");
+		defines.push_back(name);
+		values.push_back(value);
+	}
+}
+
 }
 
 
@@ -482,7 +548,6 @@ EffectParameter* Effect::GetParameterByName( const String& paraName ) const
 	return nullptr;
 }
 
-
 EffectParameter* Effect::AddShaderParameterInternal(const String& name, EffectParameterType type, bool array)
 {
 	EffectParameter* effectParam;
@@ -503,8 +568,20 @@ void Effect::LoadImpl()
 {
 	FileSystem& fileSystem = FileSystem::GetSingleton();
 	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
+	
+	vector<String> effectFlags;
+	
+	//split the effect name to get effect file and flags
+	std::istringstream iss(mName); 
+	do 
+	{ 
+		String sub; 
+		iss >> sub; 
+		if (!sub.empty())
+			effectFlags.push_back(sub);	
+	} while (iss); 
 
-	shared_ptr<Stream> effectStream = fileSystem.OpenStream(mName, mGroup);
+	shared_ptr<Stream> effectStream = fileSystem.OpenStream(effectFlags[0], mGroup);
 	Stream& source = *effectStream;	
 
 	XMLDoc doc;
@@ -514,44 +591,43 @@ void Effect::LoadImpl()
 	mName = root->AttributeString("name", "");
 
 	// store all shader this effect will use
-	unordered_map<String, shared_ptr<Shader> > shaders;
+	unordered_map<String, ShaderStage> shaderStages;
 
 	XMLNodePtr shaderNode; 
 	for (shaderNode = root->FirstNode("Shader");  shaderNode; shaderNode = shaderNode->NextSibling("Shader"))
 	{
-		String stage = shaderNode->AttributeString("stage", "");
 		String name = shaderNode->AttributeString("name", "");
-		String entry = shaderNode->AttributeString("entry", "");
 
-		XMLNodePtr shaderSourceNode = shaderNode->FirstNode();
+		ShaderStage& shaderStage = shaderStages[name];
 
+		shaderStage.Name = name;
+		shaderStage.Stage = shaderNode->AttributeString("stage", "");	
+		shaderStage.Entry = shaderNode->AttributeString("entry", "");
+
+		vector<String> includes;
+		for (XMLNodePtr includeNode = shaderNode->FirstNode("Include");  includeNode; includeNode = includeNode->NextSibling("Include"))
+		{
+			String includeName = includeNode->Attribute("name")->ValueString();
+
+			shared_ptr<Stream> streamPtr = FileSystem::GetSingleton().OpenStream(includeName, mGroup);
+			Stream& includeStream = *streamPtr;
+
+			XMLDoc includeDoc;
+			XMLNodePtr includeSourceNode = includeDoc.Parse(includeStream)->FirstNode("ShaderSource")->FirstNode();
+			assert (includeSourceNode->NodeType() == XML_Node_CData);
+			
+			String includeSource = includeSourceNode->ValueString(); 
+			shaderStage.Includes.push_back(includeSource);
+		}
+
+		XMLNodePtr shaderSourceNode = shaderNode->FirstNode("ShaderSource")->FirstNode();
 		if (shaderSourceNode->NodeType() == XML_Node_CData)
 		{
-			String shaderSource = shaderSourceNode->ValueString();
-
-			if (stage == String("Vertex"))
-			{
-				shared_ptr<Shader> vertexShader = factory.CreateShader(ST_Vertex);
-
-				if( !vertexShader->Compile(shaderSource) )
-				{
-					std::cout << vertexShader->GetCompileInfo() << std::endl;
-					ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Vertex Shader:" + name  + " compile error!",
-						"Effect::LoadForm");
-				}
-				shaders.insert(std::make_pair(name, vertexShader));
-			}
-			else if (stage == String("Pixel"))
-			{
-				shared_ptr<Shader> pixelShader = factory.CreateShader(ST_Pixel);
-				if( !pixelShader->Compile(shaderSource))
-				{
-					std::cout << pixelShader->GetCompileInfo() << std::endl;
-					ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Pixel shader:" + name  + " compile error!",
-						"Effect::LoadForm");
-				}
-				shaders.insert(std::make_pair(name, pixelShader));
-			}
+			shaderStage.Source =  shaderSourceNode->ValueString();	
+		}
+		else
+		{
+			assert(false);
 		}
 	}
 
@@ -583,14 +659,32 @@ void Effect::LoadImpl()
 
 			XMLNodePtr vertexNode = passNode->FirstNode("VertexShader");
 			String vertexName = vertexNode->AttributeString("name", "");
-			shared_ptr<Shader> vertexShader = shaders.find(vertexName)->second;
+			if (shaderStages.find(vertexName) != shaderStages.end())
+			{
+				vector<String> defines, values;
+				CollectShaderMacro(vertexNode, defines, values);
+
+				for (size_t i = 1; i < effectFlags.size(); ++i)
+				{
+					defines.push_back(effectFlags[i]);
+					values.push_back(String(""));
+				}
+				program->AttachShader(CompileShader(shaderStages[vertexName], defines, values));
+			}
 
 			XMLNodePtr pixelNode = passNode->FirstNode("PixelShader");
 			String pixelName = pixelNode->AttributeString("name", "");
-			shared_ptr<Shader> pixelShader = shaders.find(pixelName)->second;
-
-			program->AttachShader(vertexShader);
-			program->AttachShader(pixelShader);
+			if (shaderStages.find(pixelName) != shaderStages.end())
+			{
+				vector<String> defines, values;
+				CollectShaderMacro(pixelNode, defines, values);
+				for (size_t i = 1; i < effectFlags.size(); ++i)
+				{
+					defines.push_back(effectFlags[i]);
+					values.push_back(String(""));
+				}
+				program->AttachShader(CompileShader(shaderStages[pixelName], defines, values));
+			}
 
 			if (!program->LinkProgram())
 			{
@@ -612,7 +706,6 @@ void Effect::UnloadImpl()
 {
 
 }
-
 
 shared_ptr<Resource> Effect::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 {

@@ -102,8 +102,6 @@ public:
 	shared_ptr<FrameBuffer> GetFrameBuffer(const String& name);
 	shared_ptr<Texture> GetRenderTexture(const String& frameName, Attachment attach);
 
-
-
 public:
 	static shared_ptr<Resource> FactoryFunc(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 

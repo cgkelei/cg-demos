@@ -1,0 +1,42 @@
+<Effect name="LightingUtil">
+<ShaderSource>
+	<![CDATA[
+
+float DirectionalLighting(const vec3 lightDir, const vec3 normal)
+{
+	return dot(-lightDir, normal);
+}
+
+float PointLighting(const vec3 lightPos, const vec3 litPoint, const vec3 normal)
+{
+	return dot(normalize(lightPos-litPoint), normal);
+}
+
+float SpotLighting(const vec3 lightPos, const vec3 lightDir, const vec2 cosCone, const vec3 litPoint)
+{
+	// calc the cos angle between lightdir and litpoint dir
+	float cosAlpha =  dot(normalize(litPoint - lightPos), lightDir);
+	return smoothstep(cosCone.x, cosCone.y, cosAlpha);
+}
+
+float CalcShininess(const vec3 halfVec, const vec3 normal, float shinness)
+{
+	return pow(max(dot(halfVec, normal), 0.0), shinness);
+}
+
+float CalcAttenuation(const vec3 lightPos, const vec3 point, const vec3 atten)
+{
+	float d = distance(lightPos, point);
+	return 1.0 / (atten.x + d * atten.y + d * d * atten.z);
+}
+
+vec3 CalcPhongSpotLight(const vec3 diffuse, const vec3 specular, float shinness,  const vec3 l, const vec3 h, const vec3 n)
+{
+	return max((diffuse + specular * CalcShininess(h, n, shinness))* dot(n, l), 0.0);
+}
+
+	]]>
+</ShaderSource>
+
+</Effect>
+	

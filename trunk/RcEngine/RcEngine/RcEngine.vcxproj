@@ -237,6 +237,14 @@
     <ClInclude Include="Scene\SubEntity.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Media\Effect\GLSL\Basic.frag" />
+    <None Include="..\Media\Effect\GLSL\Basic.vert" />
+    <None Include="..\Media\Effect\GLSL\Model.frag.glsl" />
+    <None Include="..\Media\Effect\GLSL\Model.vert.glsl" />
+    <None Include="..\Media\Effect\GLSL\Skinning.include.glsl" />
+    <None Include="..\Media\Effect\GLSL\Transform.vert" />
+    <None Include="..\Media\Effect\GLSL\Uniforms.vert" />
+    <None Include="..\Media\Effect\GLSL\LightingUtil.include.glsl" />
     <None Include="Math\BoundingBox.inl" />
     <None Include="Math\BoundingSphere.inl" />
     <None Include="Math\ColorRGBA.inl" />

@@ -31,39 +31,35 @@ enum VertexElementUsage
 {
 	/** Position, 3 float per vertex
 	*/
-	VEU_Position = 1, 
+	VEU_Position = 0, 
 		
 	/** Blending weight data
 	*/
-	VEU_BlendWeight = 2,
+	VEU_BlendWeight = 1,
 		
 	/** Blending indices data
 	*/
-	VEU_BlendIndices = 3, 
+	VEU_BlendIndices = 2, 
 		
 	/** Vertex normal data.
 	*/
-	VEU_Normal = 4,
+	VEU_Normal = 3,
 		
-	/** Diffuse Color
+	/** Color
 	*/
-	VEU_Diffuse = 5,
-		
-	/** Specular Color
-	*/
-	VEU_Specular = 6,
+	VEU_Color = 4,
 	
 	/**  Texture coordinates
 	*/
-	VEU_TextureCoordinate = 7,
+	VEU_TextureCoordinate = 5,
 		
 	/** Vertex tangent data.
 	*/
-	VEU_Tangent = 9,	
+	VEU_Tangent = 6,	
 
 	/** Vertex binormal data.
 	*/
-	VEU_Binormal = 8,
+	VEU_Binormal = 7,
 };
 
 enum TextureMapAccess

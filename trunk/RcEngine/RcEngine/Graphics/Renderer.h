@@ -3,7 +3,7 @@
 
 #include <Core/Prerequisites.h>
 #include <Graphics/GraphicsCommon.h>
-#include <Graphics/FrameBuffer.h>
+
 
 namespace RcEngine {
 
@@ -24,7 +24,20 @@ private:
 	void DrawRenderable(Camera* camera, const String& tech, const String& matClass, RenderOrder order);
 
 private:
+	void DrawEntity();
+
+	void ApplyMaterial(const shared_ptr<Material>& material);
+
+private:
 	shared_ptr<FrameBuffer> mCurrentFrameBuffer;
+	
+	shared_ptr<Material> mCurrentMat;
+	
+	EffectTechnique* mCurrentTechnique;
+
+	Matrix4f mViewMat, mViewMatInv, mProjMat, mViewProjMat, mViewProjMatInv;
+
+	Light* mCurrentLight;
 };
 
 

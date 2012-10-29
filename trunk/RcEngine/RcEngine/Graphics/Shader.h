@@ -21,6 +21,9 @@ public:
 
 	bool Validate() const { return mValidate; } 
 
+	void AddInclude(const String& include);
+	void AddDefine(const String& name, const String& value);
+
 private:
 	Shader( const Shader& );
 	Shader& operator= ( const Shader& );
@@ -28,8 +31,13 @@ private:
 protected:
 	ShaderType mShaderType;
 	String mShaderSource;
+	String mShaderIncludes;
+	vector<String> mDefines;
+	vector<String> mDefineValues;
 	String mCompileOutput;
 	bool mValidate;
+	
+
 };
 
 }

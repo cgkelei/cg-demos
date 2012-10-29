@@ -19,7 +19,7 @@
 namespace RcEngine {
 
 Entity::Entity( const String& name, const shared_ptr<Mesh>& mesh )
-	: SceneObject(name), mNumBoneMatrices(0), mMesh(mesh),
+	: SceneObject(name), mNumSkinMatrices(0), mMesh(mesh),
 	mSkeleton( mesh->GetSkeleton() ? mesh->GetSkeleton()->Clone() : 0 )
 {
 	mType = SOT_Entity;
@@ -48,8 +48,8 @@ void Entity::Initialize()
 
 	if (HasSkeleton())
 	{
-		mNumBoneMatrices = mSkeleton->GetBoneCount();
-		mSkinMatrices.resize(mNumBoneMatrices);
+		mNumSkinMatrices = mSkeleton->GetBoneCount();
+		mSkinMatrices.resize(mNumSkinMatrices);
 	}
 
 
@@ -127,7 +127,7 @@ shared_ptr<Skeleton> Entity::GetSkeleton()
 	return mSkeleton;
 }
 
-bool Entity::HasAnimation() const
+bool Entity::HasSkeletonAnimation() const
 {
 	return mMesh->HasAnimation();
 }
@@ -247,15 +247,15 @@ void Entity::UpdateAnimation()
 	// Note: the model's world transform will be baked in the skin matrices
 	const vector<Bone*>& bones = mSkeleton->GetBones();
 		
-	if (mBoneWorldMatrices.empty())
+	if (mSkinMatrices.empty())
 	{
-		mBoneWorldMatrices.resize(bones.size());
+		mSkinMatrices.resize(bones.size());
 	}
 
 	for (size_t i = 0; i < bones.size(); ++i)
 	{
 		Bone* bone = bones[i];
-		mBoneWorldMatrices[i] = bone->GetOffsetMatrix() * bone->GetWorldTransform() * GetWorldTransform();
+		mSkinMatrices[i] = bone->GetOffsetMatrix() * bone->GetWorldTransform();
 	}
 }
 

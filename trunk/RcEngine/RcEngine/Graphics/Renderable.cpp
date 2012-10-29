@@ -39,29 +39,34 @@ void Renderable::Render()
 
 void Renderable::OnRenderBegin()
 {
-	// Get world transforms
-	uint32_t matCounts = GetWorldTransformsCount();
-	vector<Matrix4f> matWorlds(matCounts);
-	GetWorldTransforms(&matWorlds[0]);
-
 	// Get material 
 	shared_ptr<Material> material = GetMaterial();
 
-	// Set world transform
-	MaterialParameter* world = material->GetCustomParameter(EPU_WorldMatrix);
-	
-	if (world)
+	// Get world transforms
+	uint32_t matCounts = GetWorldTransformsCount();
+
+	vector<Matrix4f> matWorlds(matCounts);
+	GetWorldTransforms(&matWorlds[0]);
+
+	/**
+	 * Last matrix is world mat, before is skin matrices.
+	 */
+	EffectParameter* worldParam = material->GetCustomParameter(EPU_WorldMatrix);
+	if (worldParam)
 	{
-		if (matCounts == 1)
-		{
-			world->EffectParam->SetValue(matWorlds[0]);
-		}
-		else
-		{
-			world->EffectParam->SetValue(matWorlds);
-		}	
+		worldParam->SetValue(matWorlds.back());
 	}
 
+	if (matCounts > 1)
+	{	
+		EffectParameter* skinMatricesParam = material->GetCustomParameter("SkinMatrices");
+		if (skinMatricesParam)
+		{
+			// delete last world matrix first
+			matWorlds.pop_back();
+			skinMatricesParam->SetValue(matWorlds);
+		}
+	}
 				
 	// Setup other material parameter
 	material->ApplyMaterial();

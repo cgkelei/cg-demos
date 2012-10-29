@@ -67,6 +67,9 @@ void TestApp::LoadContent()
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 	
+	auto h = resMan.AddResource(ResourceTypes::Material, "SkinModel.material.xml", "Custom");
+	resMan.GetResourceByHandle(h)->Load();
+
 	resMan.AddResource(ResourceTypes::Mesh, "him.mesh", "Custom");
 	//resMan.AddResource(ResourceTypes::Mesh, "Teapot.mesh", "Custom");
 	resMan.AddResource(ResourceTypes::Pipeline, "DeferredLighting.pipeline.xml", "General");

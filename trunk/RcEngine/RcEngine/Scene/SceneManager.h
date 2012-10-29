@@ -87,6 +87,8 @@ public:
 	
 	vector<RenderQueueItem>& GetRenderQueue() { return mRendeQueue; }
 
+	vector<Light*>& GetSceneLight() { return mSceneLights; }
+
 	AnimationController* GetAnimationController() const;
 
 protected:
@@ -94,23 +96,24 @@ protected:
 	virtual SceneNode* CreateSceneNodeImpl( const String& name );
 
 protected:
+	// Registry of scene object types
+	std::map< uint32_t, SceneObjectRegEntry >  mRegistry; 
 
-	std::map< uint32_t, SceneObjectRegEntry >  mRegistry;  // Registry of scene object types
-
+	// scene object collection, first dimension is scene object type
 	std::map< uint32_t, std::vector<SceneObject*> > mSceneObjectCollections;
 
-
-	AnimationController* mAnimationController;
-
-	/// Keep track of all scene node
+	// Keep track of all scene node
     vector<SceneNode*> mAllSceneNodes;		// [0] is root node
 
+	// keep track of light
 	vector<Light*> mSceneLights;
-
 
 	SceneNode* mSkyBoxNode;	
 	Sky* mSkyBox;
+	
+	AnimationController* mAnimationController;
 
+	// render queue
 	vector< RenderQueueItem > mRendeQueue;
 };
 
