@@ -24,9 +24,4 @@
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Shader.glsl">
-      <Filter>资源文件</Filter>
-    </None>
-  </ItemGroup>
 </Project>

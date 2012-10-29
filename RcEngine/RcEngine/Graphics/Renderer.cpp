@@ -2,12 +2,15 @@
 #include <Graphics/Pipeline.h>
 #include <Graphics/RenderDevice.h>
 #include <Graphics/RenderView.h>
+#include <Graphics/FrameBuffer.h>
+#include <Graphics/Material.h>
 #include <Core/Context.h>
 
 namespace RcEngine {
 
 Renderer::Renderer()
-	: mCurrentFrameBuffer(nullptr)
+	: mCurrentFrameBuffer(nullptr), mCurrentLight(nullptr), mCurrentTechnique(nullptr),
+	  mCurrentMat(nullptr)
 {
 
 }

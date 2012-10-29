@@ -484,13 +484,16 @@ void OpenGLShaderProgram::CaptureAllParameter()
 		{
 			glGetActiveAttrib(mOGLProgramObject, i, maxLength, &length, &attibSize, &attibType, &maxName[0]);
 			String actualName(&maxName[0], length);
-			int a = 0;
+			//std::cout << actualName << std::endl;
 		}
-		GLint pos = glGetAttribLocation(mOGLProgramObject, "Position");
-		GLint norm = glGetAttribLocation(mOGLProgramObject, "Normal");
-		GLint tex = glGetAttribLocation(mOGLProgramObject, "Tex");
-		GLint weight = glGetAttribLocation(mOGLProgramObject, "BlendWeights");
-		GLint indices = glGetAttribLocation(mOGLProgramObject, "BlendIndices");
+
+		auto iPos = glGetAttribLocation(mOGLProgramObject, "iPos");
+		auto iBlendWeights = glGetAttribLocation(mOGLProgramObject, "iBlendWeights");
+		auto iBlendIndices = glGetAttribLocation(mOGLProgramObject, "iBlendIndices");
+		auto iNormal = glGetAttribLocation(mOGLProgramObject, "iNormal");
+		auto iTex0 = glGetAttribLocation(mOGLProgramObject, "iTex0");
+		auto iTangent = glGetAttribLocation(mOGLProgramObject, "iTangent");
+		auto iBinormal = glGetAttribLocation(mOGLProgramObject, "iBinormal");
 	}
 
 	// Query and store uniforms from the program.
@@ -504,8 +507,6 @@ void OpenGLShaderProgram::CaptureAllParameter()
 		glGetProgramiv(mOGLProgramObject, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxLength);
 		vector<char> maxName(maxLength);
 
-		bool isArray = false;
-
 		GLint length;
 		GLint uniformSize;
 		GLenum uniformType;
@@ -515,6 +516,7 @@ void OpenGLShaderProgram::CaptureAllParameter()
 		{
 			glGetActiveUniform(mOGLProgramObject, i, maxLength, &length, &uniformSize, &uniformType, &maxName[0]);
 
+			bool isArray = false;
 			if (uniformSize > 1 && maxLength > 3)
 			{
 				// This is an array uniform

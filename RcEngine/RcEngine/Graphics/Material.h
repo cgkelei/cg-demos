@@ -32,8 +32,8 @@ public:
 	const shared_ptr<Effect>& GetEffect() const			{ return mEffect; }
 	EffectTechnique* GetCurrentTechnique() const		{ return mCurrentTechnique; }
 			
-	MaterialParameter* GetCustomParameter(EffectParameterUsage usage);
-	MaterialParameter* GetCustomParameter(const String& name);
+	EffectParameter* GetCustomParameter(EffectParameterUsage usage);
+	EffectParameter* GetCustomParameter(const String& name);
 
 	void SetAmbientColor(const ColorRGBA& ambient)		{ mAmbient = ambient; }
 	void SetDiffuseColor(const ColorRGBA& diffuse)		{ mDiffuse = diffuse; }
@@ -41,7 +41,7 @@ public:
 
 	void SetTexture(const String& texUint, const shared_ptr<Texture>& texture);
 			
-	virtual void ApplyMaterial();
+	void ApplyMaterial();
 
 	shared_ptr<Material> Clone();
 

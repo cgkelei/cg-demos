@@ -39,7 +39,7 @@ public:
 	bool HasSkeleton() const;
 	shared_ptr<Skeleton> GetSkeleton();
 
-	bool HasAnimation() const;
+	bool HasSkeletonAnimation() const;
 	AnimationPlayer* GetAnimationPlayer() const;
 
 	void OnAttach( Node* node );
@@ -71,7 +71,7 @@ protected:
 
 	vector<Matrix4f> mBoneWorldMatrices;
 	vector<Matrix4f> mSkinMatrices;
-	uint32_t mNumBoneMatrices;
+	uint32_t mNumSkinMatrices;
 
 	SkinnedAnimationPlayer* mAnimationPlayer;
 };

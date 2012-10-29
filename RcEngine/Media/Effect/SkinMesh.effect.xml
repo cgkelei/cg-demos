@@ -1,6 +1,7 @@
 <Effect name="SkinMesh">
 
 <Shader name="SkinVS" stage="Vertex" entry="main">
+<ShaderSource>
 <![CDATA[
 #version 330
 
@@ -16,7 +17,8 @@ out vec3 oLightDir;
 
 const int MAX_MATRICES = 58;
 
-uniform mat4 WorldMatrices[MAX_MATRICES];
+uniform mat4 SkinMatrices[MAX_MATRICES];
+uniform mat4 World;
 uniform mat4 ViewProj;
 
 vec3 LightPos = vec3(0, 0, 100);
@@ -27,34 +29,33 @@ void main()
 {
 	vec4 pos = vec4(0.0f);
 	vec4 norm = vec4(0.0f);
-	float lastWeight = 0.0f;
 	
-
-	for(int i = 0; i < NunBones - 1; ++i)
+	for(int i = 0; i < NunBones; ++i)
 	{
-		pos += BlendWeights[i] * vec4(Position, 1.0) * WorldMatrices[BlendIndices[i]];
-		norm += BlendWeights[i] * vec4(Normal, 0.0) * WorldMatrices[BlendIndices[i]];
-		lastWeight += BlendWeights[i];
+		pos += BlendWeights[i] * vec4(Position, 1.0) * SkinMatrices[BlendIndices[i]];
+		norm += BlendWeights[i] * vec4(Normal, 0.0) * SkinMatrices[BlendIndices[i]];
 	}
-
-	lastWeight = 1.0f - lastWeight;
-	
-	pos += lastWeight * vec4(Position, 1.0) * WorldMatrices[BlendIndices[NunBones - 1]];
-	norm += lastWeight * vec4(Normal, 0.0) * WorldMatrices[BlendIndices[NunBones - 1]];
 	
 	pos.w = 1.0f;
 	norm.w = 0.0f;
 	
-	oNormal = vec3(norm);
+	// world pos 
+	pos = pos * World;
+	
+	// world normal
+	oNormal = vec3(norm * World);
+	
 	oTex = vec2(Tex.x, 1-Tex.y);
 	oLightDir = LightPos - vec3(pos);
 	
 	gl_Position = pos * ViewProj;
 }
 ]]>
+</ShaderSource>
 </Shader>
 
 <Shader name="SkinPS" stage="Pixel" entry="main">
+<ShaderSource>
 <![CDATA[
 
 #version 330
@@ -81,6 +82,7 @@ void main()
 }
 
 ]]>
+</ShaderSource>
 </Shader>
 
 <Technique name="PhongLight">

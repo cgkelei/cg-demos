@@ -214,30 +214,30 @@ void Material::ApplyMaterial()
 
 }
 
-MaterialParameter* Material::GetCustomParameter( EffectParameterUsage usage )
+EffectParameter* Material::GetCustomParameter( EffectParameterUsage usage )
 {
 	for (size_t i = 0; i < mCachedEffectParams.size(); ++i)
 	{
 		if (mCachedEffectParams[i]->Usage == usage)
 		{
-			return mCachedEffectParams[i];
+			return mCachedEffectParams[i]->EffectParam;
 		}
 	}
 
-return nullptr;
+	return nullptr;
 }
 
-MaterialParameter* Material::GetCustomParameter( const String& name )
+EffectParameter* Material::GetCustomParameter( const String& name )
 {
 	for (size_t i = 0; i < mCachedEffectParams.size(); ++i)
 	{
 		if (mCachedEffectParams[i]->Name == name)
 		{
-			return mCachedEffectParams[i];
+			return mCachedEffectParams[i]->EffectParam;
 		}
 	}
-
-	return nullptr;
+	
+	return mEffect->GetParameterByName(name);
 }
 
 shared_ptr<Material> Material::Clone()
@@ -306,14 +306,25 @@ void Material::LoadImpl()
 
 	// effect first
 	XMLNodePtr effectNode = root->FirstNode("Effect");
-	String effecName =  effectNode->AttributeString("name", "");
+	String effecFile =  effectNode->AttributeString("name", "");		// file name
+	
+	/* effect name is unique resource ID, but with the effect shader macro, we can define 
+     * different effect with the same file, so effect name is the effect file string + shader macro,
+	 * by this way, we can distinction effects
+	 */
+	String effectName = effecFile;
 
-	XMLNodePtr techNode = effectNode->FirstNode("Technique");
-	String techName = techNode->AttributeString("name", "");
+	vector<String> effectFlags;
+	for (XMLNodePtr effectFlagNode = effectNode->FirstNode("Flag"); effectFlagNode; effectFlagNode = effectFlagNode->NextSibling("Flag"))
+	{
+		String flag = effectFlagNode->AttributeString("name", "");
+		effectName += " " + flag;
+		effectFlags.push_back(flag);
+	}
 
 	String effectResGroup;
 	// Test if a effect exits in group as material
-	if( fileSystem.Exits(effecName, mGroup) )
+	if( fileSystem.Exits(effecFile, mGroup) )
 	{
 		effectResGroup = mGroup;
 	}
@@ -323,9 +334,10 @@ void Material::LoadImpl()
 		effectResGroup = "General";
 	}
 	
-	mEffect = std::static_pointer_cast<Effect>( resMan.GetResourceByName(ResourceTypes::Effect, effecName, effectResGroup) );
+	mEffect = std::static_pointer_cast<Effect>( resMan.GetResourceByName(ResourceTypes::Effect, effectName, effectResGroup) );
+	
 	mEffect->Load();
-	mCurrentTechnique = mEffect->GetTechniqueByName(techName);
+	mCurrentTechnique = mEffect->GetTechniqueByIndex(0);
 
 	for (XMLNodePtr samplerNode = root->FirstNode("Sampler"); samplerNode; samplerNode = samplerNode->NextSibling("Sampler"))
 	{

@@ -51,6 +51,24 @@ bool OpenGLShader::Compile( const String& source, const String& entryPoint /*= "
 		return false;
 	}
 
+	String version, defines;
+
+	size_t versionStart = mShaderSource.find("#version");
+	if (versionStart != String::npos)
+	{
+		size_t versionEnd = mShaderSource.find('\n', versionStart);
+		if (versionEnd != String::npos)
+		{
+			version = mShaderSource.substr(versionStart, versionEnd - versionStart+1);
+			mShaderSource = mShaderSource.substr(versionEnd);
+		}
+	}
+
+	for (unsigned i = 0; i < mDefines.size(); ++i)
+		defines += "#define " + mDefines[i] + " " + mDefineValues[i] + "\n";
+
+	mShaderSource = version + defines + mShaderIncludes + mShaderSource;
+
 	const char* glslSrc = mShaderSource.c_str();
 	glShaderSource(mOGLShaderObject, 1, &glslSrc, NULL);
 	glCompileShader(mOGLShaderObject);
@@ -65,7 +83,6 @@ bool OpenGLShader::Compile( const String& source, const String& entryPoint /*= "
 		glGetShaderiv(mOGLShaderObject, GL_INFO_LOG_LENGTH, &length);
 		mCompileOutput.resize(length);
 		glGetShaderInfoLog(mOGLShaderObject, length, &length, &mCompileOutput[0]);
-		std::cout << mCompileOutput;
 	}
 	else
 	{

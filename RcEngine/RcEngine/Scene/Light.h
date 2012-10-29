@@ -33,7 +33,7 @@ public:
 	
 	LightType GetLightType() const					{ return mLightType; }
 	const Vector3f& GetPosition() const				{ return mLightDirection; }
-	const Vector3f& GetDirection() const				{ return mLightPosition; }
+	const Vector3f& GetDirection() const			{ return mLightPosition; }
 	const ColorRGBA& GetLightDiffuse() const		{ return mLightDiffuse; }
 	const ColorRGBA& GetLightSpecular() const		{ return mLightSpecular; }
 	float GetAttenuationRange () const				{ return mRange; }

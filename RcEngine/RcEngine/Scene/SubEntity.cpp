@@ -55,32 +55,48 @@ EffectTechnique* SubEntity::GetTechnique() const
 
 void SubEntity::GetWorldTransforms( Matrix4f* xform ) const
 {
-	if (!mParent->mNumBoneMatrices || !mParent->HasAnimation())
+	if (!mParent->mNumSkinMatrices || !mParent->HasSkeletonAnimation())
 	{
 		// no skeleton animation
 		*xform = mParent->GetWorldTransform();
 	}
 	else
 	{
-		for (size_t i = 0; i < mParent->mNumBoneMatrices; ++i)
+		// hardware skin
+		if (mParent->HasSkeletonAnimation())
 		{
-			xform[i] = mParent->mBoneWorldMatrices[i];
+			assert(mParent->mNumSkinMatrices);
+			size_t i;
+			for (i = 0; i < mParent->mNumSkinMatrices; ++i)
+			{
+				xform[i] = mParent->mSkinMatrices[i];
+			}
+
+			// last matrix is scene node world matrix
+			xform[i] = mParent->GetWorldTransform();
+		}
+		else
+		{
+			// All animations disabled, use parent entity world transform only
+			std::fill_n(xform, mParent->mNumSkinMatrices + 1, mParent->GetWorldTransform());
 		}
 	}
 }
 
 std::uint32_t SubEntity::GetWorldTransformsCount() const
 {
-	if (!mParent->mNumBoneMatrices)
-	{
-		// No Skin animation
-		return 1;
-	}
-	else
-	{
-		// to do,add skin mesh support
-		return mParent->mNumBoneMatrices;
-	}
+	return 1 + mParent->mNumSkinMatrices;
+
+	//if (!mParent->mNumBoneMatrices)
+	//{
+	//	// No Skin animation
+	//	return 1;
+	//}
+	//else
+	//{
+	//	// to do,add skin mesh support
+	//	return mParent->mNumBoneMatrices;
+	//}
 }
 
 const shared_ptr<RenderOperation>& SubEntity::GetRenderOperation() const
