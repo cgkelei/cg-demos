@@ -46,6 +46,7 @@ protected:
 	GLenum mTargetType;
 	std::vector<GLuint> mPixelBuffers;
 	std::vector< std::vector<unsigned char> > mTextureData;
+	TextureMapAccess mTextureMapAccess;
 };
 
 

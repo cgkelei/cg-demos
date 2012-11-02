@@ -19,7 +19,8 @@ struct ResourceTypes
 		Effect,
 		Animation,
 		Texture,
-		Pipeline
+		Pipeline,
+		Font
 	};
 };
 

@@ -55,7 +55,6 @@ protected:
 	TextureType mType;
 };
 
-
 class TextureResource : public Resource
 {
 public:

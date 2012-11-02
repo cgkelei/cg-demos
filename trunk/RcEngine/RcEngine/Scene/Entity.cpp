@@ -11,6 +11,7 @@
 #include <Graphics/AnimationController.h>
 #include <Graphics/Animation.h>
 #include <Graphics/AnimationState.h>
+#include <Graphics/RenderQueue.h>
 #include <Core/Context.h>
 #include <Core/Exception.h>
 #include <Math/MathUtil.h>
@@ -137,7 +138,7 @@ AnimationPlayer* Entity::GetAnimationPlayer() const
 	return mAnimationPlayer;
 }
 
-void Entity::OnUpdateRenderQueue(RenderQueue& renderQueue, Camera* camera, RenderOrder order)
+void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, Camera* camera, RenderOrder order)
 {
 	// Add each visible SubEntity to the queue
 	for (auto iter= mSubEntityList.begin(); iter != mSubEntityList.end(); ++iter)
@@ -146,11 +147,10 @@ void Entity::OnUpdateRenderQueue(RenderQueue& renderQueue, Camera* camera, Rende
 		BoundingBoxf subWorldBoud = Transform(subEntity->GetBoundingBox(), mParentNode->GetWorldTransform());
 
 		// tode  mesh part world bounding has some bugs.
-
 		/*if(cam->Visible(subWorldBoud))
 		{*/
-
 			float sortKey = 0;
+			RenderQueue::Bucket bucket =  RenderQueue::BucketOpaque;
 
 			switch( order )
 			{
@@ -164,16 +164,21 @@ void Entity::OnUpdateRenderQueue(RenderQueue& renderQueue, Camera* camera, Rende
 				sortKey = -NearestDistToAABB( camera->GetPosition(), subWorldBoud.Min, subWorldBoud.Max);
 				break;
 			}
-
+			
+			if (subEntity->GetMaterial()->Transparent())
+			{
+				bucket = RenderQueue::BucketTransparent;
+				// Transparent object must render from furthest to nearest
+				sortKey =  -NearestDistToAABB( camera->GetPosition(), subWorldBoud.Min, subWorldBoud.Max);
+			}
 
 			RenderQueueItem item;
 			item.Renderable = subEntity;
 			item.Type = SOT_Entity;
+			item.SortKey = sortKey;
 
-			// todo add render queue sort
-			item.SortKey = 0.0f;
-
-			renderQueue.push_back(item);
+			renderQueue->AddToQueue(item, bucket);
+			
 		//}
 	}
 

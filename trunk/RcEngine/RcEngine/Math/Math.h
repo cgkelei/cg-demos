@@ -37,9 +37,20 @@ public:
 	static const Real SQRT_3;
 	static const Real INV_SQRT_3;
 
+
+	static Real Clamp(Real val, Real min, Real max);
 	static Real ToDegree(Real radian)	{ return radian * RAD_TO_DEG;}
 	static Real ToRadian(Real degree)	{ return degree * DEG_TO_RAD; }
 };
+
+template <typename Real>
+Real Math<Real>::Clamp( Real val, Real min, Real max )
+{
+	if (val < min)	return min;
+	if (val > max)  return max;
+	return val;
+}
+
 
 typedef Math<float> Mathf;
 
@@ -67,6 +78,7 @@ template<> const double Math<double>::INV_PI = 1.0/Math<double>::PI;
 template<> const double Math<double>::INV_TWO_PI = 1.0/Math<double>::TWO_PI;
 template<> const double Math<double>::DEG_TO_RAD = Math<double>::PI/180.0;
 template<> const double Math<double>::RAD_TO_DEG = 180.0/Math<double>::PI;
+
 
 
 }

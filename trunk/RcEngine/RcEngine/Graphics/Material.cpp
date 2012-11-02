@@ -132,7 +132,7 @@ private:
 
 //--------------------------------------------------------------------------------------------------
 Material::Material(uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
-	: Resource(resType, creator, handle, name, group)
+	: Resource(resType, creator, handle, name, group), mTransparent(false)
 {
 }
 

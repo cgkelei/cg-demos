@@ -8,6 +8,9 @@ template<typename Real>
 class Quaternion
 {
 public:
+	typedef Real value_type;
+
+public:
 	Quaternion();
 	Quaternion(Real w, Real x, Real y, Real z);
 	Quaternion(const Quaternion& rhs);

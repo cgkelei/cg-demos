@@ -1,4 +1,11 @@
 template<typename Real>
+Rectangle<Real>::Rectangle()
+{
+
+}
+
+
+template<typename Real>
 Rectangle<Real>::Rectangle( Real x, Real y, Real width, Real height )
 	: X(x), Y(y), Width(width), Height(height)
 {
@@ -88,7 +95,31 @@ Real Rectangle<Real>::Top() const
 }
 
 template<typename Real>
-Real RcEngine::Rectangle<Real>::Left() const
+Real Rectangle<Real>::Left() const
 {
 	return X;
+}
+
+template<typename Real>
+void RcEngine::Rectangle<Real>::SetBottom( Real bottom )
+{
+	Height = bottom - Y;
+}
+
+template<typename Real>
+void Rectangle<Real>::SetRight( Real right )
+{
+	Width = right - X;
+}
+
+template<typename Real>
+void Rectangle<Real>::SetTop( Real top )
+{
+	Y = top;
+}
+
+template<typename Real>
+void Rectangle<Real>::SetLeft( Real left )
+{
+	X = left;
 }

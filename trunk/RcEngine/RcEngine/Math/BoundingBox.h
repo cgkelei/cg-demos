@@ -10,6 +10,9 @@ template <typename Real>
 class BoundingBox
 {
 public:
+	typedef Real value_type;
+
+public:
 	BoundingBox() : Defined(false) { }
 
 	BoundingBox(const Vector<Real,3>& min, const Vector<Real,3>& max)

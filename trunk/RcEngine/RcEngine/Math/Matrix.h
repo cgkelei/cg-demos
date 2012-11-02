@@ -10,6 +10,9 @@ template<typename Real>
 class Matrix4
 {
 public:
+	typedef Real value_type;
+
+public:
 	Matrix4();
 	Matrix4(const Real* rhs);
 	Matrix4(const Matrix4& rhs);

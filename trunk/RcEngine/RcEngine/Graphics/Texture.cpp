@@ -49,6 +49,11 @@ shared_ptr<Resource> TextureResource::FactoryFunc( ResourceManager* creator, Res
 	return std::make_shared<TextureResource>(ResourceTypes::Texture, creator, handle, name, group);
 }
 
+void _ApiExport SaveTexture( const shared_ptr<Texture> texture, const String& texName )
+{
+
+}
+
 
 
 } // Namespace RcEngine

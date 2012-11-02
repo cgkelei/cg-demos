@@ -22,6 +22,9 @@ template<typename Real>
 class Frustum
 {
 public:
+	typedef Real value_type;
+
+public:
 	Frustum();
 
 	/**

@@ -14,6 +14,9 @@ template< typename Real, int32_t Size >
 class Vector
 {
 public:
+	typedef Real value_type;
+
+public:
 	Vector();
 
 	Vector(Real fX, Real fY);
@@ -111,7 +114,6 @@ typedef Vector<float,3> Vector3f;
 typedef Vector<float,4> Vector4f;
 typedef Vector<double,3> Vector3d;
 typedef Vector<double,4> Vector4d;
-
 
 } // Namespace RcEngine
 #endif

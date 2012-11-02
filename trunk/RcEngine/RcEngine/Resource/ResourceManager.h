@@ -44,7 +44,7 @@ public:
 
 public:
 	ResourceManager();
-	virtual~ ResourceManager();
+	~ ResourceManager();
 
 	void RegisterType(uint32_t type, const String& typeString, ResTypeFactoryFunc factoryFunc);
 
