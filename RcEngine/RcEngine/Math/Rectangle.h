@@ -9,6 +9,10 @@ template<typename Real>
 class Rectangle
 {
 public:
+	typedef Real value_type;
+
+public:
+	Rectangle();
 	Rectangle(Real x, Real y, Real width, Real height);
 	Rectangle(const Rectangle& other);
 
@@ -16,6 +20,11 @@ public:
 	inline Real Top() const;
 	inline Real Right() const;
 	inline Real Bottom() const;
+	
+	inline void SetLeft(Real left);
+	inline void SetTop(Real top);
+	inline void SetRight(Real right);
+	inline void SetBottom(Real bpttom);
 
 	inline bool Contains(Real x, Real y) const;
 	inline ContainmentType Contains(Real x, Real y, Real width, Real height) const;
@@ -29,6 +38,8 @@ public:
 	Real Width, Height;
 };
 
+
+
 ///**
 // * Creates a Rectangle defining the area where one rectangle overlaps with another rectangle.
 // */
@@ -41,7 +52,11 @@ public:
 //template<typename Real>
 //Rectangle<Real> Union(const Rectangle<Real>& lhs, const Rectangle<Real>& rhs);
 
+#include <Math/Rectangle.inl>
+
 typedef Rectangle<float> Rectanglef;
+typedef Rectangle<int32_t> IntRect;
+
 }
 
 

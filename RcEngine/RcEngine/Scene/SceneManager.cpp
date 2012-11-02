@@ -8,6 +8,7 @@
 #include <Graphics/Mesh.h>
 #include <Graphics/Camera.h>
 #include <Graphics/Sky.h>
+#include <Graphics/RenderQueue.h>
 #include <Graphics/AnimationController.h>
 #include <Core/Exception.h>
 #include <Core/Context.h>
@@ -26,11 +27,14 @@ SceneManager::SceneManager()
 
 	RegisterType(SOT_Entity, "Entity Type", nullptr, nullptr, Entity::FactoryFunc);
 	RegisterType(SOT_Light, "Light Type", nullptr, nullptr, Light::FactoryFunc);
+
+	mRenderQueue = new RenderQueue;
 }
 
 SceneManager::~SceneManager()
 {
 	ClearScene();
+	Safe_Delete(mRenderQueue);
 }
 
 SceneNode* SceneManager::CreateSceneNode( const String& name )
@@ -91,14 +95,15 @@ void SceneManager::DestroySceneNode( SceneNode* node )
 
 void SceneManager::UpdateRenderQueue(Camera* cam, RenderOrder order)
 {
-	mRendeQueue.clear();
+	mRenderQueue->ClearAllQueue();
+
 	GetRootSceneNode()->OnUpdateRenderQueues(cam, order);
 
 	// Update skynode same with camera positon, add sky box to render queue
 	if (mSkyBoxNode)
 	{
 		mSkyBoxNode->SetPosition( cam->GetPosition() );
-		mRendeQueue.push_back( RenderQueueItem(SOT_Sky, mSkyBox, 0) );
+		mRenderQueue->AddToQueue(  RenderQueueItem(SOT_Sky, mSkyBox, 0) ,RenderQueue::BucketSky);
 	}
 }
 
@@ -178,10 +183,21 @@ void SceneManager::CreateSkyBox( const shared_ptr<Texture>& texture, bool cubema
 
 void SceneManager::RenderScene()
 {
-	for (auto iter = mRendeQueue.begin(); iter != mRendeQueue.end(); ++iter)
+	auto& renderBuckets = mRenderQueue->GetAllRenderBuckets();
+
+	for (auto iter = renderBuckets.begin(); iter != renderBuckets.end(); ++iter)
 	{
-		RenderQueueItem& item = *iter;
-		item.Renderable->Render();
+		RenderBucket& renderBucket = *(iter->second);
+
+		std::sort(renderBucket.begin(), renderBucket.end(), [](const RenderQueueItem& lhs, const RenderQueueItem& rhs)
+		{
+			return lhs.SortKey < rhs.SortKey;
+		});
+		
+		for (auto renderableIter = renderBucket.begin(); renderableIter != renderBucket.end(); ++renderableIter)
+		{
+			renderableIter->Renderable->Render();
+		}
 	}
 }
 

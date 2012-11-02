@@ -12,18 +12,6 @@ namespace RcEngine {
 class Sky;
 class SceneObject;
 
-struct _ApiExport RenderQueueItem
-{
-	uint32_t Type;
-	Renderable* Renderable;
-	float SortKey;
-
-	RenderQueueItem() {}
-	RenderQueueItem( uint32_t type, class Renderable* rd, float key ) : Type(type), Renderable(rd), SortKey(key) { }
-};
-typedef vector<RenderQueueItem> RenderQueue;
-
-
 class _ApiExport SceneManager
 {
 public:
@@ -82,10 +70,9 @@ public:
 	 */
 	void UpdateRenderQueue(Camera* cam, RenderOrder order);
 
+	RenderQueue* GetRenderQueue() { return mRenderQueue; }
 
 	void RenderScene();
-	
-	vector<RenderQueueItem>& GetRenderQueue() { return mRendeQueue; }
 
 	vector<Light*>& GetSceneLight() { return mSceneLights; }
 
@@ -113,8 +100,7 @@ protected:
 	
 	AnimationController* mAnimationController;
 
-	// render queue
-	vector< RenderQueueItem > mRendeQueue;
+	RenderQueue* mRenderQueue;
 };
 
 

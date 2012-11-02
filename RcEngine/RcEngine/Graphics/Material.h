@@ -40,6 +40,8 @@ public:
 	void SetSpecularColor(const ColorRGBA& specular)	{ mSpecular = specular; }
 
 	void SetTexture(const String& texUint, const shared_ptr<Texture>& texture);
+
+	bool Transparent() const { return mTransparent; }
 			
 	void ApplyMaterial();
 
@@ -71,6 +73,8 @@ protected:
 	ColorRGBA mSpecular;
 	ColorRGBA mEmissive;
 	float mPower;
+
+	bool mTransparent;
 
 	unordered_map<String, TextureLayer > mTextures;
 			

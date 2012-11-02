@@ -34,10 +34,6 @@ public:
 		uint32_t arraySize, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality,
 		uint32_t accessHint, ElementInitData* initData);
 
-	virtual shared_ptr<Texture> CreateTextureFromFile(const std::string& texFileName, uint32_t accessHint);
-
-	virtual shared_ptr<Texture> CreateTextureArrayFromFile( const vector<String>& textures, uint32_t accessHint = 0);
-
 	// Views
 	//-------------------------------------------------------------------------------------------------------
 	virtual shared_ptr<RenderView> CreateRenderTargetView2D(const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level);
@@ -52,6 +48,11 @@ public:
 	
 	virtual shared_ptr<Shader> CreateShader(ShaderType type);
 	virtual shared_ptr<ShaderProgram> CreateShaderProgram(Effect& effect);
+
+	// 
+	virtual shared_ptr<Texture> CreateTextureFromFile(const std::string& texFileName, uint32_t accessHint);
+	virtual shared_ptr<Texture> CreateTextureArrayFromFile( const vector<String>& textures, uint32_t accessHint = 0);
+	virtual void SaveTexture2D( const String& texFile, const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level);
 	
 protected:
 	virtual shared_ptr<DepthStencilState> CreateDepthStencilStateImpl( const DepthStencilStateDesc& desc ); 

@@ -53,7 +53,7 @@ public:
 	/**
 	 * Called when scene manger update render queue.
 	 */
-	virtual void OnUpdateRenderQueue( RenderQueue& renderQueue, Camera* cam, RenderOrder order );
+	virtual void OnUpdateRenderQueue( RenderQueue* renderQueue, Camera* cam, RenderOrder order );
 	
 	Node* GetParentNode() const { return mParentNode; }
 

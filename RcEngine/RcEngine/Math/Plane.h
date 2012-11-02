@@ -20,6 +20,9 @@ template< typename Real >
 class Plane
 {
 public:
+	typedef Real value_type;
+
+public:
 	Plane();
 	Plane(const Vector<Real, 3>& nroaml, Real distance);
 	Plane(const Vector<Real, 3>& nroaml, const Vector<Real, 3>& point);	

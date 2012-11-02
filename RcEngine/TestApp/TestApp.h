@@ -22,6 +22,8 @@ protected:
 	void Render();
 	void Update(float deltaTime);
 
+	void CalculateFrameRate();
+
 private:
 	shared_ptr<Effect> mEffect;
 	EffectTechnique* mTechnique;

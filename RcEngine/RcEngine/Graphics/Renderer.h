@@ -3,6 +3,7 @@
 
 #include <Core/Prerequisites.h>
 #include <Graphics/GraphicsCommon.h>
+#include <Math/Matrix.h>
 
 
 namespace RcEngine {
@@ -20,8 +21,17 @@ public:
 
 private:
 	void DrawFSQuad(const shared_ptr<Material>& mat, const String& tech);
-	void DrawGeometry(const String& tech, const String& matClass, RenderOrder order);
-	void DrawRenderable(Camera* camera, const String& tech, const String& matClass, RenderOrder order);
+
+	/**
+	 * Draw geometry with light, it can used to generate shadow map
+	 */
+	void DrawGeometry(const String& tech, const String& matClass);
+
+	void DrawLightGeometry(Light* light, const String& matClass);
+
+	void DrawRenderable(Camera* camera, const String& tech, const String& matClass);
+
+	void SetupViewProjMatirices(const Matrix4f& view, const Matrix4f& proj);
 
 private:
 	void DrawEntity();
@@ -35,7 +45,7 @@ private:
 	
 	EffectTechnique* mCurrentTechnique;
 
-	Matrix4f mViewMat, mViewMatInv, mProjMat, mViewProjMat, mViewProjMatInv;
+	Matrix4f mViewMat, mViewMatInv, mProjMat, mViewProjMat;
 
 	Light* mCurrentLight;
 };

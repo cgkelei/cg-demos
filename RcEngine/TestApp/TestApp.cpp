@@ -15,6 +15,7 @@
 #include "Graphics/Animation.h"
 #include "Graphics/AnimationClip.h"
 #include "Graphics/AnimationState.h"
+#include "Graphics/Font.h"
 #include "Math/ColorRGBA.h"
 #include "Math/MathUtil.h"
 #include "Core/Context.h"
@@ -31,10 +32,10 @@
 #include "Graphics/SimpleGeometry.h"
 #include "Resource/ResourceManager.h"
 #include <D3DX10Math.h>
+#include "Math/Rectangle.h"
 #include "Core/XMLDom.h"
 
 #pragma comment(lib, "D3DX10.lib")
-
 
 TestApp::TestApp( const String& config )
 	:Application(config)
@@ -66,6 +67,14 @@ void TestApp::LoadContent()
 	RenderFactory* factory = RcEngine::Context::GetSingleton().GetRenderFactoryPtr();
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
+
+	shared_ptr<Font> font =  
+		std::static_pointer_cast<Font>(
+		resMan.GetResourceByHandle(resMan.AddResource(ResourceTypes::Font, "VeraMoBI.ttf", "General"))) ;
+
+	font->Load();
+
+	auto face = font->GetFace(10);
 	
 	auto h = resMan.AddResource(ResourceTypes::Material, "SkinModel.material.xml", "Custom");
 	resMan.GetResourceByHandle(h)->Load();
@@ -140,7 +149,11 @@ void TestApp::LoadContent()
 
 	auto texture = factory->CreateTextureArrayFromFile(skyTextures);*/
 
-	String skyTexPath = FileSystem::GetSingleton().Locate("MeadowTrail.dds");
+	//String skyTexPath = FileSystem::GetSingleton().Locate("MeadowTrail.dds");
+
+	String skyTexPath = FileSystem::GetSingleton().Locate("front.dds");
+	auto texture = factory->CreateTextureFromFile(skyTexPath);
+	factory->SaveTexture2D("Test.dds", texture, 0, 0);
 
 	// Sky 
 	//sceneManager->CreateSkyBox(texture, false);
@@ -158,10 +171,21 @@ void TestApp::UnloadContent()
 
 void TestApp::Render()
 {
-	//RenderDevice* device = Context::GetSingleton().GetRenderDevicePtr();
-	//device->GetCurrentFrameBuffer()->Clear(CF_Color | CF_Depth |CF_Stencil, 
-	//	RcEngine::ColorRGBA(1.1f, 1.1f, 1.1f, 1.0f), 1.0f, 0);
-	//device->GetCurrentFrameBuffer()->SwapBuffers();
+	RenderDevice& renderDevice = Context::GetSingleton().GetRenderDevice();
+	SceneManager& scenenMan = Context::GetSingleton().GetSceneManager();
+
+	shared_ptr<FrameBuffer> currentFrameBuffer = renderDevice.GetCurrentFrameBuffer();
+
+	float clr = (float)169/255;
+	currentFrameBuffer->Clear(CF_Color | CF_Depth |CF_Stencil, RcEngine::ColorRGBA(clr, clr, clr, 1.0f), 1.0f, 0);
+
+	scenenMan.UpdateRenderQueue(currentFrameBuffer->GetCamera(), RO_StateChange);
+
+	Context::GetSingleton().GetSceneManager().RenderScene();
+
+	currentFrameBuffer->SwapBuffers();
+
+	CalculateFrameRate();
 }
 
 
@@ -172,6 +196,24 @@ void TestApp::Update( float deltaTime )
 
 	//SceneNode* dwarfNode = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf");
 	//dwarfNode->SetRotation(QuaternionFromRotationMatrix(mCameraControler->GetWorldMatrix()));
+}
+
+void TestApp::CalculateFrameRate()
+{
+	static int frameCount = 0;
+	static float baseTime = 0;
+
+	frameCount++;
+
+	if (mTimer.GetGameTime()-baseTime >= 1.0f)
+	{
+		float fps = (float)frameCount;
+		std::stringstream sss; 
+		sss << "FPS: " << fps;
+		mMainWindow->SetTitle(sss.str());
+		frameCount = 0;
+		baseTime += 1.0f;
+	}
 }
 
 

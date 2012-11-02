@@ -10,14 +10,14 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 	{
 		// calculate mip map levels
 		mMipMaps = 1;
-		uint32_t w = width;
+		/*uint32_t w = width;
 		uint32_t h = height;
 		while( w!= 1 || h != 1)
 		{
 			++mMipMaps;
 			w = std::max<uint32_t>(1U, w / 2);
 			h = std::max<uint32_t>(1U, h / 2);
-		}
+		}*/
 	}
 	else
 	{
@@ -173,13 +173,167 @@ uint32_t OpenGLTexture2D::GetHeight( uint32_t level )
 
 void OpenGLTexture2D::Map2D( uint32_t arrayIndex, uint32_t level, TextureMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height, void*& data, uint32_t& rowPitch )
 {
+	// store 
+	mTextureMapAccess = tma;
+
+	GLint glinternalFormat;
+	GLenum glformat;
+	GLenum gltype;
+	OpenGLMapping::Mapping(glinternalFormat, glformat, gltype, mFormat);
+
+	uint32_t texelSize = PixelFormatUtils::GetNumElemBytes(mFormat);
+
+	int blockSize = 0;
+	if (PixelFormatUtils::IsCompressed(mFormat))
+	{
+		blockSize = (glinternalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16; 
+	}
+
+	rowPitch = mWidths[level] * texelSize; 
+
+	uint8_t* p;
+	switch(tma)
+	{
+	case TMA_Read_Only:
+	case TMA_Read_Write:
+		{
+			if (!mPixelBuffers.empty())
+			{
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+				glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, mPixelBuffers[arrayIndex * mMipMaps + level]);
+
+				glBindTexture(mTargetType, mTextureID);
+				if (PixelFormatUtils::IsCompressed(mFormat))
+				{
+					glGetCompressedTexImage(mTargetType, level, NULL);
+					p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY));
+				}
+				else
+				{
+					glGetTexImage(mTargetType, level, glformat, gltype, NULL);
+					p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY));
+				}
+			}
+			else
+			{
+				glBindTexture(mTargetType, mTextureID);
+				if (PixelFormatUtils::IsCompressed(mFormat))
+				{
+					glGetCompressedTexImage(mTargetType, level, &mTextureData[arrayIndex * mMipMaps + level][0]);
+					p = &mTextureData[arrayIndex * mMipMaps + level][0];
+				}
+				else
+				{
+					glGetTexImage(mTargetType, level, glformat, gltype, &mTextureData[arrayIndex * mMipMaps + level][0]);
+					p = &mTextureData[arrayIndex * mMipMaps + level][0];
+				}
+			}
+		}
+		break;
+
+	case TMA_Write_Only:
+		{
+			if (!mPixelBuffers.empty())
+			{
+				glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, mPixelBuffers[arrayIndex * mMipMaps + level]);
+				p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY));
+			}
+			else
+			{
+				p = &mTextureData[arrayIndex * mMipMaps + level][0];
+			}
+		}
+		break;
+
+	default:
+		assert(false);
+	}
+
+	if (PixelFormatUtils::IsCompressed(mFormat))
+	{
+		data = p + (yOffset / 4) * rowPitch + (xOffset / 4 * blockSize);
+	}
+	else
+	{
+		data = p + (yOffset * mWidths[level] + xOffset) * texelSize;
+	}
 
 }
 
-
 void OpenGLTexture2D::Unmap2D( uint32_t arrayIndex, uint32_t level )
 {
+	switch(mTextureMapAccess)
+	{
+	case TMA_Read_Only:
+		{
+			if (!mPixelBuffers.empty())
+			{
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+				glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, mPixelBuffers[arrayIndex * mMipMaps + level]);
+				glUnmapBuffer(GL_PIXEL_PACK_BUFFER_ARB);
+			}
+			break;
+		}
 
+	case TMA_Write_Only:
+	case TMA_Read_Write:
+		{
+			GLint glinternalFormat;
+			GLenum glformat;
+			GLenum gltype;
+			OpenGLMapping::Mapping(glinternalFormat, glformat, gltype, mFormat);
+			
+			uint32_t imageSize = 0;
+			if (PixelFormatUtils::IsCompressed(mFormat))
+			{
+				int blockSize = (glinternalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16; 
+				imageSize = ((mWidths[level]+3)/4)*((mHeights[level]+3)/4)*blockSize; 
+			}
+
+			glBindTexture(mTargetType, mTextureID);
+
+			uint8_t* p;
+			if (!mPixelBuffers.empty())
+			{
+
+				glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, mPixelBuffers[arrayIndex * mMipMaps + level]);
+				glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB);
+
+				p = NULL;
+			}
+			else
+			{
+				// resize texture data for copy
+				p = &mTextureData[arrayIndex * mMipMaps + level][0];
+			}
+
+			if (PixelFormatUtils::IsCompressed(mFormat))
+			{
+				if (mTextureArraySize > 1)
+				{	
+					glCompressedTexSubImage3D(mTargetType, level, 0, 0, arrayIndex, mWidths[level], mHeights[level], 1, glformat, imageSize, p);
+				}
+				else
+				{
+					glCompressedTexSubImage2D(mTargetType, level, 0, 0, mWidths[level], mHeights[level], glformat, imageSize, p);
+				}
+			}
+			else
+			{
+				if (mTextureArraySize > 1)
+				{	
+					glTexSubImage3D(mTargetType, level, 0, 0, arrayIndex, mWidths[level], mHeights[level], 1, glformat, gltype, p);
+				}
+				else
+				{
+					glTexSubImage2D(mTargetType, level, glinternalFormat,  mWidths[level], mHeights[level], 0, glformat, gltype, p);
+				}
+
+			}
+		}
+	}
 }
 
 }

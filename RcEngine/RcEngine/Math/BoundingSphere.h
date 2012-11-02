@@ -11,6 +11,9 @@ template<typename Real>
 class BoundingSphere
 {
 public:
+	typedef Real value_type;
+
+public:
 	BoundingSphere(): Defined(false) { }
 
 	BoundingSphere(const Vector<Real, 3>& center, Real radius)

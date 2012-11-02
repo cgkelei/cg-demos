@@ -11,6 +11,92 @@
 #include <Graphics/DepthStencilState.h>
 #include <Graphics/RasterizerState.h>
 
+namespace {
+
+union Pixel32
+{
+	Pixel32()
+		: integer(0) { }
+	Pixel32(uint8_t bi, uint8_t gi, uint8_t ri, uint8_t ai = 255)
+	{
+		b = bi;
+		g = gi;
+		r = ri;
+		a = ai;
+	}
+
+	uint8_t integer;
+
+	struct
+	{
+#ifdef BIG_ENDIAN
+		uint8_t a, r, g, b;
+#else // BIG_ENDIAN
+		uint8_t b, g, r, a;
+#endif // BIG_ENDIAN
+	};
+};
+
+// TGA Header struct to make it simple to dump a TGA to disc.
+
+#if defined(_MSC_VER) || defined(__GNUC__)
+#pragma pack(push, 1)
+#pragma pack(1)               // Dont pad the following struct.
+#endif
+
+struct TGAHeader
+{
+	uint8_t   idLength,           // Length of optional identification sequence.
+		paletteType,        // Is a palette present? (1=yes)
+		imageType;          // Image data type (0=none, 1=indexed, 2=rgb,
+	// 3=grey, +8=rle packed).
+	uint16_t  firstPaletteEntry,  // First palette index, if present.
+		numPaletteEntries;  // Number of palette entries, if present.
+	uint8_t   paletteBits;        // Number of bits per palette entry.
+	uint16_t  x,                  // Horiz. pixel coord. of lower left of image.
+		y,                  // Vert. pixel coord. of lower left of image.
+		width,              // Image width in pixels.
+		height;             // Image height in pixels.
+	uint8_t   depth,              // Image color depth (bits per pixel).
+		descriptor;         // Image attribute flags.
+};
+
+#if defined(_MSC_VER) || defined(__GNUC__)
+#pragma pack(pop)
+#endif
+
+bool
+	WriteTGA(const std::string &filename,
+	const Pixel32 *pxl,
+	uint16_t width,
+	uint16_t height)
+{
+	std::ofstream file(filename.c_str(), std::ios::binary);
+	if (file)
+	{
+		TGAHeader header;
+		memset(&header, 0, sizeof(TGAHeader));
+		header.imageType  = 2;
+		header.width = width;
+		header.height = height;
+		header.depth = 32;
+		header.descriptor = 0x20;
+
+		file.write((const char *)&header, sizeof(TGAHeader));
+		file.write((const char *)pxl, sizeof(Pixel32) * width * height);
+
+		return true;
+	}
+	return false;
+}
+
+
+
+
+
+}
+
+
 namespace RcEngine {
 
 
@@ -73,6 +159,31 @@ shared_ptr<SamplerState> OpenGLRenderFactory::CreateSamplerStateImpl( const Samp
 	return std::make_shared<OpenGLSamplerState>(desc);
 }
 
+shared_ptr<RenderView> OpenGLRenderFactory::CreateDepthStencilView( const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level )
+{
+	return std::make_shared<OpenGLDepthStencilView>(*texture, arrayIndex, level);
+}
+
+shared_ptr<RenderView> OpenGLRenderFactory::CreateRenderTargetView2D( const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level )
+{
+	return std::make_shared<OpenGLRenderTargetView2D>(*texture, arrayIndex, level);
+}
+
+shared_ptr<Shader> OpenGLRenderFactory::CreateShader( ShaderType type )
+{
+	return std::make_shared<OpenGLShader>(type);
+}
+
+shared_ptr<ShaderProgram> OpenGLRenderFactory::CreateShaderProgram( Effect& effect )
+{
+	return std::make_shared<OpenGLShaderProgram>(effect);
+}
+
+shared_ptr<FrameBuffer> OpenGLRenderFactory::CreateFrameBuffer( uint32_t width, uint32_t height )
+{
+	return std::make_shared<OpenGLFrameBuffer>(width, height, true);
+}
+
 shared_ptr<Texture> OpenGLRenderFactory::CreateTextureFromFile( const std::string& texFileName, uint32_t accessHint )
 {
 	TextureType type;
@@ -83,7 +194,7 @@ shared_ptr<Texture> OpenGLRenderFactory::CreateTextureFromFile( const std::strin
 	{
 		ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, "Load Texture Error", "OpenGLRenderFactory::CreateTextureFromFile");
 	}
-			
+
 	int32_t numMipmaps = image.getMipLevels();
 	int32_t imageWidth = image.getWidth();
 	int32_t imageHeight = image.getHeight();
@@ -149,15 +260,15 @@ shared_ptr<Texture> OpenGLRenderFactory::CreateTextureFromFile( const std::strin
 	switch(type)
 	{
 	case TT_Texture1D:
-		return CreateTexture1D(imageWidth, format, 1, numMipmaps, 0, 1, accessHint, &imageData[0]);
+		return CreateTexture1D(imageWidth, format, 1, numMipmaps, 1, 0, accessHint, &imageData[0]);
 	case TT_Texture2D:
-		return CreateTexture2D(imageWidth, imageHeight, format, 1, numMipmaps, 0, 1, accessHint, &imageData[0]);
+		return CreateTexture2D(imageWidth, imageHeight, format, 1, numMipmaps, 1, 0, accessHint, &imageData[0]);
 	case TT_Texture3D:
-		return CreateTexture3D(imageWidth, imageHeight, imageDepth, format, 1, numMipmaps, 0, 1, accessHint, &imageData[0]);
+		return CreateTexture3D(imageWidth, imageHeight, imageDepth, format, 1, numMipmaps, 1, 0, accessHint, &imageData[0]);
 	case TT_TextureCube:
-		return CreateTextureCube(imageWidth, imageHeight, format, 1, numMipmaps, 0, 1, accessHint, &imageData[0]);
+		return CreateTextureCube(imageWidth, imageHeight, format, 1, numMipmaps, 1, 0, accessHint, &imageData[0]);
 	};
-	
+
 	ENGINE_EXCEPT(Exception::ERR_RT_ASSERTION_FAILED, "Unsupported Texture Format", "OpenGLRenderFactory::CreateTextureFromFile");
 }
 
@@ -168,11 +279,11 @@ shared_ptr<Texture> OpenGLRenderFactory::CreateTextureArrayFromFile( const vecto
 	uint32_t textureHeight;
 	uint32_t textureMipMaps;
 	PixelFormat textureFormat;
-	
+
 	nv::Image image;
-	
+
 	vector<ElementInitData> imageData;
-	
+
 	size_t arraySize = textures.size();
 	for (size_t arrIndex = 0; arrIndex < textures.size(); ++arrIndex)
 	{
@@ -191,7 +302,7 @@ shared_ptr<Texture> OpenGLRenderFactory::CreateTextureArrayFromFile( const vecto
 		bool isCompressed = image.isCompressed();
 		bool isCubeMap = image.isCubeMap();
 		bool isVolume = image.isVolume();
-		
+
 		TextureType type;
 		if( isCubeMap )
 		{
@@ -236,7 +347,7 @@ shared_ptr<Texture> OpenGLRenderFactory::CreateTextureArrayFromFile( const vecto
 					"OpenGLRenderFactory::CreateTextureFromFile");
 			}
 		}
-		
+
 		if(!isCubeMap)
 		{
 			for (int32_t level = 0; level < numMipmaps; ++level)
@@ -276,33 +387,116 @@ shared_ptr<Texture> OpenGLRenderFactory::CreateTextureArrayFromFile( const vecto
 	};
 }
 
-
-shared_ptr<RenderView> OpenGLRenderFactory::CreateDepthStencilView( const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level )
+void ExportToPfm(const String& filename, uint32_t width, uint32_t height, PixelFormat format, void* data)
 {
-	return std::make_shared<OpenGLDepthStencilView>(*texture, arrayIndex, level);
+	vector<float> temp;
+	temp.resize(width * height * 3);
+	float* temPixel = &temp[0];
+
+	uint8_t* pixel = (uint8_t*)data;
+	
+	if (format == PF_A8R8G8B8)
+	{
+		for (uint32_t j = 0; j < height; j++)
+			for(uint32_t i = 0; i < width; i ++)
+		{	
+			uint8_t b = pixel[(j * width + i)*4 + 0];
+			uint8_t g = pixel[(j * width + i)*4 +1];
+			uint8_t r = pixel[(j * width + i)*4 +2];
+			uint8_t a = pixel[(j * width + i)*4 +3];
+
+			assert(a == 255);
+			temPixel[0] = r / 255.0f;
+			temPixel[1] = g / 255.0f;
+			temPixel[2] = b / 255.0f;
+			temPixel += 3;
+		}
+
+			FILE* file = fopen(filename.c_str(), "wb");
+			assert(file != NULL);
+			fprintf(file, "PF\n%d %d\n-1.0\n", width, height);
+			fwrite(&temp[0],sizeof(float) * temp.size(), 1,file);
+			fclose(file);
+	}
+	else if (format == PF_Luminance8)
+	{
+		for (uint32_t j = 0; j < height; j++)
+			for(uint32_t i = 0; i < width; i ++)
+			{	
+				uint8_t b = pixel[(j * width + i)];
+				uint8_t g = pixel[(j * width + i)];
+				uint8_t r = pixel[(j * width + i)];
+				uint8_t a = pixel[(j * width + i)];
+
+				temPixel[0] = r / 255.0f;
+				temPixel[1] = g / 255.0f;
+				temPixel[2] = b / 255.0f;
+				temPixel += 3;
+			}
+
+			FILE* file = fopen(filename.c_str(), "wb");
+			assert(file != NULL);
+			fprintf(file, "PF\n%d %d\n-1.0\n", width, height);
+			fwrite(&temp[0],sizeof(float) * temp.size(), 1,file);
+			fclose(file);
+	}
 }
 
-shared_ptr<RenderView> OpenGLRenderFactory::CreateRenderTargetView2D( const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level )
+void OpenGLRenderFactory::SaveTexture2D( const String& texFile, const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level)
 {
-	return std::make_shared<OpenGLRenderTargetView2D>(*texture, arrayIndex, level);
+	assert(texture->GetTextureType() == TT_Texture2D);
+
+	uint32_t w = texture->GetWidth(level);
+	uint32_t h = texture->GetHeight(level);
+
+	if (texture->GetTextureFormat() == PF_A8R8G8B8)
+	{
+		void* pData;
+		uint32_t rowPitch;
+		texture->Map2D(arrayIndex, level, TMA_Read_Only, 0, 0, 0, 0, pData, rowPitch);
+
+		uint8_t* pixel = (uint8_t*)pData;
+		vector<Pixel32> imageData(w*h);
+		for (uint32_t j = 0; j < h; j++)
+			for(uint32_t i = 0; i < w; i ++)
+			{
+				uint8_t b = pixel[((h-j -1) * w + i)*4 + 0];
+				uint8_t g = pixel[((h-j-1) * w + i)*4 +1];
+				uint8_t r = pixel[((h-j-1) * w + i)*4 +2];
+				uint8_t a = pixel[((h-j-1) * w + i)*4 +3];
+
+				imageData[j*w+i].r = r;
+				imageData[j*w+i].g = g;
+				imageData[j*w+i].b = b;
+				imageData[j*w+i].a = a;
+			}
+
+		WriteTGA("E:/test.tga", &imageData[0], w, h);
+	}
+	else if (texture->GetTextureFormat() == PF_Alpha8)
+	{
+		void* pData;
+		uint32_t rowPitch;
+		texture->Map2D(arrayIndex, level, TMA_Read_Only, 0, 0, 0, 0, pData, rowPitch);
+
+		uint8_t* pixel = (uint8_t*)pData;
+		vector<Pixel32> imageData(w*h);
+		for (uint32_t j = 0; j < h; j++)
+			for(uint32_t i = 0; i < w; i ++)
+			{
+				uint8_t b = pixel[((j) * w + i)];
+				uint8_t g = pixel[((j) * w + i)];
+				uint8_t r = pixel[((j) * w + i)];
+				uint8_t a = 255;
+
+				imageData[j*w+i].r = r;
+				imageData[j*w+i].g = g;
+				imageData[j*w+i].b = b;
+				imageData[j*w+i].a = a;
+			}
+
+			WriteTGA("E:/font.tga", &imageData[0], w, h);
+	}
 }
-
-shared_ptr<Shader> OpenGLRenderFactory::CreateShader( ShaderType type )
-{
-	return std::make_shared<OpenGLShader>(type);
-}
-
-shared_ptr<ShaderProgram> OpenGLRenderFactory::CreateShaderProgram( Effect& effect )
-{
-	return std::make_shared<OpenGLShaderProgram>(effect);
-}
-
-shared_ptr<FrameBuffer> OpenGLRenderFactory::CreateFrameBuffer( uint32_t width, uint32_t height )
-{
-	return std::make_shared<OpenGLFrameBuffer>(width, height, true);
-}
-
-
-
 
 }

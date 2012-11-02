@@ -1,6 +1,7 @@
 #include <Scene/SceneObject.h>
 #include <Scene/SceneManager.h>
 #include <Scene/SceneNode.h>
+#include <Graphics/RenderQueue.h>
 
 namespace RcEngine {
 
@@ -49,7 +50,7 @@ void SceneObject::OnDetach( Node* node )
 }
 
 
-void SceneObject::OnUpdateRenderQueue( RenderQueue& renderQueue, Camera* cam, RenderOrder order )
+void SceneObject::OnUpdateRenderQueue( RenderQueue* renderQueue, Camera* cam, RenderOrder order )
 {
 
 }

@@ -5,6 +5,13 @@
 #include <Graphics/RenderFactory.h>
 #include <Graphics/FrameBuffer.h>
 #include <Graphics/Camera.h>
+#include <Graphics/Material.h>
+#include <Graphics/Effect.h>
+#include <Graphics/Texture.h>
+#include <Graphics/AnimationClip.h>
+#include <Graphics/Mesh.h>
+#include <Graphics/Pipeline.h>
+#include <Graphics/Font.h>
 #include <Scene/SceneManager.h>
 #include <Core/Exception.h>
 #include <Core/Context.h>
@@ -16,12 +23,7 @@
 #include <Input/InputDevice.h>
 #include <IO/FileSystem.h>
 #include <IO/FileStream.h>
-#include <Graphics/Material.h>
-#include <Graphics/Effect.h>
-#include <Graphics/Texture.h>
-#include <Graphics/AnimationClip.h>
-#include <Graphics/Mesh.h>
-#include <Graphics/Pipeline.h>
+
 
 namespace RcEngine {
 
@@ -36,12 +38,14 @@ Application::Application( const String& config )
 	// todo add sub scene manager
 	new SceneManager;
 
-	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Mesh, "Mesh", Mesh::FactoryFunc);
-	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Material, "Material", Material::FactoryFunc);
-	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Effect, "Effect", Effect::FactoryFunc);
-	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Animation, "Animation",AnimationClip::FactoryFunc);
-	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Texture, "Texture", TextureResource::FactoryFunc);
-	ResourceManager::GetSingleton().RegisterType(ResourceTypes::Pipeline, "Pipeline", Pipeline::FactoryFunc);
+	ResourceManager& resMan = ResourceManager::GetSingleton();
+	resMan.RegisterType(ResourceTypes::Mesh, "Mesh", Mesh::FactoryFunc);
+	resMan.RegisterType(ResourceTypes::Material, "Material", Material::FactoryFunc);
+	resMan.RegisterType(ResourceTypes::Effect, "Effect", Effect::FactoryFunc);
+	resMan.RegisterType(ResourceTypes::Animation, "Animation",AnimationClip::FactoryFunc);
+	resMan.RegisterType(ResourceTypes::Texture, "Texture", TextureResource::FactoryFunc);
+	resMan.RegisterType(ResourceTypes::Pipeline, "Pipeline", Pipeline::FactoryFunc);
+	resMan.RegisterType(ResourceTypes::Font, "Font", Font::FactoryFunc);
 
 	ReadConfiguration();
 
@@ -110,35 +114,11 @@ void Application::Tick()
 	{	
 		Update(mTimer.GetDeltaTime());
 
-		shared_ptr<FrameBuffer> currentFrameBuffer = renderDevice.GetCurrentFrameBuffer();
-		//renderDevice.BindFrameBuffer(currentFrameBuffer);
-
 		// update scene graph
 		sceneMan.UpdateSceneGraph(mTimer.GetDeltaTime());
-		sceneMan.UpdateRenderQueue(currentFrameBuffer->GetCamera(), RO_FrontToBack);
 
-		static int frameCount = 0;
-		static float baseTime = 0;
-
-		frameCount++;
-
-		if (mTimer.GetGameTime()-baseTime >= 1.0f)
-		{
-			float fps = (float)frameCount;
-			std::stringstream sss; 
-			sss << "FPS: " << fps;
-			mMainWindow->SetTitle(sss.str());
-			frameCount = 0;
-			baseTime += 1.0f;
-		}
-		
-
-		float clr = (float)169/255;
-		currentFrameBuffer->Clear(CF_Color | CF_Depth |CF_Stencil, RcEngine::ColorRGBA(clr, clr, clr, 1.0f), 1.0f, 0);
-
-		Context::GetSingleton().GetSceneManager().RenderScene();
-
-		currentFrameBuffer->SwapBuffers();
+		// render
+		Render();
 	}
 	else
 		::Sleep(50);

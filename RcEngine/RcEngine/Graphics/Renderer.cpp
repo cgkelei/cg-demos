@@ -25,12 +25,12 @@ void Renderer::DrawFSQuad( const shared_ptr<Material>& mat, const String& tech )
 
 }
 
-void Renderer::DrawGeometry( const String& tech, const  String& matClass, RenderOrder order )
+void Renderer::DrawGeometry( const String& tech, const  String& matClass)
 {
 
 }
 
-void Renderer::DrawRenderable( Camera* camera, const String& tech, const  String& matClass, RenderOrder order )
+void Renderer::DrawRenderable( Camera* camera, const String& tech, const  String& matClass)
 {
 
 }
@@ -100,7 +100,7 @@ void Renderer::RenderScene( const shared_ptr<Pipeline>& pipeline )
 						order = RenderOrder(command.params[2].GetParamUInt());
 					}
 
-					DrawGeometry( techName, matClass, order);
+					DrawGeometry(techName, matClass);
 				}
 				break;
 			}
@@ -111,6 +111,14 @@ void Renderer::RenderScene( const shared_ptr<Pipeline>& pipeline )
 void Renderer::UpdateShadowMap()
 {
 
+}
+
+void Renderer::SetupViewProjMatirices( const Matrix4f& view, const Matrix4f& proj )
+{
+	mViewMat = view;
+	mViewMatInv = view.Inverse();
+	mProjMat = proj;
+	mViewProjMat = view * proj;
 }
 
 }

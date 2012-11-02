@@ -40,10 +40,6 @@ public:
 	virtual shared_ptr<Texture> CreateTextureCube(uint32_t width, uint32_t height, PixelFormat format,
 		uint32_t arraySize, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality,
 		uint32_t accessHint, ElementInitData* initData) = 0;
-
-	virtual shared_ptr<Texture> CreateTextureFromFile(const std::string& texFileName, uint32_t accessHint = 0) = 0;
-
-	virtual shared_ptr<Texture> CreateTextureArrayFromFile( const vector<String>& textures, uint32_t accessHint = 0) = 0;
 	
 	// Buffers
 	//-------------------------------------------------------------------------------------------------------
@@ -59,21 +55,6 @@ public:
 	virtual shared_ptr<RenderView> CreateRenderTargetView2D(const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level) = 0;
 	virtual shared_ptr<RenderView> CreateDepthStencilView(const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level) = 0;
 			
-	/**
-	 * Create a material from file, if the material is already loaded, use the loaded one.
-	 * @param matName: material name which is uniquely identify the material.
-	 * @param path: the material file location.
-	 */
-	//shared_ptr<Material> CreateMaterialFromFile(const String& matName, const String& path);
-
-	/**
-	 * Create a effect from file, if the effect is already loaded, use the loaded one.
-	 * @param effectName: effect name which is uniquely identify the effect.
-	 * @param effectFile: the effect file location.
-	 */
-	//shared_ptr<Effect> CreateEffectFromFile(const String& effectName, const String& effectFile);
-			
-
 	/**
 	 * Create an vertex declaration object to describe the input-buffer data.
 	 */
@@ -103,6 +84,15 @@ public:
 
 	virtual shared_ptr<Shader> CreateShader(ShaderType type) = 0;
 	virtual shared_ptr<ShaderProgram> CreateShaderProgram(Effect& effect) = 0;
+
+
+	/**
+	 * Todo
+	 * Implement texture load and save
+	 */
+	virtual shared_ptr<Texture> CreateTextureFromFile(const std::string& texFileName, uint32_t accessHint = 0) = 0;
+	virtual shared_ptr<Texture> CreateTextureArrayFromFile( const vector<String>& textures, uint32_t accessHint = 0) = 0;
+	virtual void SaveTexture2D( const String& texFile, const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level) = 0;
 
 protected:
 

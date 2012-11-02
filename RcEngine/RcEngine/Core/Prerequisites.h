@@ -127,6 +127,7 @@ class Material;
 class Pipeline;
 class Renderer;
 class Effect;
+class RenderQueue;
 class EffectParameter;
 class EffectTechnique;
 class EffectPass;
