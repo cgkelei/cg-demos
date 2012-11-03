@@ -78,6 +78,12 @@ void UIElement::SetPosition( const IntVector2& position )
 	}
 }
 
+void UIElement::SetFocusPolicy( FocusPolicy policy )
+{
+	mFocusPolicy = policy;
+}
+
+
 void UIElement::SetPosition( int32_t x, int32_t y )
 {
 	SetPosition(IntVector2(x, y));
@@ -100,17 +106,17 @@ void UIElement::MarkDirty()
 
 }
 
-void UIElement::OnMouseCover( const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, uint32_t qualifiers, Cursor* cursor )
+void UIElement::OnMouseCover( const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, uint32_t qualifiers )
 {
 
 }
 
-void UIElement::OnMouseDown( const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, int qualifiers, Cursor* cursor )
+void UIElement::OnMouseDown( const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, int qualifiers)
 {
 
 }
 
-void UIElement::OnMouseUp( const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, int qualifiers, Cursor* cursor )
+void UIElement::OnMouseUp( const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, int qualifiers)
 {
 
 }
@@ -120,27 +126,28 @@ void UIElement::OnMouseWheel( int32_t delta, uint32_t buttons, uint32_t qualifie
 
 }
 
-void UIElement::OnDragBegin( const IntVector2& position, const IntVector2& screenPosition, int buttons, int qualifiers, Cursor* cursor )
+void UIElement::OnDragBegin( const IntVector2& position, const IntVector2& screenPosition, int buttons, int qualifiers)
 {
 
 }
 
-void UIElement::OnDragMove( const IntVector2& position, const IntVector2& screenPosition, int buttons, int qualifiers, Cursor* cursor )
+void UIElement::OnDragMove( const IntVector2& position, const IntVector2& screenPosition, int buttons, int qualifiers)
 {
 
 }
 
-void UIElement::OnDragEnd( const IntVector2& position, const IntVector2& screenPosition, Cursor* cursor )
+void UIElement::OnDragEnd( const IntVector2& position, const IntVector2& screenPosition)
 {
 
 }
 
-void UIElement::OnKeyDown( uint8_t key, uint32_t buttons, uint32_t qualifiers )
+
+void UIElement::OnKeyDown( uint8_t key, uint32_t qualifiers )
 {
 
 }
 
-void UIElement::OnKeyUp( uint8_t key, uint32_t buttons, uint32_t qualifiers )
+void UIElement::OnKeyUp( uint8_t key, uint32_t qualifiers )
 {
 
 }
@@ -202,20 +209,19 @@ bool UIElement::IsInside(IntVector2 position, bool isScreen )
 	return position.X() >= 0 && position.Y() >= 0 && position.X() < mSize.X() && position.Y() < mSize.Y();
 }
 
-const shared_ptr<Material>& UIElement::GetMaterial() const
+void UIElement::GetChildren( std::vector<UIElement*>& children, bool recursive /*= true*/ ) const
 {
-	
+	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
+	{
+		children.push_back(*iter);
+
+		if (recursive && (*iter)->GetNumChildren())
+		{
+			(*iter)->GetChildren(children, recursive);
+		}
+	}
 }
 
-void UIElement::GetWorldTransforms( Matrix4f* xform ) const
-{
-
-}
-
-uint32_t UIElement::GetWorldTransformsCount() const
-{
-	return 1;
-}
 
 
 }

@@ -26,6 +26,14 @@ enum VerticalAlignment
 	VA_Bottom
 };
 
+enum FocusPolicy
+{
+	FP_NoFocus = 0,
+	FP_TabFocus = 0x1,
+	FP_ClickFocus = 0x2,
+	FP_Tab_ClickFocus = FP_TabFocus | FP_ClickFocus,
+};
+
 
 typedef Vector<int32_t, 2> IntVector2;
 
@@ -35,25 +43,27 @@ public:
 	UIElement();
 	virtual ~UIElement();
 	
-	virtual void OnMouseCover(const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, uint32_t qualifiers, Cursor* cursor);
+	virtual void OnMouseCover(const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, uint32_t qualifiers);
 
-	virtual void OnMouseDown(const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, int qualifiers, Cursor* cursor);
-	virtual void OnMouseUp(const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, int qualifiers, Cursor* cursor);
+	virtual void OnMouseDown(const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, int qualifiers);
+	virtual void OnMouseUp(const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, int qualifiers);
 
 	virtual void OnMouseWheel(int32_t delta, uint32_t buttons, uint32_t qualifiers);
 
-	virtual void OnDragBegin(const IntVector2& position, const IntVector2& screenPosition, int buttons, int qualifiers, Cursor* cursor);
-	virtual void OnDragMove(const IntVector2& position, const IntVector2& screenPosition, int buttons, int qualifiers, Cursor* cursor);
-	virtual void OnDragEnd(const IntVector2& position, const IntVector2& screenPosition, Cursor* cursor);
+	virtual void OnDragBegin(const IntVector2& position, const IntVector2& screenPosition, int buttons, int qualifiers);
+	virtual void OnDragMove(const IntVector2& position, const IntVector2& screenPosition, int buttons, int qualifiers);
+	virtual void OnDragEnd(const IntVector2& position, const IntVector2& screenPosition);
 
-	virtual void OnKeyDown(uint8_t key, uint32_t buttons, uint32_t qualifiers);
-	virtual void OnKeyUp(uint8_t key, uint32_t buttons, uint32_t qualifiers);
+	virtual void OnKeyDown(uint8_t key, uint32_t qualifiers);
+	virtual void OnKeyUp(uint8_t key, uint32_t qualifiers);
 
 	void SetName(const String& name);
 	void SetPosition(const IntVector2& position);
 	void SetPosition(int32_t x, int32_t y);
 	void SetSize(const IntVector2& size);
 	void SetSize(int32_t width, int32_t height);
+	void SetFocusPolicy(FocusPolicy policy);
+
 
 	const String& GetName() const				{ return mName; }
 	const IntVector2& GetPosition() const		{ return mPosition; }
@@ -66,11 +76,14 @@ public:
 	bool IsMouseCover() const					{ return mCovering; }
 	bool IsActive() const					    { return mActive; }
 	bool IsVisible() const						{ return mVisible; }
+	FocusPolicy GetFocusPolicy() const			{ return mFocusPolicy; }
 
 	UIElement* GetParent() const							{ return mParent; }
-	const std::vector<UIElement*>& GetChildren() const		{ return mChildren; }
 
 	uint32_t GetNumChildren(bool recursive = false) const;
+	const std::vector<UIElement*>& GetChildren() const		{ return mChildren; }
+	
+	void GetChildren(std::vector<UIElement*>& children, bool recursive = true) const;	
 	UIElement* GetChild(const String& name, bool recursive = false) const;
 	UIElement* GetChild(uint32_t index) const;
 	
@@ -102,6 +115,7 @@ protected:
 
 	HorizontalAlignment mHorizontalAlignment;
 	VerticalAlignment mVerticalAlignment;
+	FocusPolicy mFocusPolicy;
 
 	IntRect mClipBorder;
 };
