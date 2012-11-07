@@ -65,5 +65,17 @@ void OpenGLGraphicsBuffer::UnMap()
 	glBindBuffer(mTarget, 0);
 }
 
+void OpenGLGraphicsBuffer::ResizeBuffer( uint32_t sizeInByte )
+{
+	if (mSizeInBytes != sizeInByte)
+	{
+		glBindBuffer(mTarget, mBufferID);
+		glBufferData(mTarget, static_cast<GLsizeiptr>(sizeInByte), NULL, 
+			(BU_Static == mBufferUsage) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+
+		mSizeInBytes = sizeInByte;
+	}
+}
+
 }
 

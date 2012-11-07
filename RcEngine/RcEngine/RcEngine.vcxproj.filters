@@ -279,6 +279,9 @@
     <ClCompile Include="GUI\UIManager.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
+    <ClCompile Include="GUI\Theme.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainApp\Application.h">
@@ -558,6 +561,9 @@
       <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="GUI\UIManager.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Theme.h">
       <Filter>GUI</Filter>
     </ClInclude>
   </ItemGroup>

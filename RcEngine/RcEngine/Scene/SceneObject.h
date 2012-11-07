@@ -17,6 +17,7 @@ enum SceneObejctType
 	SOT_Camera,
 	SOT_Particle,
 	SOT_Sky, 
+	SOT_Sprite,
 	SOT_Count
 };
 
