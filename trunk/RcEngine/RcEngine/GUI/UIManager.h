@@ -3,6 +3,7 @@
 
 #include <Core/Prerequisites.h>
 #include <Core/Singleton.h>
+#include <GUI/UIElement.h>
 
 namespace RcEngine {
 
@@ -17,11 +18,13 @@ public:
 	UIManager();
 	~UIManager();
 
-
 	void SetFocusElement(UIElement* element);
 
 	UIElement* GetFocusElement()		{ return mFocusElement; }
-	
+
+		
+	void DrawButton(const IntRect& area, const String& text, UIElementState state);
+
 public:
 	void HandleKeyDown(uint8_t key, uint32_t qualifiers);
 	void HandleKeyUp(uint8_t key, uint32_t qualifiers);

@@ -17,6 +17,7 @@ public:
 	GLenum GetTarget() const;
 	GLuint GetBufferID() const;
 
+	void ResizeBuffer(uint32_t sizeInByte);
 	void* Map(uint32_t offset, uint32_t length, BufferAccess options);
 	void UnMap();
 

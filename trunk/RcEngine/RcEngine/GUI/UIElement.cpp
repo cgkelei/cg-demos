@@ -14,6 +14,49 @@ UIElement::~UIElement()
 
 }
 
+void UIElement::SetName( const String& name )
+{
+	mName = name;
+}
+
+void UIElement::SetPosition( const IntVector2& position )
+{
+	if (mPosition != position)
+	{
+		mPosition = position;
+		MarkDirty();
+	}
+}
+
+void UIElement::SetFocusPolicy( FocusPolicy policy )
+{
+	mFocusPolicy = policy;
+}
+
+
+void UIElement::SetPosition( int32_t x, int32_t y )
+{
+	SetPosition(IntVector2(x, y));
+}
+
+void UIElement::SetSize( int32_t width, int32_t height )
+{
+	SetSize(IntVector2(width, height));
+}
+
+void UIElement::SetVisible( bool visible )
+{
+	mVisible = visible;
+}
+
+
+void UIElement::SetSize( const IntVector2& size )
+{
+	IntVector2 validateSize;
+	validateSize.X() = Math<IntVector2::value_type>::Clamp(size.X(), mMinSize.X(), mMaxSize.X());
+	validateSize.Y() = Math<IntVector2::value_type>::Clamp(size.Y(), mMinSize.Y(), mMaxSize.Y());
+}
+
 IntVector2 UIElement::GetScreenPosition()
 {
 	if (mPositionDirty)
@@ -64,41 +107,15 @@ IntVector2 UIElement::GetScreenPosition()
 	return mScreenPosition;
 }
 
-void UIElement::SetName( const String& name )
+IntRect UIElement::GetArea() const
 {
-	mName = name;
+	return IntRect(mPosition.X(), mPosition.Y(), mSize.X(), mSize.Y());
 }
 
-void UIElement::SetPosition( const IntVector2& position )
+IntRect UIElement::GetGlobalArea()
 {
-	if (mPosition != position)
-	{
-		mPosition = position;
-		MarkDirty();
-	}
-}
-
-void UIElement::SetFocusPolicy( FocusPolicy policy )
-{
-	mFocusPolicy = policy;
-}
-
-
-void UIElement::SetPosition( int32_t x, int32_t y )
-{
-	SetPosition(IntVector2(x, y));
-}
-
-void UIElement::SetSize( int32_t width, int32_t height )
-{
-	SetSize(IntVector2(width, height));
-}
-
-void UIElement::SetSize( const IntVector2& size )
-{
-	IntVector2 validateSize;
-	validateSize.X() = Math<IntVector2::value_type>::Clamp(size.X(), mMinSize.X(), mMaxSize.X());
-	validateSize.Y() = Math<IntVector2::value_type>::Clamp(size.Y(), mMinSize.Y(), mMaxSize.Y());
+	IntVector2 screenPos = GetScreenPosition();
+	return IntRect(screenPos.X(), screenPos.Y(), mSize.X(), mSize.Y());
 }
 
 void UIElement::MarkDirty()
@@ -221,6 +238,14 @@ void UIElement::GetChildren( std::vector<UIElement*>& children, bool recursive /
 		}
 	}
 }
+
+
+void UIElement::Draw()
+{
+
+}
+
+
 
 
 

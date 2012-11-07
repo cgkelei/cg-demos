@@ -1,0 +1,52 @@
+<Effect name="SkinMesh">
+
+<Shader name="SpriteVS" stage="Vertex" entry="main">
+<ShaderSource>
+<![CDATA[
+
+uniform mat4 ProjMat;
+
+in vec3 iPos;
+in vec2 iTex;
+in vec4 iColor;
+
+out vec2 oTex;
+out vec4 oColor;
+
+void main()
+{
+	gl_Position = vec4(iPos, 1) * ProjMat;
+	oTex = iTex;
+	oColor = iColor;
+}
+
+]]>
+</ShaderSource>
+</Shader>
+
+<Shader name="SpritePS" stage="Pixel" entry="main">
+<ShaderSource>
+<![CDATA[
+
+uniform sampler2D SpriteTexture;
+
+in vec2 oTex;
+in vec4 oColor;
+
+void main()
+{
+	gl_FragColor = oColor * texture2D(SpriteTexture, oTex);
+}
+
+]]>
+</ShaderSource>
+</Shader>
+
+<Technique name="SpriteTech">
+	<Pass name="p0">
+		<VertexShader name="SpriteVS"/>
+		<PixelShader name="SpritePS"/>
+	</Pass>
+</Technique>
+
+</Effect>

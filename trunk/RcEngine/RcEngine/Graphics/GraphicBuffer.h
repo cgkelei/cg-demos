@@ -17,6 +17,7 @@ public:
 	uint32_t		GetAccessHint() const;
 	uint32_t		GetBufferSize() const;
 
+	virtual void ResizeBuffer(uint32_t sizeInByte) = 0;
 	virtual void* Map(uint32_t offset, uint32_t length, BufferAccess options) = 0;
 	virtual void UnMap() = 0;
 

@@ -123,3 +123,27 @@ void Rectangle<Real>::SetLeft( Real left )
 {
 	X = left;
 }
+
+template<typename Real>
+Vector<Real, 2> Rectangle<Real>::BottomRight() const
+{
+	return Vector<Real, 2>(X+Width, Y+Height);
+}
+
+template<typename Real>
+Vector<Real, 2> Rectangle<Real>::BottomLeft() const
+{
+	return Vector<Real, 2>(X, Y+Height);
+}
+
+template<typename Real>
+Vector<Real, 2> Rectangle<Real>::TopRight() const
+{
+	return Vector<Real, 2>(X+Width, Y);
+}
+
+template<typename Real>
+Vector<Real, 2> Rectangle<Real>::TopLeft() const
+{
+	return Vector<Real, 2>(X, Y);
+}

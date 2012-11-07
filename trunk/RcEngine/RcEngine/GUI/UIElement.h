@@ -34,6 +34,17 @@ enum FocusPolicy
 	FP_Tab_ClickFocus = FP_TabFocus | FP_ClickFocus,
 };
 
+enum UIElementState
+{
+	UI_State_Normal = 0,
+	UI_State_Disable,
+	UI_State_Hidden,
+	UI_State_Focus,
+	UI_State_Selected,
+	UI_State_MouseOver,
+	UI_State_Pressed,
+};
+
 
 typedef Vector<int32_t, 2> IntVector2;
 
@@ -63,14 +74,18 @@ public:
 	void SetSize(const IntVector2& size);
 	void SetSize(int32_t width, int32_t height);
 	void SetFocusPolicy(FocusPolicy policy);
-
+	void SetVisible(bool visible);
 
 	const String& GetName() const				{ return mName; }
 	const IntVector2& GetPosition() const		{ return mPosition; }
 	IntVector2 GetScreenPosition();
 
+	const IntVector2& GetSize() const			{ return mSize; }
 	const IntVector2& GetMinSize() const		{ return mMinSize; }
 	const IntVector2& GetMaxSize() const		{ return mMaxSize; }
+
+	IntRect GetArea() const;
+	IntRect GetGlobalArea();
 
 	bool HasFocus() const;
 	bool IsMouseCover() const					{ return mCovering; }
@@ -91,6 +106,8 @@ public:
 	IntVector2 ClientToScreen(const IntVector2& position);
 
 	bool IsInside(IntVector2 position, bool isScreen);
+
+	virtual void Draw();
 
 private:
 	void MarkDirty();
@@ -116,6 +133,8 @@ protected:
 	HorizontalAlignment mHorizontalAlignment;
 	VerticalAlignment mVerticalAlignment;
 	FocusPolicy mFocusPolicy;
+
+	float mOpacity;
 
 	IntRect mClipBorder;
 };

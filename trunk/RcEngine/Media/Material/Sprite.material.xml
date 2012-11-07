@@ -1,0 +1,14 @@
+<Material name="Sprite">
+
+	<Sampler name="LinearSampler">
+		<State name="Filter" value="Min_Mag_Mip_Linear"/>
+		<State name="AddressU" value="Clamp"/>
+		<State name="AddressV" value="Clamp"/>
+	</Sampler>
+	
+	<Parameter type="float4x4" name="ProjMat" semantic="ProjectionMatrix" />
+	<Parameter type="texture2d" name="SpriteTexture" semantic="DiffuseMaterialMap" stage="PixelShader" sampler="LinearSampler" texUnit="0"/>
+	
+	<Effect name="Sprite.effect.xml">
+	</Effect>
+</Material>

@@ -79,6 +79,11 @@ void UIManager::SetFocusElement( UIElement* element )
 
 }
 
+void UIManager::DrawButton( const IntRect& area, const String& text, UIElementState state )
+{
+
+}
+
 
 
 }
