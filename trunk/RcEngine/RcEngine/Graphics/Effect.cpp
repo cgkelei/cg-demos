@@ -548,7 +548,7 @@ EffectParameter* Effect::GetParameterByName( const String& paraName ) const
 	return nullptr;
 }
 
-EffectParameter* Effect::AddShaderParameterInternal(const String& name, EffectParameterType type, bool array)
+EffectParameter* Effect::AddOrGetShaderParameter(const String& name, EffectParameterType type, bool array)
 {
 	EffectParameter* effectParam;
 	auto found = mParameters.find(name);
@@ -563,6 +563,34 @@ EffectParameter* Effect::AddShaderParameterInternal(const String& name, EffectPa
 	}
 	return effectParam;
 }
+
+
+shared_ptr<Resource> Effect::Clone()
+{
+	printf("Clone effect: %s\n", mef.c_str());
+
+	shared_ptr<Effect> retVal = std::make_shared<Effect>(mResourceType, mCreator, mResourceHandle, mName, mGroup);
+	
+	retVal->mEffectName = mEffectName;
+
+	// clone paremeters
+	for (auto iter = mParameters.begin(); iter != mParameters.end(); ++iter)
+	{
+		retVal->mParameters[iter->first] = iter->second->Clone();
+	}	
+
+	// clone technique
+	retVal->mTechniques.resize(mTechniques.size());
+	for (size_t i = 0; i < mTechniques.size(); ++i)
+	{
+		retVal->mTechniques[i] = mTechniques[i]->Clone(*retVal);
+	}
+
+	retVal->SetLoadState(Resource::Loaded);
+
+	return retVal;
+}
+
 
 void Effect::LoadImpl()
 {
@@ -588,7 +616,7 @@ void Effect::LoadImpl()
 	XMLNodePtr root = doc.Parse(source);
 
 	// effect name 
-	mName = root->AttributeString("name", "");
+	mEffectName = root->AttributeString("name", "");
 
 	// store all shader this effect will use
 	unordered_map<String, ShaderStage> shaderStages;

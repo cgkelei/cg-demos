@@ -21,7 +21,7 @@ SubEntity::SubEntity( Entity* parent, const shared_ptr<MeshPart>& meshPart )
 
 SubEntity::~SubEntity()
 {
-
+	int a = 0;
 }
 
 const shared_ptr<Material>& SubEntity::GetMaterial() const
@@ -41,6 +41,9 @@ void SubEntity::SetMaterial( const String& matName, const String& group )
 		ResourceManager::GetSingleton().GetResourceByName(ResourceTypes::Material, matName, group));
 
 	mMaterial->Load();
+
+	// if use material animation, we must use material clone
+	//mMaterial = std::static_pointer_cast<Material>(mMaterial->Clone());
 }
 
 const String& SubEntity::GetName() const

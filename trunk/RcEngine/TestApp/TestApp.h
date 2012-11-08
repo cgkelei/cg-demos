@@ -35,7 +35,6 @@ private:
 	shared_ptr<SimpleTexturedQuad> mQuad;
 	shared_ptr<Mesh> mDwarf;
 	shared_ptr<Material> mDwarfMaterial;
-	
 	FPSCameraControler* mCameraControler;
 	//ModelViewerCameraControler* mCameraControler;
 };

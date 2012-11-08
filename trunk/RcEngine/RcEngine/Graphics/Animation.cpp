@@ -205,6 +205,11 @@ void SkinnedAnimationPlayer::CrossFade( const String& fadeClip, float fadeLength
 	//}
 }
 
+SkinnedAnimationPlayer::~SkinnedAnimationPlayer()
+{
+
+}
+
 
 }
 

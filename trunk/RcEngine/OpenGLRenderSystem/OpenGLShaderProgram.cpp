@@ -378,17 +378,15 @@ private:
 	EffectParameter* Param;
 };
 
-
 //////////////////////////////////////////////////////////////////////////
 OpenGLShaderProgram::OpenGLShaderProgram(Effect& effect)
 	: ShaderProgram(effect), mOGLProgramObject(0)
 {
-
 }
 
 OpenGLShaderProgram::~OpenGLShaderProgram()
 {
-
+	Release();
 }
 
 void OpenGLShaderProgram::Bind()
@@ -414,6 +412,8 @@ bool OpenGLShaderProgram::LinkProgram()
 		return false;
 
 	mOGLProgramObject = glCreateProgram();
+	//printf("create shader program ID: %d \n", mOGLProgramObject);
+
 	if (!mOGLProgramObject)
 	{
 		mLinkerOutput = "Could not create shader program";
@@ -459,10 +459,134 @@ void OpenGLShaderProgram::Release()
 			shared_ptr<OpenGLShader> shaderOGL = std::static_pointer_cast<OpenGLShader>(*iter);
 			glDetachShader(mOGLProgramObject, shaderOGL->GetShaderObject());
 		}
+
+		mAttachedShaders.clear();
+		mParameterBinds.clear();
+
 		glDeleteProgram(mOGLProgramObject);
 		mOGLProgramObject = 0;
 	}
+}
 
+OpenGLShaderProgram::ParameterBind OpenGLShaderProgram::GetShaderParamBindFunc(GLint location, EffectParameter* effectParam, bool isArray)
+{
+	ParameterBind paramBind;
+	paramBind.EffectParameter = effectParam;
+	paramBind.Location = location;
+	paramBind.Name = effectParam->GetName();
+	paramBind.Type = effectParam->GetParameterType();
+	paramBind.IsArray = isArray;
+
+	switch(paramBind.Type)
+	{
+	case EPT_Boolean:
+		{
+			if (isArray)
+			{
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<bool*>(location, effectParam);
+			}
+			else
+			{
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<bool>(location, effectParam);
+			}	
+		}
+		break;
+	case EPT_Int:
+		{
+			if (isArray)
+			{
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<int32_t*>(location, effectParam);
+			}
+			else
+			{
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<int32_t>(location, effectParam);
+			}	
+		}
+		break;
+	case EPT_Float:
+		{
+			if (isArray)
+			{
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float*>(location, effectParam);
+			}
+			else
+			{
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float>(location, effectParam);
+			}	
+		}
+		break;
+	case EPT_Float2:
+		{
+			if (isArray)
+			{
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<Vector2f*>(location, effectParam);
+			}
+			else
+			{
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<Vector2f>(location, effectParam);
+			}	
+		}
+		break;
+	case EPT_Float3:
+		{
+			if (isArray)
+			{
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<Vector3f*>(location, effectParam);
+			}
+			else
+			{
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<Vector3f>(location, effectParam);
+			}	
+		}
+		break;
+	case EPT_Float4:
+		{
+			if (isArray)
+			{
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<Vector4f*>(location, effectParam);
+			}
+			else
+			{
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<Vector4f>(location, effectParam);
+			}	
+		}
+		break;
+	case EPT_Matrix4x4:
+		{
+			if (isArray)
+			{
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<Matrix4f*>(location, effectParam);
+			}
+			else
+			{
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<Matrix4f>(location, effectParam);
+			}	
+		}
+		break;
+	case EPT_Texture1D:
+	case EPT_Texture1DArray:
+	case EPT_Texture2D:
+	case EPT_Texture2DArray:
+	case EPT_Texture3D:
+	case EPT_Texture3DArray:
+	case EPT_TextureCUBE:
+	case EPT_TextureCUBEArray:
+		{
+			if (isArray)
+			{
+				assert(false);
+			}
+			else
+			{
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<TextureLayer>(location, effectParam);
+			}
+		}
+		break;
+	default:
+		assert(false);
+	}
+
+	return paramBind;
 }
 
 void OpenGLShaderProgram::CaptureAllParameter()
@@ -529,15 +653,18 @@ void OpenGLShaderProgram::CaptureAllParameter()
 			String actualName(&maxName[0], length);
 			GLint location = glGetUniformLocation(mOGLProgramObject, actualName.c_str());
 
-			mParameterBinds[i].Name = actualName;
+			
 
 			EffectParameterType effectParamType;
 			OpenGLMapping::UnMapping(effectParamType, uniformType);
 
 			
-			EffectParameter* effectParam = mEffect.AddShaderParameterInternal(actualName, effectParamType, isArray);
+			EffectParameter* effectParam = mEffect.AddOrGetShaderParameter(actualName, effectParamType, isArray);
 
-			switch(effectParamType)
+			mParameterBinds[i] = GetShaderParamBindFunc(location, effectParam, isArray);
+
+
+		/*	switch(effectParamType)
 			{
 			case EPT_Boolean:
 				{
@@ -646,10 +773,68 @@ void OpenGLShaderProgram::CaptureAllParameter()
 				assert(false);
 			}
 
-			mParameterBinds[i].Type = effectParamType;
+			mParameterBinds[i].Type = effectParamType;*/
 		}
 			//mParameterBinds[i].TextureSamplerIndex =  GL_SAMPLER_2D ? (samplerIndex++) : 0;
 	}
+}
+
+shared_ptr<ShaderProgram> OpenGLShaderProgram::Clone( Effect& effect )
+{
+	shared_ptr<OpenGLShaderProgram> retVal = std::make_shared<OpenGLShaderProgram>(effect);
+
+	// copy attached shader
+	retVal->mAttachedShaders.resize(mAttachedShaders.size());
+	for (size_t i = 0; i < mAttachedShaders.size(); ++i)
+	{
+		// not create new shader object, because a shader object can be attached 
+		// to more than one program object
+		retVal->mAttachedShaders[i] = mAttachedShaders[i];
+	}
+	
+	// link program
+	retVal->LinkProgram();
+
+
+	//retVal->mOGLProgramObject = glCreateProgram();
+	//if (!retVal->mOGLProgramObject)
+	//{
+	//	retVal->mLinkerOutput = "Could not create shader program";
+	//	return nullptr;
+	//}
+
+	//for (auto iter = retVal->mAttachedShaders.begin(); iter != retVal->mAttachedShaders.end(); ++iter)
+	//{
+	//	shared_ptr<OpenGLShader> shaderOGL = std::static_pointer_cast<OpenGLShader>(*iter);
+	//	glAttachShader(retVal->mOGLProgramObject, shaderOGL->GetShaderObject());
+	//}
+	//glLinkProgram(retVal->mOGLProgramObject);
+
+	//int linked;
+	//glGetProgramiv(retVal->mOGLProgramObject, GL_LINK_STATUS, &linked);
+	//retVal->mValidate = (linked != 0);
+	//if (!retVal->mValidate)
+	//{
+	//	int length;
+	//	glGetProgramiv(retVal->mOGLProgramObject, GL_INFO_LOG_LENGTH, &length);
+	//	retVal->mLinkerOutput.resize(length);
+	//	glGetProgramInfoLog(retVal->mOGLProgramObject, length, &length, &retVal->mLinkerOutput[0]);
+	//}
+	//else
+	//{
+	//	retVal->mLinkerOutput.clear();
+	//}
+
+	//if (!retVal->mValidate)
+	//	return nullptr;
+
+	//retVal->CaptureAllParameter();
+
+
+	//printf("Clone shader program ID: %d \n", retVal->mOGLProgramObject);
+
+
+	return retVal;
 }
 
 }

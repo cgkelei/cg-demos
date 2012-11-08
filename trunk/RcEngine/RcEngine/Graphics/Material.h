@@ -30,7 +30,7 @@ public:
 	const String& GetName() const						{ return mName; }
 
 	const shared_ptr<Effect>& GetEffect() const			{ return mEffect; }
-	EffectTechnique* GetCurrentTechnique() const		{ return mCurrentTechnique; }
+	EffectTechnique* GetCurrentTechnique() const;
 			
 	EffectParameter* GetCustomParameter(EffectParameterUsage usage);
 	EffectParameter* GetCustomParameter(const String& name);
@@ -45,7 +45,7 @@ public:
 			
 	void ApplyMaterial();
 
-	shared_ptr<Material> Clone();
+	shared_ptr<Resource> Clone();
 
 protected:
 
@@ -60,7 +60,7 @@ protected:
 	String mMaterialName;
 
 	shared_ptr<Effect> mEffect;
-	EffectTechnique* mCurrentTechnique;
+
 	vector<MaterialParameter*> mCachedEffectParams;
 
 	shared_ptr<DepthStencilState> mDepthStencilState;

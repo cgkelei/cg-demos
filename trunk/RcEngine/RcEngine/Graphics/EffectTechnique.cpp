@@ -38,4 +38,21 @@ EffectPass* EffectTechnique::GetPassByIndex( uint32_t index )
 	return nullptr;
 }
 
+EffectTechnique* EffectTechnique::Clone(Effect& effect)
+{
+	EffectTechnique* retVal = new EffectTechnique();
+
+	retVal->mName = mName;
+	retVal->mValid = mValid;
+
+	// clone effect pass
+	retVal->mPasses.resize(mPasses.size());
+	for (size_t i = 0; i < mPasses.size(); ++i)
+	{
+		retVal->mPasses[i] = mPasses[i]->Clone(effect);
+	}
+
+	return retVal;
+}
+
 } // Namespace RcEngine

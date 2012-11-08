@@ -189,15 +189,19 @@ void SceneManager::RenderScene()
 	{
 		RenderBucket& renderBucket = *(iter->second);
 
-		std::sort(renderBucket.begin(), renderBucket.end(), [](const RenderQueueItem& lhs, const RenderQueueItem& rhs)
+		if (renderBucket.size())
 		{
-			return lhs.SortKey < rhs.SortKey;
-		});
-		
-		for (auto renderableIter = renderBucket.begin(); renderableIter != renderBucket.end(); ++renderableIter)
-		{
-			renderableIter->Renderable->Render();
+			std::sort(renderBucket.begin(), renderBucket.end(), [](const RenderQueueItem& lhs, const RenderQueueItem& rhs)
+			{
+				return lhs.SortKey < rhs.SortKey;
+			});
+
+			for (auto renderableIter = renderBucket.begin(); renderableIter != renderBucket.end(); ++renderableIter)
+			{
+				renderableIter->Renderable->Render();
+			}
 		}
+		
 	}
 }
 

@@ -102,20 +102,11 @@ protected:
 	virtual shared_ptr<SamplerState> CreateSamplerStateImpl( const SamplerStateDesc& desc ) = 0;
 
 protected:
-	typedef unordered_map<String, shared_ptr<Effect> > EffectMap;
-	typedef EffectMap::iterator EffectMapIter;
-
-	typedef unordered_map<String, shared_ptr<Material> > MaterialMap;
-	typedef MaterialMap::iterator MaterialMapIter;
-
 	std::map<DepthStencilStateDesc, shared_ptr<DepthStencilState> > mDepthStecilStatePool;
 	std::map<RasterizerStateDesc, shared_ptr<RasterizerState> > mRasterizerStatePool;
 	std::map<SamplerStateDesc, shared_ptr<SamplerState> > mSamplerStatePool;
 	std::map<BlendStateDesc, shared_ptr<BlendState> > mBlendStatePool;
 
-
-	EffectMap mEffectPool;
-	MaterialMap mMaterialPool;
 };
 
 

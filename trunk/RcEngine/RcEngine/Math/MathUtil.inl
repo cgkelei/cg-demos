@@ -33,6 +33,25 @@ CreateLookAtMatrixRH(const Vector<Real,3>& vEye, const Vector<Real,3>& vAt, cons
 //----------------------------------------------------------------------------
 template<typename Real>
 inline Matrix4<Real> 
+CreateOrthographicLH(Real width, Real height, Real zNear,  Real zFar)
+{
+/**
+	2/w  0    0           0
+	0    2/h  0           0
+	0    0    1/(zf-zn)   0
+	0    0    zn/(zn-zf)  1
+ */
+
+	return Matrix4<Real>((Real)2 / width, (Real)0, (Real)0, (Real)0, 
+		(Real)0, (Real)2 / height, (Real)0, (Real)0, 
+		(Real)0, (Real)0, (Real)1 / (zFar - zNear), (Real)0,
+		(Real)0, (Real)0, zNear / (zNear - zFar), (Real)1);
+
+}
+
+//----------------------------------------------------------------------------
+template<typename Real>
+inline Matrix4<Real> 
 CreatePerspectiveFovLH(Real fovy, Real aspect, Real zNear,  Real zFar)
 {
 /*

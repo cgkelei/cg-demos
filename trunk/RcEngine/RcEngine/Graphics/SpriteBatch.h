@@ -53,9 +53,6 @@ public:
 	void Draw(const shared_ptr<Texture>& texture, const Vector2f& position, IntRect* sourceRectangle, const ColorRGBA& color);
 
 private:
-	shared_ptr<Material> mMaterial;
-	shared_ptr<Texture> mTexture;
-
 	Matrix4f mProjectionMatrix;
 	uint32_t mSortMode;
 	shared_ptr<Material> mSpriteMaterial;

@@ -28,6 +28,8 @@ public:
 
 	virtual ~EffectParameter(void) { }
 
+	virtual EffectParameter* Clone() = 0;
+
 	const String& GetName() const { return mName; }
 	EffectParameterType GetParameterType() const  { return mType; }
 
@@ -79,6 +81,17 @@ class _ApiExport EffectParameterNumberic : public EffectParameter
 public:
 	EffectParameterNumberic(const String& name, EffectParameterType type) : EffectParameter(name, type) {}
 	~EffectParameterNumberic()  { }
+
+	EffectParameter* Clone()
+	{
+		EffectParameterNumberic<T>* retVal = new EffectParameterNumberic<T>(mName, mType);
+		
+		retVal->mArray = mArray;
+		retVal->mValue = mValue;
+
+		return retVal;
+	}
+
 
 	virtual void SetValue(const T& value)
 	{
@@ -153,6 +166,21 @@ public:
 			mTextureLayer = value;
 			mDirty = true;
 		}
+	}
+
+	EffectParameter* Clone()
+	{
+		EffectParameterTexture* retVal = new EffectParameterTexture(mName, mType);
+
+		retVal->mDirty = mDirty;
+		retVal->mArray = mArray;
+
+		retVal->mTextureLayer.TexUnit = mTextureLayer.TexUnit;
+		retVal->mTextureLayer.Stage = mTextureLayer.Stage;
+		retVal->mTextureLayer.Texture = mTextureLayer.Texture;
+		retVal->mTextureLayer.Sampler = mTextureLayer.Sampler;
+
+		return retVal;
 	}
 
 private:
