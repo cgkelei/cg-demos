@@ -31,11 +31,15 @@
 #include "Graphics/Sky.h"
 #include "Graphics/SimpleGeometry.h"
 #include "Resource/ResourceManager.h"
+#include "Graphics/SpriteBatch.h"
 #include <D3DX10Math.h>
 #include "Math/Rectangle.h"
 #include "Core/XMLDom.h"
 
 #pragma comment(lib, "D3DX10.lib")
+
+
+SpriteBatch* spriteBatch;
 
 TestApp::TestApp( const String& config )
 	:Application(config)
@@ -68,7 +72,7 @@ void TestApp::LoadContent()
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
-	shared_ptr<Font> font =  
+	/*shared_ptr<Font> font =  
 		std::static_pointer_cast<Font>(
 		resMan.GetResourceByHandle(resMan.AddResource(ResourceTypes::Font, "VeraMoBI.ttf", "General"))) ;
 
@@ -77,27 +81,16 @@ void TestApp::LoadContent()
 	auto face = font->GetFace(10);
 	
 	auto h = resMan.AddResource(ResourceTypes::Material, "SkinModel.material.xml", "Custom");
-	resMan.GetResourceByHandle(h)->Load();
+	resMan.GetResourceByHandle(h)->Load();*/
 
+	resMan.AddResource(ResourceTypes::Material, "Sprite.material.xml", "General");
 	resMan.AddResource(ResourceTypes::Mesh, "him.mesh", "Custom");
 	//resMan.AddResource(ResourceTypes::Mesh, "Teapot.mesh", "Custom");
-	resMan.AddResource(ResourceTypes::Pipeline, "DeferredLighting.pipeline.xml", "General");
+	//resMan.AddResource(ResourceTypes::Pipeline, "DeferredLighting.pipeline.xml", "General");
 
 	resMan.LoadAllFromDisk();
 
-	//shared_ptr<Resource> re = ResourceManager::GetSingleton().GetResourceByHandle()
-
-	/*Entity* teapotEntity = sceneManager->CreateEntity("teapot", "Teapot.mesh",  "Custom");
-	SceneNode* teapotNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("teapot");
-	teapotNode->AttachObject(teapotEntity);*/
-
-	
-	/*Entity* dwarfEntity = sceneManager->CreateEntity("dwarf", "him.mesh",  "Custom");
-	SceneNode* dwarfNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
-	dwarfNode->SetPosition(Vector3f(0, 0, 0));
-	dwarfNode->SetScale(Vector3f(50, 50, 50));
-	dwarfNode->AttachObject(dwarfEntity);*/
-
+	spriteBatch  = new SpriteBatch();
 	
 	Entity* dudeEntity = sceneManager->CreateEntity("Dude", "him.mesh",  "Custom");
 	SceneNode* dudeNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
@@ -152,8 +145,8 @@ void TestApp::LoadContent()
 	//String skyTexPath = FileSystem::GetSingleton().Locate("MeadowTrail.dds");
 
 	String skyTexPath = FileSystem::GetSingleton().Locate("front.dds");
-	auto texture = factory->CreateTextureFromFile(skyTexPath);
-	factory->SaveTexture2D("Test.dds", texture, 0, 0);
+	mTexture = factory->CreateTextureFromFile(skyTexPath);
+	//factory->SaveTexture2D("Test.dds", texture, 0, 0);
 
 	// Sky 
 	//sceneManager->CreateSkyBox(texture, false);
@@ -173,6 +166,12 @@ void TestApp::Render()
 {
 	RenderDevice& renderDevice = Context::GetSingleton().GetRenderDevice();
 	SceneManager& scenenMan = Context::GetSingleton().GetSceneManager();
+
+	spriteBatch->Begin();
+	spriteBatch->Draw(mTexture, Vector2f(0, 0), ColorRGBA::White);
+	spriteBatch->End();
+	spriteBatch->Flush();
+
 
 	shared_ptr<FrameBuffer> currentFrameBuffer = renderDevice.GetCurrentFrameBuffer();
 
@@ -219,9 +218,12 @@ void TestApp::CalculateFrameRate()
 
 int32_t main()
 {
-	TestApp app("Config.xml");
-	app.Create();
-	app.RunGame();
-	app.Release();
+	{
+		TestApp app("Config.xml");
+		app.Create();
+		app.RunGame();
+		app.Release();
+	}
+	
 	return 0;
 }

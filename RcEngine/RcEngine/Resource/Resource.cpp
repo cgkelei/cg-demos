@@ -1,4 +1,5 @@
 #include <Resource/Resource.h>
+#include <Core/Exception.h>
 
 
 namespace RcEngine {
@@ -66,6 +67,12 @@ void Resource::SetLoadState( LoadState state )
 	mMutex.lock();
 	mLoadState = state;
 	mMutex.unlock();
+}
+
+shared_ptr<Resource> Resource::Clone()
+{
+	String err = "Resource type doesn't allow to clone";
+	ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, err , "Resource::Clone");
 }
 
 }

@@ -31,7 +31,14 @@ Entity::Entity( const String& name, const shared_ptr<Mesh>& mesh )
 
 Entity::~Entity()
 {
+	for (auto iter = mSubEntityList.begin(); iter != mSubEntityList.end(); ++iter)
+	{
+		Safe_Delete(*iter);
+	}
+	mSubEntityList.clear();
+	mChildAttachedObjects.clear();
 
+	Safe_Delete(mAnimationPlayer);
 }
 
 
@@ -155,7 +162,7 @@ void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, Camera* camera, Rende
 			switch( order )
 			{
 			case RO_StateChange:
-				sortKey = (float)subEntity->GetMaterial()->GetResourceHandle();
+				sortKey = (float)subEntity->GetMaterial()->GetEffect()->GetResourceHandle();
 				break;
 			case RO_FrontToBack:
 				sortKey = NearestDistToAABB( camera->GetPosition(), subWorldBoud.Min, subWorldBoud.Max);

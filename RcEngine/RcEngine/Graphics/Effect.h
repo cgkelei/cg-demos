@@ -25,11 +25,12 @@ public:
 
 	EffectParameter* GetParameterByName(const String& paraName) const;
 
+	shared_ptr<Resource> Clone();
 
 	/**
 	 * Only used by sub render system shader parameter set internal.
 	 */
-	EffectParameter* AddShaderParameterInternal(const String& name, EffectParameterType type, bool array);
+	EffectParameter* AddOrGetShaderParameter(const String& name, EffectParameterType type, bool array);
 
 protected:
 	void LoadImpl();

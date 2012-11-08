@@ -143,9 +143,10 @@ void SceneNode::OnUpdateRenderQueues(Camera* camera,  RenderOrder order)
 
 	for (auto iter = mAttachedObjects.begin(); iter != mAttachedObjects.end(); ++iter)
 	{
-		if ((*iter)->Renderable())
+		SceneObject* object = *iter;
+		if (object->Renderable() && object->IsVisible())
 		{
-			(*iter)->OnUpdateRenderQueue(mScene->GetRenderQueue(), camera, order);
+			object->OnUpdateRenderQueue(mScene->GetRenderQueue(), camera, order);
 		}	
 	}
 

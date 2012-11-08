@@ -20,6 +20,7 @@ public:
 
 	const String& GetTechniqueName() const				{ return mName; }
 
+	EffectTechnique* Clone(Effect& effect);
 
 	vector<EffectPass*>& GetPasses()	{ return mPasses; }
 

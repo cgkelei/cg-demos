@@ -11,7 +11,10 @@
 #include <Scene/SceneObject.h>
 #include <Scene/SceneNode.h>
 #include <Resource/ResourceManager.h>
+#include <Math/MathUtil.h>
 #include <Core/Context.h>
+#include <MainApp/Application.h>
+#include <MainApp/Window.h>
 
 
 namespace {
@@ -57,7 +60,7 @@ class SpriteEntity : public Renderable, public SceneObject
 {
 public:
 	SpriteEntity(const shared_ptr<Texture>& texture, const shared_ptr<Material>& mat)
-		: SceneObject(""), mDirty(true)
+		: SceneObject("Sprite"), mDirty(true)
 	{
 		RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 
@@ -66,6 +69,8 @@ public:
 
 		mSpriteTexture = texture;
 		mSpriteMaterial = mat;
+
+		mSpriteMaterial->SetTexture("SpriteTexture", texture);
 
 		mRenderOperation = std::make_shared<RenderOperation>();
 		mRenderOperation->BaseVertexLocation = 0;
@@ -89,11 +94,16 @@ public:
 
 		mRenderOperation->BindVertexStream(mVertexBuffer, factory.CreateVertexDeclaration(elements, 3));
 		mRenderOperation->BindIndexStream(mIndexBuffer, IBT_Bit16);
+
+		// add to scene graph
+		SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
+		SceneNode* sceneNode = sceneMan.GetRootSceneNode();
+		sceneNode->AttachObject(this);
 	}
 
 	~SpriteEntity()
 	{
-
+		Context::GetSingleton().GetSceneManager().GetRootSceneNode()->DetachOject(this);
 	}
 
 	const shared_ptr<Material>& GetMaterial() const		{ return mSpriteMaterial; }
@@ -124,9 +134,14 @@ public:
 		item.Type = SOT_Sprite;
 
 		// ignore render order, only handle state change order
-		item.SortKey = (float)mSpriteMaterial->GetResourceHandle();
+		item.SortKey = (float)mSpriteMaterial->GetEffect()->GetResourceHandle();
 
 		renderQueue->AddToQueue(item, RenderQueue::BucketGui);
+	}
+
+	void SetProjectionMatrix(const Matrix4f& mat)
+	{
+		mSpriteMaterial->GetCustomParameter("ProjMat")->SetValue(mat);
 	}
 
 	void UpdateGeometryBuffers()
@@ -152,6 +167,11 @@ public:
 
 			mDirty = false;
 		}
+	}
+
+	bool Empty() const 
+	{
+		return mInidces.empty();
 	}
 
 	void ClearAll()
@@ -201,7 +221,11 @@ SpriteBatch::~SpriteBatch()
 
 void SpriteBatch::Begin( )
 {
-
+	for (auto iter = mBatches.begin(); iter != mBatches.end(); ++iter)
+	{
+		iter->second->ClearAll();
+	}
+	
 }
 
 void SpriteBatch::End()
@@ -222,7 +246,7 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const IntRect& dest,
 	SpriteEntity* spriteEntity = nullptr;
 	if (mBatches.find(texture) == mBatches.end())
 	{
-		spriteEntity = new SpriteEntity(texture, mSpriteMaterial);
+		spriteEntity = new SpriteEntity(texture, std::static_pointer_cast<Material>(mSpriteMaterial->Clone()));
 		mBatches[texture] = spriteEntity;
 	}
 	else
@@ -350,12 +374,23 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Vector2f& posi
 
 void SpriteBatch::Flush()
 {
-	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
-	SceneNode* sceneNode = sceneMan.GetRootSceneNode();
+	//SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
+	//SceneNode* sceneNode = sceneMan.GetRootSceneNode();
+
+	// update parameter
+	Window* mainWindow =  Context::GetSingleton().GetApplication().GetMainWindow();
+	mProjectionMatrix = CreateOrthographicLH(float(mainWindow->GetWidth()), float(mainWindow->GetHeight()), float(-1), float(1));
 
 	for (auto iter = mBatches.begin(); iter != mBatches.end(); ++iter)
 	{
-		sceneNode->AttachObject(iter->second);
+		if (!iter->second->Empty())
+		{
+			iter->second->SetProjectionMatrix(mProjectionMatrix);
+		}	
+		else
+		{
+			iter->second->SetVisible(false);
+		}
 	}
 }
 

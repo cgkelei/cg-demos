@@ -24,6 +24,8 @@ public:
 	void BeginPass();
 	void EndPass();
 
+	EffectPass* Clone(Effect& effect);
+
 protected:
 	String mName;
 	bool mValid;

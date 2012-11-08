@@ -20,24 +20,17 @@ public:
 	virtual void Bind() = 0;
 	virtual void Unbind() = 0;
 	virtual bool LinkProgram() = 0;
-	
+	virtual shared_ptr<ShaderProgram> Clone(Effect& effect) = 0;
+
 	bool Validate() const { return mValidate; }
 	const String& GetLinkInfo() const { return mLinkerOutput; }
+
 	
 protected:
 	Effect& mEffect;
 	vector<shared_ptr<Shader> > mAttachedShaders;
 	String mLinkerOutput;	// Only for opengl render system
 	bool mValidate;
-
-	struct ParameterBind
-	{
-		String Name;
-		EffectParameterType Type;
-		std::function<void()> ShaderParamSetFunc;
-		EffectParameter* EffectParameter;
-	};
-	vector<ParameterBind> mParameterBinds;
 };
 
 }

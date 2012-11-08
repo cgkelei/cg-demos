@@ -30,6 +30,8 @@ Mesh::~Mesh()
 
 void Mesh::LoadImpl()
 {
+	ResourceManager& resMan = ResourceManager::GetSingleton();
+
 	FileSystem& fileSystem = FileSystem::GetSingleton();
 	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 
@@ -57,6 +59,9 @@ void Mesh::LoadImpl()
 	{
 		shared_ptr<MeshPart> subMesh = std::make_shared<MeshPart>(*this);
 		subMesh->Load(source);
+		
+		// add mesh part material resource
+		ResourceManager::GetSingleton().AddResource(ResourceTypes::Material, subMesh->mMaterialName, mGroup);
 
 		mMeshParts[i] = subMesh;
 	}
@@ -70,6 +75,7 @@ void Mesh::LoadImpl()
 	for (uint32_t i = 0; i < animClipCount; i++)
 	{
 		mAninationClips[i] = source.ReadString();
+		resMan.AddResource(ResourceTypes::Animation, mAninationClips[i], mGroup);
 	}
 }
 

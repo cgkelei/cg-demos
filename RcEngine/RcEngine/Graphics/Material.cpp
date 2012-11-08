@@ -240,13 +240,13 @@ EffectParameter* Material::GetCustomParameter( const String& name )
 	return mEffect->GetParameterByName(name);
 }
 
-shared_ptr<Material> Material::Clone()
+shared_ptr<Resource> Material::Clone()
 {
-	/*shared_ptr<Material> retVal = std::make_shared<Material>();
+	printf("Clone material: %s\n", mMaterialName.c_str());
 
-	retVal->mName = mName + "Clone ";
+	shared_ptr<Material> retVal = std::make_shared<Material>(mResourceType, mCreator, mResourceHandle, mName, mGroup);
 
-	String name = mName;
+	retVal->mMaterialName = mMaterialName;
 
 	retVal->mAmbient = mEmissive;
 	retVal->mDiffuse = mDiffuse;
@@ -258,22 +258,24 @@ shared_ptr<Material> Material::Clone()
 	retVal->mBlendState = mBlendState;
 	retVal->mRasterizerState = mRasterizerState;
 
-	retVal->mEffect = mEffect;
-	retVal->mCurrentTechnique = mCurrentTechnique;
+	retVal->mEffect = std::static_pointer_cast<Effect>(mEffect->Clone());
+
 	retVal->mTextures = mTextures;
 
 	for (auto iter = mCachedEffectParams.begin(); iter != mCachedEffectParams.end(); ++iter)
 	{
-	MaterialParameter* param = new MaterialParameter;
-	param->EffectParam = (*iter)->EffectParam;
-	param->Usage = (*iter)->Usage;
-	param->IsSemantic = (*iter)->IsSemantic;
-	param->Name = (*iter)->Name;
-	param->Type = (*iter)->Type;
-	retVal->mCachedEffectParams.push_back(param);
-	}*/
+		MaterialParameter* param = new MaterialParameter;
+		param->EffectParam = retVal->mEffect->GetParameterByName((*iter)->Name);
+		param->Usage = (*iter)->Usage;
+		param->IsSemantic = (*iter)->IsSemantic;
+		param->Name = (*iter)->Name;
+		param->Type = (*iter)->Type;
+		retVal->mCachedEffectParams.push_back(param);
+	}
 
-	return nullptr;
+	retVal->SetLoadState(Resource::Loaded);
+
+	return retVal;
 }
 
 void Material::SetTexture( const String& texUint, const shared_ptr<Texture>& texture )
@@ -288,6 +290,12 @@ void Material::SetTexture( const String& texUint, const shared_ptr<Texture>& tex
 		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Texture Unit: "+texUint +"doesn't exit!", "Material::SetTexture");
 	}
 }
+
+EffectTechnique* Material::GetCurrentTechnique() const
+{
+	return mEffect->GetTechniqueByIndex(0);
+}
+
 
 void Material::LoadImpl()
 {
@@ -334,10 +342,15 @@ void Material::LoadImpl()
 		effectResGroup = "General";
 	}
 	
-	mEffect = std::static_pointer_cast<Effect>( resMan.GetResourceByName(ResourceTypes::Effect, effectName, effectResGroup) );
+	// load effect
+	{
+		shared_ptr<Resource> effectProtype = resMan.GetResourceByName(ResourceTypes::Effect, effectName, effectResGroup);
+		effectProtype->Load();
+
+		// if use material animation, use effect clone
+		mEffect = std::static_pointer_cast<Effect>(effectProtype->Clone());
+	}
 	
-	mEffect->Load();
-	mCurrentTechnique = mEffect->GetTechniqueByIndex(0);
 
 	for (XMLNodePtr samplerNode = root->FirstNode("Sampler"); samplerNode; samplerNode = samplerNode->NextSibling("Sampler"))
 	{
@@ -534,6 +547,9 @@ shared_ptr<Resource> Material::FactoryFunc( ResourceManager* creator, ResourceHa
 {
 	return std::make_shared<Material>(ResourceTypes::Material, creator, handle, name, group);
 }
+
+
+
 
 
 

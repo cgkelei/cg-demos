@@ -39,7 +39,7 @@ public:
 	Resource(uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	virtual ~Resource();
 
-	
+	virtual shared_ptr<Resource> Clone();
 
 	const String& GetName() const				{ return mName; }
 	const String& GetResourceGroup() const		{ return mGroup; }

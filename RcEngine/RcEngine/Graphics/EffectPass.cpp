@@ -30,4 +30,27 @@ void EffectPass::EndPass()
 	mShaderProgram->Unbind();
 }
 
+EffectPass* EffectPass::Clone(Effect& effect)
+{
+	EffectPass* retVal = new EffectPass;
+
+
+	retVal->mName =  mName;
+	retVal->mValid = mValid;
+	retVal->mBlendState = mBlendState;
+	retVal->mDepthStencilState = mDepthStencilState;
+	retVal->mRasterizerState = mRasterizerState;
+
+	retVal->mFrontStencilRef = mFrontStencilRef;
+	retVal->mBackStencilRef = mBackStencilRef;
+
+	retVal->mBlendColor = mBlendColor;
+	retVal->mSampleMask = mSampleMask;
+
+	// clone shader program
+	retVal->mShaderProgram = mShaderProgram->Clone(effect);
+
+	return retVal;
+}
+
 } // Namespace RcEngine
