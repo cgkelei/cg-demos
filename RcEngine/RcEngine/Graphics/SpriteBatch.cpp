@@ -1,6 +1,8 @@
 #include <Graphics/SpriteBatch.h>
 #include <Graphics/Renderable.h>
+#include <Graphics/RenderDevice.h>
 #include <Graphics/Material.h>
+#include <Graphics/FrameBuffer.h>
 #include <Graphics/Texture.h>
 #include <Graphics/GraphicBuffer.h>
 #include <Graphics/RenderFactory.h>
@@ -70,13 +72,16 @@ public:
 		mSpriteTexture = texture;
 		mSpriteMaterial = mat;
 
+		mWindowSizeParam = mSpriteMaterial->GetCustomParameter("WindowSize");
+
 		mSpriteMaterial->SetTexture("SpriteTexture", texture);
+
 
 		mRenderOperation = std::make_shared<RenderOperation>();
 		mRenderOperation->BaseVertexLocation = 0;
 		mRenderOperation->StartIndexLocation = 0;
 		mRenderOperation->StartVertexLocation = 0;
-		mRenderOperation->PrimitiveType = PT_Line_List;
+		mRenderOperation->PrimitiveType = PT_Triangle_List;
 
 		// create index buffer 
 		mIndexBuffer = factory.CreateIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
@@ -125,6 +130,17 @@ public:
 		return mRenderOperation;
 	}
 
+	void OnRenderBegin()
+	{
+		Renderable::OnRenderBegin();
+
+		auto frameBuffer = Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer();
+		auto w = frameBuffer->GetWidth();
+		auto h = frameBuffer->GetHeight();
+		mWindowSizeParam->SetValue(Vector2f(float(frameBuffer->GetWidth()), float(frameBuffer->GetHeight())));
+
+	}
+
 	void OnUpdateRenderQueue( RenderQueue* renderQueue, Camera* cam, RenderOrder order )
 	{
 		UpdateGeometryBuffers();
@@ -161,7 +177,7 @@ public:
 				mIndexBuffer->ResizeBuffer(ibSize);
 
 				uint8_t* ibData = (uint8_t*)mIndexBuffer->Map(0, ibSize, BA_Read_Write);
-				memcpy(vbData, (uint8_t*)&mInidces[0], ibSize);
+				memcpy(ibData, (uint8_t*)&mInidces[0], ibSize);
 				mIndexBuffer->UnMap();
 			}
 
@@ -188,7 +204,7 @@ public:
 
 	vector<uint16_t>& GetIndices()
 	{
-		mDirty = false;
+		mDirty = true;
 		return mInidces;
 	}
 
@@ -201,6 +217,8 @@ private:
 
 	shared_ptr<GraphicsBuffer> mVertexBuffer;
 	shared_ptr<GraphicsBuffer> mIndexBuffer;
+
+	EffectParameter* mWindowSizeParam;
 
 	bool mDirty;
 };
@@ -378,14 +396,15 @@ void SpriteBatch::Flush()
 	//SceneNode* sceneNode = sceneMan.GetRootSceneNode();
 
 	// update parameter
-	Window* mainWindow =  Context::GetSingleton().GetApplication().GetMainWindow();
-	mProjectionMatrix = CreateOrthographicLH(float(mainWindow->GetWidth()), float(mainWindow->GetHeight()), float(-1), float(1));
+	//Window* mainWindow =  Context::GetSingleton().GetApplication().GetMainWindow();
+	//mProjectionMatrix = CreateOrthographicLH(float(mainWindow->GetWidth()), float(mainWindow->GetHeight()), float(-1), float(1));
+	//Context::GetSingleton().GetRenderDevice().AdjustProjectionMatrix(mProjectionMatrix);
 
 	for (auto iter = mBatches.begin(); iter != mBatches.end(); ++iter)
 	{
 		if (!iter->second->Empty())
 		{
-			iter->second->SetProjectionMatrix(mProjectionMatrix);
+			//iter->second->SetProjectionMatrix(mProjectionMatrix);
 		}	
 		else
 		{

@@ -136,10 +136,10 @@ void SceneNode::OnUpdateRenderQueues(Camera* camera,  RenderOrder order)
 {
 	const BoundingBoxf& worldBound = GetWorldBoundingBox();
 	
-	if (!camera->Visible(GetWorldBoundingBox()))
+	/*if (!camera->Visible(GetWorldBoundingBox()))
 	{
 		return;
-	}
+	}*/
 
 	for (auto iter = mAttachedObjects.begin(); iter != mAttachedObjects.end(); ++iter)
 	{

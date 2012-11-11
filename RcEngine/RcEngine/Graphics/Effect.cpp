@@ -567,7 +567,7 @@ EffectParameter* Effect::AddOrGetShaderParameter(const String& name, EffectParam
 
 shared_ptr<Resource> Effect::Clone()
 {
-	printf("Clone effect: %s\n", mef.c_str());
+	printf("Clone effect: %s\n", mEffectName.c_str());
 
 	shared_ptr<Effect> retVal = std::make_shared<Effect>(mResourceType, mCreator, mResourceHandle, mName, mGroup);
 	

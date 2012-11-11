@@ -168,7 +168,7 @@ void TestApp::Render()
 	SceneManager& scenenMan = Context::GetSingleton().GetSceneManager();
 
 	spriteBatch->Begin();
-	spriteBatch->Draw(mTexture, Vector2f(0, 0), ColorRGBA::White);
+	spriteBatch->Draw(mTexture, Vector2f(0, 0), ColorRGBA::Green);
 	spriteBatch->End();
 	spriteBatch->Flush();
 
