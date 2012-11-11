@@ -5,10 +5,11 @@
 <![CDATA[
 #version 330
 
-uniform mat4 ProjMat;
+//uniform mat4 ProjMat;
+uniform vec2 WindowSize;
 
 in vec3 iPos;
-in vec2 iTex;
+in vec2 iTex0;
 in vec4 iColor;
 
 out vec2 oTex;
@@ -16,8 +17,14 @@ out vec4 oColor;
 
 void main()
 {
-	gl_Position = vec4(iPos, 1) * ProjMat;
-	oTex = iTex;
+	vec4 oPos = vec4(iPos, 1.0);
+	
+	oPos.xy = vec2(2.0 * iPos.x - WindowSize.x,  WindowSize.y - 2.0 * iPos.y ) / WindowSize;
+	
+	//gl_Position = vec4(iPos, 1) * ProjMat;
+	
+	gl_Position = oPos;
+	oTex = iTex0;
 	oColor = iColor;
 }
 

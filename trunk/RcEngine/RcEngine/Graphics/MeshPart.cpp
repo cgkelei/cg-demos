@@ -85,7 +85,7 @@ void MeshPart::Load(  Stream& source )
 	vInitData.rowPitch = vertexBufferSize;
 	vInitData.slicePitch = 0;
 	mVertexBuffer = factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
-	
+
 	void* data = mVertexBuffer->Map(0, vertexBufferSize, BA_Write_Only);
 	source.Read(data, vertexBufferSize);
 	mVertexBuffer->UnMap();
