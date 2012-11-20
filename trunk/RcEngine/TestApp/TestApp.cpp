@@ -44,7 +44,6 @@ SpriteBatch* spriteBatch;
 TestApp::TestApp( const String& config )
 	:Application(config)
 {
-
 }
 
 
@@ -72,16 +71,19 @@ void TestApp::LoadContent()
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
-	/*shared_ptr<Font> font =  
+	shared_ptr<Font> font =  
 		std::static_pointer_cast<Font>(
-		resMan.GetResourceByHandle(resMan.AddResource(ResourceTypes::Font, "VeraMoBI.ttf", "General"))) ;
+		resMan.GetResourceByHandle(resMan.AddResource(ResourceTypes::Font, "msyh.ttf", "General"))) ;
 
 	font->Load();
 
-	auto face = font->GetFace(10);
+	auto face = font->GetFace(32);
+
+	uint32_t width, height;
+	font->MeasureText(L"Test", 32, &width, &height);
 	
-	auto h = resMan.AddResource(ResourceTypes::Material, "SkinModel.material.xml", "Custom");
-	resMan.GetResourceByHandle(h)->Load();*/
+	//auto h = resMan.AddResource(ResourceTypes::Material, "SkinModel.material.xml", "Custom");
+	//resMan.GetResourceByHandle(h)->Load();
 
 	resMan.AddResource(ResourceTypes::Material, "Sprite.material.xml", "General");
 	resMan.AddResource(ResourceTypes::Mesh, "him.mesh", "Custom");
