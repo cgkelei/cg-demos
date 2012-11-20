@@ -34,7 +34,7 @@ SceneManager::SceneManager()
 SceneManager::~SceneManager()
 {
 	ClearScene();
-	Safe_Delete(mRenderQueue);
+	SAFE_DELETE(mRenderQueue);
 }
 
 SceneNode* SceneManager::CreateSceneNode( const String& name )
@@ -157,7 +157,7 @@ void SceneManager::CreateSkyBox( const shared_ptr<Texture>& texture, bool cubema
 {
 	if (mSkyBox)
 	{
-		Safe_Delete(mSkyBox);
+		SAFE_DELETE(mSkyBox);
 	}
 
 	if (!mSkyBoxNode)
@@ -227,11 +227,11 @@ Light* SceneManager::CreateLight( const String& name)
 
 void SceneManager::ClearScene()
 {
-	Safe_Delete(mAnimationController);
+	SAFE_DELETE(mAnimationController);
 
 	for (auto iter = mAllSceneNodes.begin(); iter != mAllSceneNodes.end(); ++iter)
 	{
-		Safe_Delete(*iter);
+		SAFE_DELETE(*iter);
 	}
 	mAllSceneNodes.clear();
 
@@ -239,7 +239,7 @@ void SceneManager::ClearScene()
 	{
 		for (auto jIter = iIter->second.begin(); jIter != iIter->second.end(); ++jIter)
 		{
-			Safe_Delete(*jIter);
+			SAFE_DELETE(*jIter);
 		}
 	}
 	mSceneObjectCollections.clear();

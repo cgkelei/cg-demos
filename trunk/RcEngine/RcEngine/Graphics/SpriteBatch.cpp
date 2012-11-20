@@ -7,6 +7,7 @@
 #include <Graphics/GraphicBuffer.h>
 #include <Graphics/RenderFactory.h>
 #include <Graphics/RenderQueue.h>
+#include <Graphics/Font.h>
 #include <Graphics/Camera.h>
 #include <Graphics/RenderOperation.h>
 #include <Scene/SceneManager.h>
@@ -412,6 +413,5 @@ void SpriteBatch::Flush()
 		}
 	}
 }
-
 
 }

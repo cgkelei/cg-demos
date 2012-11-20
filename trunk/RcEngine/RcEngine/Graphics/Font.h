@@ -3,6 +3,8 @@
 
 #include <Core/Prerequisites.h>
 #include <Resource/Resource.h>
+#include <Math/ColorRGBA.h>
+#include <Math/Vector.h>
 
 
 static const int FONT_TEXTURE_MIN_SIZE = 128;
@@ -25,6 +27,7 @@ struct _ApiExport FontGlyph
 	unordered_map<uint32_t, uint32_t> Kerning;
 };
 
+class SpriteBatch;
 
 class _ApiExport FontFace 
 {
@@ -32,7 +35,8 @@ public:
 	FontFace();
 	~FontFace();
 
-	const FontGlyph& GetGlyph(uint32_t c) const;
+	const FontGlyph& GetGlyph(uint32_t ch) const;
+	uint32_t GetKerning(uint32_t c, uint32_t d) const;
 
 	shared_ptr<Texture> Texture;
 	vector<FontGlyph> FontGlyphs;
@@ -48,10 +52,31 @@ public:
 class _ApiExport Font : public Resource
 {
 public:
+	enum Alignment
+	{
+		Align_Hor_Left = 1UL << 0,
+		Align_Hor_Center = 1UL << 1,
+		Align_Hor_Right = 1UL << 2,
+
+		Align_Ver_Top = 1UL << 3,
+		Align_Ver_Center = 1UL << 4,
+		Align_Ver_Bottom= 1UL << 5,
+	};
+
+public:
 	Font(uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	~Font();
 
+	void DrawText(std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color);
+	void DrawText(std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color, float rotation, const Vector2f& origin, float scale, float layerDepth);
+	void DrawText(std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color, float rotation, const Vector2f& origin, const Vector2f& scale, float layerDepth);
+
+	void MeasureText(const std::wstring& text,uint32_t size, uint32_t* widthOut, uint32_t* heightOut);
+
 	const FontFace* GetFace(uint32_t pointSize);
+
+private:
+	void Draw(SpriteBatch* spriteBatch, const std::wstring& text, const Vector2f& Position, const ColorRGBA& color, float rotation, const Vector2f&  origin, const Vector2f& scale, float depth);
 
 protected:
 	void LoadImpl();
@@ -63,7 +88,6 @@ public:
 protected:
 	vector<uint8_t> mFontData;
 	uint32_t mFontDataSize;
-
 	unordered_map<uint32_t, FontFace*> mFontFaces;
 };
 

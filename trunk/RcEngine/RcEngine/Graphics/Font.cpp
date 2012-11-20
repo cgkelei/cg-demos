@@ -1,6 +1,7 @@
 #include <Graphics/Font.h>
 #include <Graphics/Texture.h>
 #include <Graphics/RenderFactory.h>
+#include <Graphics/SpriteBatch.h>
 #include <Core/Context.h>
 #include <Core/Exception.h>
 #include <Core/Utility.h>
@@ -219,6 +220,33 @@ const FontGlyph& FontFace::GetGlyph( uint32_t c ) const
 		return FontGlyphs[0];
 }
 
+uint32_t FontFace::GetKerning( uint32_t c, uint32_t d ) const
+{
+	if (!HasKerning)
+		return 0;
+
+	if (c == static_cast<uint32_t>(L'\n') || d == static_cast<uint32_t>(L'\n'))
+		return 0;
+
+	uint32_t leftIndex = 0;
+	uint32_t rightIndex = 0;
+	
+	auto leftIt = GlyphMapping.find(c);
+	auto rightIt = GlyphMapping.find(d);
+
+	if (leftIt != GlyphMapping.end())
+		leftIndex = leftIt->second;
+
+	if (rightIt != GlyphMapping.end())
+		rightIndex = rightIt->second;
+
+	auto kerningIt = FontGlyphs[leftIndex].Kerning.find(rightIndex);
+	if (kerningIt != FontGlyphs[leftIndex].Kerning.end())
+		return kerningIt->second;
+	else
+		return 0;
+}
+
 ////////////////////////////////////////////////////////////////////////////
 Font::Font( uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 	: Resource(resType, creator, handle, name, group)
@@ -280,7 +308,6 @@ const FontFace* Font::GetFace( uint32_t pointSize )
 
 	FontFace* fontFace = new FontFace;
 
-
 	FT_F26Dot6 ftSize = (FT_F26Dot6)(pointSize * (1 << 6));
 	error = FT_Set_Char_Size(face, 0, ftSize, FONT_DPI, FONT_DPI);
 	if (error)
@@ -289,6 +316,8 @@ const FontFace* Font::GetFace( uint32_t pointSize )
 		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Could not set font point size:" + ToString(pointSize), "Font::GetFace");
 	}
 
+	// Set character encoding
+	FT_Select_Charmap(face,FT_ENCODING_UNICODE);
 
 	FT_GlyphSlot slot = face->glyph;
 	uint32_t numGlyphs = 0;
@@ -428,8 +457,6 @@ const FontFace* Font::GetFace( uint32_t pointSize )
 	vector<unsigned char> fontTextureData(texHeight * texWidth);
 	memset(&fontTextureData[0], 0, sizeof(unsigned char) * texHeight * texWidth);
 
-
-
 	// Render glyphs into texture, and find out a scaling value in case font uses less than full opacity (thin outlines)
 	unsigned char avgMaxOpacity = 255;
 	unsigned sumMaxOpacity = 0;
@@ -504,6 +531,64 @@ const FontFace* Font::GetFace( uint32_t pointSize )
 shared_ptr<Resource> Font::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 {
 	return std::make_shared<Font>(ResourceTypes::Font, creator, handle, name, group);
+}
+
+
+void Font::DrawText( std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color )
+{
+
+}
+
+void Font::DrawText( std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color, float rotation, const Vector2f& origin, float scale, float layerDepth )
+{
+
+}
+
+void Font::DrawText( std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color, float rotation, const Vector2f& origin, const Vector2f& scale, float layerDepth )
+{
+
+}
+
+void Font::MeasureText( const std::wstring& text, uint32_t size, uint32_t* widthOut, uint32_t* heightOut )
+{
+	const FontFace* face = GetFace(size);
+
+	if (!face || !text.length())
+	{
+		if(widthOut)  *widthOut = 0;
+		if(heightOut) *heightOut = 0;
+		return;
+	}
+
+	int rowHeight = face->RowHeight;
+	
+	std::vector<uint32_t> rowWidths(1, 0);
+
+	for (size_t i = 0, length = text.length(); i < length; ++i)
+	{
+		wchar_t ch = text[i];
+
+		if (ch != L'\n')
+		{
+			const FontGlyph& glyph = face->GetGlyph(static_cast<uint32_t>(ch));
+			rowWidths.back() += glyph.Advance;
+
+			if (i < length - 1)
+				rowWidths.back() += face->GetKerning(static_cast<uint32_t>(ch), static_cast<uint32_t>(text[i + 1]));
+		}
+		else
+		{
+			rowWidths.push_back(0);
+		}
+	}
+
+	if(widthOut)  *widthOut = *std::max_element(rowWidths.begin(), rowWidths.end());
+	if(heightOut) *heightOut = rowWidths.size() * face->RowHeight;
+}
+
+void Font::Draw( SpriteBatch* spriteBatch, const std::wstring& text, const Vector2f& Position, const ColorRGBA& color, float rotation, const Vector2f& origin, const Vector2f& scale, float depth )
+{
+
 }
 
 
