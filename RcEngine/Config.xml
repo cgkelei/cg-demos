@@ -11,6 +11,7 @@
 			<Path Name="../Media/Mesh"/>
 			<Path Name="../Media/Pipiline"/>
 			<Path Name="../Media/Texture"/>
+			<Path Name="../Media/Font"/>
 		</Group>
 		
 		<Group Name="Custom">
