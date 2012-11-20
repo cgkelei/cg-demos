@@ -18,7 +18,7 @@ Viewport::Viewport( uint32_t left, uint32_t top, uint32_t width, uint32_t height
 
 Viewport::~Viewport()
 {
-	Safe_Delete(AttachCamera);
+	SAFE_DELETE(AttachCamera);
 }
 
 bool Viewport::operator==( const Viewport& rhs )

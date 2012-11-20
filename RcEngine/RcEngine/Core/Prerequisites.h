@@ -83,7 +83,7 @@ using namespace tthread;
 typedef std::map<String, String> NameValuePairList;
 
 
-#define Safe_Delete(p) if(p) { delete p; p = NULL;}
+#define SAFE_DELETE(p) if(p) { delete p; p = NULL;}
 
 // for normal pointer 
 template<class Type, class SourceType>

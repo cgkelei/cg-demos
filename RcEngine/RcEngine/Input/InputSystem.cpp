@@ -27,8 +27,8 @@ InputSystem::InputSystem()
 
 InputSystem::~InputSystem()
 {
-	Safe_Delete(mMouse);
-	Safe_Delete(mKeyboard);
+	SAFE_DELETE(mMouse);
+	SAFE_DELETE(mKeyboard);
 }
 
 void InputSystem::Update(float delata)

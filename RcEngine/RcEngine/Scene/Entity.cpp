@@ -33,12 +33,12 @@ Entity::~Entity()
 {
 	for (auto iter = mSubEntityList.begin(); iter != mSubEntityList.end(); ++iter)
 	{
-		Safe_Delete(*iter);
+		SAFE_DELETE(*iter);
 	}
 	mSubEntityList.clear();
 	mChildAttachedObjects.clear();
 
-	Safe_Delete(mAnimationPlayer);
+	SAFE_DELETE(mAnimationPlayer);
 }
 
 
