@@ -33,7 +33,7 @@ OpenGLRenderDevice::OpenGLRenderDevice()
 
 OpenGLRenderDevice::~OpenGLRenderDevice(void)
 {
-	Safe_Delete(mRenderFactory);
+	SAFE_DELETE(mRenderFactory);
 }
 
 void OpenGLRenderDevice::Create()
@@ -44,7 +44,7 @@ void OpenGLRenderDevice::Create()
 
 void OpenGLRenderDevice::Release()
 {
-	Safe_Delete(mRenderFactory);
+	SAFE_DELETE(mRenderFactory);
 }
 
 void OpenGLRenderDevice::CreateRenderWindow( const RenderSettings& settings )
