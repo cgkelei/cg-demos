@@ -4,16 +4,35 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{F40A2145-80F8-4121-8764-9E6E667B07E8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InputSystem", "InputSystem\InputSystem.vcxproj", "{3187CECE-7BFA-4120-A3E2-EB9265560098}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E2D69818-CCCE-4983-A7BE-F9EDB882246A} = {E2D69818-CCCE-4983-A7BE-F9EDB882246A}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RcEngine", "RcEngine\RcEngine.vcxproj", "{E2D69818-CCCE-4983-A7BE-F9EDB882246A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FbxImport", "Tools\FbxImport\FbxImport.vcxproj", "{1EF11618-D31A-4924-8E22-0A28FA8CA9DF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E2D69818-CCCE-4983-A7BE-F9EDB882246A} = {E2D69818-CCCE-4983-A7BE-F9EDB882246A}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestApp", "TestApp\TestApp.vcxproj", "{DD17C4CA-5319-49FB-A464-357FB9CA375C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E2D69818-CCCE-4983-A7BE-F9EDB882246A} = {E2D69818-CCCE-4983-A7BE-F9EDB882246A}
+		{3187CECE-7BFA-4120-A3E2-EB9265560098} = {3187CECE-7BFA-4120-A3E2-EB9265560098}
+		{26E04EDA-8664-44F6-A633-4C71932EB86F} = {26E04EDA-8664-44F6-A633-4C71932EB86F}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MeshImporter", "Tools\MeshImporter\MeshImporter.vcxproj", "{C6F62DF1-E874-4347-9EA5-567181DA4DBC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E2D69818-CCCE-4983-A7BE-F9EDB882246A} = {E2D69818-CCCE-4983-A7BE-F9EDB882246A}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGLRenderSystem", "OpenGLRenderSystem\OpenGLRenderSystem.vcxproj", "{26E04EDA-8664-44F6-A633-4C71932EB86F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E2D69818-CCCE-4983-A7BE-F9EDB882246A} = {E2D69818-CCCE-4983-A7BE-F9EDB882246A}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FontImporter", "Tools\FontImporter\FontImporter.vcxproj", "{152D7331-86F2-4A57-9650-74F95C21054B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,12 +64,17 @@ Global
 		{26E04EDA-8664-44F6-A633-4C71932EB86F}.Debug|Win32.Build.0 = Debug|Win32
 		{26E04EDA-8664-44F6-A633-4C71932EB86F}.Release|Win32.ActiveCfg = Release|Win32
 		{26E04EDA-8664-44F6-A633-4C71932EB86F}.Release|Win32.Build.0 = Release|Win32
+		{152D7331-86F2-4A57-9650-74F95C21054B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{152D7331-86F2-4A57-9650-74F95C21054B}.Debug|Win32.Build.0 = Debug|Win32
+		{152D7331-86F2-4A57-9650-74F95C21054B}.Release|Win32.ActiveCfg = Release|Win32
+		{152D7331-86F2-4A57-9650-74F95C21054B}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{C6F62DF1-E874-4347-9EA5-567181DA4DBC} = {F40A2145-80F8-4121-8764-9E6E667B07E8}
 		{1EF11618-D31A-4924-8E22-0A28FA8CA9DF} = {F40A2145-80F8-4121-8764-9E6E667B07E8}
+		{C6F62DF1-E874-4347-9EA5-567181DA4DBC} = {F40A2145-80F8-4121-8764-9E6E667B07E8}
+		{152D7331-86F2-4A57-9650-74F95C21054B} = {F40A2145-80F8-4121-8764-9E6E667B07E8}
 	EndGlobalSection
 EndGlobal

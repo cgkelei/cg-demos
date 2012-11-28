@@ -71,16 +71,10 @@ void TestApp::LoadContent()
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
-	shared_ptr<Font> font =  
-		std::static_pointer_cast<Font>(
-		resMan.GetResourceByHandle(resMan.AddResource(ResourceTypes::Font, "msyh.ttf", "General"))) ;
+	//shared_ptr<Font> font =  
+	//	std::static_pointer_cast<Font>(
+	//	resMan.GetResourceByHandle(resMan.AddResource(ResourceTypes::Font, "msyh.ttf", "General"))) ;
 
-	font->Load();
-
-	auto face = font->GetFace(32);
-
-	uint32_t width, height;
-	font->MeasureText(L"Test", 32, &width, &height);
 	
 	//auto h = resMan.AddResource(ResourceTypes::Material, "SkinModel.material.xml", "Custom");
 	//resMan.GetResourceByHandle(h)->Load();
