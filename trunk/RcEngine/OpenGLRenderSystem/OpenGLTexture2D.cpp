@@ -328,7 +328,7 @@ void OpenGLTexture2D::Unmap2D( uint32_t arrayIndex, uint32_t level )
 				}
 				else
 				{
-					glTexSubImage2D(mTargetType, level, glinternalFormat,  mWidths[level], mHeights[level], 0, glformat, gltype, p);
+					glTexSubImage2D(mTargetType, level, 0, 0, mWidths[level], mHeights[level],  glformat, gltype, p);
 				}
 
 			}
