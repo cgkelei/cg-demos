@@ -13,7 +13,9 @@ void ComputeDistanceField( uint8_t* srcImage, int32_t srcWidth, int32_t srcHeigh
 	const int32_t width = size / upScale;
 	const int32_t height = size / upScale;
 
-	outImage.resize(width*height);
+	outImage.resize(width*height + spread*2);
+
+	// copy image from freetype to buffer
 
 	//  ÂÖÀªÖÜÎ§×î´ó·¶Î§¾àÀë
 	const int32_t maxDist = upScale * spread;
