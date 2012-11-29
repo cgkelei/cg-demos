@@ -1,0 +1,47 @@
+<Effect name="Lighting">
+	
+<Shader name="VS" stage="Vertex" entry="main">
+<![CDATA[
+
+#version 330
+
+in vec3 Position;
+in vec3 Tex;
+
+out vec3 oTex;
+
+uniform mat4 World;
+uniform mat4 ViewProj;
+
+void main()
+{
+	gl_Position = vec4(Position, 1.0) * World * ViewProj;
+	oTex = vec3(Tex.x, 1-Tex.y, Tex.z);
+}
+
+]]>
+</Shader>
+
+<Shader name="VS" stage="Vertex" entry="main">
+<Include name="DefferedReadUtil.include.xml"/>
+<![CDATA[
+
+#version 330
+
+in vec3 Position;
+in vec3 Tex;
+
+out vec3 oTex;
+
+uniform mat4 World;
+uniform mat4 ViewProj;
+
+void main()
+{
+	gl_Position = vec4(Position, 1.0) * World * ViewProj;
+	oTex = vec3(Tex.x, 1-Tex.y, Tex.z);
+}
+
+]]>
+</Shader>
+	
