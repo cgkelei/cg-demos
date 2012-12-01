@@ -86,10 +86,18 @@ private:
 	int32_t TextureSize;
 
 	GLuint mVertexBufferID, mIndexBufferID;
-
-
 };
 
+
+class DistanceCompute
+{
+public:
+	DistanceCompute();
+	~DistanceCompute();
+
+	void Extract();
+
+};
 
 
 }

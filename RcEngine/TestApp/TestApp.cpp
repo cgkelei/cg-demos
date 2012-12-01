@@ -32,11 +32,8 @@
 #include "Graphics/SimpleGeometry.h"
 #include "Resource/ResourceManager.h"
 #include "Graphics/SpriteBatch.h"
-#include <D3DX10Math.h>
 #include "Math/Rectangle.h"
 #include "Core/XMLDom.h"
-
-#pragma comment(lib, "D3DX10.lib")
 
 
 SpriteBatch* spriteBatch;

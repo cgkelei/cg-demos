@@ -3,6 +3,8 @@
 
 	using namespace std;
 
+namespace {
+
 	union Pixel32
 	{
 		Pixel32()
@@ -83,6 +85,7 @@
 		return false;
 	}
 
+}
 	void SaveTGA(int32_t w, int32_t h, uint8_t* pData)
 	{
 		uint8_t* pixel = pData;

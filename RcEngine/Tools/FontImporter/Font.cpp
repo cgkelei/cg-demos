@@ -1,6 +1,7 @@
 #include "Font.h"
 #include <algorithm>
 #include <cmath>
+#include <bitset>
 
 static const int FONT_TEXTURE_SIZE = 1024;
 static const int FONT_DPI = 96;
@@ -13,7 +14,7 @@ void ComputeDistanceField( uint8_t* srcImage, int32_t srcWidth, int32_t srcHeigh
 	const int32_t width = size / upScale;
 	const int32_t height = size / upScale;
 
-	outImage.resize(width*height + spread*2);
+	outImage.resize(width*height);
 
 	// copy image from freetype to buffer
 
@@ -375,6 +376,220 @@ void Font::DrawText( const std::wstring& text, int sx, int sy, int32_t fontSize)
 	glEnd();
 }
 
+//void Font::BuildFontTexture( const wstring& text )
+//{
+//	FT_Error error;
+//
+//	const uint32_t numCharPerRow = TextureSize / CharSize;
+//	const uint32_t totalNumChars = numCharPerRow * numCharPerRow;
+//
+//	glBindTexture(GL_TEXTURE_2D, mTextureID);
+//
+//	for (auto charIter = text.begin(); charIter != text.end(); ++charIter)
+//	{
+//		wchar_t ch = *charIter;
+//
+//		auto found = mCharacterCached.find(ch);
+//
+//		if (found == mCharacterCached.end())
+//		{
+//			error = FT_Load_Char(Face, ch, FT_LOAD_DEFAULT);
+//
+//			FT_GlyphSlot slot = Face->glyph;
+//
+//			if (!error)
+//			{
+//				int32_t charPosX, charPosY;
+//				CharInfo charInfo;
+//
+//				if (mCharacterCached.size() < totalNumChars)
+//				{
+//					std::pair<int32_t, int32_t>& firstFreeSlots = mFreeCharacterSlots.front();
+//
+//					const int32_t slot = firstFreeSlots.first;
+//
+//					charPosY = slot / numCharPerRow;
+//					charPosX = slot - charPosY * numCharPerRow;
+//
+//					charPosX *= CharSize;
+//					charPosY *= CharSize;
+//
+//					charInfo.u1 = (static_cast<float>(charPosX) / TextureSize);
+//					charInfo.v1 = (static_cast<float>(charPosY) / TextureSize);
+//
+//					++ firstFreeSlots.first;
+//					if (firstFreeSlots.first == firstFreeSlots.second)
+//					{
+//						mFreeCharacterSlots.pop_front();
+//					}
+//				}
+//				else
+//				{
+//					throw std::exception("Char overflow");
+//				}
+//
+//				charInfo.u2 = (charInfo.u1 + static_cast<float>(slot->metrics.width >> 6) / CHAR_GLYPH_SIZE * CharSize / TextureSize);
+//				charInfo.v2 = (charInfo.v1 + static_cast<float>(slot->metrics.height >> 6) / CHAR_GLYPH_SIZE * CharSize / TextureSize);
+//
+//				// add new GlyphMapping if doesn't exit
+//				if (GlyphMapping.find(ch) == GlyphMapping.end())
+//				{
+//					FontGlyph newGlyph;
+//					newGlyph.Advance = int32_t(float(slot->advance.x >> 6) / CHAR_GLYPH_SIZE * CharSize);
+//					newGlyph.Width = int32_t(float(slot->metrics.width >> 6) / CHAR_GLYPH_SIZE * CharSize);
+//					newGlyph.Height = int32_t(float(slot->metrics.height >> 6) / CHAR_GLYPH_SIZE * CharSize);
+//					newGlyph.OffsetX = int32_t(float(slot->metrics.horiBearingX >> 6) / CHAR_GLYPH_SIZE * CharSize);
+//					newGlyph.OffsetY = int32_t(float(slot->metrics.horiBearingY >> 6) / CHAR_GLYPH_SIZE * CharSize);
+//
+//					GlyphMapping.insert(make_pair((unsigned)ch, Glyphs.size()));
+//					Glyphs.push_back(newGlyph);
+//				}
+//
+//				// cache this character
+//				mCharacterCached.insert(std::make_pair(ch, charInfo));
+//
+//				// convert into bitmap
+//				error = FT_Render_Glyph( slot,  FT_RENDER_MODE_NORMAL );
+//				FontCharData.resize(CHAR_GLYPH_SIZE*CHAR_GLYPH_SIZE);
+//				if (!error)
+//				{
+//					memset(&FontCharData[0], 0, FontCharData.size());
+//					int32_t width, height;
+//					//ComputeDistanceField(slot->bitmap.buffer, slot->bitmap.width, slot->bitmap.rows, slot->bitmap.pitch,
+//					//	CHAR_GLYPH_SIZE, 128, 4, FontCharData, &width, &height);
+//
+//					for (int32_t y = 0; y < slot->bitmap.rows; ++y)
+//					{
+//						unsigned char* src = slot->bitmap.buffer + slot->bitmap.pitch * y;
+//						unsigned char* dest = &FontCharData[0] + CHAR_GLYPH_SIZE * y;
+//
+//						for (int32_t x = 0; x < slot->bitmap.width; ++x)
+//						{
+//							dest[x] = src[x];
+//						}
+//					}
+//
+//					SaveTGA(CHAR_GLYPH_SIZE, CHAR_GLYPH_SIZE, &FontCharData[0]);
+//					glTexSubImage2D(GL_TEXTURE_2D, 0, charPosX, charPosY, CharSize, CharSize, 
+//						GL_ALPHA, GL_UNSIGNED_BYTE, &FontCharData[0]);					
+//				}	
+//			}
+//		}
+//	}
+//
+//	glBindTexture(GL_TEXTURE_2D, 0);
+//}
+
+
+struct RasterUser
+{
+	FT_BBox BBox;
+	uint32_t BufferWidth, BufferHeight;
+	bool Empty;
+	uint8_t* GlyphData;
+	uint8_t* GlyphDataTemp;
+};
+
+void printBits(uint8_t bit)
+{
+	int i = 0;
+	while (i < 8)
+	{
+		printf("%d", (bit & (1U << i++)) ? 1:0);
+	}
+	printf(" ");
+}
+
+void RasterCallback(const int y, const int count, const FT_Span * const spans, void * const user) 
+{
+	RasterUser* pRasterUser = static_cast<RasterUser*>(user);
+	FT_BBox& bbox = pRasterUser->BBox;
+
+	int y0 = pRasterUser->BufferHeight - (y - bbox.yMin) - 1;
+
+	if (y0 >= 0)
+	{
+		for (int i = 0; i < count; ++i)
+		{
+			if (spans[i].coverage > 127)
+			{
+				int const x0 = spans[i].x - bbox.xMin;
+				int const x_end = x0 + spans[i].len;
+
+				/*if (y0 == 1)
+				{
+				printf("\n");
+				printf("y=%d, x=%d len=%d ", y0, x0, spans[i].len);*/
+				
+				int const x_align_8 = ((x0) & ~0x7);
+				int x = max(0, x0);
+				pRasterUser->GlyphDataTemp[(y0 * CHAR_GLYPH_SIZE + x) / 8] = static_cast<uint8_t>((0xFF << ( x - x_align_8)));
+			//	printBits(pRasterUser->GlyphDataTemp[(y0 * CHAR_GLYPH_SIZE + x) / 8]);
+
+				for (x = x_align_8 + 8; x < (x_end & ~0x7); x += 8)
+				{
+					pRasterUser->GlyphDataTemp[(y0 * CHAR_GLYPH_SIZE + x) / 8] = 0xFF;
+				//	printBits(pRasterUser->GlyphDataTemp[(y0 * CHAR_GLYPH_SIZE + x) / 8]);
+				}
+
+				if ( x > x_end)
+				{
+					uint8_t before = pRasterUser->GlyphDataTemp[(y0 * CHAR_GLYPH_SIZE + x-8) / 8];
+					//printf("before: ");
+					//printBits(pRasterUser->GlyphDataTemp[(y0 * CHAR_GLYPH_SIZE + x-8) / 8]);
+
+					uint8_t after = before & (0xFF >> ( x - x_end));
+					pRasterUser->GlyphDataTemp[(y0 * CHAR_GLYPH_SIZE + x-8) / 8] = after;
+
+					//printf(" after: ");
+					//printBits(pRasterUser->GlyphDataTemp[(y0 * CHAR_GLYPH_SIZE + x-8) / 8]);
+				}
+				else if ( x < x_end)
+				{
+					uint8_t temp = ~(0xFF << ( x_end - x));
+					pRasterUser->GlyphDataTemp[(y0 * CHAR_GLYPH_SIZE + x) / 8] = temp;
+					//printBits(pRasterUser->GlyphDataTemp[(y0 * CHAR_GLYPH_SIZE + x) / 8]);
+				}
+
+				// update 
+				for ( x = x_align_8; x <= (x_end & ~0x7);  x += 8)
+				{
+					pRasterUser->GlyphData[(y0 * CHAR_GLYPH_SIZE + x) / 8] |= pRasterUser->GlyphDataTemp[(y0 * CHAR_GLYPH_SIZE + x) / 8];
+				}
+
+				//}
+			}
+		}
+	}
+}
+
+void SaveOutline(uint8_t* bitmap, uint32_t width, uint32_t height)
+{
+	vector<uint8_t> data(width * height);
+
+	for (uint32_t y = 0; y < height; ++y)
+	{
+		for (uint32_t x = 0; x < width; ++x)
+		{
+			if (x == 147 && y == 1)
+			{
+				int a = 0;
+			}
+			auto bit = x % 8;
+			int const x_align_8 = ((x) & ~0x7);
+			auto index = y * (CHAR_GLYPH_SIZE/8)  + x / 8;
+			
+			auto value = bitmap[index];	
+			
+			uint8_t pixel = (value & ((1U << bit)))  ? 255 : 0;
+			
+			data[y * width + x] = pixel;
+		}
+	}
+
+	SaveTGA(width, height, &data[0]);
+}
+
 void Font::BuildFontTexture( const wstring& text )
 {
 	FT_Error error;
@@ -392,12 +607,41 @@ void Font::BuildFontTexture( const wstring& text )
 
 		if (found == mCharacterCached.end())
 		{
-			error = FT_Load_Char(Face, ch, FT_LOAD_DEFAULT);
 
 			FT_GlyphSlot slot = Face->glyph;
 
-			if (!error)
+			error = FT_Load_Char(Face, ch, FT_LOAD_NO_BITMAP);
+			if(!error && slot->format == FT_GLYPH_FORMAT_OUTLINE)
 			{
+				FT_BBox  bbox;
+
+				FT_Outline_Get_CBox(&slot->outline, &bbox);
+
+				bbox.xMin = (bbox.xMin) >> 6;
+				bbox.xMax = (bbox.xMax) >> 6;
+				bbox.yMin = (bbox.yMin) >> 6;
+				bbox.yMax = (bbox.yMax) >> 6;
+
+				vector<uint8_t> glyphData(CHAR_GLYPH_SIZE / 8 * CHAR_GLYPH_SIZE);
+				vector<uint8_t> glyphDataTemp(CHAR_GLYPH_SIZE / 8 * CHAR_GLYPH_SIZE);
+
+				RasterUser rasterUser;
+				rasterUser.BBox = bbox;
+				rasterUser.BufferWidth = (std::min)(static_cast<int>(rasterUser.BBox.xMax - rasterUser.BBox.xMin) + 1, static_cast<int>(CHAR_GLYPH_SIZE));
+				rasterUser.BufferHeight = (std::min)(static_cast<int>(rasterUser.BBox.yMax - rasterUser.BBox.yMin) + 1, static_cast<int>(CHAR_GLYPH_SIZE));
+				rasterUser.GlyphData = &glyphData[0];
+				rasterUser.GlyphDataTemp = &glyphDataTemp[0];
+
+				FT_Raster_Params params;
+				memset(&params, 0, sizeof(params));
+				params.flags = FT_RASTER_FLAG_AA | FT_RASTER_FLAG_DIRECT;
+				params.gray_spans = RasterCallback;
+				params.user = &rasterUser;
+
+				FT_Outline_Render(Library, &slot->outline, &params);
+				SaveOutline(&glyphData[0], CHAR_GLYPH_SIZE, CHAR_GLYPH_SIZE);
+				//SaveTGA(CHAR_GLYPH_SIZE, CHAR_GLYPH_SIZE, &glyphData[0]);
+				
 				int32_t charPosX, charPosY;
 				CharInfo charInfo;
 
@@ -447,35 +691,55 @@ void Font::BuildFontTexture( const wstring& text )
 				// cache this character
 				mCharacterCached.insert(std::make_pair(ch, charInfo));
 
-				// convert into bitmap
-				error = FT_Render_Glyph( slot,  FT_RENDER_MODE_NORMAL );
-				if (!error)
-				{
-					/*memset(&FontCharData[0], 0, FontCharData.size());*/
-					int32_t width, height;
-					ComputeDistanceField(slot->bitmap.buffer, slot->bitmap.width, slot->bitmap.rows, slot->bitmap.pitch,
-						CHAR_GLYPH_SIZE, 128, 4, FontCharData, &width, &height);
-
-					/*for (int32_t y = 0; y < slot->bitmap.rows; ++y)
+					// Need an outline for this to work.
+					if (slot->format == FT_GLYPH_FORMAT_OUTLINE)
 					{
-						unsigned char* src = slot->bitmap.buffer + slot->bitmap.pitch * y;
-						unsigned char* dest = &FontCharData[0] + CharSize * y;
 
-						for (int32_t x = 0; x < slot->bitmap.width; ++x)
+					// convert into bitmap
+					error = FT_Render_Glyph( slot,  FT_RENDER_MODE_NORMAL );
+					if (!error)
+					{
+						//memset(&FontCharData[0], 0, FontCharData.size());
+						int32_t width, height;
+						ComputeDistanceField(slot->bitmap.buffer, slot->bitmap.width, slot->bitmap.rows, slot->bitmap.pitch,
+							CHAR_GLYPH_SIZE, 128, 4, FontCharData, &width, &height);
+
+						/*for (int32_t y = 0; y < slot->bitmap.rows; ++y)
 						{
-							dest[x] = src[x];
-						}
-					}*/
+							unsigned char* src = slot->bitmap.buffer + slot->bitmap.pitch * y;
+							unsigned char* dest = &FontCharData[0] + CharSize * y;
 
-			/*		SaveTGA(CharSize, CharSize, &FontCharData[0]);*/
-					glTexSubImage2D(GL_TEXTURE_2D, 0, charPosX, charPosY, CharSize, CharSize, 
-						GL_ALPHA, GL_UNSIGNED_BYTE, &FontCharData[0]);					
-				}	
-			}
+							for (int32_t x = 0; x < slot->bitmap.width; ++x)
+							{
+								dest[x] = src[x];
+							}
+						}
+
+						SaveTGA(CharSize, CharSize, &FontCharData[0]);*/
+						glTexSubImage2D(GL_TEXTURE_2D, 0, charPosX, charPosY, CharSize, CharSize, 
+							GL_ALPHA, GL_UNSIGNED_BYTE, &FontCharData[0]);					
+					}	
+				}
+			}	
 		}
 	}
 
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+DistanceCompute::DistanceCompute()
+{
+
+}
+
+DistanceCompute::~DistanceCompute()
+{
+
+}
+
+void DistanceCompute::Extract()
+{
+
 }
 
 }

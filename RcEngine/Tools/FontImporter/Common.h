@@ -12,6 +12,8 @@
 #include <unordered_map>
 #include <map>
 
+#include <amp.h>
+
 #include <GL/glew.h>
 #include <GL/glut.h>
 

@@ -111,22 +111,39 @@ OpenGLRenderFactory::~OpenGLRenderFactory(void)
 
 shared_ptr<Texture> OpenGLRenderFactory::CreateTexture1D( uint32_t width, PixelFormat format, uint32_t arrSize, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData )
 {
-	return std::make_shared<OpenGLTexture1D>(format, arrSize, numMipMaps, width, sampleCount, sampleQuality, accessHint, initData);
+	shared_ptr<OpenGLTexture1D> retVal(
+		new OpenGLTexture1D(format, arrSize, numMipMaps, width, sampleCount, sampleQuality, accessHint, initData));
+
+	return retVal;
+
+	// VS2012 Bug
+	//return std::make_shared<OpenGLTexture1D>(format, arrSize, numMipMaps, width, sampleCount, sampleQuality, accessHint, initData);
 }
 
 shared_ptr<Texture> OpenGLRenderFactory::CreateTexture2D( uint32_t width, uint32_t height, PixelFormat format, uint32_t arrSize, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData )
 {
-	return std::make_shared<OpenGLTexture2D>(format, arrSize, numMipMaps, width, height, sampleCount, sampleQuality, accessHint, initData);
+	shared_ptr<OpenGLTexture2D> retVal(
+		new OpenGLTexture2D(format, arrSize, numMipMaps, width, height, sampleCount, sampleQuality, accessHint, initData));
+
+	return retVal;
+	//return std::make_shared<OpenGLTexture2D>(format, arrSize, numMipMaps, width, height, sampleCount, sampleQuality, accessHint, initData);
 }
 
 shared_ptr<Texture> OpenGLRenderFactory::CreateTexture3D( uint32_t width, uint32_t height, uint32_t depth, PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData )
 {
-	return std::make_shared<OpenGLTexture2D>(format, arraySize, numMipMaps, width, height, sampleCount, sampleQuality, accessHint, initData);
+	shared_ptr<OpenGLTexture3D> retVal(
+		new OpenGLTexture3D(format, arraySize, numMipMaps, width, height, depth, sampleCount, sampleQuality, accessHint, initData));
+	
+	return retVal;
+	//return std::make_shared<OpenGLTexture3D>(format, arraySize, numMipMaps, width, height, depth, sampleCount, sampleQuality, accessHint, initData);
 }
 
 shared_ptr<Texture> OpenGLRenderFactory::CreateTextureCube( uint32_t width, uint32_t height, PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData )
 {
-	return std::make_shared<OpenGLTextureCube>(format, arraySize, numMipMaps, width, height, sampleCount, sampleQuality, accessHint, initData);
+	shared_ptr<OpenGLTextureCube> retVal(
+		new OpenGLTextureCube(format, arraySize, numMipMaps, width, height, sampleCount, sampleQuality, accessHint, initData));
+
+	return retVal;//return std::make_shared<OpenGLTextureCube>(format, arraySize, numMipMaps, width, height, sampleCount, sampleQuality, accessHint, initData);
 }
 
 shared_ptr<GraphicsBuffer> OpenGLRenderFactory::CreateVertexBuffer( BufferUsage usage, uint32_t accessHint, ElementInitData* initData )
