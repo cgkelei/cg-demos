@@ -17,7 +17,9 @@ uniform mat4 World;
 
 uniform float AlbedoGamma = 2.2;
 uniform float DiffuseColorMix = 0.5;
-uniform float EnvAmount = 1.0;
+uniform float EnvAmount = 0.2;
+uniform float Roughness = 0.3;
+uniform float Rho_s = 0.18;
 
 uniform sampler2D   AlbedoTex;
 uniform sampler2D   SpecTex; // spec amount in r, g, b, and roughness value over the surface
@@ -25,6 +27,7 @@ uniform sampler2D   NormalTex;
 uniform sampler2D   ShadowTex[LIGHTCOUNT];
 uniform sampler2D   Rho_d_Tex; // Torrance-Sparrow BRDF integrated over hemisphere for range of roughness and incident angles
 uniform samplerCube EnvCube;
+ 
 
 in vec3 oWorldPos;
 in vec3 oWorldNormal;
@@ -106,17 +109,17 @@ void main()
  //   //float rho_s = specTap.x * 0.16 + 0.18;
 
 	//// no specular map
-	float surface_roughness = 0.3;
-	float rho_s = 0.18;
+	//float Roughness = 0.3;
+	//float Rho_s = 0.18;
 
 	//// DIFFUSE LIGHT  
     vec3 Li1cosi = saturate(bumpDot_L0) * pointLight0Color;
     vec3 Li2cosi = saturate(bumpDot_L1) * pointLight1Color;
     vec3 Li3cosi = saturate(bumpDot_L2) * pointLight2Color;
 
-    float rho_dt_L0 = 1.0 - rho_s * texture( Rho_d_Tex, vec2( bumpDot_L0, surface_roughness ) ).x;
-    float rho_dt_L1 = 1.0 - rho_s * texture( Rho_d_Tex, vec2( bumpDot_L1, surface_roughness ) ).x;
-    float rho_dt_L2 = 1.0 - rho_s * texture( Rho_d_Tex, vec2( bumpDot_L2, surface_roughness ) ).x;
+    float rho_dt_L0 = 1.0 - Rho_s * texture( Rho_d_Tex, vec2( bumpDot_L0, Roughness ) ).x;
+    float rho_dt_L1 = 1.0 - Rho_s * texture( Rho_d_Tex, vec2( bumpDot_L1, Roughness ) ).x;
+    float rho_dt_L2 = 1.0 - Rho_s * texture( Rho_d_Tex, vec2( bumpDot_L2, Roughness ) ).x;
 
 	vec3 E0 = Li1cosi * rho_dt_L0;
     vec3 E1 = Li2cosi * rho_dt_L1;
@@ -128,17 +131,17 @@ void main()
 	//////float occlusion = albedoTap.w;  
 	float occlusion = 1.0;
 
-	//vec3 cubeTap1 = pow( texture( EnvCube, N_nonBumped ).xyz, vec3(1.0) );
+	//vec3 cubeTap1 = texture( EnvCube, N_nonBumped ).xyz;
 	//vec3 envLight = saturate( EnvAmount * cubeTap1.xyz * occlusion);
-	vec3 envLight = vec3(0.1, 0.1, 0.1);
+	vec3 envLight = vec3(0.0, 0.0, 0.0);
 
 	//// start mixing the diffuse lighting - re-compute non-blurred lighting per pixel to get maximum resolutions
-    vec3 diffuseContrib = pow( albedo.xyz, vec3(DiffuseColorMix) ) * ( E0 + E1 + E2 /*+ envLight*/);        
+    vec3 diffuseContrib = pow( albedo.xyz, vec3(DiffuseColorMix) ) * ( E0 + E1 + E2 + envLight);        
     vec3 finalCol = diffuseContrib.xyz;  
 
-	float lit = (L0Shadow + L1Shadow + L2Shadow);
-	lit = clamp( lit, 0.0, 1.0);
-	//FragColor = vec4(albedo.xyz * lit, 1);
+	//vec3 lit = (E0 + E1 + E2);
+	//lit = clamp( lit, 0.0, 1.0);
+	//FragColor = vec4(lit, 1);
 
 	//FragColor = vec4(N_bumped, lit * 1.0);
 

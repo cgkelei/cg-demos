@@ -23,3 +23,18 @@ void main()
 	oDepth = hPos.z / hPos.w;	// non linear depth
 	oTex = iTex;	
 }
+
+//in vec4 gl_Vertex;
+//in vec3 gl_Normal;
+//in vec4 gl_MultiTexCoord0;
+
+//void main()
+//{
+//	vec4 modelPos = gl_Vertex;
+//	modelPos.xyz += normalize(gl_Normal) * Grow;  // scale vertex along normal
+//	gl_Position = Projection * View * World * gl_Vertex;
+
+//	vec4 hPos = Projection * View * World * gl_Vertex;
+//	oDepth = hPos.z / hPos.w;	// non linear depth
+//	oTex = gl_MultiTexCoord0.xy;	
+//}

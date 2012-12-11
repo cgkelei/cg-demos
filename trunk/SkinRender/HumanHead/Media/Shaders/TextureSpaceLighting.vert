@@ -33,3 +33,28 @@ void main()
 		oShadowCoord[i] = ShadowMatrix[i] * worldPos;
 	}
 }
+
+
+//in vec4 gl_Vertex;
+//in vec3 gl_Normal;
+//in vec4 gl_MultiTexCoord0;
+
+//void main()
+//{
+//	// unwrap the texture coordinate to fill the screen
+//	gl_Position = vec4(gl_MultiTexCoord0.xy * 2.0 - 1.0, 0.0, 1.0);
+	
+//	vec4 worldPos = World * gl_Vertex;
+
+//	oTex = gl_MultiTexCoord0.xy;
+//	oWorldPos = worldPos.xyz;
+
+//	// transform normal to world space
+//    oWorldNormal = normalize(mat3(World) * gl_Normal);
+
+//	// Find the position of this pixel in light space
+//	for(int i = 0; i < LIGHTCOUNT; ++i)
+//	{
+//		oShadowCoord[i] = ShadowMatrix[i] * worldPos;
+//	}
+//}

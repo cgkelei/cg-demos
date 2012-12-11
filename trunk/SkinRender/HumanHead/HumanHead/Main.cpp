@@ -44,8 +44,8 @@ struct Light
 Light gLights[LIGHT_COUNT];
 
 
-int gWindowWidth = 1024;
-int gWindowHeight = 768;
+int gWindowWidth = 800;
+int gWindowHeight = 800;
 
 nv::SDKPath gAppPath;
 nv::GlutUIContext gHub;
@@ -88,7 +88,6 @@ enum UIOption {
 };
 
 bool gOptions[OPTION_COUNT];
-float gLightColor[LIGHT_COUNT];
 
 enum RenderMode
 {
@@ -101,7 +100,7 @@ int gMode = RM_NORMAL;
 struct PipelineEffect
 {
 	GLuint ProgramID;
-	GLint WorldParam, ViewParam, ProjectionParam, AlbedoTexParam;
+	GLint WorldParam, ViewProjParam, AlbedoTexParam;
 } gPipelineEffect;
 
 struct StretchEffect
@@ -134,6 +133,27 @@ struct TextureSpaceLightEffect
 
 } gTexSpaceLightEffect;
 
+struct FinalSkinEffect
+{
+	GLuint ProgramID;
+	GLint WorldParam, ViewProjParam, ShadowMatrixParam, AlbedoTexParam,
+		NormalTexParam, Rho_d_TexParam, ShadowTexParam, IrradTexParam, GaussWeightsParam, EyePosParam;
+	GLint LightsPosParam, LightsColorParam, LightsAmountParam;
+	GLint DiffuseColorMixParam, RoughnessParam, Rho_sParam;
+
+} gFinalSkinEffect;
+
+
+//struct FinalSkinTSMEffect
+//{
+//	GLuint ProgramID;
+//	GLint WorldParam, ShadowMatrixParam, AlbedoTexParam, SpecTexParam,
+//		NormalTexParam, Rho_d_TexParam, EnvCubeParam, ShadowTexParam;
+//	GLint LightsPosParam, LightsColorParam, LightsAmountParam;
+//
+//} gTexSpaceLightEffect;
+
+
 void BuildModel(nv::Model* model, GLuint* vbo, GLuint* ibo)
 {
 	glGenBuffers(1, vbo);
@@ -148,6 +168,28 @@ void BuildModel(nv::Model* model, GLuint* vbo, GLuint* ibo)
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(model->getCompiledIndexCount( nv::Model::eptTriangles) * sizeof(GLuint)),
 		model->getCompiledIndices( nv::Model::eptTriangles), GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+//	static int i = 0;
+//
+//	*vbo = ++i;
+//
+//	glNewList(*vbo, GL_COMPILE);
+//	
+//	glVertexPointer( model->getPositionSize(), GL_FLOAT, model->getCompiledVertexSize() * sizeof(float), model->getCompiledVertices());
+//	glNormalPointer( GL_FLOAT, model->getCompiledVertexSize() * sizeof(float), model->getCompiledVertices() + model->getCompiledNormalOffset());
+//	glTexCoordPointer (model->getTexCoordSize(), GL_FLOAT, model->getCompiledVertexSize() * sizeof(float), model->getCompiledVertices() + model->getCompiledTexCoordOffset());
+//
+//	glEnableClientState( GL_VERTEX_ARRAY);
+//	glEnableClientState( GL_NORMAL_ARRAY);
+//	glEnableClientState( GL_TEXTURE_COORD_ARRAY);
+//
+//	glDrawElements( GL_TRIANGLES, model->getCompiledIndexCount( nv::Model::eptTriangles), GL_UNSIGNED_INT, model->getCompiledIndices( nv::Model::eptTriangles));
+//
+//	glDisableClientState( GL_VERTEX_ARRAY);
+//	glDisableClientState( GL_NORMAL_ARRAY);
+//	glDisableClientState( GL_TEXTURE_COORD_ARRAY);
+//
+//	glEndList();
 }
 
 void DrawModel(nv::Model* model, GLuint vbo, GLuint ibo)
@@ -178,6 +220,8 @@ void DrawModel(nv::Model* model, GLuint vbo, GLuint ibo)
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	//glCallList(vbo);
 }
 
 GLuint Create2DTextureFromFile(const char* fileName, GLenum wrapType = GL_REPEAT)
@@ -260,20 +304,17 @@ void CreateBuffers(GLenum format)
 		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	}
 	
-	for (int i = 0; i < TEXTURE_BUFFER_COUNT; i++)
+	for (int i = 0; i < LIGHT_COUNT; i++)
 	{
-		for (int j = 0; j < LIGHT_COUNT; ++j)
+		for (int j = 0; j < TEXTURE_BUFFER_COUNT; ++j)
 		{
-			gIrradianceBuffer[j][i] = new RenderTexture(BUFFER_SIZE, BUFFER_SIZE, target); 
-			gIrradianceBuffer[j][i]->InitColor_Tex(0, format);
+			gIrradianceBuffer[i][j] = new RenderTexture(BUFFER_SIZE, BUFFER_SIZE, target); 
+			gIrradianceBuffer[i][j]->InitColor_Tex(0, format);
 			glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-			if (i == 0)
-			{
-				gIrradianceBuffer[j][i]->InitDepth_Tex();
-			}
 		}
+		gIrradianceBuffer[i][0]->InitDepth_Tex();
 	}
 
 	for (int i = 0; i < LIGHT_COUNT; i++) 
@@ -337,8 +378,7 @@ void LoadShaderEffect()
 	ASSERT(gPipelineEffect.ProgramID > 0);
 
 	RETRIEVE_UNIFORM_LOCATION(gPipelineEffect.WorldParam, gPipelineEffect.ProgramID, "World");
-	RETRIEVE_UNIFORM_LOCATION(gPipelineEffect.ViewParam, gPipelineEffect.ProgramID, "View");
-	RETRIEVE_UNIFORM_LOCATION(gPipelineEffect.ProjectionParam, gPipelineEffect.ProgramID, "Projection");
+	RETRIEVE_UNIFORM_LOCATION(gPipelineEffect.ViewProjParam, gPipelineEffect.ProgramID, "ViewProj");
 	RETRIEVE_UNIFORM_LOCATION(gPipelineEffect.AlbedoTexParam, gPipelineEffect.ProgramID, "AlbedoTex");
 
 	// StretchMap generate effect
@@ -388,8 +428,8 @@ void LoadShaderEffect()
 	printf("Load Texture Space Light Effect...\n");
 	gTexSpaceLightEffect.ProgramID = Utility::LoadShaderEffect("TextureSpaceLighting.vert", "TextureSpaceLighting.frag");
 	ASSERT(gTexSpaceLightEffect.ProgramID > 0);
-	//Utility::PrintEffectAttribs(gTexSpaceLightEffect.ProgramID);
-	//Utility::PrintEffectUniforms(gTexSpaceLightEffect.ProgramID);
+	Utility::PrintEffectAttribs(gTexSpaceLightEffect.ProgramID);
+	Utility::PrintEffectUniforms(gTexSpaceLightEffect.ProgramID);
 
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightEffect.WorldParam, gTexSpaceLightEffect.ProgramID, "World");
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightEffect.LightsColorParam, gTexSpaceLightEffect.ProgramID, "Lights[0].Color");
@@ -402,6 +442,36 @@ void LoadShaderEffect()
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightEffect.EnvCubeParam, gTexSpaceLightEffect.ProgramID, "EnvCube");
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightEffect.ShadowMatrixParam, gTexSpaceLightEffect.ProgramID, "ShadowMatrix[0]");
 
+	// Final Skin Without TSM effect
+	printf("Load Final Skin Without TSM effect...\n");
+	gFinalSkinEffect.ProgramID = Utility::LoadShaderEffect("FinalSkin.vert", "FinalSkin.frag");
+	ASSERT(gFinalSkinEffect.ProgramID > 0);
+	//Utility::PrintEffectAttribs(gFinalSkinEffect.ProgramID);
+	//Utility::PrintEffectUniforms(gFinalSkinEffect.ProgramID);
+
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.WorldParam, gFinalSkinEffect.ProgramID, "World");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.ViewProjParam, gFinalSkinEffect.ProgramID, "ViewProj");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.LightsColorParam, gFinalSkinEffect.ProgramID, "Lights[0].Color");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.LightsPosParam, gFinalSkinEffect.ProgramID, "Lights[0].Position");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.LightsAmountParam, gFinalSkinEffect.ProgramID, "Lights[0].Amount");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.ShadowTexParam, gFinalSkinEffect.ProgramID,  "ShadowTex[0]");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.NormalTexParam, gFinalSkinEffect.ProgramID, "NormalTex");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.AlbedoTexParam, gFinalSkinEffect.ProgramID, "AlbedoTex");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.Rho_d_TexParam, gFinalSkinEffect.ProgramID, "Rho_d_Tex");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.ShadowMatrixParam, gFinalSkinEffect.ProgramID, "ShadowMatrix[0]");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.Rho_d_TexParam, gFinalSkinEffect.ProgramID, "IrradTex[0]");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.GaussWeightsParam, gFinalSkinEffect.ProgramID, "GaussWeights[0]");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.EyePosParam, gFinalSkinEffect.ProgramID, "EyePos");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.IrradTexParam, gFinalSkinEffect.ProgramID, "IrradTex[0]");
+
+	glUseProgram(gFinalSkinEffect.ProgramID);
+	glUniform3f(gFinalSkinEffect.GaussWeightsParam + 0, 0.233f, 0.455f, 0.649f);
+	glUniform3f(gFinalSkinEffect.GaussWeightsParam + 1, 0.233f, 0.455f, 0.649f);
+	glUniform3f(gFinalSkinEffect.GaussWeightsParam + 2, 0.233f, 0.455f, 0.649f);
+	glUniform3f(gFinalSkinEffect.GaussWeightsParam + 3, 0.233f, 0.455f, 0.649f);
+	glUniform3f(gFinalSkinEffect.GaussWeightsParam + 4, 0.233f, 0.455f, 0.649f);
+	glUniform3f(gFinalSkinEffect.GaussWeightsParam + 5, 0.233f, 0.455f, 0.649f);
+	glUseProgram(0);
 }
 
 void LoadModel()
@@ -483,7 +553,8 @@ void LoadPresents()
 		{
 			stream >> gLights[i].Camera;
 			stream >> gLights[i].Color.x >> gLights[i].Color.y >> gLights[i].Color.z;
-			gLights[i].Amount = 1.0f;
+
+			gLights[i].Amount = 0.3f;
 		}
 	}
 }
@@ -535,7 +606,7 @@ void DoUI()
 		std::stringstream s;
 		s << "Light" << i;
 		gHub.doRadioButton(1 + i, none, s.str().c_str(),  &gManipulator);
-		gHub.doHorizontalSlider(none, 0.0f, 1.0f, &gLightColor[i]);
+		gHub.doHorizontalSlider(none, 0.0f, 1.0f, &gLights[i].Amount);
 		gHub.endGroup();
 	}
 
@@ -576,8 +647,8 @@ void DrawLights()
 
 	glUseProgram(gPipelineEffect.ProgramID);
 
-	glUniformMatrix4fv(gPipelineEffect.ProjectionParam, 1, false, glm::value_ptr(gCamera.GetProjectionMatrix()));
-	glUniformMatrix4fv(gPipelineEffect.ViewParam, 1, false, glm::value_ptr(gCamera.GetViewMatrix()));
+	glm::mat4 veiwProj = CurrentObject()->GetProjectionMatrix() * CurrentObject()->GetViewMatrix();
+	glUniformMatrix4fv(gPipelineEffect.ViewProjParam, 1, false, glm::value_ptr(veiwProj));
 	glUniform1ui(gPipelineEffect.AlbedoTexParam, 0);
 
 	for (int i = 0; i < LIGHT_COUNT; ++i)
@@ -661,9 +732,6 @@ void ConvolutionStretch(RenderTexture* src, RenderTexture* dest, int itr)
 {
 	glPushAttrib(GL_VIEWPORT_BIT);
 
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_DEPTH_TEST);
-
 	// convolution U
 	gTempBuffer->Activate();
 	SetOrthoProjection(BUFFER_SIZE, BUFFER_SIZE);
@@ -700,9 +768,6 @@ void ConvolutionStretch(RenderTexture* src, RenderTexture* dest, int itr)
 
 	dest->Deactivate();
 
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-
 	glUseProgram(0);
 	glPopAttrib();
 }
@@ -710,9 +775,6 @@ void ConvolutionStretch(RenderTexture* src, RenderTexture* dest, int itr)
 void Convolution(RenderTexture* src, RenderTexture* dest, int itr)
 {
 	glPushAttrib(GL_VIEWPORT_BIT);
-
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_DEPTH_TEST);
 
 	// convolution U
 	gTempBuffer->Activate();
@@ -759,9 +821,6 @@ void Convolution(RenderTexture* src, RenderTexture* dest, int itr)
 
 	dest->Deactivate();
 
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-
 	glUseProgram(0);
 	glPopAttrib();
 }
@@ -776,9 +835,6 @@ void MakeStretchMap()
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-
 	glUseProgram(gStretchEffect.ProgramID);
 
 	glUniformMatrix4fv(gStretchEffect.WorldParam, 1, false, glm::value_ptr(gModelWorld));
@@ -787,12 +843,9 @@ void MakeStretchMap()
 	DrawModel(&gModel, gModelVBO, gModelIBO);
 
 	glUseProgram(0);
-	glPopAttrib(); 
-
+	
 	gStretchBuffer[0]->Deactivate();
-
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
+	glPopAttrib(); 
 
 	//Utility::SaveTextureToPfm("StrechXY0.pfm", gStretchBuffer[0]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);
 	ConvolutionStretch(gStretchBuffer[0], gStretchBuffer[1], 0);
@@ -803,6 +856,8 @@ void MakeStretchMap()
 	//Utility::SaveTextureToPfm("StrechXY3.pfm", gStretchBuffer[3]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);
 	ConvolutionStretch(gStretchBuffer[3], gStretchBuffer[4], 3);	
 	//Utility::SaveTextureToPfm("StrechXY4.pfm", gStretchBuffer[3]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);
+
+	
 }
 
 /**
@@ -818,16 +873,13 @@ void RenderIrradiance()
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_DEPTH_TEST);
-
 	glUseProgram(gTexSpaceLightEffect.ProgramID);
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, gAlbedoTexID);
 	glUniform1i(gTexSpaceLightEffect.AlbedoTexParam, 0);
-	
+
 	glActiveTexture(GL_TEXTURE1);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, gNormalTexID);
@@ -868,12 +920,8 @@ void RenderIrradiance()
 	DrawModel(&gModel, gModelVBO, gModelIBO);
 
 	glUseProgram(0);
-	glPopAttrib();
 
 	gIrradianceBuffer[0][0]->Deactivate();
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
 
 	//convolve 5 times!!!!!
 	Convolution(gIrradianceBuffer[0][0], gIrradianceBuffer[0][1], 0);
@@ -882,22 +930,120 @@ void RenderIrradiance()
 	Convolution(gIrradianceBuffer[0][3], gIrradianceBuffer[0][4], 3);
 	Convolution(gIrradianceBuffer[0][4], gIrradianceBuffer[0][5], 4);
 
+	glPopAttrib();
+
 	//for (int i = 0; i < TEXTURE_BUFFER_COUNT; ++i)
 	//{
 	//	std::stringstream sss;
 	//	sss << "blurIrradiance" << i << ".pfm";
 	//	Utility::SaveTextureToPfm(sss.str().c_str(), gIrradianceBuffer[0][i]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);
-	//}	
+	//}
 }
 
 void RenderFinal()
-{
+{	
+	//gIrradianceBuffer[1][0]->Activate();
+	//glPushAttrib(GL_VIEWPORT_BIT);	
+	//glViewport(0, 0, BUFFER_SIZE, BUFFER_SIZE);
 
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearDepth(1.0f);
+	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+
+	if (gOptions[OPTION_WIREFRAME])
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}else
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
+	glUseProgram(gFinalSkinEffect.ProgramID);
+
+	glUniformMatrix4fv(gFinalSkinEffect.WorldParam, 1, false, glm::value_ptr(gModelWorld));
+
+	Camera* currentCam = CurrentObject();
+	glm::vec3 eyePos = currentCam->GetEyePosition();
+
+	glm::mat4 viewProj = currentCam->GetProjectionMatrix() * currentCam->GetViewMatrix();
+	glUniformMatrix4fv(gFinalSkinEffect.ViewProjParam, 1, false, glm::value_ptr(viewProj));
+	glUniform3fv(gFinalSkinEffect.EyePosParam, 1, glm::value_ptr(currentCam->GetEyePosition()));
+
+	glUniform3f(gFinalSkinEffect.GaussWeightsParam + 0, 0.233f, 0.455f, 0.649f);
+	glUniform3f(gFinalSkinEffect.GaussWeightsParam + 1, 0.1f, 0.336f, 0.344f);
+	glUniform3f(gFinalSkinEffect.GaussWeightsParam + 2, 0.118f, 0.198f, 0.0f);
+	glUniform3f(gFinalSkinEffect.GaussWeightsParam + 3, 0.113f, 0.007f, 0.007f);
+	glUniform3f(gFinalSkinEffect.GaussWeightsParam + 4, 0.358f, 0.004f, 0.0f);
+	glUniform3f(gFinalSkinEffect.GaussWeightsParam + 5, 0.078f, 0.0f, 0.0f);
+
+	glActiveTexture(GL_TEXTURE0);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, gAlbedoTexID);
+	glUniform1i(gFinalSkinEffect.AlbedoTexParam, 0);
+
+	glActiveTexture(GL_TEXTURE1);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, gNormalTexID);
+	glUniform1i(gFinalSkinEffect.NormalTexParam, 1);
+
+	glActiveTexture(GL_TEXTURE2);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, gRhodTexID);
+	glUniform1i(gFinalSkinEffect.Rho_d_TexParam, 2);
+
+	static glm::mat4 bais(glm::vec4(0.5, 0, 0, 0), 
+		glm::vec4(0, 0.5, 0, 0),
+		glm::vec4(0, 0, 0.5, 0),
+		glm::vec4(0.5, 0.5, 0.5, 1.0));
+
+	for (int i = 0; i < LIGHT_COUNT; ++i)
+	{
+		glActiveTexture(GL_TEXTURE3 + i);
+		glEnable(GL_TEXTURE_2D);
+		gLights[i].ShadowMap->GetTexture()->BindColor(0);
+		glUniform1i(gFinalSkinEffect.ShadowTexParam + i, 3 + i);		
+
+		glm::mat4 shadowMatrix = bais * gLights[i].Camera.GetProjectionMatrix() * gLights[i].Camera.GetViewMatrix();
+		glUniformMatrix4fv(gFinalSkinEffect.ShadowMatrixParam + i, 1, false, glm::value_ptr(shadowMatrix));
+
+		glUniform3fv(gFinalSkinEffect.LightsPosParam + i * 3, 1, glm::value_ptr(gLights[i].Camera.GetEyePosition()));
+		glUniform3fv(gFinalSkinEffect.LightsColorParam + i * 3, 1, glm::value_ptr(gLights[i].Color));
+		glUniform1f(gFinalSkinEffect.LightsAmountParam + i * 3, gLights[i].Amount);
+	}
+
+	for (int i = 0; i < 6; ++i)
+	{
+		glActiveTexture(GL_TEXTURE3 + LIGHT_COUNT + i);
+		glEnable(GL_TEXTURE_2D);
+		gIrradianceBuffer[0][i]->BindColor(0);
+		glUniform1i(gFinalSkinEffect.IrradTexParam + i, 6 + i);	
+	}
+
+	DrawModel(&gModel, gModelVBO, gModelIBO);
+
+	//gIrradianceBuffer[1][0]->Deactivate();
+	glUseProgram(0);
+
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+	
+	//glPopAttrib();
+	//Utility::SaveTextureToPfm("final.pfm",gIrradianceBuffer[1][0]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);
+
+	for (int i = 0; i < 8; ++i)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	
 }
 
 void RenderFinalTSM()
 {
-
+	
 }
 
 void RenderNormal()
@@ -905,6 +1051,9 @@ void RenderNormal()
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(1.0f);
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 
 	if (gOptions[OPTION_WIREFRAME])
 	{
@@ -920,14 +1069,15 @@ void RenderNormal()
 	glEnable(GL_TEXTURE_2D);
 	//glBindTexture(GL_TEXTURE_2D, gAlbedoTexID);
 	gIrradianceBuffer[0][0]->BindColor();
-	glUniform1ui(gPipelineEffect.AlbedoTexParam, 0);
+	glUniform1i(gPipelineEffect.AlbedoTexParam, 0);
 
 	glUniformMatrix4fv(gPipelineEffect.WorldParam, 1, false, glm::value_ptr(gModelWorld));
-	//glUniformMatrix4fv(gPipelineEffect.ProjectionParam, 1, false, glm::value_ptr(gCamera.GetProjectionMatrix()));
-	//glUniformMatrix4fv(gPipelineEffect.ViewParam, 1, false, glm::value_ptr(gCamera.GetViewMatrix()));
 
-	glUniformMatrix4fv(gPipelineEffect.ProjectionParam, 1, false, glm::value_ptr(CurrentObject()->GetProjectionMatrix()));
-	glUniformMatrix4fv(gPipelineEffect.ViewParam, 1, false, glm::value_ptr(CurrentObject()->GetViewMatrix()));
+	auto eye = CurrentObject()->GetEyePosition();
+
+	Camera* currentCam = CurrentObject();
+	glm::mat4 viewProj = currentCam->GetProjectionMatrix() * currentCam->GetViewMatrix();
+	glUniformMatrix4fv(gPipelineEffect.ViewProjParam, 1, false, glm::value_ptr(viewProj));
 
 	DrawModel(&gModel, gModelVBO, gModelIBO);
 
@@ -937,14 +1087,34 @@ void RenderNormal()
 		DrawLights();
 	}	
 
+
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+
 	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glActiveTexture(GL_TEXTURE6);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 
 void Init()
 {
-	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+	glDisable(GL_DEPTH_TEST);
 
 	ShadowMap::Init();
 
@@ -980,6 +1150,9 @@ void RenderScene()
 
 	float elapsedTime = gElapsedTime / (float)1000;
 
+	std::stringstream sss; sss << gFPS;
+	glutSetWindowTitle(sss.str().c_str());
+
 	gCamera.Update(elapsedTime);
 	for (int i = 0; i < LIGHT_COUNT; i++)
 		gLights[i].Camera.Update(elapsedTime);
@@ -999,7 +1172,7 @@ void RenderScene()
 		{
 			RenderIrradiance();
 			RenderNormal();
-			
+			//RenderFinal();
 		}
 		break;
 	case RM_SHADOW_0:
@@ -1027,14 +1200,6 @@ void RenderScene()
 
 void Idle()
 {
-	/*CalculateFPS();
-	
-	float elapsedTime = gElapsedTime / (float)1000;
-	
-	gCamera.Update(elapsedTime);
-	for (int i = 0; i < LIGHT_COUNT; i++)
-		gLights[i].Camera.Update(elapsedTime);*/
-
 	glutPostRedisplay();
 }
 
@@ -1111,10 +1276,10 @@ int main( int argc, char** argv) {
 		printf("Error: %s\n", glewGetErrorString(err));
 	}
 
-	if (WGLEW_EXT_swap_control)
+	/*if (WGLEW_EXT_swap_control)
 	{
 		wglSwapIntervalEXT(0);
-	}
+	}*/
 
 	gAppPath.addPath("../Media/");
 	gAppPath.addPath("../Media/Models/");
@@ -1123,7 +1288,7 @@ int main( int argc, char** argv) {
 	gAppPath.addPath("../Media/Presents/");
 
 	glutDisplayFunc(RenderScene);
-	glutIdleFunc(Idle);
+	glutIdleFunc(RenderScene);
 	glutKeyboardFunc( Keys);
 	glutSpecialFunc(Special);
 	glutReshapeFunc(Reshape);
