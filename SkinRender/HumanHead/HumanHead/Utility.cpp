@@ -106,8 +106,19 @@ void Utility::SaveTextureToPfm( const char* file, GLuint tex, int width, int hei
 {
 	std::vector<float> TextureData(width * height * 3);
 
+	//glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex);
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, &TextureData[0]);
+
+	WritePfm(file, width, height, 3, &TextureData[0]);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+
+void Utility::SaveScreenToPfmDepth( const char* file, int width, int height )
+{
+	std::vector<float> TextureData(width * height * 3);
+	glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, &TextureData[0]);
 
 	WritePfm(file, width, height, 3, &TextureData[0]);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -265,3 +276,4 @@ void Utility::PrintEffectAttribs( GLuint program )
 		}
 	}
 }
+

@@ -86,7 +86,7 @@ void ShadowMap::End()
 	glUseProgram(0);
 
 	//Utility::SaveTextureToTGA("Depth.tga", mTexture->GetColorTex(), mWidth, mHeight);
-
+	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 }
 
