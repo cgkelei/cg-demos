@@ -70,9 +70,6 @@
     <None Include="..\Media\Shaders\Stretch.vert">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="..\Media\Shaders\ConvolutionStretch.vert">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="..\Media\Shaders\ConvolutionV.frag">
       <Filter>资源文件</Filter>
     </None>
@@ -104,6 +101,21 @@
       <Filter>资源文件</Filter>
     </None>
     <None Include="..\Media\Shaders\TextureSpaceLightingTSM.vert">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Media\Shaders\Convolution.vert">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Media\Shaders\FinalSkin.frag">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Media\Shaders\FinalSkin.vert">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Media\Shaders\FinalSkinTSM.frag">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Media\Shaders\FinalSkinTSM.vert">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>

@@ -60,7 +60,7 @@ void ShadowMap::Begin( const glm::mat4& view, const glm::mat4& projection )
 	glPushAttrib(GL_VIEWPORT_BIT);
 	glViewport(0, 0, mWidth, mHeight);
 
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 	glClearDepth(1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

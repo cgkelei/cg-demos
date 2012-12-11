@@ -13,7 +13,7 @@ struct Light
 
 uniform Light Lights[LIGHTCOUNT];
 
-uniform mat4 WorldMat;
+uniform mat4 World;
 
 uniform float AlbedoGamma = 2.2;
 uniform float DiffuseColorMix = 0.5;
@@ -33,6 +33,7 @@ in vec2 oTex;
 
 out vec4 FragColor;
 
+#define saturate(value) clamp(value, 0.0, 1.0)
 
 float Shadow(vec4 shadowCoord, sampler2D shadowTex)
 {
@@ -76,15 +77,6 @@ void main()
 	float L1atten = 1.0;
 	float L2atten = 1.0;
 
-	//vec3 shadowCorrdWDiv_L0 = oShadowCoord[0].xyz / oShadowCoord[0].w ;
-	//float L0Shadow = (texture(ShadowTex[0], shadowCorrdWDiv_L0.xy).x < (shadowCorrdWDiv_L0.z- SHADOW_BAIS)) ? 0.0 : 1.0;
-	
-	//vec3 shadowCorrdWDiv_L1 = oShadowCoord[1].xyz / oShadowCoord[1].w ;
-	//float L1Shadow = (texture(ShadowTex[1], shadowCorrdWDiv_L1.xy).x < (shadowCorrdWDiv_L1.z- SHADOW_BAIS)) ? 0.0 : 1.0;	
-	
-	//vec3 shadowCorrdWDiv_L2 = oShadowCoord[2].xyz / oShadowCoord[2].w ;
-	//float L2Shadow = (texture(ShadowTex[2], shadowCorrdWDiv_L2.xy).x < (shadowCorrdWDiv_L2.z- SHADOW_BAIS)) ? 0.0 : 1.0;
-	
 	//float L0Shadow = Shadow(oShadowCoord[0], ShadowTex[0]);
 	//float L1Shadow = Shadow(oShadowCoord[1], ShadowTex[1]);
 	//float L2Shadow = Shadow(oShadowCoord[2], ShadowTex[2]);
@@ -98,7 +90,7 @@ void main()
 
 	// compute bumped world normal
     vec3 objNormal = texture( NormalTex, oTex ).xyz * vec3( 2.0, 2.0, 2.0 ) - vec3( 1.0, 1.0, 1.0 );  
-    vec3 N_bumped = normalize( mat3(WorldMat) * objNormal );
+    vec3 N_bumped = normalize( mat3(World) * objNormal );
 
 	float bumpDot_L0 = dot( N_bumped, L0 );
     float bumpDot_L1 = dot( N_bumped, L1 );
@@ -109,7 +101,7 @@ void main()
     vec3 pointLight2Color = Lights[2].Color * Lights[2].Amount * L2Shadow * L2atten;
 
 	//// Specular Constant
- //   //vec4 specTap = texture2D( SpecTex, gl_TexCoord[0].xy ); // rho_s and roughness
+ //   //vec4 specTap = texture( SpecTex, oTex ); // rho_s and roughness
  //   //float surface_roughness = specTap.w * 0.09 + 0.23;	 // m is specular roughness
  //   //float rho_s = specTap.x * 0.16 + 0.18;
 
@@ -118,33 +110,37 @@ void main()
 	float rho_s = 0.18;
 
 	//// DIFFUSE LIGHT  
-    vec3 Li1cosi =/* clamp(bumpDot_L0, 0.0, 1.0) **/ pointLight0Color;
-    vec3 Li2cosi = /*clamp(bumpDot_L1, 0.0, 1.0) * */pointLight1Color;
-    vec3 Li3cosi = /*clamp(bumpDot_L2, 0.0, 1.0) * */pointLight2Color;
+    vec3 Li1cosi = saturate(bumpDot_L0) * pointLight0Color;
+    vec3 Li2cosi = saturate(bumpDot_L1) * pointLight1Color;
+    vec3 Li3cosi = saturate(bumpDot_L2) * pointLight2Color;
 
     float rho_dt_L0 = 1.0 - rho_s * texture( Rho_d_Tex, vec2( bumpDot_L0, surface_roughness ) ).x;
     float rho_dt_L1 = 1.0 - rho_s * texture( Rho_d_Tex, vec2( bumpDot_L1, surface_roughness ) ).x;
     float rho_dt_L2 = 1.0 - rho_s * texture( Rho_d_Tex, vec2( bumpDot_L2, surface_roughness ) ).x;
 
-	vec3 E0 = Li1cosi /** rho_dt_L0*/;
-    vec3 E1 = Li2cosi /** rho_dt_L1*/;
-    vec3 E2 = Li3cosi /** rho_dt_L2*/;
+	vec3 E0 = Li1cosi * rho_dt_L0;
+    vec3 E1 = Li2cosi * rho_dt_L1;
+    vec3 E2 = Li3cosi * rho_dt_L2;
 
 	vec4 albedoTap = texture( AlbedoTex, oTex );
-    vec3 albedo = pow( albedoTap.xyz, vec3(AlbedoGamma) );
+	vec3 albedo = albedoTap.xyz;
+    //vec3 albedo = pow( albedoTap.xyz, vec3(AlbedoGamma) );
 	//////float occlusion = albedoTap.w;  
 	float occlusion = 1.0;
 
-	vec3 cubeTap1 = pow( texture( EnvCube, N_nonBumped ).xyz, vec3(1.0) );
-	
+	//vec3 cubeTap1 = pow( texture( EnvCube, N_nonBumped ).xyz, vec3(1.0) );
+	//vec3 envLight = saturate( EnvAmount * cubeTap1.xyz * occlusion);
+	vec3 envLight = vec3(0.1, 0.1, 0.1);
+
 	//// start mixing the diffuse lighting - re-compute non-blurred lighting per pixel to get maximum resolutions
-    vec3 diffuseContrib = pow( albedo.xyz, vec3(DiffuseColorMix) ) * ( E0 + E1 + E2 /*+ clamp( EnvAmount * cubeTap1.xyz * occlusion, 0.0, 1.0)*/);        
+    vec3 diffuseContrib = pow( albedo.xyz, vec3(DiffuseColorMix) ) * ( E0 + E1 + E2 /*+ envLight*/);        
     vec3 finalCol = diffuseContrib.xyz;  
 
 	float lit = (L0Shadow + L1Shadow + L2Shadow);
 	lit = clamp( lit, 0.0, 1.0);
+	//FragColor = vec4(albedo.xyz * lit, 1);
 
-	FragColor = vec4(albedo.xyz * lit, 1);
+	//FragColor = vec4(N_bumped, lit * 1.0);
 
-	//FragColor = vec4(finalCol,  1.0 );
+	FragColor = vec4(finalCol,  1.0 );
 }
