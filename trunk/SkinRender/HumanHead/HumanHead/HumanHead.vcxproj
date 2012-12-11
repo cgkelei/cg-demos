@@ -95,11 +95,15 @@
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Media\Shaders\ConvolutionStretch.vert" />
+    <None Include="..\Media\Shaders\Convolution.vert" />
     <None Include="..\Media\Shaders\ConvolutionStretchU.frag" />
     <None Include="..\Media\Shaders\ConvolutionStretchV.frag" />
     <None Include="..\Media\Shaders\ConvolutionU.frag" />
     <None Include="..\Media\Shaders\ConvolutionV.frag" />
+    <None Include="..\Media\Shaders\FinalSkin.frag" />
+    <None Include="..\Media\Shaders\FinalSkin.vert" />
+    <None Include="..\Media\Shaders\FinalSkinTSM.frag" />
+    <None Include="..\Media\Shaders\FinalSkinTSM.vert" />
     <None Include="..\Media\Shaders\FixedPipeline.frag" />
     <None Include="..\Media\Shaders\FixedPipeline.vert" />
     <None Include="..\Media\Shaders\test.hlsl" />

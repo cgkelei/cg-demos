@@ -1,13 +1,12 @@
 #version 120
 
-uniform sampler2D StretchTex;
 uniform sampler2D InputTex;	// inputTex ¨C Texture being convolved  
 uniform float GaussWidth; // Scale ¨C Used to widen Gaussian taps.  GaussWidth should be the standard deviation. 
   
 void main()
 {
 	float scaleConv = 1.0 / 1024.0;  
-	vec2 stretch = texture2D( StretchTex, gl_TexCoord[0].xy).xy;  
+	vec2 stretch = texture2D( InputTex, gl_TexCoord[0].xy).xy;  
 	float netFilterWidth = scaleConv * GaussWidth * stretch.x;
 
 	 // Gaussian curve ¨C standard deviation of 1.0  
