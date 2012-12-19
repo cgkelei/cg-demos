@@ -33,6 +33,9 @@
     <ClCompile Include="Camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Bloom.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h">
@@ -54,6 +57,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Bloom.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -116,6 +122,18 @@
       <Filter>资源文件</Filter>
     </None>
     <None Include="..\Media\Shaders\FinalSkinTSM.vert">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Media\Shaders\Phong.frag">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Media\Shaders\Phong.vert">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Media\Shaders\Bloom.frag">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Media\Shaders\Bloom.vert">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>

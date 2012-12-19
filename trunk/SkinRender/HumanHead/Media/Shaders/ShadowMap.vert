@@ -1,8 +1,7 @@
 #version 330
 
 uniform mat4 World;
-uniform mat4 View;
-uniform mat4 Projection;
+uniform mat4 ViewProj;
 
 uniform float Grow =  0.000001;
 
@@ -17,9 +16,9 @@ void main()
 {
 	vec4 modelPos = iPos;
 	modelPos.xyz += normalize(iNormal) * Grow;  // scale vertex along normal
-	gl_Position = Projection * View * World * iPos;
+	gl_Position = ViewProj * World * iPos;
 
-	vec4 hPos = Projection * View * World * iPos;
+	vec4 hPos = ViewProj * World * iPos;
 	oDepth = hPos.z / hPos.w;	// non linear depth
 	oTex = iTex;	
 }

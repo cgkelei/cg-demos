@@ -161,15 +161,27 @@ void Camera::UpdateMatrices()
 	t = glm::rotate(glm::mat4(1.0f),  -mAngle.x, glm::vec3(0.0f, 1.0f, 0.0f));
 	mView = mView * t ;
 
-	glm::mat4 viewInverse = mView._inverse();
+	glm::mat4 viewInverse = glm::inverse(mView);
 
 	glm::vec4 lookAtPosition4 = glm::vec4(0.0f, 0.0f, -mDistance, 1.0f);
-	lookAtPosition4 = lookAtPosition4 * viewInverse;
+	lookAtPosition4 = viewInverse * lookAtPosition4;
 	mLookAt = glm::vec3(lookAtPosition4);
 
-	glm::vec4 eyePosition4 = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	eyePosition4 = eyePosition4 * viewInverse;
-	mEyePosition =  glm::vec3(eyePosition4);
+	//glm::vec4 eyePosition4 = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	//eyePosition4 = viewInverse * eyePosition4  ;
+	//mEyePosition =  glm::vec3(eyePosition4);
+	
+	mEyePosition = glm::vec3(glm::column(viewInverse, 3));
+
+	mViewProj = mProjection * mView;
+
+
+	static glm::mat4 bais(glm::vec4(0.5, 0, 0, 0), 
+		glm::vec4(0, 0.5, 0, 0),
+		glm::vec4(0, 0, 0.5, 0),
+		glm::vec4(0.5, 0.5, 0.5, 1.0));
+
+	mShadowMatrix = bais * mViewProj;
 }
 
 void Camera::Update( float elapsedTime )

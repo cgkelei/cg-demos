@@ -51,12 +51,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;NV_REPORT_COMPILE_ERRORS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../3rdParty/nvSDK;../3rdParty/nvModel/include;../3rdParty/nvImage/include;../3rdParty/glm-0.9.4.0;../3rdParty/nvWidgets/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../3rdParty/nvSDK;../3rdParty/nvModel/include;../3rdParty/nvImage/include;../3rdParty/glm-0.9.4.0;../3rdParty/nvWidgets/include;C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../3rdParty/nvImage/lib;../3rdParty/nvModel/lib;../3rdParty/nvWidgets/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../3rdParty/nvImage/lib;../3rdParty/nvModel/lib;../3rdParty/nvWidgets/lib;C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>nvImage.lib;opengl32.lib;glut32.lib;glew32.lib;nvModel.lib;nvWidgets.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -78,6 +78,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Bloom.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="pfm.cpp" />
@@ -86,6 +87,7 @@
     <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bloom.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="pfm.h" />
@@ -95,6 +97,8 @@
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Media\Shaders\Bloom.frag" />
+    <None Include="..\Media\Shaders\Bloom.vert" />
     <None Include="..\Media\Shaders\Convolution.vert" />
     <None Include="..\Media\Shaders\ConvolutionStretchU.frag" />
     <None Include="..\Media\Shaders\ConvolutionStretchV.frag" />
@@ -106,6 +110,8 @@
     <None Include="..\Media\Shaders\FinalSkinTSM.vert" />
     <None Include="..\Media\Shaders\FixedPipeline.frag" />
     <None Include="..\Media\Shaders\FixedPipeline.vert" />
+    <None Include="..\Media\Shaders\Phong.frag" />
+    <None Include="..\Media\Shaders\Phong.vert" />
     <None Include="..\Media\Shaders\test.hlsl" />
     <None Include="..\Media\Shaders\TextureSpaceLighting.frag" />
     <None Include="..\Media\Shaders\TextureSpaceLighting.vert" />

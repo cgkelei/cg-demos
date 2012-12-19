@@ -6,7 +6,7 @@ uniform float GaussWidth; // Scale ¨C Used to widen Gaussian taps.  GaussWidth s
 
 void main()
 {
-	float scaleConv = 1.0 / 1024.0;  
+	float scaleConv = 1.0 / 800.0;  
 	vec2 stretch = texture2D( StretchTex, gl_TexCoord[0].xy).xy;  
 	float netFilterWidth = scaleConv * GaussWidth * stretch.x;
 

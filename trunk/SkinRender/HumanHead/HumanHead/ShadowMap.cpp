@@ -4,8 +4,7 @@
 
 GLuint ShadowMap::msShadowProgramID = 0;
 GLint ShadowMap::msWorldParam = -1;
-GLint ShadowMap::msViewParam = -1;
-GLint ShadowMap::msProjParam = -1;
+GLint ShadowMap::msViewProjParam = -1;
 GLint ShadowMap::msGlowParam = -1;
 
 void ShadowMap::Init()
@@ -15,11 +14,8 @@ void ShadowMap::Init()
 	msWorldParam = glGetUniformLocation(msShadowProgramID, "World");
 	ASSERT(msWorldParam >= 0);
 
-	msViewParam = glGetUniformLocation(msShadowProgramID, "View");
-	ASSERT(msViewParam >= 0);
-
-	msProjParam = glGetUniformLocation(msShadowProgramID, "Projection");
-	ASSERT(msProjParam >= 0);
+	msViewProjParam = glGetUniformLocation(msShadowProgramID, "ViewProj");
+	ASSERT(msViewProjParam >= 0);
 
 	msGlowParam = glGetUniformLocation(msShadowProgramID, "Grow");
 	//ASSERT(msGlowParam >= 0);
@@ -53,7 +49,7 @@ ShadowMap::~ShadowMap(void)
 
 glm::mat4 gworld;
 
-void ShadowMap::Begin( const glm::mat4& view, const glm::mat4& projection )
+void ShadowMap::Begin(const glm::mat4& viewProj)
 {
 	mTexture->Activate();
 
@@ -68,8 +64,7 @@ void ShadowMap::Begin( const glm::mat4& view, const glm::mat4& projection )
 	glEnable(GL_DEPTH_TEST);
 
 	glUseProgram(msShadowProgramID);
-	glUniformMatrix4fv(msViewParam, 1, false, glm::value_ptr(view));
-	glUniformMatrix4fv(msProjParam, 1, false, glm::value_ptr(projection));
+	glUniformMatrix4fv(msViewProjParam, 1, false, glm::value_ptr(viewProj));
 }
 
 void ShadowMap::SetWorldMatrix( const glm::mat4& world )
@@ -85,7 +80,6 @@ void ShadowMap::End()
 	glPopAttrib();
 	glUseProgram(0);
 
-	//Utility::SaveTextureToTGA("Depth.tga", mTexture->GetColorTex(), mWidth, mHeight);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 }
