@@ -10,10 +10,10 @@ public:
 	ShadowMap(int width, int height);
 	~ShadowMap(void);
 
-	void Begin(const glm::mat4& view, const glm::mat4& projection);
+	void Begin(const glm::mat4& viewProj);
 	void End();
 
-	RenderTexture* GetTexture() const { return mTexture; }
+	RenderTexture* GetRenderTexture() const { return mTexture; }
 
 private:
 	RenderTexture* mTexture;
@@ -27,8 +27,7 @@ public:
 private:
 	static GLuint msShadowProgramID;
 	static GLint msWorldParam;
-	static GLint msViewParam;
-	static GLint msProjParam;
+	static GLint msViewProjParam;
 	static GLint msGlowParam;
 };
 

@@ -17,8 +17,6 @@ out vec2 oTex;
 
 void main()
 {
-	gl_Position = ViewProj * World * iPos;
-	
 	vec4 worldPos = World * iPos;
 
 	oTex = iTex;
@@ -32,6 +30,8 @@ void main()
 	{
 		oShadowCoord[i] = ShadowMatrix[i] * worldPos;
 	}
+
+	gl_Position = ViewProj * worldPos;
 }
 
 //in vec4 gl_Vertex;

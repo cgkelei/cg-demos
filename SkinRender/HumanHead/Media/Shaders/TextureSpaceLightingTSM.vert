@@ -24,10 +24,5 @@ void main()
 
 	// transform normal to world space
     oWorldNormal = normalize(mat3(World) * iNormal);
-
-	// Find the position of this pixel in light space
-	for(int i = 0; i < LIGHTCOUNT; ++i)
-	{
-		oShadowCoord[i] = ShadowMatrix[i] * worldPos;
-	}
+	oShadowCoord = ShadowMatrix * worldPos;
 }

@@ -253,3 +253,129 @@ float4 main(
   return float4( finalCol, 1.0 );
 
 }
+
+
+#include "commonlib.cg"
+
+#define SMAP_SIZE 1600
+#define SHADOW_EPSILON 0.009f
+
+// application to vertex shader
+struct a2v 
+{
+    float4 Position		: POSITION;
+    float3 Normal		: NORMAL;
+	float2 TexCoord		: TEXCOORD0;
+};
+
+// vertex shader to fragment shader
+struct v2f 
+{
+    float4 P	: POSITION;		// position
+	float3 N	: TEXCOORD0;	// normal
+    float2 T	: TEXCOORD1;	// tex coord
+	
+	float3 worldCoord	: TEXCOORD2;
+	float dist			: TEXCOORD3;
+	float4 TSMcoord	: TEXCOORD4;
+};
+
+v2f irradiance_vp(a2v In,
+				uniform float4x4	viewProjWin_Target,
+				//uniform float4x4	viewProjWin_Target2,
+				//uniform float4x4	viewProjWin_Target3,
+				uniform float4x4	model)
+{
+    v2f Out;
+
+    // transform position to world space
+    float4 worldPos = mul(model, In.Position);
+
+    // transform normal to world space
+    float3 N = mul((float3x3) model, In.Normal.xyz);
+
+    Out.N = normalize(N);
+    Out.T = In.TexCoord;
+	Out.P = v2t(In.TexCoord);
+	
+	Out.worldCoord = worldPos.xyz;
+	
+	float4 depthCoord = mul(viewProjWin_Target, worldPos);
+	depthCoord /= depthCoord.w;
+	Out.TSMcoord.xyz = 0.5*depthCoord.xyz + float3(0.5, 0.5, 0.5);
+	Out.TSMcoord.w = 1.0;
+	
+	Out.dist = depthCoord.z;
+
+	return Out;
+}
+
+float4 irradiance_fp(v2f In, 
+				
+				uniform float3		s_worldEyePos,
+				
+				uniform sampler2D	skinTex		: TEXUNIT0,
+				uniform sampler2D	normalTex	: TEXUNIT1,
+				uniform sampler2D	rhodTex		: TEXUNIT2,			// x: rho_s, y: beckmannTex, z: fresnelReflectance
+				uniform sampler2D	TSMTex		: TEXUNIT3,
+				uniform float4x4	model
+                ) : COLOR
+{
+	//***1: compute irradiance...
+    float3 objNormal = f3tex2D( normalTex, In.T ) * float3( 2.0, 2.0, 2.0 ) - float3( 1.0, 1.0, 1.0 );
+	float3 N = normalize( mul( (float3x3)model, objNormal ) );
+	float3 vertexN = In.N;
+    	
+    //s_worldEyePos = mul((float3x3)model, s_worldEyePos);
+	//float3 V = normalize( s_worldEyePos - In.worldCoord );
+	
+	float3 worldLight = mul((float3x3) model, glstate.light[0].position.xyz);
+	float3 L = normalize( worldLight );
+	
+	
+	float distanceToLight = In.dist;
+	float2 TSMcoord = In.TSMcoord.xy/ In.TSMcoord.w;
+	float4 TSMTap = f4tex2D( TSMTex, TSMcoord );
+	
+	
+	//** VSM
+	float lightShadow = chebyshevUpperBound(distanceToLight, TSMTap.ra);
+	
+	float m = 0.3;
+	float rho_s = 0.18;
+	
+	float ndotl = dot(N, L);
+	float3 lightColor = float3(0.3, 0.3, 0.3) * lightShadow;
+	float3 lightCos = saturate(ndotl) * lightColor;
+	float rho_dt_L = 1 - rho_s * f3tex2D(rhodTex, float2(ndotl, m)).x;
+	float3 E = lightCos * rho_dt_L;
+	
+	float3 texel = tex2D(skinTex, In.T).rgb;
+	float3 envLight = float3(0.03, 0.03, 0.03);
+	float3 irradiance = (E + envLight) * sqrt(texel);
+	
+	//** warp light
+	//float3 wlight = wrapLight(N, L);
+	//irradiance += wlight;
+	
+	//***3: compute alpha...
+	// Find normal on back side of object, Ni
+	float3 objNi = f3tex2D( normalTex, TSMTap.yz ) * float3( 2.0, 2.0, 2.0 ) - float3( 1.0, 1.0, 1.0 );
+	float3 Ni = mul( (float3x3)model, objNi);
+	
+	float backFacingEst = saturate( -dot( Ni, vertexN ));
+	float thicknessToLight = distanceToLight - TSMTap.x;
+
+	thicknessToLight = max(thicknessToLight, 0.0);
+	
+	// Set a large distance for surface points facing the light
+	float vertexNdotL = dot(L, vertexN);
+	if( vertexNdotL > 0.0 )
+		thicknessToLight = 100.0;//500.0*vertexNdotL;
+	
+	float correctedThickness = saturate( -vertexNdotL ) * thicknessToLight;
+	float finalThickness = lerp( thicknessToLight, correctedThickness, backFacingEst );
+
+	//***4: return irradiance and finalThickness
+	return float4( irradiance, finalThickness );
+}

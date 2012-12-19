@@ -17,6 +17,7 @@ uniform mat4 World;
 uniform sampler2D AlbedoTex;
 uniform sampler2D NormalTex;
 uniform sampler2D Rho_d_Tex; 
+uniform sampler2D SpecTex;
 uniform sampler2D IrradTex[6];
 uniform sampler2D ShadowTex[LIGHTCOUNT];
 
@@ -35,11 +36,13 @@ in vec2 oTex;
 
 out vec4 FragColor;
 
+#define saturate(value) clamp(value, 0.0, 1.0)
+
 float FresnelReflectance( vec3 H, vec3 V, float F0 )  
 {
 	float base = 1.0 - dot( V, H );  
 	float exponential = pow( base, 5.0 );  
-	return exponential + F0 * ( 1.0 - exponential );  
+	return F0 + (1.0 - F0) * exponential;
 }
 
 float KS_Skin_Specular( vec3 N, // Bumped surface normal  
@@ -56,7 +59,7 @@ float KS_Skin_Specular( vec3 N, // Bumped surface normal
 		vec3 h = L + V; // Unnormalized half-way vector  
 		vec3 H = normalize( h );  
 		float ndoth = dot( N, H );  
-		float PH = pow( 2.0* texture(beckmannTex,vec2(ndoth,m)).r, 10.0 );  
+		float PH = pow( 2.0* texture(beckmannTex,vec2(ndoth,m)).y, 10.0 );  
 		float F = FresnelReflectance( H, V, 0.028 );  
 		float frSpec = max( PH * F / dot( h, h ), 0 );  
 		result = ndotl * rho_s * frSpec; // BRDF * dot(N,L) * rho_s  
@@ -101,6 +104,11 @@ void main()
 	float L1Shadow = ShadowPCF(oShadowCoord[1], ShadowTex[1], 4, 1);
 	float L2Shadow = ShadowPCF(oShadowCoord[2], ShadowTex[2], 4, 1);
 
+	//float L0Shadow = Shadow(oShadowCoord[0], ShadowTex[0]);
+	//float L1Shadow = Shadow(oShadowCoord[1], ShadowTex[1]);
+	//float L2Shadow = Shadow(oShadowCoord[2], ShadowTex[2]);
+
+
 	// View vector
 	vec3 V = normalize( EyePos - oWorldPos );
 
@@ -132,26 +140,30 @@ void main()
 
 	// Determine skin color from a diffuseColor map
 	vec3 albedo = texture( AlbedoTex, oTex ).xyz;
-	diffuseLight *=  pow( albedo.xyz, vec3(DiffuseColorMix) );
+	diffuseLight *=  pow( albedo.xyz, vec3(1.0 - DiffuseColorMix) );
 
 	// Constant for specular calculation
 	// Use constant parameters m(roughness) and rho_s(intensity) for specular calculation
+	
 	float m = Roughness;
 	float rho_s = Rho_s;
+
+	//vec4 specTap = texture( SpecTex, oTex ); // rho_s and roughness
+    //float m = specTap.w * 0.09 + 0.23;	 // m is specular roughness
+    //float rho_s = specTap.x * 0.16 + 0.18;
 	
 	//Energy conservation (optional) - rho_s and m can be painted
-	//float finalScale = 1 - rho_s * texture(Rho_d_Tex, vec2(dot(N_bumped, L), m)).x;
-	//diffuseLight *= finalScale;
+	float finalScale = 1 - rho_s * texture(Rho_d_Tex, vec2(dot(N_bumped, V), m)).x;
+	diffuseLight *= finalScale;
 
 	vec3 specularLight = vec3(0);  
     // Compute specular for each light  
-    //specularLight += Lights[0].Color * Lights[0].Amount * L0Shadow * KS_Skin_Specular(N_bumped, L0, V, m, rho_s, Rho_d_Tex );
-	//specularLight += Lights[1].Color * Lights[1].Amount * L1Shadow * KS_Skin_Specular(N_bumped, L1, V, m, rho_s, Rho_d_Tex );
-	//specularLight += Lights[2].Color * Lights[2].Amount * L2Shadow * KS_Skin_Specular(N_bumped, L2, V, m, rho_s, Rho_d_Tex );
+    specularLight += Lights[0].Color * Lights[0].Amount * L0Shadow * KS_Skin_Specular(N_bumped, L0, V, m, rho_s, Rho_d_Tex );
+	specularLight += Lights[1].Color * Lights[1].Amount * L1Shadow * KS_Skin_Specular(N_bumped, L1, V, m, rho_s, Rho_d_Tex );
+	specularLight += Lights[2].Color * Lights[2].Amount * L2Shadow * KS_Skin_Specular(N_bumped, L2, V, m, rho_s, Rho_d_Tex );
 	
-	//float lit = (L0Shadow + L1Shadow + L2Shadow);
-	//lit = clamp( lit, 0.0, 1.0);
-	//FragColor = vec4(albedo.xy * lit, 1, 1);
- 
-    FragColor = vec4( diffuseLight + specularLight, 1.0 );  	
+	//specularLight = pow( specularLight.xyz, vec3(1.0 / 2.2) );
+    //FragColor = vec4( /*diffuseLight +*/ specularLight, saturate(length(diffuseLight) + 1.0) );  	
+
+	FragColor = vec4( diffuseLight + specularLight, 1.0 );  
 }
