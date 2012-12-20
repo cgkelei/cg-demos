@@ -1,5 +1,7 @@
  #version 330
 
+ #include "Common.include.glsl"
+
 #define SHADOW_BAIS 0.0004
 #define SHADOW_MAP_SIZE 1024
 
@@ -32,45 +34,11 @@ in vec2 oTex;
 
 out vec4 FragColor;
 
-#define saturate(value) clamp(value, 0.0, 1.0)
-
-float Shadow(vec4 shadowCoord, sampler2D shadowTex)
-{
-    vec3 shadowCoordWDiv = shadowCoord.xyz / shadowCoord.w;  
-    return (texture(shadowTex, shadowCoordWDiv.xy).r < (shadowCoordWDiv.z- SHADOW_BAIS)) ? 0.0 : 1.0;
-}
-
-
-float ShadowPCF(vec4 shadowCoord, sampler2D shadowTex, int samples, float width)
-{
-	vec3 shadowCoordWDiv = shadowCoord.xyz / shadowCoord.w;
-
-    float shadow = 0.0;
-    float offset = (samples - 1.0) / 2.0;
-   
-    for (float x = -offset; x <= offset; x += 1.0) 
-	{
-        for (float y = -offset; y <= offset; y += 1.0)
-		{
-            vec2 tex = shadowCoordWDiv.xy + width * vec2(x, y) / SHADOW_MAP_SIZE;
-            shadow += (texture(shadowTex, tex).r < (shadowCoordWDiv.z- SHADOW_BAIS)) ? 0.0 : 1.0;
-        }
-    }
-    shadow /= samples * samples;
-    return shadow;
-}
-
 
 void main()
 {
 	// lighting parameters
 	vec3 L0 = normalize( LightPos - oWorldPos ); // point light 0 light vector
-
-	//float L0atten = 600 * 600 / dot( LightPos - oWorldPos, LightPos - oWorldPos);
-	float L0atten = 1.0;
-
-	//float L0Shadow = Shadow(oShadowCoord, ShadowTex);
-	float L0Shadow = ShadowPCF(oShadowCoord, ShadowTex, 4, 1);
 
 	// compute world normal
 	vec3 N_nonBumped = normalize( oWorldNormal );
@@ -79,19 +47,32 @@ void main()
     vec3 objNormal = texture( NormalTex, oTex ).xyz * vec3( 2.0, 2.0, 2.0 ) - vec3( 1.0, 1.0, 1.0 );  
     vec3 N_bumped = normalize( mat3(World) * objNormal );
 
+	// N dot L
 	float bumpDot_L0 = dot( N_bumped, L0 );
 
+	//float L0atten = 600 * 600 / dot( LightPos - oWorldPos, LightPos - oWorldPos);
+	float L0atten = 1.0;
+
+#ifdef SHADOW_PCF	
+	float L0Shadow = ShadowPCF(oShadowCoord, ShadowTex, vec2(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE), SHADOW_BAIS, 4, 1);
+#else
+	float L0Shadow = Shadow(oShadowCoord, ShadowTex, SHADOW_BAIS);
+#endif
+
 	vec3 pointLight0Color = LightColor * LightAmount * L0Shadow * L0atten;
+
+	// DIFFUSE LIGHT  
+    vec3 Li0cosi = saturate(bumpDot_L0) * pointLight0Color;
 
 	// Specular Constant
 	//vec4 specTap = texture( SpecTex, oTex ); // rho_s and roughness
 	//float m = specTap.w * 0.09 + 0.23;	 // m is specular roughness
 	//float rho_s = specTap.x * 0.16 + 0.18;
 
-	// DIFFUSE LIGHT  
-    vec3 Li0cosi = saturate(bumpDot_L0) * pointLight0Color;
+	float m = Roughness;	
+	float rho_s = Rho_s;
 
-    float rho_dt_L0 = 1.0 - Rho_s * texture( Rho_d_Tex, vec2( bumpDot_L0, Roughness ) ).x;
+    float rho_dt_L0 = 1.0 - Rho_s * texture( Rho_d_Tex, vec2( bumpDot_L0, m ) ).x;
 	vec3 E0 = Li0cosi * rho_dt_L0;
 
 	vec4 albedoTap = texture( AlbedoTex, oTex );
@@ -109,6 +90,8 @@ void main()
     vec3 diffuseContrib = pow( albedo.xyz, vec3(DiffuseColorMix) ) * (E0 + envLight);        
     vec3 finalCol = diffuseContrib.xyz;  
 
+
+	//----------------------------------------------------------------------------------------------
 	// Compute thickness
 	vec3 shadowCoordWDiv = oShadowCoord.xyz / oShadowCoord.w;
 	float distanceToLight = shadowCoordWDiv.z;
@@ -124,12 +107,12 @@ void main()
 	// Set a large distance for surface points facing the light  
     if( bumpDot_L0 > 0.0 )  
     {  
-		thicknessToLight = 50.0;  
+		thicknessToLight = 100.0;  
     } 
 	 
-    float correctedThickness = saturate( -bumpDot_L0 ) * thicknessToLight;  
+    float correctedThickness = saturate( -bumpDot_L0 ) * thicknessToLight * 10.0;  
     float finalThickness = mix( thicknessToLight, correctedThickness,  
                                backFacingEst );  
    
-	FragColor = vec4(finalCol,  finalThickness );
+	FragColor = vec4(finalCol.xyz,  /*finalThickness, */finalThickness);
 }

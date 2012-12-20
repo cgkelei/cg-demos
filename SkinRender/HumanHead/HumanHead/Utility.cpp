@@ -218,38 +218,124 @@ void Utility::PrintEffectUniforms( GLuint mOGLProgramObject )
 	}		
 }
 
+// global path manager
 extern nv::SDKPath gAppPath;
 
-GLuint Utility::LoadShaderEffect( const char* vsFile, const char* fsFile )
+//GLuint Utility::LoadShaderEffect( const char* vsFile, const char* fsFile )
+//{
+//	std::string resolvedPath;
+//	GLuint shaderVS, shaderFS;
+//
+//	if (gAppPath.getFilePath( vsFile, resolvedPath)) 
+//	{
+//		shaderVS = nv::CompileGLSLShaderFromFile(GL_VERTEX_SHADER, resolvedPath.c_str());
+//	} else
+//	{
+//		fprintf(stderr, "Failed to locate program '%s'\n", vsFile);
+//		return 0;
+//	}
+//
+//	if (gAppPath.getFilePath( fsFile, resolvedPath)) 
+//	{
+//		shaderFS = nv::CompileGLSLShaderFromFile(GL_FRAGMENT_SHADER, resolvedPath.c_str());
+//	} else
+//	{
+//		fprintf(stderr, "Failed to locate program '%s'\n", fsFile);
+//		return 0;
+//	}
+//
+//	/*ASSERT(shaderVS > 0);
+//	shaderVS = nv::CompileGLSLShaderFromFile(GL_VERTEX_SHADER, vsFile);
+//	shaderFS = nv::CompileGLSLShaderFromFile(GL_FRAGMENT_SHADER, fsFile);
+//	ASSERT(shaderFS > 0);*/
+//
+//	return nv::LinkGLSLProgram(shaderVS, shaderFS);
+//}
+
+GLuint Utility::LoadShaderEffect( const char* vsFile, const char* fsFile, const std::vector<ShaderMacro>* macro /*= NULL*/ )
 {
 	std::string resolvedPath;
 	GLuint shaderVS, shaderFS;
 
-	if (gAppPath.getFilePath( vsFile, resolvedPath)) 
-	{
-		shaderVS = nv::CompileGLSLShaderFromFile(GL_VERTEX_SHADER, resolvedPath.c_str());
-	} else
-	{
-		fprintf(stderr, "Failed to locate program '%s'\n", vsFile);
-		return 0;
-	}
-
-	if (gAppPath.getFilePath( fsFile, resolvedPath)) 
-	{
-		shaderFS = nv::CompileGLSLShaderFromFile(GL_FRAGMENT_SHADER, resolvedPath.c_str());
-	} else
-	{
-		fprintf(stderr, "Failed to locate program '%s'\n", fsFile);
-		return 0;
-	}
-
-	/*ASSERT(shaderVS > 0);
-	shaderVS = nv::CompileGLSLShaderFromFile(GL_VERTEX_SHADER, vsFile);
-	shaderFS = nv::CompileGLSLShaderFromFile(GL_FRAGMENT_SHADER, fsFile);
-	ASSERT(shaderFS > 0);*/
-
+	shaderVS = LoadShader(GL_VERTEX_SHADER, vsFile, macro );
+	shaderFS = LoadShader(GL_FRAGMENT_SHADER, fsFile, macro );
 	return nv::LinkGLSLProgram(shaderVS, shaderFS);
 }
+
+GLuint Utility::LoadShader( GLenum type, const char* file, const std::vector<ShaderMacro>* macro /*= NULL*/ )
+{
+	std::string resolvedPath;
+	GLuint shaderObject;
+
+	if (gAppPath.getFilePath( file, resolvedPath)) 
+	{
+		std::string version, includes, defines, shaderSource;
+
+		std::ifstream fileStream(resolvedPath.c_str());
+		std::string fileContent((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
+
+		size_t posStart = std::string::npos;
+		size_t posEnd = 0;
+
+		posStart = fileContent.find("#version");
+
+		if (posStart != std::string::npos)
+		{
+			posEnd = fileContent.find("\n", posStart);
+			version = fileContent.substr(posStart, posEnd - posStart + 1);
+
+			// skin '\n'
+			posEnd += 1;
+		}
+
+		// build shader macro
+		if (macro)
+		{
+			for (unsigned i = 0; i < macro->size(); ++i)
+				defines += "#define " + (*macro)[i].first + " " + (*macro)[i].second + "\n";
+		}
+
+		posStart = fileContent.find("#include");
+		while(posStart != std::string::npos)
+		{
+			size_t start = fileContent.find("\"", posStart);
+			size_t end = fileContent.find("\"", start + 1);
+			std::string includeFile = fileContent.substr(start+1, end - start-1);
+
+			if (gAppPath.getFilePath( includeFile, resolvedPath)) 
+			{
+				std::ifstream stream(resolvedPath.c_str());
+				std::string source((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+				includes += source;
+			}
+
+			// keep track of current position, skin "
+			posEnd = end + 1;
+			posStart = fileContent.find("#include", end);
+		}
+
+		shaderSource = version + defines + includes + fileContent.substr(posEnd);
+
+		/*std::ofstream test("test.glsl");
+		test << shaderSource;
+		test.close();*/
+
+		shaderObject = nv::CompileGLSLShader(type, shaderSource.c_str());
+	} 
+	else
+	{
+		fprintf(stderr, "Failed to locate program '%s'\n", file);
+		return 0;
+	}
+
+	return shaderObject;
+}
+
+GLuint Utility::LinkShaderProgram( GLuint vertexShader, GLuint fragmentShader )
+{
+	return nv::LinkGLSLProgram(vertexShader, fragmentShader);
+}
+
 
 void Utility::PrintEffectAttribs( GLuint program )
 {
@@ -276,4 +362,5 @@ void Utility::PrintEffectAttribs( GLuint program )
 		}
 	}
 }
+
 
