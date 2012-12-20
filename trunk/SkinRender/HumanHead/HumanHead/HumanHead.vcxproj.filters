@@ -21,9 +21,6 @@
     <ClCompile Include="ShadowMap.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="SkyDome.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Utility.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -34,6 +31,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Bloom.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyDome.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -94,9 +94,6 @@
     <None Include="..\Media\Shaders\TextureSpaceLighting.vert">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="..\Media\Shaders\test.hlsl">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="..\Media\Shaders\FixedPipeline.frag">
       <Filter>资源文件</Filter>
     </None>
@@ -134,6 +131,12 @@
       <Filter>资源文件</Filter>
     </None>
     <None Include="..\Media\Shaders\Bloom.vert">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Media\Shaders\Common.include.glsl">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="read.hlsl">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>

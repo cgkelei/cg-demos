@@ -1,5 +1,7 @@
 #version 330
 
+#include "Common.include.glsl"
+
 #define LIGHTCOUNT 3
 #define SHADOW_BAIS 0.0004
 #define SHADOW_MAP_SIZE 1024
@@ -36,35 +38,6 @@ in vec2 oTex;
 
 out vec4 FragColor;
 
-#define saturate(value) clamp(value, 0.0, 1.0)
-
-float Shadow(vec4 shadowCoord, sampler2D shadowTex)
-{
-    vec3 shadowCoordWDiv = shadowCoord.xyz / shadowCoord.w;  
-    return (texture(shadowTex, shadowCoordWDiv.xy).r < (shadowCoordWDiv.z- SHADOW_BAIS)) ? 0.0 : 1.0;
-}
-
-
-float ShadowPCF(vec4 shadowCoord, sampler2D shadowTex, int samples, float width)
-{
-	vec3 shadowCoordWDiv = shadowCoord.xyz / shadowCoord.w;
-
-    float shadow = 0.0;
-    float offset = (samples - 1.0) / 2.0;
-   
-    for (float x = -offset; x <= offset; x += 1.0) 
-	{
-        for (float y = -offset; y <= offset; y += 1.0)
-		{
-            vec2 tex = shadowCoordWDiv.xy + width * vec2(x, y) / SHADOW_MAP_SIZE;
-            shadow += (texture(shadowTex, tex).r < (shadowCoordWDiv.z- SHADOW_BAIS)) ? 0.0 : 1.0;
-        }
-    }
-    shadow /= samples * samples;
-    return shadow;
-}
-
-
 void main()
 {
 	// lighting parameters
@@ -80,13 +53,15 @@ void main()
 	float L1atten = 1.0;
 	float L2atten = 1.0;
 
-	//float L0Shadow = Shadow(oShadowCoord[0], ShadowTex[0]);
-	//float L1Shadow = Shadow(oShadowCoord[1], ShadowTex[1]);
-	//float L2Shadow = Shadow(oShadowCoord[2], ShadowTex[2]);
-	
-	float L0Shadow = ShadowPCF(oShadowCoord[0], ShadowTex[0], 4, 1);
-	float L1Shadow = ShadowPCF(oShadowCoord[1], ShadowTex[1], 4, 1);
-	float L2Shadow = ShadowPCF(oShadowCoord[2], ShadowTex[2], 4, 1);
+#ifdef SHADOW_PCF	
+	float L0Shadow = ShadowPCF(oShadowCoord[0], ShadowTex[0], vec2(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE), SHADOW_BAIS, 4, 1);
+	float L1Shadow = ShadowPCF(oShadowCoord[1], ShadowTex[1], vec2(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE), SHADOW_BAIS, 4, 1);
+	float L2Shadow = ShadowPCF(oShadowCoord[2], ShadowTex[2], vec2(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE), SHADOW_BAIS, 4, 1);
+#else
+	float L0Shadow = Shadow(oShadowCoord[0], ShadowTex[0], SHADOW_BAIS);
+	float L1Shadow = Shadow(oShadowCoord[1], ShadowTex[1], SHADOW_BAIS);
+	float L2Shadow = Shadow(oShadowCoord[2], ShadowTex[2], SHADOW_BAIS);
+#endif
 
 	// compute world normal
 	vec3 N_nonBumped = normalize( oWorldNormal );

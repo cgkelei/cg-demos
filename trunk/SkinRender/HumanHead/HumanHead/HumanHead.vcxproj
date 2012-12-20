@@ -99,6 +99,7 @@
   <ItemGroup>
     <None Include="..\Media\Shaders\Bloom.frag" />
     <None Include="..\Media\Shaders\Bloom.vert" />
+    <None Include="..\Media\Shaders\Common.include.glsl" />
     <None Include="..\Media\Shaders\Convolution.vert" />
     <None Include="..\Media\Shaders\ConvolutionStretchU.frag" />
     <None Include="..\Media\Shaders\ConvolutionStretchV.frag" />
@@ -112,7 +113,6 @@
     <None Include="..\Media\Shaders\FixedPipeline.vert" />
     <None Include="..\Media\Shaders\Phong.frag" />
     <None Include="..\Media\Shaders\Phong.vert" />
-    <None Include="..\Media\Shaders\test.hlsl" />
     <None Include="..\Media\Shaders\TextureSpaceLighting.frag" />
     <None Include="..\Media\Shaders\TextureSpaceLighting.vert" />
     <None Include="..\Media\Shaders\ShadowMap.frag" />
@@ -121,6 +121,7 @@
     <None Include="..\Media\Shaders\Stretch.vert" />
     <None Include="..\Media\Shaders\TextureSpaceLightingTSM.frag" />
     <None Include="..\Media\Shaders\TextureSpaceLightingTSM.vert" />
+    <None Include="read.hlsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
