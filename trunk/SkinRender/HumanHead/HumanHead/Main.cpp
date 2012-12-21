@@ -342,7 +342,7 @@ void CreateBuffers(GLenum format)
 	for (int i = 0; i < LIGHT_COUNT; i++) 
 	{
 		//gLights->Camera.SetDistance(2.0);
-		gLights[i].Camera.SetProjection(CAMERA_FOV, 1.0f, 0.1f, 10.0f);
+		gLights[i].Camera.SetProjection(CAMERA_FOV, 1.0f, 0.1f, 10000.0f);
 		gLights[i].ShadowMap = new ShadowMap(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 	}
 
@@ -1153,9 +1153,9 @@ void RenderIrradianceTSM()
 		Convolution(gIrradianceBuffer[i][3], gIrradianceBuffer[i][4], 3);
 		Convolution(gIrradianceBuffer[i][4], gIrradianceBuffer[i][5], 4);
 
-		/*std::stringstream sss;
+		std::stringstream sss;
 		sss << "light" << i << "Irr.pfm";
-		Utility::SaveTextureToPfm(sss.str().c_str(), gIrradianceBuffer[i][0]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);*/
+		Utility::SaveTextureToPfm(sss.str().c_str(), gIrradianceBuffer[i][0]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);
 	}
 }
 
