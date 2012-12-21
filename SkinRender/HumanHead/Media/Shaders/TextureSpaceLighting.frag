@@ -3,7 +3,7 @@
 #include "Common.include.glsl"
 
 #define LIGHTCOUNT 3
-#define SHADOW_BAIS 0.0004
+#define SHADOW_BAIS 0.0001
 #define SHADOW_MAP_SIZE 1024
 
 struct Light

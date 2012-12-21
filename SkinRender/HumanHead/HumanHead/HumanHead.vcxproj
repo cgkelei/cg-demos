@@ -121,6 +121,7 @@
     <None Include="..\Media\Shaders\Stretch.vert" />
     <None Include="..\Media\Shaders\TextureSpaceLightingTSM.frag" />
     <None Include="..\Media\Shaders\TextureSpaceLightingTSM.vert" />
+    <None Include="..\Media\Shaders\ViewDepth.frag" />
     <None Include="read.hlsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

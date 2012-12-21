@@ -97,15 +97,32 @@ enum RenderMode
 	RM_NoSSS = 0,
 	RM_SSS_Without_TSM,
 	RM_SSS_With_TSM,
+	RM_Debug
 };
-//int gMode = RM_SSS_With_TSM;
-int gMode = RM_NoSSS;
+int gMode = RM_SSS_With_TSM;
+//int gMode = RM_NoSSS;
+
+enum DebugMode
+{
+	DM_Depth0 = 0,
+	DM_IrradianceMap0 = DM_Depth0 + LIGHT_COUNT,
+};
+
+int gDebugMode = DM_Depth0;
+
 
 struct PipelineEffect
 {
 	GLuint ProgramID;
 	GLint WorldParam, ViewProjParam, AlbedoTexParam;
 } gPipelineEffect;
+
+struct ViewDepthEffect
+{
+	GLuint ProgramID;
+	GLint DepthTexParam;
+} gViewDepthEffectEffect;
+
 
 struct StretchEffect
 {
@@ -342,7 +359,7 @@ void CreateBuffers(GLenum format)
 	for (int i = 0; i < LIGHT_COUNT; i++) 
 	{
 		//gLights->Camera.SetDistance(2.0);
-		gLights[i].Camera.SetProjection(CAMERA_FOV, 1.0f, 0.1f, 10000.0f);
+		gLights[i].Camera.SetProjection(CAMERA_FOV, 1.0f, 0.1f, 20.0f);
 		gLights[i].ShadowMap = new ShadowMap(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 	}
 
@@ -398,6 +415,12 @@ void LoadShaderEffect()
 #define RETRIEVE_UNIFORM_LOCATION(loc, program, name)  loc = glGetUniformLocation(program, name); /*\
 														ASSERT(loc >= 0);*/
 	std::vector<Utility::ShaderMacro> shaderDefines;
+	shaderDefines.push_back(Utility::ShaderMacro("SHADOW_PCF", ""));
+
+	gViewDepthEffectEffect.ProgramID = Utility::LoadShaderEffect("Convolution.vert", "ViewDepth.frag");
+	gViewDepthEffectEffect.DepthTexParam = -1;
+	RETRIEVE_UNIFORM_LOCATION(gViewDepthEffectEffect.DepthTexParam, gViewDepthEffectEffect.ProgramID, "DepthMap");
+	ASSERT(gViewDepthEffectEffect.ProgramID > 0);
 
 	gPipelineEffect.ProgramID = Utility::LoadShaderEffect("FixedPipeline.vert", "FixedPipeline.frag");
 	ASSERT(gPipelineEffect.ProgramID > 0);
@@ -450,7 +473,6 @@ void LoadShaderEffect()
 
 	// Texture Space Light effect
 	printf("Load Texture Space Light Without TSM  Effect...\n");
-	shaderDefines.push_back(Utility::ShaderMacro("SHADOW_PCF", ""));
 	gTexSpaceLightEffect.ProgramID = Utility::LoadShaderEffect("TextureSpaceLighting.vert", "TextureSpaceLighting.frag", &shaderDefines);
 	ASSERT(gTexSpaceLightEffect.ProgramID > 0);
 	//Utility::PrintEffectAttribs(gTexSpaceLightEffect.ProgramID);
@@ -597,6 +619,9 @@ void LoadModel()
 			gModel.computeNormals();
 		}
 
+		// Scale to 1.0
+		gModel.rescale(1.0f);
+
 		//compute the model dimensions
 		nv::vec3f minPos, maxPos;
 
@@ -671,7 +696,8 @@ void SavePresents()
 void DoUI()
 {
 	static nv::Rect none;
-	
+	static char tempBuffer[255];
+
 	gHub.begin();
 
 	gHub.beginGroup( nv::GroupFlags_GrowDownFromLeft);
@@ -691,41 +717,66 @@ void DoUI()
 	gHub.doRadioButton(0, none, "No SSS",  &gMode);
 	gHub.doRadioButton(1, none, "SSS Without TSM",  &gMode);
 	gHub.doRadioButton(2, none, "SSS With TSM",  &gMode);
+	gHub.doRadioButton(3, none, "SSS Debug",  &gMode);
 	gHub.doLabel( none, "");
 
-	gHub.doLabel( none, "Render Parameters");
-	gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
-	gHub.doLabel(none, "Roughness");
-	gHub.doHorizontalSlider(none, 0.0f, 1.0f, &gRoughness);
-	gHub.endGroup();
+	if (RM_Debug == gMode)
+	{	
 
-	gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
-	gHub.doLabel(none, "Rho_s");
-	gHub.doHorizontalSlider(none, 0.0f, 1.0f, &gRho_s);
-	gHub.endGroup();
+		for (int i = 0; i < LIGHT_COUNT; ++i)
+		{
+			gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
+			gHub.doLabel( none, "");
+			sprintf(tempBuffer, "Depth Map %d", i);
+			gHub.doRadioButton(i, none, tempBuffer,  &gDebugMode);
+			gHub.endGroup();
+		}
 
-	gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
-	gHub.doLabel(none, "StrechScale");
-	gHub.doHorizontalSlider(none, 0.0f, 0.002f, &gStrechScale);
-	gHub.endGroup();
-
-	gHub.doLabel( none, "");
-
-
-	gHub.doLabel( none, "Manipulator Control");
-	gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
-	gHub.doRadioButton(0, none, "Camera",  &gManipulator);
-	gHub.doCheckButton(none, "View From Light", &gViewFromLight);
-	gHub.endGroup();
-
-	for (int i = 0; i < LIGHT_COUNT; ++i)
+		for (int i = 0; i < 6; ++i)
+		{
+			gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
+			gHub.doLabel( none, "");
+			sprintf(tempBuffer, "Irradiance Map Blured %d", i + 1);
+			gHub.doRadioButton(i + LIGHT_COUNT, none, tempBuffer,  &gDebugMode);
+			gHub.endGroup();
+		}
+	}
+	else
 	{
+		gHub.doLabel( none, "Render Parameters");
 		gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
-		std::stringstream s;
-		s << "Light" << i;
-		gHub.doRadioButton(1 + i, none, s.str().c_str(),  &gManipulator);
-		gHub.doHorizontalSlider(none, 0.0f, 1.0f, &gLights[i].Amount);
+		gHub.doLabel(none, "Roughness");
+		gHub.doHorizontalSlider(none, 0.0f, 1.0f, &gRoughness);
 		gHub.endGroup();
+
+		gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
+		gHub.doLabel(none, "Rho_s");
+		gHub.doHorizontalSlider(none, 0.0f, 1.0f, &gRho_s);
+		gHub.endGroup();
+
+		gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
+		gHub.doLabel(none, "StrechScale");
+		gHub.doHorizontalSlider(none, 0.0f, 0.002f, &gStrechScale);
+		gHub.endGroup();
+
+		gHub.doLabel( none, "");
+
+
+		gHub.doLabel( none, "Manipulator Control");
+		gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
+		gHub.doRadioButton(0, none, "Camera",  &gManipulator);
+		gHub.doCheckButton(none, "View From Light", &gViewFromLight);
+		gHub.endGroup();
+
+		for (int i = 0; i < LIGHT_COUNT; ++i)
+		{
+			gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
+			sprintf(tempBuffer, "Light %d", i + 1);
+			gHub.doRadioButton(1 + i, none, tempBuffer,  &gManipulator);
+			gHub.doHorizontalSlider(none, 0.0f, 1.0f, &gLights[i].Amount);
+			gHub.endGroup();
+		}
+
 	}
 
 	gHub.endGroup();
@@ -1153,16 +1204,14 @@ void RenderIrradianceTSM()
 		Convolution(gIrradianceBuffer[i][3], gIrradianceBuffer[i][4], 3);
 		Convolution(gIrradianceBuffer[i][4], gIrradianceBuffer[i][5], 4);
 
-		std::stringstream sss;
+		/*std::stringstream sss;
 		sss << "light" << i << "Irr.pfm";
-		Utility::SaveTextureToPfm(sss.str().c_str(), gIrradianceBuffer[i][0]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);
+		Utility::SaveTextureToPfm(sss.str().c_str(), gIrradianceBuffer[i][0]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);*/
 	}
 }
 
 void RenderFinal()
 {	
-	//gIrradianceBuffer[1][0]->Activate();
-
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(1.0f);
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1244,10 +1293,6 @@ void RenderFinal()
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
-	
-	//gIrradianceBuffer[1][0]->Deactivate();
-
-	//Utility::SaveTextureToPfm("final.pfm",gIrradianceBuffer[1][0]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);
 
 	for (int i = 0; i < 8; ++i)
 	{
@@ -1560,6 +1605,35 @@ void RenderScene()
 			RenderFinalTSM();
 		}
 		break;
+	case RM_Debug:
+		{
+			glClear(GL_COLOR_BUFFER_BIT);
+
+			if (gDebugMode < LIGHT_COUNT)
+			{
+				// view depth map
+				glPushAttrib(GL_VIEWPORT_BIT);
+				SetOrthoProjection(gWindowWidth, gWindowHeight);
+
+				glUseProgram(gViewDepthEffectEffect.ProgramID);
+
+				glActiveTexture(GL_TEXTURE0);
+				glEnable(GL_TEXTURE_2D);
+				gLights[gDebugMode].ShadowMap->GetRenderTexture()->BindColor();
+				glUniform1i(gViewDepthEffectEffect.DepthTexParam, 0);
+
+				DrawQuad(gWindowWidth, gWindowHeight);	
+
+				glUseProgram(0);
+
+				glPopAttrib();
+			}
+			else if (gDebugMode >= LIGHT_COUNT && gDebugMode < LIGHT_COUNT + 6)
+			{
+				DrawViewport(gIrradianceBuffer[0][gDebugMode-LIGHT_COUNT]);
+			}
+		}
+		break;
 
 	default:
 		break;
@@ -1652,7 +1726,7 @@ void Mouse(int button, int state, int x, int y)
 	// Pass non-ui mouse events to the manipulator
 	gHub.mouse(button, state, x, y);
 
-	if (!gHub.isOnFocus()) 
+	if (!gHub.isOnFocus() && gMode != RM_Debug) 
 	{
 		CurrentManipulator()->HandleMouse(button, state, glutGetModifiers(), x, gWindowHeight - y);
 	}
@@ -1661,7 +1735,7 @@ void Mouse(int button, int state, int x, int y)
 void Motion(int x, int y)
 {
 	gHub.mouseMotion(x, y);
-	if (!gHub.isOnFocus()) 
+	if (!gHub.isOnFocus() && gMode != RM_Debug) 
 	{
 		CurrentManipulator()->HandleMotion(x, gWindowHeight - y);
 	}

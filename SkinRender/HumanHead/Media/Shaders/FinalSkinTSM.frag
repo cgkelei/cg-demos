@@ -3,7 +3,7 @@
 #include "Common.include.glsl"
 
 #define LIGHTCOUNT 3
-#define SHADOW_BAIS 0.0004
+#define SHADOW_BAIS 0.0001
 #define SHADOW_MAP_SIZE 1024
 
 struct Light
@@ -30,7 +30,7 @@ uniform vec3 EyePos;
 uniform float DiffuseColorMix = 0.5;
 uniform float Roughness = 0.3;	
 uniform float Rho_s = 0.18;
-uniform float DepthScale = 300.0;
+uniform float DepthScale = 100.0;
 
 in vec3 oWorldPos;
 in vec3 oWorldNormal;
@@ -135,11 +135,11 @@ void main()
 	// Four average thicknesses through the object (in mm)  		
 	thickness_mm = DepthScale * vec4( irrad1Tap1.w, irrad2Tap0.w,  irrad3Tap0.w, irrad4Tap0.w );
 	fades = exp( thickness_mm * thickness_mm * inv_a );  
-	blend = textureScale *  texDist / 0.05;
+	blend = 0.08 * textureScale *  texDist / 0.05;
 
-	blendFactor3 = saturate(blend / ( a_values.y * 6.0) );  
-	blendFactor4 = saturate(blend / ( a_values.z * 6.0) );  
-	blendFactor5 = saturate(blend / ( a_values.w * 6.0) );  
+	blendFactor3 = saturate(blend / ( a_values.y ) );  
+	blendFactor4 = saturate(blend / ( a_values.z ) );  
+	blendFactor5 = saturate(blend / ( a_values.w ) );  
 		
 	diffuseLight += GaussWeights[3]  * fades.y * blendFactor3 * texture( IrradTex[0 * 6 + 3], TSMtap0.yz ).xyz / normConst;  
 	diffuseLight += GaussWeights[4]  * fades.z * blendFactor4 * texture( IrradTex[0 * 6 + 4], TSMtap0.yz ).xyz / normConst; 
@@ -155,9 +155,9 @@ void main()
 
 	blend = textureScale *  texDist / 0.05;
 
-	blendFactor3 = saturate(blend / ( a_values.y * 6.0) );  
-	blendFactor4 = saturate(blend / ( a_values.z * 6.0) );  
-	blendFactor5 = saturate(blend / ( a_values.w * 6.0) );  
+	blendFactor3 = saturate(blend / ( a_values.y ) );  
+	blendFactor4 = saturate(blend / ( a_values.z ) );  
+	blendFactor5 = saturate(blend / ( a_values.w ) );  
 		
 	diffuseLight += GaussWeights[3]  * fades.y * blendFactor3 * texture( IrradTex[1 * 6 + 3], TSMtap1.yz ).xyz / normConst;  
 	diffuseLight += GaussWeights[4]  * fades.z * blendFactor4 * texture( IrradTex[1 * 6 + 4], TSMtap1.yz ).xyz / normConst; 
@@ -173,9 +173,9 @@ void main()
 
 	blend = textureScale *  texDist / 0.05;
 
-	blendFactor3 = saturate(blend / ( a_values.y * 6.0) );  
-	blendFactor4 = saturate(blend / ( a_values.z * 6.0) );  
-	blendFactor5 = saturate(blend / ( a_values.w * 6.0) );  
+	blendFactor3 = saturate(blend / ( a_values.y ) );  
+	blendFactor4 = saturate(blend / ( a_values.z ) );  
+	blendFactor5 = saturate(blend / ( a_values.w ) );  
 		
 	diffuseLight += GaussWeights[3]  * fades.y * blendFactor3 * texture( IrradTex[2 * 6 + 3], TSMtap2.yz ).xyz / normConst;  
 	diffuseLight += GaussWeights[4]  * fades.z * blendFactor4 * texture( IrradTex[2 * 6 + 4], TSMtap2.yz ).xyz / normConst; 

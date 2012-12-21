@@ -1,5 +1,16 @@
 #define saturate(value) clamp(value, 0.0, 1.0)
 
+
+float ViewDepthFromClip(vec4 clipPos, float zNear, float zFar)
+{
+	return ((-clipPos.z) * (zFar - zNear) - 2.0 * zNear * zFar) / (zNear + zFar);
+}
+
+float NormalizedDepth(float z, float zNear, float zFar)
+{
+	return (z - zNear) / (zFar - zNear);
+}
+
 float Shadow(vec4 shadowCoord, sampler2D shadowTex, float bais)
 {
     vec3 shadowCoordWDiv = shadowCoord.xyz / shadowCoord.w;  
