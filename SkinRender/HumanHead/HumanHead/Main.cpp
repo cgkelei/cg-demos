@@ -896,7 +896,7 @@ void MakeShadowMap()
 	{
 		if (glm::length(gLights[i].Color) > 0.0f)
 		{
-			gLights[i].ShadowMap->Begin(gLights[i].Camera.GetViewProjectionMatrix());
+			gLights[i].ShadowMap->Begin(&gLights[i].Camera);
 				DrawModel(&gModel, gModelVBO, gModelIBO);
 			gLights[i].ShadowMap->End();
 		}

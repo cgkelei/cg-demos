@@ -1,11 +1,15 @@
 #include "ShadowMap.h"
 #include "Utility.h"
 #include "RenderTextureFBO.h"
+#include "Camera.h"
 
 GLuint ShadowMap::msShadowProgramID = 0;
 GLint ShadowMap::msWorldParam = -1;
-GLint ShadowMap::msViewProjParam = -1;
+GLint ShadowMap::msViewParam = -1;
+GLint ShadowMap::msProjParam = -1;
 GLint ShadowMap::msGlowParam = -1;
+GLint ShadowMap::msZNearParam = -1;
+GLint ShadowMap::msZFarParam = -1;
 
 void ShadowMap::Init()
 {
@@ -14,8 +18,17 @@ void ShadowMap::Init()
 	msWorldParam = glGetUniformLocation(msShadowProgramID, "World");
 	ASSERT(msWorldParam >= 0);
 
-	msViewProjParam = glGetUniformLocation(msShadowProgramID, "ViewProj");
-	ASSERT(msViewProjParam >= 0);
+	msViewParam = glGetUniformLocation(msShadowProgramID, "View");
+	ASSERT(msViewParam >= 0);
+
+	msProjParam = glGetUniformLocation(msShadowProgramID, "Proj");
+	ASSERT(msViewParam >= 0);
+
+	/*msZNearParam = glGetUniformLocation(msShadowProgramID, "ZNear");
+	ASSERT(msZNearParam >= 0);
+
+	msZFarParam = glGetUniformLocation(msShadowProgramID, "ZFar");
+	ASSERT(msZFarParam >= 0);*/
 
 	msGlowParam = glGetUniformLocation(msShadowProgramID, "Grow");
 	//ASSERT(msGlowParam >= 0);
@@ -49,7 +62,7 @@ ShadowMap::~ShadowMap(void)
 
 glm::mat4 gworld;
 
-void ShadowMap::Begin(const glm::mat4& viewProj)
+void ShadowMap::Begin(const Camera* camera)
 {
 	mTexture->Activate();
 
@@ -64,7 +77,8 @@ void ShadowMap::Begin(const glm::mat4& viewProj)
 	glEnable(GL_DEPTH_TEST);
 
 	glUseProgram(msShadowProgramID);
-	glUniformMatrix4fv(msViewProjParam, 1, false, glm::value_ptr(viewProj));
+	glUniformMatrix4fv(msViewParam, 1, false, glm::value_ptr(camera->GetViewMatrix()));
+	glUniformMatrix4fv(msProjParam, 1, false, glm::value_ptr(camera->GetProjectionMatrix()));
 }
 
 void ShadowMap::SetWorldMatrix( const glm::mat4& world )
