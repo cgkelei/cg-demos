@@ -196,6 +196,10 @@ void Camera::Update( float elapsedTime )
 
 void Camera::SetProjection( float fov, float aspect, float nearPlane, float farPlane )
 {
+	mFov = fov; 
+	mZFar = farPlane;
+	mZNear = nearPlane;
+
 	mProjection = glm::perspective(fov, aspect, nearPlane, farPlane);
 }
 
