@@ -44,7 +44,7 @@ public:
 	void SetProjection(float fov, float aspect, float nearPlane, float farPlane);
 	void SetViewportSize(const glm::vec2& viewportSize) { mViewportSize = viewportSize; }
 
-	const glm::mat4& GetViewMatrix() { return mView; }
+	const glm::mat4& GetViewMatrix() const { return mView; }
 	const glm::mat4& GetProjectionMatrix() const { return mProjection; }
 	const glm::mat4& GetViewProjectionMatrix() const { return mViewProj; }
 
@@ -53,6 +53,10 @@ public:
 
 	const glm::vec3& GetLookAtPosition() { return mLookAt; }  
 	const glm::vec3& GetEyePosition() { return mEyePosition; }  
+
+	float GetNearPlane() const { return mZNear; }
+	float GetFarPlane() const { return mZFar; }
+
 
 	friend std::ostream& operator <<(std::ostream &os, const Camera &camera);
 	friend std::istream& operator >>(std::istream &is, Camera &camera);
@@ -65,6 +69,8 @@ private:
 
 private:
 	float mDistance, mDistanceVelocity;
+
+	float mZNear, mZFar, mFov;
 
 	glm::vec2 mPanPosition, mPanVelocity;
 	glm::vec2 mAngle, mAngularVelocity;
