@@ -2,7 +2,7 @@
 
  #include "Common.include.glsl"
 
-#define SHADOW_BAIS 0.0004
+#define SHADOW_BAIS 0.0001
 #define SHADOW_MAP_SIZE 1024
 
 // parameters
@@ -114,6 +114,6 @@ void main()
     float correctedThickness = saturate( -bumpDot_L0 ) * thicknessToLight * 10.0;  
     float finalThickness = mix( thicknessToLight, correctedThickness, backFacingEst );  
    
-    FragColor = vec4(TSMTap.x, distanceToLight, finalThickness, finalCol.x);
-	//FragColor = vec4(finalCol, finalThickness);
+    //FragColor = vec4(TSMTap.x, distanceToLight, finalThickness, finalCol.x);
+	FragColor = vec4(finalCol, finalThickness);
 }

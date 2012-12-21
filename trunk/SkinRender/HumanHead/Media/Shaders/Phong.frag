@@ -3,7 +3,7 @@
 #include "Common.include.glsl"
 
 #define LIGHTCOUNT 3
-#define SHADOW_BAIS 0.0004
+#define SHADOW_BAIS 0.0001
 #define SHADOW_MAP_SIZE 1024
 
 struct Light
@@ -20,6 +20,9 @@ uniform Light Lights[LIGHTCOUNT];
 
 uniform mat4 World;
 uniform vec3 EyePos;
+
+uniform float ZNear;
+uniform float ZFar;
 
 uniform sampler2D AlbedoTex;
 uniform sampler2D NormalTex;
@@ -61,7 +64,6 @@ void main()
 	float L1atten = 1.0;
 	float L2atten = 1.0;
 
-
 #ifdef SHADOW_PCF	
 	float L0Shadow = ShadowPCF(oShadowCoord[0], ShadowTex[0], vec2(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE), SHADOW_BAIS, 4, 1);
 	float L1Shadow = ShadowPCF(oShadowCoord[1], ShadowTex[1], vec2(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE), SHADOW_BAIS, 4, 1);
@@ -71,7 +73,6 @@ void main()
 	float L1Shadow = Shadow(oShadowCoord[1], ShadowTex[1], SHADOW_BAIS);
 	float L2Shadow = Shadow(oShadowCoord[2], ShadowTex[2], SHADOW_BAIS);
 #endif
-
 
 	float bumpDot_L0 = dot( N_bumped, L0 );
     float bumpDot_L1 = dot( N_bumped, L1 );
