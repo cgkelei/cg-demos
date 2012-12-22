@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Common.h"
+#include "Utility.h"
 
 class RenderTexture;
 class Camera;
@@ -21,7 +22,7 @@ private:
 	int mWidth, mHeight;
 
 public:
-	static void Init();
+	static void Init(std::vector<Utility::ShaderMacro>* macro = NULL);
 	static void Release();
 	static void SetWorldMatrix(const glm::mat4& world);
 
