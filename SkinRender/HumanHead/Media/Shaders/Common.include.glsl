@@ -3,52 +3,27 @@ struct Light
 	vec3 Position;	// Positon in world space
 	vec3 Color;	
 	float Amount;
-	float Bias;
 	vec2 NearFarPlane;
 };	
 
 #define SHADOW_MAP_SIZE 1024
+#define SHADOW_BIAS 0.001
 #define saturate(value) clamp(value, 0.0, 1.0)
+
 
 float NormalizedDepth(float depth, float zNear, float zFar)
 {
 	return (depth - zNear) / (zFar - zNear);
 }
 
-//float RealDepth(float depth, float zNear, float zFar)
-//{
-//	return depth * (zFar - zNear) + zNear;
-//}
-
 vec4 RealDepth(vec4 depth, vec2 nearFar)
 {
 	return depth * (nearFar.y - nearFar.x) + nearFar.x;
 }
 
-
-//float DepthFromClip(vec4 clipPos, float zNear, float zFar)
-//{
-//	return -((-clipPos.z) * (zFar - zNear) - 2.0 * zNear * zFar) / (zNear + zFar);
-//}
-
-//float NormalizedDepthFromClip(vec4 clipPos, vec2 nearFar)
-//{
-//	float zNear = nearFar.x;
-//	float zFar = nearFar.y;
-
-//	float depth =   -((-clipPos.z) * (zFar - zNear) - 2.0 * zNear * zFar) / (zNear + zFar);
-//	return (depth - zNear) / (zFar - zNear);
-//}
-
 vec2 ShadowTexCoord(vec4 clipPos)
 {
 	return (clipPos.xy / clipPos.w) * 0.5 + vec2(0.5, 0.5);
-}
-
-float Shadow(vec4 shadowCoord, sampler2D shadowTex, float bais)
-{
-    vec3 shadowCoordWDiv = shadowCoord.xyz / shadowCoord.w;  
-    return (texture(shadowTex, shadowCoordWDiv.xy).r < (shadowCoordWDiv.z- bais)) ? 0.0 : 1.0;
 }
 
 float Shadow(vec2 UV, sampler2D shadowTex, float depth)
@@ -73,23 +48,21 @@ float ShadowPCF(vec2 UV, sampler2D shadowTex, float depth, int samples, float wi
     return shadow;
 }
 
-float ShadowPCF(vec4 shadowCoord, sampler2D shadowTex, vec2 texSize, float bais, int samples, float width)
+float chebyshevUpperBound(float dist, vec2 moments)
 {
-	vec3 shadowCoordWDiv = shadowCoord.xyz / shadowCoord.w;
-
-    float shadow = 0.0;
-    float offset = (samples - 1.0) / 2.0;
-   
-    for (float x = -offset; x <= offset; x += 1.0) 
-	{
-        for (float y = -offset; y <= offset; y += 1.0)
-		{
-            vec2 tex = shadowCoordWDiv.xy + width * vec2(x, y) / texSize;
-            shadow += (texture(shadowTex, tex).r < (shadowCoordWDiv.z- bais)) ? 0.0 : 1.0;
-        }
-    }
-    shadow /= samples * samples;
-    return shadow;
+	// Surface is fully lit. as the current fragment is before the light occluder
+	if (dist <= moments.x)
+		return 1.0 ;
+	
+	// The fragment is either in shadow or penumbra. We now use chebyshev's upperBound to check
+	// How likely this pixel is to be lit (p_max)
+	float variance = moments.y - (moments.x*moments.x);
+	variance = max(variance,0.00001);
+	
+	float d = dist - moments.x;
+	float p_max = variance / (variance + d*d);
+	
+	return p_max;
 }
 
 

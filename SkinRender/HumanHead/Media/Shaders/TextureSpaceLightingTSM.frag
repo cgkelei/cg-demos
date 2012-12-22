@@ -53,9 +53,13 @@ void main()
 	vec2 UV0 = ShadowTexCoord(oShadowCoord);
 
 #ifdef SHADOW_PCF	
-	float L0Shadow = ShadowPCF(UV0, ShadowTex, depth0- Lights[0].Bias, 4, 1);
+	float L0Shadow = ShadowPCF(UV0, ShadowTex, depth0 - SHADOW_BIAS, 4, 1);
 #else
-	float L0Shadow = Shadow(UV0, ShadowTex, depth0- Lights[0].Bias);
+	#ifdef SHADOW_VSM 
+	float L0Shadow = chebyshevUpperBound(depth0, texture2D(ShadowTex, UV0).ra);
+	#else
+	float L0Shadow = Shadow(UV0, ShadowTex, depth0 - SHADOW_BIAS);
+	#endif
 #endif
 
 
