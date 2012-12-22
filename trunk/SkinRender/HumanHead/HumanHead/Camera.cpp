@@ -181,7 +181,7 @@ void Camera::UpdateMatrices()
 		glm::vec4(0, 0, 0.5, 0),
 		glm::vec4(0.5, 0.5, 0.5, 1.0));
 
-	mShadowMatrix = bais * mViewProj;
+	mShadowMatrix =/* bais **/ mViewProj;
 }
 
 void Camera::Update( float elapsedTime )

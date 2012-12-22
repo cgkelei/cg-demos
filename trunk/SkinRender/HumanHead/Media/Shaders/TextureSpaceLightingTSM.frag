@@ -2,9 +2,6 @@
 
  #include "Common.include.glsl"
 
-#define SHADOW_BAIS 0.0001
-#define SHADOW_MAP_SIZE 1024
-
 // parameters
 uniform float AlbedoGamma = 2.2;
 uniform float DiffuseColorMix = 0.5;
@@ -15,9 +12,7 @@ uniform float Rho_s = 0.18;
 
 uniform mat4 World;// World Transform
 
-uniform vec3 LightPos;	// Positon in world space
-uniform	vec3 LightColor;	
-uniform	float LightAmount;
+uniform Light Lights[1];
 
 uniform sampler2D   AlbedoTex;
 uniform sampler2D   SpecTex; // spec amount in r, g, b, and roughness value over the surface
@@ -30,6 +25,7 @@ uniform samplerCube EnvCube;
 in vec3 oWorldPos;
 in vec3 oWorldNormal;
 in vec4 oShadowCoord;
+in float oLightDist;
 in vec2 oTex;
 
 out vec4 FragColor;
@@ -38,7 +34,7 @@ out vec4 FragColor;
 void main()
 {
 	// lighting parameters
-	vec3 L0 = normalize( LightPos - oWorldPos ); // point light 0 light vector
+	vec3 L0 = normalize( Lights[0].Position - oWorldPos ); // point light 0 light vector
 
 	// compute world normal
 	vec3 N_nonBumped = normalize( oWorldNormal );
@@ -53,13 +49,17 @@ void main()
 	//float L0atten = 600 * 600 / dot( LightPos - oWorldPos, LightPos - oWorldPos);
 	float L0atten = 1.0;
 
+	float depth0 = NormalizedDepth(oLightDist, Lights[0].NearFarPlane.x, Lights[0].NearFarPlane.y);
+	vec2 UV0 = ShadowTexCoord(oShadowCoord);
+
 #ifdef SHADOW_PCF	
-	float L0Shadow = ShadowPCF(oShadowCoord, ShadowTex, vec2(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE), SHADOW_BAIS, 4, 1);
+	float L0Shadow = ShadowPCF(UV0, ShadowTex, depth0- Lights[0].Bias, 4, 1);
 #else
-	float L0Shadow = Shadow(oShadowCoord, ShadowTex, SHADOW_BAIS);
+	float L0Shadow = Shadow(UV0, ShadowTex, depth0- Lights[0].Bias);
 #endif
 
-	vec3 pointLight0Color = LightColor * LightAmount * L0Shadow * L0atten;
+
+	vec3 pointLight0Color = Lights[0].Color * Lights[0].Amount * L0Shadow * L0atten;
 
 	// DIFFUSE LIGHT  
     vec3 Li0cosi = saturate(bumpDot_L0) * pointLight0Color;
@@ -84,8 +84,7 @@ void main()
 
 	//vec3 cubeTap1 = texture( EnvCube, N_nonBumped ).xyz;
 	//vec3 envLight = saturate( EnvAmount * cubeTap1.xyz * occlusion);
-	//vec3 envLight = vec3(0.1, 0.1, 0.1);
-	vec3 envLight = vec3(0.0, 0.0, 0.0);
+	vec3 envLight = vec3(0.1 / 3, 0.1 /3, 0.1 / 3);
 
 	//// start mixing the diffuse lighting - re-compute non-blurred lighting per pixel to get maximum resolutions
     vec3 diffuseContrib = pow( albedo.xyz, vec3(DiffuseColorMix) ) * (E0 + envLight);        
@@ -94,10 +93,9 @@ void main()
 
 	//----------------------------------------------------------------------------------------------
 	// Compute thickness
-	vec3 shadowCoordWDiv = oShadowCoord.xyz / oShadowCoord.w;
-	float distanceToLight = shadowCoordWDiv.z;
+	float distanceToLight = depth0; // depth0 range 0...1
 
-	vec4 TSMTap = texture(ShadowTex, shadowCoordWDiv.xy);
+	vec4 TSMTap = texture(ShadowTex, UV0);
 	
 	vec3 objNormalBack = texture( NormalTex, TSMTap.yz).xyz * vec3( 2.0, 2.0, 2.0 ) - vec3( 1.0, 1.0, 1.0 );  
     vec3 N_bumpedBack = normalize( mat3(World) * objNormalBack ); 
@@ -111,7 +109,7 @@ void main()
 		thicknessToLight = 100.0;  
     } 
 	 
-    float correctedThickness = saturate( -bumpDot_L0 ) * thicknessToLight * 10.0;  
+    float correctedThickness = saturate( -bumpDot_L0 ) * thicknessToLight;  
     float finalThickness = mix( thicknessToLight, correctedThickness, backFacingEst );  
    
     //FragColor = vec4(TSMTap.x, distanceToLight, finalThickness, finalCol.x);
