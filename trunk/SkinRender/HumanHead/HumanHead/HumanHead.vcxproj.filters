@@ -136,9 +136,6 @@
     <None Include="..\Media\Shaders\Common.include.glsl">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="read.hlsl">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="..\Media\Shaders\ViewDepth.frag">
       <Filter>资源文件</Filter>
     </None>

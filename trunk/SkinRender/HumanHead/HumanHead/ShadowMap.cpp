@@ -11,10 +11,10 @@ GLint ShadowMap::msGlowParam = -1;
 GLint ShadowMap::msZNearParam = -1;
 GLint ShadowMap::msZFarParam = -1;
 
-void ShadowMap::Init()
+void ShadowMap::Init( std::vector<Utility::ShaderMacro>* macro )
 {
-	msShadowProgramID = Utility::LoadShaderEffect("ShadowMap.vert", "ShadowMap.frag");
-	
+	msShadowProgramID = Utility::LoadShaderEffect("ShadowMap.vert", "ShadowMap.frag", macro);
+
 	msWorldParam = glGetUniformLocation(msShadowProgramID, "World");
 	ASSERT(msWorldParam >= 0);
 
