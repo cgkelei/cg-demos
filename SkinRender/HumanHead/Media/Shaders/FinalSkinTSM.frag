@@ -6,13 +6,6 @@
 #define SHADOW_BAIS 0.0001
 #define SHADOW_MAP_SIZE 1024
 
-struct Light
-{
-	vec3 Position;	// Positon in world space
-	vec3 Color;	
-	float Amount;	
-};	
-
 uniform Light Lights[LIGHTCOUNT];
 uniform mat4 World;
 
@@ -30,11 +23,12 @@ uniform vec3 EyePos;
 uniform float DiffuseColorMix = 0.5;
 uniform float Roughness = 0.3;	
 uniform float Rho_s = 0.18;
-uniform float DepthScale = 100.0;
+uniform float DepthScale = 10.0;
 
 in vec3 oWorldPos;
 in vec3 oWorldNormal;
 in vec4 oShadowCoord[LIGHTCOUNT];
+in float oLightDist[LIGHTCOUNT];
 in vec2 oTex;
 
 out vec4 FragColor;
@@ -55,15 +49,24 @@ void main()
     vec3 N_bumped = normalize( mat3(World) * objNormal );
 
 	
+	float depth0 = NormalizedDepth(oLightDist[0], Lights[0].NearFarPlane.x, Lights[0].NearFarPlane.y)- Lights[0].Bias;
+	float depth1 = NormalizedDepth(oLightDist[1], Lights[1].NearFarPlane.x, Lights[1].NearFarPlane.y)- Lights[1].Bias;
+	float depth2 = NormalizedDepth(oLightDist[2], Lights[2].NearFarPlane.x, Lights[2].NearFarPlane.y)- Lights[2].Bias;
+
+	vec2 UV0 = ShadowTexCoord(oShadowCoord[0]);
+	vec2 UV1 = ShadowTexCoord(oShadowCoord[1]);
+	vec2 UV2 = ShadowTexCoord(oShadowCoord[2]);
+
 #ifdef SHADOW_PCF	
-	float L0Shadow = ShadowPCF(oShadowCoord[0], ShadowTex[0], vec2(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE), SHADOW_BAIS, 4, 1);
-	float L1Shadow = ShadowPCF(oShadowCoord[1], ShadowTex[1], vec2(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE), SHADOW_BAIS, 4, 1);
-	float L2Shadow = ShadowPCF(oShadowCoord[2], ShadowTex[2], vec2(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE), SHADOW_BAIS, 4, 1);
+	float L0Shadow = ShadowPCF(UV0, ShadowTex[0], depth0, 4, 1);
+	float L1Shadow = ShadowPCF(UV1, ShadowTex[1], depth1, 4, 1);
+	float L2Shadow = ShadowPCF(UV2, ShadowTex[2], depth2, 4, 1);
 #else
-	float L0Shadow = Shadow(oShadowCoord[0], ShadowTex[0], SHADOW_BAIS);
-	float L1Shadow = Shadow(oShadowCoord[1], ShadowTex[1], SHADOW_BAIS);
-	float L2Shadow = Shadow(oShadowCoord[2], ShadowTex[2], SHADOW_BAIS);
+	float L0Shadow = Shadow(UV0, ShadowTex[0], depth0);
+	float L1Shadow = Shadow(UV1, ShadowTex[1], depth1);
+	float L2Shadow = Shadow(UV2, ShadowTex[2], depth2);
 #endif
+
 	
 	vec3 diffuseLight = vec3(0.0);
 
@@ -129,53 +132,53 @@ void main()
 	vec4 thickness_mm, fades;
 
 	// Light0 
-	vec3 TSMtap0 = texture( ShadowTex[0], oShadowCoord[0].xy / oShadowCoord[0].w ).xyz; 
+	vec3 TSMtap0 = texture( ShadowTex[0], UV0).xyz; 
 	texDist = length(oTex.xy - TSMtap0.yz);
 		
-	// Four average thicknesses through the object (in mm)  		
-	thickness_mm = DepthScale * vec4( irrad1Tap1.w, irrad2Tap0.w,  irrad3Tap0.w, irrad4Tap0.w );
+	// Four average thicknesses through the object (in mm)  
+	thickness_mm = DepthScale * RealDepth ( vec4( irrad1Tap0.w, irrad2Tap0.w,  irrad3Tap0.w, irrad4Tap0.w ), Lights[0].NearFarPlane);
 	fades = exp( thickness_mm * thickness_mm * inv_a );  
-	blend = 0.08 * textureScale *  texDist / 0.05;
+	blend = textureScale *  texDist;
 
-	blendFactor3 = saturate(blend / ( a_values.y ) );  
-	blendFactor4 = saturate(blend / ( a_values.z ) );  
-	blendFactor5 = saturate(blend / ( a_values.w ) );  
+	blendFactor3 = saturate(blend / ( a_values.y * 6.0) );  
+	blendFactor4 = saturate(blend / ( a_values.z * 6.0) );  
+	blendFactor5 = saturate(blend / ( a_values.w * 6.0) );  
 		
 	diffuseLight += GaussWeights[3]  * fades.y * blendFactor3 * texture( IrradTex[0 * 6 + 3], TSMtap0.yz ).xyz / normConst;  
 	diffuseLight += GaussWeights[4]  * fades.z * blendFactor4 * texture( IrradTex[0 * 6 + 4], TSMtap0.yz ).xyz / normConst; 
 	diffuseLight += GaussWeights[5]  * fades.w * blendFactor5 * texture( IrradTex[0 * 6 + 5], TSMtap0.yz ).xyz / normConst;
 
 	// Light1 
-	vec3 TSMtap1 = texture( ShadowTex[1], oShadowCoord[1].xy / oShadowCoord[1].w ).xyz; 
+	vec3 TSMtap1 = texture( ShadowTex[1], UV1 ).xyz; 
 	texDist = length(oTex.xy - TSMtap1.yz);
 		
 	// Four average thicknesses through the object (in mm)  		
-	thickness_mm = DepthScale * vec4( irrad1Tap1.w, irrad2Tap1.w,  irrad3Tap1.w, irrad4Tap1.w );
+	thickness_mm = DepthScale * RealDepth ( vec4( irrad1Tap1.w, irrad2Tap1.w,  irrad3Tap1.w, irrad4Tap1.w ), Lights[0].NearFarPlane);
 	fades = exp( thickness_mm * thickness_mm * inv_a );  
 
-	blend = textureScale *  texDist / 0.05;
+	blend = textureScale *  texDist;
 
-	blendFactor3 = saturate(blend / ( a_values.y ) );  
-	blendFactor4 = saturate(blend / ( a_values.z ) );  
-	blendFactor5 = saturate(blend / ( a_values.w ) );  
+	blendFactor3 = saturate(blend / ( a_values.y * 6.0) );  
+	blendFactor4 = saturate(blend / ( a_values.z * 6.0) );  
+	blendFactor5 = saturate(blend / ( a_values.w * 6.0) );  
 		
 	diffuseLight += GaussWeights[3]  * fades.y * blendFactor3 * texture( IrradTex[1 * 6 + 3], TSMtap1.yz ).xyz / normConst;  
 	diffuseLight += GaussWeights[4]  * fades.z * blendFactor4 * texture( IrradTex[1 * 6 + 4], TSMtap1.yz ).xyz / normConst; 
 	diffuseLight += GaussWeights[5]  * fades.w * blendFactor5 * texture( IrradTex[1 * 6 + 5], TSMtap1.yz ).xyz / normConst;
 
 	// Light2 
-	vec3 TSMtap2 = texture( ShadowTex[2], oShadowCoord[2].xy / oShadowCoord[2].w ).xyz; 
+	vec3 TSMtap2 = texture( ShadowTex[2], UV2 ).xyz; 
 	texDist = length(oTex.xy - TSMtap2.yz);
 		
 	// Four average thicknesses through the object (in mm)  		
-	thickness_mm = DepthScale * vec4( irrad1Tap2.w, irrad2Tap2.w,  irrad3Tap2.w, irrad4Tap2.w );
+	thickness_mm = DepthScale * RealDepth ( vec4( irrad1Tap2.w, irrad2Tap2.w,  irrad3Tap2.w, irrad4Tap2.w ), Lights[1].NearFarPlane);
 	fades = exp( thickness_mm * thickness_mm * inv_a );  
 
-	blend = textureScale *  texDist / 0.05;
+	blend = textureScale *  texDist;
 
-	blendFactor3 = saturate(blend / ( a_values.y ) );  
-	blendFactor4 = saturate(blend / ( a_values.z ) );  
-	blendFactor5 = saturate(blend / ( a_values.w ) );  
+	blendFactor3 = saturate(blend / ( a_values.y * 6.0) );  
+	blendFactor4 = saturate(blend / ( a_values.z * 6.0) );  
+	blendFactor5 = saturate(blend / ( a_values.w * 6.0) );  
 		
 	diffuseLight += GaussWeights[3]  * fades.y * blendFactor3 * texture( IrradTex[2 * 6 + 3], TSMtap2.yz ).xyz / normConst;  
 	diffuseLight += GaussWeights[4]  * fades.z * blendFactor4 * texture( IrradTex[2 * 6 + 4], TSMtap2.yz ).xyz / normConst; 
@@ -191,9 +194,9 @@ void main()
 	float m = Roughness;
 	float rho_s = Rho_s;
 
-	////vec4 specTap = texture( SpecTex, oTex ); // rho_s and roughness
- //   //float m = specTap.w * 0.09 + 0.23;	 // m is specular roughness
- //   //float rho_s = specTap.x * 0.16 + 0.18;
+	//vec4 specTap = texture( SpecTex, oTex ); // rho_s and roughness
+    //float m = specTap.w * 0.09 + 0.23;	 // m is specular roughness
+    //float rho_s = specTap.x * 0.16 + 0.18;
 	
 	//Energy conservation (optional) - rho_s and m can be painted
 	float finalScale = 1 - rho_s * texture(Rho_d_Tex, vec2(dot(N_bumped, V), m)).x;

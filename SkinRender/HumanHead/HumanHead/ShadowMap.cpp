@@ -24,11 +24,11 @@ void ShadowMap::Init()
 	msProjParam = glGetUniformLocation(msShadowProgramID, "Proj");
 	ASSERT(msViewParam >= 0);
 
-	/*msZNearParam = glGetUniformLocation(msShadowProgramID, "ZNear");
+	msZNearParam = glGetUniformLocation(msShadowProgramID, "ZNear");
 	ASSERT(msZNearParam >= 0);
 
 	msZFarParam = glGetUniformLocation(msShadowProgramID, "ZFar");
-	ASSERT(msZFarParam >= 0);*/
+	ASSERT(msZFarParam >= 0);
 
 	msGlowParam = glGetUniformLocation(msShadowProgramID, "Grow");
 	//ASSERT(msGlowParam >= 0);
@@ -79,6 +79,9 @@ void ShadowMap::Begin(const Camera* camera)
 	glUseProgram(msShadowProgramID);
 	glUniformMatrix4fv(msViewParam, 1, false, glm::value_ptr(camera->GetViewMatrix()));
 	glUniformMatrix4fv(msProjParam, 1, false, glm::value_ptr(camera->GetProjectionMatrix()));
+
+	glUniform1f(msZNearParam, camera->GetNearPlane());
+	glUniform1f(msZFarParam, camera->GetFarPlane());
 }
 
 void ShadowMap::SetWorldMatrix( const glm::mat4& world )
@@ -96,5 +99,7 @@ void ShadowMap::End()
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
+
+	//Utility::SaveTextureToPfm("depth.pfm", mTexture->GetColorTex(), 1024, 1024);
 }
 

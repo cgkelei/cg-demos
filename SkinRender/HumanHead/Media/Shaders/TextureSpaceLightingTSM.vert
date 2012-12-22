@@ -1,7 +1,9 @@
 #version 330
 
 uniform mat4 World;
-uniform mat4 ShadowMatrix;
+uniform mat4 LightView;
+uniform mat4 LightProj;
+
 
 in vec4 iPos;
 in vec2 iTex;
@@ -10,6 +12,7 @@ in vec3 iNormal;
 out vec3 oWorldPos;
 out vec3 oWorldNormal;
 out vec4 oShadowCoord;
+out float oLightDist;
 out vec2 oTex;
 
 void main()
@@ -24,5 +27,8 @@ void main()
 
 	// transform normal to world space
     oWorldNormal = normalize(mat3(World) * iNormal);
-	oShadowCoord = ShadowMatrix * worldPos;
+	
+	oShadowCoord = LightView * worldPos;
+	oLightDist = -oShadowCoord.z;				// view space depth
+	oShadowCoord = LightProj * oShadowCoord;
 }

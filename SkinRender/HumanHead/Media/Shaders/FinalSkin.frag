@@ -6,13 +6,6 @@
 #define SHADOW_BAIS 0.0001
 #define SHADOW_MAP_SIZE 1024
 
-struct Light
-{
-	vec3 Position;	// Positon in world space
-	vec3 Color;	
-	float Amount;	
-};	
-
 uniform Light Lights[LIGHTCOUNT];
 uniform mat4 World;
 
@@ -34,6 +27,7 @@ uniform float Rho_s = 0.18;
 in vec3 oWorldPos;
 in vec3 oWorldNormal;
 in vec4 oShadowCoord[LIGHTCOUNT];
+in float oLightDist[LIGHTCOUNT];
 in vec2 oTex;
 
 out vec4 FragColor;
@@ -55,15 +49,24 @@ void main()
     vec3 objNormal = texture( NormalTex, oTex ).xyz * vec3( 2.0, 2.0, 2.0 ) - vec3( 1.0, 1.0, 1.0 );  
     vec3 N_bumped = normalize( mat3(World) * objNormal );
 
+	float depth0 = NormalizedDepth(oLightDist[0], Lights[0].NearFarPlane.x, Lights[0].NearFarPlane.y)- Lights[0].Bias;
+	float depth1 = NormalizedDepth(oLightDist[1], Lights[1].NearFarPlane.x, Lights[1].NearFarPlane.y)- Lights[1].Bias;
+	float depth2 = NormalizedDepth(oLightDist[2], Lights[2].NearFarPlane.x, Lights[2].NearFarPlane.y)- Lights[2].Bias;
+
+	vec2 UV0 = ShadowTexCoord(oShadowCoord[0]);
+	vec2 UV1 = ShadowTexCoord(oShadowCoord[1]);
+	vec2 UV2 = ShadowTexCoord(oShadowCoord[2]);
+
 #ifdef SHADOW_PCF	
-	float L0Shadow = ShadowPCF(oShadowCoord[0], ShadowTex[0], vec2(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE), SHADOW_BAIS, 4, 1);
-	float L1Shadow = ShadowPCF(oShadowCoord[1], ShadowTex[1], vec2(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE), SHADOW_BAIS, 4, 1);
-	float L2Shadow = ShadowPCF(oShadowCoord[2], ShadowTex[2], vec2(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE), SHADOW_BAIS, 4, 1);
+	float L0Shadow = ShadowPCF(UV0, ShadowTex[0], depth0, 4, 1);
+	float L1Shadow = ShadowPCF(UV1, ShadowTex[1], depth1, 4, 1);
+	float L2Shadow = ShadowPCF(UV2, ShadowTex[2], depth2, 4, 1);
 #else
-	float L0Shadow = Shadow(oShadowCoord[0], ShadowTex[0], SHADOW_BAIS);
-	float L1Shadow = Shadow(oShadowCoord[1], ShadowTex[1], SHADOW_BAIS);
-	float L2Shadow = Shadow(oShadowCoord[2], ShadowTex[2], SHADOW_BAIS);
+	float L0Shadow = Shadow(UV0, ShadowTex[0], depth0);
+	float L1Shadow = Shadow(UV1, ShadowTex[1], depth1);
+	float L2Shadow = Shadow(UV2, ShadowTex[2], depth2);
 #endif
+
 
 	vec3 diffuseLight = vec3(0.0);
 	 
