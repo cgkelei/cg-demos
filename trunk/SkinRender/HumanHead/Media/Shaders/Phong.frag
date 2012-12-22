@@ -56,35 +56,28 @@ void main()
 	float L1atten = 1.0;
 	float L2atten = 1.0;
 
-	//float L0Shadow = Shadow(oShadowCoord[0], ShadowTex[0], vec2(NearPlane,FarPlane), SHADOW_BAIS);
-	//float L1Shadow = Shadow(oShadowCoord[1], ShadowTex[1], vec2(NearPlane,FarPlane), SHADOW_BAIS);
-	//float L2Shadow = Shadow(oShadowCoord[2], ShadowTex[2], vec2(NearPlane,FarPlane), SHADOW_BAIS);
-
-	//vec2 shadowCoordWDiv = ShadowTexCoord(oShadowCoord[0]);  
-    //float depth00 = texture(ShadowTex[0], shadowCoordWDiv.xy).r;
-
-	//FragColor =  vec4(depth0, depth00, depth0, 1.0);
-
-	//float depth0 = NormalizedDepthFromClip(oShadowCoord[0], Lights[0].NearFarPlane) - Lights[0].Bias;
-	//float depth1 = NormalizedDepthFromClip(oShadowCoord[1], Lights[1].NearFarPlane) - Lights[1].Bias;
-	//float depth2 = NormalizedDepthFromClip(oShadowCoord[2], Lights[2].NearFarPlane) - Lights[2].Bias;
-
-	float depth0 = NormalizedDepth(oLightDist[0], Lights[0].NearFarPlane.x, Lights[0].NearFarPlane.y)- Lights[0].Bias;
-	float depth1 = NormalizedDepth(oLightDist[1], Lights[1].NearFarPlane.x, Lights[1].NearFarPlane.y)- Lights[1].Bias;
-	float depth2 = NormalizedDepth(oLightDist[2], Lights[2].NearFarPlane.x, Lights[2].NearFarPlane.y)- Lights[2].Bias;
+	float depth0 = NormalizedDepth(oLightDist[0], Lights[0].NearFarPlane.x, Lights[0].NearFarPlane.y);
+	float depth1 = NormalizedDepth(oLightDist[1], Lights[1].NearFarPlane.x, Lights[1].NearFarPlane.y);
+	float depth2 = NormalizedDepth(oLightDist[2], Lights[2].NearFarPlane.x, Lights[2].NearFarPlane.y);
 
 	vec2 UV0 = ShadowTexCoord(oShadowCoord[0]);
 	vec2 UV1 = ShadowTexCoord(oShadowCoord[1]);
 	vec2 UV2 = ShadowTexCoord(oShadowCoord[2]);
 
 #ifdef SHADOW_PCF	
-	float L0Shadow = ShadowPCF(UV0, ShadowTex[0], depth0, 4, 1);
-	float L1Shadow = ShadowPCF(UV1, ShadowTex[1], depth1, 4, 1);
-	float L2Shadow = ShadowPCF(UV2, ShadowTex[2], depth2, 4, 1);
+	float L0Shadow = ShadowPCF(UV0, ShadowTex[0], depth0 - SHADOW_BIAS, 4, 1);
+	float L1Shadow = ShadowPCF(UV1, ShadowTex[1], depth1 - SHADOW_BIAS, 4, 1);
+	float L2Shadow = ShadowPCF(UV2, ShadowTex[2], depth2 - SHADOW_BIAS, 4, 1);
 #else
-	float L0Shadow = Shadow(UV0, ShadowTex[0], depth0);
-	float L1Shadow = Shadow(UV1, ShadowTex[1], depth1);
-	float L2Shadow = Shadow(UV2, ShadowTex[2], depth2);
+	#ifdef SHADOW_VSM 
+	float L0Shadow = chebyshevUpperBound(depth0, texture2D(ShadowTex[0], UV0).ra);
+	float L1Shadow = chebyshevUpperBound(depth1, texture2D(ShadowTex[1], UV1).ra);
+	float L2Shadow = chebyshevUpperBound(depth2, texture2D(ShadowTex[2], UV2).ra);	
+	#else
+	float L0Shadow = Shadow(UV0, ShadowTex[0], depth0 - SHADOW_BIAS);
+	float L1Shadow = Shadow(UV1, ShadowTex[1], depth1 - SHADOW_BIAS);
+	float L2Shadow = Shadow(UV2, ShadowTex[2], depth2 - SHADOW_BIAS);
+	#endif
 #endif
 
 	float bumpDot_L0 = dot( N_bumped, L0 );
@@ -125,7 +118,6 @@ void main()
 
 	//// start mixing the diffuse lighting - re-compute non-blurred lighting per pixel to get maximum resolutions
     vec3 diffuseContrib = albedo.xyz * ( E0 + E1 + E2 + envLight);        
-   
 
 	vec3 specularContrib = vec3(0);  
     // Compute specular for each light  
@@ -133,6 +125,8 @@ void main()
 	specularContrib += Lights[1].Color * Lights[1].Amount * L1Shadow * KS_Skin_Specular(N_bumped, L1, V, m, rho_s, Rho_d_Tex );
 	specularContrib += Lights[2].Color * Lights[2].Amount * L2Shadow * KS_Skin_Specular(N_bumped, L2, V, m, rho_s, Rho_d_Tex );
 
+	specularContrib = pow( specularContrib.xyz, vec3(1.0 / 2.2) );
+	
 
 	FragColor = vec4(diffuseContrib + specularContrib,  1.0 );
 }
