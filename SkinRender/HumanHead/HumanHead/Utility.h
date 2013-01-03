@@ -12,6 +12,8 @@ public:
 	static void SaveScreenToPfmDepth( const char* file, int width, int height );
 	static void SaveTextureToPfmDepth( const char* file, GLuint tex, int width, int height );
 	static void SaveTextureToTGA(const char* file, GLuint tex, int width, int height);
+
+	static void WriteTGARGBA(const char* file, int width, int height, float* src);
 	
 	static void PrintEffectUniforms(GLuint program);
 	static void PrintEffectAttribs(GLuint program);
@@ -20,7 +22,8 @@ public:
 
 	static GLuint LinkShaderProgram( GLuint vertexShader, GLuint fragmentShader);
 	static GLuint LoadShader(GLenum type, const char* file, const std::vector<ShaderMacro>* macro = NULL);
-		
+
+	
 		
 //	 std: tring formatString(const char *fmt, ...) {
 //	char tmp[512];
@@ -63,11 +66,5 @@ public:
 //	return std: tring(tmp);
 //}
 
-	static nv::matrix4f Inverse(const nv::matrix4f& mat);
-
-	static void BuildLookAtMatrix(double eyex, double eyey, double eyez,
-		double centerx, double centery, double centerz,
-		double upx, double upy, double upz,
-		float m[16]);
 };
 

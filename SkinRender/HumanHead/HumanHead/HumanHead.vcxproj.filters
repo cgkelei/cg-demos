@@ -33,7 +33,13 @@
     <ClCompile Include="Bloom.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="SkyDome.cpp">
+    <ClCompile Include="SurfaceImage.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CubeMapProcessor.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SHProjection.h.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -42,9 +48,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ShadowMap.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="SkyDome.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="RenderTextureFBO.h">
@@ -60,6 +63,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Bloom.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SurfaceImage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeMapProcessor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SHProjection.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -137,6 +149,15 @@
       <Filter>资源文件</Filter>
     </None>
     <None Include="..\Media\Shaders\ViewDepth.frag">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="SHProjection.inl">
+      <Filter>头文件</Filter>
+    </None>
+    <None Include="..\Media\Shaders\SkyBox.frag">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Media\Shaders\SkyBox.vert">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>

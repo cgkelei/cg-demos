@@ -48,9 +48,6 @@ public:
 	const glm::mat4& GetProjectionMatrix() const { return mProjection; }
 	const glm::mat4& GetViewProjectionMatrix() const { return mViewProj; }
 
-	// multiply the bais matrix
-	const glm::mat4& GetShadowMatrix() const { return mShadowMatrix; }
-
 	const glm::vec3& GetLookAtPosition() { return mLookAt; }  
 	const glm::vec3& GetEyePosition() { return mEyePosition; }  
 
@@ -77,7 +74,7 @@ private:
 
 	glm::vec2 mViewportSize;
 
-	glm::mat4 mView, mProjection, mViewProj, mShadowMatrix;
+	glm::mat4 mView, mProjection, mViewProj;
 
 	glm::vec3 mLookAt, mEyePosition;
 

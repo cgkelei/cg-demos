@@ -136,8 +136,7 @@ void Camera::UpdatePosition(glm::vec2 delta)
 
 	transform = mProjection * transform;
 
-	glm::mat4 inverse =  transform._inverse();
-
+	glm::mat4 inverse = glm::inverse(transform); 
 
 	glm::vec4 t = glm::vec4(mPanPosition.x, mPanPosition.y, 0.0f, 1.0f);
 	t = transform * t;
@@ -174,14 +173,6 @@ void Camera::UpdateMatrices()
 	mEyePosition = glm::vec3(glm::column(viewInverse, 3));
 
 	mViewProj = mProjection * mView;
-
-
-	static glm::mat4 bais(glm::vec4(0.5, 0, 0, 0), 
-		glm::vec4(0, 0.5, 0, 0),
-		glm::vec4(0, 0, 0.5, 0),
-		glm::vec4(0.5, 0.5, 0.5, 1.0));
-
-	mShadowMatrix =/* bais **/ mViewProj;
 }
 
 void Camera::Update( float elapsedTime )

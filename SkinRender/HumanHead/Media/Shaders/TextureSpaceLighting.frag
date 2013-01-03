@@ -19,8 +19,8 @@ uniform sampler2D   SpecTex; // spec amount in r, g, b, and roughness value over
 uniform sampler2D   NormalTex;	    
 uniform sampler2D   ShadowTex[LIGHTCOUNT];
 uniform sampler2D   Rho_d_Tex; // Torrance-Sparrow BRDF integrated over hemisphere for range of roughness and incident angles
-uniform samplerCube EnvCube;
- 
+uniform samplerCube IrradEnvMap;
+uniform samplerCube GlossyEnvMap;
 
 in vec3 oWorldPos;
 in vec3 oWorldNormal;
@@ -112,12 +112,12 @@ void main()
 	//float occlusion = albedoTap.w;  
 	float occlusion = 1.0;
 
-	//vec3 cubeTap1 = texture( EnvCube, N_nonBumped ).xyz;
-	//vec3 envLight = saturate( EnvAmount * cubeTap1.xyz * occlusion);
-	vec3 envLight = vec3(0.1, 0.1, 0.1);
+	vec3 cubeTap1 = texture( IrradEnvMap, N_nonBumped ).xyz;
+	vec3 envLight = saturate( EnvAmount * cubeTap1.xyz * occlusion);
+	//vec3 envLight = vec3(0.1, 0.1, 0.1);
 
 	//// start mixing the diffuse lighting - re-compute non-blurred lighting per pixel to get maximum resolutions
-    vec3 diffuseContrib = pow( albedo.xyz, vec3(DiffuseColorMix) ) * ( E0 + E1 + E2 + envLight);        
+    vec3 diffuseContrib = pow( albedo.xyz, vec3(DiffuseColorMix) ) * ( E0 + E1 + E2 + envLight );        
     vec3 finalCol = diffuseContrib.xyz;  
 
 	FragColor = vec4(finalCol,  1.0 );
