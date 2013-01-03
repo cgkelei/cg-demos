@@ -6,6 +6,7 @@ struct Light
 	vec2 NearFarPlane;
 };	
 
+#define GlossyNumMipmap 8
 #define SHADOW_MAP_SIZE 1024
 #define SHADOW_BIAS 0.001
 #define saturate(value) clamp(value, 0.0, 1.0)

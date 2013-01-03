@@ -6,6 +6,8 @@
 
 uniform float Roughness = 0.3;
 uniform float Rho_s = 0.18;
+uniform float EnvAmount = 0.2;
+uniform float SpecularIntensity = 1.88;
 
 uniform Light Lights[LIGHTCOUNT];
 
@@ -20,7 +22,8 @@ uniform sampler2D NormalTex;
 uniform sampler2D Rho_d_Tex; 
 uniform sampler2D SpecTex;
 uniform sampler2D   ShadowTex[LIGHTCOUNT];
-uniform samplerCube EnvCube;
+uniform samplerCube IrradEnvMap;
+uniform samplerCube GlossyEnvMap;
 
 in vec3 oWorldPos;
 in vec3 oWorldNormal;
@@ -39,7 +42,7 @@ void main()
     vec3 objNormal = texture( NormalTex, oTex ).xyz * vec3( 2.0, 2.0, 2.0 ) - vec3( 1.0, 1.0, 1.0 );  
     vec3 N_bumped = normalize( mat3(World) * objNormal );
 
-	// compute view
+	// compute world view
 	vec3 V = normalize(EyePos - oWorldPos);
 	
 	// lighting parameters
@@ -100,7 +103,6 @@ void main()
 	float m = Roughness;	 // m is specular roughness
     float rho_s = Rho_s;
 
-
 	float rho_dt_L0 = 1.0 - rho_s * texture( Rho_d_Tex, vec2( bumpDot_L0, m ) ).x;
     float rho_dt_L1 = 1.0 - rho_s * texture( Rho_d_Tex, vec2( bumpDot_L1, m ) ).x;
     float rho_dt_L2 = 1.0 - rho_s * texture( Rho_d_Tex, vec2( bumpDot_L2, m ) ).x;
@@ -112,21 +114,32 @@ void main()
 	vec4 albedoTap = texture( AlbedoTex, oTex );
 	vec3 albedo = albedoTap.xyz;
 
-	//vec3 cubeTap1 = texture( EnvCube, N_nonBumped ).xyz;
-	//vec3 envLight = saturate( EnvAmount * cubeTap1.xyz * occlusion);
-	vec3 envLight = vec3(0.1, 0.1, 0.1);
+	float occlusion = 1.0;
+	vec3 cubeTap1 = texture( IrradEnvMap, N_nonBumped ).xyz;
+	vec3 envLight = saturate( EnvAmount * cubeTap1.xyz * occlusion);
 
 	//// start mixing the diffuse lighting - re-compute non-blurred lighting per pixel to get maximum resolutions
     vec3 diffuseContrib = albedo.xyz * ( E0 + E1 + E2 + envLight);        
 
-	vec3 specularContrib = vec3(0);  
+	vec3 specularLight = vec3(0);  
     // Compute specular for each light  
-    specularContrib += Lights[0].Color * Lights[0].Amount * L0Shadow * KS_Skin_Specular(N_bumped, L0, V, m, rho_s, Rho_d_Tex );
-	specularContrib += Lights[1].Color * Lights[1].Amount * L1Shadow * KS_Skin_Specular(N_bumped, L1, V, m, rho_s, Rho_d_Tex );
-	specularContrib += Lights[2].Color * Lights[2].Amount * L2Shadow * KS_Skin_Specular(N_bumped, L2, V, m, rho_s, Rho_d_Tex );
+    specularLight += Lights[0].Color * Lights[0].Amount * L0Shadow * KS_Skin_Specular(N_bumped, L0, V, m, rho_s, Rho_d_Tex );
+	specularLight += Lights[1].Color * Lights[1].Amount * L1Shadow * KS_Skin_Specular(N_bumped, L1, V, m, rho_s, Rho_d_Tex );
+	specularLight += Lights[2].Color * Lights[2].Amount * L2Shadow * KS_Skin_Specular(N_bumped, L2, V, m, rho_s, Rho_d_Tex );
 
-	specularContrib = pow( specularContrib.xyz, vec3(1.0 / 2.2) );
+	// Compute specular for env light 
+	vec3 R_bumped = normalize( reflect( -V, N_bumped ) );	// refelct vector
+    vec3 R_nonBumped = normalize( reflect( -V, N_nonBumped ) );
+
+	// Gloss is the [0..1] value from your gloss map not decompressed in specular power
+	float MipmapIndex = (1 - m) * (GlossyNumMipmap - 1);  
+	vec3 AmbientSpecular = textureLod(GlossyEnvMap, R_bumped, MipmapIndex).xyz;
+	specularLight += EnvAmount * AmbientSpecular * FresnelReflectance( normalize(R_bumped + V), V,  0.028 );
 	
+	specularLight *= SpecularIntensity;
 
-	FragColor = vec4(diffuseContrib + specularContrib,  1.0 );
+	//specularLight = pow( specularLight.xyz, vec3(1.0 / 2.2) );
+	//FragColor = vec4(specularLight,  diffuseContrib);
+
+	FragColor = vec4(diffuseContrib + specularLight,  1.0 );
 }

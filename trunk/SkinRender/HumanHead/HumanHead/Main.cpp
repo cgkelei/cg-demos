@@ -14,8 +14,8 @@
 using namespace std;
 
 const char* HeadFile = "Infinite-Level_02.OBJ";
-const char* HeadAlbedo =  "Map-COL.dds";
-const char* HeadNormal =  "Infinite-Level_02_World_SmoothUV.dds";
+const char* HeadAlbedo =  "Map-COL.png";
+const char* HeadNormal =  "Infinite-Level_02_World_NoSmoothUV.png";
 const char* EnvMap = "Env.dds";
 const char* RhodMap = "rho_d.png";
 
@@ -36,8 +36,15 @@ struct Light
 	ShadowMap* ShadowMap;
 };
 
-Light gLights[LIGHT_COUNT];
+struct Environment
+{
+	GLuint DiffuseEnvMap, IrradianceEnvMap, GlossyEnvMap;
+};
 
+Light gLights[LIGHT_COUNT];
+Environment gEnvironment[3];
+int gCurrentEnv = 0;
+float gEnvLightAmount = 0.3;
 
 int gWindowWidth = 800;
 int gWindowHeight = 800;
@@ -49,6 +56,7 @@ float gRoughness = 0.3;
 float gRho_s = 0.18;
 float gStrechScale = 0.0014444444f;
 float gThicknessScale = 16.0f;
+float gSpecularIntensity = 1.88f;
 
 nv::Model gLightModel;
 GLuint gLightTexID, gLightModelVBO, gLightModelIBO;
@@ -60,7 +68,6 @@ glm::mat4 gModelWorld;
 
 GLuint gModelVBO, gModelIBO;
 GLuint gAlbedoTexID, gSpecTexID, gNormalTexID, gRhodTexID;
-GLuint gEnvTexID;
 
 bool gStrechMapDirty = true;		
 
@@ -119,6 +126,12 @@ struct PipelineEffect
 	GLint WorldParam, ViewProjParam, AlbedoTexParam;
 } gPipelineEffect;
 
+struct SkyBoxEffect
+{
+	GLuint ProgramID;
+	GLint MVPParam, EnvTexParam;
+} gSkyBoxEffect;
+
 struct ViewDepthEffect
 {
 	GLuint ProgramID;
@@ -155,8 +168,8 @@ struct LightParams
 struct TextureSpaceLightEffect
 {
 	GLuint ProgramID;
-	GLint WorldParam, LightViewParam, LightProjParam, AlbedoTexParam, SpecTexParam,
-		  NormalTexParam, Rho_d_TexParam, EnvCubeParam, ShadowTexParam, RoughnessParam, Rho_sParam;
+	GLint WorldParam, LightViewParam, LightProjParam, AlbedoTexParam, SpecTexParam, 
+		  NormalTexParam, Rho_d_TexParam, IrradEnvParam, EnvAmount, ShadowTexParam, RoughnessParam, Rho_sParam;
 	LightParams LightParam;
 
 } gTexSpaceLightEffect;
@@ -165,7 +178,7 @@ struct TextureSpaceLightTSMEffect
 {
 	GLuint ProgramID;
 	GLint WorldParam, LightViewParam, LightProjParam, AlbedoTexParam, SpecTexParam,
-		NormalTexParam, Rho_d_TexParam, EnvCubeParam, ShadowTexParam, RoughnessParam, Rho_sParam;
+		NormalTexParam, Rho_d_TexParam, IrradEnvParam, EnvAmount, ShadowTexParam, RoughnessParam, Rho_sParam;
 	LightParams LightParam;
 
 } gTexSpaceLightTSMEffect;
@@ -174,29 +187,28 @@ struct TextureSpaceLightTSMEffect
 struct FinalSkinEffect
 {
 	GLuint ProgramID;
-	GLint WorldParam, ViewProjParam, LightViewParam, LightProjParam, AlbedoTexParam, SpecTexParam,
-		NormalTexParam, Rho_d_TexParam, ShadowTexParam, IrradTexParam, GaussWeightsParam, EyePosParam;
+	GLint WorldParam, ViewProjParam, LightViewParam, LightProjParam, AlbedoTexParam, SpecTexParam, SpecIntensityParam,
+		NormalTexParam, Rho_d_TexParam, ShadowTexParam, EnvCubeParam, GlossyEnvParam, EnvAmount,
+		IrradTexParam, GaussWeightsParam, EyePosParam, DiffuseColorMixParam, RoughnessParam, Rho_sParam;
 	LightParams LightParam;
-	GLint DiffuseColorMixParam, RoughnessParam, Rho_sParam;
 
 } gFinalSkinEffect;
 
 struct FinalSkinTSMEffect
 {
 	GLuint ProgramID;
-	GLint WorldParam, ViewProjParam, LightViewParam, LightProjParam, AlbedoTexParam, SpecTexParam, StretchTexParam,
-		NormalTexParam, Rho_d_TexParam, EnvCubeParam, ShadowTexParam, IrradTexParam, GaussWeightsParam, EyePosParam;
+	GLint WorldParam, ViewProjParam, LightViewParam, LightProjParam, AlbedoTexParam, SpecTexParam, StretchTexParam, SpecIntensityParam,
+		NormalTexParam, Rho_d_TexParam, EnvCubeParam, EnvAmount, GlossyEnvParam, ShadowTexParam, IrradTexParam, 
+		GaussWeightsParam, EyePosParam, DiffuseColorMixParam, RoughnessParam, Rho_sParam, ThicknessScaleParam;
 	LightParams LightParam;
-	GLint DiffuseColorMixParam, RoughnessParam, Rho_sParam, ThicknessScaleParam;
 
 } gFinalSkinTSMEffect;
 
 struct PhongEffect
 {
 	GLuint ProgramID;
-	GLint WorldParam, ViewProjParam, LightViewParam, LightProjParam;
-	GLint AlbedoTexParam, NormalTexParam, SpecTexParam , Rho_d_TexParam, EnvCubeParam, ShadowTexParam, EyePosParam;
-	GLint RoughnessParam, Rho_sParam;
+	GLint WorldParam, ViewProjParam, LightViewParam, LightProjParam, AlbedoTexParam, NormalTexParam, SpecTexParam , SpecIntensityParam,
+		Rho_d_TexParam, IrradEnvParam, GlossyEnvParam, EnvAmount,ShadowTexParam, EyePosParam, RoughnessParam, Rho_sParam;
 	LightParams LightParam;
 
 } gPhongEffect;
@@ -271,7 +283,7 @@ void DrawModel(nv::Model* model, GLuint vbo, GLuint ibo)
 	//glCallList(vbo);
 }
 
-GLuint Create2DTextureFromFile(const char* fileName, GLenum wrapType = GL_REPEAT)
+GLuint Create2DTextureFromFile(const char* fileName, GLenum wrapType = GL_REPEAT )
 {
 	GLuint tex = 0;
 
@@ -289,10 +301,9 @@ GLuint Create2DTextureFromFile(const char* fileName, GLenum wrapType = GL_REPEAT
 		glBindTexture(GL_TEXTURE_2D, tex);
 
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapType);
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapType);
-		glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, GL_TRUE);
 
 		glTexImage2D( GL_TEXTURE_2D, 0, image.getInternalFormat(), image.getWidth(), image.getHeight(), 0,
 			image.getFormat(), image.getType(), image.getLevel(0));
@@ -301,7 +312,7 @@ GLuint Create2DTextureFromFile(const char* fileName, GLenum wrapType = GL_REPEAT
 	return tex;
 }
 
-GLuint CreateCubemapTextureFromFile(const char* fileName)
+GLuint CreateCubemapTextureFromFile(const char* fileName, bool mipMap)
 {
 	GLuint tex = 0;
 
@@ -316,23 +327,44 @@ GLuint CreateCubemapTextureFromFile(const char* fileName)
 		}
 		assert( image.isCubeMap() == true);
 
+		
+
 		glGenTextures(1, &tex);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
 
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		GLenum filter = GL_LINEAR;
+		if (mipMap)  filter = GL_LINEAR_MIPMAP_LINEAR;
+
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, filter);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, filter);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		//glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
 
 		//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_GENERATE_MIPMAP_SGIS, GL_TRUE);
 
 		// load face data
-		for(int i=0; i<6; i++) {
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,
-				image.getInternalFormat(), image.getWidth(), image.getHeight(), 0, 
-				GL_RGB, GL_FLOAT, image.getLevel(0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i));
+		
+
+		// calculate mip map levels
+		int mipMaps = image.getMipLevels();
+		
+		unsigned int width = static_cast<unsigned int>(image.getWidth());
+		unsigned int height = static_cast<unsigned int>(image.getHeight());
+		
+		for (int level = 0; level < mipMaps; ++level)
+		{
+			for(int i=0; i<6; i++) 
+			{
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, level,
+					image.getInternalFormat(), width, height, 0, 
+					image.getFormat(), image.getType(), image.getLevel(level, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i));
+			}	
+
+			width = std::max<unsigned int>(1U, width / 2);
+			height = std::max<unsigned int>(1U, height / 2);
 		}
 	}
 
@@ -428,11 +460,17 @@ void LoadShaderEffect()
 
 	ShadowMap::Init(&shaderDefines);
 
+	printf("Load Skybox effect...\n");
+	gSkyBoxEffect.ProgramID = Utility::LoadShaderEffect("SkyBox.vert", "SkyBox.frag");
+	RETRIEVE_UNIFORM_LOCATION(gSkyBoxEffect.MVPParam, gSkyBoxEffect.ProgramID, "MVP");
+	RETRIEVE_UNIFORM_LOCATION(gSkyBoxEffect.EnvTexParam, gSkyBoxEffect.ProgramID, "EnvTex");
+
 	gViewDepthEffectEffect.ProgramID = Utility::LoadShaderEffect("Convolution.vert", "ViewDepth.frag");
 	gViewDepthEffectEffect.DepthTexParam = -1;
 	RETRIEVE_UNIFORM_LOCATION(gViewDepthEffectEffect.DepthTexParam, gViewDepthEffectEffect.ProgramID, "DepthMap");
 	ASSERT(gViewDepthEffectEffect.ProgramID > 0);
 
+	printf("Load FixedPipeline effect...\n");
 	gPipelineEffect.ProgramID = Utility::LoadShaderEffect("FixedPipeline.vert", "FixedPipeline.frag");
 	ASSERT(gPipelineEffect.ProgramID > 0);
 
@@ -499,11 +537,13 @@ void LoadShaderEffect()
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightEffect.AlbedoTexParam, gTexSpaceLightEffect.ProgramID, "AlbedoTex");
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightEffect.SpecTexParam, gTexSpaceLightEffect.ProgramID, "SpecTex");
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightEffect.Rho_d_TexParam, gTexSpaceLightEffect.ProgramID, "Rho_d_Tex");
-	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightEffect.EnvCubeParam, gTexSpaceLightEffect.ProgramID, "EnvCube");
+	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightEffect.IrradEnvParam, gTexSpaceLightEffect.ProgramID, "IrradEnvMap");
+	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightEffect.EnvAmount, gTexSpaceLightEffect.ProgramID, "EnvAmount");
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightEffect.LightViewParam, gTexSpaceLightEffect.ProgramID, "LightView[0]");
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightEffect.LightProjParam, gTexSpaceLightEffect.ProgramID, "LightProj[0]");
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightEffect.RoughnessParam, gTexSpaceLightEffect.ProgramID, "Roughness");
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightEffect.Rho_sParam, gTexSpaceLightEffect.ProgramID, "Rho_s");
+	
 
 	// Final Skin Without TSM effect
 	printf("Load Final Skin Without TSM effect...\n");
@@ -530,6 +570,10 @@ void LoadShaderEffect()
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.IrradTexParam, gFinalSkinEffect.ProgramID, "IrradTex[0]");
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.RoughnessParam, gFinalSkinEffect.ProgramID, "Roughness");
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.Rho_sParam, gFinalSkinEffect.ProgramID, "Rho_s");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.EnvCubeParam, gFinalSkinEffect.ProgramID, "IrradEnvMap");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.EnvAmount, gFinalSkinEffect.ProgramID, "EnvAmount");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.GlossyEnvParam, gFinalSkinEffect.ProgramID, "GlossyEnvMap");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.SpecIntensityParam, gFinalSkinEffect.ProgramID, "SpecularIntensity");
 
 	// Texture Space Light With TSM effect
 	printf("Load Texture Space Light With TSM Effect...\n");
@@ -548,7 +592,8 @@ void LoadShaderEffect()
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightTSMEffect.AlbedoTexParam, gTexSpaceLightTSMEffect.ProgramID, "AlbedoTex");
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightTSMEffect.Rho_d_TexParam, gTexSpaceLightTSMEffect.ProgramID, "Rho_d_Tex");
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightTSMEffect.SpecTexParam, gTexSpaceLightTSMEffect.ProgramID, "SpecTex");
-	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightTSMEffect.EnvCubeParam, gTexSpaceLightTSMEffect.ProgramID, "EnvCube");
+	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightTSMEffect.IrradEnvParam, gTexSpaceLightTSMEffect.ProgramID, "IrradEnvMap");
+	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightTSMEffect.EnvAmount, gTexSpaceLightTSMEffect.ProgramID, "EnvAmount");
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightTSMEffect.LightViewParam, gTexSpaceLightTSMEffect.ProgramID, "LightView");
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightTSMEffect.LightProjParam, gTexSpaceLightTSMEffect.ProgramID, "LightProj");
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightTSMEffect.RoughnessParam, gTexSpaceLightTSMEffect.ProgramID, "Roughness");
@@ -576,15 +621,18 @@ void LoadShaderEffect()
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.Rho_d_TexParam, gFinalSkinTSMEffect.ProgramID, "Rho_d_Tex");
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.LightViewParam, gFinalSkinTSMEffect.ProgramID, "LightView[0]");
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.LightProjParam, gFinalSkinTSMEffect.ProgramID, "LightProj[0]");
-	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.Rho_d_TexParam, gFinalSkinTSMEffect.ProgramID, "IrradTex[0]");
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.GaussWeightsParam, gFinalSkinTSMEffect.ProgramID, "GaussWeights[0]");
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.EyePosParam, gFinalSkinTSMEffect.ProgramID, "EyePos");
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.IrradTexParam, gFinalSkinTSMEffect.ProgramID, "IrradTex[0]");
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.RoughnessParam, gFinalSkinTSMEffect.ProgramID, "Roughness");
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.Rho_sParam, gFinalSkinTSMEffect.ProgramID, "Rho_s");
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.ThicknessScaleParam, gFinalSkinTSMEffect.ProgramID, "DepthScale");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.EnvCubeParam, gFinalSkinTSMEffect.ProgramID, "IrradEnvMap");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.EnvAmount, gFinalSkinTSMEffect.ProgramID, "EnvAmount");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.GlossyEnvParam, gFinalSkinTSMEffect.ProgramID, "GlossyEnvMap");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.SpecIntensityParam, gFinalSkinTSMEffect.ProgramID, "SpecularIntensity");
 
-	printf("Load Phong with Kelemen/Szirmay-Kalos Specular BRDF effect...\n");
+	printf("Load Lambert with Kelemen/Szirmay-Kalos Specular BRDF effect...\n");
 	gPhongEffect.ProgramID = Utility::LoadShaderEffect("Phong.vert", "Phong.frag", &shaderDefines);
 	Utility::PrintEffectAttribs(gPhongEffect.ProgramID);
 	Utility::PrintEffectUniforms(gPhongEffect.ProgramID);
@@ -603,9 +651,12 @@ void LoadShaderEffect()
 	RETRIEVE_UNIFORM_LOCATION(gPhongEffect.ShadowTexParam, gPhongEffect.ProgramID,  "ShadowTex[0]");
 	RETRIEVE_UNIFORM_LOCATION(gPhongEffect.LightViewParam, gPhongEffect.ProgramID, "LightView[0]");
 	RETRIEVE_UNIFORM_LOCATION(gPhongEffect.LightProjParam, gPhongEffect.ProgramID, "LightProj[0]");
-	RETRIEVE_UNIFORM_LOCATION(gPhongEffect.EnvCubeParam, gPhongEffect.ProgramID, "EnvCube");
+	RETRIEVE_UNIFORM_LOCATION(gPhongEffect.IrradEnvParam, gPhongEffect.ProgramID, "IrradEnvMap");
+	RETRIEVE_UNIFORM_LOCATION(gPhongEffect.GlossyEnvParam, gPhongEffect.ProgramID, "GlossyEnvMap");
+	RETRIEVE_UNIFORM_LOCATION(gPhongEffect.EnvAmount, gPhongEffect.ProgramID, "EnvAmount");
 	RETRIEVE_UNIFORM_LOCATION(gPhongEffect.Rho_sParam, gPhongEffect.ProgramID, "Rho_s");
 	RETRIEVE_UNIFORM_LOCATION(gPhongEffect.RoughnessParam, gPhongEffect.ProgramID, "Roughness");
+	RETRIEVE_UNIFORM_LOCATION(gPhongEffect.SpecIntensityParam, gPhongEffect.ProgramID, "SpecularIntensity");
 }
 
 void LoadModel()
@@ -664,6 +715,8 @@ void LoadModel()
 		// load model textures
 		printf("load head albedo map...\n");
 		gAlbedoTexID = Create2DTextureFromFile(HeadAlbedo);
+		//Utility::SaveTextureToPfm("al.pfm", gAlbedoTexID, 4096, 4096);
+		
 
 		printf("load head normal map...\n");
 		gNormalTexID = Create2DTextureFromFile(HeadNormal);
@@ -674,7 +727,9 @@ void LoadModel()
 
 	// Load env map
 	printf("load environment map...\n");
-	gEnvTexID = CreateCubemapTextureFromFile("MeadowTrail");
+	gEnvironment[0].DiffuseEnvMap = CreateCubemapTextureFromFile("Environment/Eucalyptus/DiffuseMap.dds", false);
+	gEnvironment[0].IrradianceEnvMap = CreateCubemapTextureFromFile("Environment/Eucalyptus/IrradianceMap.dds", false);
+	gEnvironment[0].GlossyEnvMap =  CreateCubemapTextureFromFile("Environment/Eucalyptus/GlossyEnvMap.dds", true);
 }
 
 void LoadPresents()
@@ -720,6 +775,13 @@ void DoUI()
 {
 	static nv::Rect none;
 	static char tempBuffer[255];
+
+	for (int i = 0; i < 8; ++i)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
 
 	gHub.begin();
 
@@ -767,6 +829,13 @@ void DoUI()
 	else
 	{
 		gHub.doLabel( none, "Render Parameters");
+
+		gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
+		sprintf(tempBuffer, "Spec Intensity %.2f", gSpecularIntensity);
+		gHub.doLabel(none, tempBuffer);
+		gHub.doHorizontalSlider(none, 0.0f, 4.0f, &gSpecularIntensity);
+		gHub.endGroup();
+
 		gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
 		sprintf(tempBuffer, "Roughness %.2f", gRoughness);
 		gHub.doLabel(none, tempBuffer);
@@ -779,16 +848,17 @@ void DoUI()
 		gHub.doHorizontalSlider(none, 0.0f, 1.0f, &gRho_s);
 		gHub.endGroup();
 
-		gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
+		/*gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
 		sprintf(tempBuffer, "StrechScale %f", gStrechScale);
 		gHub.doLabel(none, tempBuffer);
 		gHub.doHorizontalSlider(none, 0.0f, 0.002f, &gStrechScale);
-		gHub.endGroup();
+		gHub.endGroup();*/
+
 
 		if (gMode == RM_SSS_With_TSM)
 		{
 			gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
-			sprintf(tempBuffer, "ThincknessScale %f", gThicknessScale);
+			sprintf(tempBuffer, "ThincknessScale %.0f", gThicknessScale);
 			gHub.doLabel(none, tempBuffer);
 			gHub.doHorizontalSlider(none, 5.0f, 20.0f, &gThicknessScale);
 			gHub.endGroup();
@@ -812,6 +882,11 @@ void DoUI()
 			gHub.endGroup();
 		}
 
+		gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
+		sprintf(tempBuffer, "Environment Light: %.2f",  gEnvLightAmount);
+		gHub.doLabel( none, tempBuffer);
+		gHub.doHorizontalSlider(none, 0.0f, 1.0f, &gEnvLightAmount);
+		gHub.endGroup();
 	}
 
 	gHub.endGroup();
@@ -1090,6 +1165,64 @@ void MakeStretchMap()
 	ConvolutionStretch(gStretchBuffer[3], gStretchBuffer[4], 3);	
 }
 
+void RenderSkyBox()
+{
+	glUseProgram(gSkyBoxEffect.ProgramID);
+
+	glm::mat4 MVP = CurrentCamera()->GetViewProjectionMatrix() * glm::scale(glm::mat4(1.0f), glm::vec3(10.0f));
+	glUniformMatrix4fv(gSkyBoxEffect.MVPParam, 1, false, glm::value_ptr(MVP));
+
+	/*glDisable(GL_CULL_FACE);*/
+	glEnable(GL_DEPTH_TEST);
+
+	glActiveTexture(GL_TEXTURE0);
+	glEnable(GL_TEXTURE_CUBE_MAP);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, gEnvironment[gCurrentEnv].DiffuseEnvMap);
+	glUniform1i(gSkyBoxEffect.EnvTexParam, 0);
+
+	glBegin(GL_QUADS);          // Start Drawing Quads
+	// Front Face
+	glVertex3f(-1.0f, -1.0f,  1.0f);  // Bottom Left Of The Texture and Quad
+	glVertex3f( 1.0f, -1.0f,  1.0f);  // Bottom Right Of The Texture and Quad
+	glVertex3f( 1.0f,  1.0f,  1.0f);  // Top Right Of The Texture and Quad
+	glVertex3f(-1.0f,  1.0f,  1.0f);  // Top Left Of The Texture and Quad
+	
+	// Back Face
+	glVertex3f(-1.0f, -1.0f, -1.0f);  // Bottom Right Of The Texture and Quad
+	glVertex3f(-1.0f,  1.0f, -1.0f);  // Top Right Of The Texture and Quad
+	glVertex3f( 1.0f,  1.0f, -1.0f);  // Top Left Of The Texture and Quad
+	glVertex3f( 1.0f, -1.0f, -1.0f);  // Bottom Left Of The Texture and Quad
+	
+	// Top Face
+	glVertex3f(-1.0f,  1.0f, -1.0f);  // Top Left Of The Texture and Quad
+	glVertex3f(-1.0f,  1.0f,  1.0f);  // Bottom Left Of The Texture and Quad
+	glVertex3f( 1.0f,  1.0f,  1.0f);  // Bottom Right Of The Texture and Quad
+	glVertex3f( 1.0f,  1.0f, -1.0f);  // Top Right Of The Texture and Quad
+	
+	// Bottom Face
+	glVertex3f(-1.0f, -1.0f, -1.0f);  // Top Right Of The Texture and Quad
+	glVertex3f( 1.0f, -1.0f, -1.0f);  // Top Left Of The Texture and Quad
+	glVertex3f( 1.0f, -1.0f,  1.0f);  // Bottom Left Of The Texture and Quad
+	glVertex3f(-1.0f, -1.0f,  1.0f);  // Bottom Right Of The Texture and Quad
+	
+	// Right face
+	glVertex3f( 1.0f, -1.0f, -1.0f);  // Bottom Right Of The Texture and Quad
+	glVertex3f( 1.0f,  1.0f, -1.0f);  // Top Right Of The Texture and Quad
+	glVertex3f( 1.0f,  1.0f,  1.0f);  // Top Left Of The Texture and Quad
+	glVertex3f( 1.0f, -1.0f,  1.0f);  // Bottom Left Of The Texture and Quad
+	
+	// Left Face
+	glVertex3f(-1.0f, -1.0f, -1.0f);  // Bottom Left Of The Texture and Quad
+	glVertex3f(-1.0f, -1.0f,  1.0f);  // Bottom Right Of The Texture and Quad
+	glVertex3f(-1.0f,  1.0f,  1.0f);  // Top Right Of The Texture and Quad
+	glVertex3f(-1.0f,  1.0f, -1.0f);  // Top Left Of The Texture and Quad
+	glEnd();                    // Done Drawing Quads
+
+	glDisable(GL_DEPTH_TEST);
+	//glEnable(GL_CULL_FACE);
+	glUseProgram(0);
+}
+
 /**
  * Texture space lighting to get Irradiance 
  */
@@ -1100,11 +1233,13 @@ void RenderIrradiance()
 	glPushAttrib(GL_VIEWPORT_BIT);	
 	glViewport(0, 0, BUFFER_SIZE, BUFFER_SIZE);
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0.729f, 0.596f, 0.549f, 1.0f);
+	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(gTexSpaceLightEffect.ProgramID);
 
+	glUniform1f(gTexSpaceLightEffect.EnvAmount, gEnvLightAmount);
 	glUniform1f(gTexSpaceLightEffect.Rho_sParam, gRho_s);
 	glUniform1f(gTexSpaceLightEffect.RoughnessParam, gRoughness);
 	glUniformMatrix4fv(gTexSpaceLightEffect.WorldParam, 1, false, glm::value_ptr(gModelWorld));
@@ -1147,8 +1282,8 @@ void RenderIrradiance()
 
 	glActiveTexture(GL_TEXTURE7);
 	glEnable(GL_TEXTURE_CUBE_MAP);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, gEnvTexID);
-	glUniform1i(gTexSpaceLightEffect.EnvCubeParam, 7);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, gEnvironment[gCurrentEnv].IrradianceEnvMap);
+	glUniform1i(gTexSpaceLightEffect.IrradEnvParam, 7);
 
 	DrawModel(&gModel, gModelVBO, gModelIBO);
 
@@ -1164,12 +1299,12 @@ void RenderIrradiance()
 	Convolution(gIrradianceBuffer[0][4], gIrradianceBuffer[0][5], 4);
 	
 
-	//for (int i = 0; i < TEXTURE_BUFFER_COUNT; ++i)
-	//{
-	//	std::stringstream sss;
-	//	sss << "blurIrradiance" << i << ".pfm";
-	//	Utility::SaveTextureToPfm(sss.str().c_str(), gIrradianceBuffer[0][i]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);
-	//}
+	/*for (int i = 0; i < TEXTURE_BUFFER_COUNT; ++i)
+	{
+		std::stringstream sss;
+		sss << "blurIrradiance" << i << ".pfm";
+		Utility::SaveTextureToPfm(sss.str().c_str(), gIrradianceBuffer[0][i]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);
+	}*/
 }
 
 void RenderIrradianceTSM()
@@ -1179,6 +1314,8 @@ void RenderIrradianceTSM()
 
 	glUseProgram(gTexSpaceLightTSMEffect.ProgramID);
 
+	
+	glUniform1f(gTexSpaceLightTSMEffect.EnvAmount, gEnvLightAmount);
 	glUniform1f(gTexSpaceLightTSMEffect.Rho_sParam, gRho_s);
 	glUniform1f(gTexSpaceLightTSMEffect.RoughnessParam, gRoughness);
 	glUniformMatrix4fv(gTexSpaceLightTSMEffect.WorldParam, 1, false, glm::value_ptr(gModelWorld));
@@ -1205,14 +1342,15 @@ void RenderIrradianceTSM()
 
 	glActiveTexture(GL_TEXTURE4);
 	glEnable(GL_TEXTURE_CUBE_MAP);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, gEnvTexID);
-	glUniform1i(gTexSpaceLightTSMEffect.EnvCubeParam, 4);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, gEnvironment[gCurrentEnv].IrradianceEnvMap);
+	glUniform1i(gTexSpaceLightTSMEffect.IrradEnvParam, 4);
 
 	for (int i = 0 ; i < LIGHT_COUNT; ++i)
 	{
 		gIrradianceBuffer[i][0]->Activate();
 
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.729f / 3, 0.596f / 3, 0.549f / 3, 1.0f);
+		//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glActiveTexture(GL_TEXTURE5);
@@ -1271,6 +1409,8 @@ void RenderFinal()
 
 	glUseProgram(gFinalSkinEffect.ProgramID);
 
+	glUniform1f(gFinalSkinEffect.SpecIntensityParam, gSpecularIntensity);
+	glUniform1f(gFinalSkinEffect.EnvAmount, gEnvLightAmount);
 	glUniformMatrix4fv(gFinalSkinEffect.WorldParam, 1, false, glm::value_ptr(gModelWorld));
 
 	Camera* currentCam = CurrentCamera();
@@ -1331,19 +1471,22 @@ void RenderFinal()
 	glBindTexture(GL_TEXTURE_2D, gRhodTexID);
 	glUniform1i(gFinalSkinEffect.Rho_d_TexParam, 12);
 
+	glActiveTexture(GL_TEXTURE13);
+	glEnable(GL_TEXTURE_CUBE_MAP);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, gEnvironment[gCurrentEnv].IrradianceEnvMap);
+	glUniform1i(gFinalSkinEffect.EnvCubeParam, 13);
+
+	glActiveTexture(GL_TEXTURE14);
+	glEnable(GL_TEXTURE_CUBE_MAP);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, gEnvironment[gCurrentEnv].GlossyEnvMap);
+	glUniform1i(gFinalSkinEffect.GlossyEnvParam, 14);
+
 	DrawModel(&gModel, gModelVBO, gModelIBO);
 
 	glUseProgram(0);
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
-
-	for (int i = 0; i < 8; ++i)
-	{
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-	
 }
 
 void RenderFinalTSM()
@@ -1367,6 +1510,8 @@ void RenderFinalTSM()
 
 	glUseProgram(gFinalSkinTSMEffect.ProgramID);
 
+	glUniform1f(gFinalSkinTSMEffect.SpecIntensityParam, gSpecularIntensity);
+	glUniform1f(gFinalSkinTSMEffect.EnvAmount, gEnvLightAmount);
 	glUniformMatrix4fv(gFinalSkinTSMEffect.WorldParam, 1, false, glm::value_ptr(gModelWorld));
 
 	Camera* currentCam = CurrentCamera();
@@ -1429,15 +1574,26 @@ void RenderFinalTSM()
 
 		for (int j = 0; j < 6; ++j)
 		{
+			auto ss = GL_TEXTURE5 + LIGHT_COUNT + i * 6 + j - GL_TEXTURE0;
+			auto p = gFinalSkinTSMEffect.IrradTexParam + i * 6 + j;
+
 			glActiveTexture(GL_TEXTURE5 + LIGHT_COUNT + i * 6 + j);
 			glEnable(GL_TEXTURE_2D);
 			gIrradianceBuffer[i][j]->BindColor(0);
-			auto ss = GL_TEXTURE5 + LIGHT_COUNT + i * 6 + j - GL_TEXTURE0;
-			auto p = gFinalSkinTSMEffect.IrradTexParam + i * 6 + j;
 			glUniform1i(gFinalSkinTSMEffect.IrradTexParam + i * 6 + j, GL_TEXTURE5 + LIGHT_COUNT + i * 6 + j - GL_TEXTURE0);		
 		}
 	}
 	
+	glActiveTexture(GL_TEXTURE27);
+	glEnable(GL_TEXTURE_CUBE_MAP);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, gEnvironment[gCurrentEnv].IrradianceEnvMap);
+	glUniform1i(gFinalSkinTSMEffect.EnvCubeParam, 27);
+
+	glActiveTexture(GL_TEXTURE28);
+	glEnable(GL_TEXTURE_CUBE_MAP);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, gEnvironment[gCurrentEnv].GlossyEnvMap);
+	glUniform1i(gFinalSkinTSMEffect.GlossyEnvParam, 28);
+
 	DrawModel(&gModel, gModelVBO, gModelIBO);
 
 	glUseProgram(0);
@@ -1448,77 +1604,6 @@ void RenderFinalTSM()
 	//gStretchBuffer[4]->Deactivate();
 
 	//Utility::SaveTextureToPfm("final.pfm",gStretchBuffer[4]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);
-
-	for (int i = 0; i < 8; ++i)
-	{
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-
-}
-
-void RenderNormal()
-{
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClearDepth(1.0f);
-	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-
-	if (gOptions[OPTION_WIREFRAME])
-	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	}else
-	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	}
-
-	glUseProgram(gPipelineEffect.ProgramID);
-
-	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
-	//glBindTexture(GL_TEXTURE_2D, gAlbedoTexID);
-	gIrradianceBuffer[0][0]->BindColor();
-	glUniform1i(gPipelineEffect.AlbedoTexParam, 0);
-
-	glUniformMatrix4fv(gPipelineEffect.WorldParam, 1, false, glm::value_ptr(gModelWorld));
-
-	auto eye = CurrentManipulator()->GetEyePosition();
-
-	Camera* currentCam = CurrentManipulator();
-	glm::mat4 viewProj = currentCam->GetProjectionMatrix() * currentCam->GetViewMatrix();
-	glUniformMatrix4fv(gPipelineEffect.ViewProjParam, 1, false, glm::value_ptr(viewProj));
-
-	DrawModel(&gModel, gModelVBO, gModelIBO);
-
-	glUseProgram(0);
-	if (gOptions[OPTION_SHOW_LIGHTS])
-	{
-		DrawLights();
-	}	
-
-
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glActiveTexture(GL_TEXTURE6);
-	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void RenderPhong()
@@ -1542,6 +1627,8 @@ void RenderPhong()
 
 	glUseProgram(gPhongEffect.ProgramID);
 
+	glUniform1f(gPhongEffect.EnvAmount, gEnvLightAmount);
+	glUniform1f(gPhongEffect.SpecIntensityParam, gSpecularIntensity);
 	glUniformMatrix4fv(gPhongEffect.WorldParam, 1, false, glm::value_ptr(gModelWorld));
 	
 	Camera* currentCam = CurrentCamera();
@@ -1571,8 +1658,8 @@ void RenderPhong()
 
 	glActiveTexture(GL_TEXTURE4);
 	glEnable(GL_TEXTURE_CUBE_MAP);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, gEnvTexID);
-	glUniform1i(gPhongEffect.EnvCubeParam, 4);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, gEnvironment[gCurrentEnv].IrradianceEnvMap);
+	glUniform1i(gPhongEffect.IrradEnvParam, 4);
 
 	for (int i = 0; i < LIGHT_COUNT; ++i)
 	{
@@ -1590,6 +1677,12 @@ void RenderPhong()
 		glUniform1f(gPhongEffect.LightParam.AmountParam + i * 4, gLights[i].Amount);
 	}
 
+	glActiveTexture(GL_TEXTURE20);
+	glEnable(GL_TEXTURE_CUBE_MAP);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, gEnvironment[gCurrentEnv].GlossyEnvMap);
+	glUniform1i(gPhongEffect.GlossyEnvParam, 20);
+
+
 	DrawModel(&gModel, gModelVBO, gModelIBO);
 
 	glUseProgram(0);
@@ -1604,12 +1697,6 @@ void RenderPhong()
 
 	//gStretchBuffer[4]->Deactivate();
 	//Utility::SaveTextureToPfm("final.pfm",gStretchBuffer[4]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);
-
-	for (int i = 0; i < 8; ++i)
-	{
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
 }
 
 void RenderScene()
@@ -1695,7 +1782,7 @@ void RenderScene()
 
 	if (gOptions[OPTION_DRAW_SKYBOX])
 	{
-
+		RenderSkyBox();
 	}
 	
 	DoUI();
@@ -1705,6 +1792,11 @@ void RenderScene()
 
 void Init()
 {
+	if (GLEW_ARB_seamless_cube_map)
+	{
+		glEnable(GL_ARB_seamless_cube_map);
+	}
+	
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 
@@ -1788,6 +1880,67 @@ void Motion(int x, int y)
 	}
 }
 
+int NumChannels(GLenum internalFmt)
+{
+	switch(internalFmt)
+	{
+	case GL_RGBA8:
+	case GL_BGRA:
+	case GL_RGBA16F:
+	case GL_RGBA32F:
+	case GL_RGBA16:
+		return 4;
+	case GL_RGB8:
+	case GL_RGB16F:
+	case GL_RGB32F:
+	case GL_RGB16:
+		return 3;
+	default:
+		assert(false);
+	}
+	return 0;
+}
+
+#include "CubeMapProcessor.h"
+
+void Test()
+{
+	nv::Image cubeMap;
+	cubeMap.loadImageFromFile("Showroom256.dds");
+
+	auto fmt = cubeMap.getFormat();
+	auto numChannel = NumChannels(cubeMap.getInternalFormat());
+
+	auto size = cubeMap.getWidth();
+	auto type = cubeMap.getType();
+
+	assert(cubeMap.getWidth() == cubeMap.getHeight());
+
+	CubeMapProcessor processor;
+	processor.Init(cubeMap.getWidth(), cubeMap.getWidth(), numChannel);
+
+	int pitch = cubeMap.getImageSize(0) / size;
+	for (int i = 0; i < cubeMap.getFaces(); ++i)
+	{
+		processor.SetInputFaceData(i, cubeMap.getInternalFormat(), numChannel, pitch, cubeMap.getLevel(0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i));
+	}
+
+	processor.Dump("Input.tga", processor.mSrcCubeMap);
+
+	processor.SHIrrandianceFilterCubeMap(4, true, CubeMapProcessor::EF_Stretch);
+
+	processor.Dump("Dest.tga", processor.mDstCubeMap);
+
+	/*for (int i = 0; i < cubeMap.getFaces(); ++i)
+	{
+	std::stringstream sss; sss << i << ".tga";
+	processor.mDstCubeMap[i].WritePfmFile(sss.str().c_str());
+	}*/
+
+}
+
+
+
 int main( int argc, char** argv) {
 	glutInit( &argc, argv);
 	glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
@@ -1824,6 +1977,8 @@ int main( int argc, char** argv) {
 	Init();
 
 	glutMainLoop();
+
+	//Test();
 
 	return 0;
 }

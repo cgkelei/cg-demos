@@ -3,8 +3,6 @@
 #include "Common.include.glsl"
 
 #define LIGHTCOUNT 3
-#define SHADOW_BAIS 0.0001
-#define SHADOW_MAP_SIZE 1024
 
 uniform Light Lights[LIGHTCOUNT];
 uniform mat4 World;
@@ -16,6 +14,8 @@ uniform sampler2D SpecTex;
 uniform sampler2D StretchTex;
 uniform sampler2D IrradTex[6*LIGHTCOUNT];
 uniform sampler2D ShadowTex[LIGHTCOUNT];
+uniform samplerCube IrradEnvMap;
+uniform samplerCube GlossyEnvMap;
 
 uniform vec3 GaussWeights[6];
 uniform vec3 EyePos;
@@ -24,6 +24,8 @@ uniform float DiffuseColorMix = 0.5;
 uniform float Roughness = 0.3;	
 uniform float Rho_s = 0.18;
 uniform float DepthScale = 10.0;
+uniform float EnvAmount = 0.2;
+uniform float SpecularIntensity = 1.88;
 
 in vec3 oWorldPos;
 in vec3 oWorldNormal;
@@ -214,7 +216,18 @@ void main()
 	specularLight += Lights[1].Color * Lights[1].Amount * L1Shadow * KS_Skin_Specular(N_bumped, L1, V, m, rho_s, Rho_d_Tex );
 	specularLight += Lights[2].Color * Lights[2].Amount * L2Shadow * KS_Skin_Specular(N_bumped, L2, V, m, rho_s, Rho_d_Tex );
 
-	specularLight = pow( specularLight.xyz, vec3(1.0 / 2.2) );
+	// Compute specular for env light 
+	vec3 R_bumped = normalize( reflect( -V, N_bumped ) );	// refelct vector
+    vec3 R_nonBumped = normalize( reflect( -V, N_nonBumped ) );
+
+	// Gloss is the [0..1] value from your gloss map not decompressed in specular power
+	float MipmapIndex = (1 - m) * (GlossyNumMipmap - 1);  
+	vec3 AmbientSpecular = textureLod(GlossyEnvMap, R_bumped, MipmapIndex).xyz;
+	specularLight += EnvAmount * AmbientSpecular * FresnelReflectance( normalize(R_bumped + V), V,  0.028 );
+
+	specularLight *= SpecularIntensity;
+
+	//FragColor = pow( FragColor.xyz, vec3(1.0 / 2.2) );
 
 	FragColor = vec4(diffuseLight + specularLight, 1.0 );  
 }

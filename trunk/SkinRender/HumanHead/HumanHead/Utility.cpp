@@ -154,6 +154,33 @@ void Utility::SaveTextureToTGA( const char* file, GLuint tex, int width, int hei
 		WriteTGA(file, &imageData[0], w, h);
 }
 
+
+void Utility::WriteTGARGBA( const char* file, int width, int height, float* src )
+{
+	std::vector<Pixel32> imageData(width*height);
+
+	auto h = height;
+	auto w = width;
+
+	for (int32_t j = 0; j < h; j++)
+		for(int32_t i = 0; i < w; i ++)
+		{
+			uint8_t r = uint8_t(src[(j * w + i)*4 + 0] * 255);
+			uint8_t g = uint8_t(src[(j * w + i)*4 + 1] * 255);
+			uint8_t b = uint8_t(src[(j * w + i)*4 + 2] * 255);
+			uint8_t a = uint8_t(src[(j * w + i)*4 + 3] * 255);
+
+			imageData[j*w+i].r = r;
+			imageData[j*w+i].g = g;
+			imageData[j*w+i].b = b;
+			imageData[j*w+i].a = a;
+		}
+
+
+	WriteTGA(file, &imageData[0], w, h);
+}
+
+
 void Utility::PrintEffectUniforms( GLuint mOGLProgramObject )
 {
 	// Query and store uniforms from the program.
