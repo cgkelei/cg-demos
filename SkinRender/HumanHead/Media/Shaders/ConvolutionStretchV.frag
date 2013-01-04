@@ -10,9 +10,9 @@ void main()
 	float netFilterWidth = scaleConv * GaussWidth * stretch.y;
 
 	 // Gaussian curve ¨C standard deviation of 1.0  
-   float curve[7] = float[7](0.006,0.061,0.242,0.383,0.242,0.061,0.006);  
+    float curve[7] = float[7](0.006,0.061,0.242,0.383,0.242,0.061,0.006);  
     vec2 coords = gl_TexCoord[0].xy - vec2( 0.0 , netFilterWidth * 3.0);  
-     vec4 sum = vec4(0.0);  
+    vec4 sum = vec4(0.0);  
     for( int i = 0; i < 7; i++ )  
     {  
 		vec4 tap = texture2D( InputTex,  coords );  

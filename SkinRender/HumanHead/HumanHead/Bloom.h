@@ -1,12 +1,24 @@
 #ifndef Bloom_h__
 #define Bloom_h__
 
+#include "Common.h"
 
-class Bloom
+class RenderTexture;
+
+class FastBloom
 {
 public:
-	Bloom(void);
-	~Bloom(void);
+	FastBloom(void);
+	~FastBloom(void);
+
+	void Go(RenderTexture* input);
+
+private:
+	GLuint mBlurProgramID, mCombineProgramID;
+	GLint mGaussWidthParam, mBlurSrcTexParam, mStepParam;
+	GLint mInputTexParam, mBloomTexcParam;
+
+	RenderTexture* mBloomTex[2];
 };
 
 #endif // Bloom_h__

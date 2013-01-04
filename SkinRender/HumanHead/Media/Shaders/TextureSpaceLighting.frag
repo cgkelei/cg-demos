@@ -114,7 +114,6 @@ void main()
 
 	vec3 cubeTap1 = texture( IrradEnvMap, N_nonBumped ).xyz;
 	vec3 envLight = saturate( EnvAmount * cubeTap1.xyz * occlusion);
-	//vec3 envLight = vec3(0.1, 0.1, 0.1);
 
 	//// start mixing the diffuse lighting - re-compute non-blurred lighting per pixel to get maximum resolutions
     vec3 diffuseContrib = pow( albedo.xyz, vec3(DiffuseColorMix) ) * ( E0 + E1 + E2 + envLight );        

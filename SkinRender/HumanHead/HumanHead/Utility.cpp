@@ -115,7 +115,8 @@ void Utility::SaveTextureToPfm( const char* file, GLuint tex, int width, int hei
 }
 
 
-void Utility::SaveScreenToPfmDepth( const char* file, int width, int height )
+
+void Utility::SaveScreenToPfm( const char* file, int width, int height )
 {
 	std::vector<float> TextureData(width * height * 3);
 	glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, &TextureData[0]);
@@ -123,6 +124,7 @@ void Utility::SaveScreenToPfmDepth( const char* file, int width, int height )
 	WritePfm(file, width, height, 3, &TextureData[0]);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
+
 
 void Utility::SaveTextureToTGA( const char* file, GLuint tex, int width, int height )
 {

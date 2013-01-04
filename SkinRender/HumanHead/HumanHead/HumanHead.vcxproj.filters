@@ -30,9 +30,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Bloom.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="SurfaceImage.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -60,9 +57,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Bloom.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="SurfaceImage.h">
@@ -139,12 +133,6 @@
     <None Include="..\Media\Shaders\Phong.vert">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="..\Media\Shaders\Bloom.frag">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="..\Media\Shaders\Bloom.vert">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="..\Media\Shaders\Common.include.glsl">
       <Filter>资源文件</Filter>
     </None>
@@ -158,6 +146,12 @@
       <Filter>资源文件</Filter>
     </None>
     <None Include="..\Media\Shaders\SkyBox.vert">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Media\Shaders\GaussianBlur.frag">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Media\Shaders\FastBloom.frag">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>
