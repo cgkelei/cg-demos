@@ -1,6 +1,7 @@
 #include "Common.h"
-#include "ShadowMap.h"
 #include "RenderTextureFBO.h"
+#include "ShadowMap.h"
+#include "Bloom.h"
 #include "Camera.h"
 #include "Utility.h"
 #include <nvMath.h>
@@ -18,11 +19,11 @@ const char* HeadAlbedo =  "Map-COL.png";
 const char* HeadNormal =  "Infinite-Level_02_World_NoSmoothUV.png";
 const char* EnvMap = "Env.dds";
 const char* RhodMap = "rho_d.png";
+const char* SeamMskMap = "HeadMask.png";
 
 #define LIGHT_COUNT 3
 #define BLOOM_BUFFER_COUNT 2
 #define TEXTURE_BUFFER_COUNT 6
-#define BUFFER_SIZE 800
 #define SHADOW_MAP_SIZE 1024
 #define CAMERA_FOV 20.0f
 #define MATH_PI float(3.14159265358979323846264338327950288f)
@@ -67,7 +68,7 @@ glm::vec3 gCenter;	// center of the model
 glm::mat4 gModelWorld;
 
 GLuint gModelVBO, gModelIBO;
-GLuint gAlbedoTexID, gSpecTexID, gNormalTexID, gRhodTexID;
+GLuint gAlbedoTexID, gSpecTexID, gNormalTexID, gRhodTexID, gSeamMaskTexID;
 
 bool gStrechMapDirty = true;		
 
@@ -76,6 +77,7 @@ Camera gCamera, gCameraTemp;
 RenderTexture* gTempBuffer, *gFinalBuffer;
 RenderTexture* gStretchBuffer[TEXTURE_BUFFER_COUNT];	// stretch texture blur storage
 RenderTexture* gIrradianceBuffer[LIGHT_COUNT][TEXTURE_BUFFER_COUNT];
+RenderTexture* gBloomBuffer[2];
 
 /**
  * First blur is so narrow, so we don't do it, just use the original irradiance texture
@@ -91,6 +93,7 @@ enum UIOption {
 	OPTION_WIREFRAME = 0,
 	OPTION_DRAW_SKYBOX,
 	OPTION_SHOW_LIGHTS,
+	OPTION_BLOOM,
 	OPTION_MANIPULATE_CAMERA,
 	OPTION_MANIPULATE_LIGHT0,
 	OPTION_SSS_WITH_TSM = OPTION_MANIPULATE_LIGHT0 + LIGHT_COUNT,
@@ -119,6 +122,7 @@ enum DebugMode
 
 int gDebugMode = DM_Depth0;
 
+FastBloom* gFastBloom;
 
 struct PipelineEffect
 {
@@ -188,7 +192,7 @@ struct FinalSkinEffect
 {
 	GLuint ProgramID;
 	GLint WorldParam, ViewProjParam, LightViewParam, LightProjParam, AlbedoTexParam, SpecTexParam, SpecIntensityParam,
-		NormalTexParam, Rho_d_TexParam, ShadowTexParam, EnvCubeParam, GlossyEnvParam, EnvAmount,
+		NormalTexParam, Rho_d_TexParam, ShadowTexParam, EnvCubeParam, GlossyEnvParam, EnvAmount, SeamMaskTexParam,
 		IrradTexParam, GaussWeightsParam, EyePosParam, DiffuseColorMixParam, RoughnessParam, Rho_sParam;
 	LightParams LightParam;
 
@@ -198,7 +202,7 @@ struct FinalSkinTSMEffect
 {
 	GLuint ProgramID;
 	GLint WorldParam, ViewProjParam, LightViewParam, LightProjParam, AlbedoTexParam, SpecTexParam, StretchTexParam, SpecIntensityParam,
-		NormalTexParam, Rho_d_TexParam, EnvCubeParam, EnvAmount, GlossyEnvParam, ShadowTexParam, IrradTexParam, 
+		NormalTexParam, Rho_d_TexParam, EnvCubeParam, EnvAmount, GlossyEnvParam, ShadowTexParam, IrradTexParam, SeamMaskTexParam,
 		GaussWeightsParam, EyePosParam, DiffuseColorMixParam, RoughnessParam, Rho_sParam, ThicknessScaleParam;
 	LightParams LightParam;
 
@@ -212,6 +216,14 @@ struct PhongEffect
 	LightParams LightParam;
 
 } gPhongEffect;
+
+struct BloomEffect
+{
+	GLuint BlurProgramID, CombineProgramID;
+	GLint GaussWidthParam, BlurInputTexParam, BlurStepParam;
+	GLint CombineInputTexParam, CombineBloomTexParam;
+
+} gBloomEffect;
 
 void BuildModel(nv::Model* model, GLuint* vbo, GLuint* ibo)
 {
@@ -373,29 +385,6 @@ GLuint CreateCubemapTextureFromFile(const char* fileName, bool mipMap)
 
 void CreateBuffers(GLenum format)
 {
-	GLenum target = GL_TEXTURE_2D;
-
-	if (!gTempBuffer)
-	{
-		gTempBuffer = new RenderTexture(BUFFER_SIZE, BUFFER_SIZE, target); 
-		gTempBuffer->InitColor_Tex(0, format);
-		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	}
-	
-	for (int i = 0; i < LIGHT_COUNT; i++)
-	{
-		for (int j = 0; j < TEXTURE_BUFFER_COUNT; ++j)
-		{
-			gIrradianceBuffer[i][j] = new RenderTexture(BUFFER_SIZE, BUFFER_SIZE, target); 
-			gIrradianceBuffer[i][j]->InitColor_Tex(0, format);
-			glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-		}
-		gIrradianceBuffer[i][0]->InitDepth_Tex();
-	}
-
 	for (int i = 0; i < LIGHT_COUNT; i++) 
 	{
 		//gLights->Camera.SetDistance(2.0);
@@ -403,17 +392,6 @@ void CreateBuffers(GLenum format)
 		gLights[i].ShadowMap = new ShadowMap(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 	}
 
-	if (!gStretchBuffer[0])
-	{
-		for (int i=0; i<TEXTURE_BUFFER_COUNT; i++)
-		{
-			gStretchBuffer[i] = new RenderTexture(BUFFER_SIZE, BUFFER_SIZE, GL_TEXTURE_2D);
-			gStretchBuffer[i]->InitColor_Tex(0, format);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		}
-		//bStretchMap = false;
-	}
 }
 
 int gFPS = 0;
@@ -459,6 +437,17 @@ void LoadShaderEffect()
 	shaderDefines.push_back(Utility::ShaderMacro("SHADOW_VSM", ""));
 
 	ShadowMap::Init(&shaderDefines);
+	
+	printf("Load Bloom effect...\n");
+	gBloomEffect.BlurProgramID = Utility::LoadShaderEffect("Convolution.vert", "GaussianBlur.frag");
+	gBloomEffect.CombineProgramID = Utility::LoadShaderEffect("Convolution.vert", "FastBloom.frag");
+
+	RETRIEVE_UNIFORM_LOCATION(gBloomEffect.GaussWidthParam, gBloomEffect.BlurProgramID, "GaussWidth");
+	RETRIEVE_UNIFORM_LOCATION(gBloomEffect.BlurInputTexParam, gBloomEffect.BlurProgramID, "InputTex");
+	RETRIEVE_UNIFORM_LOCATION(gBloomEffect.BlurStepParam, gBloomEffect.BlurProgramID, "Step");
+
+	RETRIEVE_UNIFORM_LOCATION(gBloomEffect.CombineInputTexParam, gBloomEffect.CombineProgramID, "InputTex");
+	RETRIEVE_UNIFORM_LOCATION(gBloomEffect.CombineBloomTexParam, gBloomEffect.CombineProgramID, "BloomTex");
 
 	printf("Load Skybox effect...\n");
 	gSkyBoxEffect.ProgramID = Utility::LoadShaderEffect("SkyBox.vert", "SkyBox.frag");
@@ -574,6 +563,7 @@ void LoadShaderEffect()
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.EnvAmount, gFinalSkinEffect.ProgramID, "EnvAmount");
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.GlossyEnvParam, gFinalSkinEffect.ProgramID, "GlossyEnvMap");
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.SpecIntensityParam, gFinalSkinEffect.ProgramID, "SpecularIntensity");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinEffect.SeamMaskTexParam, gFinalSkinEffect.ProgramID, "SeamMaskTex");
 
 	// Texture Space Light With TSM effect
 	printf("Load Texture Space Light With TSM Effect...\n");
@@ -631,6 +621,7 @@ void LoadShaderEffect()
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.EnvAmount, gFinalSkinTSMEffect.ProgramID, "EnvAmount");
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.GlossyEnvParam, gFinalSkinTSMEffect.ProgramID, "GlossyEnvMap");
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.SpecIntensityParam, gFinalSkinTSMEffect.ProgramID, "SpecularIntensity");
+	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.SeamMaskTexParam, gFinalSkinTSMEffect.ProgramID, "SeamMaskTex");
 
 	printf("Load Lambert with Kelemen/Szirmay-Kalos Specular BRDF effect...\n");
 	gPhongEffect.ProgramID = Utility::LoadShaderEffect("Phong.vert", "Phong.frag", &shaderDefines);
@@ -723,6 +714,9 @@ void LoadModel()
 
 		printf("load head rho_d map...\n");
 		gRhodTexID = Create2DTextureFromFile(RhodMap, GL_CLAMP_TO_EDGE);
+
+		printf("load seam mask map...\n");
+		gSeamMaskTexID = Create2DTextureFromFile(SeamMskMap, GL_CLAMP_TO_EDGE);
 	}
 
 	// Load env map
@@ -795,6 +789,7 @@ void DoUI()
 	gHub.doCheckButton(none, "Draw Wireframe", &gOptions[OPTION_WIREFRAME]);
 	gHub.doCheckButton(none, "Draw Skybox", &gOptions[OPTION_DRAW_SKYBOX]);
 	gHub.doCheckButton(none, "Show Light", &gOptions[OPTION_SHOW_LIGHTS]);
+	gHub.doCheckButton(none, "Bloom", &gOptions[OPTION_BLOOM]);
 	gHub.doLabel( none, "");
 
 	// TSM 
@@ -860,7 +855,7 @@ void DoUI()
 			gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
 			sprintf(tempBuffer, "ThincknessScale %.0f", gThicknessScale);
 			gHub.doLabel(none, tempBuffer);
-			gHub.doHorizontalSlider(none, 5.0f, 20.0f, &gThicknessScale);
+			gHub.doHorizontalSlider(none, 5.0f, 25.0f, &gThicknessScale);
 			gHub.endGroup();
 		}
 
@@ -1029,7 +1024,7 @@ void ConvolutionStretch(RenderTexture* src, RenderTexture* dest, int itr)
 
 	// convolution U
 	gTempBuffer->Activate();
-	SetOrthoProjection(BUFFER_SIZE, BUFFER_SIZE);
+	SetOrthoProjection(gWindowWidth, gWindowHeight);
 
 	glUseProgram(gConvStretchUEffect.ProgramID);
 	glUniform1f(gConvStretchUEffect.GaussWidthParam, sqrtf(gConvolutionScale[itr]));
@@ -1040,7 +1035,7 @@ void ConvolutionStretch(RenderTexture* src, RenderTexture* dest, int itr)
 	src->Bind();
 	glUniform1i(gConvStretchUEffect.InputTexParam, 0);
 	
-	DrawQuad(BUFFER_SIZE, BUFFER_SIZE);
+	DrawQuad(gWindowWidth, gWindowHeight);
 
 	glActiveTexture(GL_TEXTURE0);
 	src->Release();
@@ -1058,7 +1053,7 @@ void ConvolutionStretch(RenderTexture* src, RenderTexture* dest, int itr)
 	glUniform1f(gConvStretchVEffect.GaussWidthParam, sqrtf(gConvolutionScale[itr]));
 	//glUniform1f(gConvStretchVEffect.GaussWidthParam, gaussWidth);
 
-	DrawQuad(BUFFER_SIZE, BUFFER_SIZE);
+	DrawQuad(gWindowWidth, gWindowHeight);
 
 	glActiveTexture(GL_TEXTURE0);
 	gTempBuffer->Release();
@@ -1086,7 +1081,11 @@ void Convolution(RenderTexture* src, RenderTexture* dest, int itr)
 
 	// convolution U
 	gTempBuffer->Activate();
-	SetOrthoProjection(BUFFER_SIZE, BUFFER_SIZE);
+	SetOrthoProjection(gWindowWidth, gWindowHeight);
+
+	glm::vec2 stepX = glm::vec2(1.0f, 0.0f) * (1.0f / gWindowWidth);
+	glm::vec2 stepY = glm::vec2(0.0f, 1.0f) * (1.0f / gWindowHeight);
+
 	
 	glUseProgram(gConvolutionUEffect.ProgramID);
 	//glUniform1f(gConvolutionUEffect.GaussWidthParam, sqrtf(gaussWidth));
@@ -1102,7 +1101,7 @@ void Convolution(RenderTexture* src, RenderTexture* dest, int itr)
 	gStretchBuffer[itr]->Bind();
 	glUniform1i(gConvolutionUEffect.StretchTexParam, 1);	
 
-	DrawQuad(BUFFER_SIZE, BUFFER_SIZE);
+	DrawQuad(gWindowWidth, gWindowHeight);
 	
 	gTempBuffer->Deactivate();
 
@@ -1122,7 +1121,7 @@ void Convolution(RenderTexture* src, RenderTexture* dest, int itr)
 	gStretchBuffer[itr]->Bind();
 	glUniform1i(gConvolutionVEffect.StretchTexParam, 1);	
 
-	DrawQuad(BUFFER_SIZE, BUFFER_SIZE);
+	DrawQuad(gWindowWidth, gWindowHeight);
 
 	glActiveTexture(GL_TEXTURE0);
 	gTempBuffer->Release();
@@ -1136,12 +1135,56 @@ void Convolution(RenderTexture* src, RenderTexture* dest, int itr)
 	glPopAttrib();
 }
 
+void BloomGuassianBlur(RenderTexture* src, RenderTexture* dest, float guassianWidth)
+{
+	glPushAttrib(GL_VIEWPORT_BIT);
+
+	// convolution U
+	gTempBuffer->Activate();
+	SetOrthoProjection(gWindowWidth, gWindowHeight);
+	
+	glm::vec2 stepX = glm::vec2(1.0f, 0.0f) * (1.0f / gWindowWidth);
+	glm::vec2 stepY = glm::vec2(0.0f, 1.0f) * (1.0f / gWindowHeight);
+
+	glUseProgram(gBloomEffect.BlurProgramID);
+	glUniform1f(gBloomEffect.GaussWidthParam, guassianWidth);
+	glUniform2f(gBloomEffect.BlurStepParam, stepX.x, stepX.y );
+
+	glActiveTexture(GL_TEXTURE0);
+	glEnable(GL_TEXTURE_2D);
+	src->Bind();
+	glUniform1i(gBloomEffect.BlurInputTexParam, 0);
+
+	DrawQuad(gWindowWidth, gWindowHeight);
+	
+	gTempBuffer->Deactivate();
+
+	// convolution V
+	dest->Activate();
+
+	glUniform2f(gBloomEffect.BlurStepParam, stepY.x, stepY.y );
+	
+	glActiveTexture(GL_TEXTURE0);
+	gTempBuffer->Bind();
+	glUniform1i(gConvolutionVEffect.InputTexParam, 0);	
+
+	DrawQuad(gWindowWidth, gWindowHeight);
+
+	glActiveTexture(GL_TEXTURE0);
+	gTempBuffer->Release();
+
+	dest->Deactivate();
+
+	glUseProgram(0);
+	glPopAttrib();
+}
+
 void MakeStretchMap()
 {
 	gStretchBuffer[0]->Activate();
 
 	glPushAttrib(GL_VIEWPORT_BIT);
-	glViewport(0, 0, BUFFER_SIZE, BUFFER_SIZE);
+	glViewport(0, 0, gWindowWidth, gWindowHeight);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1158,7 +1201,7 @@ void MakeStretchMap()
 	gStretchBuffer[0]->Deactivate();
 	glPopAttrib(); 
 
-	//Utility::SaveTextureToPfm("StrechXY0.pfm", gStretchBuffer[0]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);
+	//Utility::SaveTextureToPfm("StrechXY0.pfm", gStretchBuffer[0]->GetColorTex(), gWindowWidth, gWindowWidth);
 	ConvolutionStretch(gStretchBuffer[0], gStretchBuffer[1], 0);
 	ConvolutionStretch(gStretchBuffer[1], gStretchBuffer[2], 1);
 	ConvolutionStretch(gStretchBuffer[2], gStretchBuffer[3], 2);
@@ -1231,7 +1274,7 @@ void RenderIrradiance()
 	gIrradianceBuffer[0][0]->Activate();
 
 	glPushAttrib(GL_VIEWPORT_BIT);	
-	glViewport(0, 0, BUFFER_SIZE, BUFFER_SIZE);
+	glViewport(0, 0, gWindowWidth, gWindowHeight);
 
 	glClearColor(0.729f, 0.596f, 0.549f, 1.0f);
 	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -1303,14 +1346,14 @@ void RenderIrradiance()
 	{
 		std::stringstream sss;
 		sss << "blurIrradiance" << i << ".pfm";
-		Utility::SaveTextureToPfm(sss.str().c_str(), gIrradianceBuffer[0][i]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);
+		Utility::SaveTextureToPfm(sss.str().c_str(), gIrradianceBuffer[0][i]->GetColorTex(), gWindowWidth, gWindowWidth);
 	}*/
 }
 
 void RenderIrradianceTSM()
 {
 	glPushAttrib(GL_VIEWPORT_BIT);	
-	glViewport(0, 0, BUFFER_SIZE, BUFFER_SIZE);
+	glViewport(0, 0, gWindowWidth, gWindowHeight);
 
 	glUseProgram(gTexSpaceLightTSMEffect.ProgramID);
 
@@ -1386,12 +1429,17 @@ void RenderIrradianceTSM()
 
 		/*std::stringstream sss;
 		sss << "light" << i << "Irr.pfm";
-		Utility::SaveTextureToPfm(sss.str().c_str(), gIrradianceBuffer[i][0]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);*/
+		Utility::SaveTextureToPfm(sss.str().c_str(), gIrradianceBuffer[i][0]->GetColorTex(), gWindowWidth, gWindowWidth);*/
 	}
 }
 
 void RenderFinal()
-{	
+{
+	if (gOptions[OPTION_BLOOM])
+	{
+		gFinalBuffer->Activate();
+	}
+
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(1.0f);
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1481,18 +1529,26 @@ void RenderFinal()
 	glBindTexture(GL_TEXTURE_CUBE_MAP, gEnvironment[gCurrentEnv].GlossyEnvMap);
 	glUniform1i(gFinalSkinEffect.GlossyEnvParam, 14);
 
+	glActiveTexture(GL_TEXTURE15);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, gSeamMaskTexID);
+	glUniform1i(gFinalSkinEffect.SeamMaskTexParam, 15);
+
 	DrawModel(&gModel, gModelVBO, gModelIBO);
 
 	glUseProgram(0);
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
+
+	if (gOptions[OPTION_BLOOM])
+	{
+		gFinalBuffer->Deactivate();
+	}
 }
 
 void RenderFinalTSM()
 {
-	//gStretchBuffer[4]->Activate();
-
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(1.0f);
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1594,6 +1650,11 @@ void RenderFinalTSM()
 	glBindTexture(GL_TEXTURE_CUBE_MAP, gEnvironment[gCurrentEnv].GlossyEnvMap);
 	glUniform1i(gFinalSkinTSMEffect.GlossyEnvParam, 28);
 
+	glActiveTexture(GL_TEXTURE29);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, gSeamMaskTexID);
+	glUniform1i(gFinalSkinTSMEffect.SeamMaskTexParam, 29);
+
 	DrawModel(&gModel, gModelVBO, gModelIBO);
 
 	glUseProgram(0);
@@ -1601,15 +1662,11 @@ void RenderFinalTSM()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 
-	//gStretchBuffer[4]->Deactivate();
-
-	//Utility::SaveTextureToPfm("final.pfm",gStretchBuffer[4]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);
+	//Utility::SaveTextureToPfm("final.pfm",gStretchBuffer[4]->GetColorTex(), gWindowWidth, gWindowWidth);
 }
 
 void RenderPhong()
 {
-	//gStretchBuffer[4]->Activate();
-
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(1.0f);
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1682,21 +1739,12 @@ void RenderPhong()
 	glBindTexture(GL_TEXTURE_CUBE_MAP, gEnvironment[gCurrentEnv].GlossyEnvMap);
 	glUniform1i(gPhongEffect.GlossyEnvParam, 20);
 
-
 	DrawModel(&gModel, gModelVBO, gModelIBO);
-
-	glUseProgram(0);
-	if (gOptions[OPTION_SHOW_LIGHTS])
-	{
-		DrawLights();
-	}	
-
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 
-	//gStretchBuffer[4]->Deactivate();
-	//Utility::SaveTextureToPfm("final.pfm",gStretchBuffer[4]->GetColorTex(), BUFFER_SIZE, BUFFER_SIZE);
+	//Utility::SaveTextureToPfm("final.pfm",gStretchBuffer[4]->GetColorTex(), gWindowWidth, gWindowWidth);
 }
 
 void RenderScene()
@@ -1775,20 +1823,48 @@ void RenderScene()
 		break;
 	}
 
-	if (gOptions[OPTION_SHOW_LIGHTS])
+	/*if (gOptions[OPTION_SHOW_LIGHTS])
 	{
 		DrawLights();
-	}
+	}*/
 
 	if (gOptions[OPTION_DRAW_SKYBOX])
 	{
 		RenderSkyBox();
 	}
-	
+
+	/*if ()
+	{
+	}*/
+
 	DoUI();
 	glutSwapBuffers();
 }
 
+void BloomPass(RenderTexture* input)
+{
+	BloomGuassianBlur(input, gBloomBuffer[0], sqrtf(0.008));
+	BloomGuassianBlur(input, gBloomBuffer[1], sqrtf(0.0576));
+
+	// Conbine
+	SetOrthoProjection(gWindowWidth, gWindowHeight);
+
+	glUseProgram(gBloomEffect.CombineProgramID);
+
+	glActiveTexture(GL_TEXTURE0);
+	input->Bind();
+	glUniform1i(gBloomEffect.CombineInputTexParam, 0);	
+
+	glActiveTexture(GL_TEXTURE1);
+	gBloomBuffer[0]->Bind();
+	glUniform1i(gBloomEffect.CombineBloomTexParam, 1);	
+
+	glActiveTexture(GL_TEXTURE2);
+	gBloomBuffer[1]->Bind();
+	glUniform1i(gBloomEffect.CombineBloomTexParam+1, 2);
+
+	glUseProgram(0);
+}
 
 void Init()
 {
@@ -1803,9 +1879,6 @@ void Init()
 	//init mode
 	gOptions[OPTION_SSS_WITH_TSM] = false;
 	gOptions[OPTION_SSS_WITHOUT_TSM] = true;
-
-	/*gOptions[OPTION_SSS_WITH_TSM] = true;
-	gOptions[OPTION_SSS_WITHOUT_TSM] = false;*/
 
 	gOptions[OPTION_DRAW_SKYBOX] = true;
 	gOptions[OPTION_SHOW_LIGHTS] = false;
@@ -1824,8 +1897,59 @@ void Reshape( int w, int h)
 	gWindowHeight = h;
 	glViewport( 0, 0, gWindowWidth, gWindowHeight);
 
+	// we need to resize all RenderTexture
+	for (int i=0; i<TEXTURE_BUFFER_COUNT; i++)
+	{
+		SAFE_DELETE(gStretchBuffer[i]); 
+		gStretchBuffer[i] = new RenderTexture(w, h, GL_TEXTURE_2D);
+		gStretchBuffer[i]->InitColor_Tex(0, GL_RGBA32F);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	}
+	//bStretchMap = false;
+
+	SAFE_DELETE(gTempBuffer); 
+	gTempBuffer = new RenderTexture(w, h, GL_TEXTURE_2D); 
+	gTempBuffer->InitColor_Tex(0, GL_RGBA32F);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+
+	for (int i = 0; i < 2; i++) 
+	{
+		SAFE_DELETE(gBloomBuffer[i]); 
+		gBloomBuffer[i] = new RenderTexture(w, h, GL_TEXTURE_2D);
+		gBloomBuffer[i]->InitColor_Tex(0, GL_RGBA32F);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	}
+
+	SAFE_DELETE(gFinalBuffer); 
+	gFinalBuffer = new RenderTexture(w, h, GL_TEXTURE_2D);
+	gFinalBuffer->InitColor_Tex(0, GL_RGBA32F);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	for (int i = 0; i < LIGHT_COUNT; i++)
+	{
+		for (int j = 0; j < TEXTURE_BUFFER_COUNT; ++j)
+		{
+			// delete if already exits
+			SAFE_DELETE(gIrradianceBuffer[i][j]); 
+
+			gIrradianceBuffer[i][j] = new RenderTexture(w, h, GL_TEXTURE_2D); 
+			gIrradianceBuffer[i][j]->InitColor_Tex(0, GL_RGBA32F);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		}
+		gIrradianceBuffer[i][0]->InitDepth_Tex();
+	}
+
+	// resize GUI
 	gHub.reshape(w, h);
 
+	// project matrix
 	glm::vec2 vpSize = glm::vec2((float) w, (float) h);
 	float aspect = (float)gWindowWidth / gWindowHeight;
 
@@ -1880,68 +2004,8 @@ void Motion(int x, int y)
 	}
 }
 
-int NumChannels(GLenum internalFmt)
-{
-	switch(internalFmt)
-	{
-	case GL_RGBA8:
-	case GL_BGRA:
-	case GL_RGBA16F:
-	case GL_RGBA32F:
-	case GL_RGBA16:
-		return 4;
-	case GL_RGB8:
-	case GL_RGB16F:
-	case GL_RGB32F:
-	case GL_RGB16:
-		return 3;
-	default:
-		assert(false);
-	}
-	return 0;
-}
-
-#include "CubeMapProcessor.h"
-
-void Test()
-{
-	nv::Image cubeMap;
-	cubeMap.loadImageFromFile("Showroom256.dds");
-
-	auto fmt = cubeMap.getFormat();
-	auto numChannel = NumChannels(cubeMap.getInternalFormat());
-
-	auto size = cubeMap.getWidth();
-	auto type = cubeMap.getType();
-
-	assert(cubeMap.getWidth() == cubeMap.getHeight());
-
-	CubeMapProcessor processor;
-	processor.Init(cubeMap.getWidth(), cubeMap.getWidth(), numChannel);
-
-	int pitch = cubeMap.getImageSize(0) / size;
-	for (int i = 0; i < cubeMap.getFaces(); ++i)
-	{
-		processor.SetInputFaceData(i, cubeMap.getInternalFormat(), numChannel, pitch, cubeMap.getLevel(0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i));
-	}
-
-	processor.Dump("Input.tga", processor.mSrcCubeMap);
-
-	processor.SHIrrandianceFilterCubeMap(4, true, CubeMapProcessor::EF_Stretch);
-
-	processor.Dump("Dest.tga", processor.mDstCubeMap);
-
-	/*for (int i = 0; i < cubeMap.getFaces(); ++i)
-	{
-	std::stringstream sss; sss << i << ".tga";
-	processor.mDstCubeMap[i].WritePfmFile(sss.str().c_str());
-	}*/
-
-}
-
-
-
 int main( int argc, char** argv) {
+
 	glutInit( &argc, argv);
 	glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
 	glutInitWindowSize( gWindowWidth, gWindowHeight);

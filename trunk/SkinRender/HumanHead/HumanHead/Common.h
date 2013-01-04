@@ -23,4 +23,5 @@
 #define MEDIA_TEXTURE_PATH "../Media/Textures/"
 
 
+#define SAFE_DELETE(p) if(p) { delete p; p = NULL; }
 #define ASSERT(condition) { if(!(condition)) { std::cerr << "ASSERT FAILED: " << #condition << " @ " << __FILE__ << " (" << __LINE__ << ")" << std::endl; } assert(condition); }

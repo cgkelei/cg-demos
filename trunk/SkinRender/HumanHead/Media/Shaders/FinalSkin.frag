@@ -15,6 +15,7 @@ uniform sampler2D IrradTex[6];
 uniform sampler2D ShadowTex[LIGHTCOUNT];
 uniform samplerCube IrradEnvMap;
 uniform samplerCube GlossyEnvMap;
+uniform sampler2D SeamMaskTex;
 
 uniform vec3 GaussWeights[6];
 uniform vec3 EyePos;
@@ -75,10 +76,53 @@ void main()
 	#endif
 #endif
 
+	float bumpDot_L0 = dot( N_bumped, L0 );
+    float bumpDot_L1 = dot( N_bumped, L1 );
+    float bumpDot_L2 = dot( N_bumped, L2 );
+
+	vec3 pointLight0Color = Lights[0].Color * Lights[0].Amount * L0Shadow ;
+    vec3 pointLight1Color = Lights[1].Color * Lights[1].Amount * L1Shadow ;
+    vec3 pointLight2Color = Lights[2].Color * Lights[2].Amount * L2Shadow ;
+
+
+	//Specular Constant
+    //vec4 specTap = texture( SpecTex, oTex ); // rho_s and roughness
+    //float m = specTap.w * 0.09 + 0.23;	 // m is specular roughness
+    //float rho_s = specTap.x * 0.16 + 0.18;
+	
+	float m = Roughness;	 // m is specular roughness
+    float rho_s = Rho_s;
+
+	//// DIFFUSE LIGHT  
+    vec3 Li0cosi = saturate(bumpDot_L0) * pointLight0Color;
+    vec3 Li1cosi = saturate(bumpDot_L1) * pointLight1Color;
+    vec3 Li2cosi = saturate(bumpDot_L2) * pointLight2Color;
+
+    float rho_dt_L0 = 1.0 - rho_s * texture( Rho_d_Tex, vec2( bumpDot_L0, m ) ).x;
+    float rho_dt_L1 = 1.0 - rho_s * texture( Rho_d_Tex, vec2( bumpDot_L1, m ) ).x;
+    float rho_dt_L2 = 1.0 - rho_s * texture( Rho_d_Tex, vec2( bumpDot_L2, m ) ).x;
+
+	vec3 E0 = Li0cosi * rho_dt_L0;
+    vec3 E1 = Li1cosi * rho_dt_L1;
+    vec3 E2 = Li2cosi * rho_dt_L2;
+
+	// material diffuse 
+	vec4 albedoTap = texture( AlbedoTex, oTex );
+	vec3 albedo = albedoTap.xyz;
 
 	vec3 diffuseLight = vec3(0.0);
-	 
-	vec4 irrad0Tap = texture(IrradTex[0], oTex);
+	
+	// Deal with seam
+	float seamMask = texture(SeamMaskTex, oTex).x;
+    float alterSeamMask = pow( 1.0 - seamMask, 0.03);
+
+	vec3 cubeTap1 = texture( IrradEnvMap, N_nonBumped ).xyz;
+	vec3 envLight = saturate( EnvAmount * cubeTap1.xyz );
+
+	// correct seam problems
+    vec3 comparativeLocalLightColor = pow(albedo, vec3(DiffuseColorMix) ) * ( E0 + E1 + E2 + envLight );
+
+	vec4 irrad0Tap = texture(IrradTex[0], oTex); 
 	vec4 irrad1Tap = texture(IrradTex[1], oTex);
 	vec4 irrad2Tap = texture(IrradTex[2], oTex);
 	vec4 irrad3Tap = texture(IrradTex[3], oTex);
@@ -91,30 +135,27 @@ void main()
 	diffuseLight += GaussWeights[3] * irrad3Tap.xyz;  
 	diffuseLight += GaussWeights[4] * irrad4Tap.xyz;  
 	diffuseLight += GaussWeights[5] * irrad5Tap.xyz; 
+
+	//diffuseLight += GaussWeights[0] * mix( irrad0Tap.xyz, comparativeLocalLightColor, alterSeamMask);  
+	//diffuseLight += GaussWeights[1] * mix( irrad1Tap.xyz, comparativeLocalLightColor, alterSeamMask); 
+	//diffuseLight += GaussWeights[2] * mix( irrad2Tap.xyz, comparativeLocalLightColor, alterSeamMask); 
+	//diffuseLight += GaussWeights[3] * mix( irrad3Tap.xyz, comparativeLocalLightColor, alterSeamMask); 
+	//diffuseLight += GaussWeights[4] * mix( irrad4Tap.xyz, comparativeLocalLightColor, alterSeamMask);  
+	//diffuseLight += GaussWeights[5] * mix( irrad5Tap.xyz, comparativeLocalLightColor, alterSeamMask);  
 	
     // Renormalize diffusion profiles to white  
     vec3 normConst = GaussWeights[0] + GaussWeights[1] + GaussWeights[2] + GaussWeights[3] + GaussWeights[4] + GaussWeights[5];  
-    diffuseLight /= normConst; // Renormalize to white diffuse light   
-
+    diffuseLight /= normConst; // Renormalize to white diffuse light  
+	
+	// correct seam problems
+	diffuseLight =  mix( diffuseLight, comparativeLocalLightColor, alterSeamMask);  
+   	
 	// Determine skin color from a diffuseColor map
-	vec3 albedo = texture( AlbedoTex, oTex ).xyz;
 	diffuseLight *=  pow( albedo.xyz, vec3(1.0 - DiffuseColorMix) );
 
-
-	// Constant for specular calculation
-	// Use constant parameters m(roughness) and rho_s(intensity) for specular calculation
-	
-	float m = Roughness;
-	float rho_s = Rho_s;
-
-	//vec4 specTap = texture( SpecTex, oTex ); // rho_s and roughness
-    //float m = specTap.w * 0.09 + 0.23;	 // m is specular roughness
-    //float rho_s = specTap.x * 0.16 + 0.18;
-	
 	//Energy conservation (optional) - rho_s and m can be painted
-	//float finalScale = 1 - rho_s * texture(Rho_d_Tex, vec2(dot(N_bumped, V), m)).x;
-	//diffuseLight *= finalScale;
-
+	float finalScale = 1 - rho_s * texture(Rho_d_Tex, vec2(dot(N_bumped, V), m)).x;
+	diffuseLight *= finalScale;
 
 	vec3 specularLight = vec3(0);  
     // Compute specular for each light  
@@ -134,6 +175,10 @@ void main()
 	specularLight *= SpecularIntensity;
 
 	//FragColor = pow( FragColor.xyz, vec3(1.0 / 2.2) );
+
+	//FragColor = vec4( comparativeLocalLightColor , specularLight + diffuseLight );  
+
+	//FragColor = vec4( alterSeamMask, alterSeamMask, alterSeamMask , specularLight + diffuseLight ); 
 	
 	FragColor = vec4( diffuseLight + specularLight, 1.0 );  
 }

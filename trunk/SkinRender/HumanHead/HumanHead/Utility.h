@@ -9,7 +9,7 @@ public:
 
 public:
 	static void SaveTextureToPfm(const char* file, GLuint tex, int width, int height);
-	static void SaveScreenToPfmDepth( const char* file, int width, int height );
+	static void SaveScreenToPfm( const char* file, int width, int height );
 	static void SaveTextureToPfmDepth( const char* file, GLuint tex, int width, int height );
 	static void SaveTextureToTGA(const char* file, GLuint tex, int width, int height);
 

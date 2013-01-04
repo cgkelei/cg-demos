@@ -78,7 +78,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Bloom.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CubeMapProcessor.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -89,7 +88,6 @@
     <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Bloom.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="CubeMapProcessor.h" />
@@ -101,8 +99,7 @@
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Media\Shaders\Bloom.frag" />
-    <None Include="..\Media\Shaders\Bloom.vert" />
+    <None Include="..\Media\Shaders\FastBloom.frag" />
     <None Include="..\Media\Shaders\Common.include.glsl" />
     <None Include="..\Media\Shaders\Convolution.vert" />
     <None Include="..\Media\Shaders\ConvolutionStretchU.frag" />
@@ -115,6 +112,7 @@
     <None Include="..\Media\Shaders\FinalSkinTSM.vert" />
     <None Include="..\Media\Shaders\FixedPipeline.frag" />
     <None Include="..\Media\Shaders\FixedPipeline.vert" />
+    <None Include="..\Media\Shaders\GaussianBlur.frag" />
     <None Include="..\Media\Shaders\Phong.frag" />
     <None Include="..\Media\Shaders\Phong.vert" />
     <None Include="..\Media\Shaders\SkyBox.frag" />
