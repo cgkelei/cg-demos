@@ -16,11 +16,15 @@ uniform float Rho_s = 0.18;
 
 uniform sampler2D   AlbedoTex;
 uniform sampler2D   SpecTex; // spec amount in r, g, b, and roughness value over the surface
-uniform sampler2D   NormalTex;	    
 uniform sampler2D   ShadowTex[LIGHTCOUNT];
 uniform sampler2D   Rho_d_Tex; // Torrance-Sparrow BRDF integrated over hemisphere for range of roughness and incident angles
 uniform samplerCube IrradEnvMap;
 uniform samplerCube GlossyEnvMap;
+
+#ifdef USE_NormalMap
+	uniform sampler2D NormalTex;
+#endif
+
 
 in vec3 oWorldPos;
 in vec3 oWorldNormal;
@@ -32,6 +36,20 @@ out vec4 FragColor;
 
 void main()
 {
+	// compute world normal
+	vec3 N_nonBumped = normalize( oWorldNormal );
+
+	// for historical reason, here we use the name N_bumped to represent vertex normal
+	// it may compute form vertex position info to from a normal map 
+#ifdef USE_NormalMap 
+	// if normal map exits, use it. 
+    vec3 objNormal = texture( NormalTex, oTex ).xyz * vec3( 2.0, 2.0, 2.0 ) - vec3( 1.0, 1.0, 1.0 );  
+	vec3 N_bumped = normalize( mat3(World) * objNormal );
+#else
+	vec3 N_bumped = N_nonBumped;
+#endif
+
+
 	// lighting parameters
 	vec3 L0 = normalize( Lights[0].Position - oWorldPos ); // point light 0 light vector
 	vec3 L1 = normalize( Lights[1].Position - oWorldPos ); // point light 1 light vector
@@ -68,13 +86,6 @@ void main()
 	float L2Shadow = Shadow(UV2, ShadowTex[2], depth2 - SHADOW_BIAS);
 	#endif
 #endif
-
-	// compute world normal
-	vec3 N_nonBumped = normalize( oWorldNormal );
-
-	// compute bumped world normal
-    vec3 objNormal = texture( NormalTex, oTex ).xyz * vec3( 2.0, 2.0, 2.0 ) - vec3( 1.0, 1.0, 1.0 );  
-    vec3 N_bumped = normalize( mat3(World) * objNormal );
 
 	float bumpDot_L0 = dot( N_bumped, L0 );
     float bumpDot_L1 = dot( N_bumped, L1 );

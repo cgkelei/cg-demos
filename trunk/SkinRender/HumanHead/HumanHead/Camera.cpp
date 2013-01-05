@@ -166,9 +166,9 @@ void Camera::UpdateMatrices()
 	lookAtPosition4 = viewInverse * lookAtPosition4;
 	mLookAt = glm::vec3(lookAtPosition4);
 
-	//glm::vec4 eyePosition4 = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	//eyePosition4 = viewInverse * eyePosition4  ;
-	//mEyePosition =  glm::vec3(eyePosition4);
+	/*glm::vec4 eyePosition4 = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	eyePosition4 = viewInverse * eyePosition4  ;
+	mEyePosition =  glm::vec3(eyePosition4);*/
 	
 	mEyePosition = glm::vec3(glm::column(viewInverse, 3));
 

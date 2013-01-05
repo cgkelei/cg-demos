@@ -18,12 +18,15 @@ uniform float NearPlane = 0.1;
 uniform float FarPlane = 20.0;
 
 uniform sampler2D AlbedoTex;
-uniform sampler2D NormalTex;
 uniform sampler2D Rho_d_Tex; 
 uniform sampler2D SpecTex;
 uniform sampler2D   ShadowTex[LIGHTCOUNT];
 uniform samplerCube IrradEnvMap;
 uniform samplerCube GlossyEnvMap;
+
+#ifdef USE_NormalMap
+	uniform sampler2D NormalTex;
+#endif
 
 in vec3 oWorldPos;
 in vec3 oWorldNormal;
@@ -38,9 +41,15 @@ void main()
 	// compute world normal
 	vec3 N_nonBumped = normalize( oWorldNormal );
 
-	// compute bumped world normal
+	// for historical reason, here we use the name N_bumped to represent vertex normal
+	// it may compute form vertex position info to from a normal map 
+#ifdef USE_NormalMap 
+	// if normal map exits, use it. 
     vec3 objNormal = texture( NormalTex, oTex ).xyz * vec3( 2.0, 2.0, 2.0 ) - vec3( 1.0, 1.0, 1.0 );  
-    vec3 N_bumped = normalize( mat3(World) * objNormal );
+	vec3 N_bumped = normalize( mat3(World) * objNormal );
+#else
+	vec3 N_bumped = N_nonBumped;
+#endif
 
 	// compute world view
 	vec3 V = normalize(EyePos - oWorldPos);
@@ -115,7 +124,7 @@ void main()
 	vec3 albedo = albedoTap.xyz;
 
 	float occlusion = 1.0;
-	vec3 cubeTap1 = texture( IrradEnvMap, N_nonBumped ).xyz;
+	vec3 cubeTap1 = texture( IrradEnvMap, N_bumped ).xyz;
 	vec3 envLight = saturate( EnvAmount * cubeTap1.xyz * occlusion);
 
 	//// start mixing the diffuse lighting - re-compute non-blurred lighting per pixel to get maximum resolutions
@@ -129,7 +138,6 @@ void main()
 
 	// Compute specular for env light 
 	vec3 R_bumped = normalize( reflect( -V, N_bumped ) );	// refelct vector
-    vec3 R_nonBumped = normalize( reflect( -V, N_nonBumped ) );
 
 	// Gloss is the [0..1] value from your gloss map not decompressed in specular power
 	float MipmapIndex = (1 - m) * (GlossyNumMipmap - 1);  
@@ -139,7 +147,9 @@ void main()
 	specularLight *= SpecularIntensity;
 
 	//specularLight = pow( specularLight.xyz, vec3(1.0 / 2.2) );
-	//FragColor = vec4(specularLight,  diffuseContrib);
+	//FragColor = vec4(diffuseContrib,  specularLight);
 
-	FragColor = vec4(diffuseContrib + specularLight,  1.0 );
+	FragColor = vec4(N_bumped, diffuseContrib +  specularLight);
+
+	//FragColor = vec4(diffuseContrib + specularLight,  1.0 );
 }

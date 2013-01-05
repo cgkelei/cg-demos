@@ -88,7 +88,7 @@ float KS_Skin_Specular( vec3 N, // Bumped surface normal
 		vec3 h = L + V; // Unnormalized half-way vector  
 		vec3 H = normalize( h );  
 		float ndoth = dot( N, H );  
-		float PH = pow( 2.0* texture(beckmannTex,vec2(ndoth,m)).y, 10.0 );  
+		float PH = pow( 2.0* texture(beckmannTex,vec2(ndoth,m) ).y, 10.0 );  
 		float F = FresnelReflectance( H, V, 0.028 );  
 		float frSpec = max( PH * F / dot( h, h ), 0 );  
 		result = ndotl * rho_s * frSpec; // BRDF * dot(N,L) * rho_s  
