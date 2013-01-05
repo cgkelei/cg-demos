@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{1DB20B9F-40BB-4EC9-AB8C-03B57386D82D}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>HumanHead</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <EmbedManifest>false</EmbedManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;NV_REPORT_COMPILE_ERRORS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../3rdParty/nvSDK;../3rdParty/nvModel/include;../3rdParty/nvImage/include;../3rdParty/glm-0.9.4.0;../3rdParty/nvWidgets/include;C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>../3rdParty/nvImage/lib;../3rdParty/nvModel/lib;../3rdParty/nvWidgets/lib;C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>nvImage.lib;opengl32.lib;glut32.lib;glew32.lib;nvModel.lib;nvWidgets.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CubeMapProcessor.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="pfm.cpp" />
+    <ClCompile Include="ShadowMap.cpp" />
+    <ClCompile Include="SHProjection.h.cpp" />
+    <ClCompile Include="SurfaceImage.cpp" />
+    <ClCompile Include="Utility.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Common.h" />
+    <ClInclude Include="CubeMapProcessor.h" />
+    <ClInclude Include="pfm.h" />
+    <ClInclude Include="RenderTextureFBO.h" />
+    <ClInclude Include="ShadowMap.h" />
+    <ClInclude Include="SHProjection.h" />
+    <ClInclude Include="SurfaceImage.h" />
+    <ClInclude Include="Utility.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Media\Shaders\BloomExtract.frag" />
+    <None Include="..\Media\Shaders\FastBloom.frag" />
+    <None Include="..\Media\Shaders\Common.include.glsl" />
+    <None Include="..\Media\Shaders\Convolution.vert" />
+    <None Include="..\Media\Shaders\Convolution.frag" />
+    <None Include="..\Media\Shaders\FinalSkin.frag" />
+    <None Include="..\Media\Shaders\FinalSkin.vert" />
+    <None Include="..\Media\Shaders\FinalSkinTSM.frag" />
+    <None Include="..\Media\Shaders\FinalSkinTSM.vert" />
+    <None Include="..\Media\Shaders\Phong.frag" />
+    <None Include="..\Media\Shaders\Phong.vert" />
+    <None Include="..\Media\Shaders\SkyBox.frag" />
+    <None Include="..\Media\Shaders\SkyBox.vert" />
+    <None Include="..\Media\Shaders\TextureSpaceLighting.frag" />
+    <None Include="..\Media\Shaders\TextureSpaceLighting.vert" />
+    <None Include="..\Media\Shaders\ShadowMap.frag" />
+    <None Include="..\Media\Shaders\ShadowMap.vert" />
+    <None Include="..\Media\Shaders\Stretch.frag" />
+    <None Include="..\Media\Shaders\Stretch.vert" />
+    <None Include="..\Media\Shaders\TextureSpaceLightingTSM.frag" />
+    <None Include="..\Media\Shaders\TextureSpaceLightingTSM.vert" />
+    <None Include="..\Media\Shaders\ViewDepth.frag" />
+    <None Include="SHProjection.inl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
