@@ -71,7 +71,8 @@ glm::mat4 gModelWorld;
 GLuint gModelVBO, gModelIBO;
 GLuint gAlbedoTexID, gSpecTexID, gNormalTexID, gRhodTexID, gSeamMaskTexID;
 
-bool gStrechMapDirty = true;		
+bool gStrechMapDirty = true;
+bool gDebugOut = false;
 
 Camera gCamera, gCameraTemp;
 
@@ -107,10 +108,10 @@ bool gOptions[OPTION_COUNT];
 
 enum RenderMode
 {
-	RM_NoSSS = 0,
+	RM_Debug = 0,
+	RM_NoSSS,
 	RM_SSS_Without_TSM,
 	RM_SSS_With_TSM,
-	RM_Debug
 };
 //int gMode = RM_SSS_With_TSM;
 int gMode = RM_NoSSS;
@@ -240,28 +241,6 @@ void BuildModel(nv::Model* model, GLuint* vbo, GLuint* ibo)
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(model->getCompiledIndexCount( nv::Model::eptTriangles) * sizeof(GLuint)),
 		model->getCompiledIndices( nv::Model::eptTriangles), GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-//	static int i = 0;
-//
-//	*vbo = ++i;
-//
-//	glNewList(*vbo, GL_COMPILE);
-//	
-//	glVertexPointer( model->getPositionSize(), GL_FLOAT, model->getCompiledVertexSize() * sizeof(float), model->getCompiledVertices());
-//	glNormalPointer( GL_FLOAT, model->getCompiledVertexSize() * sizeof(float), model->getCompiledVertices() + model->getCompiledNormalOffset());
-//	glTexCoordPointer (model->getTexCoordSize(), GL_FLOAT, model->getCompiledVertexSize() * sizeof(float), model->getCompiledVertices() + model->getCompiledTexCoordOffset());
-//
-//	glEnableClientState( GL_VERTEX_ARRAY);
-//	glEnableClientState( GL_NORMAL_ARRAY);
-//	glEnableClientState( GL_TEXTURE_COORD_ARRAY);
-//
-//	glDrawElements( GL_TRIANGLES, model->getCompiledIndexCount( nv::Model::eptTriangles), GL_UNSIGNED_INT, model->getCompiledIndices( nv::Model::eptTriangles));
-//
-//	glDisableClientState( GL_VERTEX_ARRAY);
-//	glDisableClientState( GL_NORMAL_ARRAY);
-//	glDisableClientState( GL_TEXTURE_COORD_ARRAY);
-//
-//	glEndList();
 }
 
 void DrawModel(nv::Model* model, GLuint vbo, GLuint ibo)
@@ -292,8 +271,6 @@ void DrawModel(nv::Model* model, GLuint vbo, GLuint ibo)
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	//glCallList(vbo);
 }
 
 GLuint Create2DTextureFromFile(const char* fileName, GLenum wrapType = GL_REPEAT )
@@ -425,9 +402,19 @@ void LoadShaderEffect()
 	std::vector<Utility::ShaderMacro> shadowMacro;
 	std::vector<Utility::ShaderMacro> blurMacro;
 
+	/**
+	 * Use shadowMacro to control shadowmap algorithm and whether use normal map or not
+	 */
+	
 	//shaderDefines.push_back(Utility::ShaderMacro("SHADOW_PCF", ""));
 	shadowMacro.push_back(Utility::ShaderMacro("SHADOW_VSM", ""));
 
+	if (gNormalTexID > 0)
+	{
+		shadowMacro.push_back(Utility::ShaderMacro("USE_NormalMap", ""));
+	}
+
+	printf("Load shadow map Effect...\n");
 	ShadowMap::Init(&shadowMacro);
 
 	// StretchMap generate effect
@@ -459,7 +446,6 @@ void LoadShaderEffect()
 	RETRIEVE_UNIFORM_LOCATION(gConvolutionEffect.GaussWidthParam, gConvolutionEffect.ProgramID, "GaussWidth");
 	RETRIEVE_UNIFORM_LOCATION(gConvolutionEffect.BlurStepParam, gConvolutionEffect.ProgramID, "Step");
 
-	
 	printf("Load Bloom effect...\n");
 	blurMacro.clear(); blurMacro.push_back(Utility::ShaderMacro("BLUR_Bloom", ""));
 	gBloomEffect.BlurProgramID = Utility::LoadShaderEffect("Convolution.vert", "Convolution.frag", &blurMacro);
@@ -689,11 +675,15 @@ void LoadModel()
 		// load model textures
 		printf("load head albedo map...\n");
 		gAlbedoTexID = Create2DTextureFromFile(HeadAlbedo);
-		//Utility::SaveTextureToPfm("al.pfm", gAlbedoTexID, 4096, 4096);
 		
-
-		printf("load head normal map...\n");
+		printf("try to load head normal map...\n");
 		gNormalTexID = Create2DTextureFromFile(HeadNormal);
+		if (gNormalTexID > 0)
+			printf("load head normal map successed...\n");
+		else
+			printf("normal map doesn't exit...\n");
+
+		//Utility::SaveTextureToPfm("normal.pfm", gNormalTexID, 6000, 6000);
 
 		printf("load head rho_d map...\n");
 		gRhodTexID = Create2DTextureFromFile(RhodMap, GL_CLAMP_TO_EDGE);
@@ -775,12 +765,11 @@ void DoUI()
 	gHub.doCheckButton(none, "Bloom", &gOptions[OPTION_BLOOM]);
 	gHub.doLabel( none, "");
 
-	// TSM 
 	gHub.doLabel( none, "Render Mode");
-	gHub.doRadioButton(0, none, "No SSS",  &gMode);
-	gHub.doRadioButton(1, none, "SSS Without TSM",  &gMode);
-	gHub.doRadioButton(2, none, "SSS With TSM",  &gMode);
-	gHub.doRadioButton(3, none, "SSS Debug",  &gMode);
+	gHub.doRadioButton(0, none, "SSS Debug",  &gMode);
+	gHub.doRadioButton(1, none, "No SSS",  &gMode);
+	gHub.doRadioButton(2, none, "SSS Without TSM",  &gMode);
+	if(gNormalTexID > 0) gHub.doRadioButton(3, none, "SSS With TSM",  &gMode);  // show this option when normal map exits, so can use TSM
 	gHub.doLabel( none, "");
 
 	if (RM_Debug == gMode)
@@ -842,7 +831,7 @@ void DoUI()
 		gHub.endGroup();*/
 
 
-		if (gMode == RM_SSS_With_TSM)
+		if (gMode == RM_SSS_With_TSM && gNormalTexID)
 		{
 			gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
 			sprintf(tempBuffer, "ThincknessScale %.0f", gThicknessScale);
@@ -1247,6 +1236,10 @@ void RenderSkyBox()
 	glDisable(GL_DEPTH_TEST);
 	//glEnable(GL_CULL_FACE);
 	glUseProgram(0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glDisable(GL_TEXTURE_CUBE_MAP);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
 /**
@@ -1798,8 +1791,7 @@ void RenderScene()
 			if ( gOptions[OPTION_BLOOM])  gFinalBuffer->Activate();	
 			RenderFinal();
 			if (gOptions[OPTION_DRAW_SKYBOX]) RenderSkyBox();
-			if ( gOptions[OPTION_BLOOM])  gFinalBuffer->Deactivate();
-			
+			if ( gOptions[OPTION_BLOOM])  gFinalBuffer->Deactivate();	
 		}
 		break;
 	case RM_SSS_With_TSM:
@@ -1882,9 +1874,13 @@ void Init()
 		gLights[i].ShadowMap = new ShadowMap(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 	}
 
+	
 	LoadPresents();
-	LoadShaderEffect();
+	
 	LoadModel();
+
+	LoadShaderEffect();
+	
 }
 
 void Reshape( int w, int h)
@@ -1970,6 +1966,12 @@ void Keys(unsigned char c, int x, int y)
 	{
 	case ' ':
 		SavePresents();
+		break;
+	case 'd':
+		{
+			gDebugOut = true;
+			Utility::SaveScreenToPfm("test.pfm", gWindowWidth, gWindowHeight);
+		}
 		break;
 	default:
 		break;

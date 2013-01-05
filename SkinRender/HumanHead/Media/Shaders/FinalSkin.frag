@@ -8,7 +8,6 @@ uniform Light Lights[LIGHTCOUNT];
 uniform mat4 World;
 
 uniform sampler2D AlbedoTex;
-uniform sampler2D NormalTex;
 uniform sampler2D Rho_d_Tex; 
 uniform sampler2D SpecTex;
 uniform sampler2D IrradTex[6];
@@ -16,6 +15,10 @@ uniform sampler2D ShadowTex[LIGHTCOUNT];
 uniform samplerCube IrradEnvMap;
 uniform samplerCube GlossyEnvMap;
 uniform sampler2D SeamMaskTex;
+
+#ifdef USE_NormalMap
+	uniform sampler2D NormalTex;
+#endif
 
 uniform vec3 GaussWeights[6];
 uniform vec3 EyePos;
@@ -38,19 +41,26 @@ out vec4 FragColor;
 
 void main()
 {
+	// compute world normal
+	vec3 N_nonBumped = normalize( oWorldNormal );
+
+	// for historical reason, here we use the name N_bumped to represent vertex normal
+	// it may compute form vertex position info to from a normal map 
+#ifdef USE_NormalMap 
+	// if normal map exits, use it. 
+    vec3 objNormal = texture( NormalTex, oTex ).xyz * vec3( 2.0, 2.0, 2.0 ) - vec3( 1.0, 1.0, 1.0 );  
+	vec3 N_bumped = normalize( mat3(World) * objNormal );
+#else
+	vec3 N_bumped = N_nonBumped;
+#endif
+	
+	// View vector
+	vec3 V = normalize( EyePos - oWorldPos );
+
 	// lighting parameters
 	vec3 L0 = normalize( Lights[0].Position - oWorldPos ); // point light 0 light vector
 	vec3 L1 = normalize( Lights[1].Position - oWorldPos ); // point light 1 light vector
     vec3 L2 = normalize( Lights[2].Position - oWorldPos ); // point light 2 light vector
-
-	// View vector
-	vec3 V = normalize( EyePos - oWorldPos );
-
-	vec3 N_nonBumped = normalize( oWorldNormal );
-
-	// compute bumped world normal
-    vec3 objNormal = texture( NormalTex, oTex ).xyz * vec3( 2.0, 2.0, 2.0 ) - vec3( 1.0, 1.0, 1.0 );  
-    vec3 N_bumped = normalize( mat3(World) * objNormal );
 
 	float depth0 = NormalizedDepth(oLightDist[0], Lights[0].NearFarPlane.x, Lights[0].NearFarPlane.y);
 	float depth1 = NormalizedDepth(oLightDist[1], Lights[1].NearFarPlane.x, Lights[1].NearFarPlane.y);
@@ -116,7 +126,7 @@ void main()
 	float seamMask = texture(SeamMaskTex, oTex).x;
     float alterSeamMask = pow( 1.0 - seamMask, 0.03);
 
-	vec3 cubeTap1 = texture( IrradEnvMap, N_nonBumped ).xyz;
+	vec3 cubeTap1 = texture( IrradEnvMap, N_bumped ).xyz;
 	vec3 envLight = saturate( EnvAmount * cubeTap1.xyz );
 
 	// correct seam problems
@@ -165,7 +175,6 @@ void main()
 	
 	// Compute specular for env light 
 	vec3 R_bumped = ( reflect( -V, N_bumped ) );	// refelct vector
-    vec3 R = reflect( -V, N_nonBumped );
 
 	float occlusion = 1.0;
 	float MipmapIndex = (1 - m) * (GlossyNumMipmap - 1);  
@@ -176,9 +185,5 @@ void main()
 
 	//FragColor = pow( FragColor.xyz, vec3(1.0 / 2.2) );
 
-	//FragColor = vec4( comparativeLocalLightColor , specularLight + diffuseLight );  
-
-	//FragColor = vec4( alterSeamMask, alterSeamMask, alterSeamMask , specularLight + diffuseLight ); 
-	
 	FragColor = vec4( diffuseLight + specularLight, 1.0 );  
 }

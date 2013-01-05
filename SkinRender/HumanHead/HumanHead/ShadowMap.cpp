@@ -100,6 +100,6 @@ void ShadowMap::End()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 
-	//Utility::SaveTextureToPfm("depth.pfm", mTexture->GetColorTex(), 1024, 1024);
+	//Utility::SaveTextureToPfm("depth.pfm", mTexture->GetColorTex(), mTexture->GetWidth(), mTexture->GetHeight());
 }
 
