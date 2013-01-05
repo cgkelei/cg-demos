@@ -58,6 +58,7 @@ float gRho_s = 0.18;
 float gStrechScale = 0.0014444444f;
 float gThicknessScale = 16.0f;
 float gSpecularIntensity = 1.88f;
+float gExposure = 1.5f;
 
 nv::Model gLightModel;
 GLuint gLightTexID, gLightModelVBO, gLightModelIBO;
@@ -153,16 +154,16 @@ struct StretchEffect
 struct ConvolutionStretchEffect
 {
 	GLuint ProgramID;
-	GLint GaussWidthParam, InputTexParam;
+	GLint GaussWidthParam, InputTexParam, BlurStepParam;
 
-} gConvStretchUEffect, gConvStretchVEffect;
+} gConvStretchEffect;
 
 struct ConvolutionEffect
 {
 	GLuint ProgramID;
-	GLint GaussWidthParam, StretchTexParam, InputTexParam;
+	GLint GaussWidthParam, StretchTexParam, InputTexParam, BlurStepParam;
 
-} gConvolutionUEffect, gConvolutionVEffect;
+} gConvolutionEffect;
 
 struct LightParams
 {
@@ -221,7 +222,7 @@ struct BloomEffect
 {
 	GLuint BlurProgramID, CombineProgramID;
 	GLint GaussWidthParam, BlurInputTexParam, BlurStepParam;
-	GLint CombineInputTexParam, CombineBloomTexParam;
+	GLint CombineInputTexParam, CombineBloomTexParam, ExposureParam;
 
 } gBloomEffect;
 
@@ -383,17 +384,6 @@ GLuint CreateCubemapTextureFromFile(const char* fileName, bool mipMap)
 	return tex;
 }
 
-void CreateBuffers(GLenum format)
-{
-	for (int i = 0; i < LIGHT_COUNT; i++) 
-	{
-		//gLights->Camera.SetDistance(2.0);
-		gLights[i].Camera.SetProjection(CAMERA_FOV, 1.0f, 0.1f, 20.0f);
-		gLights[i].ShadowMap = new ShadowMap(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
-	}
-
-}
-
 int gFPS = 0;
 int gElapsedTime = 0;
 
@@ -432,14 +422,47 @@ void LoadShaderEffect()
 
 #define RETRIEVE_UNIFORM_LOCATION(loc, program, name)  loc = glGetUniformLocation(program, name); /*\
 														ASSERT(loc >= 0);*/
-	std::vector<Utility::ShaderMacro> shaderDefines;
-	//shaderDefines.push_back(Utility::ShaderMacro("SHADOW_PCF", ""));
-	shaderDefines.push_back(Utility::ShaderMacro("SHADOW_VSM", ""));
+	std::vector<Utility::ShaderMacro> shadowMacro;
+	std::vector<Utility::ShaderMacro> blurMacro;
 
-	ShadowMap::Init(&shaderDefines);
+	//shaderDefines.push_back(Utility::ShaderMacro("SHADOW_PCF", ""));
+	shadowMacro.push_back(Utility::ShaderMacro("SHADOW_VSM", ""));
+
+	ShadowMap::Init(&shadowMacro);
+
+	// StretchMap generate effect
+	printf("Load StretchMap Effect...\n");
+	gStretchEffect.ProgramID = Utility::LoadShaderEffect("Stretch.vert", "Stretch.frag");
+	ASSERT(gStretchEffect.ProgramID > 0);
+
+	RETRIEVE_UNIFORM_LOCATION(gStretchEffect.WorldParam, gStretchEffect.ProgramID, "WorldMat");
+	RETRIEVE_UNIFORM_LOCATION(gStretchEffect.ScaleParam, gStretchEffect.ProgramID, "Scale");
+
+	// ConvolutionStretch effect
+	printf("Load ConvolutionStretch Effect...\n");
+	blurMacro.clear(); blurMacro.push_back(Utility::ShaderMacro("BLUR_Stretch", ""));
+	gConvStretchEffect.ProgramID = Utility::LoadShaderEffect("Convolution.vert", "Convolution.frag", &blurMacro);
+	ASSERT(gConvStretchEffect.ProgramID > 0);
+
+	RETRIEVE_UNIFORM_LOCATION(gConvStretchEffect.InputTexParam, gConvStretchEffect.ProgramID, "InputTex");
+	RETRIEVE_UNIFORM_LOCATION(gConvStretchEffect.GaussWidthParam, gConvStretchEffect.ProgramID, "GaussWidth");
+	RETRIEVE_UNIFORM_LOCATION(gConvStretchEffect.BlurStepParam, gConvStretchEffect.ProgramID, "Step");
+
+	// Convolution effect
+	printf("Load ConvolutionU Effect...\n");
+	blurMacro.clear(); blurMacro.push_back(Utility::ShaderMacro("BLUR_Diffusion", ""));
+	gConvolutionEffect.ProgramID = Utility::LoadShaderEffect("Convolution.vert", "Convolution.frag", &blurMacro);
+	ASSERT(gConvolutionEffect.ProgramID > 0);
+
+	RETRIEVE_UNIFORM_LOCATION(gConvolutionEffect.StretchTexParam, gConvolutionEffect.ProgramID, "StretchTex");
+	RETRIEVE_UNIFORM_LOCATION(gConvolutionEffect.InputTexParam, gConvolutionEffect.ProgramID, "InputTex");
+	RETRIEVE_UNIFORM_LOCATION(gConvolutionEffect.GaussWidthParam, gConvolutionEffect.ProgramID, "GaussWidth");
+	RETRIEVE_UNIFORM_LOCATION(gConvolutionEffect.BlurStepParam, gConvolutionEffect.ProgramID, "Step");
+
 	
 	printf("Load Bloom effect...\n");
-	gBloomEffect.BlurProgramID = Utility::LoadShaderEffect("Convolution.vert", "GaussianBlur.frag");
+	blurMacro.clear(); blurMacro.push_back(Utility::ShaderMacro("BLUR_Bloom", ""));
+	gBloomEffect.BlurProgramID = Utility::LoadShaderEffect("Convolution.vert", "Convolution.frag", &blurMacro);
 	gBloomEffect.CombineProgramID = Utility::LoadShaderEffect("Convolution.vert", "FastBloom.frag");
 
 	RETRIEVE_UNIFORM_LOCATION(gBloomEffect.GaussWidthParam, gBloomEffect.BlurProgramID, "GaussWidth");
@@ -448,7 +471,8 @@ void LoadShaderEffect()
 
 	RETRIEVE_UNIFORM_LOCATION(gBloomEffect.CombineInputTexParam, gBloomEffect.CombineProgramID, "InputTex");
 	RETRIEVE_UNIFORM_LOCATION(gBloomEffect.CombineBloomTexParam, gBloomEffect.CombineProgramID, "BloomTex");
-
+	RETRIEVE_UNIFORM_LOCATION(gBloomEffect.ExposureParam, gBloomEffect.CombineProgramID, "Exposure");
+	
 	printf("Load Skybox effect...\n");
 	gSkyBoxEffect.ProgramID = Utility::LoadShaderEffect("SkyBox.vert", "SkyBox.frag");
 	RETRIEVE_UNIFORM_LOCATION(gSkyBoxEffect.MVPParam, gSkyBoxEffect.ProgramID, "MVP");
@@ -459,59 +483,17 @@ void LoadShaderEffect()
 	RETRIEVE_UNIFORM_LOCATION(gViewDepthEffectEffect.DepthTexParam, gViewDepthEffectEffect.ProgramID, "DepthMap");
 	ASSERT(gViewDepthEffectEffect.ProgramID > 0);
 
-	printf("Load FixedPipeline effect...\n");
+	/*printf("Load FixedPipeline effect...\n");
 	gPipelineEffect.ProgramID = Utility::LoadShaderEffect("FixedPipeline.vert", "FixedPipeline.frag");
-	ASSERT(gPipelineEffect.ProgramID > 0);
+	ASSERT(gPipelineEffect.ProgramID > 0);*/
 
 	RETRIEVE_UNIFORM_LOCATION(gPipelineEffect.WorldParam, gPipelineEffect.ProgramID, "World");
 	RETRIEVE_UNIFORM_LOCATION(gPipelineEffect.ViewProjParam, gPipelineEffect.ProgramID, "ViewProj");
 	RETRIEVE_UNIFORM_LOCATION(gPipelineEffect.AlbedoTexParam, gPipelineEffect.ProgramID, "AlbedoTex");
 
-	// StretchMap generate effect
-	printf("Load StretchMap Effect...\n");
-	gStretchEffect.ProgramID = Utility::LoadShaderEffect("Stretch.vert", "Stretch.frag");
-	ASSERT(gStretchEffect.ProgramID > 0);
-
-	RETRIEVE_UNIFORM_LOCATION(gStretchEffect.WorldParam, gStretchEffect.ProgramID, "WorldMat");
-	RETRIEVE_UNIFORM_LOCATION(gStretchEffect.ScaleParam, gStretchEffect.ProgramID, "Scale");
-
-	// ConvolutionStretchU effect
-	printf("Load ConvolutionStretchU Effect...\n");
-	gConvStretchUEffect.ProgramID = Utility::LoadShaderEffect("Convolution.vert", "ConvolutionStretchU.frag");
-	ASSERT(gConvStretchUEffect.ProgramID > 0);
-
-	RETRIEVE_UNIFORM_LOCATION(gConvStretchUEffect.InputTexParam, gConvStretchUEffect.ProgramID, "InputTex");
-	RETRIEVE_UNIFORM_LOCATION(gConvStretchUEffect.GaussWidthParam, gConvStretchUEffect.ProgramID, "GaussWidth");
-
-	// ConvolutionStretchV effect
-	printf("Load ConvolutionStretchV Effect...\n");
-	gConvStretchVEffect.ProgramID = Utility::LoadShaderEffect("Convolution.vert", "ConvolutionStretchV.frag");
-	ASSERT(gConvStretchVEffect.ProgramID > 0);
-
-	RETRIEVE_UNIFORM_LOCATION(gConvStretchVEffect.InputTexParam, gConvStretchVEffect.ProgramID, "InputTex");
-	RETRIEVE_UNIFORM_LOCATION(gConvStretchVEffect.GaussWidthParam, gConvStretchVEffect.ProgramID, "GaussWidth");
-
-	// ConvolutionU effect
-	printf("Load ConvolutionU Effect...\n");
-	gConvolutionUEffect.ProgramID = Utility::LoadShaderEffect("Convolution.vert", "ConvolutionU.frag");
-	ASSERT(gConvolutionUEffect.ProgramID > 0);
-
-	RETRIEVE_UNIFORM_LOCATION(gConvolutionUEffect.StretchTexParam, gConvolutionUEffect.ProgramID, "StretchTex");
-	RETRIEVE_UNIFORM_LOCATION(gConvolutionUEffect.InputTexParam, gConvolutionUEffect.ProgramID, "InputTex");
-	RETRIEVE_UNIFORM_LOCATION(gConvolutionUEffect.GaussWidthParam, gConvolutionUEffect.ProgramID, "GaussWidth");
-
-	// ConvolutionV effect
-	printf("Load ConvolutionV Effect...\n");
-	gConvolutionVEffect.ProgramID = Utility::LoadShaderEffect("Convolution.vert", "ConvolutionV.frag");
-	ASSERT(gConvolutionVEffect.ProgramID > 0);
-
-	RETRIEVE_UNIFORM_LOCATION(gConvolutionVEffect.StretchTexParam, gConvolutionVEffect.ProgramID, "StretchTex");
-	RETRIEVE_UNIFORM_LOCATION(gConvolutionVEffect.InputTexParam, gConvolutionVEffect.ProgramID, "InputTex");
-	RETRIEVE_UNIFORM_LOCATION(gConvolutionVEffect.GaussWidthParam, gConvolutionVEffect.ProgramID, "GaussWidth");
-
 	// Texture Space Light effect
 	printf("Load Texture Space Light Without TSM  Effect...\n");
-	gTexSpaceLightEffect.ProgramID = Utility::LoadShaderEffect("TextureSpaceLighting.vert", "TextureSpaceLighting.frag", &shaderDefines);
+	gTexSpaceLightEffect.ProgramID = Utility::LoadShaderEffect("TextureSpaceLighting.vert", "TextureSpaceLighting.frag", &shadowMacro);
 	ASSERT(gTexSpaceLightEffect.ProgramID > 0);
 	//Utility::PrintEffectAttribs(gTexSpaceLightEffect.ProgramID);
 	//Utility::PrintEffectUniforms(gTexSpaceLightEffect.ProgramID);
@@ -536,7 +518,7 @@ void LoadShaderEffect()
 
 	// Final Skin Without TSM effect
 	printf("Load Final Skin Without TSM effect...\n");
-	gFinalSkinEffect.ProgramID = Utility::LoadShaderEffect("FinalSkin.vert", "FinalSkin.frag", &shaderDefines);
+	gFinalSkinEffect.ProgramID = Utility::LoadShaderEffect("FinalSkin.vert", "FinalSkin.frag", &shadowMacro);
 	ASSERT(gFinalSkinEffect.ProgramID > 0);
 	//Utility::PrintEffectAttribs(gFinalSkinEffect.ProgramID);
 	//Utility::PrintEffectUniforms(gFinalSkinEffect.ProgramID);
@@ -567,7 +549,7 @@ void LoadShaderEffect()
 
 	// Texture Space Light With TSM effect
 	printf("Load Texture Space Light With TSM Effect...\n");
-	gTexSpaceLightTSMEffect.ProgramID = Utility::LoadShaderEffect("TextureSpaceLightingTSM.vert", "TextureSpaceLightingTSM.frag", &shaderDefines);
+	gTexSpaceLightTSMEffect.ProgramID = Utility::LoadShaderEffect("TextureSpaceLightingTSM.vert", "TextureSpaceLightingTSM.frag", &shadowMacro);
 	ASSERT(gTexSpaceLightTSMEffect.ProgramID > 0);
 	/*Utility::PrintEffectAttribs(gTexSpaceLightTSMEffect.ProgramID);
 	Utility::PrintEffectUniforms(gTexSpaceLightTSMEffect.ProgramID);*/
@@ -592,7 +574,7 @@ void LoadShaderEffect()
 
 	//// Final Skin With TSM effect
 	printf("Load Final Skin With TSM effect...\n");
-	gFinalSkinTSMEffect.ProgramID = Utility::LoadShaderEffect("FinalSkinTSM.vert", "FinalSkinTSM.frag", &shaderDefines);
+	gFinalSkinTSMEffect.ProgramID = Utility::LoadShaderEffect("FinalSkinTSM.vert", "FinalSkinTSM.frag", &shadowMacro);
 	ASSERT(gFinalSkinTSMEffect.ProgramID > 0);
 	//Utility::PrintEffectAttribs(gFinalSkinTSMEffect.ProgramID);
 	//Utility::PrintEffectUniforms(gFinalSkinTSMEffect.ProgramID);
@@ -624,7 +606,7 @@ void LoadShaderEffect()
 	RETRIEVE_UNIFORM_LOCATION(gFinalSkinTSMEffect.SeamMaskTexParam, gFinalSkinTSMEffect.ProgramID, "SeamMaskTex");
 
 	printf("Load Lambert with Kelemen/Szirmay-Kalos Specular BRDF effect...\n");
-	gPhongEffect.ProgramID = Utility::LoadShaderEffect("Phong.vert", "Phong.frag", &shaderDefines);
+	gPhongEffect.ProgramID = Utility::LoadShaderEffect("Phong.vert", "Phong.frag", &shadowMacro);
 	Utility::PrintEffectAttribs(gPhongEffect.ProgramID);
 	Utility::PrintEffectUniforms(gPhongEffect.ProgramID);
 
@@ -653,21 +635,22 @@ void LoadShaderEffect()
 void LoadModel()
 {
 	std::string resolvedPath;
-	if (gAppPath.getFilePath( "Light.obj", resolvedPath)) 
+
+	/*if (gAppPath.getFilePath( "Light.obj", resolvedPath)) 
 	{
-		if (!gLightModel.loadModelFromFile(resolvedPath.c_str())) 
-		{
-			fprintf(stderr, "Error loading model '%s'\n", HeadFile);
-			exit(-1);
-		}
-
-		printf("compiling light mesh...\n");
-		gLightModel.compileModel( nv::Model::eptTriangles);
-
-		BuildModel(&gLightModel, &gLightModelVBO, &gLightModelIBO);
-
-		gLightTexID = Create2DTextureFromFile("light.dds");
+	if (!gLightModel.loadModelFromFile(resolvedPath.c_str())) 
+	{
+	fprintf(stderr, "Error loading model '%s'\n", HeadFile);
+	exit(-1);
 	}
+
+	printf("compiling light mesh...\n");
+	gLightModel.compileModel( nv::Model::eptTriangles);
+
+	BuildModel(&gLightModel, &gLightModelVBO, &gLightModelIBO);
+
+	gLightTexID = Create2DTextureFromFile("light.dds");
+	}*/
 	
 	if (gAppPath.getFilePath( HeadFile, resolvedPath)) 
 	{
@@ -788,7 +771,7 @@ void DoUI()
 	gHub.doLabel( none, "");
 	gHub.doCheckButton(none, "Draw Wireframe", &gOptions[OPTION_WIREFRAME]);
 	gHub.doCheckButton(none, "Draw Skybox", &gOptions[OPTION_DRAW_SKYBOX]);
-	gHub.doCheckButton(none, "Show Light", &gOptions[OPTION_SHOW_LIGHTS]);
+	//gHub.doCheckButton(none, "Show Light", &gOptions[OPTION_SHOW_LIGHTS]);
 	gHub.doCheckButton(none, "Bloom", &gOptions[OPTION_BLOOM]);
 	gHub.doLabel( none, "");
 
@@ -843,6 +826,15 @@ void DoUI()
 		gHub.doHorizontalSlider(none, 0.0f, 1.0f, &gRho_s);
 		gHub.endGroup();
 
+		if (gOptions[OPTION_BLOOM])
+		{
+			gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
+			sprintf(tempBuffer, "Exposure %.2f", gExposure);
+			gHub.doLabel(none, tempBuffer);
+			gHub.doHorizontalSlider(none, 0.2f, 20.0f, &gExposure);
+			gHub.endGroup();
+		}
+		
 		/*gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
 		sprintf(tempBuffer, "StrechScale %f", gStrechScale);
 		gHub.doLabel(none, tempBuffer);
@@ -924,45 +916,45 @@ Camera* CurrentCamera()
 	return &gCamera;
 }
 
-void DrawLights()
-{
-	glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.013f, 0.013f, 0.013f));
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, gLightTexID);
-
-	glUseProgram(gPipelineEffect.ProgramID);
-
-	glm::mat4 veiwProj = CurrentManipulator()->GetProjectionMatrix() * CurrentManipulator()->GetViewMatrix();
-	glUniformMatrix4fv(gPipelineEffect.ViewProjParam, 1, false, glm::value_ptr(veiwProj));
-	glUniform1ui(gPipelineEffect.AlbedoTexParam, 0);
-
-	for (int i = 0; i < LIGHT_COUNT; ++i)
-	{
-		glm::vec3 lightPos = gLights[i].Camera.GetEyePosition();
-		glm::vec3 targetPos = gLights[i].Camera.GetLookAtPosition();
-		glm::vec3 lightDir = glm::normalize(targetPos - lightPos);
-
-		glm::vec3 tZ = glm::vec3(0, 0, 1); 
-		glm::vec3 tX = glm::cross(lightDir, tZ);
-		tX = glm::normalize(tX);
-		tZ = glm::cross(tX, lightDir);
-
-		glm::mat4 orientation;
-		orientation = glm::column(orientation, 0, glm::vec4(tX, 0.0f));
-		orientation = glm::column(orientation, 1, glm::vec4(lightDir, 0.0f));
-		orientation = glm::column(orientation, 2, glm::vec4(tZ, 0.0f));
-
-		glm::mat4 baseRot = glm::rotate(glm::mat4(1.0f), 180.0f, glm::vec3(1, 0, 0));
-
-		glm::mat4 world = glm::translate(glm::mat4(1.0f), lightPos) * orientation * baseRot * scale;
-		glUniformMatrix4fv(gPipelineEffect.WorldParam, 1, false, glm::value_ptr(world));
-		
-		DrawModel(&gLightModel, gLightModelVBO, gLightModelIBO);
-	}
-
-	glUseProgram(0);
-}
+//void DrawLights()
+//{
+//	glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.013f, 0.013f, 0.013f));
+//
+//	glActiveTexture(GL_TEXTURE0);
+//	glBindTexture(GL_TEXTURE_2D, gLightTexID);
+//
+//	glUseProgram(gPipelineEffect.ProgramID);
+//
+//	glm::mat4 veiwProj = CurrentManipulator()->GetProjectionMatrix() * CurrentManipulator()->GetViewMatrix();
+//	glUniformMatrix4fv(gPipelineEffect.ViewProjParam, 1, false, glm::value_ptr(veiwProj));
+//	glUniform1ui(gPipelineEffect.AlbedoTexParam, 0);
+//
+//	for (int i = 0; i < LIGHT_COUNT; ++i)
+//	{
+//		glm::vec3 lightPos = gLights[i].Camera.GetEyePosition();
+//		glm::vec3 targetPos = gLights[i].Camera.GetLookAtPosition();
+//		glm::vec3 lightDir = glm::normalize(targetPos - lightPos);
+//
+//		glm::vec3 tZ = glm::vec3(0, 0, 1); 
+//		glm::vec3 tX = glm::cross(lightDir, tZ);
+//		tX = glm::normalize(tX);
+//		tZ = glm::cross(tX, lightDir);
+//
+//		glm::mat4 orientation;
+//		orientation = glm::column(orientation, 0, glm::vec4(tX, 0.0f));
+//		orientation = glm::column(orientation, 1, glm::vec4(lightDir, 0.0f));
+//		orientation = glm::column(orientation, 2, glm::vec4(tZ, 0.0f));
+//
+//		glm::mat4 baseRot = glm::rotate(glm::mat4(1.0f), 180.0f, glm::vec3(1, 0, 0));
+//
+//		glm::mat4 world = glm::translate(glm::mat4(1.0f), lightPos) * orientation * baseRot * scale;
+//		glUniformMatrix4fv(gPipelineEffect.WorldParam, 1, false, glm::value_ptr(world));
+//		
+//		DrawModel(&gLightModel, gLightModelVBO, gLightModelIBO);
+//	}
+//
+//	glUseProgram(0);
+//}
 
 void DrawQuad(int w, int h)
 {
@@ -1022,45 +1014,44 @@ void ConvolutionStretch(RenderTexture* src, RenderTexture* dest, int itr)
 		gaussWidth =  sqrtf(gConvolutionScale[itr] - gConvolutionScale[itr-1]);
 	}*/
 
-	// convolution U
-	gTempBuffer->Activate();
 	SetOrthoProjection(gWindowWidth, gWindowHeight);
 
-	glUseProgram(gConvStretchUEffect.ProgramID);
-	glUniform1f(gConvStretchUEffect.GaussWidthParam, sqrtf(gConvolutionScale[itr]));
+	glm::vec2 stepX = glm::vec2(1.0f, 0.0f) * (1.0f / gWindowWidth);
+	glm::vec2 stepY = glm::vec2(0.0f, 1.0f) * (1.0f / gWindowHeight);
+
+
+	glUseProgram(gConvStretchEffect.ProgramID);
+
+	glUniform2f(gConvStretchEffect.BlurStepParam, stepX.x, stepX.y );
+	glUniform1f(gConvStretchEffect.GaussWidthParam, sqrtf(gConvolutionScale[itr]));
 	//glUniform1f(gConvStretchUEffect.GaussWidthParam, gaussWidth);
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 	src->Bind();
-	glUniform1i(gConvStretchUEffect.InputTexParam, 0);
+	glUniform1i(gConvStretchEffect.InputTexParam, 0);
 	
+	// convolution U
+	gTempBuffer->Activate();
 	DrawQuad(gWindowWidth, gWindowHeight);
-
-	glActiveTexture(GL_TEXTURE0);
-	src->Release();
-
 	gTempBuffer->Deactivate();
 
 	// convolution V
-	dest->Activate();
-
-	glUseProgram(gConvStretchVEffect.ProgramID);
+	glUniform2f(gConvStretchEffect.BlurStepParam, stepY.x, stepY.y );
 
 	glActiveTexture(GL_TEXTURE0);
 	gTempBuffer->Bind();
-	glUniform1i(gConvStretchVEffect.InputTexParam, 0);
-	glUniform1f(gConvStretchVEffect.GaussWidthParam, sqrtf(gConvolutionScale[itr]));
-	//glUniform1f(gConvStretchVEffect.GaussWidthParam, gaussWidth);
+	glUniform1i(gConvStretchEffect.InputTexParam, 0);
 
+	dest->Activate();
 	DrawQuad(gWindowWidth, gWindowHeight);
+	dest->Deactivate();
+
+	glUseProgram(0);
 
 	glActiveTexture(GL_TEXTURE0);
 	gTempBuffer->Release();
 
-	dest->Deactivate();
-
-	glUseProgram(0);
 	glPopAttrib();
 }
 
@@ -1078,60 +1069,50 @@ void Convolution(RenderTexture* src, RenderTexture* dest, int itr)
 		gaussWidth =  sqrtf(gConvolutionScale[itr] - gConvolutionScale[itr-1]);
 	}*/
 
-
-	// convolution U
-	gTempBuffer->Activate();
 	SetOrthoProjection(gWindowWidth, gWindowHeight);
 
 	glm::vec2 stepX = glm::vec2(1.0f, 0.0f) * (1.0f / gWindowWidth);
 	glm::vec2 stepY = glm::vec2(0.0f, 1.0f) * (1.0f / gWindowHeight);
 
-	
-	glUseProgram(gConvolutionUEffect.ProgramID);
-	//glUniform1f(gConvolutionUEffect.GaussWidthParam, sqrtf(gaussWidth));
-	glUniform1f(gConvolutionUEffect.GaussWidthParam, sqrtf(gConvolutionScale[itr]));
+	glUseProgram(gConvolutionEffect.ProgramID);
+	//glUniform1f(gConvolutionEffect.GaussWidthParam, sqrtf(gaussWidth));
+	glUniform1f(gConvolutionEffect.GaussWidthParam, sqrtf(gConvolutionScale[itr]));
+	glUniform2f(gConvolutionEffect.BlurStepParam, stepX.x, stepX.y );
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 	src->Bind();
-	glUniform1i(gConvolutionUEffect.InputTexParam, 0);
+	glUniform1i(gConvolutionEffect.InputTexParam, 0);
 
 	glActiveTexture(GL_TEXTURE1);
 	glEnable(GL_TEXTURE_2D);
 	gStretchBuffer[itr]->Bind();
-	glUniform1i(gConvolutionUEffect.StretchTexParam, 1);	
+	glUniform1i(gConvolutionEffect.StretchTexParam, 1);	
 
+	// convolution U
+	gTempBuffer->Activate();
 	DrawQuad(gWindowWidth, gWindowHeight);
-	
 	gTempBuffer->Deactivate();
 
 	// convolution V
-	dest->Activate();
-
-	glUseProgram(gConvolutionVEffect.ProgramID);
-	glUniform1f(gConvolutionVEffect.GaussWidthParam, sqrtf(gConvolutionScale[itr]));
-	//glUniform1f(gConvolutionVEffect.GaussWidthParam, gaussWidth);
-	
+	glUniform2f(gConvolutionEffect.BlurStepParam, stepY.x, stepY.y );
 
 	glActiveTexture(GL_TEXTURE0);
 	gTempBuffer->Bind();
-	glUniform1i(gConvolutionVEffect.InputTexParam, 0);
+	glUniform1i(gConvolutionEffect.InputTexParam, 0);
 
-	glActiveTexture(GL_TEXTURE1);
-	gStretchBuffer[itr]->Bind();
-	glUniform1i(gConvolutionVEffect.StretchTexParam, 1);	
-
+	dest->Activate();
 	DrawQuad(gWindowWidth, gWindowHeight);
+	dest->Deactivate();
+
+	glUseProgram(0);
 
 	glActiveTexture(GL_TEXTURE0);
 	gTempBuffer->Release();
 
 	glActiveTexture(GL_TEXTURE1);
 	gStretchBuffer[itr]->Release();
-
-	dest->Deactivate();
-
-	glUseProgram(0);
+	
 	glPopAttrib();
 }
 
@@ -1161,12 +1142,11 @@ void BloomGuassianBlur(RenderTexture* src, RenderTexture* dest, float guassianWi
 
 	// convolution V
 	dest->Activate();
-
 	glUniform2f(gBloomEffect.BlurStepParam, stepY.x, stepY.y );
 	
 	glActiveTexture(GL_TEXTURE0);
 	gTempBuffer->Bind();
-	glUniform1i(gConvolutionVEffect.InputTexParam, 0);	
+	glUniform1i(gBloomEffect.BlurInputTexParam, 0);	
 
 	DrawQuad(gWindowWidth, gWindowHeight);
 
@@ -1435,11 +1415,6 @@ void RenderIrradianceTSM()
 
 void RenderFinal()
 {
-	if (gOptions[OPTION_BLOOM])
-	{
-		gFinalBuffer->Activate();
-	}
-
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(1.0f);
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1540,11 +1515,6 @@ void RenderFinal()
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
-
-	if (gOptions[OPTION_BLOOM])
-	{
-		gFinalBuffer->Deactivate();
-	}
 }
 
 void RenderFinalTSM()
@@ -1747,6 +1717,41 @@ void RenderPhong()
 	//Utility::SaveTextureToPfm("final.pfm",gStretchBuffer[4]->GetColorTex(), gWindowWidth, gWindowWidth);
 }
 
+void BloomPass(RenderTexture* input)
+{
+	BloomGuassianBlur(input, gBloomBuffer[0], sqrtf(0.008));
+	BloomGuassianBlur(input, gBloomBuffer[1], sqrtf(0.0576));
+
+	//Utility::SaveTextureToPfm("final.pfm", input->GetColorTex(), gWindowWidth, gWindowWidth);
+	//Utility::SaveTextureToPfm("bloom1.pfm", gBloomBuffer[0]->GetColorTex(), gWindowWidth, gWindowWidth);
+
+	// Conbine
+	SetOrthoProjection(gWindowWidth, gWindowHeight);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear( GL_COLOR_BUFFER_BIT );
+	glUseProgram(gBloomEffect.CombineProgramID);
+
+	glUniform1f(gBloomEffect.ExposureParam, gExposure);	
+
+	glActiveTexture(GL_TEXTURE0);
+	input->Bind();
+	glUniform1i(gBloomEffect.CombineInputTexParam, 0);	
+
+	glActiveTexture(GL_TEXTURE1);
+	gBloomBuffer[0]->Bind();
+	glUniform1i(gBloomEffect.CombineBloomTexParam, 1);	
+
+	glActiveTexture(GL_TEXTURE2);
+	gBloomBuffer[1]->Bind();
+	glUniform1i(gBloomEffect.CombineBloomTexParam+1, 2);
+
+
+	DrawQuad(gWindowWidth, gWindowHeight);
+
+	glUseProgram(0);
+}
+
+
 void RenderScene()
 {
 	CalculateFPS();
@@ -1761,7 +1766,6 @@ void RenderScene()
 	for (int i = 0; i < LIGHT_COUNT; i++)
 		gLights[i].Camera.Update(elapsedTime);
 
-
 	MakeShadowMap();
 
 	if (gStrechMapDirty)
@@ -1774,19 +1778,33 @@ void RenderScene()
 	{
 	case RM_NoSSS:
 		{
+			if ( gOptions[OPTION_BLOOM])  gFinalBuffer->Activate();	
 			RenderPhong();
+			if (gOptions[OPTION_DRAW_SKYBOX]) RenderSkyBox();
+			if ( gOptions[OPTION_BLOOM])  gFinalBuffer->Deactivate();
+			
 		}
 		break;
 	case RM_SSS_Without_TSM:
 		{
 			RenderIrradiance();
+
+			if ( gOptions[OPTION_BLOOM])  gFinalBuffer->Activate();	
 			RenderFinal();
+			if (gOptions[OPTION_DRAW_SKYBOX]) RenderSkyBox();
+			if ( gOptions[OPTION_BLOOM])  gFinalBuffer->Deactivate();
+			
 		}
 		break;
 	case RM_SSS_With_TSM:
 		{
 			RenderIrradianceTSM();
+
+			if ( gOptions[OPTION_BLOOM])  gFinalBuffer->Activate();	
 			RenderFinalTSM();
+			if (gOptions[OPTION_DRAW_SKYBOX]) RenderSkyBox();
+			if ( gOptions[OPTION_BLOOM])  gFinalBuffer->Deactivate();
+			
 		}
 		break;
 	case RM_Debug:
@@ -1823,47 +1841,13 @@ void RenderScene()
 		break;
 	}
 
-	/*if (gOptions[OPTION_SHOW_LIGHTS])
+	if (gOptions[OPTION_BLOOM] && gMode != RM_Debug)
 	{
-		DrawLights();
-	}*/
-
-	if (gOptions[OPTION_DRAW_SKYBOX])
-	{
-		RenderSkyBox();
+		BloomPass(gFinalBuffer);
 	}
-
-	/*if ()
-	{
-	}*/
 
 	DoUI();
 	glutSwapBuffers();
-}
-
-void BloomPass(RenderTexture* input)
-{
-	BloomGuassianBlur(input, gBloomBuffer[0], sqrtf(0.008));
-	BloomGuassianBlur(input, gBloomBuffer[1], sqrtf(0.0576));
-
-	// Conbine
-	SetOrthoProjection(gWindowWidth, gWindowHeight);
-
-	glUseProgram(gBloomEffect.CombineProgramID);
-
-	glActiveTexture(GL_TEXTURE0);
-	input->Bind();
-	glUniform1i(gBloomEffect.CombineInputTexParam, 0);	
-
-	glActiveTexture(GL_TEXTURE1);
-	gBloomBuffer[0]->Bind();
-	glUniform1i(gBloomEffect.CombineBloomTexParam, 1);	
-
-	glActiveTexture(GL_TEXTURE2);
-	gBloomBuffer[1]->Bind();
-	glUniform1i(gBloomEffect.CombineBloomTexParam+1, 2);
-
-	glUseProgram(0);
 }
 
 void Init()
@@ -1885,9 +1869,16 @@ void Init()
 	gOptions[OPTION_WIREFRAME] = false;
 	gOptions[OPTION_NoSSS] = false;
 
+	// Create Shadow map buffers
+	for (int i = 0; i < LIGHT_COUNT; i++) 
+	{
+		//gLights->Camera.SetDistance(2.0);
+		gLights[i].Camera.SetProjection(CAMERA_FOV, 1.0f, 0.1f, 20.0f);
+		gLights[i].ShadowMap = new ShadowMap(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+	}
+
 	LoadPresents();
 	LoadShaderEffect();
-	CreateBuffers(GL_RGBA32F_ARB);
 	LoadModel();
 }
 
@@ -1927,6 +1918,7 @@ void Reshape( int w, int h)
 	SAFE_DELETE(gFinalBuffer); 
 	gFinalBuffer = new RenderTexture(w, h, GL_TEXTURE_2D);
 	gFinalBuffer->InitColor_Tex(0, GL_RGBA32F);
+	gFinalBuffer->InitDepth_RB();
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 

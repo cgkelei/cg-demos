@@ -82,28 +82,10 @@
     <None Include="..\Media\Shaders\Stretch.vert">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="..\Media\Shaders\ConvolutionV.frag">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="..\Media\Shaders\ConvolutionU.frag">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="..\Media\Shaders\ConvolutionStretchU.frag">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="..\Media\Shaders\ConvolutionStretchV.frag">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="..\Media\Shaders\TextureSpaceLighting.frag">
       <Filter>资源文件</Filter>
     </None>
     <None Include="..\Media\Shaders\TextureSpaceLighting.vert">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="..\Media\Shaders\FixedPipeline.frag">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="..\Media\Shaders\FixedPipeline.vert">
       <Filter>资源文件</Filter>
     </None>
     <None Include="..\Media\Shaders\TextureSpaceLightingTSM.frag">
@@ -148,10 +130,10 @@
     <None Include="..\Media\Shaders\SkyBox.vert">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="..\Media\Shaders\GaussianBlur.frag">
+    <None Include="..\Media\Shaders\FastBloom.frag">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="..\Media\Shaders\FastBloom.frag">
+    <None Include="..\Media\Shaders\Convolution.frag">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>
