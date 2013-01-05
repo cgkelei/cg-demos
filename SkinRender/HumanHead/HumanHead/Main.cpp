@@ -607,8 +607,8 @@ void LoadShaderEffect()
 
 	printf("Load Lambert with Kelemen/Szirmay-Kalos Specular BRDF effect...\n");
 	gPhongEffect.ProgramID = Utility::LoadShaderEffect("Phong.vert", "Phong.frag", &shadowMacro);
-	Utility::PrintEffectAttribs(gPhongEffect.ProgramID);
-	Utility::PrintEffectUniforms(gPhongEffect.ProgramID);
+	//Utility::PrintEffectAttribs(gPhongEffect.ProgramID);
+	//Utility::PrintEffectUniforms(gPhongEffect.ProgramID);
 
 	RETRIEVE_UNIFORM_LOCATION(gPhongEffect.WorldParam, gPhongEffect.ProgramID, "World");
 	RETRIEVE_UNIFORM_LOCATION(gPhongEffect.ViewProjParam, gPhongEffect.ProgramID, "ViewProj");
@@ -847,7 +847,7 @@ void DoUI()
 			gHub.beginGroup(nv::GroupFlags_GrowLeftFromTop);
 			sprintf(tempBuffer, "ThincknessScale %.0f", gThicknessScale);
 			gHub.doLabel(none, tempBuffer);
-			gHub.doHorizontalSlider(none, 5.0f, 25.0f, &gThicknessScale);
+			gHub.doHorizontalSlider(none, 10.0f, 30.0f, &gThicknessScale);
 			gHub.endGroup();
 		}
 
@@ -976,6 +976,7 @@ void DrawViewport(RenderTexture *src)
 	glActiveTexture(GL_TEXTURE0);
 	src->Bind();
 
+	glUseProgram(0);
 	glDisable(GL_DEPTH_TEST);
 
 	DrawQuad(gWindowWidth, gWindowHeight);
@@ -1023,6 +1024,7 @@ void ConvolutionStretch(RenderTexture* src, RenderTexture* dest, int itr)
 	glUseProgram(gConvStretchEffect.ProgramID);
 
 	glUniform2f(gConvStretchEffect.BlurStepParam, stepX.x, stepX.y );
+	//glUniform1f(gConvStretchEffect.GaussWidthParam, gConvolutionScale[itr]);
 	glUniform1f(gConvStretchEffect.GaussWidthParam, sqrtf(gConvolutionScale[itr]));
 	//glUniform1f(gConvStretchUEffect.GaussWidthParam, gaussWidth);
 
@@ -1077,6 +1079,7 @@ void Convolution(RenderTexture* src, RenderTexture* dest, int itr)
 	glUseProgram(gConvolutionEffect.ProgramID);
 	//glUniform1f(gConvolutionEffect.GaussWidthParam, sqrtf(gaussWidth));
 	glUniform1f(gConvolutionEffect.GaussWidthParam, sqrtf(gConvolutionScale[itr]));
+	//glUniform1f(gConvStretchEffect.GaussWidthParam, gConvolutionScale[itr]);
 	glUniform2f(gConvolutionEffect.BlurStepParam, stepX.x, stepX.y );
 
 	glActiveTexture(GL_TEXTURE0);
@@ -1397,6 +1400,9 @@ void RenderIrradianceTSM()
 	glUseProgram(0);
 	glPopAttrib();
 	
+	///Utility::SaveTextureToPfm("depth00.pfm", gIrradianceBuffer[0][0]->GetColorTex(), gWindowWidth, gWindowWidth);
+	//Utility::SaveTextureToPfm("depth11.pfm", gIrradianceBuffer[1][0]->GetColorTex(), gWindowWidth, gWindowWidth);
+	//Utility::SaveTextureToPfm("depth22.pfm", gIrradianceBuffer[2][0]->GetColorTex(), gWindowWidth, gWindowWidth);
 	
 	//convolve 5 times!!!!!
 	for (int i = 0 ; i < LIGHT_COUNT; ++i)
@@ -1803,8 +1809,7 @@ void RenderScene()
 			if ( gOptions[OPTION_BLOOM])  gFinalBuffer->Activate();	
 			RenderFinalTSM();
 			if (gOptions[OPTION_DRAW_SKYBOX]) RenderSkyBox();
-			if ( gOptions[OPTION_BLOOM])  gFinalBuffer->Deactivate();
-			
+			if ( gOptions[OPTION_BLOOM])  gFinalBuffer->Deactivate();	
 		}
 		break;
 	case RM_Debug:

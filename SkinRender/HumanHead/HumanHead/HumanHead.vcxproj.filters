@@ -136,5 +136,8 @@
     <None Include="..\Media\Shaders\Convolution.frag">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="..\Media\Shaders\BloomExtract.frag">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
 </Project>
