@@ -365,7 +365,6 @@ GLuint Utility::LinkShaderProgram( GLuint vertexShader, GLuint fragmentShader )
 	return nv::LinkGLSLProgram(vertexShader, fragmentShader);
 }
 
-
 void Utility::PrintEffectAttribs( GLuint program )
 {
 	GLint activeAttribs;

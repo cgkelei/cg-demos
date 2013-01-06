@@ -100,6 +100,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Media\Shaders\BloomExtract.frag" />
+    <None Include="..\Media\Shaders\DebugView.frag" />
     <None Include="..\Media\Shaders\FastBloom.frag" />
     <None Include="..\Media\Shaders\Common.include.glsl" />
     <None Include="..\Media\Shaders\Convolution.vert" />
@@ -120,7 +121,6 @@
     <None Include="..\Media\Shaders\Stretch.vert" />
     <None Include="..\Media\Shaders\TextureSpaceLightingTSM.frag" />
     <None Include="..\Media\Shaders\TextureSpaceLightingTSM.vert" />
-    <None Include="..\Media\Shaders\ViewDepth.frag" />
     <None Include="SHProjection.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

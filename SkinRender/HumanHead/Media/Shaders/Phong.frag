@@ -149,7 +149,5 @@ void main()
 	//specularLight = pow( specularLight.xyz, vec3(1.0 / 2.2) );
 	//FragColor = vec4(diffuseContrib,  specularLight);
 
-	FragColor = vec4(N_bumped, diffuseContrib +  specularLight);
-
-	//FragColor = vec4(diffuseContrib + specularLight,  1.0 );
+	FragColor = vec4(diffuseContrib + specularLight,  1.0 );
 }
