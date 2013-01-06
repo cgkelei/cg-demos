@@ -9,6 +9,8 @@ uniform float EnvAmount = 0.2;
 uniform float Roughness = 0.3;
 uniform float Rho_s = 0.18;
 
+// Only add env light when in first light pass, turn off in second and third lihgt to avoid Duplicate 
+uniform int EnvLightOn;
 
 uniform mat4 World;// World Transform
 
@@ -62,7 +64,6 @@ void main()
 	#endif
 #endif
 
-
 	vec3 pointLight0Color = Lights[0].Color * Lights[0].Amount * L0Shadow * L0atten;
 
 	// DIFFUSE LIGHT  
@@ -83,16 +84,20 @@ void main()
 	vec3 albedo = albedoTap.xyz;
     
 	//vec3 albedo = pow( albedoTap.xyz, vec3(AlbedoGamma) );
-	//float occlusion = albedoTap.w;  
-	float occlusion = 1.0 / 3.0;
 
-	vec3 cubeTap1 = texture( IrradEnvMap, N_nonBumped ).xyz;
-	vec3 envLight = saturate( EnvAmount * cubeTap1.xyz * occlusion);
+	if (EnvLightOn == 0)
+	{
+		float occlusion = 1.0;
+
+		vec3 cubeTap1 = texture( IrradEnvMap, N_bumped ).xyz;
+		vec3 envLight = saturate( EnvAmount * cubeTap1.xyz * occlusion);
+
+		E0 += envLight;
+	}
 
 	//// start mixing the diffuse lighting - re-compute non-blurred lighting per pixel to get maximum resolutions
-    vec3 diffuseContrib = pow( albedo.xyz, vec3(DiffuseColorMix) ) * (E0 + envLight);        
+    vec3 diffuseContrib = pow( albedo.xyz, vec3(DiffuseColorMix) ) * (E0);        
     vec3 finalCol = diffuseContrib.xyz;  
-
 
 	//----------------------------------------------------------------------------------------------
 	// Compute thickness

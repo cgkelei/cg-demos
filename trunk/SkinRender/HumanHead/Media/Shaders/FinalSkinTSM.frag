@@ -116,7 +116,7 @@ void main()
 	float seamMask = texture(SeamMaskTex, oTex).x;
     float alterSeamMask = pow( 1.0 - seamMask, 0.03);
 
-	vec3 cubeTap1 = texture( IrradEnvMap, N_nonBumped ).xyz;
+	vec3 cubeTap1 = texture( IrradEnvMap, N_bumped ).xyz;
 	vec3 envLight = saturate( EnvAmount * cubeTap1.xyz );
 
 	// correct seam problems
@@ -179,7 +179,7 @@ void main()
 	float stretchval = 0.5 * (stretchTap.x + stretchTap.y);
 	vec4 a_values = vec4(0.433, 0.753, 1.412, 2.722);
 	vec4 inv_a = -1.0 / (2.0 * a_values * a_values );
-	float textureScale = 800.0 * 0.1 / stretchval;
+	float textureScale = 1024.0 * 0.1 / stretchval;
 	
 	// Compute global scatter from modified TSM  
     float texDist, blend, blendFactor3, blendFactor4, blendFactor5;
@@ -257,7 +257,7 @@ void main()
 
 	// Compute specular for env light 
 	vec3 R_bumped = normalize( reflect( -V, N_bumped ) );	// refelct vector
-    vec3 R_nonBumped = normalize( reflect( -V, N_nonBumped ) );
+    vec3 R_nonBumped = normalize( reflect( -V, N_bumped ) );
 
 	// Gloss is the [0..1] value from your gloss map not decompressed in specular power
 	float MipmapIndex = (1 - m) * (GlossyNumMipmap - 1);  
@@ -267,6 +267,7 @@ void main()
 	specularLight *= SpecularIntensity;
 	//FragColor = pow( FragColor.xyz, vec3(1.0 / 2.2) );
 
+	//FragColor = vec4(alterSeamMask, alterSeamMask, alterSeamMask, diffuseLight + specularLight); 
 	//FragColor = vec4(diffuseLight , specularLight );  
 	FragColor = vec4(diffuseLight + specularLight, 1.0 );  
 }

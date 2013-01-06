@@ -25,6 +25,7 @@ const char* SeamMskMap = "HeadMask.png";
 #define BLOOM_BUFFER_COUNT 2
 #define TEXTURE_BUFFER_COUNT 6
 #define SHADOW_MAP_SIZE 1024
+#define IRRADIANCE_BUFFER_SIZE 1024
 #define CAMERA_FOV 20.0f
 #define MATH_PI float(3.14159265358979323846264338327950288f)
 
@@ -47,8 +48,8 @@ Environment gEnvironment[3];
 int gCurrentEnv = 0;
 float gEnvLightAmount = 0.3;
 
-int gWindowWidth = 800;
-int gWindowHeight = 800;
+int gWindowWidth = 824;
+int gWindowHeight = 328;
 
 nv::SDKPath gAppPath;
 nv::GlutUIContext gHub;
@@ -77,9 +78,9 @@ bool gDebugOut = false;
 Camera gCamera, gCameraTemp;
 
 RenderTexture* gTempBuffer, *gFinalBuffer;
-RenderTexture* gStretchBuffer[TEXTURE_BUFFER_COUNT];	// stretch texture blur storage
+RenderTexture* gStretchBuffer[TEXTURE_BUFFER_COUNT - 1];	// stretch texture blur storage
 RenderTexture* gIrradianceBuffer[LIGHT_COUNT][TEXTURE_BUFFER_COUNT];
-RenderTexture* gBloomBuffer[2];
+RenderTexture* gBloomBuffer[2], *gBloomBlurTemp;
 
 /**
  * First blur is so narrow, so we don't do it, just use the original irradiance texture
@@ -138,11 +139,12 @@ struct SkyBoxEffect
 	GLint MVPParam, EnvTexParam;
 } gSkyBoxEffect;
 
-struct ViewDepthEffect
+struct DebugViewEffect
 {
 	GLuint ProgramID;
-	GLint DepthTexParam;
-} gViewDepthEffectEffect;
+	GLint ColorTexParam;
+	GLint DepthParam;
+} gDebugViewEffect;
 
 
 struct StretchEffect
@@ -183,7 +185,7 @@ struct TextureSpaceLightEffect
 struct TextureSpaceLightTSMEffect
 {
 	GLuint ProgramID;
-	GLint WorldParam, LightViewParam, LightProjParam, AlbedoTexParam, SpecTexParam,
+	GLint WorldParam, LightViewParam, LightProjParam, AlbedoTexParam, SpecTexParam,EnvLightOnParam,
 		NormalTexParam, Rho_d_TexParam, IrradEnvParam, EnvAmount, ShadowTexParam, RoughnessParam, Rho_sParam;
 	LightParams LightParam;
 
@@ -383,17 +385,6 @@ void CalculateFPS()
 	previousTime = currentTime;
 }
 
-void SetOrthoProjection(int w, int h)
-{
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, w, 0, h, -1.0, 1.0);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glViewport(0, 0, w, h);
-}
-
 void LoadShaderEffect()
 {
 
@@ -409,6 +400,7 @@ void LoadShaderEffect()
 	//shaderDefines.push_back(Utility::ShaderMacro("SHADOW_PCF", ""));
 	shadowMacro.push_back(Utility::ShaderMacro("SHADOW_VSM", ""));
 
+	// if has normal map, use it
 	if (gNormalTexID > 0)
 	{
 		shadowMacro.push_back(Utility::ShaderMacro("USE_NormalMap", ""));
@@ -464,10 +456,11 @@ void LoadShaderEffect()
 	RETRIEVE_UNIFORM_LOCATION(gSkyBoxEffect.MVPParam, gSkyBoxEffect.ProgramID, "MVP");
 	RETRIEVE_UNIFORM_LOCATION(gSkyBoxEffect.EnvTexParam, gSkyBoxEffect.ProgramID, "EnvTex");
 
-	gViewDepthEffectEffect.ProgramID = Utility::LoadShaderEffect("Convolution.vert", "ViewDepth.frag");
-	gViewDepthEffectEffect.DepthTexParam = -1;
-	RETRIEVE_UNIFORM_LOCATION(gViewDepthEffectEffect.DepthTexParam, gViewDepthEffectEffect.ProgramID, "DepthMap");
-	ASSERT(gViewDepthEffectEffect.ProgramID > 0);
+	printf("Load Debug view effect...\n");
+	gDebugViewEffect.ProgramID = Utility::LoadShaderEffect("Convolution.vert", "DebugView.frag");
+	RETRIEVE_UNIFORM_LOCATION(gDebugViewEffect.ColorTexParam, gDebugViewEffect.ProgramID, "ColorTex");
+	RETRIEVE_UNIFORM_LOCATION(gDebugViewEffect.DepthParam, gDebugViewEffect.ProgramID, "ViewDepth");
+
 
 	/*printf("Load FixedPipeline effect...\n");
 	gPipelineEffect.ProgramID = Utility::LoadShaderEffect("FixedPipeline.vert", "FixedPipeline.frag");
@@ -556,6 +549,7 @@ void LoadShaderEffect()
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightTSMEffect.LightProjParam, gTexSpaceLightTSMEffect.ProgramID, "LightProj");
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightTSMEffect.RoughnessParam, gTexSpaceLightTSMEffect.ProgramID, "Roughness");
 	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightTSMEffect.Rho_sParam, gTexSpaceLightTSMEffect.ProgramID, "Rho_s");
+	RETRIEVE_UNIFORM_LOCATION(gTexSpaceLightTSMEffect.EnvLightOnParam, gTexSpaceLightTSMEffect.ProgramID, "EnvLightOn");
 	
 
 	//// Final Skin With TSM effect
@@ -945,34 +939,23 @@ Camera* CurrentCamera()
 //	glUseProgram(0);
 //}
 
-void DrawQuad(int w, int h)
+
+void DrawFullscreenQuad()
 {
 	glBegin(GL_QUADS);
+
 	glTexCoord2f(0.0, 1.0);
-	glVertex2f(0.0, h);
+	glVertex3f(-1.0, 1.0, 1.0);
+
 	glTexCoord2f(1.0, 1.0);
-	glVertex2f(w, h);
+	glVertex3f(1.0, 1.0, 1.0);
+
 	glTexCoord2f(1.0, 0.0);
-	glVertex2f(w, 0.0);
+	glVertex3f(1.0, -1.0, 1.0);
+
 	glTexCoord2f(0.0, 0.0);
-	glVertex2f(0.0, 0.0);
+	glVertex3f(-1.0, -1.0, 1.0);
 	glEnd();
-}
-
-void DrawViewport(RenderTexture *src)
-{
-	SetOrthoProjection(gWindowWidth, gWindowHeight);
-	glActiveTexture(GL_TEXTURE0);
-	src->Bind();
-
-	glUseProgram(0);
-	glDisable(GL_DEPTH_TEST);
-
-	DrawQuad(gWindowWidth, gWindowHeight);
-
-	glEnable(GL_DEPTH_TEST);
-
-	src->Release();
 }
 
 void MakeShadowMap()
@@ -992,7 +975,11 @@ void MakeShadowMap()
 
 void ConvolutionStretch(RenderTexture* src, RenderTexture* dest, int itr)
 {
+	int bufferWidth = src->GetWidth();
+	int buffetHeight = src->GetHeight();
+
 	glPushAttrib(GL_VIEWPORT_BIT);
+	glViewport(0, 0, bufferWidth, buffetHeight);
 
 	/*float gaussWidth;
 	if (itr == 0)
@@ -1004,17 +991,16 @@ void ConvolutionStretch(RenderTexture* src, RenderTexture* dest, int itr)
 		gaussWidth =  sqrtf(gConvolutionScale[itr] - gConvolutionScale[itr-1]);
 	}*/
 
-	SetOrthoProjection(gWindowWidth, gWindowHeight);
-
-	glm::vec2 stepX = glm::vec2(1.0f, 0.0f) * (1.0f / gWindowWidth);
-	glm::vec2 stepY = glm::vec2(0.0f, 1.0f) * (1.0f / gWindowHeight);
-
+	glm::vec2 stepX = glm::vec2(1.0f, 0.0f) * (1.0f / bufferWidth);
+	glm::vec2 stepY = glm::vec2(0.0f, 1.0f) * (1.0f / buffetHeight);
 
 	glUseProgram(gConvStretchEffect.ProgramID);
 
+	// one pixel size combined with blur direction
 	glUniform2f(gConvStretchEffect.BlurStepParam, stepX.x, stepX.y );
-	//glUniform1f(gConvStretchEffect.GaussWidthParam, gConvolutionScale[itr]);
-	glUniform1f(gConvStretchEffect.GaussWidthParam, sqrtf(gConvolutionScale[itr]));
+
+	glUniform1f(gConvStretchEffect.GaussWidthParam, gConvolutionScale[itr]);
+	//glUniform1f(gConvStretchEffect.GaussWidthParam, sqrtf(gConvolutionScale[itr]));
 	//glUniform1f(gConvStretchUEffect.GaussWidthParam, gaussWidth);
 
 	glActiveTexture(GL_TEXTURE0);
@@ -1022,9 +1008,8 @@ void ConvolutionStretch(RenderTexture* src, RenderTexture* dest, int itr)
 	src->Bind();
 	glUniform1i(gConvStretchEffect.InputTexParam, 0);
 	
-	// convolution U
-	gTempBuffer->Activate();
-	DrawQuad(gWindowWidth, gWindowHeight);
+	gTempBuffer->Activate();			
+	DrawFullscreenQuad();
 	gTempBuffer->Deactivate();
 
 	// convolution V
@@ -1035,7 +1020,7 @@ void ConvolutionStretch(RenderTexture* src, RenderTexture* dest, int itr)
 	glUniform1i(gConvStretchEffect.InputTexParam, 0);
 
 	dest->Activate();
-	DrawQuad(gWindowWidth, gWindowHeight);
+	DrawFullscreenQuad();
 	dest->Deactivate();
 
 	glUseProgram(0);
@@ -1048,7 +1033,11 @@ void ConvolutionStretch(RenderTexture* src, RenderTexture* dest, int itr)
 
 void Convolution(RenderTexture* src, RenderTexture* dest, int itr)
 {
+	int bufferWidth = src->GetWidth();
+	int buffetHeight = src->GetHeight();
+
 	glPushAttrib(GL_VIEWPORT_BIT);
+	glViewport(0, 0, bufferWidth, buffetHeight);
 
 	/*float gaussWidth;
 	if (itr == 0)
@@ -1060,16 +1049,17 @@ void Convolution(RenderTexture* src, RenderTexture* dest, int itr)
 		gaussWidth =  sqrtf(gConvolutionScale[itr] - gConvolutionScale[itr-1]);
 	}*/
 
-	SetOrthoProjection(gWindowWidth, gWindowHeight);
-
-	glm::vec2 stepX = glm::vec2(1.0f, 0.0f) * (1.0f / gWindowWidth);
-	glm::vec2 stepY = glm::vec2(0.0f, 1.0f) * (1.0f / gWindowHeight);
+	// one pixel size combined with blur direction
+	glm::vec2 stepX = glm::vec2(1.0f, 0.0f) * (1.0f / bufferWidth);
+	glm::vec2 stepY = glm::vec2(0.0f, 1.0f) * (1.0f / buffetHeight);
 
 	glUseProgram(gConvolutionEffect.ProgramID);
+	glUniform2f(gConvolutionEffect.BlurStepParam, stepX.x, stepX.y );
+
 	//glUniform1f(gConvolutionEffect.GaussWidthParam, sqrtf(gaussWidth));
 	glUniform1f(gConvolutionEffect.GaussWidthParam, sqrtf(gConvolutionScale[itr]));
 	//glUniform1f(gConvStretchEffect.GaussWidthParam, gConvolutionScale[itr]);
-	glUniform2f(gConvolutionEffect.BlurStepParam, stepX.x, stepX.y );
+	
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
@@ -1083,7 +1073,7 @@ void Convolution(RenderTexture* src, RenderTexture* dest, int itr)
 
 	// convolution U
 	gTempBuffer->Activate();
-	DrawQuad(gWindowWidth, gWindowHeight);
+	DrawFullscreenQuad();
 	gTempBuffer->Deactivate();
 
 	// convolution V
@@ -1094,7 +1084,7 @@ void Convolution(RenderTexture* src, RenderTexture* dest, int itr)
 	glUniform1i(gConvolutionEffect.InputTexParam, 0);
 
 	dest->Activate();
-	DrawQuad(gWindowWidth, gWindowHeight);
+	DrawFullscreenQuad();
 	dest->Deactivate();
 
 	glUseProgram(0);
@@ -1110,14 +1100,14 @@ void Convolution(RenderTexture* src, RenderTexture* dest, int itr)
 
 void BloomGuassianBlur(RenderTexture* src, RenderTexture* dest, float guassianWidth)
 {
-	glPushAttrib(GL_VIEWPORT_BIT);
+	int bufferWidth = src->GetWidth();
+	int bufferHeight = src->GetHeight();
 
-	// convolution U
-	gTempBuffer->Activate();
-	SetOrthoProjection(gWindowWidth, gWindowHeight);
-	
-	glm::vec2 stepX = glm::vec2(1.0f, 0.0f) * (1.0f / gWindowWidth);
-	glm::vec2 stepY = glm::vec2(0.0f, 1.0f) * (1.0f / gWindowHeight);
+	glPushAttrib(GL_VIEWPORT_BIT);
+	glViewport(0, 0, bufferWidth, bufferHeight);
+
+	glm::vec2 stepX = glm::vec2(1.0f, 0.0f) * (1.0f / bufferWidth);
+	glm::vec2 stepY = glm::vec2(0.0f, 1.0f) * (1.0f / bufferHeight);
 
 	glUseProgram(gBloomEffect.BlurProgramID);
 	glUniform1f(gBloomEffect.GaussWidthParam, guassianWidth);
@@ -1128,27 +1118,27 @@ void BloomGuassianBlur(RenderTexture* src, RenderTexture* dest, float guassianWi
 	src->Bind();
 	glUniform1i(gBloomEffect.BlurInputTexParam, 0);
 
-	DrawQuad(gWindowWidth, gWindowHeight);
-	
-	gTempBuffer->Deactivate();
+	// convolution U
+	gBloomBlurTemp->Activate();
+	DrawFullscreenQuad();
+	gBloomBlurTemp->Deactivate();
 
 	// convolution V
-	dest->Activate();
 	glUniform2f(gBloomEffect.BlurStepParam, stepY.x, stepY.y );
 	
 	glActiveTexture(GL_TEXTURE0);
-	gTempBuffer->Bind();
+	gBloomBlurTemp->Bind();
 	glUniform1i(gBloomEffect.BlurInputTexParam, 0);	
 
-	DrawQuad(gWindowWidth, gWindowHeight);
-
-	glActiveTexture(GL_TEXTURE0);
-	gTempBuffer->Release();
-
+	dest->Activate();
+	DrawFullscreenQuad();
 	dest->Deactivate();
 
 	glUseProgram(0);
 	glPopAttrib();
+
+	glActiveTexture(GL_TEXTURE0);
+	gBloomBlurTemp->Release();
 }
 
 void MakeStretchMap()
@@ -1156,7 +1146,10 @@ void MakeStretchMap()
 	gStretchBuffer[0]->Activate();
 
 	glPushAttrib(GL_VIEWPORT_BIT);
-	glViewport(0, 0, gWindowWidth, gWindowHeight);
+	glViewport(0, 0, gStretchBuffer[0]->GetWidth(), gStretchBuffer[0]->GetHeight());
+
+	auto w = gStretchBuffer[0]->GetWidth();
+	auto h = gStretchBuffer[0]->GetHeight();
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1173,11 +1166,15 @@ void MakeStretchMap()
 	gStretchBuffer[0]->Deactivate();
 	glPopAttrib(); 
 
-	//Utility::SaveTextureToPfm("StrechXY0.pfm", gStretchBuffer[0]->GetColorTex(), gWindowWidth, gWindowWidth);
 	ConvolutionStretch(gStretchBuffer[0], gStretchBuffer[1], 0);
 	ConvolutionStretch(gStretchBuffer[1], gStretchBuffer[2], 1);
 	ConvolutionStretch(gStretchBuffer[2], gStretchBuffer[3], 2);
 	ConvolutionStretch(gStretchBuffer[3], gStretchBuffer[4], 3);	
+
+	//Utility::SaveTextureToPfm("StrechXY3.pfm", gStretchBuffer[3]->GetColorTex(), gStretchBuffer[0]->GetWidth(), gStretchBuffer[0]->GetHeight());
+	//Utility::SaveTextureToPfm("StrechXY2.pfm", gStretchBuffer[2]->GetColorTex(), gStretchBuffer[0]->GetWidth(), gStretchBuffer[0]->GetHeight());
+	//Utility::SaveTextureToPfm("StrechXY1.pfm", gStretchBuffer[1]->GetColorTex(), gStretchBuffer[0]->GetWidth(), gStretchBuffer[0]->GetHeight());
+	//Utility::SaveTextureToPfm("StrechXY4.pfm", gStretchBuffer[4]->GetColorTex(), gStretchBuffer[0]->GetWidth(), gStretchBuffer[0]->GetHeight());
 }
 
 void RenderSkyBox()
@@ -1247,10 +1244,13 @@ void RenderSkyBox()
  */
 void RenderIrradiance()
 {
+	int bufferWidth = gIrradianceBuffer[0][0]->GetWidth();
+	int bufferHeight = gIrradianceBuffer[0][0]->GetHeight();
+
 	gIrradianceBuffer[0][0]->Activate();
 
 	glPushAttrib(GL_VIEWPORT_BIT);	
-	glViewport(0, 0, gWindowWidth, gWindowHeight);
+	glViewport(0, 0, bufferWidth, bufferHeight);
 
 	glClearColor(0.729f, 0.596f, 0.549f, 1.0f);
 	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -1320,19 +1320,18 @@ void RenderIrradiance()
 
 	/*for (int i = 0; i < TEXTURE_BUFFER_COUNT; ++i)
 	{
-		std::stringstream sss;
-		sss << "blurIrradiance" << i << ".pfm";
-		Utility::SaveTextureToPfm(sss.str().c_str(), gIrradianceBuffer[0][i]->GetColorTex(), gWindowWidth, gWindowWidth);
+	std::stringstream sss;
+	sss << "blurIrradiance" << i << ".pfm";
+	Utility::SaveTextureToPfm(sss.str().c_str(), gIrradianceBuffer[0][i]->GetColorTex(), bufferWidth, bufferHeight);
 	}*/
 }
 
 void RenderIrradianceTSM()
 {
 	glPushAttrib(GL_VIEWPORT_BIT);	
-	glViewport(0, 0, gWindowWidth, gWindowHeight);
+	glViewport(0, 0, IRRADIANCE_BUFFER_SIZE, IRRADIANCE_BUFFER_SIZE);
 
 	glUseProgram(gTexSpaceLightTSMEffect.ProgramID);
-
 	
 	glUniform1f(gTexSpaceLightTSMEffect.EnvAmount, gEnvLightAmount);
 	glUniform1f(gTexSpaceLightTSMEffect.Rho_sParam, gRho_s);
@@ -1368,6 +1367,9 @@ void RenderIrradianceTSM()
 	{
 		gIrradianceBuffer[i][0]->Activate();
 
+		glUniform1i(gTexSpaceLightTSMEffect.EnvLightOnParam , i);	
+
+
 		glClearColor(0.729f / 3, 0.596f / 3, 0.549f / 3, 1.0f);
 		//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1393,10 +1395,6 @@ void RenderIrradianceTSM()
 	glUseProgram(0);
 	glPopAttrib();
 	
-	///Utility::SaveTextureToPfm("depth00.pfm", gIrradianceBuffer[0][0]->GetColorTex(), gWindowWidth, gWindowWidth);
-	//Utility::SaveTextureToPfm("depth11.pfm", gIrradianceBuffer[1][0]->GetColorTex(), gWindowWidth, gWindowWidth);
-	//Utility::SaveTextureToPfm("depth22.pfm", gIrradianceBuffer[2][0]->GetColorTex(), gWindowWidth, gWindowWidth);
-	
 	//convolve 5 times!!!!!
 	for (int i = 0 ; i < LIGHT_COUNT; ++i)
 	{
@@ -1406,9 +1404,9 @@ void RenderIrradianceTSM()
 		Convolution(gIrradianceBuffer[i][3], gIrradianceBuffer[i][4], 3);
 		Convolution(gIrradianceBuffer[i][4], gIrradianceBuffer[i][5], 4);
 
-		/*std::stringstream sss;
-		sss << "light" << i << "Irr.pfm";
-		Utility::SaveTextureToPfm(sss.str().c_str(), gIrradianceBuffer[i][0]->GetColorTex(), gWindowWidth, gWindowWidth);*/
+		//std::stringstream sss;
+		//sss << "light" << i << "Irr.pfm";
+		//Utility::SaveTextureToPfm(sss.str().c_str(), gIrradianceBuffer[i][5]->GetColorTex(), IRRADIANCE_BUFFER_SIZE, IRRADIANCE_BUFFER_SIZE);
 	}
 }
 
@@ -1630,8 +1628,6 @@ void RenderFinalTSM()
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
-
-	//Utility::SaveTextureToPfm("final.pfm",gStretchBuffer[4]->GetColorTex(), gWindowWidth, gWindowWidth);
 }
 
 void RenderPhong()
@@ -1721,13 +1717,13 @@ void BloomPass(RenderTexture* input)
 	BloomGuassianBlur(input, gBloomBuffer[0], sqrtf(0.008));
 	BloomGuassianBlur(input, gBloomBuffer[1], sqrtf(0.0576));
 
-	//Utility::SaveTextureToPfm("final.pfm", input->GetColorTex(), gWindowWidth, gWindowWidth);
-	//Utility::SaveTextureToPfm("bloom1.pfm", gBloomBuffer[0]->GetColorTex(), gWindowWidth, gWindowWidth);
+	/*Utility::SaveTextureToPfm("final.pfm", input->GetColorTex(), gWindowWidth, gWindowHeight);
+	Utility::SaveTextureToPfm("bloom1.pfm", gBloomBuffer[0]->GetColorTex(), gWindowWidth, gWindowHeight);*/
 
 	// Conbine
-	SetOrthoProjection(gWindowWidth, gWindowHeight);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear( GL_COLOR_BUFFER_BIT );
+
 	glUseProgram(gBloomEffect.CombineProgramID);
 
 	glUniform1f(gBloomEffect.ExposureParam, gExposure);	
@@ -1744,8 +1740,7 @@ void BloomPass(RenderTexture* input)
 	gBloomBuffer[1]->Bind();
 	glUniform1i(gBloomEffect.CombineBloomTexParam+1, 2);
 
-
-	DrawQuad(gWindowWidth, gWindowHeight);
+	DrawFullscreenQuad();
 
 	glUseProgram(0);
 }
@@ -1754,10 +1749,6 @@ void BloomPass(RenderTexture* input)
 void RenderScene()
 {
 	CalculateFPS();
-
-	/*char strFPS[100];
-	sprintf(strFPS, "%dfps", gFPS);
-	glutSetWindowTitle(strFPS);*/
 
 	float elapsedTime = gElapsedTime / (float)1000;
 
@@ -1808,29 +1799,44 @@ void RenderScene()
 		{
 			glClear(GL_COLOR_BUFFER_BIT);
 
+			glPushAttrib(GL_VIEWPORT_BIT);
+			glViewport(0, 0, gWindowWidth, gWindowHeight);
+
 			if (gDebugMode < LIGHT_COUNT)
 			{
 				// view depth map
-				glPushAttrib(GL_VIEWPORT_BIT);
-				SetOrthoProjection(gWindowWidth, gWindowHeight);
+				glUseProgram(gDebugViewEffect.ProgramID);
 
-				glUseProgram(gViewDepthEffectEffect.ProgramID);
-
+				glUniform1i(gDebugViewEffect.DepthParam, 1);
+	
 				glActiveTexture(GL_TEXTURE0);
 				glEnable(GL_TEXTURE_2D);
 				gLights[gDebugMode].ShadowMap->GetRenderTexture()->BindColor();
-				glUniform1i(gViewDepthEffectEffect.DepthTexParam, 0);
+				glUniform1i(gDebugViewEffect.ColorTexParam, 0);
 
-				DrawQuad(gWindowWidth, gWindowHeight);	
+				DrawFullscreenQuad();
 
 				glUseProgram(0);
 
-				glPopAttrib();
+				
 			}
 			else if (gDebugMode >= LIGHT_COUNT && gDebugMode < LIGHT_COUNT + 6)
 			{
-				DrawViewport(gIrradianceBuffer[0][gDebugMode-LIGHT_COUNT]);
+				glUseProgram(gDebugViewEffect.ProgramID);
+
+				glUniform1i(gDebugViewEffect.DepthParam, 0);
+
+				glActiveTexture(GL_TEXTURE0);
+				glEnable(GL_TEXTURE_2D);
+				gIrradianceBuffer[0][gDebugMode - LIGHT_COUNT]->BindColor();
+				glUniform1i(gDebugViewEffect.ColorTexParam, 0);
+
+				DrawFullscreenQuad();
+
+				glUseProgram(0);
 			}
+
+			glPopAttrib();
 		}
 		break;
 
@@ -1847,6 +1853,43 @@ void RenderScene()
 	glutSwapBuffers();
 }
 
+
+void CreateBuffer()
+{
+	// always use the fixed stretch buffer size
+	for (int i=0; i<TEXTURE_BUFFER_COUNT - 1; i++)
+	{
+		SAFE_DELETE(gStretchBuffer[i]); 
+		gStretchBuffer[i] = new RenderTexture(IRRADIANCE_BUFFER_SIZE, IRRADIANCE_BUFFER_SIZE, GL_TEXTURE_2D);
+		gStretchBuffer[i]->InitColor_Tex(0, GL_RG32F);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	}
+	//bStretchMap = false;
+
+	SAFE_DELETE(gTempBuffer); 
+	gTempBuffer = new RenderTexture(IRRADIANCE_BUFFER_SIZE, IRRADIANCE_BUFFER_SIZE, GL_TEXTURE_2D); 
+	gTempBuffer->InitColor_Tex(0, GL_RGBA32F);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	for (int i = 0; i < LIGHT_COUNT; i++)
+	{
+		for (int j = 0; j < TEXTURE_BUFFER_COUNT; ++j)
+		{
+			// delete if already exits
+			SAFE_DELETE(gIrradianceBuffer[i][j]); 
+
+			gIrradianceBuffer[i][j] = new RenderTexture(IRRADIANCE_BUFFER_SIZE, IRRADIANCE_BUFFER_SIZE, GL_TEXTURE_2D); 
+			gIrradianceBuffer[i][j]->InitColor_Tex(0, GL_RGBA32F);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		}
+		gIrradianceBuffer[i][0]->InitDepth_Tex();
+	}
+}
+
 void Init()
 {
 	if (GLEW_ARB_seamless_cube_map)
@@ -1856,6 +1899,12 @@ void Init()
 	
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 
 	//init mode
 	gOptions[OPTION_SSS_WITH_TSM] = false;
@@ -1873,14 +1922,14 @@ void Init()
 		gLights[i].Camera.SetProjection(CAMERA_FOV, 1.0f, 0.1f, 20.0f);
 		gLights[i].ShadowMap = new ShadowMap(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 	}
-
 	
+	CreateBuffer();
+
 	LoadPresents();
 	
 	LoadModel();
 
 	LoadShaderEffect();
-	
 }
 
 void Reshape( int w, int h)
@@ -1890,22 +1939,12 @@ void Reshape( int w, int h)
 	glViewport( 0, 0, gWindowWidth, gWindowHeight);
 
 	// we need to resize all RenderTexture
-	for (int i=0; i<TEXTURE_BUFFER_COUNT; i++)
-	{
-		SAFE_DELETE(gStretchBuffer[i]); 
-		gStretchBuffer[i] = new RenderTexture(w, h, GL_TEXTURE_2D);
-		gStretchBuffer[i]->InitColor_Tex(0, GL_RGBA32F);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	}
-	//bStretchMap = false;
-
-	SAFE_DELETE(gTempBuffer); 
-	gTempBuffer = new RenderTexture(w, h, GL_TEXTURE_2D); 
-	gTempBuffer->InitColor_Tex(0, GL_RGBA32F);
+	SAFE_DELETE(gFinalBuffer); 
+	gFinalBuffer = new RenderTexture(w, h, GL_TEXTURE_2D);
+	gFinalBuffer->InitColor_Tex(0, GL_RGBA32F);
+	gFinalBuffer->InitDepth_RB();
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
 
 	for (int i = 0; i < 2; i++) 
 	{
@@ -1916,28 +1955,11 @@ void Reshape( int w, int h)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	}
 
-	SAFE_DELETE(gFinalBuffer); 
-	gFinalBuffer = new RenderTexture(w, h, GL_TEXTURE_2D);
-	gFinalBuffer->InitColor_Tex(0, GL_RGBA32F);
-	gFinalBuffer->InitDepth_RB();
+	SAFE_DELETE(gBloomBlurTemp); 
+	gBloomBlurTemp = new RenderTexture(w, h, GL_TEXTURE_2D);
+	gBloomBlurTemp->InitColor_Tex(0, GL_RGBA32F);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-	for (int i = 0; i < LIGHT_COUNT; i++)
-	{
-		for (int j = 0; j < TEXTURE_BUFFER_COUNT; ++j)
-		{
-			// delete if already exits
-			SAFE_DELETE(gIrradianceBuffer[i][j]); 
-
-			gIrradianceBuffer[i][j] = new RenderTexture(w, h, GL_TEXTURE_2D); 
-			gIrradianceBuffer[i][j]->InitColor_Tex(0, GL_RGBA32F);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-		}
-		gIrradianceBuffer[i][0]->InitDepth_Tex();
-	}
 
 	// resize GUI
 	gHub.reshape(w, h);

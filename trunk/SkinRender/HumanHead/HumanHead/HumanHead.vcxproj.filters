@@ -118,9 +118,6 @@
     <None Include="..\Media\Shaders\Common.include.glsl">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="..\Media\Shaders\ViewDepth.frag">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="SHProjection.inl">
       <Filter>头文件</Filter>
     </None>
@@ -137,6 +134,9 @@
       <Filter>资源文件</Filter>
     </None>
     <None Include="..\Media\Shaders\BloomExtract.frag">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Media\Shaders\DebugView.frag">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>

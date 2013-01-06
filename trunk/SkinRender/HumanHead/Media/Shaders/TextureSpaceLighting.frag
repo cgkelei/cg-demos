@@ -21,6 +21,7 @@ uniform sampler2D   Rho_d_Tex; // Torrance-Sparrow BRDF integrated over hemisphe
 uniform samplerCube IrradEnvMap;
 uniform samplerCube GlossyEnvMap;
 
+
 #ifdef USE_NormalMap
 	uniform sampler2D NormalTex;
 #endif
@@ -123,7 +124,7 @@ void main()
 	//float occlusion = albedoTap.w;  
 	float occlusion = 1.0;
 
-	vec3 cubeTap1 = texture( IrradEnvMap, N_nonBumped ).xyz;
+	vec3 cubeTap1 = texture( IrradEnvMap, N_bumped ).xyz;
 	vec3 envLight = saturate( EnvAmount * cubeTap1.xyz * occlusion);
 
 	//// start mixing the diffuse lighting - re-compute non-blurred lighting per pixel to get maximum resolutions

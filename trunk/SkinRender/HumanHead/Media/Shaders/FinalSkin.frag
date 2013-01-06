@@ -145,13 +145,6 @@ void main()
 	diffuseLight += GaussWeights[3] * irrad3Tap.xyz;  
 	diffuseLight += GaussWeights[4] * irrad4Tap.xyz;  
 	diffuseLight += GaussWeights[5] * irrad5Tap.xyz; 
-
-	//diffuseLight += GaussWeights[0] * mix( irrad0Tap.xyz, comparativeLocalLightColor, alterSeamMask);  
-	//diffuseLight += GaussWeights[1] * mix( irrad1Tap.xyz, comparativeLocalLightColor, alterSeamMask); 
-	//diffuseLight += GaussWeights[2] * mix( irrad2Tap.xyz, comparativeLocalLightColor, alterSeamMask); 
-	//diffuseLight += GaussWeights[3] * mix( irrad3Tap.xyz, comparativeLocalLightColor, alterSeamMask); 
-	//diffuseLight += GaussWeights[4] * mix( irrad4Tap.xyz, comparativeLocalLightColor, alterSeamMask);  
-	//diffuseLight += GaussWeights[5] * mix( irrad5Tap.xyz, comparativeLocalLightColor, alterSeamMask);  
 	
     // Renormalize diffusion profiles to white  
     vec3 normConst = GaussWeights[0] + GaussWeights[1] + GaussWeights[2] + GaussWeights[3] + GaussWeights[4] + GaussWeights[5];  
@@ -185,5 +178,6 @@ void main()
 
 	//FragColor = pow( FragColor.xyz, vec3(1.0 / 2.2) );
 
+	//FragColor = vec4(alterSeamMask, alterSeamMask, alterSeamMask, diffuseLight + specularLight);  
 	FragColor = vec4( diffuseLight + specularLight, 1.0 );  
 }
