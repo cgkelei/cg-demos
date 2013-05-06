@@ -587,7 +587,7 @@ void SaveOutline(uint8_t* bitmap, uint32_t width, uint32_t height)
 		}
 	}
 
-	SaveTGA(width, height, &data[0]);
+	//SaveTGA(width, height, &data[0]);
 }
 
 void Font::BuildFontTexture( const wstring& text )

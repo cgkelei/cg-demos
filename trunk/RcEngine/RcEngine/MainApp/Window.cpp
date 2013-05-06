@@ -176,8 +176,8 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 				if (mMinimized)
 					OnResume();
 
-				mMinimized = true;
-				mMaximized = true;
+				mMinimized = false;
+				mMaximized = false;
 
 				if(!mInSizeMove)
 					OnUserResized();
@@ -185,8 +185,6 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 		}
 		break;
 	
-
-
 	case WM_PAINT:
 		OnPaint();
 		break;

@@ -1,6 +1,7 @@
 <Effect name="Sky">
 
 <Shader name="VS" stage="Vertex" entry="main">
+<ShaderSource>
 <![CDATA[
 
 #version 330
@@ -20,9 +21,11 @@ void main()
 }
 
 ]]>
+</ShaderSource>
 </Shader>
 
 <Shader name="PS" stage="Pixel" entry="main">
+<ShaderSource>
 <![CDATA[
 
 #version 330
@@ -42,9 +45,11 @@ void main()
 }
 
 ]]>
+</ShaderSource>
 </Shader>
 
 <Shader name="VSCubeMap" stage="Vertex" entry="main">
+<ShaderSource>
 <![CDATA[
 
 #version 330
@@ -66,9 +71,11 @@ void main()
 	gl_Position = posH.xyww;
 }
 ]]>
+</ShaderSource>
 </Shader>
 
 <Shader name="PSCubeMap" stage="Pixel" entry="main">
+<ShaderSource>
 <![CDATA[
 
 #version 330
@@ -85,6 +92,7 @@ void main()
 }
 
 ]]>
+</ShaderSource>
 </Shader>
 
 <Technique name="SkyBoxPlane">

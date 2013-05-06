@@ -7,6 +7,7 @@
 #include <Graphics/VertexDeclaration.h>
 #include <Graphics/SimpleGeometry.h>
 #include <Graphics/Material.h>
+#include <Resource/ResourceManager.h>
 #include <Core/Context.h>
 #include <IO/FileSystem.h>
 
@@ -319,8 +320,10 @@ void Sky::InitializeSkyCubeMap(float size)
 	mIndexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
 
 	// Load material
-	String skyMatPath = FileSystem::GetSingleton().Locate("SkyCubeMap.material.xml");
-	//mMaterial = factory.CreateMaterialFromFile("SkyCubeMap", skyMatPath);
+	mMaterial = std::static_pointer_cast<Material>(
+		ResourceManager::GetSingleton().GetResourceByName(ResourceTypes::Material, "SkyCubeMap.material.xml", "General"));
+
+	mMaterial->Load();
 }
 
 }
