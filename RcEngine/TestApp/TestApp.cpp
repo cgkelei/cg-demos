@@ -35,7 +35,6 @@
 #include "Math/Rectangle.h"
 #include "Core/XMLDom.h"
 
-
 SpriteBatch* spriteBatch;
 
 TestApp::TestApp( const String& config )
@@ -68,6 +67,9 @@ void TestApp::LoadContent()
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
+
+	//factory->CreateTextureFromFile("F:/RcEngine/Media/Mesh/Dude/jacket.dds");
+
 	//shared_ptr<Font> font =  
 	//	std::static_pointer_cast<Font>(
 	//	resMan.GetResourceByHandle(resMan.AddResource(ResourceTypes::Font, "msyh.ttf", "General"))) ;
@@ -99,46 +101,10 @@ void TestApp::LoadContent()
 	animPlayer->PlayClip("Take 001");
 
 
-	/*Entity* dudeEntity1 = sceneManager->CreateEntity("Dude1", "dude.mdl",  "Custom");
-	SceneNode* dudeNode1 = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dude1");
-	dudeNode1->SetPosition(Vector3f(100, 0, 0));
-	dudeNode1->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(180.0f), 0.0f, 0.0f));
-	dudeNode1->AttachObject(dudeEntity1);
+	String skyTexPath = FileSystem::GetSingleton().Locate("MeadowTrail.dds");
 
-
-	AnimationPlayer* animPlayer1 = dudeEntity1->GetAnimationPlayer();
-	AnimationState* takeClip1 = animPlayer1->GetClip("Take 001");
-	takeClip1->WrapMode = AnimationState::Wrap_Loop;
-
-	animPlayer1->PlayClip("Take 001");*/
-
-	//Entity* tinyEntity = sceneManager->CreateEntity("dance", "dance.mdl");
-	//SceneNode* tinyNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("dance");
-	////tinyNode->SetScale(Vector3f(0.3, 0.3, 0.3));
-	//tinyNode->SetRotation(QuaternionFromRotationYawPitchRoll(0.0f, Mathf::ToRadian(-90.0f), 0.0f));
-	//tinyNode->AttachObject(tinyEntity);
-
-
-	//shared_ptr<Animation> animPlayer = tinyEntity->GetAnimationPlayer();
-	//AnimationClip* takeClip = animPlayer->GetClip("Take 001");
-	//takeClip->GetAnimationState()->SetAnimationWrapMode(AnimationState::Wrap_Loop);
-	//takeClip->Play();
-
-
-	/*vector<String> skyTextures;
-	skyTextures.push_back( String("../Media/Textures/left.dds"));
-	skyTextures.push_back( String("../Media/Textures/right.dds"));
-	skyTextures.push_back( String("../Media/Textures/up.dds"));
-	skyTextures.push_back( String("../Media/Textures/down.dds"));
-	skyTextures.push_back( String("../Media/Textures/front.dds"));
-	skyTextures.push_back( String("../Media/Textures/back.dds"));
-
-	auto texture = factory->CreateTextureArrayFromFile(skyTextures);*/
-
-	//String skyTexPath = FileSystem::GetSingleton().Locate("MeadowTrail.dds");
-
-	String skyTexPath = FileSystem::GetSingleton().Locate("front.dds");
-	mTexture = factory->CreateTextureFromFile(skyTexPath);
+	//String skyTexPath = FileSystem::GetSingleton().Locate("front.dds");
+	//mTexture = factory->CreateTextureFromFile(skyTexPath);
 	//factory->SaveTexture2D("Test.dds", texture, 0, 0);
 
 	// Sky 
@@ -160,10 +126,10 @@ void TestApp::Render()
 	RenderDevice& renderDevice = Context::GetSingleton().GetRenderDevice();
 	SceneManager& scenenMan = Context::GetSingleton().GetSceneManager();
 
-	spriteBatch->Begin();
+	/*spriteBatch->Begin();
 	spriteBatch->Draw(mTexture, Vector2f(0, 0), ColorRGBA::Green);
 	spriteBatch->End();
-	spriteBatch->Flush();
+	spriteBatch->Flush();*/
 
 
 	shared_ptr<FrameBuffer> currentFrameBuffer = renderDevice.GetCurrentFrameBuffer();

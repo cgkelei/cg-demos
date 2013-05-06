@@ -29,21 +29,25 @@ void Context::Init( std::string configFile )
 
 void Context::SetRenderDevice( RenderDevice* device )
 {
+	assert(device);
 	mRenderDevice = device;
 }
 
 void Context::SetApplication( Application* app )
 {
+	assert(app);
 	mApplication = app;
 }
 
 void Context::SetRenderFactory( RenderFactory* factory )
 {
+	assert(factory);
 	mRenderFactory = factory;
 }
 
 void Context::SetInputSystem( InputSystem* input )
 {
+	assert(input);
 	mInputSystem = input;
 }
 

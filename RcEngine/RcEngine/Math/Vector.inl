@@ -217,10 +217,8 @@ Vector<Real, Size> Vector<Real, Size>::operator/( Real fScalar ) const
 {
 	Vector<Real, Size> result;
 
-	Real fInvScalar = ((Real)1.0)/fScalar;
-
 	for(int32_t i = 0; i < Size; i++)
-		result[i] = mTuple[i] * fInvScalar;
+		result[i] = mTuple[i] / fScalar;
 
 	return result;
 }
