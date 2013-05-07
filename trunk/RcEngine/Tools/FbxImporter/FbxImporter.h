@@ -8,8 +8,6 @@
 #include <Math/MathUtil.h>
 #include <Math/ColorRGBA.h>
 
-#pragma comment(lib, "fbxsdk-2013.3-mdd.lib")
-
 using namespace RcEngine;
 
 class FbxProcesser

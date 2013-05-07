@@ -412,7 +412,7 @@ bool FbxProcesser::LoadScene( const char* filename )
 
 	if( !lImportStatus )
 	{
-		FBXSDK_printf("Call to FbxImporter::Initialize() failed.\n");
+		/*FBXSDK_printf("Call to FbxImporter::Initialize() failed.\n");
 		FBXSDK_printf("Error returned: %s\n\n", lImporter->GetLastErrorString());
 
 		if (lImporter->GetLastErrorID() == FbxIOBase::eFileVersionNotSupportedYet ||
@@ -420,7 +420,7 @@ bool FbxProcesser::LoadScene( const char* filename )
 		{
 			FBXSDK_printf("FBX file format version for this FBX SDK is %d.%d.%d\n", lSDKMajor, lSDKMinor, lSDKRevision);
 			FBXSDK_printf("FBX file format version for file '%s' is %d.%d.%d\n\n", filename, lFileMajor, lFileMinor, lFileRevision);
-		}
+		}*/
 
 		return false;
 	}
@@ -473,29 +473,6 @@ bool FbxProcesser::LoadScene( const char* filename )
 
 	// Import the scene.
 	lStatus = lImporter->Import(mFBXScene);
-
-	if(lStatus == false && lImporter->GetLastErrorID() == FbxIOBase::ePasswordError)
-	{
-		FBXSDK_printf("Please enter password: ");
-
-		lPassword[0] = '\0';
-
-		FBXSDK_CRT_SECURE_NO_WARNING_BEGIN
-			scanf("%s", lPassword);
-		FBXSDK_CRT_SECURE_NO_WARNING_END
-
-			FbxString lString(lPassword);
-
-		IOS_REF.SetStringProp(IMP_FBX_PASSWORD,      lString);
-		IOS_REF.SetBoolProp(IMP_FBX_PASSWORD_ENABLE, true);
-
-		lStatus = lImporter->Import(mFBXScene);
-
-		if(lStatus == false && lImporter->GetLastErrorID() == FbxIOBase::ePasswordError)
-		{
-			FBXSDK_printf("\nPassword is wrong, import aborted.\n");
-		}
-	}
 
 	//// Convert to DirectX axis system
 	//FbxAxisSystem currentAxisSystem = mFBXScene->GetGlobalSettings().GetAxisSystem();
