@@ -11,6 +11,7 @@ namespace RcEngine {
 
 class Sky;
 class SceneObject;
+class SpriteEntity;
 
 class _ApiExport SceneManager
 {
@@ -77,6 +78,9 @@ public:
 	void RenderScene();
 
 	AnimationController* GetAnimationController() const;
+
+public_internal:
+	SpriteEntity* CreateSpriteEntity( const shared_ptr<Texture>& tex, const shared_ptr<Material>& mat);
 
 protected:
 	void ClearScene();

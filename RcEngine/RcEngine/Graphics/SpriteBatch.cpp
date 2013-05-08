@@ -52,179 +52,7 @@ static void Rotate(Vector<Real,2>& point, const Vector<Real,2>& origin, Real rot
 
 namespace RcEngine {
 
-struct SpriteVertex
-{
-	Vector3f Position;
-	Vector2f TexCoord;
-	ColorRGBA Color;
-};
 
-class SpriteEntity : public Renderable, public SceneObject
-{
-public:
-	SpriteEntity(const shared_ptr<Texture>& texture, const shared_ptr<Material>& mat)
-		: SceneObject("Sprite"), mDirty(true)
-	{
-		RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
-
-		mType = SOT_Sprite;
-		mRenderable = true;
-
-		mSpriteTexture = texture;
-		mSpriteMaterial = mat;
-
-		mWindowSizeParam = mSpriteMaterial->GetCustomParameter("WindowSize");
-
-		mSpriteMaterial->SetTexture("SpriteTexture", texture);
-
-
-		mRenderOperation = std::make_shared<RenderOperation>();
-		mRenderOperation->BaseVertexLocation = 0;
-		mRenderOperation->StartIndexLocation = 0;
-		mRenderOperation->StartVertexLocation = 0;
-		mRenderOperation->PrimitiveType = PT_Triangle_List;
-
-		// create index buffer 
-		mIndexBuffer = factory.CreateIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
-
-		// create vertex buffer
-		mVertexBuffer = factory.CreateVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
-
-		// bind vertex stream
-		VertexElement elements[3] = 
-		{
-			VertexElement(0, VEF_Float3, VEU_Position, 0),
-			VertexElement(sizeof(Vector3f), VEF_Float2, VEU_TextureCoordinate, 0),
-			VertexElement(sizeof(Vector3f) + sizeof(Vector2f), VEF_Float4, VEU_Color, 0)
-		};
-
-		mRenderOperation->BindVertexStream(mVertexBuffer, factory.CreateVertexDeclaration(elements, 3));
-		mRenderOperation->BindIndexStream(mIndexBuffer, IBT_Bit16);
-
-		// add to scene graph
-		SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
-		SceneNode* sceneNode = sceneMan.GetRootSceneNode();
-		sceneNode->AttachObject(this);
-	}
-
-	~SpriteEntity()
-	{
-		Context::GetSingleton().GetSceneManager().GetRootSceneNode()->DetachOject(this);
-	}
-
-	const shared_ptr<Material>& GetMaterial() const		{ return mSpriteMaterial; }
-	EffectTechnique* GetTechnique() const	{ return mSpriteMaterial->GetCurrentTechnique(); }
-
-	uint32_t GetWorldTransformsCount() const 
-	{
-		// no world transform
-		return 0;
-	}
-
-	void GetWorldTransforms(Matrix4f* xform) const
-	{
-
-	}
-
-	const shared_ptr<RenderOperation>& GetRenderOperation() const
-	{
-		return mRenderOperation;
-	}
-
-	void OnRenderBegin()
-	{
-		Renderable::OnRenderBegin();
-
-		auto frameBuffer = Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer();
-		auto w = frameBuffer->GetWidth();
-		auto h = frameBuffer->GetHeight();
-		mWindowSizeParam->SetValue(Vector2f(float(frameBuffer->GetWidth()), float(frameBuffer->GetHeight())));
-
-	}
-
-	void OnUpdateRenderQueue( RenderQueue* renderQueue, Camera* cam, RenderOrder order )
-	{
-		UpdateGeometryBuffers();
-
-		RenderQueueItem item;
-		item.Renderable = this;
-		item.Type = SOT_Sprite;
-
-		// ignore render order, only handle state change order
-		item.SortKey = (float)mSpriteMaterial->GetEffect()->GetResourceHandle();
-
-		renderQueue->AddToQueue(item, RenderQueue::BucketGui);
-	}
-
-	void SetProjectionMatrix(const Matrix4f& mat)
-	{
-		mSpriteMaterial->GetCustomParameter("ProjMat")->SetValue(mat);
-	}
-
-	void UpdateGeometryBuffers()
-	{
-		if (mDirty)
-		{
-			if (mVertices.size() && mInidces.size())
-			{
-				uint32_t vbSize = sizeof(SpriteVertex) * mVertices.size();
-				mVertexBuffer->ResizeBuffer(vbSize);
-
-				uint8_t* vbData = (uint8_t*)mVertexBuffer->Map(0, vbSize, BA_Read_Write);
-				memcpy(vbData, (uint8_t*)&mVertices[0], vbSize);
-				mVertexBuffer->UnMap();
-
-				uint32_t ibSize = sizeof(uint16_t) * mInidces.size();
-				mIndexBuffer->ResizeBuffer(ibSize);
-
-				uint8_t* ibData = (uint8_t*)mIndexBuffer->Map(0, ibSize, BA_Read_Write);
-				memcpy(ibData, (uint8_t*)&mInidces[0], ibSize);
-				mIndexBuffer->UnMap();
-			}
-
-			mDirty = false;
-		}
-	}
-
-	bool Empty() const 
-	{
-		return mInidces.empty();
-	}
-
-	void ClearAll()
-	{
-		mVertices.resize(0);
-		mInidces.resize(0);
-	}
-
-	vector<SpriteVertex>& GetVertices()
-	{
-		mDirty = true;
-		return mVertices;
-	}
-
-	vector<uint16_t>& GetIndices()
-	{
-		mDirty = true;
-		return mInidces;
-	}
-
-private:
-	shared_ptr<Texture> mSpriteTexture;
-	shared_ptr<Material> mSpriteMaterial;
-	shared_ptr<RenderOperation> mRenderOperation;
-	vector<SpriteVertex> mVertices;
-	vector<uint16_t> mInidces;
-
-	shared_ptr<GraphicsBuffer> mVertexBuffer;
-	shared_ptr<GraphicsBuffer> mIndexBuffer;
-
-	EffectParameter* mWindowSizeParam;
-
-	bool mDirty;
-};
-
-//////////////////////////////////////////////////////////////////////////
 SpriteBatch::SpriteBatch()
 {
 	mSpriteMaterial = std::static_pointer_cast<Material>(
@@ -244,7 +72,6 @@ void SpriteBatch::Begin( )
 	{
 		iter->second->ClearAll();
 	}
-	
 }
 
 void SpriteBatch::End()
@@ -265,7 +92,8 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const IntRect& dest,
 	SpriteEntity* spriteEntity = nullptr;
 	if (mBatches.find(texture) == mBatches.end())
 	{
-		spriteEntity = new SpriteEntity(texture, std::static_pointer_cast<Material>(mSpriteMaterial->Clone()));
+		spriteEntity = Context::GetSingleton().GetSceneManager().CreateSpriteEntity(texture, 
+			std::static_pointer_cast<Material>(mSpriteMaterial->Clone()));
 		mBatches[texture] = spriteEntity;
 	}
 	else
@@ -412,6 +240,137 @@ void SpriteBatch::Flush()
 			iter->second->SetVisible(false);
 		}
 	}
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+SpriteEntity::SpriteEntity( const String& name )
+: SceneObject(name, SOT_Sprite, true), mDirty(true)
+{
+	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
+
+	mRenderOperation = std::make_shared<RenderOperation>();
+	mRenderOperation->BaseVertexLocation = 0;
+	mRenderOperation->StartIndexLocation = 0;
+	mRenderOperation->StartVertexLocation = 0;
+	mRenderOperation->PrimitiveType = PT_Triangle_List;
+
+	// create index buffer 
+	mIndexBuffer = factory.CreateIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
+
+	// create vertex buffer
+	mVertexBuffer = factory.CreateVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
+
+	// bind vertex stream
+	VertexElement elements[3] = 
+	{
+		VertexElement(0, VEF_Float3, VEU_Position, 0),
+		VertexElement(sizeof(Vector3f), VEF_Float2, VEU_TextureCoordinate, 0),
+		VertexElement(sizeof(Vector3f) + sizeof(Vector2f), VEF_Float4, VEU_Color, 0)
+	};
+
+	mRenderOperation->BindVertexStream(mVertexBuffer, factory.CreateVertexDeclaration(elements, 3));
+	mRenderOperation->BindIndexStream(mIndexBuffer, IBT_Bit16);
+}
+
+SpriteEntity::~SpriteEntity()
+{
+	
+}
+
+void SpriteEntity::OnRenderBegin()
+{
+	Renderable::OnRenderBegin();
+
+	auto frameBuffer = Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer();
+	auto w = frameBuffer->GetWidth();
+	auto h = frameBuffer->GetHeight();
+	mWindowSizeParam->SetValue(Vector2f(float(frameBuffer->GetWidth()), float(frameBuffer->GetHeight())));
+}
+
+void SpriteEntity::OnUpdateRenderQueue( RenderQueue* renderQueue, Camera* cam, RenderOrder order )
+{
+	UpdateGeometryBuffers();
+
+	RenderQueueItem item;
+	item.Renderable = this;
+	item.Type = SOT_Sprite;
+
+	// ignore render order, only handle state change order
+	item.SortKey = (float)mSpriteMaterial->GetEffect()->GetResourceHandle();
+
+	renderQueue->AddToQueue(item, RenderQueue::BucketGui);
+}
+
+void SpriteEntity::SetProjectionMatrix( const Matrix4f& mat )
+{
+	mSpriteMaterial->GetCustomParameter("ProjMat")->SetValue(mat);
+}
+
+void SpriteEntity::UpdateGeometryBuffers()
+{
+	if (mDirty)
+	{
+		if (mVertices.size() && mInidces.size())
+		{
+			uint32_t vbSize = sizeof(SpriteVertex) * mVertices.size();
+			mVertexBuffer->ResizeBuffer(vbSize);
+
+			uint8_t* vbData = (uint8_t*)mVertexBuffer->Map(0, vbSize, BA_Read_Write);
+			memcpy(vbData, (uint8_t*)&mVertices[0], vbSize);
+			mVertexBuffer->UnMap();
+
+			uint32_t ibSize = sizeof(uint16_t) * mInidces.size();
+			mIndexBuffer->ResizeBuffer(ibSize);
+
+			uint8_t* ibData = (uint8_t*)mIndexBuffer->Map(0, ibSize, BA_Read_Write);
+			memcpy(ibData, (uint8_t*)&mInidces[0], ibSize);
+			mIndexBuffer->UnMap();
+		}
+
+		mDirty = false;
+	}
+}
+
+bool SpriteEntity::Empty() const
+{
+	return mInidces.empty();
+}
+
+void SpriteEntity::ClearAll()
+{
+	mVertices.resize(0);
+	mInidces.resize(0);
+}
+
+vector<SpriteVertex>& SpriteEntity::GetVertices()
+{
+	mDirty = true;
+	return mVertices;
+}
+
+vector<uint16_t>& SpriteEntity::GetIndices()
+{
+	mDirty = true;
+	return mInidces;
+}
+
+EffectTechnique* SpriteEntity::GetTechnique() const
+{
+	return mSpriteMaterial->GetCurrentTechnique();
+}
+
+void SpriteEntity::SetSpriteContent( const shared_ptr<Texture>& tex, const shared_ptr<Material>& mat )
+{
+	mSpriteTexture = tex;
+	mSpriteMaterial = mat;
+
+	mSpriteMaterial->SetTexture("SpriteTexture", mSpriteTexture);
+	mWindowSizeParam = mSpriteMaterial->GetCustomParameter("WindowSize");
+}
+
+SceneObject* SpriteEntity::FactoryFunc( const String& name, const NameValuePairList* params )
+{
+	return new SpriteEntity(name);
 }
 
 }

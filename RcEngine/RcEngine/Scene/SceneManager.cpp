@@ -8,6 +8,7 @@
 #include <Graphics/Mesh.h>
 #include <Graphics/Camera.h>
 #include <Graphics/Sky.h>
+#include <Graphics/SpriteBatch.h>
 #include <Graphics/RenderQueue.h>
 #include <Graphics/AnimationController.h>
 #include <Core/Exception.h>
@@ -25,8 +26,10 @@ SceneManager::SceneManager()
 {
 	Context::GetSingleton().SetSceneManager(this);
 
+	// Register all known scene object types
 	RegisterType(SOT_Entity, "Entity Type", nullptr, nullptr, Entity::FactoryFunc);
 	RegisterType(SOT_Light, "Light Type", nullptr, nullptr, Light::FactoryFunc);
+	RegisterType(SOT_Sprite, "Sprite Type", nullptr, nullptr, SpriteEntity::FactoryFunc);
 
 	mRenderQueue = new RenderQueue;
 }
@@ -139,6 +142,26 @@ SceneNode* SceneManager::FindSceneNode( const String& name ) const
 	}
 	return nullptr;
 }
+
+SpriteEntity* SceneManager::CreateSpriteEntity( const shared_ptr<Texture>& tex, const shared_ptr<Material>& mat )
+{
+	auto factoryIter = mRegistry.find(SOT_Sprite);
+	if (factoryIter == mRegistry.end())
+	{
+		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Entity type haven't Registed", "SceneManager::CreateSpriteEntity");
+	}
+
+	SpriteEntity* entity = static_cast<SpriteEntity*>((factoryIter->second.factoryFunc)(mat->GetName(), NULL));
+	entity->SetSpriteContent(tex, mat);
+
+	// all sprite is attached in scene root node
+	GetRootSceneNode()->AttachObject(entity);
+
+	mSceneObjectCollections[SOT_Sprite].push_back(entity);
+
+	return entity;
+}
+
 
 void SceneManager::CreateSkyBox( const shared_ptr<Texture>& texture, bool cubemap /*= true*/, float distance /*= 100.0f */ )
 {

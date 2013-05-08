@@ -82,7 +82,8 @@ using namespace tthread;
 /// Name / value parameter pair (first = name, second = value)
 typedef std::map<String, String> NameValuePairList;
 
-
+/////////////////////////////////////////////////////////////////////////////
+#define public_internal public
 #define SAFE_DELETE(p) if(p) { delete p; p = NULL;}
 
 // for normal pointer 

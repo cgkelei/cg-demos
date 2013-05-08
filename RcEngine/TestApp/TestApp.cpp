@@ -127,7 +127,9 @@ void TestApp::LoadContent()
 	animPlayer->PlayClip("Take 001");
 
 
-	//String skyTexPath = FileSystem::GetSingleton().Locate("front.dds");
+	mTexture = factory->CreateTextureFromFile(FileSystem::GetSingleton().Locate("brick_texture1.dds"));
+
+	//String skyTexPath = ;
 	//mTexture = factory->CreateTextureFromFile(skyTexPath);
 	//factory->SaveTexture2D("Test.dds", texture, 0, 0);
 
@@ -150,10 +152,10 @@ void TestApp::Render()
 	RenderDevice& renderDevice = Context::GetSingleton().GetRenderDevice();
 	SceneManager& scenenMan = Context::GetSingleton().GetSceneManager();
 
-	/*spriteBatch->Begin();
-	spriteBatch->Draw(mTexture, Vector2f(0, 0), ColorRGBA::Green);
+	spriteBatch->Begin();
+	spriteBatch->Draw(mTexture, IntRect(0, 0, 100, 100), ColorRGBA::Green);
 	spriteBatch->End();
-	spriteBatch->Flush();*/
+	spriteBatch->Flush();
 
 
 	shared_ptr<FrameBuffer> currentFrameBuffer = renderDevice.GetCurrentFrameBuffer();

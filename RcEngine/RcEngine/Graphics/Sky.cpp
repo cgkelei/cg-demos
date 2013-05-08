@@ -140,11 +140,9 @@ namespace RcEngine {
 
 //---------------------------------------------------------------------------
 Sky::Sky( float size  , bool cube /*= false*/ )
-	: SceneObject("Sky Box"), mCubeMapSky(cube), mRenderOperation(new RenderOperation)
+	: SceneObject("Sky Box", SOT_Sky, true), 
+	mCubeMapSky(cube), mRenderOperation(new RenderOperation)
 {
-	mType = SOT_Sky;
-	mRenderable = true;
-
 	if (!cube)
 	{
 		InitializeSkyBox(size);	

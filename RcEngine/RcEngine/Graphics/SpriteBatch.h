@@ -5,11 +5,20 @@
 #include <Math/Matrix.h>
 #include <Math/Rectangle.h>
 #include <Math/ColorRGBA.h>
+#include <Graphics/Renderable.h>
+#include <Scene/SceneObject.h>
 
 namespace RcEngine {
 
 // Forward declaration
 class SpriteEntity;
+
+struct SpriteVertex
+{
+	Vector3f Position;
+	Vector2f TexCoord;
+	ColorRGBA Color;
+};
 
 class _ApiExport SpriteBatch
 {
@@ -57,9 +66,65 @@ private:
 	uint32_t mSortMode;
 	shared_ptr<Material> mSpriteMaterial;
 
+	// SpriteEntity is keep track by SceneManager, So SceneManager will delete it when destroy
 	std::map<shared_ptr<Texture>, SpriteEntity*> mBatches;
 };
 
+
+/**
+ */
+class SpriteEntity : public Renderable, public SceneObject
+{
+public:
+	SpriteEntity(const String& name);
+	~SpriteEntity();
+
+	const shared_ptr<Material>& GetMaterial() const { return mSpriteMaterial; }
+
+	EffectTechnique* GetTechnique() const;
+
+	// no world transform
+	uint32_t GetWorldTransformsCount() const { return 0; }
+
+	void GetWorldTransforms(Matrix4f* xform) const { }
+
+	const shared_ptr<RenderOperation>& GetRenderOperation() const { return mRenderOperation; }
+
+	bool Empty() const;
+
+	void ClearAll();
+
+	vector<SpriteVertex>& GetVertices();
+
+	vector<uint16_t>& GetIndices();
+
+	void SetProjectionMatrix(const Matrix4f& mat);
+
+	void OnRenderBegin();
+
+	void OnUpdateRenderQueue( RenderQueue* renderQueue, Camera* cam, RenderOrder order );	
+
+	void UpdateGeometryBuffers();
+
+public_internal:
+	static SceneObject* FactoryFunc(const String& name, const NameValuePairList* params);
+
+	void SetSpriteContent(const shared_ptr<Texture>& tex, const shared_ptr<Material>& mat);
+
+private:
+	shared_ptr<Texture> mSpriteTexture;
+	shared_ptr<Material> mSpriteMaterial;
+	shared_ptr<RenderOperation> mRenderOperation;
+	vector<SpriteVertex> mVertices;
+	vector<uint16_t> mInidces;
+
+	shared_ptr<GraphicsBuffer> mVertexBuffer;
+	shared_ptr<GraphicsBuffer> mIndexBuffer;
+
+	EffectParameter* mWindowSizeParam;
+
+	bool mDirty;
+};
 
 }
 

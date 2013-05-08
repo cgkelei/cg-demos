@@ -20,12 +20,9 @@
 namespace RcEngine {
 
 Entity::Entity( const String& name, const shared_ptr<Mesh>& mesh )
-	: SceneObject(name), mNumSkinMatrices(0), mMesh(mesh),
+	: SceneObject(name, SOT_Entity, true), mNumSkinMatrices(0), mMesh(mesh),
 	mSkeleton( mesh->GetSkeleton() ? mesh->GetSkeleton()->Clone() : 0 )
 {
-	mType = SOT_Entity;
-	mRenderable = true;
-
 	Initialize();
 }
 
