@@ -24,7 +24,7 @@ struct _ApiExport MaterialParameter
 class _ApiExport Material : public Resource
 {
 public:
-	Material(uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group );
+	Material(ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group );
 	virtual ~Material(void);
 
 	const String& GetName() const						{ return mName; }

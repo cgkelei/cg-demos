@@ -3,6 +3,14 @@
 
 namespace RcEngine{
 
+
+#define SINGLETON_DECL_HEADER(T) static T& GetSingleton( void ); static T* GetSingletonPtr( void );
+
+#define SINGLETON_DECL(T) template<> T* Singleton<T>::ms_Singleton = 0;						 \
+	T& T::GetSingleton( void ) { assert( ms_Singleton );  return ( *ms_Singleton );  }		 \
+	T* T::GetSingletonPtr( void ) { return ms_Singleton; }  
+
+
 template <typename T> 
 class Singleton
 {
@@ -48,11 +56,6 @@ public:
 	}
 
 };
-
-#define SINGLETON_DECL_HEADER(T) static T& GetSingleton( void ); static T* GetSingletonPtr( void );
-#define SINGLETON_DECL(T) template<> T* Singleton<T>::ms_Singleton = 0;						 \
-	T& T::GetSingleton( void ) { assert( ms_Singleton );  return ( *ms_Singleton );  }		 \
-	T* T::GetSingletonPtr( void ) { return ms_Singleton; }  
 
 } // Namespace RcEngine
 

@@ -39,13 +39,13 @@ Application::Application( const String& config )
 	new SceneManager;
 
 	ResourceManager& resMan = ResourceManager::GetSingleton();
-	resMan.RegisterType(ResourceTypes::Mesh, "Mesh", Mesh::FactoryFunc);
-	resMan.RegisterType(ResourceTypes::Material, "Material", Material::FactoryFunc);
-	resMan.RegisterType(ResourceTypes::Effect, "Effect", Effect::FactoryFunc);
-	resMan.RegisterType(ResourceTypes::Animation, "Animation",AnimationClip::FactoryFunc);
-	resMan.RegisterType(ResourceTypes::Texture, "Texture", TextureResource::FactoryFunc);
-	resMan.RegisterType(ResourceTypes::Pipeline, "Pipeline", Pipeline::FactoryFunc);
-	resMan.RegisterType(ResourceTypes::Font, "Font", Font::FactoryFunc);
+	resMan.RegisterType(RT_Mesh, "Mesh", Mesh::FactoryFunc);
+	resMan.RegisterType(RT_Material, "Material", Material::FactoryFunc);
+	resMan.RegisterType(RT_Effect, "Effect", Effect::FactoryFunc);
+	resMan.RegisterType(RT_Animation, "Animation",AnimationClip::FactoryFunc);
+	resMan.RegisterType(RT_Texture, "Texture", TextureResource::FactoryFunc);
+	resMan.RegisterType(RT_Pipeline, "Pipeline", Pipeline::FactoryFunc);
+	resMan.RegisterType(RT_Font, "Font", Font::FactoryFunc);
 
 	ReadConfiguration();
 

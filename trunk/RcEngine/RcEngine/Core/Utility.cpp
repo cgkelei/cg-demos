@@ -1,5 +1,7 @@
 #include <Core/Utility.h>
 
+namespace RcEngine {
+
 std::wstring& Convert( std::wstring& dest, std::string const & src )
 {
 	int32_t const wcs_len = ::MultiByteToWideChar(CP_ACP, 0, src.c_str(), static_cast<int32_t>(src.size()), NULL, 0);
@@ -31,3 +33,4 @@ float Uint32ToFloat( uint32_t v )
 	return static_cast<float>(fnu.f);
 }
 
+}

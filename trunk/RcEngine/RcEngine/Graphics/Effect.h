@@ -16,7 +16,7 @@ public:
 	typedef std::map<String, EffectParameter*> EffectParameterMap;
 
 public:
-	Effect(uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
+	Effect(ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	~Effect();
 
 	vector<EffectTechnique*>& GetTechniques()	{ return mTechniques; }

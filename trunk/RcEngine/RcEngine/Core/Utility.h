@@ -4,6 +4,8 @@
 
 #include <Core/Prerequisites.h>
 
+namespace RcEngine {
+
 // Convert Build-In type to String
 template<typename T>
 inline std::string ToString(const T& value)
@@ -28,5 +30,6 @@ std::wstring& Convert(std::wstring& dest, std::string const & src);
 uint32_t FloatToUint32(float v);
 float Uint32ToFloat(uint32_t v);
 
+}
 
 #endif // _Utility__H

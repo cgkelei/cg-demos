@@ -34,6 +34,7 @@
 #include "Graphics/SpriteBatch.h"
 #include "Math/Rectangle.h"
 #include "Core/XMLDom.h"
+#include "Core/Utility.h"
 
 SpriteBatch* spriteBatch;
 
@@ -52,7 +53,7 @@ void TestApp::Initialize()
 	Camera* camera = RcEngine::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
 	
 	Vector3f up(0, 1, 0);
-	camera->SetViewParams(Vector3f(0, 100, 400), Vector3f(0, 100, 0), up);
+	camera->SetViewParams(Vector3f(0, 50, 150), Vector3f(0, 50, 0), up);
 	camera->SetProjectionParams(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 10000.0f );
 
 	mCameraControler = new FPSCameraControler;
@@ -61,32 +62,57 @@ void TestApp::Initialize()
 	mCameraControler->AttachCamera(camera);
 }
 
+//void TestApp::LoadContent()
+//{
+//	RenderFactory* factory = RcEngine::Context::GetSingleton().GetRenderFactoryPtr();
+//	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
+//	ResourceManager& resMan = ResourceManager::GetSingleton();
+//
+//	resMan.AddResource(RT_Material, "Sprite.material.xml", "General");
+//	resMan.AddResource(RT_Mesh, "him.mesh", "Custom");
+//
+//	resMan.LoadAllFromDisk();
+//
+//	spriteBatch  = new SpriteBatch();
+//	
+//	Entity* dudeEntity = sceneManager->CreateEntity("Dude", "him.mesh",  "Custom");
+//	SceneNode* dudeNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
+//	dudeNode->SetPosition(Vector3f(0, 0, 0));
+//	dudeNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(180.0f), 0.0f, 0.0f));
+//	dudeNode->AttachObject(dudeEntity);
+//
+//
+//	AnimationPlayer* animPlayer = dudeEntity->GetAnimationPlayer();
+//	AnimationState* takeClip = animPlayer->GetClip("Take 001");
+//	takeClip->WrapMode = AnimationState::Wrap_Loop;
+//
+//	animPlayer->PlayClip("Take 001");
+//
+//	String skyTexPath = FileSystem::GetSingleton().Locate("MeadowTrail.dds");
+//
+//	//String skyTexPath = FileSystem::GetSingleton().Locate("front.dds");
+//	//mTexture = factory->CreateTextureFromFile(skyTexPath);
+//	//factory->SaveTexture2D("Test.dds", texture, 0, 0);
+//
+//	// Sky 
+//	//sceneManager->CreateSkyBox(texture, false);
+//	//sceneManager->CreateSkyBox(factory->CreateTextureFromFile(skyTexPath, 0));
+//	//sceneManager->CreateSkyBox(factory->CreateTextureFromFile("../Media/Textures/grassenvmap1024.dds", 0), 5000.0f); 
+//}
+
 void TestApp::LoadContent()
 {
 	RenderFactory* factory = RcEngine::Context::GetSingleton().GetRenderFactoryPtr();
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
-
-	//factory->CreateTextureFromFile("F:/RcEngine/Media/Mesh/Dude/jacket.dds");
-
-	//shared_ptr<Font> font =  
-	//	std::static_pointer_cast<Font>(
-	//	resMan.GetResourceByHandle(resMan.AddResource(ResourceTypes::Font, "msyh.ttf", "General"))) ;
-
-	
-	//auto h = resMan.AddResource(ResourceTypes::Material, "SkinModel.material.xml", "Custom");
-	//resMan.GetResourceByHandle(h)->Load();
-
-	resMan.AddResource(ResourceTypes::Material, "Sprite.material.xml", "General");
-	resMan.AddResource(ResourceTypes::Mesh, "him.mesh", "Custom");
-	//resMan.AddResource(ResourceTypes::Mesh, "Teapot.mesh", "Custom");
-	//resMan.AddResource(ResourceTypes::Pipeline, "DeferredLighting.pipeline.xml", "General");
+	resMan.AddResource(RT_Material, "Sprite.material.xml", "General");
+	resMan.AddResource(RT_Mesh, "him.mesh", "Custom");
 
 	resMan.LoadAllFromDisk();
 
 	spriteBatch  = new SpriteBatch();
-	
+
 	Entity* dudeEntity = sceneManager->CreateEntity("Dude", "him.mesh",  "Custom");
 	SceneNode* dudeNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
 	dudeNode->SetPosition(Vector3f(0, 0, 0));
@@ -100,8 +126,6 @@ void TestApp::LoadContent()
 
 	animPlayer->PlayClip("Take 001");
 
-
-	String skyTexPath = FileSystem::GetSingleton().Locate("MeadowTrail.dds");
 
 	//String skyTexPath = FileSystem::GetSingleton().Locate("front.dds");
 	//mTexture = factory->CreateTextureFromFile(skyTexPath);
@@ -166,9 +190,7 @@ void TestApp::CalculateFrameRate()
 	if (mTimer.GetGameTime()-baseTime >= 1.0f)
 	{
 		float fps = (float)frameCount;
-		std::stringstream sss; 
-		sss << "FPS: " << fps;
-		mMainWindow->SetTitle(sss.str());
+		mMainWindow->SetTitle(ToString(fps));
 		frameCount = 0;
 		baseTime += 1.0f;
 	}

@@ -4,7 +4,7 @@
 
 namespace RcEngine {
 
-Resource::Resource( uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
+Resource::Resource( ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 	: mResourceType(resType), mCreator(creator), mName(name), mResourceHandle(handle), mGroup(group), mBackground(false), mSize(0),
 		mLoadState(Unloaded)
 {

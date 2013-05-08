@@ -52,11 +52,13 @@ public:
 	 */
 	void DestroySceneNode( SceneNode* node );
 
-
 	SceneNode* FindSceneNode( const String& name ) const;
 
 	Entity* CreateEntity( const String& entityName, const String& meshName, const String& groupName );
+
 	Light* CreateLight( const String& name);
+
+	const std::vector<Light*>& GetSceneLights() const  { return mAllSceneLights; }
 
 	void CreateSkyBox( const shared_ptr<Texture>& texture, bool cubemap = true, float distance = 100.0f );
 
@@ -74,8 +76,6 @@ public:
 
 	void RenderScene();
 
-	vector<Light*>& GetSceneLight() { return mSceneLights; }
-
 	AnimationController* GetAnimationController() const;
 
 protected:
@@ -90,11 +90,12 @@ protected:
 	std::map< uint32_t, std::vector<SceneObject*> > mSceneObjectCollections;
 
 	// Keep track of all scene node
-    vector<SceneNode*> mAllSceneNodes;		// [0] is root node
+    std::vector<SceneNode*> mAllSceneNodes;		// [0] is root node
 
-	// keep track of light
-	vector<Light*> mSceneLights;
+	// Keep track of all scene lights
+	std::vector<Light*> mAllSceneLights;
 
+	// For sky box
 	SceneNode* mSkyBoxNode;	
 	Sky* mSkyBox;
 	
