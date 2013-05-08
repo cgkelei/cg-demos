@@ -93,49 +93,36 @@ void SceneManager::DestroySceneNode( SceneNode* node )
 	mAllSceneNodes.erase(found);
 }
 
-void SceneManager::UpdateRenderQueue(Camera* cam, RenderOrder order)
+Light* SceneManager::CreateLight( const String& name )
 {
-	mRenderQueue->ClearAllQueue();
-
-	GetRootSceneNode()->OnUpdateRenderQueues(cam, order);
-
-	// Update skynode same with camera positon, add sky box to render queue
-	if (mSkyBoxNode)
+	auto lightFactoryIter = mRegistry.find(SOT_Light);
+	if (lightFactoryIter == mRegistry.end())
 	{
-		mSkyBoxNode->SetPosition( cam->GetPosition() );
-		mRenderQueue->AddToQueue(  RenderQueueItem(SOT_Sky, mSkyBox, 0) ,RenderQueue::BucketSky);
+		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Light type haven't Registed", "SceneManager::CreateEntity");
 	}
+
+	Light* light = static_cast<Light*>((lightFactoryIter->second.factoryFunc)(name, nullptr));
+	mSceneObjectCollections[SOT_Light].push_back(light);
+
+	// keep track of light
+	mAllSceneLights.push_back(light);
+
+	return light;
 }
-
-
-void SceneManager::UpdateSceneGraph( float delta )
-{
-	// update anination controller first 
-	mAnimationController->Update(delta);
-
-	// update scene node transform
-	GetRootSceneNode()->Update();
-}
-
 
 Entity* SceneManager::CreateEntity( const String& entityName, const String& meshName, const String& groupName )
 {
-	auto found = mRegistry.find(SOT_Entity);
-	if (found == mRegistry.end())
+	auto entityFactoryIter = mRegistry.find(SOT_Entity);
+	if (entityFactoryIter == mRegistry.end())
 	{
 		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Entity type haven't Registed", "SceneManager::CreateEntity");
 	}
-
-	/*if (mSceneObjects.find(entityName) != mSceneObjects.end())
-	{
-	ENGINE_EXCEPT(Exception::ERR_DUPLICATE_ITEM, "Scene Object with name " +entityName+" already exits", "SceneManager::CreateLight");
-	}*/
 
 	NameValuePairList params;
 	params["ResourceGroup"] = groupName;
 	params["Mesh"] = meshName;
 
-	Entity* entity = static_cast<Entity*>((found->second.factoryFunc)(entityName, &params));
+	Entity* entity = static_cast<Entity*>((entityFactoryIter->second.factoryFunc)(entityName, &params));
 	mSceneObjectCollections[SOT_Entity].push_back(entity);
 	
 	return entity;
@@ -181,6 +168,29 @@ void SceneManager::CreateSkyBox( const shared_ptr<Texture>& texture, bool cubema
 	mSkyBoxNode->AttachObject(mSkyBox);
 }
 
+void SceneManager::UpdateRenderQueue(Camera* cam, RenderOrder order)
+{
+	mRenderQueue->ClearAllQueue();
+
+	GetRootSceneNode()->OnUpdateRenderQueues(cam, order);
+
+	// Update skynode same with camera positon, add sky box to render queue
+	if (mSkyBoxNode)
+	{
+		mSkyBoxNode->SetPosition( cam->GetPosition() );
+		mRenderQueue->AddToQueue(  RenderQueueItem(SOT_Sky, mSkyBox, 0) ,RenderQueue::BucketSky);
+	}
+}
+
+void SceneManager::UpdateSceneGraph( float delta )
+{
+	// update anination controller first 
+	mAnimationController->Update(delta);
+
+	// update scene node transform
+	GetRootSceneNode()->Update();
+}
+
 void SceneManager::RenderScene()
 {
 	auto& renderBuckets = mRenderQueue->GetAllRenderBuckets();
@@ -205,36 +215,18 @@ void SceneManager::RenderScene()
 	}
 }
 
-Light* SceneManager::CreateLight( const String& name)
-{
-	auto found = mRegistry.find(SOT_Light);
-	if (found == mRegistry.end())
-	{
-		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Light type haven't Registed", "SceneManager::CreateEntity");
-	}
-
-	/*if (mSceneObjects.find(name) != mSceneObjects.end())
-	{
-		ENGINE_EXCEPT(Exception::ERR_DUPLICATE_ITEM, "Scene Object with name " +name+" already exits", "SceneManager::CreateLight");
-	}*/
-
-	Light* light = static_cast<Light*>((found->second.factoryFunc)(name, nullptr));
-	mSceneObjectCollections[SOT_Light].push_back(light);
-
-	return light;
-}
-
-
 void SceneManager::ClearScene()
 {
 	SAFE_DELETE(mAnimationController);
 
+	// clear all scene node
 	for (auto iter = mAllSceneNodes.begin(); iter != mAllSceneNodes.end(); ++iter)
 	{
 		SAFE_DELETE(*iter);
 	}
 	mAllSceneNodes.clear();
 
+	// clear all scene object
 	for (auto iIter = mSceneObjectCollections.begin(); iIter != mSceneObjectCollections.end(); ++iIter)
 	{
 		for (auto jIter = iIter->second.begin(); jIter != iIter->second.end(); ++jIter)
@@ -243,6 +235,10 @@ void SceneManager::ClearScene()
 		}
 	}
 	mSceneObjectCollections.clear();
+
+
+	// lights has delete by mSceneObjectCollections
+	mAllSceneLights.clear();
 }
 
 void SceneManager::RegisterType( uint32_t type, const String& typeString, ResTypeInitializationFunc inf, ResTypeReleaseFunc rf, ResTypeFactoryFunc ff )
@@ -257,7 +253,5 @@ void SceneManager::RegisterType( uint32_t type, const String& typeString, ResTyp
 	// Initialize resource type
 	if( inf != 0 ) (*inf)();
 }
-
-
 
 }

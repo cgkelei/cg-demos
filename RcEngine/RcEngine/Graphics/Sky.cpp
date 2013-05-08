@@ -321,7 +321,7 @@ void Sky::InitializeSkyCubeMap(float size)
 
 	// Load material
 	mMaterial = std::static_pointer_cast<Material>(
-		ResourceManager::GetSingleton().GetResourceByName(ResourceTypes::Material, "SkyCubeMap.material.xml", "General"));
+		ResourceManager::GetSingleton().GetResourceByName(RT_Material, "SkyCubeMap.material.xml", "General"));
 
 	mMaterial->Load();
 }

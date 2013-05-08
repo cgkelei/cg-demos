@@ -228,7 +228,7 @@ private:
 SpriteBatch::SpriteBatch()
 {
 	mSpriteMaterial = std::static_pointer_cast<Material>(
-		ResourceManager::GetSingleton().GetResourceByName(ResourceTypes::Material, "Sprite.material.xml", "General"));
+		ResourceManager::GetSingleton().GetResourceByName(RT_Material, "Sprite.material.xml", "General"));
 
 	mSpriteMaterial->Load();
 }	

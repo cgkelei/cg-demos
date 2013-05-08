@@ -38,7 +38,7 @@ void SubEntity::SetMaterial( const shared_ptr<Material>& mat )
 void SubEntity::SetMaterial( const String& matName, const String& group )
 {
 	mMaterial = std::static_pointer_cast<Material>(
-		ResourceManager::GetSingleton().GetResourceByName(ResourceTypes::Material, matName, group));
+		ResourceManager::GetSingleton().GetResourceByName(RT_Material, matName, group));
 
 	mMaterial->Load();
 

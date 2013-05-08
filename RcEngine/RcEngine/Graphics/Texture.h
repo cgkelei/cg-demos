@@ -58,7 +58,7 @@ protected:
 class TextureResource : public Resource
 {
 public:
-	TextureResource(uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
+	TextureResource(ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	~TextureResource();
 
 

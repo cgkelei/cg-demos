@@ -70,7 +70,7 @@ void Entity::Initialize()
 		for (size_t i = 0; i != animations.size(); ++i)
 		{
 			shared_ptr<AnimationClip> clip = std::static_pointer_cast<AnimationClip>(
-				ResourceManager::GetSingleton().GetResourceByName(ResourceTypes::Animation, animations[i], mMesh->GetResourceGroup()));
+				ResourceManager::GetSingleton().GetResourceByName(RT_Animation, animations[i], mMesh->GetResourceGroup()));
 			clip->Load();
 
 			mAnimationPlayer->AddClip(clip);
@@ -331,7 +331,7 @@ SceneObject* Entity::FactoryFunc( const String& name, const NameValuePairList* p
 		{
 			// Get mesh (load if required)
 			pMesh = std::static_pointer_cast<Mesh>(
-				ResourceManager::GetSingleton().GetResourceByName(ResourceTypes::Mesh, found->second, groupName));	
+				ResourceManager::GetSingleton().GetResourceByName(RT_Mesh, found->second, groupName));	
 		}
 	}
 

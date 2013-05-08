@@ -131,7 +131,7 @@ private:
 };
 
 //--------------------------------------------------------------------------------------------------
-Material::Material(uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
+Material::Material(ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 	: Resource(resType, creator, handle, name, group), mTransparent(false)
 {
 }
@@ -344,7 +344,7 @@ void Material::LoadImpl()
 	
 	// load effect
 	{
-		shared_ptr<Resource> effectProtype = resMan.GetResourceByName(ResourceTypes::Effect, effectName, effectResGroup);
+		shared_ptr<Resource> effectProtype = resMan.GetResourceByName(RT_Effect, effectName, effectResGroup);
 		effectProtype->Load();
 
 		// if use material animation, use effect clone
@@ -473,7 +473,7 @@ void Material::LoadImpl()
 				layer.Texture = factory.CreateTextureFromFile(texFullPath, 0);*/
 
 				shared_ptr<TextureResource> textureRes = std::static_pointer_cast<TextureResource>(
-					resMan.GetResourceByName(ResourceTypes::Texture, texFile, mGroup));
+					resMan.GetResourceByName(RT_Texture, texFile, mGroup));
 				textureRes->Load();
 
 				layer.Texture = textureRes->GetTexture();
@@ -545,7 +545,7 @@ void Material::UnloadImpl()
 
 shared_ptr<Resource> Material::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 {
-	return std::make_shared<Material>(ResourceTypes::Material, creator, handle, name, group);
+	return std::make_shared<Material>(RT_Material, creator, handle, name, group);
 }
 
 

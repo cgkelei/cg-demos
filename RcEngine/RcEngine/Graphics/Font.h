@@ -46,7 +46,7 @@ public:
 	};
 
 public:
-	Font(uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
+	Font(ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	~Font();
 
 	void DrawText(std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color);

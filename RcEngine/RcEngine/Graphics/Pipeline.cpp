@@ -53,10 +53,10 @@ namespace RcEngine {
 
 shared_ptr<Resource> Pipeline::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 {
-	return std::make_shared<Pipeline>(ResourceTypes::Pipeline, creator, handle, name, group);
+	return std::make_shared<Pipeline>(RT_Pipeline, creator, handle, name, group);
 }
 
-Pipeline::Pipeline( uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
+Pipeline::Pipeline( ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 	: Resource(resType, creator, handle, name, group)
 {
 

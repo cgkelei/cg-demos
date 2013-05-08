@@ -1693,7 +1693,7 @@ int main()
 	FbxProcesser fbxProcesser;
 	fbxProcesser.Initialize();
 
-	if (fbxProcesser.LoadScene("dude.FBX"))
+	if (fbxProcesser.LoadScene("../Media/Ship.fbx"))
 	{
 		fbxProcesser.ProcessScene(0);
 		fbxProcesser.BuildAndSaveXML();

@@ -204,7 +204,7 @@ private:
 namespace RcEngine {
 
 ////////////////////////////////////////////////////////////////////////////
-Font::Font( uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
+Font::Font( ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 	: Resource(resType, creator, handle, name, group)
 {
 
@@ -529,7 +529,7 @@ void Font::UnloadImpl()
 
 shared_ptr<Resource> Font::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 {
-	return std::make_shared<Font>(ResourceTypes::Font, creator, handle, name, group);
+	return std::make_shared<Font>(RT_Font, creator, handle, name, group);
 }
 
 

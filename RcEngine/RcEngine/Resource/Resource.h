@@ -9,19 +9,16 @@ class ResourceManager;
 
 typedef uint32_t ResourceHandle;
 
-struct ResourceTypes
+enum ResourceTypes
 {
-	enum List
-	{
-		Undefined = 0,
-		Mesh,
-		Material,
-		Effect,
-		Animation,
-		Texture,
-		Pipeline,
-		Font
-	};
+	RT_Undefined = 0,
+	RT_Mesh,
+	RT_Material,
+	RT_Effect,
+	RT_Animation,
+	RT_Texture,
+	RT_Pipeline,
+	RT_Font
 };
 
 class _ApiExport Resource
@@ -36,7 +33,7 @@ public:
 	};
 
 public:
-	Resource(uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
+	Resource(ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	virtual ~Resource();
 
 	virtual shared_ptr<Resource> Clone();
@@ -77,7 +74,7 @@ protected:
 	uint32_t mSize;
 
 	ResourceHandle mResourceHandle;
-	uint32_t mResourceType;
+	ResourceTypes mResourceType;
 
 	fast_mutex mMutex; 
 };

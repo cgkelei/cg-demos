@@ -18,7 +18,7 @@
 namespace RcEngine {
 
 Mesh::Mesh( uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
-	: Resource(ResourceTypes::Mesh, creator, handle, name, group), mSkeleton(nullptr)
+	: Resource(RT_Mesh, creator, handle, name, group), mSkeleton(nullptr)
 {
 
 }
@@ -61,7 +61,7 @@ void Mesh::LoadImpl()
 		subMesh->Load(source);
 		
 		// add mesh part material resource
-		ResourceManager::GetSingleton().AddResource(ResourceTypes::Material, subMesh->mMaterialName, mGroup);
+		ResourceManager::GetSingleton().AddResource(RT_Material, subMesh->mMaterialName, mGroup);
 
 		mMeshParts[i] = subMesh;
 	}
@@ -75,7 +75,7 @@ void Mesh::LoadImpl()
 	for (uint32_t i = 0; i < animClipCount; i++)
 	{
 		mAninationClips[i] = source.ReadString();
-		resMan.AddResource(ResourceTypes::Animation, mAninationClips[i], mGroup);
+		resMan.AddResource(RT_Animation, mAninationClips[i], mGroup);
 	}
 }
 
@@ -87,7 +87,7 @@ void Mesh::UnloadImpl()
 shared_ptr<Resource> Mesh::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 {
 	assert(creator != nullptr);
-	return std::make_shared<Mesh>(ResourceTypes::Mesh, creator, handle, name, group);
+	return std::make_shared<Mesh>(RT_Mesh, creator, handle, name, group);
 }
 
 
