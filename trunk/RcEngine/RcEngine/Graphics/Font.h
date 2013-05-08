@@ -103,14 +103,6 @@ protected:
 
 	// free slots in font texture,  [first, second]
 	std::list<std::pair<uint32_t, uint32_t> > mFreeCharacterSlots;
-
-	vector<uint8_t> mDistancesLzma;
-
-	// distance data offset in mDistancesLzma
-	vector<uint32_t> mGlyphDistanceOffset;
-
-
-	shared_ptr<Texture> mDistanceTexture;
 };
 
 

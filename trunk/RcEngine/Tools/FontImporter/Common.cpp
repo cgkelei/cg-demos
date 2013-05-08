@@ -1,7 +1,6 @@
 #include "Common.h"
 
-
-	using namespace std;
+using namespace std;
 
 namespace {
 

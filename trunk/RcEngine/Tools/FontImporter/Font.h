@@ -88,17 +88,5 @@ private:
 	GLuint mVertexBufferID, mIndexBufferID;
 };
 
-
-class DistanceCompute
-{
-public:
-	DistanceCompute();
-	~DistanceCompute();
-
-	void Extract();
-
-};
-
-
 }
 

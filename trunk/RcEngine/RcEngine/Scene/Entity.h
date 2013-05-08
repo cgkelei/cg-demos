@@ -55,7 +55,7 @@ protected:
 
 
 public:
-	static SceneObject* FactoryFunc(const String& name, const NameValuePairList* params);
+	static SceneObject* FactoryFunc(const String& name, const NameValuePairList* params = 0);
 
 protected:
 	shared_ptr<Mesh> mMesh;

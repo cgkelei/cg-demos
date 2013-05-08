@@ -258,9 +258,6 @@
     <ClInclude Include="Scene\Entity.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\HierarchyNode.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
     <ClInclude Include="Scene\Light.h">
       <Filter>Scene</Filter>
     </ClInclude>
@@ -565,9 +562,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scene\HierarchyNode.inl">
-      <Filter>Scene</Filter>
-    </None>
     <None Include="Math\BoundingBox.inl">
       <Filter>Math</Filter>
     </None>

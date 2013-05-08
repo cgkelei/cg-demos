@@ -10,7 +10,6 @@
 #include <Math/Rectangle.h>
 #include <Resource/ResourceManager.h>
 
-
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -239,22 +238,6 @@ void Font::LoadImpl()
 	uint32_t numKerning = source.ReadUInt();
 
 	mGlyphs.resize(validateNumGlyph);
-	mGlyphDistanceOffset.resize(validateNumGlyph + 1);
-	for (size_t i = 0; i < validateNumGlyph; ++i)
-	{
-		uint32_t charCode = source.ReadUInt();
-
-		mGlyphMapping[charCode] = i;
-			
-		source.Read(&mGlyphs[i], sizeof(Glyph));
-	
-		uint32_t glyphLen = source.ReadUInt();
-
-		mGlyphDistanceOffset[i] = mDistancesLzma.size();
-		mDistancesLzma.resize(mDistancesLzma.size() + glyphLen);
-		source.Read(&mDistancesLzma[mGlyphDistanceOffset[i]], glyphLen);
-	}
-	mGlyphDistanceOffset[validateNumGlyph] = mDistancesLzma.size();
 
 	uint32_t charA, charB;
 	int32_t kerning;
@@ -269,7 +252,6 @@ void Font::LoadImpl()
 
 	// Create texture
 	uint32_t texSize = FONT_TEXTURE_SIZE / mCharSize * mCharSize;
-	mDistanceTexture = factory.CreateTexture2D(texSize,texSize, PF_Alpha8, 1, 1, 1, 0, EAH_GPU_Read | EAH_CPU_Write, NULL);
 
 	mFreeCharacterSlots.push_back(std::make_pair(0, texSize * texSize / mCharSize / mCharSize));
 }
@@ -615,7 +597,7 @@ void Font::UpdateTexture( const std::wstring& text )
 	static int64_t tick = 0;
 	tick++;
 
-	uint32_t texSize = mDistanceTexture->GetWidth(0);
+	uint32_t texSize /*= mDistanceTexture->GetWidth(0)*/;
 
 	uint32_t numCharPerRow = texSize / mCharSize;
 	uint32_t totalNumChars = numCharPerRow * numCharPerRow;

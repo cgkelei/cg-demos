@@ -33,7 +33,7 @@ enum SceneObejctType
 class _ApiExport SceneObject
 {
 public:
-	SceneObject( const String& name );
+	SceneObject( const String& name, SceneObejctType type, bool renderable = false );
 	virtual ~SceneObject();
 
 	const String& GetName() const { return mName; }

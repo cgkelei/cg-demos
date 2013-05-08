@@ -18,7 +18,7 @@ namespace RcEngine {
 
 	
 RenderableHelper::RenderableHelper( const String& name )
-	: SceneObject(name), mRenderOperation(new RenderOperation)
+	: SceneObject(name, SOT_Entity, true), mRenderOperation(new RenderOperation)
 {
 
 }

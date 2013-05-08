@@ -6,14 +6,14 @@
 namespace RcEngine {
 
 Light::Light( const String& name )
-	: SceneObject(name), mLightType(LT_Point), mLightPosition(Vector3f::Zero()),
+	: SceneObject(name, SOT_Light, false), 
+	  mLightType(LT_Point), mLightPosition(Vector3f::Zero()),
 	  mLightDirection(Vector3f(0, 0, 1)), mLightDiffuse(ColorRGBA::White), mLightSpecular(ColorRGBA::Black),
 	  mSpotOuter(Mathf::ToRadian(40.0f)), mSpotInner(Mathf::ToRadian(30.0f)), mSpotFalloff(1.0f), mRange(100000), mAttenuationConst(1.0f),
 	  mAttenuationLinear(0.0f), mAttenuationQuad(0.0f), mDerivedPosition(Vector3f::Zero()), 
 	  mDerivedDirection(Vector3f(0, 0, 1)), mDerivedTransformDirty(false)
 {
-	mType = SOT_Light;
-	mRenderable = false;
+
 }
 
 Light::~Light()
