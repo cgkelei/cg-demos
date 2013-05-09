@@ -15,23 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Common.cpp">
+    <ClCompile Include="FontImporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Font.cpp">
+    <ClCompile Include="edtaa3func.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Main.cpp">
+    <ClCompile Include="pfm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Font.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="distance-field.frag">
@@ -40,5 +32,13 @@
     <None Include="distance-field.vert">
       <Filter>Resource Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="edtaa3func.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pfm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
