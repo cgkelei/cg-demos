@@ -80,17 +80,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Common.cpp" />
-    <ClCompile Include="Font.cpp" />
-    <ClCompile Include="Main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Common.h" />
-    <ClInclude Include="Font.h" />
+    <ClCompile Include="edtaa3func.c" />
+    <ClCompile Include="FontImporter.cpp" />
+    <ClCompile Include="pfm.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="distance-field.frag" />
     <None Include="distance-field.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="edtaa3func.h" />
+    <ClInclude Include="pfm.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
