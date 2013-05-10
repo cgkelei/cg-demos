@@ -36,8 +36,6 @@
 #include "Core/XMLDom.h"
 #include "Core/Utility.h"
 
-SpriteBatch* spriteBatch;
-
 TestApp::TestApp( const String& config )
 	:Application(config)
 {
@@ -46,6 +44,8 @@ TestApp::TestApp( const String& config )
 
 TestApp::~TestApp(void)
 {
+	delete mCameraControler;
+	delete mSpriteBatch;
 }
 
 void TestApp::Initialize()
@@ -60,6 +60,9 @@ void TestApp::Initialize()
 	//mCameraControler = new ModelViewerCameraControler();
 	//mCameraControler->SetWindowSize(GetMainWindow()->GetWidth(), GetMainWindow()->GetHeight());
 	mCameraControler->AttachCamera(camera);
+
+
+	mSpriteBatch = new SpriteBatch;
 }
 
 //void TestApp::LoadContent()
@@ -111,8 +114,6 @@ void TestApp::LoadContent()
 
 	resMan.LoadAllFromDisk();
 
-	spriteBatch  = new SpriteBatch();
-
 	Entity* dudeEntity = sceneManager->CreateEntity("Dude", "him.mesh",  "Custom");
 	SceneNode* dudeNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
 	dudeNode->SetPosition(Vector3f(0, 0, 0));
@@ -152,10 +153,10 @@ void TestApp::Render()
 	RenderDevice& renderDevice = Context::GetSingleton().GetRenderDevice();
 	SceneManager& scenenMan = Context::GetSingleton().GetSceneManager();
 
-	spriteBatch->Begin();
-	spriteBatch->Draw(mTexture, IntRect(0, 0, 100, 100), ColorRGBA::Green);
-	spriteBatch->End();
-	spriteBatch->Flush();
+	mSpriteBatch->Begin();
+	mSpriteBatch->Draw(mTexture, IntRect(0, 0, 100, 100), ColorRGBA::Green);
+	mSpriteBatch->End();
+	mSpriteBatch->Flush();
 
 
 	shared_ptr<FrameBuffer> currentFrameBuffer = renderDevice.GetCurrentFrameBuffer();

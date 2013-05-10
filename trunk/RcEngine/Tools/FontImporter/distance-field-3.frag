@@ -33,7 +33,7 @@
 uniform sampler2D texture;
 void main(void)
 {
-    vec3 color = vec3(0.0,0.0,0.0);
+    vec3 color = vec3(1.0,1.0,1.0);
     float dist = texture2D(texture, gl_TexCoord[0].st).a;
     float width = fwidth(dist);
     float alpha = smoothstep(0.5-width, 0.5+width, dist);

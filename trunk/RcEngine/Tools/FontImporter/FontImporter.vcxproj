@@ -85,6 +85,7 @@
     <ClCompile Include="pfm.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="distance-field-3.frag" />
     <None Include="distance-field.frag" />
     <None Include="distance-field.vert" />
   </ItemGroup>

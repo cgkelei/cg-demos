@@ -6,7 +6,7 @@
 #include <cassert>
 #include <vector>
 #include <map>
-
+#include <algorithm>
 #include <GL/glew.h>
 #include <GL/glut.h>
 
@@ -253,20 +253,15 @@ void load_glyph( const char *  filename,  const wchar_t charcode,
 	
 	glyph.Data.resize(lowres_width*lowres_height);
 
-	//float * pfmData = (float *) malloc( lowres_width*lowres_height*sizeof(float) );
-
 	for( size_t j=0; j < lowres_height; ++j )
 	{
 		for( size_t i=0; i < lowres_width; ++i )
 		{
 			double v = lowres_data[j*lowres_width+i];
 			glyph.Data[j*lowres_width+i] = (int) (255*(1-v));
-			//pfmData[(lowres_height-1-j)*lowres_width+i] = 1.0-v;
 		}
 	}
 
-	//WritePfm("lambda.pfm", lowres_width, lowres_height, 1, pfmData);
-	//free(pfmData);
 
 	// Compute new glyph information from highres value
 	float ratio = lowres_size / highres_size;
@@ -283,6 +278,8 @@ void load_glyph( const char *  filename,  const wchar_t charcode,
 	//free(data);
 }
 
+int Size = 128;
+
 void init(void)
 {
 	glShadeModel(GL_SMOOTH);							// Enable Smooth Shading
@@ -298,8 +295,28 @@ void init(void)
 	glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 	glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
-	load_glyph("msyhbd.ttf", L'@', 512, 32, 0.1, gGlyph);
-	glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 32, 32, 0, GL_ALPHA, GL_UNSIGNED_BYTE, &gGlyph.Data[0]);		
+	load_glyph("msyhbd.ttf", L'A', 512, 32, 0.1, gGlyph);
+
+	std::vector<unsigned char> TextureData(Size * Size, 0);
+
+	for (size_t y = 0; y < gGlyph.Height; ++y)
+	{
+		for (size_t x = 0; x < gGlyph.Width; ++x)
+		{
+			TextureData[y*Size+x] = gGlyph.Data[y*gGlyph.Width+x];
+		}
+	}
+
+	/*std::vector<double> downData(Size * Size / 4, 0);
+	resize(&TextureData[0],Size, Size, &downData[0], Size/2, Size/2);
+
+	std::vector<unsigned char> downDataUC(Size * Size / 4, 0);
+	std::transform(downData.begin(), downData.end(), downDataUC.begin(), [](double c){return int(c*255);});*/
+
+	glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, Size, Size, 0, GL_ALPHA, GL_UNSIGNED_BYTE, &TextureData[0]);	
+
+
+	//WritePfm("test.pfm", 64, 64, 1, &TextureData[0]);
 
 	// Load shaders
 	int status;
@@ -377,7 +394,7 @@ void reshape(int width, int height)
 
 void display( void )
 {
-	glClearColor(1.0f , 1.0f , 1.0f , 1.0f);
+	glClearColor(0.1f , 0.1f , 0.1f , 1.0f);
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	//glLoadIdentity();
 
@@ -403,14 +420,14 @@ void display( void )
 
 	glPushMatrix();
 	glTranslatef(256,256,0);
-	glRotatef(angle, 0,0,1);
-	float s = .025+.975*(1+cos(angle/100.0))/2.;
+	//glRotatef(angle, 0,0,1);
+	float s = .025+.975*(1+1/*cos(angle/100.0)*/)/2.;
 	glScalef(s,s,s);
 
 	float s0 = 0.0;
 	float t0 = 0.0;
-	float s1 = 1.0;
-	float t1 = 1.0;
+	float s1 = (gGlyph.Width) / float(Size);
+	float t1 = (gGlyph.Height) / float(Size);
 
 	glBegin(GL_QUADS);
 	glTexCoord2f( s0, t1 ); glVertex2f( x, y );
@@ -451,6 +468,7 @@ int main ( int argc, char** argv )   // Create Main Function For Bringing It All
 	 glutTimerFunc( 1000.0/60, timer, 60 );
 
 	glewInit();
+	glEnable(GL_ALPHA);
 	
 	init ();
 	glutDisplayFunc     ( display );  // Matching Earlier Functions To Their Counterparts

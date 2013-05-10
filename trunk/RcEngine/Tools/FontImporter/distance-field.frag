@@ -12,32 +12,33 @@ void main(void)
     float width = fwidth(dist);
     float alpha = smoothstep(glyph_center-width, glyph_center+width, dist);
 	
+	/*
 	if( dist > 0.45 && dist < 0.55)
 		gl_FragColor = vec4(glyph_color, alpha);
 	else if (dist > 0.55)
 		gl_FragColor = vec4(1, 0, 0, alpha);
 	else
-		gl_FragColor = vec4(0, 0, 0, alpha);
+		gl_FragColor = vec4(0, 0, 0, alpha);*/
 
     // Smooth
     //gl_FragColor = vec4(glyph_color, alpha);
 
     // Outline
     //float mu = smoothstep(outline_center-width, outline_center+width, dist);
-    //vec3 rgb = mix(outline_color, glyph_color, mu);
+   // vec3 rgb = mix(outline_color, glyph_color, mu);
    // gl_FragColor = vec4(rgb, mu);
 
     // Glow
-    //vec3 rgb = mix(glow_color, glyph_color, alpha);
-    //float mu = smoothstep(glyph_center, glow_center, sqrt(dist));
-    //gl_FragColor = vec4(rgb, max(alpha,mu));
+    vec3 rgb = mix(glow_color, glyph_color, alpha);
+    float mu = smoothstep(glyph_center, glow_center, sqrt(dist));
+    gl_FragColor = vec4(rgb, max(alpha,mu));
 
     // Glow + outline
     //vec3 rgb = mix(glow_color, glyph_color, alpha);
-    //float mu = smoothstep(glyph_center, glow_center, sqrt(dist));
-    //color = vec4(rgb, max(alpha,mu));
-    //float beta = smoothstep(outline_center-width, outline_center+width, dist);
-    //rgb = mix(outline_color, color.rgb, beta);
+   // float mu = smoothstep(glyph_center, glow_center, sqrt(dist));
+   // color = vec4(rgb, max(alpha,mu));
+   // float beta = smoothstep(outline_center-width, outline_center+width, dist);
+   // rgb = mix(outline_color, color.rgb, beta);
    // gl_FragColor = vec4(rgb, max(color.a,beta));
 
 }
