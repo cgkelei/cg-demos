@@ -144,6 +144,7 @@ class Node;
 class Light;
 class SceneNode;
 class Entity;
+class SpriteBatch;
 class AnimationPlayer;
 class AnimationState;
 class AnimationClip;

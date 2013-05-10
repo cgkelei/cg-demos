@@ -68,8 +68,10 @@ private:
 
 	/// Point size.
 	int CharSize;
+
 	/// Row height.
 	int RowHeight;
+
 	/// Glyph index mapping.
 	map<pair<int32_t, int32_t>, int32_t> Kerning;
 

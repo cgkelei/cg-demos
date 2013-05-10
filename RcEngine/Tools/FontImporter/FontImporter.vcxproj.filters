@@ -32,6 +32,9 @@
     <None Include="distance-field.vert">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="distance-field-3.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="edtaa3func.h">
