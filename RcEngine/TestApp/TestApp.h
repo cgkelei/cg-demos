@@ -35,8 +35,10 @@ private:
 	shared_ptr<SimpleTexturedQuad> mQuad;
 	shared_ptr<Mesh> mDwarf;
 	shared_ptr<Material> mDwarfMaterial;
+	shared_ptr<SpriteBatch> mSpriteBatch;
+	shared_ptr<Font> mFont;
 	FPSCameraControler* mCameraControler;
-	SpriteBatch* mSpriteBatch;
+	
 	//ModelViewerCameraControler* mCameraControler;
 };
 

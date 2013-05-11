@@ -55,7 +55,13 @@ protected:
 	TextureType mType;
 };
 
-class TextureResource : public Resource
+// Todo 
+/** 
+ * remove TextureResource class. Add own texture image reader, So we can load texture image in engine level, 
+ * don't need to do it in sub render system level. 
+ */
+
+class _ApiExport TextureResource : public Resource
 {
 public:
 	TextureResource(ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);

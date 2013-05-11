@@ -61,6 +61,11 @@ SpriteBatch::SpriteBatch()
 	mSpriteMaterial->Load();
 }	
 
+SpriteBatch::SpriteBatch( const shared_ptr<Material>& material )
+{
+	mSpriteMaterial = material;
+}
+
 SpriteBatch::~SpriteBatch()
 {
 
@@ -79,7 +84,7 @@ void SpriteBatch::End()
 
 }
 
-void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const IntRect& dest, IntRect* src, const ColorRGBA& color, float rotAngle /*= 0*/, const Vector2f& origin /*= Vector2f::Zero()*/, float layerDepth /*= 0.0f*/ )
+void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& dest, IntRect* src, const ColorRGBA& color, float rotAngle /*= 0*/, const Vector2f& origin /*= Vector2f::Zero()*/, float layerDepth /*= 0.0f*/ )
 {
 	if (color.A() <= 0)
 		return;
@@ -169,16 +174,16 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Vector2f& posi
 
 void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Vector2f& position, IntRect* sourceRectangle, const ColorRGBA& color )
 {
-	IntRect destination = IntRect((int32_t)position.X(), (int)position.Y(), texture->GetWidth(0), texture->GetHeight(0));
+	Rectanglef destination(position.X(), position.Y(), (float)texture->GetWidth(0), (float)texture->GetHeight(0));
 	Draw(texture, destination, sourceRectangle, color, 0.0f, Vector2f::Zero(), 0.0f);
 }
 
-void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const IntRect& destinationRectangle, const ColorRGBA& color )
+void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, const ColorRGBA& color )
 {
 	Draw(texture, destinationRectangle, NULL, color, 0.0f, Vector2f::Zero(), 0.0f);
 }
 
-void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const IntRect& destinationRectangle, IntRect* sourceRectangle, const ColorRGBA& color )
+void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, IntRect* sourceRectangle, const ColorRGBA& color )
 {
 	Draw(texture, destinationRectangle, sourceRectangle, color, 0.0f, Vector2f::Zero(), 0.0f);
 }
@@ -197,7 +202,7 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Vector2f& posi
 		height = (int32_t)(texture->GetHeight(0) * scale);
 	}
 
-    IntRect destination = IntRect((int)position.X(), (int)position.Y(), width, height);
+    Rectanglef destination = Rectanglef(position.X(), position.Y(), (float)width, (float)height);
 	Draw(texture, destination, sourceRectangle, color, rotation, Vector2f::Zero(), 0.0f);
 }
 
@@ -215,7 +220,7 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Vector2f& posi
 		height = (int32_t)(texture->GetHeight(0) * scale.Y());
 	}
 
-	IntRect destination = IntRect((int)position.X(), (int)position.Y(), width, height);
+	Rectanglef destination = Rectanglef(position.X(), position.Y(), (float)width, (float)height);
 	Draw(texture, destination, sourceRectangle, color, rotation, Vector2f::Zero(), 0.0f);
 }
 

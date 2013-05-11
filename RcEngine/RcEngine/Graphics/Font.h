@@ -15,6 +15,7 @@ static const int FONT_DPI = 96;
 namespace RcEngine {
 
 class SpriteBatch;
+class FontLoader;
 
 class _ApiExport Font : public Resource
 {
@@ -34,15 +35,12 @@ public:
 	{
 		int32_t Width, Height;
 		// Glyph X, Y offset from origin.
-		int32_t OffsetX, OffsetY;
+		float OffsetX, OffsetY;
 		// the horizontal advance value for the glyph. 
-		int32_t Advance;
-	};
+		float Advance;
 
-	struct CharInfo
-	{
-		Rectanglef TexRect;
-		uint64_t Tick;
+		// Start Position in Texture
+		int32_t SrcX, SrcY;
 	};
 
 public:
@@ -56,15 +54,7 @@ public:
 	void MeasureText(const std::wstring& text,uint32_t fontHeight, uint32_t* widthOut, uint32_t* heightOut);
 
 private:
-	void Draw(SpriteBatch* spriteBatch, const std::wstring& text, const Vector2f& Position, const ColorRGBA& color, float rotation, const Vector2f&  origin, const Vector2f& scale, float depth);
-
-	// map wchat_t to glyph index
-	int32_t GetGlyphIndex(wchar_t ch);
-
-	// kerning between chars
-	int32_t GetKerning(wchar_t c, wchar_t d) const;
-
-	void UpdateTexture(const std::wstring& text);
+	void Draw(const std::wstring& text, const Vector2f& Position, const ColorRGBA& color, float rotation, const Vector2f&  origin, const Vector2f& scale, float depth);
 
 protected:
 	void LoadImpl();
@@ -74,35 +64,24 @@ public:
 	static shared_ptr<Resource> FactoryFunc(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 
 protected:
-	vector<uint8_t> mFontData;
-	uint32_t mFontDataSize;
-	//unordered_map<uint32_t, FontFace*> mFontFaces;
 
-	bool mHasKerning;
-	bool mOutline;
-
-	// y of base line
-	uint32_t mBase;
-
-	// total height of the font
-	uint32_t mCharSize;
-
-
-	float mScale;
-
-	// all character glyphs
-	vector<Glyph> mGlyphs;
-
-	std::map<std::pair<uint32_t, uint32_t>, int32_t> mKerning;
-
-	// wchar_t to glyph index map
-	unordered_map<uint32_t, int32_t> mGlyphMapping;
+	friend class FontLoader;
 	
-	// cached glyph in current texture
-	unordered_map<wchar_t, CharInfo> mCharacterCached;
+	String mFontName;
 
-	// free slots in font texture,  [first, second]
-	std::list<std::pair<uint32_t, uint32_t> > mFreeCharacterSlots;
+	/// Point size.
+	int32_t mCharSize;
+
+	/// Row height.
+	int32_t mRowHeight;
+
+	std::unordered_map<uint32_t, Glyph> mGlyphs;
+
+	shared_ptr<Texture> mFontTexture;
+
+	shared_ptr<SpriteBatch> mSpriteBatch;
+
+	shared_ptr<Material> mFontMaterial;
 };
 
 

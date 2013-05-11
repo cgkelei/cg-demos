@@ -23,7 +23,15 @@ struct SpriteVertex
 class _ApiExport SpriteBatch
 {
 public:
+	/**
+	 * Default sprite batch, use to render normal 2D sprite
+	 */
 	SpriteBatch();
+
+	/**
+	 * Sprite batch with specular material
+	 */
+	SpriteBatch(const shared_ptr<Material>& material);
 	~SpriteBatch();
 
 	void Begin();
@@ -50,19 +58,18 @@ public:
 	 * @param layerDepth: The depth of a layer. By default, 0 represents the front layer and 1 represents
 	 * a back layer. Use SpriteSortMode if you want sprites to be sorted during drawing.
 	 */
-	void Draw(const shared_ptr<Texture>& texture, const IntRect& destinationRectangle, IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const Vector2f& origin, float layerDepth);
+	void Draw(const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const Vector2f& origin, float layerDepth);
 
 	void Draw(const shared_ptr<Texture>& texture, const Vector2f& position, IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const Vector2f& origin, float scale, float layerDepth);
 	void Draw(const shared_ptr<Texture>& texture, const Vector2f& position, IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const Vector2f& origin, const Vector2f& scale, float layerDepth);
 
-	void Draw(const shared_ptr<Texture>& texture, const IntRect& destinationRectangle, const ColorRGBA& color);
-	void Draw(const shared_ptr<Texture>& texture, const IntRect& destinationRectangle, IntRect* sourceRectangle, const ColorRGBA& color);
+	void Draw(const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, const ColorRGBA& color);
+	void Draw(const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, IntRect* sourceRectangle, const ColorRGBA& color);
 	
 	void Draw(const shared_ptr<Texture>& texture, const Vector2f& position, const ColorRGBA& color);
 	void Draw(const shared_ptr<Texture>& texture, const Vector2f& position, IntRect* sourceRectangle, const ColorRGBA& color);
 
 private:
-	Matrix4f mProjectionMatrix;
 	uint32_t mSortMode;
 	shared_ptr<Material> mSpriteMaterial;
 
