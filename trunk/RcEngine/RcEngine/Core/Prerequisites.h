@@ -128,6 +128,7 @@ class Material;
 class Pipeline;
 class Renderer;
 class Effect;
+class Font;
 class RenderQueue;
 class EffectParameter;
 class EffectTechnique;

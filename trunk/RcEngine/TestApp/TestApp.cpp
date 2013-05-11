@@ -30,6 +30,7 @@
 #include "Scene/SceneManager.h"
 #include "Graphics/Sky.h"
 #include "Graphics/SimpleGeometry.h"
+#include "Graphics/Font.h"
 #include "Resource/ResourceManager.h"
 #include "Graphics/SpriteBatch.h"
 #include "Math/Rectangle.h"
@@ -45,7 +46,6 @@ TestApp::TestApp( const String& config )
 TestApp::~TestApp(void)
 {
 	delete mCameraControler;
-	delete mSpriteBatch;
 }
 
 void TestApp::Initialize()
@@ -60,9 +60,6 @@ void TestApp::Initialize()
 	//mCameraControler = new ModelViewerCameraControler();
 	//mCameraControler->SetWindowSize(GetMainWindow()->GetWidth(), GetMainWindow()->GetHeight());
 	mCameraControler->AttachCamera(camera);
-
-
-	mSpriteBatch = new SpriteBatch;
 }
 
 //void TestApp::LoadContent()
@@ -111,9 +108,16 @@ void TestApp::LoadContent()
 
 	resMan.AddResource(RT_Material, "Sprite.material.xml", "General");
 	resMan.AddResource(RT_Mesh, "him.mesh", "Custom");
-
+	resMan.AddResource(RT_Font, "Consolas Regular", "General");
 	resMan.LoadAllFromDisk();
 
+	// Sprite 
+	mSpriteBatch = std::make_shared<SpriteBatch>();
+
+	// Font
+	mFont = std::static_pointer_cast<Font>(resMan.GetResourceByName(RT_Font,"Consolas Regular", "General"));
+
+	// Entity
 	Entity* dudeEntity = sceneManager->CreateEntity("Dude", "him.mesh",  "Custom");
 	SceneNode* dudeNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
 	dudeNode->SetPosition(Vector3f(0, 0, 0));
@@ -154,7 +158,7 @@ void TestApp::Render()
 	SceneManager& scenenMan = Context::GetSingleton().GetSceneManager();
 
 	mSpriteBatch->Begin();
-	mSpriteBatch->Draw(mTexture, IntRect(0, 0, 100, 100), ColorRGBA::Green);
+	mSpriteBatch->Draw(mTexture, Rectanglef(0, 0, 100, 100), ColorRGBA::Green);
 	mSpriteBatch->End();
 	mSpriteBatch->Flush();
 
