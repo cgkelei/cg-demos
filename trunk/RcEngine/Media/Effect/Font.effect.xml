@@ -33,14 +33,14 @@ void main()
 <ShaderSource>
 <![CDATA[
 
-uniform sampler2D SDFTexture;
+uniform sampler2D SpriteTexture;
 
 in vec2 oTex;
 in vec4 oColor;
 
 void main()
 {
-    float dist = texture2D(SDFTexture, gl_TexCoord[0].st).a;
+    float dist = texture2D(SpriteTexture, oTex).a;
     float width = fwidth(dist);
     float alpha = smoothstep(0.5-width, 0.5+width, dist);
     gl_FragColor = vec4(oColor.xyz, alpha);
@@ -52,7 +52,7 @@ void main()
 
 <Technique name="FontTech">
 	<Pass name="p0">
-		<State name="BlendEnable" value="ture"/>
+		<State name="BlendEnable" value="true"/>
 		<State name="SrcBlend" value="SrcAlpha"/>
 		<State name="DestBlend" value="InvSrcAlpha"/>
 		<State name="DepthFunc" value="LessEqual"/>

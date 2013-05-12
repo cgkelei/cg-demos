@@ -47,14 +47,12 @@ public:
 	Font(ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	~Font();
 
-	void DrawText(std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color);
-	void DrawText(std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color, float rotation, const Vector2f& origin, float scale, float layerDepth);
-	void DrawText(std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color, float rotation, const Vector2f& origin, const Vector2f& scale, float layerDepth);
+	void DrawString(SpriteBatch& spriteBatch, std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color);
+	
+	//void DrawText(std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color, float rotation, const Vector2f& origin, float scale, float layerDepth);
+	//void DrawText(std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color, float rotation, const Vector2f& origin, const Vector2f& scale, float layerDepth);
 
-	void MeasureText(const std::wstring& text,uint32_t fontHeight, uint32_t* widthOut, uint32_t* heightOut);
-
-private:
-	void Draw(const std::wstring& text, const Vector2f& Position, const ColorRGBA& color, float rotation, const Vector2f&  origin, const Vector2f& scale, float depth);
+	void MeasureString(const std::wstring& text,uint32_t fontHeight, uint32_t* widthOut, uint32_t* heightOut);
 
 protected:
 	void LoadImpl();
@@ -78,10 +76,6 @@ protected:
 	std::unordered_map<uint32_t, Glyph> mGlyphs;
 
 	shared_ptr<Texture> mFontTexture;
-
-	shared_ptr<SpriteBatch> mSpriteBatch;
-
-	shared_ptr<Material> mFontMaterial;
 };
 
 

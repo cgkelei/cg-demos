@@ -58,12 +58,15 @@ SpriteBatch::SpriteBatch()
 	mSpriteMaterial = std::static_pointer_cast<Material>(
 		ResourceManager::GetSingleton().GetResourceByName(RT_Material, "Sprite.material.xml", "General"));
 
-	mSpriteMaterial->Load();
+	if (!mSpriteMaterial->IsLoaded())
+		mSpriteMaterial->Load();
 }	
 
 SpriteBatch::SpriteBatch( const shared_ptr<Material>& material )
 {
 	mSpriteMaterial = material;
+	if (!mSpriteMaterial->IsLoaded())
+		mSpriteMaterial->Load();
 }
 
 SpriteBatch::~SpriteBatch()
