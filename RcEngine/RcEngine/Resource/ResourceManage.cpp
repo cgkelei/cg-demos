@@ -105,7 +105,7 @@ ResourceHandle ResourceManager::AddNonExitingResouce( uint32_t type, const Strin
 	
 shared_ptr<Resource> ResourceManager::GetResourceByName( uint32_t type, const String& name, const String& group )
 {
-	shared_ptr<Resource> retVal;
+	shared_ptr<Resource> retVal = nullptr;
 
 	auto groupIter = mResourcesWithGroup.find(group);
 
@@ -133,19 +133,27 @@ shared_ptr<Resource> ResourceManager::GetResourceByName( uint32_t type, const St
 		retVal = GetResourceByHandle(newResHandle);
 	}
 
+	if (retVal && retVal->IsLoaded() == false)
+		retVal->Load();
+
 	return retVal;
 }
 
 
 shared_ptr<Resource> ResourceManager::GetResourceByHandle( ResourceHandle handle )
 {
+	shared_ptr<Resource> retVal = nullptr;
+
 	auto found = mResourcesByHandle.find(handle);
 	if (found != mResourcesByHandle.end())
 	{
-		return found->second;
+		retVal =  found->second;
 	}
 
-	return nullptr;
+	if (retVal && retVal->IsLoaded() == false)
+		retVal->Load();
+
+	return retVal;
 }
 
 

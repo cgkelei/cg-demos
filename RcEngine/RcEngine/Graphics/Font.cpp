@@ -310,10 +310,6 @@ void Font::LoadImpl()
 	FontLoader loader(filePath, this);
 	if (!loader.Load())
 		ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, filePath + "not found!", "Font::LoadImpl");
-
-	// load material
-	mFontMaterial = std::static_pointer_cast<Material>(resMan.GetResourceByName(RT_Material, "Font.material.xml", "General"));
-	fontTexture->Load();
 }
 
 void Font::UnloadImpl()
@@ -321,7 +317,7 @@ void Font::UnloadImpl()
 
 }
 
-void Font::DrawText( std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color )
+void Font::DrawString(SpriteBatch& spriteBatch, std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color)
 {
 	float x = position.X();
 	float y = position.Y();
@@ -346,24 +342,15 @@ void Font::DrawText( std::wstring& text, uint32_t fontSize, const Vector2f& posi
 
 			IntRect sourceRect(glyph.SrcX, glyph.SrcY, glyph.Width, glyph.Height);
 			Rectanglef destRect(ch_x, ch_y, glyph.Width * scale, glyph.Height* scale);
-			mSpriteBatch->Draw(mFontTexture, destRect, &sourceRect, color);
+			
+			spriteBatch.Draw(mFontTexture, destRect, &sourceRect, color);
 		
 			x += glyph.Advance * scale;
 		}
 	}
 }
 
-void Font::DrawText( std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color, float rotation, const Vector2f& origin, float scale, float layerDepth )
-{
-
-}
-
-void Font::DrawText( std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color, float rotation, const Vector2f& origin, const Vector2f& scale, float layerDepth )
-{
-
-}
-
-void Font::MeasureText( const std::wstring& text, uint32_t fontHeight, uint32_t* widthOut, uint32_t* heightOut )
+void Font::MeasureString( const std::wstring& text, uint32_t fontHeight, uint32_t* widthOut, uint32_t* heightOut )
 {
 	const float scale = float(fontHeight) / mCharSize;
 
@@ -385,10 +372,6 @@ void Font::MeasureText( const std::wstring& text, uint32_t fontHeight, uint32_t*
 
 	if(widthOut)  *widthOut = *std::max_element(rowWidths.begin(), rowWidths.end());
 	if(heightOut) *heightOut = rowWidths.size() * fontHeight;
-}
-
-void Font::Draw( const std::wstring& text, const Vector2f& Position, const ColorRGBA& color, float rotation, const Vector2f& origin, const Vector2f& scale, float depth )
-{
 }
 
 shared_ptr<Resource> Font::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )

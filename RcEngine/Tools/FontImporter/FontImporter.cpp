@@ -403,8 +403,16 @@ void display( void )
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, gTexture);
 	glEnable( GL_TEXTURE_2D );
-	glEnable( GL_BLEND );
-	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	//glEnable( GL_BLEND );
+	glEnableIndexedEXT(GL_BLEND, 0);
+
+	glBlendFuncSeparate(GL_SRC_ALPHA, 
+		GL_ONE_MINUS_SRC_ALPHA,
+		GL_ONE, 
+		GL_ZERO);
+
+	
+	//glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
 	GLuint handle = glGetUniformLocation( gProgram, "texture" );
 	glUniform1i( handle, 0);

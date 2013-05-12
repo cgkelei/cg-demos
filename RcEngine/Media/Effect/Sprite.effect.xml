@@ -52,7 +52,7 @@ void main()
 
 <Technique name="SpriteTech">
 	<Pass name="p0">
-		<State name="BlendEnable" value="ture"/>
+		<State name="BlendEnable" value="true"/>
 		<State name="SrcBlend" value="SrcAlpha"/>
 		<State name="DestBlend" value="InvSrcAlpha"/>
 		<State name="DepthFunc" value="LessEqual"/>

@@ -38,8 +38,10 @@
 #include "Core/Utility.h"
 
 TestApp::TestApp( const String& config )
-	:Application(config)
+	:Application(config), mFramePerSecond(0)
 {
+
+
 }
 
 
@@ -106,13 +108,15 @@ void TestApp::LoadContent()
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
-	resMan.AddResource(RT_Material, "Sprite.material.xml", "General");
-	resMan.AddResource(RT_Mesh, "him.mesh", "Custom");
+	/*resMan.AddResource(RT_Material, "Sprite.material.xml", "General");
+	resMan.AddResource(RT_Mesh, "him.mesh", "Custom");*/
 	resMan.AddResource(RT_Font, "Consolas Regular", "General");
 	resMan.LoadAllFromDisk();
 
 	// Sprite 
-	mSpriteBatch = std::make_shared<SpriteBatch>();
+	mSpriteBatch = std::make_shared<SpriteBatch>(
+		std::static_pointer_cast<Material>(resMan.GetResourceByName(RT_Material, "Font.material.xml", "General")));
+	//mSpriteBatch = std::make_shared<SpriteBatch>();
 
 	// Font
 	mFont = std::static_pointer_cast<Font>(resMan.GetResourceByName(RT_Font,"Consolas Regular", "General"));
@@ -132,7 +136,7 @@ void TestApp::LoadContent()
 	animPlayer->PlayClip("Take 001");
 
 
-	mTexture = factory->CreateTextureFromFile(FileSystem::GetSingleton().Locate("brick_texture1.dds"));
+	//mTexture = factory->CreateTextureFromFile(FileSystem::GetSingleton().Locate("brick_texture1.dds"));
 
 	//String skyTexPath = ;
 	//mTexture = factory->CreateTextureFromFile(skyTexPath);
@@ -157,17 +161,23 @@ void TestApp::Render()
 	RenderDevice& renderDevice = Context::GetSingleton().GetRenderDevice();
 	SceneManager& scenenMan = Context::GetSingleton().GetSceneManager();
 
-	mSpriteBatch->Begin();
-	mSpriteBatch->Draw(mTexture, Rectanglef(0, 0, 100, 100), ColorRGBA::Green);
-	mSpriteBatch->End();
-	mSpriteBatch->Flush();
-
-
 	shared_ptr<FrameBuffer> currentFrameBuffer = renderDevice.GetCurrentFrameBuffer();
 
 	float clr = (float)169/255;
 	currentFrameBuffer->Clear(CF_Color | CF_Depth |CF_Stencil, RcEngine::ColorRGBA(clr, clr, clr, 1.0f), 1.0f, 0);
+	
+	mSpriteBatch->Begin();
 
+	wchar_t buffer[100];
+	int cx = swprintf ( buffer, 100, L"FPS: %d", mFramePerSecond );
+	mFont->DrawString(*mSpriteBatch, std::wstring(buffer, cx), 30, Vector2f(20, 580), ColorRGBA(0, 0, 0, 1));
+	mSpriteBatch->End();
+
+	mSpriteBatch->Flush();
+
+
+	// todo 
+	// Move to engine level
 	scenenMan.UpdateRenderQueue(currentFrameBuffer->GetCamera(), RO_StateChange);
 
 	Context::GetSingleton().GetSceneManager().RenderScene();
@@ -196,8 +206,7 @@ void TestApp::CalculateFrameRate()
 
 	if (mTimer.GetGameTime()-baseTime >= 1.0f)
 	{
-		float fps = (float)frameCount;
-		mMainWindow->SetTitle(ToString(fps));
+		mFramePerSecond = frameCount;
 		frameCount = 0;
 		baseTime += 1.0f;
 	}

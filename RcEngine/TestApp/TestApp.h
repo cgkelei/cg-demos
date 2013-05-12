@@ -38,6 +38,7 @@ private:
 	shared_ptr<SpriteBatch> mSpriteBatch;
 	shared_ptr<Font> mFont;
 	FPSCameraControler* mCameraControler;
+	int mFramePerSecond;
 	
 	//ModelViewerCameraControler* mCameraControler;
 };

@@ -45,6 +45,9 @@ AnimationState* AnimationPlayer::AddClip( const shared_ptr<AnimationClip>& clip 
 		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Same animation clip exits", "Animation::AddClip");
 	}
 
+	if (!clip->IsLoaded())
+		clip->Load();
+
 	AnimationState* newClipState = new AnimationState(*this, clip);
 	mAnimationStates.insert( std::make_pair(clip->GetClipName(),  newClipState) );
 
