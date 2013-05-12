@@ -223,7 +223,7 @@ void Application::ReadConfiguration()
 void Application::Create()
 {
 	// Create main window
-	mMainWindow = new Window("RcEngine", mSettings);
+	mMainWindow = new Window(mAppTitle, mSettings);
 	mMainWindow->UserResizedEvent.bind(this, &Application::Window_UserResized);
 	mMainWindow->PaintEvent.bind(this, &Application::Window_Paint);
 	mMainWindow->SuspendEvent.bind(this, &Application::Window_Suspend);
