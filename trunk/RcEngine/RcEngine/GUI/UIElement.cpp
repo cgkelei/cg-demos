@@ -1,11 +1,19 @@
 #include <GUI/UIElement.h>
+#include <GUI/UIManager.h>
 #include <Math/MathUtil.h>
 
 namespace RcEngine {
 
 UIElement::UIElement()
-	: mParent(nullptr), mPositionDirty(false)
+	: mParent(nullptr), 
+	  mPositionDirty(false), 
+	  mHovering(false), 
+	  mVisible(true), 
+	  mEnabled(false),
+	  mHorizontalAlignment(HA_Left),
+	  mVerticalAlignment(VA_Top)
 {
+
 
 }
 
@@ -14,12 +22,7 @@ UIElement::~UIElement()
 
 }
 
-void UIElement::SetName( const String& name )
-{
-	mName = name;
-}
-
-void UIElement::SetPosition( const IntVector2& position )
+void UIElement::SetPosition( const Point& position )
 {
 	if (mPosition != position)
 	{
@@ -28,21 +31,6 @@ void UIElement::SetPosition( const IntVector2& position )
 	}
 }
 
-void UIElement::SetFocusPolicy( FocusPolicy policy )
-{
-	mFocusPolicy = policy;
-}
-
-
-void UIElement::SetPosition( int32_t x, int32_t y )
-{
-	SetPosition(IntVector2(x, y));
-}
-
-void UIElement::SetSize( int32_t width, int32_t height )
-{
-	SetSize(IntVector2(width, height));
-}
 
 void UIElement::SetVisible( bool visible )
 {
@@ -50,18 +38,24 @@ void UIElement::SetVisible( bool visible )
 }
 
 
-void UIElement::SetSize( const IntVector2& size )
+void UIElement::SetSize( const Point& size )
 {
-	IntVector2 validateSize;
-	validateSize.X() = Math<IntVector2::value_type>::Clamp(size.X(), mMinSize.X(), mMaxSize.X());
-	validateSize.Y() = Math<IntVector2::value_type>::Clamp(size.Y(), mMinSize.Y(), mMaxSize.Y());
+	Point validateSize;
+	validateSize.X() = Math<Point::value_type>::Clamp(size.X(), mMinSize.X(), mMaxSize.X());
+	validateSize.Y() = Math<Point::value_type>::Clamp(size.Y(), mMinSize.Y(), mMaxSize.Y());
+
+	if (mSize != validateSize)
+	{
+		mSize = validateSize;
+		MarkDirty();
+	}
 }
 
-IntVector2 UIElement::GetScreenPosition()
+Point UIElement::GetScreenPosition()
 {
 	if (mPositionDirty)
 	{
-		IntVector2 pos = mPosition;
+		Point pos = mPosition;
 		const UIElement* parent = mParent;
 		const UIElement* current = this;
 
@@ -74,11 +68,11 @@ IntVector2 UIElement::GetScreenPosition()
 				break;
 
 			case HA_Center:
-				pos.X() += parent->mPosition.X() + parent->mSize.X() / 2 - current->mSize.X() / 2;
+				pos.X() += parent->mPosition.X() + (parent->mSize.X() - current->mSize.X()) / 2;
 				break;
 
 			case HA_Right:
-				pos.X() += parent->mPosition.X() + parent->mSize.X() - current->mSize.X();
+				pos.X() += parent->mPosition.X() + (parent->mSize.X() - current->mSize.X());
 				break;
 			}
 
@@ -89,11 +83,11 @@ IntVector2 UIElement::GetScreenPosition()
 				break;
 
 			case VA_Center:
-				pos.Y() += parent->mPosition.Y() + parent->mSize.Y() / 2 - current->mSize.Y() / 2;
+				pos.Y() += parent->mPosition.Y() + (parent->mSize.Y() - current->mSize.Y()) / 2;
 				break;
 
 			case VA_Bottom:
-				pos.Y() += parent->mPosition.Y() + parent->mSize.Y() - current->mSize.Y();
+				pos.Y() += parent->mPosition.Y() + (parent->mSize.Y() - current->mSize.Y());
 				break;
 			}
 			current = parent;
@@ -114,57 +108,56 @@ IntRect UIElement::GetArea() const
 
 IntRect UIElement::GetGlobalArea()
 {
-	IntVector2 screenPos = GetScreenPosition();
+	Point screenPos = GetScreenPosition();
 	return IntRect(screenPos.X(), screenPos.Y(), mSize.X(), mSize.Y());
 }
 
 void UIElement::MarkDirty()
 {
+	mPositionDirty = true;
 
+	for (UIElement* child : mChildren)
+		child->MarkDirty();
 }
 
-void UIElement::OnMouseCover( const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, uint32_t qualifiers )
+void UIElement::OnMouseHover( const Point& position, const Point& screenPosition, uint32_t buttons, uint32_t qualifiers )
 {
 
 }
 
-void UIElement::OnMouseDown( const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, int qualifiers)
+void UIElement::OnClick( const Point& position, const Point& screenPosition, uint32_t buttons, int qualifiers)
 {
 
 }
 
-void UIElement::OnMouseUp( const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, int qualifiers)
-{
-
-}
 
 void UIElement::OnMouseWheel( int32_t delta, uint32_t buttons, uint32_t qualifiers )
 {
 
 }
 
-void UIElement::OnDragBegin( const IntVector2& position, const IntVector2& screenPosition, int buttons, int qualifiers)
+void UIElement::OnDragBegin( const Point& position, const Point& screenPosition, int buttons, int qualifiers)
 {
 
 }
 
-void UIElement::OnDragMove( const IntVector2& position, const IntVector2& screenPosition, int buttons, int qualifiers)
+void UIElement::OnDragMove( const Point& position, const Point& screenPosition, int buttons, int qualifiers)
 {
 
 }
 
-void UIElement::OnDragEnd( const IntVector2& position, const IntVector2& screenPosition)
+void UIElement::OnDragEnd( const Point& position, const Point& screenPosition)
 {
 
 }
 
 
-void UIElement::OnKeyDown( uint8_t key, uint32_t qualifiers )
+void UIElement::OnKeyPress( uint8_t key, uint32_t qualifiers )
 {
 
 }
 
-void UIElement::OnKeyUp( uint8_t key, uint32_t qualifiers )
+void UIElement::OnKeyRelease( uint8_t key, uint32_t qualifiers )
 {
 
 }
@@ -209,33 +202,31 @@ UIElement* UIElement::GetChild( uint32_t index ) const
 	return index < mChildren.size() ? mChildren[index] : nullptr;
 }
 
-RcEngine::IntVector2 UIElement::ScreenToClient( const IntVector2& screenPosition )
+RcEngine::Point UIElement::ScreenToClient( const Point& screenPosition )
 {
 	return screenPosition - GetScreenPosition();
 }
 
-RcEngine::IntVector2 UIElement::ClientToScreen( const IntVector2& position )
+RcEngine::Point UIElement::ClientToScreen( const Point& position )
 {
 	return position + GetScreenPosition();
 }
 
-bool UIElement::IsInside(IntVector2 position, bool isScreen )
+bool UIElement::IsInside(Point position, bool isScreen )
 {
 	if (isScreen)
 		position = ScreenToClient(position);
 	return position.X() >= 0 && position.Y() >= 0 && position.X() < mSize.X() && position.Y() < mSize.Y();
 }
 
-void UIElement::GetChildren( std::vector<UIElement*>& children, bool recursive /*= true*/ ) const
+void UIElement::FlattenChildren( std::vector<UIElement*>& children) const
 {
-	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
+	for (UIElement* element : mChildren)
 	{
-		children.push_back(*iter);
+		children.push_back(element);
 
-		if (recursive && (*iter)->GetNumChildren())
-		{
-			(*iter)->GetChildren(children, recursive);
-		}
+		if (element->GetNumChildren())
+			element->FlattenChildren(children);
 	}
 }
 
@@ -243,6 +234,54 @@ void UIElement::GetChildren( std::vector<UIElement*>& children, bool recursive /
 void UIElement::Draw()
 {
 
+}
+
+
+void UIElement::BringToFront()
+{
+
+}
+
+void UIElement::RemoveChild( UIElement* child )
+{
+	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
+	{
+		if ((*iter) == child)
+		{
+			mChildren.erase(iter);
+			return;
+		}
+	}
+}
+
+void UIElement::Remove()
+{
+	if (mParent)
+	{
+		mParent->RemoveChild(this);
+	}
+}
+
+void UIElement::AddChild( UIElement* child )
+{
+	if (child)
+	{
+		child->Remove();
+		child->mParent = this;
+		child->MarkDirty();
+		mChildren.push_back(child);
+	}
+}
+
+void UIElement::SetParent( UIElement* parent )
+{
+	if (parent)
+		parent->AddChild(this);
+}
+
+bool UIElement::HasFocus() const
+{
+	return UIManager::GetSingleton().GetFocusElement() == this;
 }
 
 

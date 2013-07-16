@@ -13,7 +13,6 @@ class _ApiExport Label : public UIElement
 public:
 	Label();
 	~Label();
-
 	
 	void SetFont(const shared_ptr<Font>& font);
 	void SetText(const String& text);

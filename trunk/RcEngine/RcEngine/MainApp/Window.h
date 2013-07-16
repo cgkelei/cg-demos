@@ -18,13 +18,14 @@ public:
 	uint32_t GetLeft() const	{ return mLeft; }
 	uint32_t GetTop() const		{ return mTop; }
 	
-	bool InSizeMove() const	{ return mInSizeMove; }
-
+	bool InSizeMove() const		{ return mInSizeMove; }
+	bool IsMouseVisible() const { return mMouseVisible; }
 
 	void Reposition(int32_t left, int32_t top);
 	void ShowWindow();
 	void SetTitle(const String& title);
 	void ForceCursorToCenter();
+	void SetMouseVisible(bool visible);
 
 	// After Resize or reposition, this will compute new window size
 	void UpdateWindowSize();
@@ -54,9 +55,11 @@ private:
 	uint32_t mWidth, mHeight;
 	std::string mName;
 
+	bool mMouseVisible;
 	bool mFullscreen;
 	bool mInSizeMove;
 	bool mMinimized, mMaximized;
+
 
 	HWND mhWnd;
 	HINSTANCE mhInstance;

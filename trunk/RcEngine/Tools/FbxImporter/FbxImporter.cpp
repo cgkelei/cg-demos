@@ -420,8 +420,8 @@ bool FbxProcesser::LoadScene( const char* filename )
 		{
 			FBXSDK_printf("FBX file format version for this FBX SDK is %d.%d.%d\n", lSDKMajor, lSDKMinor, lSDKRevision);
 			FBXSDK_printf("FBX file format version for file '%s' is %d.%d.%d\n\n", filename, lFileMajor, lFileMinor, lFileRevision);
-		}*/
-
+		}
+*/
 		return false;
 	}
 
@@ -1032,6 +1032,7 @@ void FbxProcesser::CollectMaterials( FbxScene* pScene )
 
 		MaterialData matData;
 
+		matData.Name = matName;
 		matData.Ambient = ColorRGBA(AmbientColor.X(), AmbientColor.Y(), AmbientColor.Z(), 1.0f);
 		matData.Diffuse = ColorRGBA(DiffuseColor.X(), DiffuseColor.Y(), DiffuseColor.Z(), 1.0f);
 		matData.Specular = ColorRGBA(SpecularColor.X(), SpecularColor.Y(), SpecularColor.Z(), 1.0f);
@@ -1693,12 +1694,13 @@ int main()
 	FbxProcesser fbxProcesser;
 	fbxProcesser.Initialize();
 
-	if (fbxProcesser.LoadScene("../Media/Ship.fbx"))
+	if (fbxProcesser.LoadScene("PointLightSphere.fbx"))
 	{
 		fbxProcesser.ProcessScene(0);
 		fbxProcesser.BuildAndSaveXML();
 		fbxProcesser.BuildAndSaveBinary();
 	}
+
 
 	return 0;
 }
