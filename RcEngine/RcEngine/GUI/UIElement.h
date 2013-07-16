@@ -26,12 +26,12 @@ enum VerticalAlignment
 	VA_Bottom
 };
 
-enum FocusPolicy
+enum FocusMode
 {
-	FP_NoFocus = 0,
-	FP_TabFocus = 0x1,
-	FP_ClickFocus = 0x2,
-	FP_Tab_ClickFocus = FP_TabFocus | FP_ClickFocus,
+	FM_NoFocus = 0,
+	FM_TabFocus = 0x1,
+	FM_ClickFocus = 0x2,
+	FM_Tab_ClickFocus = FM_TabFocus | FM_ClickFocus,
 };
 
 enum UIElementState
@@ -45,94 +45,114 @@ enum UIElementState
 	UI_State_Pressed,
 };
 
-
-typedef Vector<int32_t, 2> IntVector2;
+typedef Vector<int32_t, 2> Point;
+typedef Vector<int32_t, 2> Size;
 
 class _ApiExport UIElement
 {
 public:
 	UIElement();
 	virtual ~UIElement();
-	
-	virtual void OnMouseCover(const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, uint32_t qualifiers);
 
-	virtual void OnMouseDown(const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, int qualifiers);
-	virtual void OnMouseUp(const IntVector2& position, const IntVector2& screenPosition, uint32_t buttons, int qualifiers);
-
+	virtual void OnMouseHover(const Point& position, const Point& screenPosition, uint32_t buttons, uint32_t qualifiers);
 	virtual void OnMouseWheel(int32_t delta, uint32_t buttons, uint32_t qualifiers);
+	
+	virtual void OnClick(const Point& position, const Point& screenPosition, uint32_t buttons, int qualifiers);
 
-	virtual void OnDragBegin(const IntVector2& position, const IntVector2& screenPosition, int buttons, int qualifiers);
-	virtual void OnDragMove(const IntVector2& position, const IntVector2& screenPosition, int buttons, int qualifiers);
-	virtual void OnDragEnd(const IntVector2& position, const IntVector2& screenPosition);
+	virtual void OnDragBegin(const Point& position, const Point& screenPosition, int buttons, int qualifiers);
+	virtual void OnDragMove(const Point& position, const Point& screenPosition, int buttons, int qualifiers);
+	virtual void OnDragEnd(const Point& position, const Point& screenPosition);
 
-	virtual void OnKeyDown(uint8_t key, uint32_t qualifiers);
-	virtual void OnKeyUp(uint8_t key, uint32_t qualifiers);
-
-	void SetName(const String& name);
-	void SetPosition(const IntVector2& position);
-	void SetPosition(int32_t x, int32_t y);
-	void SetSize(const IntVector2& size);
-	void SetSize(int32_t width, int32_t height);
-	void SetFocusPolicy(FocusPolicy policy);
-	void SetVisible(bool visible);
+	virtual void OnKeyPress(uint8_t key, uint32_t qualifiers);
+	virtual void OnKeyRelease(uint8_t key, uint32_t qualifiers);
 
 	const String& GetName() const				{ return mName; }
-	const IntVector2& GetPosition() const		{ return mPosition; }
-	IntVector2 GetScreenPosition();
+	void SetName(const String& name)			{ mName = name; }
+	
+	void SetPosition(const Point& position);
+	const Point& GetPosition() const			{ return mPosition; }
+	Point GetScreenPosition();
 
-	const IntVector2& GetSize() const			{ return mSize; }
-	const IntVector2& GetMinSize() const		{ return mMinSize; }
-	const IntVector2& GetMaxSize() const		{ return mMaxSize; }
+	void SetSize(const Size& size);
+	const Point& GetSize() const				{ return mSize; }
+
+	void SetMinSize(const Size& size);
+	const Point& GetMinSize() const				{ return mMinSize; }
+	const Point& GetMaxSize() const				{ return mMaxSize; }
+	
+	void SetFocusMode(FocusMode mode)			{ mFocusMode = mode; }
+	FocusMode GetFocusMode() const			    { return mFocusMode; }
+
+	void SetVisible(bool visible);
+	bool IsVisible() const						{ return mVisible; }
+
+	bool HasFocus() const;
+	bool IsMouseHover() const					{ return mHovering; }
+
+	void SetEnable(bool enable)					{ mEnabled = enable; }
+	bool IsEnabled() const						{ return mEnabled; }
+	
+	const std::wstring& GetToolTip() const		{ return mToolTipText; }
+	void SetToolTip(const std::wstring& txt)    { mToolTipText = txt; }
 
 	IntRect GetArea() const;
 	IntRect GetGlobalArea();
-
-	bool HasFocus() const;
-	bool IsMouseCover() const					{ return mCovering; }
-	bool IsActive() const					    { return mActive; }
-	bool IsVisible() const						{ return mVisible; }
-	FocusPolicy GetFocusPolicy() const			{ return mFocusPolicy; }
-
-	UIElement* GetParent() const							{ return mParent; }
+		
+	void SetParent(UIElement* parent);
+	UIElement* GetParent() const				{ return mParent; }
 
 	uint32_t GetNumChildren(bool recursive = false) const;
-	const std::vector<UIElement*>& GetChildren() const		{ return mChildren; }
 	
-	void GetChildren(std::vector<UIElement*>& children, bool recursive = true) const;	
 	UIElement* GetChild(const String& name, bool recursive = false) const;
 	UIElement* GetChild(uint32_t index) const;
-	
-	IntVector2 ScreenToClient(const IntVector2& screenPosition);
-	IntVector2 ClientToScreen(const IntVector2& position);
 
-	bool IsInside(IntVector2 position, bool isScreen);
+	std::vector<UIElement*>& GetChildren()						{ return mChildren; }
+	const std::vector<UIElement*>& GetChildren() const			{ return mChildren; }
+
+	void FlattenChildren(std::vector<UIElement*>& children) const;	
+
+	void AddChild(UIElement* child);
+	void RemoveChild(UIElement* child);
+	
+	// Remove from parent
+	void Remove();
+
+	Point ScreenToClient(const Point& screenPosition);
+	Point ClientToScreen(const Point& position);
+
+	bool IsInside(Point position, bool isScreen);
+
+	void BringToFront();
 
 	virtual void Draw();
 
-private:
+protected:
 	void MarkDirty();
 
 protected:
 
 	String mName;
+
 	UIElement* mParent;
 	std::vector<UIElement*> mChildren;
 
-	bool mCovering;
+	bool mHovering;
 	bool mVisible;
-	bool mActive;
+	bool mEnabled;
 	bool mPositionDirty;
 
-	IntVector2 mPosition;
-	IntVector2 mScreenPosition;
+	Point mPosition;
+	Point mScreenPosition;
 	
-	IntVector2 mSize;
-	IntVector2 mMinSize;
-	IntVector2 mMaxSize;
+	Size mSize;
+	Size mMinSize;
+	Size mMaxSize;
+
+	std::wstring mToolTipText;
 
 	HorizontalAlignment mHorizontalAlignment;
 	VerticalAlignment mVerticalAlignment;
-	FocusPolicy mFocusPolicy;
+	FocusMode mFocusMode;
 
 	float mOpacity;
 

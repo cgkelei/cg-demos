@@ -1,12 +1,18 @@
 #include <GUI/UIManager.h>
 #include <GUI/UIElement.h>
 #include <Input/InputDevice.h>
+#include <MainApp/Application.h>
+#include <MainApp/Window.h>
+#include <Core/Context.h>
 
 namespace RcEngine {
 
 SINGLETON_DECL(UIManager)
 
 UIManager::UIManager()
+	: mDragElement(nullptr),
+	  mFocusElement(nullptr),
+	  mRootElement(nullptr)
 {
 
 }
@@ -16,7 +22,31 @@ UIManager::~UIManager()
 
 }
 
-void UIManager::HandleKeyDown( uint8_t key, uint32_t qualifiers )
+void UIManager::SetFocusElement( UIElement* element )
+{
+	if (element)
+	{
+		if (mFocusElement == element)
+			return;
+
+		// Search for an element in the hierarchy that can alter focus. If none found, exit
+		element = GetFocusableElement(element);
+		if (!element)
+			return;
+	}
+
+	// Remove focus from the old element
+	if (mFocusElement)
+		mFocusElement = nullptr;
+
+	if (element && element->GetFocusMode() != FM_NoFocus)
+	{
+		mFocusElement = element;
+	}
+}
+
+
+void UIManager::HandleKeyPress( uint8_t key, uint32_t qualifiers )
 {
 	UIElement* element = GetFocusElement();
 	if (element)
@@ -31,28 +61,26 @@ void UIManager::HandleKeyDown( uint8_t key, uint32_t qualifiers )
 			if (topLevel)
 			{
 				vector<UIElement*> children;
-				topLevel->GetChildren(children, true);
+				topLevel->FlattenChildren(children);
 
 				for (size_t i = 0; i < children.size(); ++i)
 				{
-					if ( element == children[i])
+					if ( element == children[i] )
 					{
 						size_t next = (i + 1) % children.size();
-						
+
 						while( next != i )
 						{
 							UIElement* nextElement = children[next];
-							FocusPolicy childFocusPolicy = nextElement->GetFocusPolicy();
+							FocusMode childFocusPolicy = nextElement->GetFocusMode();
 
-							if (childFocusPolicy & FP_TabFocus)
+							if (childFocusPolicy & FM_TabFocus)
 							{
 								SetFocusElement(nextElement);
-								return ;
+								return;
 							}
 							else
-							{
 								next =  (next + 1) % children.size();
-							}
 						}
 
 						// no other focusable control
@@ -60,28 +88,124 @@ void UIManager::HandleKeyDown( uint8_t key, uint32_t qualifiers )
 					}			
 				}
 			}
-		}
-		else
-		{
-			// If none of the special keys, pass the key to the focused element
-			element->OnKeyDown(key, qualifiers);
+			else // If none of the special keys, pass the key to the focused element			
+				element->OnKeyPress(key, qualifiers);
 		}
 	}
 }
 
-void UIManager::HandleKeyUp( uint8_t key, uint32_t qualifiers )
+void UIManager::HandleKeyRelease( uint8_t key, uint32_t qualifiers )
 {
 
 }
 
-void UIManager::SetFocusElement( UIElement* element )
+void UIManager::HandleMousePress( const Point& pos, uint32_t buttons, int qualifiers )
 {
+	bool mouseVisible = Context::GetSingleton().GetApplication().GetMainWindow()->IsMouseVisible();
+
+	if (mouseVisible)
+	{
+		UIElement* element = GetElementFromPoint(pos);
+
+		if (element)
+		{
+			if (buttons == MS_LeftButton)
+			{
+				SetFocusElement(element);
+				element->BringToFront();
+			}
+
+			element->OnClick(element->ScreenToClient(pos), pos, buttons, qualifiers);
+
+			// Handle start of drag. OnClick() may have caused destruction of the element, so check the pointer again
+			if (element && !mDragElement && buttons == MS_LeftButton)
+			{
+				mDragElement = element;
+				element->OnDragBegin(element->ScreenToClient(pos), pos, buttons, qualifiers);
+			}
+		}
+		else
+		{
+			// If clicked over no element, or a disabled element, lose focus
+			SetFocusElement(NULL);
+		}	
+	}
+}
+
+void UIManager::HandleMouseRelease( const Point& pos, uint32_t buttons, int qualifiers )
+{
+	bool mouseVisible = Context::GetSingleton().GetApplication().GetMainWindow()->IsMouseVisible();
+
+	if (mouseVisible)
+	{
+		if (mDragElement)
+		{
+			if (mDragElement->IsEnabled() && mDragElement->IsVisible())
+				mDragElement->OnDragEnd(mDragElement->ScreenToClient(pos), pos);
+		}
+	}
+}
+
+
+void UIManager::HandleMouseMove( const Point& pos, uint32_t buttons, int qualifiers )
+{
+	bool mouseVisible = Context::GetSingleton().GetApplication().GetMainWindow()->IsMouseVisible();
+
+	if (mouseVisible && mDragElement && buttons)
+	{
+		if (mDragElement->IsEnabled() && mDragElement->IsVisible())
+			mDragElement->OnDragMove(mDragElement->ScreenToClient(pos), pos, buttons, qualifiers);
+
+		mDragElement = nullptr;
+	}
+}
+
+
+void UIManager::HandleMouseWheel( int32_t delta, uint32_t buttons, uint32_t qualifiers )
+{
+	if (mFocusElement)
+	{
+		mFocusElement->OnMouseWheel(delta, buttons, qualifiers);
+	}
+}
+
+void UIManager::GetElementFromPoint(UIElement*& result, UIElement* current, const Point& pos )
+{
+	if (!current)
+		return;
+
+	for ( UIElement* element : current->GetChildren() )
+	{
+		bool hasChildren = (element->GetNumChildren() > 0);
+
+		if (element->IsVisible())
+		{
+			if (element->IsInside(pos, true) && element->IsEnabled())
+				result = element;
+
+			if (hasChildren)
+				GetElementFromPoint(result, element, pos);
+		}
+	}
 
 }
 
-void UIManager::DrawButton( const IntRect& area, const String& text, UIElementState state )
+UIElement* UIManager::GetElementFromPoint( const Point& pos )
 {
+	UIElement* result = 0;
+	GetElementFromPoint(result, mRootElement, pos);
+	return result;
+}
 
+UIElement* UIManager::GetFocusableElement( UIElement* element )
+{
+	while (element)
+	{
+		if (element->GetFocusMode() != FM_NoFocus)
+			break;
+		element = element->GetParent();
+	}
+	return element;
 }
 
 

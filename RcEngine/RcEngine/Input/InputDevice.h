@@ -24,7 +24,7 @@ enum KeyCode
 	KC_0                            = 0x0B,
 	KC_Minus                        = 0x0C,         // - on main keyboard
 	KC_Equals                       = 0x0D,
-	KC_BackSpace            = 0x0E,         // backspace
+	KC_BackSpace					= 0x0E,         // backspace
 	KC_Tab                          = 0x0F,
 	KC_Q                            = 0x10,
 	KC_W                            = 0x11,

@@ -16,7 +16,7 @@ LRESULT CALLBACK Window::WndProcStatic( HWND hWnd, UINT message, WPARAM wParam, 
 
 
 Window::Window( const std::string& title, const RenderSettings& settings )
-	: mName(title), mInSizeMove(false), mMaximized(false), mMinimized(false)
+	: mName(title), mInSizeMove(false), mMaximized(false), mMinimized(false), mMouseVisible(true)
 {
 	msWindow = this;
 	mhInstance	= GetModuleHandle(NULL);
@@ -261,12 +261,23 @@ void Window::UpdateWindowSize()
 void Window::ForceCursorToCenter()
 {
 	POINT pt;
-	pt.x = mWidth >> 2;
-	pt.y = mHeight >> 2;
+	pt.x = mWidth >> 1;
+	pt.y = mHeight >> 1;
 
 	::ClientToScreen(mhWnd, &pt);
 	SetCursorPos(pt.x, pt.y);
-	ShowCursor(false);
+
+	// Invisible mouse
+	SetMouseVisible(false);
+}
+
+void Window::SetMouseVisible( bool visible )
+{
+	if (mMouseVisible != visible)
+	{
+		mMouseVisible = visible;
+		ShowCursor(mMouseVisible);
+	}
 }
 
 } // Namespace RcEngine
