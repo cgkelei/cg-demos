@@ -34,8 +34,7 @@ public:
 	LightType GetLightType() const					{ return mLightType; }
 	const Vector3f& GetPosition() const				{ return mLightDirection; }
 	const Vector3f& GetDirection() const			{ return mLightPosition; }
-	const ColorRGBA& GetLightDiffuse() const		{ return mLightDiffuse; }
-	const ColorRGBA& GetLightSpecular() const		{ return mLightSpecular; }
+	const ColorRGBA& GetLightColor() const		{ return mLightColor; }
 	float GetAttenuationRange () const				{ return mRange; }
 	float GetAttenuationConstant () const			{ return mAttenuationConst; }
 	float GetAttenuationLinear () const				{ return mAttenuationLinear; }
@@ -57,8 +56,7 @@ public:
 
 protected:
 	LightType mLightType;
-	ColorRGBA mLightDiffuse;
-	ColorRGBA mLightSpecular;
+	ColorRGBA mLightColor;
 	Vector3f mLightDirection;
 	Vector3f mLightPosition;
 	float mRange;

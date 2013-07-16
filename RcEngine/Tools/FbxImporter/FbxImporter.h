@@ -28,10 +28,10 @@ public:
 			: MaterialFlags(0) { }
 
 		String Name;
-		ColorRGBA Ambient;
-		ColorRGBA Diffuse;
-		ColorRGBA Specular;
-		ColorRGBA Emissive;
+		Vector3f Ambient;
+		Vector3f Diffuse;
+		Vector3f Specular;
+		Vector3f Emissive;
 		float Power;
 
 		uint32_t MaterialFlags;
@@ -178,6 +178,8 @@ public:
 
 	void BuildAndSaveXML();
 	void BuildAndSaveBinary();	
+
+	void ExportMaterial();
 
 private:
 	FbxManager* mFBXSdkManager;

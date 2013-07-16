@@ -580,7 +580,6 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 
 		static const char *mm_str[] = { "eNONE", "eBY_CONTROL_POINT", "eBY_POLYGON_VERTEX", "eBY_POLYGON", "eBY_EDGE", "eALL_SAME" };
 		
-
 		if( !(mm == FbxLayerElement::eByPolygon || mm == FbxLayerElement::eAllSame) )
 		{
 			// only support eByPolygon and eAllSame
@@ -649,7 +648,6 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 		mesh->MeshSkeleton  = ProcessBoneWeights(pMesh, meshBoneWeights);
 	}
 
-
 	for (size_t mi = 0; mi < polysByMaterial.size(); ++mi)
 	{
 		shared_ptr<MeshPartData> meshPart = std::make_shared<MeshPartData>();
@@ -672,24 +670,36 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 		{
 			FbxSurfaceMaterial *material = pNode->GetMaterial(mi);
 			
-			String filename;
-			if (GetMaterialTexture(material, FbxSurfaceMaterial::sBump, &filename))
+			if (material)
 			{
-				if (!filename.empty())
-					vertexFlag |= Vertex::eTexcoord0| Vertex::eTangent;
-			}
+				String filename;
+				if (GetMaterialTexture(material, FbxSurfaceMaterial::sBump, &filename))
+				{
+					if (!filename.empty())
+						vertexFlag |= Vertex::eTexcoord0| Vertex::eTangent;
+				}
+				
+				if (GetMaterialTexture(material, FbxSurfaceMaterial::sNormalMap, &filename))
+				{
+					if (!filename.empty())
+						vertexFlag |= Vertex::eTexcoord0| Vertex::eTangent;
+				}
+			}		
 		}
 
 		if (!useDefaultMat)
 		{
 			FbxSurfaceMaterial *material = pNode->GetMaterial(mi);
 
-			String filename;
-			if (GetMaterialTexture(material, FbxSurfaceMaterial::sDiffuse, &filename))
+			if (material)
 			{
-				if (!filename.empty())
-					vertexFlag |= Vertex::eTexcoord0;
-			}
+				String filename;
+				if (GetMaterialTexture(material, FbxSurfaceMaterial::sDiffuse, &filename))
+				{
+					if (!filename.empty())
+						vertexFlag |= Vertex::eTexcoord0;
+				}
+			}		
 		}
 
 		if (lHasSkin)
@@ -740,8 +750,7 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 					vertex.Normal.Normalize();
 					vertexFlag |= Vertex::eNormal;
 				}
-				
-					
+						
 				for (size_t uv_idx = 0; uv_idx  < uvSets.size(); ++uv_idx)
 				{
 					FbxVector2 uv;
@@ -970,7 +979,9 @@ void FbxProcesser::CollectMaterials( FbxScene* pScene )
 	{
 		FbxSurfaceMaterial* pSurfaceMaterial = pScene->GetMaterial(i);
 
-		String matName = pSurfaceMaterial->GetName();
+		MaterialData matData;
+
+		matData.Name = pSurfaceMaterial->GetName();
 
 		Vector3f AmbientColor;
 		Vector3f EmissiveColor;
@@ -984,9 +995,9 @@ void FbxProcesser::CollectMaterials( FbxScene* pScene )
 
 		if( pLambert )
 		{
-			AmbientColor = ReadMaterialColor(pLambert->Ambient, pLambert->AmbientFactor);
-			EmissiveColor = ReadMaterialColor(pLambert->Emissive, pLambert->EmissiveFactor);
-			DiffuseColor = ReadMaterialColor(pLambert->Diffuse, pLambert->DiffuseFactor);
+			matData.Ambient = ReadMaterialColor(pLambert->Ambient, pLambert->AmbientFactor);
+			matData.Emissive = ReadMaterialColor(pLambert->Emissive, pLambert->EmissiveFactor);
+			matData.Diffuse = ReadMaterialColor(pLambert->Diffuse, pLambert->DiffuseFactor);
 
 			FbxPropertyT<FbxDouble> FBXTransparencyProperty = pLambert->TransparencyFactor;
 			if( FBXTransparencyProperty.IsValid() )
@@ -995,11 +1006,11 @@ void FbxProcesser::CollectMaterials( FbxScene* pScene )
 
 		if( pPhong )
 		{
-			SpecularColor = ReadMaterialColor(pPhong->Specular, pPhong->SpecularFactor);
+			matData.Specular = ReadMaterialColor(pPhong->Specular, pPhong->SpecularFactor);
 
 			FbxPropertyT<FbxDouble> FBXSpecularPowerProperty = pPhong->Shininess;
 			if( FBXSpecularPowerProperty.IsValid() )
-				fSpecularPower = static_cast<float>( FBXSpecularPowerProperty.Get() );
+				matData.Power = static_cast<float>( FBXSpecularPowerProperty.Get() );
 		}
 
 		int textureLayerIndex;  
@@ -1022,7 +1033,8 @@ void FbxProcesser::CollectMaterials( FbxScene* pScene )
 						if (pFileTexture)
 						{
 							 String filepath =  pFileTexture->GetFileName();
-							// std::cout << FbxLayerElement::sTextureChannelNames[textureLayerIndex] << ": " << filepath << std::endl;
+							 matData.Textures[FbxLayerElement::sTextureChannelNames[textureLayerIndex]] = filepath;
+							 /*std::cout << FbxLayerElement::sTextureChannelNames[textureLayerIndex] << ": " << filepath << std::endl;*/
 						}
 						
 					}  
@@ -1030,14 +1042,11 @@ void FbxProcesser::CollectMaterials( FbxScene* pScene )
 			}  
 		}  
 
-		MaterialData matData;
-
-		matData.Name = matName;
-		matData.Ambient = ColorRGBA(AmbientColor.X(), AmbientColor.Y(), AmbientColor.Z(), 1.0f);
-		matData.Diffuse = ColorRGBA(DiffuseColor.X(), DiffuseColor.Y(), DiffuseColor.Z(), 1.0f);
-		matData.Specular = ColorRGBA(SpecularColor.X(), SpecularColor.Y(), SpecularColor.Z(), 1.0f);
-		matData.Emissive = ColorRGBA(EmissiveColor.X(), EmissiveColor.Y(), EmissiveColor.Z(), 1.0f);
-		matData.Power = fSpecularPower;
+		//matData.Ambient = ColorRGBA(AmbientColor.X(), AmbientColor.Y(), AmbientColor.Z(), 1.0f);
+		//matData.Diffuse = ColorRGBA(DiffuseColor.X(), DiffuseColor.Y(), DiffuseColor.Z(), 1.0f);
+		//matData.Specular = ColorRGBA(SpecularColor.X(), SpecularColor.Y(), SpecularColor.Z(), 1.0f);
+		//matData.Emissive = ColorRGBA(EmissiveColor.X(), EmissiveColor.Y(), EmissiveColor.Z(), 1.0f);
+		//matData.Power = fSpecularPower;
 
 		mMaterials.push_back(matData);
 	}
@@ -1060,6 +1069,60 @@ void FbxProcesser::CollectMeshes( FbxScene* fbxScene )
 	}
 
 	ProcessNode(fbxScene->GetRootNode(), FbxNodeAttribute::eMesh);
+}
+
+void FbxProcesser::ExportMaterial()
+{
+	XMLDoc materialxml;
+
+	XMLNodePtr rootNode = materialxml.AllocateNode(XML_Node_Element, "materials");
+	materialxml.RootNode(rootNode);
+
+	XMLNodePtr matNode, tmpNode;
+	XMLAttributePtr attrib;
+	for (size_t i = 0; i < mMaterials.size(); ++i)
+	{
+		matNode = materialxml.AllocateNode(XML_Node_Element, "material");
+		matNode->AppendAttribute(materialxml.AllocateAttributeString("material", mMaterials[i].Name));
+
+		tmpNode = materialxml.AllocateNode(XML_Node_Element, "ambient");
+		tmpNode->AppendAttribute(materialxml.AllocateAttributeFloat("r", mMaterials[i].Ambient[0]));
+		tmpNode->AppendAttribute(materialxml.AllocateAttributeFloat("g", mMaterials[i].Ambient[1]));
+		tmpNode->AppendAttribute(materialxml.AllocateAttributeFloat("b", mMaterials[i].Ambient[2]));
+		matNode->AppendNode(tmpNode);
+
+		tmpNode = materialxml.AllocateNode(XML_Node_Element, "diffuse");
+		tmpNode->AppendAttribute(materialxml.AllocateAttributeFloat("r", mMaterials[i].Diffuse[0]));
+		tmpNode->AppendAttribute(materialxml.AllocateAttributeFloat("g", mMaterials[i].Diffuse[1]));
+		tmpNode->AppendAttribute(materialxml.AllocateAttributeFloat("b", mMaterials[i].Diffuse[2]));
+		matNode->AppendNode(tmpNode);
+
+		tmpNode = materialxml.AllocateNode(XML_Node_Element, "specular");
+		tmpNode->AppendAttribute(materialxml.AllocateAttributeFloat("r", mMaterials[i].Specular[0]));
+		tmpNode->AppendAttribute(materialxml.AllocateAttributeFloat("g", mMaterials[i].Specular[1]));
+		tmpNode->AppendAttribute(materialxml.AllocateAttributeFloat("b", mMaterials[i].Specular[2]));
+		tmpNode->AppendAttribute(materialxml.AllocateAttributeFloat("power", mMaterials[i].Power));
+		matNode->AppendNode(tmpNode);
+
+		tmpNode = materialxml.AllocateNode(XML_Node_Element, "emissive");
+		tmpNode->AppendAttribute(materialxml.AllocateAttributeFloat("r", mMaterials[i].Emissive[0]));
+		tmpNode->AppendAttribute(materialxml.AllocateAttributeFloat("g", mMaterials[i].Emissive[1]));
+		tmpNode->AppendAttribute(materialxml.AllocateAttributeFloat("b", mMaterials[i].Emissive[2]));
+		matNode->AppendNode(tmpNode);
+
+		for (auto iter = mMaterials[i].Textures.begin(); iter != mMaterials[i].Textures.end(); ++iter)
+		{
+			tmpNode = materialxml.AllocateNode(XML_Node_Element, iter->first);
+			tmpNode->AppendAttribute(materialxml.AllocateAttributeString("name", iter->second));
+			matNode->AppendNode(tmpNode);
+		}	
+
+		rootNode->AppendNode(matNode);
+	}
+
+	std::ofstream xmlFile("materials.xml");
+	materialxml.Print(xmlFile);
+	xmlFile.close();
 }
 
 void FbxProcesser::BuildAndSaveXML( )
@@ -1168,7 +1231,6 @@ void FbxProcesser::BuildAndSaveXML( )
 
 			meshPartNode->AppendNode(boundNode);
 
-
 			XMLNodePtr verticesNode = meshxml.AllocateNode(XML_Node_Element, "vertices");
 			XMLAttributePtr verticesCountAttr = meshxml.AllocateAttributeUInt("verticesCount", meshPart.Vertices.size());
 			XMLAttributePtr vertexSizeAttr = meshxml.AllocateAttributeUInt("vertexSize", CalculateVertexSize(meshPart.Vertices[0].Flag));
@@ -1177,9 +1239,8 @@ void FbxProcesser::BuildAndSaveXML( )
 			// add to mesh part
 			meshPartNode->AppendNode(verticesNode);
 
-			for (size_t vi = 0; vi < meshPart.Vertices.size(); ++vi)
+			for(const Vertex& vertex : meshPart.Vertices)
 			{
-				Vertex& vertex = meshPart.Vertices[vi];
 				XMLNodePtr vertexNode = meshxml.AllocateNode(XML_Node_Element, "vertex");
 				verticesNode->AppendNode(vertexNode);
 
@@ -1334,6 +1395,8 @@ void FbxProcesser::BuildAndSaveXML( )
 		meshxml.Print(xmlFile);
 		xmlFile.close();
 	}	
+
+	ExportMaterial();
 }
 
 void FbxProcesser::BuildAndSaveBinary( )
@@ -1687,6 +1750,8 @@ void FbxProcesser::ProcessAnimation( FbxAnimStack* pStack, FbxNode* pNode, doubl
 		ProcessAnimation(pStack, pNode->GetChild(i), fFrameRate, fStart, fStop);
 	}
 }
+
+
 
 int main()
 {
