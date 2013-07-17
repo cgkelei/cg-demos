@@ -103,17 +103,14 @@ inline Vector<Real, Size> Lerp(const Vector<Real, Size>& vec1, const Vector<Real
 template<typename Real>
 inline Vector<Real, 3> Cross( const Vector<Real, 3>& vec1, const Vector<Real, 3>& vec2 );
 
-
-
-
 #include <Math/Vector.inl>
 
-typedef Vector<float, 2> Vector2f;
-typedef Vector<double, 2> Vector2d;
-typedef Vector<float,3> Vector3f;
-typedef Vector<float,4> Vector4f;
-typedef Vector<double,3> Vector3d;
-typedef Vector<double,4> Vector4d;
+typedef Vector<float, 2> float2;
+typedef Vector<float,3> float3;
+typedef Vector<float,4> float4;
+
+typedef Vector<int32_t,2> int2;
+typedef Vector<uint32_t,2> uint2;
 
 } // Namespace RcEngine
 #endif

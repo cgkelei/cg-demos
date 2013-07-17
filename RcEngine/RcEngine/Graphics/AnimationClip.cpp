@@ -87,9 +87,9 @@ void AnimationClip::LoadImpl()
 
 			animKey.Time = source.ReadFloat();
 
-			source.Read(&animKey.Translation, sizeof(Vector3f));
+			source.Read(&animKey.Translation, sizeof(float3));
 			source.Read(&animKey.Rotation, sizeof(Quaternionf));
-			source.Read(&animKey.Scale, sizeof(Vector3f));
+			source.Read(&animKey.Scale, sizeof(float3));
 		}
 	}
 }

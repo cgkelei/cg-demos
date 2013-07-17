@@ -31,7 +31,7 @@ private:
 
 	void DrawRenderable(Camera* camera, const String& tech, const String& matClass);
 
-	void SetupViewProjMatirices(const Matrix4f& view, const Matrix4f& proj);
+	void SetupViewProjMatirices(const float4x4& view, const float4x4& proj);
 
 private:
 	void DrawEntity();
@@ -45,7 +45,7 @@ private:
 	
 	EffectTechnique* mCurrentTechnique;
 
-	Matrix4f mViewMat, mViewMatInv, mProjMat, mViewProjMat;
+	float4x4 mViewMat, mViewMatInv, mProjMat, mViewProjMat;
 
 	Light* mCurrentLight;
 };

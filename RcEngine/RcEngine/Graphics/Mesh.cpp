@@ -47,9 +47,9 @@ void Mesh::LoadImpl()
 	String meshName = source.ReadString();
 
 	// read bounding box
-	Vector3f min, max;
-	source.Read(&min, sizeof(Vector3f));
-	source.Read(&max, sizeof(Vector3f));
+	float3 min, max;
+	source.Read(&min, sizeof(float3));
+	source.Read(&max, sizeof(float3));
 	mBoundingBox = BoundingBoxf(min, max);
 
 	// read mesh part

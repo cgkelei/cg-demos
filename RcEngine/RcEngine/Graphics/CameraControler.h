@@ -73,10 +73,10 @@ public:
 
 	void Reset();
 	void SetWindowSize( int32_t windowWidth, int32_t windowHeight );
-	void SetCenterAndRadius( const Vector2f& center, float radius );
+	void SetCenterAndRadius( const float2& center, float radius );
 
-	Vector3f GetConstraintAxis() const			    { return mConstraintAxis; }
-	void SetConstraintAxis( const Vector3f& axis )    { mConstraintAxis = axis; mUseConstraint = true; }
+	float3 GetConstraintAxis() const			    { return mConstraintAxis; }
+	void SetConstraintAxis( const float3& axis )    { mConstraintAxis = axis; mUseConstraint = true; }
 	void SetNoConstraintAxis( )								{ mUseConstraint = false; }
 	bool IsUsingConstraint() const							{ return mUseConstraint; }
 
@@ -89,30 +89,30 @@ public:
 	Quaternionf GetRotation() const { return mQuatNow; }
 
 private:
-	Vector3f ScreenToSphere( float screenX, float screenY );
+	float3 ScreenToSphere( float screenX, float screenY );
 
 private:
 			
 	int32_t mWindowWidth;		// arc ball's window width
 	int32_t mWindowHeight;		// arc ball's window height	
 
-	Vector2f mCenter;		 // center of arc ball in screen coordinates
+	float2 mCenter;		 // center of arc ball in screen coordinates
 	float mRadius;              // arc ball's radius in screen coordinates
 	
 	float mRadiusTranslation;   // arc ball's radius for translating the target
 
 	bool mUseConstraint;
-	Vector3f mConstraintAxis;
+	float3 mConstraintAxis;
 
 	bool mDrag;
 
 	Quaternionf mQuatNow;
 	Quaternionf mQuatDown;
 
-	Vector2f mLastMousePoint;
+	float2 mLastMousePoint;
 
-	Vector3f mDownPt;			// starting point of rotation arc on sphere
-	Vector3f mCurrentPt;		// current point of rotation arc on sphere
+	float3 mDownPt;			// starting point of rotation arc on sphere
+	float3 mCurrentPt;		// current point of rotation arc on sphere
 
 
 };
@@ -142,13 +142,13 @@ public:
 	/**
 	 * Set arcball center and radius
 	 */
-	void SetCenterAndRadius( const Vector2f& center, float radis );
+	void SetCenterAndRadius( const float2& center, float radis );
 
 
 	/**
 	 * Get the world matrix of model
 	 */
-	Matrix4f GetWorldMatrix() const	{ return mWorld; }
+	float4x4 GetWorldMatrix() const	{ return mWorld; }
 
 protected:
 	void HandleModelView(uint32_t action, bool value, float delta);
@@ -158,7 +158,7 @@ protected:
 	ArcBall mCameraArcBall;
 	ArcBall mModelArcBall;
 	Quaternionf mCameraRot;
-	Matrix4f mWorld; // world matrix of model
+	float4x4 mWorld; // world matrix of model
 };
 
 

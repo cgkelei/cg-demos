@@ -49,7 +49,7 @@ public:
 	 */
 	virtual const BoundingBoxf& GetWorldBoundingBox() const;
 
-	const Matrix4f& GetWorldTransform() const;
+	const float4x4& GetWorldTransform() const;
 
 	/**
 	 * Called when scene manger update render queue.

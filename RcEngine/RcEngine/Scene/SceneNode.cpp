@@ -36,7 +36,7 @@ Node* SceneNode::CreateChildImpl( const String& name )
 	return mScene->CreateSceneNode(name);
 }
 
-SceneNode* SceneNode::CreateChildSceneNode( const String& name, const Vector3f& translate, const Quaternionf& rotate )
+SceneNode* SceneNode::CreateChildSceneNode( const String& name, const float3& translate, const Quaternionf& rotate )
 {
 	return static_cast<SceneNode*>( CreateChild(name, translate, rotate) );
 }

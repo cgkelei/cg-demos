@@ -15,7 +15,7 @@ public:
 
 	uint32_t GetBoneIndex() const { return mBoneIndex; }
 
-	const Matrix4f& GetOffsetMatrix() const { return mOffsetMatrix; }
+	const float4x4& GetOffsetMatrix() const { return mOffsetMatrix; }
 
 	void CalculateBindPose();	
 
@@ -27,7 +27,7 @@ private:
 	
 private:
 	uint32_t mBoneIndex;
-	Matrix4f mOffsetMatrix;
+	float4x4 mOffsetMatrix;
 };
 
 class _ApiExport Skeleton

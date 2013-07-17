@@ -47,10 +47,10 @@ public:
 	Font(ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	~Font();
 
-	void DrawString(SpriteBatch& spriteBatch, std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color);
+	void DrawString(SpriteBatch& spriteBatch, std::wstring& text, uint32_t fontSize, const float2& position, const ColorRGBA& color);
 	
-	//void DrawText(std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color, float rotation, const Vector2f& origin, float scale, float layerDepth);
-	//void DrawText(std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color, float rotation, const Vector2f& origin, const Vector2f& scale, float layerDepth);
+	//void DrawText(std::wstring& text, uint32_t fontSize, const float2& position, const ColorRGBA& color, float rotation, const float2& origin, float scale, float layerDepth);
+	//void DrawText(std::wstring& text, uint32_t fontSize, const float2& position, const ColorRGBA& color, float rotation, const float2& origin, const float2& scale, float layerDepth);
 
 	void MeasureString(const std::wstring& text,uint32_t fontHeight, uint32_t* widthOut, uint32_t* heightOut);
 

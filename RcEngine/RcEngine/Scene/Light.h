@@ -20,8 +20,8 @@ public:
 	virtual ~Light();
 	
 	void SetLightType(LightType type);
-	void SetPosition(const Vector3f& pos);
-	void SetDirection(const Vector3f& vec);
+	void SetPosition(const float3& pos);
+	void SetDirection(const float3& vec);
 	void SetLightDiffuse(const ColorRGBA& color);
 	void SetLightSpecular(const ColorRGBA& color);
 	void SetAttenuation(float range, float constant, float linear, float quadratic);
@@ -32,8 +32,8 @@ public:
 	void SetSpotlightNearClipDistance(float nearClip);
 	
 	LightType GetLightType() const					{ return mLightType; }
-	const Vector3f& GetPosition() const				{ return mLightDirection; }
-	const Vector3f& GetDirection() const			{ return mLightPosition; }
+	const float3& GetPosition() const				{ return mLightDirection; }
+	const float3& GetDirection() const			{ return mLightPosition; }
 	const ColorRGBA& GetLightColor() const		{ return mLightColor; }
 	float GetAttenuationRange () const				{ return mRange; }
 	float GetAttenuationConstant () const			{ return mAttenuationConst; }
@@ -45,8 +45,8 @@ public:
 	float GetSpotlightNearClipDistance() const		{ return mSpotNearClip; }
 
 
-	const Vector3f& GetDerivedPosition() const;
-	const Vector3f& GetDerivedDirection() const;
+	const float3& GetDerivedPosition() const;
+	const float3& GetDerivedDirection() const;
 
 private:
 	void UpdateTransform() const;
@@ -57,8 +57,8 @@ public:
 protected:
 	LightType mLightType;
 	ColorRGBA mLightColor;
-	Vector3f mLightDirection;
-	Vector3f mLightPosition;
+	float3 mLightDirection;
+	float3 mLightPosition;
 	float mRange;
 	float mAttenuationConst;
 	float mAttenuationLinear;
@@ -68,8 +68,8 @@ protected:
 	float mSpotFalloff;
 	float mSpotNearClip;
 
-	mutable Vector3f mDerivedPosition;
-	mutable Vector3f mDerivedDirection;
+	mutable float3 mDerivedPosition;
+	mutable float3 mDerivedDirection;
 
 	mutable bool mDerivedTransformDirty;
 	

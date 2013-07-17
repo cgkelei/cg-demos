@@ -22,7 +22,7 @@ public:
 	const shared_ptr<RenderOperation>& GetRenderOperation() const { return mRenderOperation; }
 	const shared_ptr<Material>& GetMaterial() const				  { return mMaterial; }
 	uint32_t GetWorldTransformsCount() const					  { return 1; }
-	void GetWorldTransforms(Matrix4f* xform) const;
+	void GetWorldTransforms(float4x4* xform) const;
 	bool Renderable() const	{ return true; }
 	void SetMaterial( const shared_ptr<Material>& mat )			{ mMaterial = mat; }
 

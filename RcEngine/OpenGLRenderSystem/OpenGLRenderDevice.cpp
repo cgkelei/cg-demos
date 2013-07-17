@@ -83,11 +83,11 @@ void OpenGLRenderDevice::CreateRenderWindow( const RenderSettings& settings )
 	glEnable(GL_TEXTURE_CUBE_MAP);
 }
 
-void OpenGLRenderDevice::AdjustProjectionMatrix( Matrix4f& pOut )
+void OpenGLRenderDevice::AdjustProjectionMatrix( float4x4& pOut )
 {
 	//修改投影矩阵，使OpenGL适应左右坐标系
-	Matrix4f scale = CreateScaling(1.0f, 1.0f, 2.0f);
-	Matrix4f translate = CreateTranslation(0.0f, 0.0f, -1.0f);
+	float4x4 scale = CreateScaling(1.0f, 1.0f, 2.0f);
+	float4x4 translate = CreateTranslation(0.0f, 0.0f, -1.0f);
 	pOut =  pOut * scale * translate;
 }
 

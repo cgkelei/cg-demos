@@ -15,8 +15,8 @@ class SpriteEntity;
 
 struct SpriteVertex
 {
-	Vector3f Position;
-	Vector2f TexCoord;
+	float3 Position;
+	float2 TexCoord;
 	ColorRGBA Color;
 };
 
@@ -58,16 +58,16 @@ public:
 	 * @param layerDepth: The depth of a layer. By default, 0 represents the front layer and 1 represents
 	 * a back layer. Use SpriteSortMode if you want sprites to be sorted during drawing.
 	 */
-	void Draw(const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const Vector2f& origin, float layerDepth);
+	void Draw(const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const float2& origin, float layerDepth);
 
-	void Draw(const shared_ptr<Texture>& texture, const Vector2f& position, IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const Vector2f& origin, float scale, float layerDepth);
-	void Draw(const shared_ptr<Texture>& texture, const Vector2f& position, IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const Vector2f& origin, const Vector2f& scale, float layerDepth);
+	void Draw(const shared_ptr<Texture>& texture, const float2& position, IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const float2& origin, float scale, float layerDepth);
+	void Draw(const shared_ptr<Texture>& texture, const float2& position, IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const float2& origin, const float2& scale, float layerDepth);
 
 	void Draw(const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, const ColorRGBA& color);
 	void Draw(const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, IntRect* sourceRectangle, const ColorRGBA& color);
 	
-	void Draw(const shared_ptr<Texture>& texture, const Vector2f& position, const ColorRGBA& color);
-	void Draw(const shared_ptr<Texture>& texture, const Vector2f& position, IntRect* sourceRectangle, const ColorRGBA& color);
+	void Draw(const shared_ptr<Texture>& texture, const float2& position, const ColorRGBA& color);
+	void Draw(const shared_ptr<Texture>& texture, const float2& position, IntRect* sourceRectangle, const ColorRGBA& color);
 
 private:
 	uint32_t mSortMode;
@@ -93,7 +93,7 @@ public:
 	// no world transform
 	uint32_t GetWorldTransformsCount() const { return 0; }
 
-	void GetWorldTransforms(Matrix4f* xform) const { }
+	void GetWorldTransforms(float4x4* xform) const { }
 
 	const shared_ptr<RenderOperation>& GetRenderOperation() const { return mRenderOperation; }
 
@@ -105,7 +105,7 @@ public:
 
 	vector<uint16_t>& GetIndices();
 
-	void SetProjectionMatrix(const Matrix4f& mat);
+	void SetProjectionMatrix(const float4x4& mat);
 
 	void OnRenderBegin();
 

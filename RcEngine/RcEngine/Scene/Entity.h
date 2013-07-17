@@ -47,7 +47,7 @@ public:
 
 	void OnUpdateRenderQueue(RenderQueue* renderQueue, Camera* cam, RenderOrder order);
 
-	Bone* AttachObjectToBone (const String &boneName, SceneObject* sceneObj, const Quaternionf& offsetOrientation= Quaternionf::Identity(), const Vector3f & offsetPosition = Vector3f::Zero());
+	Bone* AttachObjectToBone (const String &boneName, SceneObject* sceneObj, const Quaternionf& offsetOrientation= Quaternionf::Identity(), const float3 & offsetPosition = float3::Zero());
 
 protected:
 	void Initialize();
@@ -69,8 +69,8 @@ protected:
 
 	mutable BoundingBoxf mWorldBoundingBox;
 
-	vector<Matrix4f> mBoneWorldMatrices;
-	vector<Matrix4f> mSkinMatrices;
+	vector<float4x4> mBoneWorldMatrices;
+	vector<float4x4> mSkinMatrices;
 	uint32_t mNumSkinMatrices;
 
 	SkinnedAnimationPlayer* mAnimationPlayer;

@@ -53,7 +53,7 @@ bool operator == (const MaterialData& lrhs, const MaterialData& rhs)
 }
 
 
-String XMLFromVector3(const Vector3f& vec)
+String XMLFromVector3(const float3& vec)
 {
 	std::stringstream sss;
 	sss << "x=\"" << vec.X() << "\" y=\"" << vec.Y() << "\" z=\"" << vec.Z() << "\"";
@@ -75,11 +75,11 @@ String XMLFromQuaternion(const Quaternionf& quat)
 }
 
 
-Vector3f Transform(const Vector3f& vec, const Matrix4f& mat)
+float3 Transform(const float3& vec, const float4x4& mat)
 {
-	Vector4f vec4(vec.X(), vec.Y(), vec.Z(), 1.0f);
-	Vector4f transformed = vec4 * mat;
-	return Vector3f(transformed.X(), transformed.Y(), transformed.Z());
+	float4 vec4(vec.X(), vec.Y(), vec.Z(), 1.0f);
+	float4 transformed = vec4 * mat;
+	return float3(transformed.X(), transformed.Y(), transformed.Z());
 }
 
 
@@ -88,9 +88,9 @@ Vector3f Transform(const Vector3f& vec, const Matrix4f& mat)
 // assume the right handed coordinate system, so aiMatrix 
 // is a right-handed matrix.You need to transpose it to get
 // a left-handed matrix.
-Matrix4f FromAIMatrix(const aiMatrix4x4& in)
+float4x4 FromAIMatrix(const aiMatrix4x4& in)
 {
-	Matrix4f out;
+	float4x4 out;
 	out.M11 = in.a1;
 	out.M12 = in.b1;
 	out.M13 = in.c1;
@@ -114,9 +114,9 @@ Matrix4f FromAIMatrix(const aiMatrix4x4& in)
 	return out;
 }
 
-Vector3f FromAIVector(const aiVector3D& vec)
+float3 FromAIVector(const aiVector3D& vec)
 {
-	 return Vector3f(vec.x, vec.y, vec.z);
+	 return float3(vec.x, vec.y, vec.z);
 }
 
 Quaternionf FromAIQuaternion(const aiQuaternion& quat)
@@ -459,7 +459,7 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 	file << "<mesh name=\"" << outModel.OutName << "\">" << endl;
 
 	// write mesh bouding sphere
-	const Vector3f& meshCenter = outModel.MeshBoundingSphere.Center;
+	const float3& meshCenter = outModel.MeshBoundingSphere.Center;
 	const float meshRadius = outModel.MeshBoundingSphere.Radius;
 	file << "\t<bounding x=\"" << meshCenter[0] << "\" y=\"" << meshCenter[1] << "\" z=\"" << meshCenter[2] << " radius=" << meshRadius << "\"/>\n";
 		
@@ -482,8 +482,8 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 			}
 			file << "\t\t<bone name=\"" << boneName << "\" parent=\"" << parentName <<  "\">" << std::endl;
 
-			Vector3f pos = bone->GetPosition();
-			Vector3f scale = bone->GetScale();
+			float3 pos = bone->GetPosition();
+			float3 scale = bone->GetScale();
 			Quaternionf quat = bone->GetRotation();
 			file << "\t\t\t<bindPosition x=\"" << pos[0] << "\" y=\"" << pos[1] << "\" z=\"" << pos[2] << "\"/>\n";
 			file << "\t\t\t<bindRotation w=\"" << quat.W() << "\" x=\"" << quat.X() << "\" y=\"" << quat.Y() << " z=" << quat.Z() << "\"/>\n";
@@ -546,7 +546,7 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 		file << "\t<subMesh name=\"" << submesh->Name << "\" material=\"" << submesh->MaterialName << "\">\n";
 
 		// write bounding sphere
-		const Vector3f& center = submesh->BoundingSphere.Center;
+		const float3& center = submesh->BoundingSphere.Center;
 		const float radius = submesh->BoundingSphere.Radius;
 		file << "\t\t<bounding x=\"" << center[0] << "\" y=\"" << center[1] << "\" z=\"" << center[2] << " radius=" << radius << "\"/>\n";
 
@@ -664,9 +664,9 @@ void AssimpProcesser::ExportBinary( OutModel& outModel )
 	stream.WriteString(outModel.OutName);
 
 	// write mesh bounding sphere
-	Vector3f center = outModel.MeshBoundingSphere.Center;
+	float3 center = outModel.MeshBoundingSphere.Center;
 	float radius = outModel.MeshBoundingSphere.Radius;
-	stream.Write(&center, sizeof(Vector3f));
+	stream.Write(&center, sizeof(float3));
 	stream.WriteFloat(radius);
 
 	// write material
@@ -707,9 +707,9 @@ void AssimpProcesser::ExportBinary( OutModel& outModel )
 		stream.WriteString(submesh->MaterialName + ".material.xml");
 
 		// write sub mesh bounding sphere
-		Vector3f center = submesh->BoundingSphere.Center;
+		float3 center = submesh->BoundingSphere.Center;
 		float radius = submesh->BoundingSphere.Radius;
-		stream.Write(&center, sizeof(Vector3f));
+		stream.Write(&center, sizeof(float3));
 		stream.WriteFloat(radius);
 
 		// write vertex count and vertex size
@@ -780,18 +780,18 @@ void AssimpProcesser::ExportBinary( OutModel& outModel )
 	//	{
 	//		Bone* bone = bones[i];
 
-	//		Vector3f pos = bone->GetPosition();
+	//		float3 pos = bone->GetPosition();
 	//		Quaternionf rot = bone->GetRotation();
-	//		Vector3f scale = bone->GetScale();
+	//		float3 scale = bone->GetScale();
 
 	//		Bone* parent = static_cast_checked<Bone*>( bone->GetParent() );
 	//		String parentName = parent ? parent->GetName() : String("");
 
 	//		stream.WriteString(bone->GetName());
 	//		stream.WriteString(parentName);
-	//		stream.Write(&pos, sizeof(Vector3f));
+	//		stream.Write(&pos, sizeof(float3));
 	//		stream.Write(&rot, sizeof(Quaternionf));
-	//		stream.Write(&scale, sizeof(Vector3f));
+	//		stream.Write(&scale, sizeof(float3));
 
 	//		// sphere radius
 	//		float radius = mModel.BoneSpheres[i].Radius;
@@ -1069,7 +1069,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 					{
 						// Bake the mesh vertex in model space defined by the root node
 						// So even without the skeleton, the mesh can render with unskin mesh.				
-						Vector3f vertex = FromAIVector( vertexTransformAI *  mesh->mVertices[i] );
+						float3 vertex = FromAIVector( vertexTransformAI *  mesh->mVertices[i] );
 						
 						*(vertexPtr) = vertex.X();
 						*(vertexPtr+1) = vertex.Y();
@@ -1081,7 +1081,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 					break;
 				case VEU_Normal:
 					{
-						Vector3f normal = FromAIVector( normalTransformAI * mesh->mNormals[i] );
+						float3 normal = FromAIVector( normalTransformAI * mesh->mNormals[i] );
 						*(vertexPtr) = normal.X();
 						*(vertexPtr+1) = normal.Y();
 						*(vertexPtr+2) = normal.Z();
@@ -1089,7 +1089,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 					break;
 				case VEU_Tangent:
 					{
-						Vector3f tangent = FromAIVector(normalTransformAI * mesh->mTangents[i]);
+						float3 tangent = FromAIVector(normalTransformAI * mesh->mTangents[i]);
 						*(vertexPtr) = tangent.X();
 						*(vertexPtr+1) = tangent.Y();
 						*(vertexPtr+2) = tangent.Z();
@@ -1097,7 +1097,7 @@ void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 					break;
 				case VEU_Binormal:
 					{
-						Vector3f bitangent = FromAIVector(normalTransformAI * mesh->mBitangents[i]);
+						float3 bitangent = FromAIVector(normalTransformAI * mesh->mBitangents[i]);
 						*(vertexPtr) = bitangent.X();
 						*(vertexPtr+1) = bitangent.Y();
 						*(vertexPtr+2) = bitangent.Z();
@@ -1281,7 +1281,7 @@ void AssimpProcesser::BuildBoneCollisions()
 				if (weight > 0.33f)
 				{
 					aiVector3D vertexBoneSpace = bone->mOffsetMatrix * mesh->mVertices[bone->mWeights[k].mVertexId];
-					Vector3f vertex = FromAIVector(vertexBoneSpace);
+					float3 vertex = FromAIVector(vertexBoneSpace);
 					mModel.BoneSpheres[boneIndex].Merge(vertex);
 				}
 			}
@@ -1297,7 +1297,7 @@ void ValidateOffsetMatrix( OutModel& outModel )
 	{
 		Bone* bone = bones[i];
 		
-		Matrix4f derivedTransform = bone->GetWorldTransform();
+		float4x4 derivedTransform = bone->GetWorldTransform();
 		
 		aiNode* node = outModel.RootNode->FindNode(bone->GetName().c_str());
 		aiMatrix4x4 mat = GetDerivedTransform(node, outModel.RootNode->FindNode("Scene_Root"));
@@ -1311,7 +1311,7 @@ void ValidateOffsetMatrix( OutModel& outModel )
 		derivedTransformInverse.Inverse();
 		derivedTransformInverse.Transpose();
 
-		Matrix4f test = FromAIMatrix(derivedTransformInverse);
+		float4x4 test = FromAIMatrix(derivedTransformInverse);
 		
 		int a = 0;
 	}*/

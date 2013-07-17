@@ -34,7 +34,7 @@ public:
 	const shared_ptr<RenderOperation>& GetRenderOperation() const	{ return mRenderOperation; }
 
 	uint32_t GetWorldTransformsCount() const;
-	void GetWorldTransforms(Matrix4f* xform) const;
+	void GetWorldTransforms(float4x4* xform) const;
 	
 	void SetMaterial( const shared_ptr<Material>& mat );
 

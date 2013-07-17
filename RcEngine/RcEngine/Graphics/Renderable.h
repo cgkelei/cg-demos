@@ -38,7 +38,7 @@ public:
 	 * Get world transform matrix, note that it may more than one matrix 
 	 * if it is a bone mesh.
 	 */
-	virtual void GetWorldTransforms(Matrix4f* xform) const = 0;
+	virtual void GetWorldTransforms(float4x4* xform) const = 0;
 
 	/**
 	 * Get world transform matrix count.

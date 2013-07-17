@@ -7,11 +7,11 @@ namespace RcEngine {
 
 Light::Light( const String& name )
 	: SceneObject(name, SOT_Light, false), 
-	  mLightType(LT_Point), mLightPosition(Vector3f::Zero()),
-	  mLightDirection(Vector3f(0, 0, 1)), mLightDiffuse(ColorRGBA::White), mLightSpecular(ColorRGBA::Black),
+	  mLightType(LT_Point), mLightPosition(float3::Zero()),
+	  mLightDirection(float3(0, 0, 1)), mLightDiffuse(ColorRGBA::White), mLightSpecular(ColorRGBA::Black),
 	  mSpotOuter(Mathf::ToRadian(40.0f)), mSpotInner(Mathf::ToRadian(30.0f)), mSpotFalloff(1.0f), mRange(100000), mAttenuationConst(1.0f),
-	  mAttenuationLinear(0.0f), mAttenuationQuad(0.0f), mDerivedPosition(Vector3f::Zero()), 
-	  mDerivedDirection(Vector3f(0, 0, 1)), mDerivedTransformDirty(false)
+	  mAttenuationLinear(0.0f), mAttenuationQuad(0.0f), mDerivedPosition(float3::Zero()), 
+	  mDerivedDirection(float3(0, 0, 1)), mDerivedTransformDirty(false)
 {
 
 }
@@ -22,14 +22,14 @@ Light::~Light()
 }
 
 
-void Light::SetPosition( const Vector3f& pos )
+void Light::SetPosition( const float3& pos )
 {
 	mLightPosition = pos;
 	mDerivedTransformDirty = true;
 }
 
 
-void Light::SetDirection( const Vector3f& vec )
+void Light::SetDirection( const float3& vec )
 {
 	mLightDirection = vec;
 	mDerivedTransformDirty = true;
@@ -91,13 +91,13 @@ void Light::SetLightType( LightType type )
 	mLightType = type;
 }
 
-const Vector3f& Light::GetDerivedPosition() const
+const float3& Light::GetDerivedPosition() const
 {
 	UpdateTransform();
 	return mDerivedPosition;
 }
 
-const Vector3f& Light::GetDerivedDirection() const
+const float3& Light::GetDerivedDirection() const
 {
 	UpdateTransform();
 	return mDerivedDirection;
@@ -111,7 +111,7 @@ void Light::UpdateTransform() const
 		{
 			// Ok, update with SceneNode we're attached to
 			const Quaternionf& parentOrientation = mParentNode->GetWorldRotation();
-			const Vector3f& parentPosition = mParentNode->GetWorldPosition();
+			const float3& parentPosition = mParentNode->GetWorldPosition();
 			mDerivedDirection = Transform(mLightDirection, parentOrientation);
 			mDerivedPosition = Transform(mLightPosition, parentOrientation) + parentPosition;
 		}

@@ -168,19 +168,19 @@ void Material::ApplyMaterial()
 			break;
 		case EPU_Material_Ambient_Color:
 			{
-				Vector4f color(mAmbient.R(), mAmbient.G(), mAmbient.B(), mAmbient.A());
+				float4 color(mAmbient.R(), mAmbient.G(), mAmbient.B(), mAmbient.A());
 				param->EffectParam->SetValue(color);
 			}
 			break;
 		case EPU_Material_Diffuse_Color:
 			{
-				Vector4f color(mDiffuse.R(), mDiffuse.G(), mDiffuse.B(), mDiffuse.A());
+				float4 color(mDiffuse.R(), mDiffuse.G(), mDiffuse.B(), mDiffuse.A());
 				param->EffectParam->SetValue(color);
 			}
 			break;
 		case EPU_Material_Specular_Color:
 			{
-				Vector4f color(mSpecular.R(), mSpecular.G(), mSpecular.B(), mSpecular.A());
+				float4 color(mSpecular.R(), mSpecular.G(), mSpecular.B(), mSpecular.A());
 				param->EffectParam->SetValue(color);
 			}
 			break;

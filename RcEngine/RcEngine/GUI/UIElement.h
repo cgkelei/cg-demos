@@ -45,23 +45,24 @@ enum UIElementState
 	UI_State_Pressed,
 };
 
-typedef Vector<int32_t, 2> Point;
-typedef Vector<int32_t, 2> Size;
-
 class _ApiExport UIElement
 {
 public:
 	UIElement();
 	virtual ~UIElement();
 
-	virtual void OnMouseHover(const Point& position, const Point& screenPosition, uint32_t buttons, uint32_t qualifiers);
+
+	virtual void Update(float delta);
+	virtual void Draw();
+
+	virtual void OnMouseHover(const int2& position, const int2& screenPosition, uint32_t buttons, uint32_t qualifiers);
 	virtual void OnMouseWheel(int32_t delta, uint32_t buttons, uint32_t qualifiers);
 	
-	virtual void OnClick(const Point& position, const Point& screenPosition, uint32_t buttons, int qualifiers);
+	virtual void OnClick(const int2& position, const int2& screenPosition, uint32_t buttons, int qualifiers);
 
-	virtual void OnDragBegin(const Point& position, const Point& screenPosition, int buttons, int qualifiers);
-	virtual void OnDragMove(const Point& position, const Point& screenPosition, int buttons, int qualifiers);
-	virtual void OnDragEnd(const Point& position, const Point& screenPosition);
+	virtual void OnDragBegin(const int2& position, const int2& screenPosition, int buttons, int qualifiers);
+	virtual void OnDragMove(const int2& position, const int2& screenPosition, int buttons, int qualifiers);
+	virtual void OnDragEnd(const int2& position, const int2& screenPosition);
 
 	virtual void OnKeyPress(uint8_t key, uint32_t qualifiers);
 	virtual void OnKeyRelease(uint8_t key, uint32_t qualifiers);
@@ -69,16 +70,16 @@ public:
 	const String& GetName() const				{ return mName; }
 	void SetName(const String& name)			{ mName = name; }
 	
-	void SetPosition(const Point& position);
-	const Point& GetPosition() const			{ return mPosition; }
-	Point GetScreenPosition();
+	void SetPosition(const int2& position);
+	const int2& GetPosition() const			{ return mPosition; }
+	int2 GetScreenPosition();
 
-	void SetSize(const Size& size);
-	const Point& GetSize() const				{ return mSize; }
+	void SetSize(const int2& size);
+	const int2& GetSize() const				{ return mSize; }
 
-	void SetMinSize(const Size& size);
-	const Point& GetMinSize() const				{ return mMinSize; }
-	const Point& GetMaxSize() const				{ return mMaxSize; }
+	void SetMinSize(const int2& size);
+	const int2& GetMinSize() const				{ return mMinSize; }
+	const int2& GetMaxSize() const				{ return mMaxSize; }
 	
 	void SetFocusMode(FocusMode mode)			{ mFocusMode = mode; }
 	FocusMode GetFocusMode() const			    { return mFocusMode; }
@@ -117,14 +118,14 @@ public:
 	// Remove from parent
 	void Remove();
 
-	Point ScreenToClient(const Point& screenPosition);
-	Point ClientToScreen(const Point& position);
+	int2 ScreenToClient(const int2& screenPosition);
+	int2 ClientToScreen(const int2& position);
 
-	bool IsInside(Point position, bool isScreen);
+	bool IsInside(int2 position, bool isScreen);
 
 	void BringToFront();
 
-	virtual void Draw();
+	
 
 protected:
 	void MarkDirty();
@@ -141,12 +142,12 @@ protected:
 	bool mEnabled;
 	bool mPositionDirty;
 
-	Point mPosition;
-	Point mScreenPosition;
+	int2 mPosition;
+	int2 mScreenPosition;
 	
-	Size mSize;
-	Size mMinSize;
-	Size mMaxSize;
+	int2 mSize;
+	int2 mMinSize;
+	int2 mMaxSize;
 
 	std::wstring mToolTipText;
 

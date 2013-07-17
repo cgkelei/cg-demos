@@ -113,7 +113,7 @@ void Renderer::UpdateShadowMap()
 
 }
 
-void Renderer::SetupViewProjMatirices( const Matrix4f& view, const Matrix4f& proj )
+void Renderer::SetupViewProjMatirices( const float4x4& view, const float4x4& proj )
 {
 	mViewMat = view;
 	mViewMatInv = view.Inverse();

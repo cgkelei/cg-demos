@@ -6,14 +6,14 @@ namespace RcEngine {
 
 Node::Node()
 	: mParent(nullptr), mDirtyBits(NODE_DIRTY_ALL), 
-	mPosition(Vector3f::Zero()), mRotation(Quaternionf::Identity()), mScale(1.0f, 1.0f, 1.0f)
+	mPosition(float3::Zero()), mRotation(Quaternionf::Identity()), mScale(1.0f, 1.0f, 1.0f)
 {
 
 }
 
 Node::Node( const String& name, Node* parent )
 	: mName(name), mParent(0), mDirtyBits(NODE_DIRTY_ALL), 
-	  mPosition(Vector3f::Zero()), mRotation(Quaternionf::Identity()), mScale(1.0f, 1.0f, 1.0f)
+	  mPosition(float3::Zero()), mRotation(Quaternionf::Identity()), mScale(1.0f, 1.0f, 1.0f)
 {
 	if (parent)
 	{
@@ -38,7 +38,7 @@ void Node::SetParent( Node* parent )
 }
 
 
-void Node::SetPosition( const Vector3f& position )
+void Node::SetPosition( const float3& position )
 {
 	mPosition = position;
 	PropagateDirtyDown(NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS);
@@ -52,14 +52,14 @@ void Node::SetRotation( const Quaternionf& rotation )
 	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
 }
 
-void Node::SetScale( const Vector3f& scale )
+void Node::SetScale( const float3& scale )
 {
 	mScale = scale;
 	PropagateDirtyDown(NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS);
 	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
 }
 
-void Node::SetTransform( const Vector3f& position, const Quaternionf& rotation )
+void Node::SetTransform( const float3& position, const Quaternionf& rotation )
 {
 	mPosition = position;
 	mRotation = rotation;
@@ -67,7 +67,7 @@ void Node::SetTransform( const Vector3f& position, const Quaternionf& rotation )
 	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
 }
 
-void Node::SetTransform( const Vector3f& position, const Quaternionf& rotation, const Vector3f& scale )
+void Node::SetTransform( const float3& position, const Quaternionf& rotation, const float3& scale )
 {
 	mPosition = position;
 	mRotation = rotation;
@@ -76,13 +76,13 @@ void Node::SetTransform( const Vector3f& position, const Quaternionf& rotation, 
 	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
 }
 
-Matrix4f Node::GetTransform() const
+float4x4 Node::GetTransform() const
 {
 	// Order SRT
 	return CreateTransformMatrix(mScale, mRotation, mPosition);
 }
 
-void Node::SetWorldPosition( const Vector3f& position )
+void Node::SetWorldPosition( const float3& position )
 {
 	if (!mParent)
 	{
@@ -91,12 +91,12 @@ void Node::SetWorldPosition( const Vector3f& position )
 	else
 	{
 		// find the position in parent's local space
-		Matrix4f parentWorldTransformInv = mParent->GetWorldTransform().Inverse();
+		float4x4 parentWorldTransformInv = mParent->GetWorldTransform().Inverse();
 		SetPosition( Transform(position, parentWorldTransformInv) );
 	}
 }
 
-Vector3f Node::GetWorldPosition() const
+float3 Node::GetWorldPosition() const
 {
 	if (mDirtyBits & NODE_DIRTY_WORLD)
 		UpdateWorldTransform();
@@ -126,16 +126,16 @@ Quaternionf Node::GetWorldRotation() const
 	return QuaternionFromRotationMatrix( RotationFromMatrix(mWorldTransform) );
 }
 
-Vector3f Node::GetWorldDirection() const
+float3 Node::GetWorldDirection() const
 {
 	if (mDirtyBits & NODE_DIRTY_WORLD)
 		UpdateWorldTransform();
 
-	const Vector3f Froward(0.0f, 0.0f, 1.0f);
+	const float3 Froward(0.0f, 0.0f, 1.0f);
 	return Transform(Froward, RotationFromMatrix(mWorldTransform));
 }
 
-Vector3f Node::GetWorldScale() const
+float3 Node::GetWorldScale() const
 {
 	if (mDirtyBits & NODE_DIRTY_WORLD)
 		UpdateWorldTransform();
@@ -144,7 +144,7 @@ Vector3f Node::GetWorldScale() const
 }
 
 
-void Node::SetWorldTransform( const Vector3f& position, const Quaternionf& rotation )
+void Node::SetWorldTransform( const float3& position, const Quaternionf& rotation )
 {
 	if (!mParent)
 	{
@@ -154,7 +154,7 @@ void Node::SetWorldTransform( const Vector3f& position, const Quaternionf& rotat
 	else
 	{
 		// find the position in parent's local space
-		Matrix4f parentWorldTransformInv = mParent->GetWorldTransform().Inverse();
+		float4x4 parentWorldTransformInv = mParent->GetWorldTransform().Inverse();
 		SetPosition( Transform(position, parentWorldTransformInv) );
 
 		Quaternionf parentWorldRotInv = QuaternionInverse( mParent->GetWorldRotation() );
@@ -165,7 +165,7 @@ void Node::SetWorldTransform( const Vector3f& position, const Quaternionf& rotat
 	PropagateDirtyUp(NODE_DIRTY_BOUNDS);
 }
 
-const Matrix4f& Node::GetWorldTransform() const
+const float4x4& Node::GetWorldTransform() const
 {
 	if (mDirtyBits & NODE_DIRTY_WORLD)
 		UpdateWorldTransform();
@@ -173,7 +173,7 @@ const Matrix4f& Node::GetWorldTransform() const
 	return mWorldTransform;
 }
 
-void Node::Translate( const Vector3f& d, TransformSpace relativeTo /*= TS_Parent*/ )
+void Node::Translate( const float3& d, TransformSpace relativeTo /*= TS_Parent*/ )
 {
 	switch (relativeTo)
 	{
@@ -186,9 +186,9 @@ void Node::Translate( const Vector3f& d, TransformSpace relativeTo /*= TS_Parent
 		{
 			if (mParent)
 			{
-				Vector3f dInv = Transform(d, mParent->GetWorldRotation().Inverse());
-				Vector3f scale = mParent->GetWorldScale();
-				mPosition += Vector3f(dInv.X() / scale.X(), dInv.Y() / scale.Y(), dInv.Z() / scale.Z());
+				float3 dInv = Transform(d, mParent->GetWorldRotation().Inverse());
+				float3 scale = mParent->GetWorldScale();
+				mPosition += float3(dInv.X() / scale.X(), dInv.Y() / scale.Y(), dInv.Z() / scale.Z());
 			}
 			else
 			{
@@ -250,7 +250,7 @@ uint32_t Node::GetNumChildren( bool recursive /*= false */ ) const
 }
 
 
-Node* Node::CreateChild( const String& name, const Vector3f& translate, const Quaternionf& rotate )
+Node* Node::CreateChild( const String& name, const float3& translate, const Quaternionf& rotate )
 {
 	Node* child = CreateChildImpl(name);
 	child->SetPosition(translate);

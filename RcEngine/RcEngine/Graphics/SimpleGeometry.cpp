@@ -28,7 +28,7 @@ RenderableHelper::~RenderableHelper()
 
 }
 
-void RenderableHelper::GetWorldTransforms( Matrix4f* xform ) const
+void RenderableHelper::GetWorldTransforms( float4x4* xform ) const
 {
 	xform[0] = GetWorldTransform();
 }
@@ -40,16 +40,16 @@ SimpleBox::SimpleBox(const String& name)
 
 	//mMaterial = factory.CreateMaterialFromFile("SimpleMat", "../Media/Materials/SimpleMat.xml");
 
-	Vector3f vertives[8] = 
+	float3 vertives[8] = 
 	{
-			Vector3f( -1.0f,  1.0f, -1.0f ),
-			Vector3f(  1.0f,  1.0f, -1.0f ),
-			Vector3f(  1.0f,  1.0f,  1.0f ),
-			Vector3f( -1.0f,  1.0f,  1.0f ),
-			Vector3f( -1.0f, -1.0f, -1.0f ),
-			Vector3f(  1.0f, -1.0f, -1.0f ), 
-			Vector3f(  1.0f, -1.0f,  1.0f ), 
-			Vector3f( -1.0f, -1.0f,  1.0f )
+			float3( -1.0f,  1.0f, -1.0f ),
+			float3(  1.0f,  1.0f, -1.0f ),
+			float3(  1.0f,  1.0f,  1.0f ),
+			float3( -1.0f,  1.0f,  1.0f ),
+			float3( -1.0f, -1.0f, -1.0f ),
+			float3(  1.0f, -1.0f, -1.0f ), 
+			float3(  1.0f, -1.0f,  1.0f ), 
+			float3( -1.0f, -1.0f,  1.0f )
 	};
 
 	uint16_t indices[] = 
@@ -106,17 +106,17 @@ SimpleTexturedQuad::SimpleTexturedQuad(const String& name)
 
 	struct PosNormalTexVertex
 	{
-		Vector3f Pos;
-		Vector3f Normal;
-		Vector2f Tex;
+		float3 Pos;
+		float3 Normal;
+		float2 Tex;
 	};
 
 	PosNormalTexVertex vertives[4] = 
 	{
-		{ Vector3f( -1.0f,  1.0f, 0.0f ), Vector3f(0.0f, 0.0f, 1.0f), Vector2f(0.0f, 1.0f) },
-		{ Vector3f( 1.0f,  1.0f, 0.0f ), Vector3f(0.0f, 0.0f, 1.0f), Vector2f(1.0f, 1.0f) },
-		{ Vector3f( 1.0f,  -1.0f, 0.0f ), Vector3f(0.0f, 0.0f, 1.0f), Vector2f(1.0f, 0.0f) },
-		{ Vector3f( -1.0f,  -1.0f, 0.0f ), Vector3f(0.0f, 0.0f, 1.0f), Vector2f(0.0f, 0.0f) }
+		{ float3( -1.0f,  1.0f, 0.0f ), float3(0.0f, 0.0f, 1.0f), float2(0.0f, 1.0f) },
+		{ float3( 1.0f,  1.0f, 0.0f ), float3(0.0f, 0.0f, 1.0f), float2(1.0f, 1.0f) },
+		{ float3( 1.0f,  -1.0f, 0.0f ), float3(0.0f, 0.0f, 1.0f), float2(1.0f, 0.0f) },
+		{ float3( -1.0f,  -1.0f, 0.0f ), float3(0.0f, 0.0f, 1.0f), float2(0.0f, 0.0f) }
 	};
 
 	uint16_t indices[] = 

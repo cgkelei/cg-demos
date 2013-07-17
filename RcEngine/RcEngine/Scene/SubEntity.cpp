@@ -56,7 +56,7 @@ EffectTechnique* SubEntity::GetTechnique() const
 	return mMaterial->GetCurrentTechnique();
 }
 
-void SubEntity::GetWorldTransforms( Matrix4f* xform ) const
+void SubEntity::GetWorldTransforms( float4x4* xform ) const
 {
 	if (!mParent->mNumSkinMatrices || !mParent->HasSkeletonAnimation())
 	{

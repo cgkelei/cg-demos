@@ -14,7 +14,7 @@ Bone::Bone( const String& name, uint32_t boneID, Bone* parent )
 
 void Bone::CalculateBindPose()
 {
-	Matrix4f bindPose = GetWorldTransform();
+	float4x4 bindPose = GetWorldTransform();
 	mOffsetMatrix = bindPose.Inverse();
 }
 
@@ -81,16 +81,16 @@ shared_ptr<Skeleton> Skeleton::LoadFrom( Stream& source )
 
 		Bone* bone = new Bone(boneName, i, parent);
 
-		Vector3f bindPos;
-		source.Read(&bindPos,sizeof(Vector3f));
+		float3 bindPos;
+		source.Read(&bindPos,sizeof(float3));
 		bone->SetPosition(bindPos);
 
 		Quaternionf bindRot;
 		source.Read(&bindRot, sizeof(Quaternionf));
 		bone->SetRotation(bindRot);
 
-		Vector3f bindScale;
-		source.Read(&bindScale,sizeof(Vector3f));
+		float3 bindScale;
+		source.Read(&bindScale,sizeof(float3));
 		bone->SetScale(bindScale);
 
 		bone->CalculateBindPose();

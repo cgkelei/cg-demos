@@ -103,8 +103,7 @@ Matrix4<Real> MatrixInverse(const Matrix4<Real>& mat);
 
 #include <Math/Matrix.inl>
 
-typedef Matrix4<float> Matrix4f;
-typedef Matrix4<double> Matrix4d;
+typedef Matrix4<float> float4x4;
 
 
 } // Namespace RcEngine

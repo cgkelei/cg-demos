@@ -37,7 +37,7 @@ public:
 	/**
 	 * Creates an named new SceneNode as a child of this node.
 	 */
-	SceneNode* CreateChildSceneNode( const String& name, const Vector3f& translate = Vector3f::Zero(),  const Quaternionf& rotate = Quaternionf::Identity());
+	SceneNode* CreateChildSceneNode( const String& name, const float3& translate = float3::Zero(),  const Quaternionf& rotate = Quaternionf::Identity());
 
 	/** 
 	 * Return the scene to which a node belongs.

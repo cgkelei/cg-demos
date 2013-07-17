@@ -83,17 +83,17 @@ void FPSCameraControler::AttachCamera( Camera* camera )
 {
 	CameraControler::AttachCamera(camera);		
 
-	const Matrix4f& viewMatrix = camera->GetViewMatrix();
+	const float4x4& viewMatrix = camera->GetViewMatrix();
 			
-	/*Matrix4f invViewMatrix = MatrixInverse(viewMatrix);	
+	/*float4x4 invViewMatrix = MatrixInverse(viewMatrix);	
 
-	Vector4f camPos = invViewMatrix.GetRow(3);
+	float4 camPos = invViewMatrix.GetRow(3);
 	Quaternionf camRot = QuaternionFromRotationMatrix(invViewMatrix);
 
 	// The axis basis vectors and camera position are stored inside the 
 	// position matrix in the 4 rows of the camera's world matrix.
 	// To figure out the yaw/pitch of the camera, we just need the Z basis vector
-	Vector4f zBais = invViewMatrix.GetRow(2);
+	float4 zBais = invViewMatrix.GetRow(2);
 
 	mCameraYawAngle = std::atan2(zBais.X(), zBais.Z());
 	float len = std::sqrt(zBais.X()* zBais.X() + zBais.Z()* zBais.Z());
@@ -103,7 +103,7 @@ void FPSCameraControler::AttachCamera( Camera* camera )
 	mCameraPitchAngle = ToDegree(mCameraPitchAngle);*/
 	
 	Quaternionf quat;
-	Vector3f scale, pos;
+	float3 scale, pos;
 	MatrixDecompose(scale, quat, pos, viewMatrix);
 
 	mCameraRot = QuaternionInverse(quat);
@@ -112,7 +112,7 @@ void FPSCameraControler::AttachCamera( Camera* camera )
 
 void FPSCameraControler::Move( float x, float y, float z )
 {
-	Vector3f newEyePos = mAttachedCamera->GetPosition() + Transform(Vector3f(x,y,z), mCameraRot);
+	float3 newEyePos = mAttachedCamera->GetPosition() + Transform(float3(x,y,z), mCameraRot);
 	mAttachedCamera->SetViewParams(newEyePos, newEyePos + mAttachedCamera->GetView(), mAttachedCamera->GetUp());
 }
 
@@ -164,9 +164,9 @@ void FPSCameraControler::Rotate( float yaw, float pitch, float roll )
 	mCameraRot = QuaternionFromRotationYawPitchRoll(mCameraYawAngle, mCameraPitchAngle, 0.0f);
 
 	// Transform vectors based on camera's rotation matrix
-	Vector3f vWorldUp, vWorldAhead;
-	Vector3f vLocalUp = Vector3f( 0, 1, 0 );
-	Vector3f vLocalAhead = Vector3f( 0, 0, 1 );
+	float3 vWorldUp, vWorldAhead;
+	float3 vLocalUp = float3( 0, 1, 0 );
+	float3 vLocalAhead = float3( 0, 0, 1 );
 	vWorldUp = Transform(vLocalUp, mCameraRot );
 	vWorldAhead = Transform( vLocalAhead, mCameraRot );
 
@@ -189,7 +189,7 @@ ArcBall::ArcBall( int32_t windowWidth, int32_t windowHeight )
 {
 	Reset();
 	SetNoConstraintAxis();
-	mCenter = Vector2f( (float)windowWidth/2, (float)windowHeight/2 );
+	mCenter = float2( (float)windowWidth/2, (float)windowHeight/2 );
 	mRadius = (std::min)( (float)windowWidth/2, (float)windowHeight/2 );
 }
 
@@ -207,10 +207,10 @@ void ArcBall::Reset()
 }
 
 
-Vector3f ArcBall::ScreenToSphere( float screenX, float screenY )
+float3 ArcBall::ScreenToSphere( float screenX, float screenY )
 {
 	// Scale to screen
-	Vector3f result;
+	float3 result;
 
 	// map to [-1, 1]
 	result.X() = -(screenX - mCenter.X()) / mRadius;
@@ -238,7 +238,7 @@ void ArcBall::OnMove( int32_t mouseX, int32_t mouseY )
 		mCurrentPt = ScreenToSphere((float)mouseX, (float)mouseY);
 
 		// Calculate quaternion form start and end point
-		Vector3f part = Cross(mDownPt, mCurrentPt);
+		float3 part = Cross(mDownPt, mCurrentPt);
 		float dot = Dot(mDownPt, mCurrentPt);
 
 		mQuatNow = mQuatDown * Quaternionf(dot, part.X(), part.Y(), part.Z());
@@ -273,11 +273,11 @@ void ArcBall::SetWindowSize( int32_t windowWidth, int32_t windowHeight )
 	else
 		mRadius = (windowWidth * .95f) * 0.5f;
 
-	mCenter = Vector2f( (float)mWindowWidth/2, (float)mWindowHeight/2 );
+	mCenter = float2( (float)mWindowWidth/2, (float)mWindowHeight/2 );
 	
 }
 
-void ArcBall::SetCenterAndRadius( const Vector2f& center, float radius )
+void ArcBall::SetCenterAndRadius( const float2& center, float radius )
 {
 	mCenter = center;
 	mRadius = radius;
@@ -333,9 +333,9 @@ void ModelViewerCameraControler::HadnleCameraView( uint32_t action, bool value, 
 			mCameraRot = QuaternionInverse(mCameraArcBall.GetRotation());
 
 			// Transform vectors based on camera's rotation matrix
-			Vector3f vWorldUp, vWorldAhead;
-			Vector3f vLocalUp = Vector3f( 0, 1, 0 );
-			Vector3f vLocalAhead = Vector3f( 0, 0, 1 );
+			float3 vWorldUp, vWorldAhead;
+			float3 vLocalUp = float3( 0, 1, 0 );
+			float3 vLocalAhead = float3( 0, 0, 1 );
 			vWorldUp = Transform(vLocalUp, mCameraRot );
 			vWorldAhead = Transform( vLocalAhead, mCameraRot );
 
@@ -382,7 +382,7 @@ void ModelViewerCameraControler::SetWindowSize( int32_t width, int32_t height )
 	mModelArcBall.SetWindowSize(width, height);
 }
 
-void ModelViewerCameraControler::SetCenterAndRadius( const Vector2f& center, float radis )
+void ModelViewerCameraControler::SetCenterAndRadius( const float2& center, float radis )
 {
 	mCameraArcBall.SetCenterAndRadius(center, radis);
 	mModelArcBall.SetCenterAndRadius(center, radis);

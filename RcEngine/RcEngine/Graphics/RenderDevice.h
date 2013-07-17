@@ -40,7 +40,7 @@ public:
 	virtual void ToggleFullscreen(bool fs) = 0;
 	virtual bool Fullscreen() const = 0;
 	virtual void CreateRenderWindow(const RenderSettings& settings) = 0;	
-	virtual void AdjustProjectionMatrix(Matrix4f& pOut) = 0;
+	virtual void AdjustProjectionMatrix(float4x4& pOut) = 0;
 
 protected:
 	virtual void DoBindFrameBuffer(const shared_ptr<FrameBuffer>& fb) = 0;

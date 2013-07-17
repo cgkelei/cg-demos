@@ -317,7 +317,7 @@ void Font::UnloadImpl()
 
 }
 
-void Font::DrawString(SpriteBatch& spriteBatch, std::wstring& text, uint32_t fontSize, const Vector2f& position, const ColorRGBA& color)
+void Font::DrawString(SpriteBatch& spriteBatch, std::wstring& text, uint32_t fontSize, const float2& position, const ColorRGBA& color)
 {
 	float x = position.X();
 	float y = position.Y();
