@@ -8,7 +8,7 @@ namespace RcEngine {
 Camera::Camera(void)
 	: mFrustumDirty(true)
 {
-	SetViewParams(Vector3f(0, 0, 0), Vector3f(0, 0, 1), Vector3f(0, 1, 0));
+	SetViewParams(float3(0, 0, 0), float3(0, 0, 1), float3(0, 1, 0));
 	SetProjectionParams(Mathf::PI / 4.0f, 1.0f, 1.0f, 1000.0f);
 }
 
@@ -17,7 +17,7 @@ Camera::~Camera(void)
 {
 }
 
-void Camera::SetViewParams( const Vector3f& eyePos, const Vector3f& lookat, const Vector3f& upVec /*= Vector3f(0, 1, 0)*/ )
+void Camera::SetViewParams( const float3& eyePos, const float3& lookat, const float3& upVec /*= float3(0, 1, 0)*/ )
 {
 	mPosition = eyePos;
 	mLookAt	= lookat;
@@ -43,12 +43,12 @@ void Camera::SetProjectionParams( float fov, float aspect, float nearPlane, floa
 	mFrustumDirty = true;
 }
 
-const Matrix4f& Camera::GetViewMatrix() const
+const float4x4& Camera::GetViewMatrix() const
 {
 	return mViewMatrix;
 }
 
-const Matrix4f& Camera::GetProjectionMatrix() const
+const float4x4& Camera::GetProjectionMatrix() const
 {
 	return mProjectionMatrix;
 }

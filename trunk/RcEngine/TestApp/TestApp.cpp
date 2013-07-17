@@ -54,8 +54,8 @@ void TestApp::Initialize()
 {
 	Camera* camera = RcEngine::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
 	
-	Vector3f up(0, 1, 0);
-	camera->SetViewParams(Vector3f(0, 50, 150), Vector3f(0, 50, 0), up);
+	float3 up(0, 1, 0);
+	camera->SetViewParams(float3(0, 50, 150), float3(0, 50, 0), up);
 	camera->SetProjectionParams(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 10000.0f );
 
 	mCameraControler = new FPSCameraControler;
@@ -79,7 +79,7 @@ void TestApp::Initialize()
 //	
 //	Entity* dudeEntity = sceneManager->CreateEntity("Dude", "him.mesh",  "Custom");
 //	SceneNode* dudeNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
-//	dudeNode->SetPosition(Vector3f(0, 0, 0));
+//	dudeNode->SetPosition(float3(0, 0, 0));
 //	dudeNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(180.0f), 0.0f, 0.0f));
 //	dudeNode->AttachObject(dudeEntity);
 //
@@ -124,7 +124,7 @@ void TestApp::LoadContent()
 	// Entity
 	Entity* dudeEntity = sceneManager->CreateEntity("Dude", "him.mesh",  "Custom");
 	SceneNode* dudeNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
-	dudeNode->SetPosition(Vector3f(0, 0, 0));
+	dudeNode->SetPosition(float3(0, 0, 0));
 	dudeNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(180.0f), 0.0f, 0.0f));
 	dudeNode->AttachObject(dudeEntity);
 
@@ -170,7 +170,7 @@ void TestApp::Render()
 
 	wchar_t buffer[100];
 	int cx = swprintf ( buffer, 100, L"FPS: %d", mFramePerSecond );
-	mFont->DrawString(*mSpriteBatch, std::wstring(buffer, cx), 30, Vector2f(20, 580), ColorRGBA(0, 0, 0, 1));
+	mFont->DrawString(*mSpriteBatch, std::wstring(buffer, cx), 30, float2(20, 580), ColorRGBA(0, 0, 0, 1));
 	mSpriteBatch->End();
 
 	mSpriteBatch->Flush();

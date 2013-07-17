@@ -1,5 +1,6 @@
 #include <GUI/UIManager.h>
 #include <GUI/UIElement.h>
+#include <Input/InputSystem.h>
 #include <Input/InputDevice.h>
 #include <MainApp/Application.h>
 #include <MainApp/Window.h>
@@ -45,6 +46,24 @@ void UIManager::SetFocusElement( UIElement* element )
 	}
 }
 
+
+void UIManager::Update( float delta )
+{
+	bool mouseVisible = Context::GetSingleton().GetApplication().GetMainWindow()->IsMouseVisible();
+	
+	Mouse* mouse = Context::GetSingleton().GetInputSystem().GetMouse();
+
+	int2 mousePos = int2( mouse->X(), mouse->Y() );
+
+	if (mouseVisible)
+	{
+		UIElement* element = GetElementFromPoint(mousePos);
+
+		if (element && element->IsEnabled())
+			element->OnMouseHover(element->ScreenToClient(mousePos), mousePos, 0, 0);
+	}
+
+}
 
 void UIManager::HandleKeyPress( uint8_t key, uint32_t qualifiers )
 {
@@ -99,7 +118,7 @@ void UIManager::HandleKeyRelease( uint8_t key, uint32_t qualifiers )
 
 }
 
-void UIManager::HandleMousePress( const Point& pos, uint32_t buttons, int qualifiers )
+void UIManager::HandleMousePress( const int2& pos, uint32_t buttons, int qualifiers )
 {
 	bool mouseVisible = Context::GetSingleton().GetApplication().GetMainWindow()->IsMouseVisible();
 
@@ -132,7 +151,7 @@ void UIManager::HandleMousePress( const Point& pos, uint32_t buttons, int qualif
 	}
 }
 
-void UIManager::HandleMouseRelease( const Point& pos, uint32_t buttons, int qualifiers )
+void UIManager::HandleMouseRelease( const int2& pos, uint32_t buttons, int qualifiers )
 {
 	bool mouseVisible = Context::GetSingleton().GetApplication().GetMainWindow()->IsMouseVisible();
 
@@ -147,7 +166,7 @@ void UIManager::HandleMouseRelease( const Point& pos, uint32_t buttons, int qual
 }
 
 
-void UIManager::HandleMouseMove( const Point& pos, uint32_t buttons, int qualifiers )
+void UIManager::HandleMouseMove( const int2& pos, uint32_t buttons, int qualifiers )
 {
 	bool mouseVisible = Context::GetSingleton().GetApplication().GetMainWindow()->IsMouseVisible();
 
@@ -169,7 +188,7 @@ void UIManager::HandleMouseWheel( int32_t delta, uint32_t buttons, uint32_t qual
 	}
 }
 
-void UIManager::GetElementFromPoint(UIElement*& result, UIElement* current, const Point& pos )
+void UIManager::GetElementFromPoint(UIElement*& result, UIElement* current, const int2& pos )
 {
 	if (!current)
 		return;
@@ -190,7 +209,7 @@ void UIManager::GetElementFromPoint(UIElement*& result, UIElement* current, cons
 
 }
 
-UIElement* UIManager::GetElementFromPoint( const Point& pos )
+UIElement* UIManager::GetElementFromPoint( const int2& pos )
 {
 	UIElement* result = 0;
 	GetElementFromPoint(result, mRootElement, pos);

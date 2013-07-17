@@ -29,7 +29,7 @@ public:
 	void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0);
 	void SetSamplerState(ShaderType stage, uint32_t unit, const shared_ptr<SamplerState>& state);
 
-	void AdjustProjectionMatrix(Matrix4f& pOut);
+	void AdjustProjectionMatrix(float4x4& pOut);
 
 	//void Draw(RenderTechnique& tech, RenderOperation& operation);
 	void DoRender( EffectTechnique& tech, RenderOperation& op);

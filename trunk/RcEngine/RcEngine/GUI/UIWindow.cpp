@@ -34,7 +34,7 @@ void UIWindow::SetResizable( bool resizable )
 	mResizable = resizable;
 }
 
-void UIWindow::OnDragBegin( const Point& position, const Point& screenPosition, int buttons, int qualifiers )
+void UIWindow::OnDragBegin( const int2& position, const int2& screenPosition, int buttons, int qualifiers )
 {
 	if (buttons != MS_LeftButton)
 	{
@@ -48,16 +48,16 @@ void UIWindow::OnDragBegin( const Point& position, const Point& screenPosition, 
 
 }
 
-void UIWindow::OnDragMove( const Point& position, const Point& screenPosition, int buttons, int qualifiers )
+void UIWindow::OnDragMove( const int2& position, const int2& screenPosition, int buttons, int qualifiers )
 {
 	if (mDragMode == Drag_None)
 		return;
 
-	const Point& originalScreenPos = GetScreenPosition();
-	const Point& originalSize = GetSize();
-	const Point& originalPos = GetPosition();
+	const int2& originalScreenPos = GetScreenPosition();
+	const int2& originalSize = GetSize();
+	const int2& originalPos = GetPosition();
 
-	Point delta = screenPosition - originalScreenPos;
+	int2 delta = screenPosition - originalScreenPos;
 
 	switch (mDragMode)
 	{
@@ -75,14 +75,14 @@ void UIWindow::OnDragMove( const Point& position, const Point& screenPosition, i
 	case Drag_Resize_Top:
 		{
 			// only affect topleft y 
-			SetPosition( Point(originalPos.X(), originalPos.Y() + delta.Y()));
-			SetSize( Point(originalSize.X(), originalSize.Y() - delta.Y()) );
+			SetPosition( int2(originalPos.X(), originalPos.Y() + delta.Y()));
+			SetSize( int2(originalSize.X(), originalSize.Y() - delta.Y()) );
 		}
 		break;
 	case Drag_Resize_TopRight:
 		{
-			SetPosition( Point(originalPos.X(), originalPos.Y() + delta.Y()));
-			SetSize( Point(originalSize.X() + delta.X(), originalSize.Y() - delta.Y()) );
+			SetPosition( int2(originalPos.X(), originalPos.Y() + delta.Y()));
+			SetSize( int2(originalSize.X() + delta.X(), originalSize.Y() - delta.Y()) );
 		}
 		break;
 	case Drag_Resize_BottomRight:
@@ -92,24 +92,24 @@ void UIWindow::OnDragMove( const Point& position, const Point& screenPosition, i
 		break;
 	case Drag_Resize_Bottom:
 		{
-			SetSize( Point(originalSize.X(), originalSize.Y() + delta.Y()) );
+			SetSize( int2(originalSize.X(), originalSize.Y() + delta.Y()) );
 		}
 		break;
 	case Drag_Resize_BottomLeft:
 		{
-			SetPosition( Point(originalPos.X() + delta.X(), originalPos.Y()));
-			SetSize( Point(originalSize.X() - delta.X(), originalSize.Y() + delta.Y()) );
+			SetPosition( int2(originalPos.X() + delta.X(), originalPos.Y()));
+			SetSize( int2(originalSize.X() - delta.X(), originalSize.Y() + delta.Y()) );
 		}
 		break;
 	case Drag_Resize_Left:
 		{
-			SetPosition( Point(originalPos.X() + delta.X(), originalPos.Y()));
-			SetSize( Point(originalSize.X() - delta.X(), originalSize.Y()) );
+			SetPosition( int2(originalPos.X() + delta.X(), originalPos.Y()));
+			SetSize( int2(originalSize.X() - delta.X(), originalSize.Y()) );
 		}
 		break;
 	case Drag_Resize_Right:
 		{
-			SetSize( Point(originalSize.X() + delta.X(), originalSize.Y()) );
+			SetSize( int2(originalSize.X() + delta.X(), originalSize.Y()) );
 		}
 		break;
 	default:
@@ -120,7 +120,7 @@ void UIWindow::OnDragMove( const Point& position, const Point& screenPosition, i
 
 }
 
-void UIWindow::OnDragEnd( const Point& position, const Point& screenPosition )
+void UIWindow::OnDragEnd( const int2& position, const int2& screenPosition )
 {
 	mDragMode = Drag_None;
 }
@@ -146,11 +146,11 @@ void UIWindow::Minimize()
 	//SetSize();
 }
 
-UIWindow::DragMode UIWindow::GetDragMode( const Point& position )
+UIWindow::DragMode UIWindow::GetDragMode( const int2& position )
 {
 	DragMode mode = Drag_None;
 
-	const Point& windowSize = GetSize();
+	const int2& windowSize = GetSize();
 	const int32_t windowWidth = windowSize.X();
 	const int32_t windowHeight = windowSize.Y();
 
@@ -214,12 +214,12 @@ void UIWindow::ValidatePosition()
 		return;
 	}
 
-	const Point& parentSize = mParent->GetSize();
-	Point position = GetPosition();
-	Point halfSize = GetSize() / 2;
+	const int2& parentSize = mParent->GetSize();
+	int2 position = GetPosition();
+	int2 halfSize = GetSize() / 2;
 
-	position.X() = Math<Point::value_type>::Clamp(position.X(), -halfSize.X(), parentSize.X() - halfSize.X());
-	position.Y() = Math<Point::value_type>::Clamp(position.X(), -halfSize.Y(), parentSize.Y() - halfSize.Y());
+	position.X() = Math<int2::value_type>::Clamp(position.X(), -halfSize.X(), parentSize.X() - halfSize.X());
+	position.Y() = Math<int2::value_type>::Clamp(position.X(), -halfSize.Y(), parentSize.Y() - halfSize.Y());
 
 	SetPosition(position);
 }

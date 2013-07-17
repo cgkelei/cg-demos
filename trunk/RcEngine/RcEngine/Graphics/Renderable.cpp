@@ -47,7 +47,7 @@ void Renderable::OnRenderBegin()
 
 	if (matCounts)
 	{
-		vector<Matrix4f> matWorlds(matCounts);
+		vector<float4x4> matWorlds(matCounts);
 		GetWorldTransforms(&matWorlds[0]);
 
 		/**

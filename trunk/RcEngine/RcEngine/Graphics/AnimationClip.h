@@ -19,9 +19,9 @@ public:
 		// The time offset from the start of the animation to this keyframe.
 		float Time;
 
-		Vector3f Translation;
+		float3 Translation;
 		Quaternionf Rotation;
-		Vector3f Scale;
+		float3 Scale;
 	};
 
 	struct _ApiExport AnimationTrack

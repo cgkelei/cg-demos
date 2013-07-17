@@ -152,7 +152,7 @@ private:
 };
 
 template <>
-struct ShaderParameterSetHelper<Vector2f>
+struct ShaderParameterSetHelper<float2>
 {
 public:
 	ShaderParameterSetHelper(GLint location, EffectParameter* param)
@@ -162,7 +162,7 @@ public:
 	{
 		if (Param->Dirty())
 		{
-			Vector2f value; Param->GetValue(value);
+			float2 value; Param->GetValue(value);
 			glUniform2f(Location, value.X(), value.Y());
 			Param->ClearDirty();
 		}
@@ -174,7 +174,7 @@ private:
 };
 
 template <>
-struct ShaderParameterSetHelper<Vector2f*>
+struct ShaderParameterSetHelper<float2*>
 {
 public:
 	ShaderParameterSetHelper(GLint location, EffectParameter* param)
@@ -184,7 +184,7 @@ public:
 	{
 		if (Param->Dirty())
 		{
-			vector<Vector2f> value; Param->GetValue(value);
+			vector<float2> value; Param->GetValue(value);
 			if (!value.empty())
 			{
 				glUniform2fv(Location, value.size(), 
@@ -200,7 +200,7 @@ private:
 };
 
 template <>
-struct ShaderParameterSetHelper<Vector3f>
+struct ShaderParameterSetHelper<float3>
 {
 public:
 	ShaderParameterSetHelper(GLint location, EffectParameter* param)
@@ -210,7 +210,7 @@ public:
 	{
 		if (Param->Dirty())
 		{
-			Vector3f value; Param->GetValue(value);
+			float3 value; Param->GetValue(value);
 			glUniform3f(Location, value[0], value[1], value[2]);
 			Param->ClearDirty();
 		}
@@ -222,7 +222,7 @@ private:
 };
 
 template <>
-struct ShaderParameterSetHelper<Vector3f*>
+struct ShaderParameterSetHelper<float3*>
 {
 public:
 	ShaderParameterSetHelper(GLint location, EffectParameter* param)
@@ -232,7 +232,7 @@ public:
 	{
 		if (Param->Dirty())
 		{
-			vector<Vector3f> value; Param->GetValue(value);
+			vector<float3> value; Param->GetValue(value);
 			if (!value.empty())
 			{
 				glUniform3fv(Location, value.size(), 
@@ -248,7 +248,7 @@ private:
 };
 
 template <>
-struct ShaderParameterSetHelper<Vector4f>
+struct ShaderParameterSetHelper<float4>
 {
 public:
 	ShaderParameterSetHelper(GLint location, EffectParameter* param)
@@ -258,7 +258,7 @@ public:
 	{
 		if (Param->Dirty())
 		{
-			Vector4f value; Param->GetValue(value);
+			float4 value; Param->GetValue(value);
 			glUniform4f(Location, value[0], value[1], value[2], value[3]);
 			Param->ClearDirty();
 		}
@@ -270,7 +270,7 @@ private:
 };
 
 template <>
-struct ShaderParameterSetHelper<Vector4f*>
+struct ShaderParameterSetHelper<float4*>
 {
 public:
 	ShaderParameterSetHelper(GLint location, EffectParameter* param)
@@ -280,7 +280,7 @@ public:
 	{
 		if (Param->Dirty())
 		{
-			vector<Vector4f> value; Param->GetValue(value);
+			vector<float4> value; Param->GetValue(value);
 			if (!value.empty())
 			{
 				glUniform3fv(Location, value.size(), 
@@ -297,7 +297,7 @@ private:
 
 
 template <>
-struct ShaderParameterSetHelper<Matrix4f>
+struct ShaderParameterSetHelper<float4x4>
 {
 public:
 	ShaderParameterSetHelper(GLint location, EffectParameter* param)
@@ -307,7 +307,7 @@ public:
 	{
 		if (Param->Dirty())
 		{
-			Matrix4f value; Param->GetValue(value);
+			float4x4 value; Param->GetValue(value);
 
 			// we know that glsl matrix is column major, so we need transpose out matrix.
 			glUniformMatrix4fv(Location, 1, true, &value[0]);
@@ -321,7 +321,7 @@ private:
 };
 
 template <>
-struct ShaderParameterSetHelper<Matrix4f*>
+struct ShaderParameterSetHelper<float4x4*>
 {
 public:
 	ShaderParameterSetHelper(GLint location, EffectParameter* param)
@@ -331,7 +331,7 @@ public:
 	{
 		if (Param->Dirty())
 		{
-			vector<Matrix4f> value; Param->GetValue(value);
+			vector<float4x4> value; Param->GetValue(value);
 			if (!value.empty())
 			{
 				glUniformMatrix4fv(Location, value.size(), true,
@@ -519,11 +519,11 @@ OpenGLShaderProgram::ParameterBind OpenGLShaderProgram::GetShaderParamBindFunc(G
 		{
 			if (isArray)
 			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<Vector2f*>(location, effectParam);
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float2*>(location, effectParam);
 			}
 			else
 			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<Vector2f>(location, effectParam);
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float2>(location, effectParam);
 			}	
 		}
 		break;
@@ -531,11 +531,11 @@ OpenGLShaderProgram::ParameterBind OpenGLShaderProgram::GetShaderParamBindFunc(G
 		{
 			if (isArray)
 			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<Vector3f*>(location, effectParam);
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float3*>(location, effectParam);
 			}
 			else
 			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<Vector3f>(location, effectParam);
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float3>(location, effectParam);
 			}	
 		}
 		break;
@@ -543,11 +543,11 @@ OpenGLShaderProgram::ParameterBind OpenGLShaderProgram::GetShaderParamBindFunc(G
 		{
 			if (isArray)
 			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<Vector4f*>(location, effectParam);
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float4*>(location, effectParam);
 			}
 			else
 			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<Vector4f>(location, effectParam);
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float4>(location, effectParam);
 			}	
 		}
 		break;
@@ -555,11 +555,11 @@ OpenGLShaderProgram::ParameterBind OpenGLShaderProgram::GetShaderParamBindFunc(G
 		{
 			if (isArray)
 			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<Matrix4f*>(location, effectParam);
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float4x4*>(location, effectParam);
 			}
 			else
 			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<Matrix4f>(location, effectParam);
+				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float4x4>(location, effectParam);
 			}	
 		}
 		break;
@@ -706,11 +706,11 @@ void OpenGLShaderProgram::CaptureAllParameter()
 				{
 					if (isArray)
 					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<Vector2f*>(location, effectParam);
+						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float2*>(location, effectParam);
 					}
 					else
 					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<Vector2f>(location, effectParam);
+						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float2>(location, effectParam);
 					}	
 				}
 				break;
@@ -718,11 +718,11 @@ void OpenGLShaderProgram::CaptureAllParameter()
 				{
 					if (isArray)
 					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<Vector3f*>(location, effectParam);
+						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float3*>(location, effectParam);
 					}
 					else
 					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<Vector3f>(location, effectParam);
+						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float3>(location, effectParam);
 					}	
 				}
 				break;
@@ -730,11 +730,11 @@ void OpenGLShaderProgram::CaptureAllParameter()
 				{
 					if (isArray)
 					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<Vector4f*>(location, effectParam);
+						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float4*>(location, effectParam);
 					}
 					else
 					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<Vector4f>(location, effectParam);
+						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float4>(location, effectParam);
 					}	
 				}
 				break;
@@ -742,11 +742,11 @@ void OpenGLShaderProgram::CaptureAllParameter()
 				{
 					if (isArray)
 					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<Matrix4f*>(location, effectParam);
+						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float4x4*>(location, effectParam);
 					}
 					else
 					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<Matrix4f>(location, effectParam);
+						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float4x4>(location, effectParam);
 					}	
 				}
 				break;

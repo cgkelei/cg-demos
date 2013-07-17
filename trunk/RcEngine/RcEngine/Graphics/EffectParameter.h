@@ -39,14 +39,14 @@ public:
 	virtual void GetValue(vector<float>& value);
 	virtual void GetValue(int& value);
 	virtual void GetValue(vector<int32_t>& value);
-	virtual void GetValue(Matrix4f& value);
-	virtual void GetValue(vector<Matrix4f>& value);
-	virtual void GetValue(Vector2f& value);
-	virtual void GetValue(vector<Vector2f>& value);
-	virtual void GetValue(Vector3f& value);
-	virtual void GetValue(vector<Vector3f>& value);
-	virtual void GetValue(Vector4f& value);
-	virtual void GetValue(vector<Vector4f>& value);
+	virtual void GetValue(float4x4& value);
+	virtual void GetValue(vector<float4x4>& value);
+	virtual void GetValue(float2& value);
+	virtual void GetValue(vector<float2>& value);
+	virtual void GetValue(float3& value);
+	virtual void GetValue(vector<float3>& value);
+	virtual void GetValue(float4& value);
+	virtual void GetValue(vector<float4>& value);
 	virtual void GetValue(TextureLayer& value);
 	
 	virtual void SetValue(const bool& value);
@@ -55,14 +55,14 @@ public:
 	virtual void SetValue(const vector<float>& value);
 	virtual void SetValue(const int& value);
 	virtual void SetValue(const vector<int32_t>& value);
-	virtual void SetValue(const Matrix4f& value);
-	virtual void SetValue(const vector<Matrix4f>& value);
-	virtual void SetValue(const Vector2f& value);
-	virtual void SetValue(const vector<Vector2f>& value);
-	virtual void SetValue(const Vector3f& value);
-	virtual void SetValue(const vector<Vector3f>& value);
-	virtual void SetValue(const Vector4f& value);
-	virtual void SetValue(const vector<Vector4f>& value);
+	virtual void SetValue(const float4x4& value);
+	virtual void SetValue(const vector<float4x4>& value);
+	virtual void SetValue(const float2& value);
+	virtual void SetValue(const vector<float2>& value);
+	virtual void SetValue(const float3& value);
+	virtual void SetValue(const vector<float3>& value);
+	virtual void SetValue(const float4& value);
+	virtual void SetValue(const vector<float4>& value);
 	virtual void SetValue(const TextureLayer& value);
 
 	void ClearDirty() { mDirty = false; }
@@ -134,15 +134,15 @@ typedef EffectParameterNumberic< vector<Vector<int32_t, 4> > > EffectParameterIn
 
 typedef EffectParameterNumberic<float> EffectParameterFloat;
 typedef EffectParameterNumberic< vector<float> > EffectParameterFloatArray;
-typedef EffectParameterNumberic<Vector2f> EffectParameterVector2;
-typedef EffectParameterNumberic< vector<Vector2f> > EffectParameterVector2Array;
-typedef EffectParameterNumberic<Vector3f> EffectParameterVector3;
-typedef EffectParameterNumberic< vector<Vector3f> > EffectParameterVector3Array;
-typedef EffectParameterNumberic<Vector4f> EffectParameterVector4;
-typedef EffectParameterNumberic< vector<Vector4f> > EffectParameterVector4Array;
+typedef EffectParameterNumberic<float2> EffectParameterVector2;
+typedef EffectParameterNumberic< vector<float2> > EffectParameterVector2Array;
+typedef EffectParameterNumberic<float3> EffectParameterVector3;
+typedef EffectParameterNumberic< vector<float3> > EffectParameterVector3Array;
+typedef EffectParameterNumberic<float4> EffectParameterVector4;
+typedef EffectParameterNumberic< vector<float4> > EffectParameterVector4Array;
 
-typedef EffectParameterNumberic<Matrix4f> EffectParameterMatrix;
-typedef EffectParameterNumberic< vector<Matrix4f> > EffectParameterMatrixArray;
+typedef EffectParameterNumberic<float4x4> EffectParameterMatrix;
+typedef EffectParameterNumberic< vector<float4x4> > EffectParameterMatrixArray;
 
 class _ApiExport EffectParameterTexture : public EffectParameter
 {

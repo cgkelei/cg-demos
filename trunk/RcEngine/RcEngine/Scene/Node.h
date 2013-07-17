@@ -52,7 +52,7 @@ public:
 	 * TS_Local: Translate node from current position in local coordinate system along current rotated axes.
 	 * TS_World: Translate node from current position in world coordinate system along unrotated axes.
 	 */
-	void Translate( const Vector3f& d, TransformSpace relativeTo = TS_Parent );
+	void Translate( const float3& d, TransformSpace relativeTo = TS_Parent );
 
 	void Rotate( const Quaternionf& rot, TransformSpace relativeTo = TS_Parent );
 
@@ -61,12 +61,12 @@ public:
 	/**
 	 * Set node local position relative to its parent.
 	 */
-	void SetPosition(const Vector3f& position);
+	void SetPosition(const float3& position);
 
 	/** 
 	 * Get node local position relative to its parent.
 	 */
-	const Vector3f& GetPosition() const { return mPosition; }
+	const float3& GetPosition() const { return mPosition; }
 
 	/**
 	 * Set node local rotation relative to its parent.
@@ -81,37 +81,37 @@ public:
 	/**
 	 * Set node local scale relative to its parent.
 	 */
-	void SetScale(const Vector3f& scale);
+	void SetScale(const float3& scale);
 
 	/**
 	 * Get node local scale relative to its parent.
 	 */
-	const Vector3f& GetScale() const { return mScale; }
+	const float3& GetScale() const { return mScale; }
 
 	/**
 	 * Set node local transform relative to its parent.
 	 */
-	void SetTransform( const Vector3f& position, const Quaternionf& rotation );
+	void SetTransform( const float3& position, const Quaternionf& rotation );
 
 	/**
 	 * Set node local transform relative to its parent.
 	 */
-	void SetTransform( const Vector3f& position, const Quaternionf& rotation, const Vector3f& scale );
+	void SetTransform( const float3& position, const Quaternionf& rotation, const float3& scale );
 
 	/**
 	 * Get local transform matrix relative to its parent.
 	 */
-	Matrix4f GetTransform() const; 
+	float4x4 GetTransform() const; 
 
 	/** 
 	 * Set node world position.
 	 */
-	void SetWorldPosition( const Vector3f& position );
+	void SetWorldPosition( const float3& position );
 
 	/**
 	 * Get world position.
 	 */
-	Vector3f GetWorldPosition() const;
+	float3 GetWorldPosition() const;
 
 	/**
 	 * Set world rotation.
@@ -126,22 +126,22 @@ public:
 	/**
 	 * Get world direction.
 	 */
-	Vector3f GetWorldDirection() const;
+	float3 GetWorldDirection() const;
 
 	/**
 	 * Get world scale.
 	 */
-	Vector3f GetWorldScale() const;
+	float3 GetWorldScale() const;
 
 	/**
 	 * Set world transform matrix.
 	 */
-	void SetWorldTransform( const Vector3f& position, const Quaternionf& rotation );
+	void SetWorldTransform( const float3& position, const Quaternionf& rotation );
 
 	/**
 	 * Get world transform matrix.
 	 */
-	const Matrix4f& GetWorldTransform() const;
+	const float4x4& GetWorldTransform() const;
 
 	/** 
 	 * Get attached child node count.
@@ -157,7 +157,7 @@ public:
 	/**
 	 * Creates an named new Node as a child of this node.
 	 */
-	Node* CreateChild( const String& name, const Vector3f& translate,  const Quaternionf& rotate );
+	Node* CreateChild( const String& name, const float3& translate,  const Quaternionf& rotate );
 
 	/**
 	 * Add a new child node.
@@ -218,11 +218,11 @@ protected:
 
 	String mName;
 
-	Vector3f mPosition;
+	float3 mPosition;
 	Quaternionf mRotation;
-	Vector3f mScale;
+	float3 mScale;
 
-	mutable Matrix4f mWorldTransform;
+	mutable float4x4 mWorldTransform;
 
 	mutable uint8_t mDirtyBits;
 };

@@ -22,7 +22,7 @@ UIElement::~UIElement()
 
 }
 
-void UIElement::SetPosition( const Point& position )
+void UIElement::SetPosition( const int2& position )
 {
 	if (mPosition != position)
 	{
@@ -38,11 +38,11 @@ void UIElement::SetVisible( bool visible )
 }
 
 
-void UIElement::SetSize( const Point& size )
+void UIElement::SetSize( const int2& size )
 {
-	Point validateSize;
-	validateSize.X() = Math<Point::value_type>::Clamp(size.X(), mMinSize.X(), mMaxSize.X());
-	validateSize.Y() = Math<Point::value_type>::Clamp(size.Y(), mMinSize.Y(), mMaxSize.Y());
+	int2 validateSize;
+	validateSize.X() = Math<int2::value_type>::Clamp(size.X(), mMinSize.X(), mMaxSize.X());
+	validateSize.Y() = Math<int2::value_type>::Clamp(size.Y(), mMinSize.Y(), mMaxSize.Y());
 
 	if (mSize != validateSize)
 	{
@@ -51,11 +51,11 @@ void UIElement::SetSize( const Point& size )
 	}
 }
 
-Point UIElement::GetScreenPosition()
+int2 UIElement::GetScreenPosition()
 {
 	if (mPositionDirty)
 	{
-		Point pos = mPosition;
+		int2 pos = mPosition;
 		const UIElement* parent = mParent;
 		const UIElement* current = this;
 
@@ -108,7 +108,7 @@ IntRect UIElement::GetArea() const
 
 IntRect UIElement::GetGlobalArea()
 {
-	Point screenPos = GetScreenPosition();
+	int2 screenPos = GetScreenPosition();
 	return IntRect(screenPos.X(), screenPos.Y(), mSize.X(), mSize.Y());
 }
 
@@ -120,12 +120,12 @@ void UIElement::MarkDirty()
 		child->MarkDirty();
 }
 
-void UIElement::OnMouseHover( const Point& position, const Point& screenPosition, uint32_t buttons, uint32_t qualifiers )
+void UIElement::OnMouseHover( const int2& position, const int2& screenPosition, uint32_t buttons, uint32_t qualifiers )
 {
 
 }
 
-void UIElement::OnClick( const Point& position, const Point& screenPosition, uint32_t buttons, int qualifiers)
+void UIElement::OnClick( const int2& position, const int2& screenPosition, uint32_t buttons, int qualifiers)
 {
 
 }
@@ -136,17 +136,17 @@ void UIElement::OnMouseWheel( int32_t delta, uint32_t buttons, uint32_t qualifie
 
 }
 
-void UIElement::OnDragBegin( const Point& position, const Point& screenPosition, int buttons, int qualifiers)
+void UIElement::OnDragBegin( const int2& position, const int2& screenPosition, int buttons, int qualifiers)
 {
 
 }
 
-void UIElement::OnDragMove( const Point& position, const Point& screenPosition, int buttons, int qualifiers)
+void UIElement::OnDragMove( const int2& position, const int2& screenPosition, int buttons, int qualifiers)
 {
 
 }
 
-void UIElement::OnDragEnd( const Point& position, const Point& screenPosition)
+void UIElement::OnDragEnd( const int2& position, const int2& screenPosition)
 {
 
 }
@@ -202,17 +202,17 @@ UIElement* UIElement::GetChild( uint32_t index ) const
 	return index < mChildren.size() ? mChildren[index] : nullptr;
 }
 
-RcEngine::Point UIElement::ScreenToClient( const Point& screenPosition )
+RcEngine::int2 UIElement::ScreenToClient( const int2& screenPosition )
 {
 	return screenPosition - GetScreenPosition();
 }
 
-RcEngine::Point UIElement::ClientToScreen( const Point& position )
+RcEngine::int2 UIElement::ClientToScreen( const int2& position )
 {
 	return position + GetScreenPosition();
 }
 
-bool UIElement::IsInside(Point position, bool isScreen )
+bool UIElement::IsInside(int2 position, bool isScreen )
 {
 	if (isScreen)
 		position = ScreenToClient(position);
@@ -282,6 +282,11 @@ void UIElement::SetParent( UIElement* parent )
 bool UIElement::HasFocus() const
 {
 	return UIManager::GetSingleton().GetFocusElement() == this;
+}
+
+void UIElement::Update( float delta )
+{
+
 }
 
 

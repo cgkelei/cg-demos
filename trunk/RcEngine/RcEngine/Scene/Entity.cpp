@@ -268,7 +268,7 @@ void Entity::UpdateAnimation()
 	}
 }
 
-Bone* Entity::AttachObjectToBone( const String &boneName, SceneObject* sceneObj, const Quaternionf& offsetOrientation/*= Quaternionf::Identity()*/, const Vector3f & offsetPosition /*= Vector3f::Zero()*/ )
+Bone* Entity::AttachObjectToBone( const String &boneName, SceneObject* sceneObj, const Quaternionf& offsetOrientation/*= Quaternionf::Identity()*/, const float3 & offsetPosition /*= float3::Zero()*/ )
 {
 	if (mChildAttachedObjects.find(sceneObj->GetName()) != mChildAttachedObjects.end())
 	{

@@ -87,7 +87,7 @@ void SpriteBatch::End()
 
 }
 
-void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& dest, IntRect* src, const ColorRGBA& color, float rotAngle /*= 0*/, const Vector2f& origin /*= Vector2f::Zero()*/, float layerDepth /*= 0.0f*/ )
+void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& dest, IntRect* src, const ColorRGBA& color, float rotAngle /*= 0*/, const float2& origin /*= float2::Zero()*/, float layerDepth /*= 0.0f*/ )
 {
 	if (color.A() <= 0)
 		return;
@@ -110,12 +110,12 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& de
 	}
 	assert(spriteEntity);
 
-	Vector2f topLeft = Vector2f((float)dest.X, (float)dest.Y);
-	Vector2f topRight = Vector2f(float(dest.X + dest.Width), (float)dest.Y);
-	Vector2f bottomLeft = Vector2f((float)dest.X, float(dest.Y + dest.Height));
-	Vector2f bottomRight = Vector2f(float(dest.X + dest.Width), float(dest.Y + dest.Height));
+	float2 topLeft = float2((float)dest.X, (float)dest.Y);
+	float2 topRight = float2(float(dest.X + dest.Width), (float)dest.Y);
+	float2 bottomLeft = float2((float)dest.X, float(dest.Y + dest.Height));
+	float2 bottomRight = float2(float(dest.X + dest.Width), float(dest.Y + dest.Height));
 
-	Vector2f pivotPoint(origin);
+	float2 pivotPoint(origin);
 	pivotPoint.X() *= dest.Width;
 	pivotPoint.Y() *= dest.Height;
 	pivotPoint.X() += dest.X;
@@ -141,23 +141,23 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& de
 	SpriteVertex spriteVertex;
 	vertices.reserve(vertices.size() + 4);
 	
-	spriteVertex.Position = Vector3f(topLeft.X(), topLeft.Y(), layerDepth);
-	spriteVertex.TexCoord = Vector2f(u1, v1);
+	spriteVertex.Position = float3(topLeft.X(), topLeft.Y(), layerDepth);
+	spriteVertex.TexCoord = float2(u1, v1);
 	spriteVertex.Color = color;
 	vertices.push_back(spriteVertex);
 
-	spriteVertex.Position = Vector3f(bottomLeft.X(), bottomLeft.Y(), layerDepth);
-	spriteVertex.TexCoord = Vector2f(u1, v2);
+	spriteVertex.Position = float3(bottomLeft.X(), bottomLeft.Y(), layerDepth);
+	spriteVertex.TexCoord = float2(u1, v2);
 	spriteVertex.Color = color;
 	vertices.push_back(spriteVertex);
 
-	spriteVertex.Position = Vector3f(bottomRight.X(), bottomRight.Y(), layerDepth);
-	spriteVertex.TexCoord = Vector2f(u2, v2);
+	spriteVertex.Position = float3(bottomRight.X(), bottomRight.Y(), layerDepth);
+	spriteVertex.TexCoord = float2(u2, v2);
 	spriteVertex.Color = color;
 	vertices.push_back(spriteVertex);
 
-	spriteVertex.Position = Vector3f(topRight.X(), topRight.Y(), layerDepth);
-	spriteVertex.TexCoord = Vector2f(u2, v1);
+	spriteVertex.Position = float3(topRight.X(), topRight.Y(), layerDepth);
+	spriteVertex.TexCoord = float2(u2, v1);
 	spriteVertex.Color = color;
 	vertices.push_back(spriteVertex);
 	
@@ -170,28 +170,28 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& de
 	indices.push_back(lastIndex + 0);
 }
 
-void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Vector2f& position, const ColorRGBA& color )
+void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const float2& position, const ColorRGBA& color )
 {
 	Draw(texture, position, nullptr, color);
 }
 
-void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Vector2f& position, IntRect* sourceRectangle, const ColorRGBA& color )
+void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const float2& position, IntRect* sourceRectangle, const ColorRGBA& color )
 {
 	Rectanglef destination(position.X(), position.Y(), (float)texture->GetWidth(0), (float)texture->GetHeight(0));
-	Draw(texture, destination, sourceRectangle, color, 0.0f, Vector2f::Zero(), 0.0f);
+	Draw(texture, destination, sourceRectangle, color, 0.0f, float2::Zero(), 0.0f);
 }
 
 void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, const ColorRGBA& color )
 {
-	Draw(texture, destinationRectangle, NULL, color, 0.0f, Vector2f::Zero(), 0.0f);
+	Draw(texture, destinationRectangle, NULL, color, 0.0f, float2::Zero(), 0.0f);
 }
 
 void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, IntRect* sourceRectangle, const ColorRGBA& color )
 {
-	Draw(texture, destinationRectangle, sourceRectangle, color, 0.0f, Vector2f::Zero(), 0.0f);
+	Draw(texture, destinationRectangle, sourceRectangle, color, 0.0f, float2::Zero(), 0.0f);
 }
 
-void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Vector2f& position, IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const Vector2f& origin, float scale, float layerDepth )
+void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const float2& position, IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const float2& origin, float scale, float layerDepth )
 {
 	int32_t width, height;
 	if (sourceRectangle)
@@ -206,10 +206,10 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Vector2f& posi
 	}
 
     Rectanglef destination = Rectanglef(position.X(), position.Y(), (float)width, (float)height);
-	Draw(texture, destination, sourceRectangle, color, rotation, Vector2f::Zero(), 0.0f);
+	Draw(texture, destination, sourceRectangle, color, rotation, float2::Zero(), 0.0f);
 }
 
-void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Vector2f& position, IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const Vector2f& origin, const Vector2f& scale, float layerDepth )
+void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const float2& position, IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const float2& origin, const float2& scale, float layerDepth )
 {
 	int32_t width, height;
 	if (sourceRectangle)
@@ -224,7 +224,7 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Vector2f& posi
 	}
 
 	Rectanglef destination = Rectanglef(position.X(), position.Y(), (float)width, (float)height);
-	Draw(texture, destination, sourceRectangle, color, rotation, Vector2f::Zero(), 0.0f);
+	Draw(texture, destination, sourceRectangle, color, rotation, float2::Zero(), 0.0f);
 }
 
 void SpriteBatch::Flush()
@@ -272,8 +272,8 @@ SpriteEntity::SpriteEntity( const String& name )
 	VertexElement elements[3] = 
 	{
 		VertexElement(0, VEF_Float3, VEU_Position, 0),
-		VertexElement(sizeof(Vector3f), VEF_Float2, VEU_TextureCoordinate, 0),
-		VertexElement(sizeof(Vector3f) + sizeof(Vector2f), VEF_Float4, VEU_Color, 0)
+		VertexElement(sizeof(float3), VEF_Float2, VEU_TextureCoordinate, 0),
+		VertexElement(sizeof(float3) + sizeof(float2), VEF_Float4, VEU_Color, 0)
 	};
 
 	mRenderOperation->BindVertexStream(mVertexBuffer, factory.CreateVertexDeclaration(elements, 3));
@@ -292,7 +292,7 @@ void SpriteEntity::OnRenderBegin()
 	auto frameBuffer = Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer();
 	auto w = frameBuffer->GetWidth();
 	auto h = frameBuffer->GetHeight();
-	mWindowSizeParam->SetValue(Vector2f(float(frameBuffer->GetWidth()), float(frameBuffer->GetHeight())));
+	mWindowSizeParam->SetValue(float2(float(frameBuffer->GetWidth()), float(frameBuffer->GetHeight())));
 }
 
 void SpriteEntity::OnUpdateRenderQueue( RenderQueue* renderQueue, Camera* cam, RenderOrder order )
@@ -309,7 +309,7 @@ void SpriteEntity::OnUpdateRenderQueue( RenderQueue* renderQueue, Camera* cam, R
 	renderQueue->AddToQueue(item, RenderQueue::BucketGui);
 }
 
-void SpriteEntity::SetProjectionMatrix( const Matrix4f& mat )
+void SpriteEntity::SetProjectionMatrix( const float4x4& mat )
 {
 	mSpriteMaterial->GetCustomParameter("ProjMat")->SetValue(mat);
 }

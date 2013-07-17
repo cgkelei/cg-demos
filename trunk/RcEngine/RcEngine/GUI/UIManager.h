@@ -21,18 +21,23 @@ public:
 
 	void SetFocusElement(UIElement* element);
 	UIElement* GetFocusElement()						{ return mFocusElement; }	
+
+
+	void Update(float delta);
+
+
 	
 private:
 	void HandleKeyPress(uint8_t key, uint32_t qualifiers);
 	void HandleKeyRelease(uint8_t key, uint32_t qualifiers);
 
-	void HandleMousePress(const Point& pos, uint32_t buttons, int qualifiers);
-	void HandleMouseRelease(const Point& pos, uint32_t buttons, int qualifiers);
-	void HandleMouseMove(const Point& pos, uint32_t buttons, int qualifiers);
+	void HandleMousePress(const int2& pos, uint32_t buttons, int qualifiers);
+	void HandleMouseRelease(const int2& pos, uint32_t buttons, int qualifiers);
+	void HandleMouseMove(const int2& pos, uint32_t buttons, int qualifiers);
 	void HandleMouseWheel(int32_t delta, uint32_t buttons, uint32_t qualifiers);
 
-	UIElement* GetElementFromPoint(const Point& pos);
-	void GetElementFromPoint(UIElement*& result, UIElement* current, const Point& pos);
+	UIElement* GetElementFromPoint(const int2& pos);
+	void GetElementFromPoint(UIElement*& result, UIElement* current, const int2& pos);
 
 	UIElement* GetFocusableElement(UIElement* element);
 

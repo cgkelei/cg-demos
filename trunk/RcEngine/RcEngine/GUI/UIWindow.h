@@ -34,9 +34,9 @@ public:
 	UIWindow();
 	~UIWindow();
 
-	void OnDragBegin(const Point& position, const Point& screenPosition, int buttons, int qualifiers);
-	void OnDragMove(const Point& position, const Point& screenPosition, int buttons, int qualifiers);
-	void OnDragEnd(const Point& position, const Point& screenPosition);
+	void OnDragBegin(const int2& position, const int2& screenPosition, int buttons, int qualifiers);
+	void OnDragMove(const int2& position, const int2& screenPosition, int buttons, int qualifiers);
+	void OnDragEnd(const int2& position, const int2& screenPosition);
 
 	void SetMovable(bool movable);
 	void SetResizable(bool resizable);
@@ -52,7 +52,7 @@ public:
 	virtual void Draw();
 
 protected:
-	DragMode GetDragMode(const Point& position);
+	DragMode GetDragMode(const int2& position);
 	void ValidatePosition();
 
 protected:
@@ -66,8 +66,8 @@ protected:
 
 	bool mMinimizing; 
 
-	Point mLastNormalPos;
-	Point mLastNormalSize;
+	int2 mLastNormalPos;
+	int2 mLastNormalSize;
 
 	
 

@@ -26,7 +26,7 @@ const BoundingBoxf& SceneObject::GetWorldBoundingBox() const
 }
 
 
-const Matrix4f& SceneObject::GetWorldTransform() const
+const float4x4& SceneObject::GetWorldTransform() const
 {
 	if (mParentNode)
 	{
@@ -34,7 +34,7 @@ const Matrix4f& SceneObject::GetWorldTransform() const
 	}
 	else
 	{
-		return Matrix4f::Identity();
+		return float4x4::Identity();
 	}
 }
 

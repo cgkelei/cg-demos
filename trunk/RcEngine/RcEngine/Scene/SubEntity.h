@@ -26,7 +26,7 @@ public:
 
 	const shared_ptr<RenderOperation>& GetRenderOperation() const;
 
-	void GetWorldTransforms(Matrix4f* xform) const;
+	void GetWorldTransforms(float4x4* xform) const;
 	uint32_t GetWorldTransformsCount() const;
 
 protected:

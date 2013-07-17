@@ -268,7 +268,7 @@ Vector<Real, 3> Transform(const Vector<Real, 3>& vec, const Quaternion<Real>& qu
 {
 	Quaternion<Real> quatVec(Real(0), vec.X(), vec.Y(), vec.Z());
 	Quaternion<Real> result = QuaternionInverse(quat) * quatVec * quat;
- 	return Vector3f(result.X(), result.Y(), result.Z());
+ 	return float3(result.X(), result.Y(), result.Z());
 }
 
 //---------------------------------------------------------------------------------------

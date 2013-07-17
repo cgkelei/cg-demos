@@ -88,14 +88,14 @@ public:
 		}
 
 
-		Vector3f Position;
-		Vector3f Normal;
-		Vector3f Binormal;
-		Vector3f Tangent;
+		float3 Position;
+		float3 Normal;
+		float3 Binormal;
+		float3 Tangent;
 		vector<uint32_t> BlendIndices;
 		vector<float> BlendWeights;
-		Vector2f Tex0;
-		Vector2f Tex1;
+		float2 Tex0;
+		float2 Tex1;
 
 		uint32_t Flag;
 		size_t Index;	// keep track index in vertices
@@ -108,9 +108,9 @@ public:
 			// The time offset from the start of the animation to this keyframe.
 			float Time;
 
-			Vector3f Translation;
+			float3 Translation;
 			Quaternionf Rotation;
-			Vector3f Scale;
+			float3 Scale;
 		};
 
 		struct  AnimationTrack
