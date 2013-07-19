@@ -8,7 +8,7 @@ namespace RcEngine {
 Light::Light( const String& name )
 	: SceneObject(name, SOT_Light, false), 
 	  mLightType(LT_Point), mLightPosition(float3::Zero()),
-	  mLightDirection(float3(0, 0, 1)), mLightDiffuse(ColorRGBA::White), mLightSpecular(ColorRGBA::Black),
+	  mLightDirection(float3(0, 0, 1)), mLightColor(ColorRGBA::Black),
 	  mSpotOuter(Mathf::ToRadian(40.0f)), mSpotInner(Mathf::ToRadian(30.0f)), mSpotFalloff(1.0f), mRange(100000), mAttenuationConst(1.0f),
 	  mAttenuationLinear(0.0f), mAttenuationQuad(0.0f), mDerivedPosition(float3::Zero()), 
 	  mDerivedDirection(float3(0, 0, 1)), mDerivedTransformDirty(false)
@@ -35,16 +35,6 @@ void Light::SetDirection( const float3& vec )
 	mDerivedTransformDirty = true;
 }
 
-void Light::SetLightDiffuse( const ColorRGBA& color )
-{
-	mLightDiffuse = color;
-}
-
-
-void Light::SetLightSpecular( const ColorRGBA& color )
-{
-	mLightSpecular = color;
-}
 
 void Light::SetAttenuation( float range, float constant, float linear, float quadratic )
 {

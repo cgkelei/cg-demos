@@ -15,6 +15,14 @@ class UIManager : public Singleton<UIManager>
 public:
 	SINGLETON_DECL_HEADER(UIManager);
 
+	enum UIEvent
+	{
+		KeyUpDown,
+		MouseUpDown,
+		MouseMove,
+		MouseWheel,
+	};
+
 public:
 	UIManager();
 	~UIManager();

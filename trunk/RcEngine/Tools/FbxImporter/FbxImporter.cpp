@@ -96,52 +96,52 @@ void CorrectName(String& matName)
 	std::replace(matName.begin(), matName.end(), ':', '_');
 }
 
-Vector4f FbxToVector4f(const FbxVector4& fbx)
+float4 FbxToVector4f(const FbxVector4& fbx)
 {
-	return Vector4f(float(fbx[0]), float(fbx[1]), float(fbx[2]), float(fbx[3]));
+	return float4(float(fbx[0]), float(fbx[1]), float(fbx[2]), float(fbx[3]));
 }
 
-Vector3f FbxToVector3f(const FbxVector4& fbx)
+float3 FbxToVector3f(const FbxVector4& fbx)
 {
-	return Vector3f(float(fbx[0]), float(fbx[1]), float(fbx[2]));
+	return float3(float(fbx[0]), float(fbx[1]), float(fbx[2]));
 }
 
-Vector2f FbxToVector2f(const FbxVector2& fbx)
+float2 FbxToVector2f(const FbxVector2& fbx)
 {
-	return Vector2f(float(fbx[0]), float(fbx[1]));
+	return float2(float(fbx[0]), float(fbx[1]));
 }
 
 
 
-Matrix4f MatrixFromFbxAMatrix(const FbxAMatrix& fbxMatrix)
+float4x4 MatrixFromFbxAMatrix(const FbxAMatrix& fbxMatrix)
 {
 	FbxVector4 translation = fbxMatrix.GetT();
 	FbxVector4 scale = fbxMatrix.GetS();
 	FbxQuaternion rotation = fbxMatrix.GetQ();
 
-	return CreateTransformMatrix(Vector3f((float)scale[0], (float)scale[1], (float)scale[2]), 
+	return CreateTransformMatrix(float3((float)scale[0], (float)scale[1], (float)scale[2]), 
 		Quaternionf((float)rotation[3], (float)rotation[0], (float)rotation[1], (float)rotation[2]),
-		Vector3f((float)translation[0], (float)translation[1], (float)translation[2]));
+		float3((float)translation[0], (float)translation[1], (float)translation[2]));
 
 	FbxVector4 r1 = fbxMatrix.GetRow(0);
 	FbxVector4 r2 = fbxMatrix.GetRow(1);
 	FbxVector4 r3 = fbxMatrix.GetRow(2);
 	FbxVector4 r4 = fbxMatrix.GetRow(3);
 
-	return Matrix4f((float)r1[0], (float)r1[1], (float)r1[2], (float)r1[3],
+	return float4x4((float)r1[0], (float)r1[1], (float)r1[2], (float)r1[3],
 					(float)r2[0], (float)r2[1], (float)r2[2], (float)r2[3],
 					(float)r3[0], (float)r3[1], (float)r3[2], (float)r3[3],
 					(float)r4[0], (float)r4[1], (float)r4[2], (float)r4[3]);
 }
 
-Vector3f ReadMaterialColor(FbxPropertyT<FbxDouble3> FBXColorProperty, FbxPropertyT<FbxDouble> FBXFactorProperty)
+float3 ReadMaterialColor(FbxPropertyT<FbxDouble3> FBXColorProperty, FbxPropertyT<FbxDouble> FBXFactorProperty)
 {
-	Vector3f Color;
+	float3 Color;
 
 	if( FBXColorProperty.IsValid() )
 	{
 		FbxDouble3 FBXColor = FBXColorProperty.Get();
-		Color = Vector3f( 
+		Color = float3( 
 			static_cast<float>(FBXColor[0]),
 			static_cast<float>(FBXColor[1]),
 			static_cast<float>(FBXColor[2]) );
@@ -933,21 +933,21 @@ shared_ptr<Skeleton>  FbxProcesser::ProcessBoneWeights( FbxMesh* pMesh, std::vec
 				pFBXCluster->GetTransformLinkMatrix(matClusterLinkTransformMatrix);
 
 				/*FbxAMatrix matInvBindPose = matClusterTransformMatrix * matClusterLinkTransformMatrix.Inverse();
-				Matrix4f matBindPose = MatrixFromFbxAMatrix(matInvBindPose.Inverse());*/
+				float4x4 matBindPose = MatrixFromFbxAMatrix(matInvBindPose.Inverse());*/
 
 
-				Matrix4f rcClusterTransformMatrix = MatrixFromFbxAMatrix(matClusterTransformMatrix);
-				Matrix4f rcClusterLinkTransformMatrix = MatrixFromFbxAMatrix(matClusterLinkTransformMatrix);
-				Matrix4f matBindPose = rcClusterLinkTransformMatrix * rcClusterTransformMatrix.Inverse();
+				float4x4 rcClusterTransformMatrix = MatrixFromFbxAMatrix(matClusterTransformMatrix);
+				float4x4 rcClusterLinkTransformMatrix = MatrixFromFbxAMatrix(matClusterLinkTransformMatrix);
+				float4x4 matBindPose = rcClusterLinkTransformMatrix * rcClusterTransformMatrix.Inverse();
 	
 				if (parentBone)
 				{
-					Matrix4f paretTrans = parentBone->GetWorldTransform();
+					float4x4 paretTrans = parentBone->GetWorldTransform();
 
 					matBindPose = matBindPose * paretTrans.Inverse();
 				}
  
-				Vector3f pos, scale;
+				float3 pos, scale;
 				Quaternionf rot;
 				MatrixDecompose(scale, rot, pos, matBindPose);
 
@@ -981,12 +981,19 @@ void FbxProcesser::CollectMaterials( FbxScene* pScene )
 
 		MaterialData matData;
 
+<<<<<<< .mine
+		float3 AmbientColor;
+		float3 EmissiveColor;
+		float3 DiffuseColor;
+		float3 SpecularColor;
+=======
 		matData.Name = pSurfaceMaterial->GetName();
 
 		Vector3f AmbientColor;
 		Vector3f EmissiveColor;
 		Vector3f DiffuseColor;
 		Vector3f SpecularColor;
+>>>>>>> .r178
 		float fSpecularPower = 1.0f;
 		float fTransparency = 1.0f;
 
@@ -1176,8 +1183,8 @@ void FbxProcesser::BuildAndSaveXML( )
 				boneNode->AppendAttribute(meshxml.AllocateAttributeString("name", parentBone ? parentBone->GetName() : ""));
 				meshSkeletonNode->AppendNode(boneNode);
 
-				Vector3f pos = bones[iBone]->GetPosition();
-				Vector3f scale = bones[iBone]->GetScale();
+				float3 pos = bones[iBone]->GetPosition();
+				float3 scale = bones[iBone]->GetScale();
 				Quaternionf rot = bones[iBone]->GetRotation();
 
 				XMLNodePtr posNode = meshxml.AllocateNode(XML_Node_Element, "bindPosition");
@@ -1363,8 +1370,8 @@ void FbxProcesser::BuildAndSaveXML( )
 							keyNode->AppendAttribute(meshxml.AllocateAttributeFloat("time", track.KeyFrames[iKey].Time));
 							trackNode->AppendNode(keyNode);
 
-							Vector3f pos = track.KeyFrames[iKey].Translation;
-							Vector3f scale = track.KeyFrames[iKey].Scale;
+							float3 pos = track.KeyFrames[iKey].Translation;
+							float3 scale = track.KeyFrames[iKey].Scale;
 							Quaternionf rot = track.KeyFrames[iKey].Rotation;
 
 							XMLNodePtr posNode = meshxml.AllocateNode(XML_Node_Element, "position");
@@ -1417,8 +1424,8 @@ void FbxProcesser::BuildAndSaveBinary( )
 		stream.WriteString(mesh.Name);
 
 		// write mesh bounding box
-		stream.Write(&mesh.Bound.Min, sizeof(Vector3f));
-		stream.Write(&mesh.Bound.Max, sizeof(Vector3f));
+		stream.Write(&mesh.Bound.Min, sizeof(float3));
+		stream.Write(&mesh.Bound.Max, sizeof(float3));
 
 		// write mesh part count
 		stream.WriteUInt(mesh.MeshParts.size());
@@ -1436,8 +1443,8 @@ void FbxProcesser::BuildAndSaveBinary( )
 			stream.WriteString(meshPart.MaterialName + ".material.xml");
 
 			// write sub mesh bounding sphere
-			stream.Write(&meshPart.Bound.Min, sizeof(Vector3f));
-			stream.Write(&meshPart.Bound.Max, sizeof(Vector3f));
+			stream.Write(&meshPart.Bound.Min, sizeof(float3));
+			stream.Write(&meshPart.Bound.Max, sizeof(float3));
 
 			// write vertex count and vertex size
 			stream.WriteUInt(meshPart.Vertices.size());
@@ -1467,8 +1474,8 @@ void FbxProcesser::BuildAndSaveBinary( )
 				
 				if (vertexFlag & Vertex::ePosition)
 				{
-					stream.Write(&vertex.Position, sizeof(Vector3f));
-					checkSize += sizeof(Vector3f);
+					stream.Write(&vertex.Position, sizeof(float3));
+					checkSize += sizeof(float3);
 				}
 
 				if (vertexFlag & Vertex::eBlendWeight)
@@ -1490,32 +1497,32 @@ void FbxProcesser::BuildAndSaveBinary( )
 
 				if (vertexFlag & Vertex::eNormal)
 				{
-					stream.Write(&vertex.Normal, sizeof(Vector3f));
-					checkSize += sizeof(Vector3f);
+					stream.Write(&vertex.Normal, sizeof(float3));
+					checkSize += sizeof(float3);
 				}
 
 				if (vertexFlag & Vertex::eTexcoord0)
 				{
-					stream.Write(&vertex.Tex0, sizeof(Vector2f));
-					checkSize += sizeof(Vector2f);
+					stream.Write(&vertex.Tex0, sizeof(float2));
+					checkSize += sizeof(float2);
 				}
 
 				if (vertexFlag & Vertex::eTexcoord1)
 				{
-					stream.Write(&vertex.Tex1, sizeof(Vector2f));
-					checkSize += sizeof(Vector2f);
+					stream.Write(&vertex.Tex1, sizeof(float2));
+					checkSize += sizeof(float2);
 				}
 
 				if (vertexFlag & Vertex::eTangent)
 				{
-					stream.Write(&vertex.Tangent, sizeof(Vector3f));
-					checkSize += sizeof(Vector3f);
+					stream.Write(&vertex.Tangent, sizeof(float3));
+					checkSize += sizeof(float3);
 				}
 
 				if (vertexFlag & Vertex::eBinormal)
 				{
-					stream.Write(&vertex.Binormal, sizeof(Vector3f));
-					checkSize += sizeof(Vector3f);
+					stream.Write(&vertex.Binormal, sizeof(float3));
+					checkSize += sizeof(float3);
 				}				
 			}
 			assert(checkSize == bufferSize);
@@ -1554,16 +1561,16 @@ void FbxProcesser::BuildAndSaveBinary( )
 					parentName = parentBone->GetName();
 				}
 
-				Vector3f pos = bone->GetPosition();
-				Vector3f scale = bone->GetScale();
+				float3 pos = bone->GetPosition();
+				float3 scale = bone->GetScale();
 				Quaternionf rot = bone->GetRotation();
 
 				stream.WriteString(bone->GetName());
 				stream.WriteString(parentName);
 
-				stream.Write(&pos, sizeof(Vector3f));
+				stream.Write(&pos, sizeof(float3));
 				stream.Write(&rot, sizeof(Quaternionf));
-				stream.Write(&scale, sizeof(Vector3f));
+				stream.Write(&scale, sizeof(float3));
 
 			}
 		}
@@ -1614,9 +1621,9 @@ void FbxProcesser::BuildAndSaveBinary( )
 							// write key time
 							clipStream.WriteFloat(keyIter->Time);
 
-							clipStream.Write(&keyIter->Translation, sizeof(Vector3f));
+							clipStream.Write(&keyIter->Translation, sizeof(float3));
 							clipStream.Write(&keyIter->Rotation, sizeof(Quaternionf));
-							clipStream.Write(&keyIter->Scale, sizeof(Vector3f));
+							clipStream.Write(&keyIter->Scale, sizeof(float3));
 						}
 					}
 

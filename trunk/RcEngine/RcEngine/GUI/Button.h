@@ -5,7 +5,7 @@
 
 namespace RcEngine {
 
-class Button : UIElement
+class _ApiExport Button : UIElement
 {
 public:
 	typedef fastdelegate::FastDelegate0<> ButtonClickedEventHandler;
