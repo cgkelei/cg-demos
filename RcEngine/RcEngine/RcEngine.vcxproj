@@ -21,6 +21,7 @@
     <ClInclude Include="Core\Singleton.h" />
     <ClInclude Include="Core\Timer.h" />
     <ClInclude Include="Core\Utility.h" />
+    <ClInclude Include="Core\Variant.h" />
     <ClInclude Include="Core\XMLDom.h" />
     <ClInclude Include="Graphics\Animation.h" />
     <ClInclude Include="Graphics\AnimationClip.h" />
@@ -116,6 +117,7 @@
     <ClCompile Include="Core\ModuleManager.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="Core\Utility.cpp" />
+    <ClCompile Include="Core\Variant.cpp" />
     <ClCompile Include="Core\XMLDom.cpp" />
     <ClCompile Include="Graphics\Animation.cpp" />
     <ClCompile Include="Graphics\AnimationClip.cpp" />

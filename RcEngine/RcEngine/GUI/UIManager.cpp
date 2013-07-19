@@ -15,6 +15,25 @@ UIManager::UIManager()
 	  mFocusElement(nullptr),
 	  mRootElement(nullptr)
 {
+	InputSystem* inputSystem = Context::GetSingleton().GetInputSystemPtr();
+
+	InputAction actions[] =
+	{
+		InputAction(MS_X,          MouseMove),
+		InputAction(MS_Y,          MouseMove),
+		InputAction(MS_LeftButton, MouseUpDown),
+		InputAction(KC_AnyKey,     KeyUpDown),
+	};
+
+	if (inputSystem)
+	{
+		inputSystem->AddAction(actions, actions+ sizeof(actions)/ sizeof(InputAction));
+		//inputSystem->AddStateHandler(Forward, fastdelegate::MakeDelegate(this, &FPSCameraControler::HandleMove));
+		//inputSystem->AddStateHandler(Backward, fastdelegate::MakeDelegate(this, &FPSCameraControler::HandleMove));
+		//inputSystem->AddStateHandler(MoveLeft, fastdelegate::MakeDelegate(this, &FPSCameraControler::HandleMove));
+		//inputSystem->AddStateHandler(MoveRight, fastdelegate::MakeDelegate(this, &FPSCameraControler::HandleMove));
+	}
+
 
 }
 

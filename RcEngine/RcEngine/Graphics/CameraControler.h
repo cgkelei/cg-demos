@@ -75,8 +75,8 @@ public:
 	void SetWindowSize( int32_t windowWidth, int32_t windowHeight );
 	void SetCenterAndRadius( const float2& center, float radius );
 
-	float3 GetConstraintAxis() const			    { return mConstraintAxis; }
-	void SetConstraintAxis( const float3& axis )    { mConstraintAxis = axis; mUseConstraint = true; }
+	float3 GetConstraintAxis() const			    		{ return mConstraintAxis; }
+	void SetConstraintAxis( const float3& axis )    		{ mConstraintAxis = axis; mUseConstraint = true; }
 	void SetNoConstraintAxis( )								{ mUseConstraint = false; }
 	bool IsUsingConstraint() const							{ return mUseConstraint; }
 

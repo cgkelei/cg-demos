@@ -155,6 +155,7 @@ enum KeyCode
 	KC_MyComputer					= 0xEB,         // My Computer
 	KC_Mail                         = 0xEC,         // Mail
 	KC_MediaSelect					= 0xED,         // Media Select
+	KC_AnyKey
 };
 
 // Êó±ê¶¯×÷

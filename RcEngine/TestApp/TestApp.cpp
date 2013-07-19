@@ -36,11 +36,13 @@
 #include "Math/Rectangle.h"
 #include "Core/XMLDom.h"
 #include "Core/Utility.h"
+#include "Core/Variant.h"
 
 TestApp::TestApp( const String& config )
 	:Application(config), mFramePerSecond(0)
 {
 
+	Variant var;
 
 }
 
