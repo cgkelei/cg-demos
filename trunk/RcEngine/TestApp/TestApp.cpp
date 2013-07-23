@@ -37,13 +37,16 @@
 #include "Core/XMLDom.h"
 #include "Core/Utility.h"
 #include "Core/Variant.h"
+#include "Core/StringHash.h"
 
 TestApp::TestApp( const String& config )
 	:Application(config), mFramePerSecond(0)
 {
+	Variant var(true);
 
-	Variant var;
+	VariantMap param;
 
+	param[StringHash("Test")] = var;
 }
 
 
