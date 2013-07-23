@@ -19,6 +19,7 @@
     <ClInclude Include="Core\ModuleManager.h" />
     <ClInclude Include="Core\Prerequisites.h" />
     <ClInclude Include="Core\Singleton.h" />
+    <ClInclude Include="Core\StringHash.h" />
     <ClInclude Include="Core\Timer.h" />
     <ClInclude Include="Core\Utility.h" />
     <ClInclude Include="Core\Variant.h" />
@@ -78,6 +79,7 @@
     <ClInclude Include="GUI\UIManager.h" />
     <ClInclude Include="GUI\UIWindow.h" />
     <ClInclude Include="Input\InputDevice.h" />
+    <ClInclude Include="Input\InputEvent.h" />
     <ClInclude Include="Input\InputModule.h" />
     <ClInclude Include="Input\InputSystem.h" />
     <ClInclude Include="IO\FileStream.h" />
@@ -115,6 +117,7 @@
     <ClCompile Include="Core\Exception.cpp" />
     <ClCompile Include="Core\IModule.cpp" />
     <ClCompile Include="Core\ModuleManager.cpp" />
+    <ClCompile Include="Core\StringHash.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="Core\Utility.cpp" />
     <ClCompile Include="Core\Variant.cpp" />

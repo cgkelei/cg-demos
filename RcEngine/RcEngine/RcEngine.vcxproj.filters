@@ -321,6 +321,12 @@
     <ClInclude Include="Core\Variant.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\StringHash.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\InputEvent.h">
+      <Filter>Input</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Context.cpp">
@@ -564,6 +570,9 @@
       <Filter>Resource</Filter>
     </ClCompile>
     <ClCompile Include="Core\Variant.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\StringHash.cpp">
       <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>

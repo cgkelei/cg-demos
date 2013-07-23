@@ -2,6 +2,7 @@
 #define Variant_h__
 
 #include <Core/Prerequisites.h>
+#include <Core/StringHash.h>
 
 namespace RcEngine {
 
@@ -18,6 +19,8 @@ enum VariantType
 	Var_UInt32,
 	Var_UInt64,
 	Var_Float,
+	Var_Double,
+	Var_Ptr
 };
 
 class _ApiExport Variant
@@ -36,7 +39,10 @@ public:
 	explicit Variant(const uint32_t& val);
 	explicit Variant(const uint64_t& val);
 	explicit Variant(const float& val);
-	explicit Variant(const void*& val);
+	explicit Variant(const double& val);
+	explicit Variant(void* val);
+
+	VariantType GetType() const { return mVariantType; }
 
 	Variant& operator= (const Variant& val);
 
@@ -50,10 +56,9 @@ public:
 	Variant& operator= (const uint32_t& val);
 	Variant& operator= (const uint64_t& val);
 	Variant& operator= (const float& val);
-	Variant& operator= (const void*& val);
-
-	VariantType GetType() const { return mVariantType; }
-
+	Variant& operator= (const double& val);
+	Variant& operator= (void* val);
+	
 	bool boolValue() const { return mVariantType == Var_Bool ? mValue.boolValue : false; }
 
 	int8_t  int8Value() const  { return mVariantType == Var_Int8 ? mValue.int8Value : 0; } 
@@ -69,14 +74,16 @@ public:
 	float  floatValue() const  { return mVariantType == Var_Float ? mValue.floatValue : 0.0f; }
 	double doubleValue() const { return mVariantType == Var_Bool ? mValue.boolValue : 0.0; }
 
+	bool operator == (const Variant& rhs);
+
 private:
 
-	void Reset();
+	void SetType(VariantType type) { mVariantType = type; }
 
 private:
 	VariantType mVariantType;
 
-	union
+	union 
 	{
 		bool boolValue;
 
@@ -94,11 +101,11 @@ private:
 		double doubleValue;
 
 		void* ptrValue;
-	} mValue;
 
+	} mValue;
 };
 
-
+typedef std::unordered_map<StringHash, Variant> VariantMap;
 
 }
 
