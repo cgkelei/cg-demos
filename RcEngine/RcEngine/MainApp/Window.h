@@ -30,6 +30,8 @@ public:
 	// After Resize or reposition, this will compute new window size
 	void UpdateWindowSize();
 
+	virtual void CollectOSEvents();
+
 private:
 	void OnUserResized();
 	void OnSuspend();

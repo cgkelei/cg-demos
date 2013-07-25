@@ -42,11 +42,11 @@
 TestApp::TestApp( const String& config )
 	:Application(config), mFramePerSecond(0)
 {
-	Variant var(true);
+	//Variant var(true);
 
-	VariantMap param;
+	//VariantMap param;
 
-	param[StringHash("Test")] = var;
+	//param[StringHash("Test")] = var;
 }
 
 

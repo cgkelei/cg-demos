@@ -37,7 +37,7 @@ enum KeyCode
 	KC_O                            = 0x18,
 	KC_P                            = 0x19,
 	KC_LeftBracket					= 0x1A,
-	KC_ReftBracket				    = 0x1B,
+	KC_RightBracket				    = 0x1B,
 	KC_Enter                        = 0x1C,         // Enter on main keyboard
 	KC_LeftCtrl                     = 0x1D,
 	KC_A                            = 0x1E,
@@ -87,7 +87,7 @@ enum KeyCode
 	KC_NumPadMinus					= 0x4A,         // - on numeric keypad
 	KC_NumPad4                      = 0x4B,
 	KC_NumPad5                      = 0x4C,
-	KC_NumPadD6                     = 0x4D,
+	KC_NumPad6                      = 0x4D,
 	KC_NumPadPlus					= 0x4E,         // + on numeric keypad
 	KC_NumPad1                      = 0x4F,
 	KC_NumPad2                      = 0x50,
@@ -155,7 +155,7 @@ enum KeyCode
 	KC_MyComputer					= 0xEB,         // My Computer
 	KC_Mail                         = 0xEC,         // Mail
 	KC_MediaSelect					= 0xED,         // Media Select
-	KC_AnyKey
+	KC_Count
 };
 
 // Êó±ê¶¯×÷
@@ -233,6 +233,15 @@ protected:
 	int32_t mIndex;
 };
 
+class _ApiExport Joystick
+{
+public:
+	Joystick(InputSystem* inputSystem);
+
+
+private:
+	InputSystem* mInputSystem;
+};
 
 } // Namespace RcEngine
 
