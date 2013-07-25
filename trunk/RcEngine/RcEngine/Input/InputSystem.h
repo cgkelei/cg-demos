@@ -1,7 +1,8 @@
 #ifndef InputSystem_h__
 #define InputSystem_h__
 
-#include "Core/Prerequisites.h"
+#include <Core/Prerequisites.h>
+#include <Input/InputEvent.h>
 
 namespace RcEngine{
 
@@ -50,6 +51,9 @@ public:
 
 public:
 	virtual const String& Name() const = 0;
+
+	void FireEvent(const InputEvent& event);
+	bool PollEvent(InputEvent* event);
 
 	Mouse* GetMouse() const	{ return mMouse; }
 	Keyboard* GetKeyboard() const { return mKeyboard; }
@@ -101,6 +105,8 @@ private:
 protected:
 	Mouse* mMouse;
 	Keyboard* mKeyboard;
+
+	std::queue<InputEvent> mEventQueue;
 
 private:
 	// Raw input to Action

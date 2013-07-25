@@ -69,6 +69,8 @@ private:
 	void LoadAllModules();
 	void UnloadAllModules();
 
+	void TickOneFrame();
+
 	void ReadConfiguration();
 
 	void Window_UserResized();
@@ -77,6 +79,8 @@ private:
 	void Window_Suspend();
 	void Window_Resume();
 	void Window_Paint();
+
+	void ProcessEventQueue();
 
 protected:
 
@@ -95,7 +99,7 @@ protected:
 	String mAppTitle;
 
 	// in case multiple threads are used
-	volatile bool mIsRunning;
+	volatile bool mEndGame;
 
 	std::string mConfigFile; 
 

@@ -211,6 +211,23 @@ bool InputSystem::HasRange(uint32_t range) const
 	return false;
 }
 
+void InputSystem::FireEvent( const InputEvent& event )
+{
+	mEventQueue.push(event);
+}
+
+bool InputSystem::PollEvent( InputEvent* event )
+{
+	if ( !mEventQueue.empty() )
+	{
+		*event = mEventQueue.front();
+		mEventQueue.pop();
+		return true;
+	}
+
+	return false;
+}
+
 //-------------------------------------------------------------------
 /*InputMaps::InputMaps()
 {

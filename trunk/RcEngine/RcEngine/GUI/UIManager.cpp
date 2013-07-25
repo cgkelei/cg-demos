@@ -22,7 +22,6 @@ UIManager::UIManager()
 		InputAction(MS_X,          MouseMove),
 		InputAction(MS_Y,          MouseMove),
 		InputAction(MS_LeftButton, MouseUpDown),
-		InputAction(KC_AnyKey,     KeyUpDown),
 	};
 
 	if (inputSystem)

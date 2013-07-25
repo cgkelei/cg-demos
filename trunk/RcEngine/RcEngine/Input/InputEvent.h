@@ -1,60 +1,74 @@
 #ifndef InputEvent_h__
 #define InputEvent_h__
 
+#include <Core/Prerequisites.h>
 #include <Core/StringHash.h>
 
 namespace RcEngine {
 
-#define EVENT(eventID, eventName) static const StringHash eventID(#eventName); namespace eventName
-#define PARAM(paramID, paramName) static const ShortStringHash paramID(#paramName)
-
-/// Mouse button pressed.
-EVENT(E_MOUSEBUTTONDOWN, MouseButtonDown)
+struct InputEventType
 {
-	PARAM(P_BUTTON, Button);                // int
-	PARAM(P_BUTTONS, Buttons);              // int
-	PARAM(P_QUALIFIERS, Qualifiers);        // int
-}
+	enum
+	{
+		None = 0,
+		
+		KeyDown,
+		KeyUp,
+		Char,
 
-/// Mouse button released.
-EVENT(E_MOUSEBUTTONUP, MouseButtonUp)
-{
-	PARAM(P_BUTTON, Button);                // int
-	PARAM(P_BUTTONS, Buttons);              // int
-	PARAM(P_QUALIFIERS, Qualifiers);        // int
-}
+		MouseButtonDown,
+		MouseButtonUp,
 
-EVENT(E_MOUSEMOVE, MouseMove)
-{
-	PARAM(P_DX, DX);                        // int
-	PARAM(P_DY, DY);                        // int
-	PARAM(P_BUTTONS, Buttons);              // int
-	PARAM(P_QUALIFIERS, Qualifiers);        // int
-}
+		MouseMove,
+		MouseWheel,
+		
+	};
 
-/// Mouse wheel moved.
-EVENT(E_MOUSEWHEEL, MouseWheel)
-{
-	PARAM(P_WHEEL, Wheel);                  // int
-	PARAM(P_BUTTONS, Buttons);              // int
-	PARAM(P_QUALIFIERS, Qualifiers);        // int
-}
+	enum MouseButtonsMask
+	{
+		NoButton          = 0x00000000,
+		LeftButtonMask    = 0x00000001,
+		RightButtonMask   = 0x00000002,
+		MiddleButtonMask  = 0x00000004,
+		XButton1Mask      = 0x00000008,
+		XButton2Mask      = 0x00000010
+	};
+};
 
-/// Key pressed.
-EVENT(E_KEYDOWN, KeyDown)
+struct MouseButtonEvent
 {
-	PARAM(P_KEY, Key);                      // int
-	PARAM(P_BUTTONS, Buttons);              // int
-	PARAM(P_QUALIFIERS, Qualifiers);        // int
-}
+    int8_t type;
+	int32_t button;
+    int16_t x, y;
+};
 
-/// Key released.
-EVENT(E_KEYUP, KeyUp)
+struct MouseMotionEvent
 {
-	PARAM(P_KEY, Key);                      // int
-	PARAM(P_BUTTONS, Buttons);              // int
-	PARAM(P_QUALIFIERS, Qualifiers);        // int
-}
+	 int8_t type;
+	 int32_t buttons;
+	 int16_t x, y;
+};
+
+struct KeyboardEvent
+{
+	int8_t type;
+	uint16_t key;
+};
+
+struct CharEvent
+{
+	int8_t type;
+	uint16_t unicode;
+};
+
+union InputEvent
+{
+	int8_t EventType;
+	MouseButtonEvent MouseButton;
+	MouseMotionEvent MouseMove;
+	KeyboardEvent Key;
+	CharEvent Char;
+};
 
 }
 

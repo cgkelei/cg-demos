@@ -21,14 +21,16 @@
 #include <Resource/ResourceManager.h>
 #include <Input/InputSystem.h>
 #include <Input/InputDevice.h>
+#include <Input/InputEvent.h>
 #include <IO/FileSystem.h>
 #include <IO/FileStream.h>
+#include <GUI/UIManager.h>
 
 
 namespace RcEngine {
 
 Application::Application( const String& config )
-	: mIsRunning(false), mAppPaused(false), mConfigFile(config)
+	: mEndGame(false), mAppPaused(false), mConfigFile(config)
 {
 	Context::Initialize();
 	ModuleManager::Initialize();
@@ -65,8 +67,6 @@ Application::~Application( void )
 
 void Application::RunGame()
 {
-	mIsRunning = true;
-
 	Initialize();
 	LoadContent();
 
@@ -75,7 +75,7 @@ void Application::RunGame()
 
 	MSG msg;
 	ZeroMemory( &msg, sizeof( msg ) );
-	while( msg.message != WM_QUIT && mIsRunning)
+	while( msg.message != WM_QUIT && !mEndGame)
 	{   
 		if( PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE ) )
 		{
@@ -92,6 +92,72 @@ void Application::RunGame()
 	UnloadContent();
 }
 
+void Application::RunGame()
+{
+	Initialize();
+
+	LoadContent();
+
+	mTimer.Reset();
+
+	do 
+	{
+		TickOneFrame();
+
+	} while ( !mEndGame );
+
+	UnloadContent();
+}
+
+
+void Application::TickOneFrame()
+{
+	InputSystem& inputSystem = Context::GetSingleton().GetInputSystem();
+	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
+	RenderDevice& renderDevice = Context::GetSingleton().GetRenderDevice();
+
+	mTimer.Tick();
+
+	if (mActice)
+	{
+		// Read Input Events;
+		MSG msg;
+		while( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE) )
+		{
+			// dispatch the message
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	}
+
+	if (!mAppPaused)
+	{
+		// Process Events
+		InputEvent event;
+		while(inputSystem->PollEvent(event))
+		{
+			bool eventConsumed = false;
+
+			eventConsumed = UIManager::GetSingleton().OnEvent(event);
+
+			if (!eventConsumed)
+			{
+				// APP 
+				eventConsumed = input->DispatchEvent(event);
+
+				if (!eventConsumed)
+				{
+					if (event.EventType = InputEvent::KeyDown)
+					{
+						endGame = true;
+						eventConsumed = true;
+					}
+				}
+			}
+		}
+	}
+}
+
 void Application::Tick()
 {
 	InputSystem& inputSystem = Context::GetSingleton().GetInputSystem();
@@ -105,7 +171,7 @@ void Application::Tick()
 		inputSystem.Update(mTimer.GetDeltaTime());
 		if (inputSystem.GetKeyboard()->KeyPress(KC_Escape))
 		{
-			mIsRunning  = false;
+			mEndGame  = true;
 			return;
 		}
 	}
@@ -253,6 +319,11 @@ void Application::Window_UserResized()
 	uint32_t height = mMainWindow->GetHeight();
 	Context::GetSingleton().GetInputSystem().Resize(width, height);
 	Context::GetSingleton().GetRenderDevice().Resize(width, height);	
+}
+
+void Application::ProcessEventQueue()
+{
+
 }
 
 } // Namespace RcEngine
