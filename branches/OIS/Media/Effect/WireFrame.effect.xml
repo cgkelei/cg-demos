@@ -1,0 +1,59 @@
+<Effect name="WireFrame">
+
+<Shader name="VS" stage="Vertex" entry="main">
+<![CDATA[
+
+#version 330
+	
+in vec4 Position;
+in vec3 Normal;
+in vec2 Tex;
+
+out vec3 oNormal;
+out vec2 oTex;
+
+uniform mat4 World;
+uniform mat4 ViewProj;
+
+		
+void main(void)
+{
+	vec4 worldPos = Position * World ;
+	
+	oNormal = Normal * mat3(World);
+	oTex = Tex;
+	
+	gl_Position = worldPos * ViewProj;
+}
+
+]]>
+</Shader>
+
+<Shader name="PS" stage="Pixel" entry="main">
+<![CDATA[
+
+#version 330
+
+in vec3 oNormal;
+in vec2 oTex;
+
+out vec4 FragColor;
+	
+void main()
+{
+	FragColor = vec4(1.0, 1, 1, 1);
+}
+
+]]>
+</Shader>
+
+<Technique name="WireFrame">
+	<Pass name="p0">
+		<State name="FillMode" value="WireFrame"/>
+		<VertexShader name="VS"/>
+		<PixelShader name="PS"/>
+	</Pass>
+</Technique>
+
+</Effect>
+	

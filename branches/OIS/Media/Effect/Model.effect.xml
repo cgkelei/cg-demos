@@ -1,0 +1,250 @@
+<Effect name="ModelEffect">
+
+<Shader name="ModelVS" stage="Vertex" entry="main">
+	<ShaderSource>
+	<![CDATA[
+#version 330
+
+#ifdef _ParallaxMapping
+	#define _NormalMapping
+#endif
+
+// uniforms
+// skin model will bake the world matrix into skin matrices
+// we not support non-uniform scale, so the normal matrix is 
+// simply the up 3x3 mat.
+#ifdef _Skinning
+	uniform mat4 WorldMatrices[64];
+#endif
+
+	uniform mat4 WorldMat;
+	uniform mat4 WorldNormalMat;
+	uniform mat4 ViewProjMat;
+	uniform vec3 ViewerPos;
+
+// shader input
+in vec3 iPos;
+
+#ifdef _Skinning
+	in vec4 iBlendWeights;
+	in uvec4 iBlendIndices;
+#endif
+
+in vec3 iNormal;
+in vec2 iTex0;
+
+#ifdef _NormalMapping
+	in vec3 iTangent;
+	in vec3 iBinormal;
+#endif
+
+
+// shader out put
+out vec4 oPosWS;
+out vec2 oTex;
+
+#ifdef _NormalMapping
+	out mat3 oTangentToWorldMat;
+#else
+	out vec3 oNormalWS;
+#endif
+
+#ifdef _ParallaxMapping
+	out vec3 oViewTS; 
+#endif
+
+void main()
+{
+#ifdef _Skinning
+	mat4 SkinningWorldMat = WorldMatrices[iBlendIndices[0]] * iBlendWeights[0] +
+							WorldMatrices[iBlendIndices[1]] * iBlendWeights[1] +
+							WorldMatrices[iBlendIndices[2]] * iBlendWeights[2] +
+							WorldMatrices[iBlendIndices[3]] * iBlendWeights[3];
+
+	mat3 SkinningNormalMat = mat3(SkinningWorldMat);
+#endif
+
+	// calculate world normal.
+#ifdef _Skinning
+	vec3 normal = normalize(iNormal * SkinningNormalMat);
+#else
+	vec3 normal = normalize(iNormal * mat3(WorldNormalMat));
+#endif
+
+	// calculate position in world space:
+#ifdef _Skinning
+	oPosWS = vec4(iPos, 1.0)* SkinningWorldMat;
+#else
+	oPosWS = vec4(iPos, 1.0) * WorldMat;
+#endif
+
+	// calculate tangent and binormal.
+#ifdef _NormalMapping
+	#ifdef _Skinning
+		vec3 tangent = normalize(iTangent * SkinningNormalMat);
+		vec3 binormal = normalize(iBinormal * SkinningNormalMat);
+	#else
+		vec3 tangent = normalize(iTangent * mat3(WorldNormalMat));
+		vec3 binormal = normalize(iBinormal * mat3(WorldNormalMat));
+	#endif
+
+	// actualy this is a world to tangent matrix, because we always use V * Mat.
+	oTangentToWorldMat = mat3( tangent, binormal, normal);
+
+	#ifdef _ParallaxMapping
+		oViewTS = (ViewerPos - oPosWS) * oTangentToWorldMat;
+	#endif
+
+	// transpose to get tangent to world matrix
+	oTangentToWorldMat = transpose(oTangentToWorldMat);
+
+#else
+	oNormalWS = normal;
+#endif
+
+	oTex = iTex0;
+	gl_Position = oPosWS * ViewProjMat;
+}
+	]]>
+	</ShaderSource>
+</Shader>
+	
+<Shader name="ModelPS" stage="Pixel" entry="main">
+	<Include name="LightingUtil.include.xml"/>
+	<ShaderSource>
+	<![CDATA[
+uniform vec3 ViewerPos;
+uniform vec4 LightPos;		// w dimension is spot light inner cone cos angle
+uniform vec4 LightDir;		// w dimension is spot light outer cone cos angle
+uniform vec3 LightColor;
+uniform vec3 LightFalloff; 
+
+uniform sampler2D DiffuseMap;
+
+#ifdef _NormalMapping
+	uniform sampler2D NormalMap;
+#endif
+
+in vec4 oPosWS;
+in vec2 oTex;
+
+#ifdef _NormalMapping
+	in mat3 oTangentToWorldMat;
+#else
+	in vec3 oNormalWS;
+#endif
+
+#ifdef _ParallaxMapping
+	in vec3 oViewTS; 
+#endif
+
+void main()
+{
+#ifdef _ParallaxMapping
+	const float heightScale = 0.03;
+	const float heightBias = 0.01;
+
+	// get height field form map
+	float currentHeight = texture2D( NormalMap, oTex).a;
+
+	// Scale and bias this height map value:
+    float height = currentHeight * heightScale + heightBias;
+
+	// Perform offset limiting if desired:
+    height /= oViewTS.z;
+
+	// Compute the offset vector for approximating parallax:
+    vec2 newTex = oTex + oViewTS.xy * height;
+#else
+	vec2 newTex = oTex ;
+#endif
+
+	vec4 diffuse = texture2D( DiffuseMap, newTex);
+
+#ifdef AlphaTest
+	if( diffuse.a < 0.01 ) discard;
+#endif
+
+#ifdef _NormalMapping
+	vec3 normal = texture2D( NormalMap, newTex ).rgb * 2.0 - 1.0;
+	normal = normal * oTangentToWorldMat;
+#else
+	vec3 normal = oNormalWS;
+#endif	
+
+#ifdef SPOTLIGHT
+	float spot = SpotLighting(LightPos.xyz, LightDir.xyz, vec2(LightPos.w, LightDir.w), oPosWS.xyz);
+#endif
+
+	vec3 finalColor = vec3(0.0);
+
+#ifdef SPOTLIGHT
+	if(spot > 0.0)
+	{
+#endif
+		
+		// calculate  light vector
+	#ifdef DIRLIGHT
+		vec3 lightVec = normalize(-LightDir.xyz);
+	#else
+		vec3 lightVec = normalize(LightPos.xyz - oPosWS.xyz);
+	#endif
+
+		vec3 viewVec = normalize(ViewerPos- oPosWS.xyz);
+		vec3 halfVec = normalize((viewVec + lightVec) / 2.0);
+		
+		// calculate attenuation
+		float atten = 1.0;
+	#ifdef SPOTLIGHT 
+		atten = spot * CalcAttenuation(LightPos.xyz, oPosWS.xyz, LightFalloff);
+	#elseif POINTLIGHT
+		atten = CalcAttenuation(LightPos.xyz, oPosWS.xyz, LightFalloff);
+	#endif
+
+		float NdotL = dot(lightVec, normal);
+		if (NdotL > 0.0)
+		{
+			finalColor += atten * diffuse.rgb * LightColor;
+		}
+
+#ifdef SPOTLIGHT
+	}
+#endif
+
+	gl_FragColor = vec4(finalColor, diffuse.a);
+	
+}
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Technique name="PointLighting">
+	<Pass name="p0">
+		<VertexShader name="ModelVS"/>
+		<PixelShader name="ModelPS">
+			<Macro name="POINTLIGHT"/>
+		</PixelShader>
+	</Pass>
+</Technique>
+
+<Technique name="DirectionalLighting">
+	<Pass name="p0">
+		<VertexShader name="ModelVS"/>
+		<PixelShader name="ModelPS">
+			<Macro name="DIRLIGHT"/>
+		</PixelShader>
+	</Pass>
+</Technique>
+
+<Technique name="SpotLighting">
+	<Pass name="p0">
+		<VertexShader name="ModelVS"/>
+		<PixelShader name="ModelPS"/>
+			<Macro name="SPOTLIGHT">
+		</PixelShader>
+	</Pass>
+</Technique>
+
+</Effect>
+	
+	
