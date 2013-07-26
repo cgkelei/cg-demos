@@ -20,12 +20,13 @@
 #include <Core/ModuleManager.h>
 #include <Resource/ResourceManager.h>
 #include <Input/InputSystem.h>
-#include <Input/InputDevice.h>
 #include <Input/InputEvent.h>
 #include <IO/FileSystem.h>
 #include <IO/FileStream.h>
 #include <GUI/UIManager.h>
 
+// C++ 11 thread
+#include <thread>
 
 namespace RcEngine {
 
@@ -36,6 +37,7 @@ Application::Application( const String& config )
 	ModuleManager::Initialize();
 	FileSystem::Initialize();
 	ResourceManager::Initialize();
+	InputSystem::Initialize();
 
 	// todo add sub scene manager
 	new SceneManager;
@@ -62,34 +64,8 @@ Application::~Application( void )
 	ResourceManager::Finalize();
 	ModuleManager::Finalize();
 	FileSystem::Finalize();
+	InputSystem::Finalize();
 	Context::Finalize();
-}
-
-void Application::RunGame()
-{
-	Initialize();
-	LoadContent();
-
-	// Reset Game Timer
-	mTimer.Reset();
-
-	MSG msg;
-	ZeroMemory( &msg, sizeof( msg ) );
-	while( msg.message != WM_QUIT && !mEndGame)
-	{   
-		if( PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE ) )
-		{
-			TranslateMessage( &msg );
-			DispatchMessage( &msg );
-
-		}
-		else
-		{
-			Tick();
-		}
-	}
-
-	UnloadContent();
 }
 
 void Application::RunGame()
@@ -102,109 +78,87 @@ void Application::RunGame()
 
 	do 
 	{
-		TickOneFrame();
+		Tick();
 
 	} while ( !mEndGame );
 
 	UnloadContent();
 }
 
-
-void Application::TickOneFrame()
+void Application::Tick()
 {
-	InputSystem& inputSystem = Context::GetSingleton().GetInputSystem();
 	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
 	RenderDevice& renderDevice = Context::GetSingleton().GetRenderDevice();
+	InputSystem& inputSystem = InputSystem::GetSingleton();
 
-	mTimer.Tick();
-
-	if (mActice)
+	if (!mActice)
 	{
-		// Read Input Events;
-		MSG msg;
-		while( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE) )
-		{
-			// dispatch the message
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
+		// Inatice, Sleep for a while
+		static const std::chrono::milliseconds inactiveSleepTime( 20 );
+		std::this_thread::sleep_for( inactiveSleepTime );
 	}
 
-	if (!mAppPaused)
-	{
-		// Process Events
-		InputEvent event;
-		while(inputSystem->PollEvent(event))
-		{
-			bool eventConsumed = false;
+	// Andvance Game Time
+	mTimer.Tick();
 
-			eventConsumed = UIManager::GetSingleton().OnEvent(event);
+	// Read Input
+	inputSystem.BeginEvents();
+		mMainWindow->CollectOSEvents();
+	inputSystem.EndEvents();
+
+	// Process input events
+	ProcessEventQueue();
+
+	// update
+	Update(mTimer.GetDeltaTime());
+
+	// update scene graph
+	sceneMan.UpdateSceneGraph(mTimer.GetDeltaTime());
+
+	// render
+	Render();
+}
+
+void Application::ProcessEventQueue()
+{
+	InputSystem& inputSystem = InputSystem::GetSingleton();
+
+	InputEvent event;
+	while(inputSystem.PollEvent(&event))
+	{
+		bool eventConsumed = false;
+
+		eventConsumed = UIManager::GetSingleton().OnEvent(event);
+		
+		if (!eventConsumed)
+		{
+			/*if (!mAppPaused)
+			eventConsumed = mAppPaused*/
 
 			if (!eventConsumed)
 			{
-				// APP 
-				eventConsumed = input->DispatchEvent(event);
-
-				if (!eventConsumed)
+				if (event.EventType == InputEventType::KeyDown && event.Key.key == KC_Escape)
 				{
-					if (event.EventType = InputEvent::KeyDown)
-					{
-						endGame = true;
-						eventConsumed = true;
-					}
+					mEndGame = true;
+					eventConsumed = true;
+					return;
 				}
 			}
 		}
 	}
-}
 
-void Application::Tick()
-{
-	InputSystem& inputSystem = Context::GetSingleton().GetInputSystem();
-	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
-	RenderDevice& renderDevice = Context::GetSingleton().GetRenderDevice();
-
-	mTimer.Tick();
-
-	if (mActice)
-	{
-		inputSystem.Update(mTimer.GetDeltaTime());
-		if (inputSystem.GetKeyboard()->KeyPress(KC_Escape))
-		{
-			mEndGame  = true;
-			return;
-		}
-	}
-
-	if(!mAppPaused)
-	{	
-		Update(mTimer.GetDeltaTime());
-
-		// update scene graph
-		sceneMan.UpdateSceneGraph(mTimer.GetDeltaTime());
-
-		// render
-		Render();
-	}
-	else
-		::Sleep(50);
-	
 }
 
 void Application::LoadAllModules()
 {
 	ModuleManager::GetSingleton().Load(MT_Render_OpengGL);
 	ModuleManager::GetSingleton().GetMoudleByType(MT_Render_OpengGL)->Initialise();
-
-	ModuleManager::GetSingleton().Load(MT_Input_OIS);
-	ModuleManager::GetSingleton().GetMoudleByType(MT_Input_OIS)->Initialise();
 }
 
 void Application::UnloadAllModules()
 {
 	ModuleManager::GetSingleton().UnloadAll();
 }
-
 
 void Application::Window_ApplicationActivated()
 {
@@ -220,17 +174,33 @@ void Application::Window_ApplicationDeactivated()
 
 void Application::Window_Suspend()
 {
+	mAppPaused = true;
 	mTimer.Stop();
 }
 
 void Application::Window_Resume()
 {
+	mAppPaused = true;
 	mTimer.Start();
 }
 
 void Application::Window_Paint()
 {
 
+}
+
+void Application::Window_UserResized()
+{
+	mMainWindow->UpdateWindowSize();
+	uint32_t width = mMainWindow->GetWidth();
+	uint32_t height = mMainWindow->GetHeight();
+	//Context::GetSingleton().GetInputSystem().Resize(width, height);
+	Context::GetSingleton().GetRenderDevice().Resize(width, height);	
+}
+
+void Application::Window_Close()
+{
+	mEndGame = true;
 }
 
 void Application::ReadConfiguration()
@@ -296,6 +266,7 @@ void Application::Create()
 	mMainWindow->ResumeEvent.bind(this, &Application::Window_Resume);
 	mMainWindow->ApplicationActivatedEvent.bind(this, &Application::Window_ApplicationActivated);
 	mMainWindow->ApplicationDeactivatedEvent.bind(this, &Application::Window_ApplicationDeactivated);
+	mMainWindow->WindowClose.bind(this, &Application::Window_Close);
 
 	// load all modules
 	LoadAllModules();
@@ -312,18 +283,6 @@ void Application::Release()
 	
 }
 
-void Application::Window_UserResized()
-{
-	mMainWindow->UpdateWindowSize();
-	uint32_t width = mMainWindow->GetWidth();
-	uint32_t height = mMainWindow->GetHeight();
-	Context::GetSingleton().GetInputSystem().Resize(width, height);
-	Context::GetSingleton().GetRenderDevice().Resize(width, height);	
-}
 
-void Application::ProcessEventQueue()
-{
-
-}
 
 } // Namespace RcEngine

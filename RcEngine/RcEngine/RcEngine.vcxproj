@@ -78,9 +78,7 @@
     <ClInclude Include="GUI\UIElement.h" />
     <ClInclude Include="GUI\UIManager.h" />
     <ClInclude Include="GUI\UIWindow.h" />
-    <ClInclude Include="Input\InputDevice.h" />
     <ClInclude Include="Input\InputEvent.h" />
-    <ClInclude Include="Input\InputModule.h" />
     <ClInclude Include="Input\InputSystem.h" />
     <ClInclude Include="IO\FileStream.h" />
     <ClInclude Include="IO\FileSystem.h" />
@@ -174,8 +172,6 @@
     <ClCompile Include="GUI\UIElement.cpp" />
     <ClCompile Include="GUI\UIManager.cpp" />
     <ClCompile Include="GUI\UIWindow.cpp" />
-    <ClCompile Include="Input\InputDevice.cpp" />
-    <ClCompile Include="Input\InputModule.cpp" />
     <ClCompile Include="Input\InputSystem.cpp" />
     <ClCompile Include="IO\FileStream.cpp" />
     <ClCompile Include="IO\FileSystem.cpp" />
@@ -184,6 +180,8 @@
     <ClCompile Include="IO\Stream.cpp" />
     <ClCompile Include="MainApp\Application.cpp" />
     <ClCompile Include="MainApp\Window.cpp" />
+    <ClCompile Include="MainApp\Window_Android.cpp" />
+    <ClCompile Include="MainApp\Window_Win32.cpp" />
     <ClCompile Include="Math\ColorRGBA.cpp" />
     <ClCompile Include="Resource\Resource.cpp" />
     <ClCompile Include="Resource\ResourceManage.cpp" />
@@ -249,7 +247,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;BUILD_DLL;RcWindows;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>./;../3rdParty;../3rdParty/freetype/include;../3rdParty/freetype/include/freetype2</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>

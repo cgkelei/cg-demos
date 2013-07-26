@@ -1,5 +1,5 @@
 #include <GUI/Button.h>
-#include <Input/InputDevice.h>
+#include <Input/InputSystem.h>
 
 namespace RcEngine {
 

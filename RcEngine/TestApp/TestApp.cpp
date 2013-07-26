@@ -24,7 +24,6 @@
 #include "IO/FileSystem.h"
 #include "MainApp/Window.h"
 #include "Input/InputSystem.h"
-#include "Input/InputDevice.h"
 #include "Scene/SceneNode.h"
 #include "Scene/Entity.h"
 #include "Scene/SceneManager.h"

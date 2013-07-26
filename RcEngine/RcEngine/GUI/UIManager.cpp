@@ -1,7 +1,6 @@
 #include <GUI/UIManager.h>
 #include <GUI/UIElement.h>
 #include <Input/InputSystem.h>
-#include <Input/InputDevice.h>
 #include <MainApp/Application.h>
 #include <MainApp/Window.h>
 #include <Core/Context.h>
@@ -15,8 +14,7 @@ UIManager::UIManager()
 	  mFocusElement(nullptr),
 	  mRootElement(nullptr)
 {
-	InputSystem* inputSystem = Context::GetSingleton().GetInputSystemPtr();
-
+	
 	InputAction actions[] =
 	{
 		InputAction(MS_X,          MouseMove),
@@ -24,9 +22,9 @@ UIManager::UIManager()
 		InputAction(MS_LeftButton, MouseUpDown),
 	};
 
-	if (inputSystem)
+	//if (inputSystem)
 	{
-		inputSystem->AddAction(actions, actions+ sizeof(actions)/ sizeof(InputAction));
+		//inputSystem->AddAction(actions, actions+ sizeof(actions)/ sizeof(InputAction));
 		//inputSystem->AddStateHandler(Forward, fastdelegate::MakeDelegate(this, &FPSCameraControler::HandleMove));
 		//inputSystem->AddStateHandler(Backward, fastdelegate::MakeDelegate(this, &FPSCameraControler::HandleMove));
 		//inputSystem->AddStateHandler(MoveLeft, fastdelegate::MakeDelegate(this, &FPSCameraControler::HandleMove));
@@ -69,9 +67,7 @@ void UIManager::Update( float delta )
 {
 	bool mouseVisible = Context::GetSingleton().GetApplication().GetMainWindow()->IsMouseVisible();
 	
-	Mouse* mouse = Context::GetSingleton().GetInputSystem().GetMouse();
-
-	int2 mousePos = int2( mouse->X(), mouse->Y() );
+	int2 mousePos = InputSystem::GetSingleton().GetMousePos();
 
 	if (mouseVisible)
 	{
@@ -243,6 +239,16 @@ UIElement* UIManager::GetFocusableElement( UIElement* element )
 		element = element->GetParent();
 	}
 	return element;
+}
+
+bool UIManager::OnEvent( const InputEvent& event )
+{
+	bool eventConsumed = false;
+
+
+
+	return eventConsumed;
+
 }
 
 

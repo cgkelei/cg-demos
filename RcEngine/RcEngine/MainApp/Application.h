@@ -34,6 +34,8 @@ public:
 
 	Window* GetMainWindow() { return mMainWindow; }
 
+	bool Active() const { return mActice; }
+
 protected:
 
 	//Called after the Game and GraphicsDevice are created, but before LoadContent.
@@ -69,8 +71,6 @@ private:
 	void LoadAllModules();
 	void UnloadAllModules();
 
-	void TickOneFrame();
-
 	void ReadConfiguration();
 
 	void Window_UserResized();
@@ -79,6 +79,7 @@ private:
 	void Window_Suspend();
 	void Window_Resume();
 	void Window_Paint();
+	void Window_Close();
 
 	void ProcessEventQueue();
 
