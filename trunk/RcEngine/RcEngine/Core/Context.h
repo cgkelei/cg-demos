@@ -31,14 +31,9 @@ public:
 	Application* GetApplicationPtr()						{ assert(mApplication); return mApplication; }
 	Application& GetApplication()							{ assert(mApplication); return *mApplication; }
 
-	void SetInputSystem(InputSystem* input);
-	InputSystem* GetInputSystemPtr()						{ assert(mInputSystem); return mInputSystem; }
-	InputSystem& GetInputSystem()							{ assert(mInputSystem); return *mInputSystem; }
-
 	void SetSceneManager( SceneManager* scene );
 	SceneManager* GetSceneManagerPtr()						{ assert(mSceneManager); return mSceneManager; }
 	SceneManager& GetSceneManager()							{ assert(mSceneManager); return *mSceneManager; }
-
 
 private:
 	RenderDevice* mRenderDevice;

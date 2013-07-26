@@ -45,12 +45,6 @@ void Context::SetRenderFactory( RenderFactory* factory )
 	mRenderFactory = factory;
 }
 
-void Context::SetInputSystem( InputSystem* input )
-{
-	assert(input);
-	mInputSystem = input;
-}
-
 void Context::SetSceneManager( SceneManager* scene )
 {
 	mSceneManager = scene;

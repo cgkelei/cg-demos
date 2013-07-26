@@ -1,7 +1,7 @@
 #include <GUI/UIWindow.h>
 #include <GUI/UIManager.h>
 #include <Math/Math.h>
-#include <Input/InputDevice.h>
+#include <Input/InputSystem.h>
 
 static const int DEFAULT_RESIZE_BORDER = 4;
 

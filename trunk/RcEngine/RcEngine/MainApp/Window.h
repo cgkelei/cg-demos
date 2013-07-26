@@ -4,19 +4,27 @@
 #include <Core/Prerequisites.h>
 #include <Graphics/RenderSettings.h>
 
+#if defined(RcWindows) 
+	#include <Windows.h>
+#elif defined(RcAndroid)
+#endif
+
 namespace RcEngine {
 
 class _ApiExport Window
 {
 public:
 	Window(const std::string& name, const RenderSettings& settings);
-	~Window(void);
+	virtual ~Window(void);
 
+#ifdef RcWindows
 	HWND GetHwnd() const		{ return mhWnd; }
+#endif
+
 	uint32_t GetWidth() const	{ return mWidth; }
 	uint32_t GetHeight() const  { return mHeight; }
-	uint32_t GetLeft() const	{ return mLeft; }
-	uint32_t GetTop() const		{ return mTop; }
+	int32_t GetLeft() const	    { return mLeft; }
+	int32_t GetTop() const		{ return mTop; }
 	
 	bool InSizeMove() const		{ return mInSizeMove; }
 	bool IsMouseVisible() const { return mMouseVisible; }
@@ -24,13 +32,16 @@ public:
 	void Reposition(int32_t left, int32_t top);
 	void ShowWindow();
 	void SetTitle(const String& title);
-	void ForceCursorToCenter();
-	void SetMouseVisible(bool visible);
 
+	// Mouse 
+	void SetMousePosition(int32_t x, int32_t y);
+	void ForceMouseToCenter();
+	void SetMouseVisible(bool visible);
+	
 	// After Resize or reposition, this will compute new window size
 	void UpdateWindowSize();
 
-	virtual void CollectOSEvents();
+	void CollectOSEvents();
 
 private:
 	void OnUserResized();
@@ -39,10 +50,13 @@ private:
 	void OnApplicationActivated();
 	void OnApplicationDeactivated();
 	void OnPaint();
+	void OnClose();
 
-public:
+#ifdef RcWindows
+private:
 	static LRESULT CALLBACK WndProcStatic(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+#endif
 
 public:
 	EventHandler PaintEvent;
@@ -51,9 +65,13 @@ public:
 	EventHandler SuspendEvent;
 	EventHandler ApplicationActivatedEvent;
 	EventHandler ApplicationDeactivatedEvent;
+	EventHandler WindowClose;
 
-private:
-	uint32_t mLeft, mTop;
+protected:
+
+	InputSystem* mInputSystem;
+
+	int32_t mLeft, mTop;
 	uint32_t mWidth, mHeight;
 	std::string mName;
 
@@ -62,12 +80,13 @@ private:
 	bool mInSizeMove;
 	bool mMinimized, mMaximized;
 
-
+#ifdef RcWindows
 	HWND mhWnd;
 	HINSTANCE mhInstance;
+#endif
+
 public:
 	static Window* msWindow;
-
 };
 
 } // Namespace RcEngine

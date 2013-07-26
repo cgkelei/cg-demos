@@ -9,8 +9,9 @@ namespace RcEngine {
 
 class UIElement;
 class Cursor;
+union InputEvent;
 
-class UIManager : public Singleton<UIManager>
+class _ApiExport UIManager : public Singleton<UIManager>
 {
 public:
 	SINGLETON_DECL_HEADER(UIManager);
@@ -34,6 +35,11 @@ public:
 	void Update(float delta);
 
 
+	/** 
+	 * Handle GUI Event, if event is handled by GUI, no need to pass to other game object.
+	 * return true if the event is consumed, false if need to pass to others.
+	 */
+	bool OnEvent(const InputEvent& event);
 	
 private:
 	void HandleKeyPress(uint8_t key, uint32_t qualifiers);

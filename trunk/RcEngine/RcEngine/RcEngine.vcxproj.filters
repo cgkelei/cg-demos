@@ -225,12 +225,6 @@
     <ClInclude Include="GUI\UIWindow.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Input\InputDevice.h">
-      <Filter>Input</Filter>
-    </ClInclude>
-    <ClInclude Include="Input\InputModule.h">
-      <Filter>Input</Filter>
-    </ClInclude>
     <ClInclude Include="Input\InputSystem.h">
       <Filter>Input</Filter>
     </ClInclude>
@@ -509,12 +503,6 @@
     <ClCompile Include="GUI\UIWindow.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Input\InputDevice.cpp">
-      <Filter>Input</Filter>
-    </ClCompile>
-    <ClCompile Include="Input\InputModule.cpp">
-      <Filter>Input</Filter>
-    </ClCompile>
     <ClCompile Include="Input\InputSystem.cpp">
       <Filter>Input</Filter>
     </ClCompile>
@@ -574,6 +562,12 @@
     </ClCompile>
     <ClCompile Include="Core\StringHash.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="MainApp\Window_Android.cpp">
+      <Filter>MainApp</Filter>
+    </ClCompile>
+    <ClCompile Include="MainApp\Window_Win32.cpp">
+      <Filter>MainApp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
