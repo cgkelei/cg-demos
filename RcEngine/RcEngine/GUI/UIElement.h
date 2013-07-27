@@ -18,7 +18,7 @@ enum HorizontalAlignment
 	HA_Right
 };
 
-/// %UI element vertical alignment.
+/// UI element vertical alignment.
 enum VerticalAlignment
 {
 	VA_Top = 0,
@@ -51,21 +51,22 @@ public:
 	UIElement();
 	virtual ~UIElement();
 
-
 	virtual void Update(float delta);
 	virtual void Draw();
 
-	virtual void OnMouseHover(const int2& position, const int2& screenPosition, uint32_t buttons, uint32_t qualifiers);
-	virtual void OnMouseWheel(int32_t delta, uint32_t buttons, uint32_t qualifiers);
+	virtual bool OnMouseHover(const int2& position, uint32_t buttons);
+	virtual bool OnMouseWheel( int32_t delta );
 	
-	virtual void OnClick(const int2& position, const int2& screenPosition, uint32_t buttons, int qualifiers);
+	virtual bool OnClick(const int2& position, uint32_t buttons);
 
-	virtual void OnDragBegin(const int2& position, const int2& screenPosition, int buttons, int qualifiers);
-	virtual void OnDragMove(const int2& position, const int2& screenPosition, int buttons, int qualifiers);
-	virtual void OnDragEnd(const int2& position, const int2& screenPosition);
+	virtual void OnDragBegin(const int2& position, uint32_t buttons);
+	virtual void OnDragMove(const int2& position, uint32_t buttons);
+	virtual void OnDragEnd(const int2& position);
 
-	virtual void OnKeyPress(uint8_t key, uint32_t qualifiers);
-	virtual void OnKeyRelease(uint8_t key, uint32_t qualifiers);
+	virtual bool OnKeyPress(uint16_t key);
+	virtual bool OnKeyRelease(uint16_t key);
+
+	virtual bool OnTextInput(uint16_t unicode);
 
 	const String& GetName() const				{ return mName; }
 	void SetName(const String& name)			{ mName = name; }

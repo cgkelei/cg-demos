@@ -17,6 +17,7 @@ OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
 	mIsDepthBuffered = PixelFormatUtils::IsDepthStencil(settings.DepthStencilFormat);
 	PixelFormatUtils::GetNumDepthStencilBits(settings.DepthStencilFormat, mDepthBits, mStencilBits);
 
+#ifdef RcWindows
 	mHwnd = Context::GetSingleton().GetApplication().GetMainWindow()->GetHwnd();
 	mHdc = GetDC(mHwnd);
 
@@ -85,9 +86,10 @@ OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
 		wglSwapIntervalEXT(settings.SyncInterval);
 	}
 
-
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+#endif
 
 	std::ostringstream oss;
 	oss << reinterpret_cast<char const *>(glGetString(GL_VENDOR)) << " "
@@ -132,7 +134,9 @@ void OpenGLRenderWindow::DoUnbind()
 
 void OpenGLRenderWindow::SwapBuffers()
 {
+#ifdef RcWindows
 	::SwapBuffers(mHdc);
+#endif
 }
 
 void OpenGLRenderWindow::Resize( uint32_t width, uint32_t height )

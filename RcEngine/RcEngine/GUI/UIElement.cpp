@@ -120,48 +120,6 @@ void UIElement::MarkDirty()
 		child->MarkDirty();
 }
 
-void UIElement::OnMouseHover( const int2& position, const int2& screenPosition, uint32_t buttons, uint32_t qualifiers )
-{
-
-}
-
-void UIElement::OnClick( const int2& position, const int2& screenPosition, uint32_t buttons, int qualifiers)
-{
-
-}
-
-
-void UIElement::OnMouseWheel( int32_t delta, uint32_t buttons, uint32_t qualifiers )
-{
-
-}
-
-void UIElement::OnDragBegin( const int2& position, const int2& screenPosition, int buttons, int qualifiers)
-{
-
-}
-
-void UIElement::OnDragMove( const int2& position, const int2& screenPosition, int buttons, int qualifiers)
-{
-
-}
-
-void UIElement::OnDragEnd( const int2& position, const int2& screenPosition)
-{
-
-}
-
-
-void UIElement::OnKeyPress( uint8_t key, uint32_t qualifiers )
-{
-
-}
-
-void UIElement::OnKeyRelease( uint8_t key, uint32_t qualifiers )
-{
-
-}
-
 uint32_t UIElement::GetNumChildren( bool recursive /*= false*/ ) const
 {
 	uint32_t allChildren =  mChildren.size();
@@ -289,8 +247,49 @@ void UIElement::Update( float delta )
 
 }
 
+bool UIElement::OnMouseHover( const int2& position, uint32_t buttons )
+{
+	return false;
+}
 
+bool UIElement::OnMouseWheel( int32_t delta )
+{
+	return false;
+}
 
+bool UIElement::OnKeyPress( uint16_t key )
+{
+	return false;
+}
+
+bool UIElement::OnKeyRelease( uint16_t key )
+{
+	return false;
+}
+
+bool UIElement::OnTextInput( uint16_t unicode )
+{
+	return false;
+}
+
+void UIElement::OnDragBegin( const int2& position, uint32_t buttons )
+{
+}
+
+void UIElement::OnDragMove( const int2& position, uint32_t buttons )
+{
+
+}
+
+void UIElement::OnDragEnd( const int2& position )
+{
+
+}
+
+bool UIElement::OnClick( const int2& position, uint32_t buttons )
+{
+	return false;
+}
 
 
 }

@@ -37,35 +37,43 @@ struct InputEventType
 
 struct MouseButtonEvent
 {
-    int8_t type;
-	int32_t button;
+    uint8_t type;
+	uint32_t button;
     int16_t x, y;
 };
 
 struct MouseMotionEvent
 {
-	 int8_t type;
-	 int32_t buttons;
+	 uint8_t type;
+	 uint32_t buttons;
 	 int16_t x, y;
+};
+
+struct MouseWheelEvent
+{
+	uint8_t type;
+	int16_t wheel;
+	int16_t x, y;
 };
 
 struct KeyboardEvent
 {
-	int8_t type;
+	uint8_t type;
 	uint16_t key;
 };
 
 struct CharEvent
 {
-	int8_t type;
+	uint8_t type;
 	uint16_t unicode;
 };
 
 union InputEvent
 {
-	int8_t EventType;
+	uint8_t EventType;
 	MouseButtonEvent MouseButton;
 	MouseMotionEvent MouseMove;
+	MouseWheelEvent MouseWheel;
 	KeyboardEvent Key;
 	CharEvent Char;
 };

@@ -22,8 +22,7 @@ public:
 	void SetLightType(LightType type);
 	void SetPosition(const float3& pos);
 	void SetDirection(const float3& vec);
-	void SetLightDiffuse(const ColorRGBA& color);
-	void SetLightSpecular(const ColorRGBA& color);
+	void SetLightColor(const ColorRGBA& color);
 	void SetAttenuation(float range, float constant, float linear, float quadratic);
 	void SetSpotlightRange(float innerAngleRadian, float outerAngleRadian, float falloff = 1.0);
 	void SetSpotlightInnerAngle(float innerAngleRadian);
@@ -33,8 +32,8 @@ public:
 	
 	LightType GetLightType() const					{ return mLightType; }
 	const float3& GetPosition() const				{ return mLightDirection; }
-	const float3& GetDirection() const			{ return mLightPosition; }
-	const ColorRGBA& GetLightColor() const		{ return mLightColor; }
+	const float3& GetDirection() const				{ return mLightPosition; }
+	const ColorRGBA& GetLightColor() const			{ return mLightColor; }
 	float GetAttenuationRange () const				{ return mRange; }
 	float GetAttenuationConstant () const			{ return mAttenuationConst; }
 	float GetAttenuationLinear () const				{ return mAttenuationLinear; }

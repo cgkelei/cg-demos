@@ -35,6 +35,7 @@
 #include "Math/Rectangle.h"
 #include "Core/XMLDom.h"
 #include "Core/Utility.h"
+#include "GUI/UIManager.h"
 #include "Core/Variant.h"
 #include "Core/StringHash.h"
 
@@ -66,6 +67,13 @@ void TestApp::Initialize()
 	//mCameraControler = new ModelViewerCameraControler();
 	//mCameraControler->SetWindowSize(GetMainWindow()->GetWidth(), GetMainWindow()->GetHeight());
 	mCameraControler->AttachCamera(camera);
+}
+
+void TestApp::InitGUI()
+{
+	UIManager& uiMan = UIManager::GetSingleton();
+
+
 }
 
 //void TestApp::LoadContent()
@@ -179,13 +187,12 @@ void TestApp::Render()
 
 	mSpriteBatch->Flush();
 
-
 	// todo 
 	// Move to engine level
 	scenenMan.UpdateRenderQueue(currentFrameBuffer->GetCamera(), RO_StateChange);
+	scenenMan.RenderScene();
 
-	Context::GetSingleton().GetSceneManager().RenderScene();
-
+	// Render UI
 	currentFrameBuffer->SwapBuffers();
 
 	CalculateFrameRate();
@@ -199,6 +206,10 @@ void TestApp::Update( float deltaTime )
 
 	//SceneNode* dwarfNode = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf");
 	//dwarfNode->SetRotation(QuaternionFromRotationMatrix(mCameraControler->GetWorldMatrix()));
+
+
+	// Update UI
+	UIManager::GetSingleton().Update(deltaTime);
 }
 
 void TestApp::CalculateFrameRate()
@@ -215,6 +226,8 @@ void TestApp::CalculateFrameRate()
 		baseTime += 1.0f;
 	}
 }
+
+
 
 
 int32_t main()

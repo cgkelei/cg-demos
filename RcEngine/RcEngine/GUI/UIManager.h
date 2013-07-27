@@ -28,6 +28,11 @@ public:
 	UIManager();
 	~UIManager();
 
+	/**
+	 * Keep track of main window, must called after main window is created.
+	 */
+	void SetMainWindow(Window* win)						{ mMainWindow = win; }
+
 	void SetFocusElement(UIElement* element);
 	UIElement* GetFocusElement()						{ return mFocusElement; }	
 
@@ -42,19 +47,55 @@ public:
 	bool OnEvent(const InputEvent& event);
 	
 private:
-	void HandleKeyPress(uint8_t key, uint32_t qualifiers);
-	void HandleKeyRelease(uint8_t key, uint32_t qualifiers);
 
-	void HandleMousePress(const int2& pos, uint32_t buttons, int qualifiers);
-	void HandleMouseRelease(const int2& pos, uint32_t buttons, int qualifiers);
-	void HandleMouseMove(const int2& pos, uint32_t buttons, int qualifiers);
-	void HandleMouseWheel(int32_t delta, uint32_t buttons, uint32_t qualifiers);
+	/**
+	 * Handle keyboard [press|release] event.
+	 * @return 
+	 *  If exits a UIElement consume this event, return true, or return false.
+	 */
+	bool HandleKeyPress(uint16_t key);
+	bool HandleKeyRelease(uint16_t key);
+
+	/**
+	 * Handle text input event.
+	 * @return 
+	 *  If exits a UIElement consume this event, return true, or return false.
+	 */
+	bool HandleTextInput(uint16_t unicode);
+
+	/**
+	 * Handle mouse button [press|release] event.
+	 * @param 
+	 *  pos: Mouse screen position.
+	 *  button: Mouse button which cause this event
+	 * @return 
+	 *  If exits a UIElement consume this event, return true, or return false.
+	 */
+	bool HandleMousePress(const int2& pos, uint32_t button);
+	bool HandleMouseRelease(const int2& pos, uint32_t button);
+
+	/**
+	 * Handle mouse move event.
+	 * @param 
+	 *  pos: Mouse screen position.
+	 *  buttons: Button states when mouse move 
+	 * @return 
+	 *  if exits a UIElement consume this event, return true, or return false.
+	 */
+	bool HandleMouseMove(const int2& pos, uint32_t buttons);
+
+	/**
+	 * Handle mouse move event.
+	 * @return 
+	 *  if exits a UIElement consume this event, return true, or return false.
+	 */
+	bool HandleMouseWheel(const int2& pos, int32_t delta);
+
 
 	UIElement* GetElementFromPoint(const int2& pos);
 	void GetElementFromPoint(UIElement*& result, UIElement* current, const int2& pos);
 
 	UIElement* GetFocusableElement(UIElement* element);
-
 
 protected:
 	
@@ -63,6 +104,8 @@ protected:
 	UIElement* mDragElement;
 
 	Cursor* mCursor;
+	
+	Window* mMainWindow;
 };
 
 }

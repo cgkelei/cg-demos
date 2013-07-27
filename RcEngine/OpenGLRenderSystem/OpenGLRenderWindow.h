@@ -25,11 +25,14 @@ protected:
 
 private:
 	int32_t mLeft, mTop;
+	bool mFullscreen;
+	std::string mDescription;
+
+#ifdef RcWindows
 	HDC  mHdc;
 	HGLRC mHrc;
 	HWND mHwnd;
-	bool mFullscreen;
-	std::string mDescription;
+#endif
 			
 
 };

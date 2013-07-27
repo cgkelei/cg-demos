@@ -1049,11 +1049,14 @@ void FbxProcesser::CollectMaterials( FbxScene* pScene )
 			}  
 		}  
 
-		//matData.Ambient = ColorRGBA(AmbientColor.X(), AmbientColor.Y(), AmbientColor.Z(), 1.0f);
-		//matData.Diffuse = ColorRGBA(DiffuseColor.X(), DiffuseColor.Y(), DiffuseColor.Z(), 1.0f);
-		//matData.Specular = ColorRGBA(SpecularColor.X(), SpecularColor.Y(), SpecularColor.Z(), 1.0f);
-		//matData.Emissive = ColorRGBA(EmissiveColor.X(), EmissiveColor.Y(), EmissiveColor.Z(), 1.0f);
-		//matData.Power = fSpecularPower;
+		MaterialData matData;
+
+		matData.Name = matName;
+		matData.Ambient = ColorRGBA(AmbientColor.X(), AmbientColor.Y(), AmbientColor.Z(), 1.0f);
+		matData.Diffuse = ColorRGBA(DiffuseColor.X(), DiffuseColor.Y(), DiffuseColor.Z(), 1.0f);
+		matData.Specular = ColorRGBA(SpecularColor.X(), SpecularColor.Y(), SpecularColor.Z(), 1.0f);
+		matData.Emissive = ColorRGBA(EmissiveColor.X(), EmissiveColor.Y(), EmissiveColor.Z(), 1.0f);
+		matData.Power = fSpecularPower;
 
 		mMaterials.push_back(matData);
 	}

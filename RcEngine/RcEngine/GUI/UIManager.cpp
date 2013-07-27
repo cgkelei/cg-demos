@@ -1,8 +1,8 @@
 #include <GUI/UIManager.h>
 #include <GUI/UIElement.h>
-#include <Input/InputSystem.h>
-#include <MainApp/Application.h>
 #include <MainApp/Window.h>
+#include <Input/InputSystem.h>
+#include <Input/InputEvent.h>
 #include <Core/Context.h>
 
 namespace RcEngine {
@@ -14,23 +14,6 @@ UIManager::UIManager()
 	  mFocusElement(nullptr),
 	  mRootElement(nullptr)
 {
-	
-	InputAction actions[] =
-	{
-		InputAction(MS_X,          MouseMove),
-		InputAction(MS_Y,          MouseMove),
-		InputAction(MS_LeftButton, MouseUpDown),
-	};
-
-	//if (inputSystem)
-	{
-		//inputSystem->AddAction(actions, actions+ sizeof(actions)/ sizeof(InputAction));
-		//inputSystem->AddStateHandler(Forward, fastdelegate::MakeDelegate(this, &FPSCameraControler::HandleMove));
-		//inputSystem->AddStateHandler(Backward, fastdelegate::MakeDelegate(this, &FPSCameraControler::HandleMove));
-		//inputSystem->AddStateHandler(MoveLeft, fastdelegate::MakeDelegate(this, &FPSCameraControler::HandleMove));
-		//inputSystem->AddStateHandler(MoveRight, fastdelegate::MakeDelegate(this, &FPSCameraControler::HandleMove));
-	}
-
 
 }
 
@@ -62,10 +45,27 @@ void UIManager::SetFocusElement( UIElement* element )
 	}
 }
 
+UIElement* UIManager::GetElementFromPoint( const int2& pos )
+{
+	UIElement* result = 0;
+	GetElementFromPoint(result, mRootElement, pos);
+	return result;
+}
+
+UIElement* UIManager::GetFocusableElement( UIElement* element )
+{
+	while (element)
+	{
+		if (element->GetFocusMode() != FM_NoFocus)
+			break;
+		element = element->GetParent();
+	}
+	return element;
+}
 
 void UIManager::Update( float delta )
 {
-	bool mouseVisible = Context::GetSingleton().GetApplication().GetMainWindow()->IsMouseVisible();
+	/*bool mouseVisible = Context::GetSingleton().GetApplication().GetMainWindow()->IsMouseVisible();
 	
 	int2 mousePos = InputSystem::GetSingleton().GetMousePos();
 
@@ -74,16 +74,202 @@ void UIManager::Update( float delta )
 		UIElement* element = GetElementFromPoint(mousePos);
 
 		if (element && element->IsEnabled())
-			element->OnMouseHover(element->ScreenToClient(mousePos), mousePos, 0, 0);
-	}
+			element->OnMouseHover(element->ScreenToClient(mousePos));
+	}*/
 
 }
 
-void UIManager::HandleKeyPress( uint8_t key, uint32_t qualifiers )
+bool UIManager::OnEvent( const InputEvent& event )
 {
+	bool eventConsumed = false;
+
+	switch (event.EventType)
+	{
+	case InputEventType::MouseButtonDown:
+		{
+			eventConsumed = HandleMousePress(
+				int2(int(event.MouseButton.x), int(event.MouseButton.y)), 
+				event.MouseButton.button);
+		}
+		break;
+	case InputEventType::MouseButtonUp:
+		{
+			eventConsumed = HandleMouseRelease(
+				int2(int(event.MouseButton.x), int(event.MouseButton.y)), 
+				event.MouseButton.button);
+		}
+		break;
+	case InputEventType::MouseMove:
+		{
+			eventConsumed = HandleMouseMove(
+				int2(int(event.MouseMove.x), int(event.MouseMove.y)), 
+				event.MouseMove.buttons);
+		}
+		break;
+	case InputEventType::MouseWheel:
+		{
+			eventConsumed = HandleMouseWheel(
+				int2(int(event.MouseWheel.x), int(event.MouseWheel.y)), 
+				event.MouseWheel.wheel);
+		}
+		break;
+	case InputEventType::KeyDown:
+		{
+			eventConsumed = HandleKeyPress(event.Key.key);
+		}
+		break;
+	case InputEventType::KeyUp:
+		{
+			eventConsumed = HandleKeyPress(event.Key.key);
+		}
+		break;
+	case InputEventType::Char:
+		{
+			eventConsumed = HandleKeyPress(event.Char.unicode);
+		}
+		break;
+	default:
+		break;
+	}
+
+	return eventConsumed;
+
+}
+
+bool UIManager::HandleMousePress( const int2& pos, uint32_t button )
+{
+	bool mouseVisible = mMainWindow->IsMouseVisible();
+
+	if (!mouseVisible)
+		return false;
+	
+	bool eventConsumed = false;
+
+	// Get UIElemet current mouse cover
+	UIElement* element = GetElementFromPoint(pos);
+
+	if (element && element->IsVisible())
+	{
+		 // Handle focusing, bringing to front
+		if (button == MS_LeftButton)
+		{
+			SetFocusElement(element);
+			element->BringToFront();
+		}
+
+		eventConsumed = element->OnClick(element->ScreenToClient(pos), button);
+
+		// if Onclick does't consume event, handle drag 
+		if (!eventConsumed && !mDragElement && button == MS_LeftButton)
+		{
+			mDragElement = element;
+			element->OnDragBegin(element->ScreenToClient(pos), button);
+		}
+
+		// Mouse position is in UI region, So there is no need to pass event to other Game Objects
+		eventConsumed = true;
+
+	}
+	else
+	{
+		// If clicked over no element, or a disabled element, lose focus
+		SetFocusElement(NULL);
+		eventConsumed = false;
+	}	
+
+	return eventConsumed;
+}
+
+bool UIManager::HandleMouseRelease( const int2& pos, uint32_t button )
+{
+	bool mouseVisible = mMainWindow->IsMouseVisible();
+
+	if (!mouseVisible)
+		return false;
+
+	bool eventConsumed = false;
+
+	if (mDragElement)
+	{
+		if (mDragElement->IsEnabled() && mDragElement->IsVisible())
+		{
+			mDragElement->OnDragEnd(mDragElement->ScreenToClient(pos));
+		}
+
+		mDragElement = nullptr;
+		eventConsumed = true;
+	}
+
+	return eventConsumed;
+}
+
+bool UIManager::HandleMouseMove( const int2& pos, uint32_t buttons )
+{
+	bool mouseVisible = mMainWindow->IsMouseVisible();
+
+	if (!mouseVisible)
+		return false;
+
+	bool eventConsumed = false;
+
+	if (mDragElement && buttons == MS_LeftButton)
+	{
+		if (mDragElement->IsEnabled() && mDragElement->IsVisible())
+		{
+			mDragElement->OnDragMove(mDragElement->ScreenToClient(pos), buttons);
+		}
+		else
+		{
+			mDragElement->OnDragEnd(mDragElement->ScreenToClient(pos));
+			mDragElement = nullptr;
+		}	
+
+		// Event consumed 
+		eventConsumed = true;
+	}
+
+	return eventConsumed;
+}
+
+bool UIManager::HandleMouseWheel( const int2& pos, int32_t delta )
+{
+	bool eventConsumed = false;
+
+	if (mFocusElement)
+	{
+		eventConsumed =  mFocusElement->OnMouseWheel(delta);
+	}
+	else
+	{
+		bool mouseVisible = mMainWindow->IsMouseVisible();
+
+		 // If no element has actual focus, get the element at cursor
+		if (mouseVisible)
+		{
+			UIElement* element = GetElementFromPoint(pos);
+
+			if (element && element->IsVisible())
+			{
+				element->OnMouseWheel(delta);
+
+				// mouse pos is in GUI region
+				eventConsumed =  true;
+			}
+		}
+	}
+
+	return eventConsumed;
+}
+
+bool UIManager::HandleKeyPress( uint16_t key )
+{
+	bool eventConsumed = false;
+
 	UIElement* element = GetFocusElement();
 	if (element)
 	{
+		eventConsumed = true;
+
 		// Switch focus between focusable elements in the same top level window
 		if (key == KC_Tab)
 		{
@@ -110,7 +296,7 @@ void UIManager::HandleKeyPress( uint8_t key, uint32_t qualifiers )
 							if (childFocusPolicy & FM_TabFocus)
 							{
 								SetFocusElement(nextElement);
-								return;
+								return eventConsumed;
 							}
 							else
 								next =  (next + 1) % children.size();
@@ -121,85 +307,31 @@ void UIManager::HandleKeyPress( uint8_t key, uint32_t qualifiers )
 					}			
 				}
 			}
-			else // If none of the special keys, pass the key to the focused element			
-				element->OnKeyPress(key, qualifiers);
 		}
+		else // If none of the special keys, pass the key to the focused element			
+			element->OnKeyPress(key);		
 	}
+
+	return eventConsumed;
 }
 
-void UIManager::HandleKeyRelease( uint8_t key, uint32_t qualifiers )
+bool UIManager::HandleKeyRelease( uint16_t key )
 {
-
+	return false;
 }
 
-void UIManager::HandleMousePress( const int2& pos, uint32_t buttons, int qualifiers )
+bool UIManager::HandleTextInput( uint16_t unicode )
 {
-	bool mouseVisible = Context::GetSingleton().GetApplication().GetMainWindow()->IsMouseVisible();
+	bool eventConsumed = false;
 
-	if (mouseVisible)
+	UIElement* element = GetFocusElement();
+	if (element)
 	{
-		UIElement* element = GetElementFromPoint(pos);
-
-		if (element)
-		{
-			if (buttons == MS_LeftButton)
-			{
-				SetFocusElement(element);
-				element->BringToFront();
-			}
-
-			element->OnClick(element->ScreenToClient(pos), pos, buttons, qualifiers);
-
-			// Handle start of drag. OnClick() may have caused destruction of the element, so check the pointer again
-			if (element && !mDragElement && buttons == MS_LeftButton)
-			{
-				mDragElement = element;
-				element->OnDragBegin(element->ScreenToClient(pos), pos, buttons, qualifiers);
-			}
-		}
-		else
-		{
-			// If clicked over no element, or a disabled element, lose focus
-			SetFocusElement(NULL);
-		}	
+		eventConsumed = element->OnTextInput(unicode);
+		eventConsumed = true;
 	}
-}
 
-void UIManager::HandleMouseRelease( const int2& pos, uint32_t buttons, int qualifiers )
-{
-	bool mouseVisible = Context::GetSingleton().GetApplication().GetMainWindow()->IsMouseVisible();
-
-	if (mouseVisible)
-	{
-		if (mDragElement)
-		{
-			if (mDragElement->IsEnabled() && mDragElement->IsVisible())
-				mDragElement->OnDragEnd(mDragElement->ScreenToClient(pos), pos);
-		}
-	}
-}
-
-
-void UIManager::HandleMouseMove( const int2& pos, uint32_t buttons, int qualifiers )
-{
-	bool mouseVisible = Context::GetSingleton().GetApplication().GetMainWindow()->IsMouseVisible();
-
-	if (mouseVisible && mDragElement && buttons)
-	{
-		if (mDragElement->IsEnabled() && mDragElement->IsVisible())
-			mDragElement->OnDragMove(mDragElement->ScreenToClient(pos), pos, buttons, qualifiers);
-
-		mDragElement = nullptr;
-	}
-}
-
-
-void UIManager::HandleMouseWheel( int32_t delta, uint32_t buttons, uint32_t qualifiers )
-{
-	if (mFocusElement)
-	{
-		mFocusElement->OnMouseWheel(delta, buttons, qualifiers);
-	}
+	return eventConsumed;
 }
 
 void UIManager::GetElementFromPoint(UIElement*& result, UIElement* current, const int2& pos )
@@ -220,37 +352,6 @@ void UIManager::GetElementFromPoint(UIElement*& result, UIElement* current, cons
 				GetElementFromPoint(result, element, pos);
 		}
 	}
-
 }
-
-UIElement* UIManager::GetElementFromPoint( const int2& pos )
-{
-	UIElement* result = 0;
-	GetElementFromPoint(result, mRootElement, pos);
-	return result;
-}
-
-UIElement* UIManager::GetFocusableElement( UIElement* element )
-{
-	while (element)
-	{
-		if (element->GetFocusMode() != FM_NoFocus)
-			break;
-		element = element->GetParent();
-	}
-	return element;
-}
-
-bool UIManager::OnEvent( const InputEvent& event )
-{
-	bool eventConsumed = false;
-
-
-
-	return eventConsumed;
-
-}
-
-
 
 }
