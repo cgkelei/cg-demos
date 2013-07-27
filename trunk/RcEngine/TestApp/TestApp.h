@@ -24,6 +24,9 @@ protected:
 
 	void CalculateFrameRate();
 
+	void InitGUI();
+
+
 private:
 	shared_ptr<Effect> mEffect;
 	EffectTechnique* mTechnique;

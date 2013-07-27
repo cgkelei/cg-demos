@@ -38,6 +38,7 @@ Application::Application( const String& config )
 	FileSystem::Initialize();
 	ResourceManager::Initialize();
 	InputSystem::Initialize();
+	UIManager::Initialize();
 
 	// todo add sub scene manager
 	new SceneManager;
@@ -65,6 +66,7 @@ Application::~Application( void )
 	ModuleManager::Finalize();
 	FileSystem::Finalize();
 	InputSystem::Finalize();
+	UIManager::Finalize();
 	Context::Finalize();
 }
 
@@ -137,10 +139,11 @@ void Application::ProcessEventQueue()
 
 			if (!eventConsumed)
 			{
+				
 				if (event.EventType == InputEventType::KeyDown && event.Key.key == KC_Escape)
 				{
-					mEndGame = true;
 					eventConsumed = true;
+					mEndGame = true;
 					return;
 				}
 			}
@@ -267,6 +270,8 @@ void Application::Create()
 	mMainWindow->ApplicationActivatedEvent.bind(this, &Application::Window_ApplicationActivated);
 	mMainWindow->ApplicationDeactivatedEvent.bind(this, &Application::Window_ApplicationDeactivated);
 	mMainWindow->WindowClose.bind(this, &Application::Window_Close);
+	
+	UIManager::GetSingleton().SetMainWindow(mMainWindow);
 
 	// load all modules
 	LoadAllModules();
