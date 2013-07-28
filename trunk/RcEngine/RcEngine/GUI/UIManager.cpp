@@ -1,5 +1,6 @@
 #include <GUI/UIManager.h>
 #include <GUI/UIElement.h>
+#include <MainApp/Application.h>
 #include <MainApp/Window.h>
 #include <Input/InputSystem.h>
 #include <Input/InputEvent.h>
@@ -10,16 +11,15 @@ namespace RcEngine {
 SINGLETON_DECL(UIManager)
 
 UIManager::UIManager()
-	: mDragElement(nullptr),
-	  mFocusElement(nullptr),
-	  mRootElement(nullptr)
+	: mDragElement(nullptr), mFocusElement(nullptr), mRootElement(nullptr), mMainWindow(nullptr),
+	  mInitialize(false)
 {
 
 }
 
 UIManager::~UIManager()
 {
-
+	SAFE_DELETE(mRootElement);
 }
 
 void UIManager::SetFocusElement( UIElement* element )
@@ -351,6 +351,28 @@ void UIManager::GetElementFromPoint(UIElement*& result, UIElement* current, cons
 			if (hasChildren)
 				GetElementFromPoint(result, element, pos);
 		}
+	}
+}
+
+void UIManager::OnGraphicsInitialize()
+{
+	if (!mInitialize)
+	{
+		//Keep track of main window
+		mMainWindow = Context::GetSingleton().GetApplication().GetMainWindow();
+
+		mRootElement = new UIElement();
+		mRootElement->SetSize(int2(mMainWindow->GetWidth(), mMainWindow->GetHeight()));
+
+		mInitialize = true;
+	}
+}
+
+void UIManager::OnWindowResize( uint32_t width, uint32_t height )
+{
+	if (mRootElement)
+	{
+		mRootElement->SetSize(int2(width, height));
 	}
 }
 

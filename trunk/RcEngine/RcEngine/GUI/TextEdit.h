@@ -1,22 +1,23 @@
-#ifndef Label_h__
-#define Label_h__
+#ifndef UITextEdit_h__
+#define UITextEdit_h__
 
 #include <Core/Prerequisites.h>
 #include <GUI/UIElement.h>
 
 namespace RcEngine {
 
-class Font;
-
-/**
- * A text label, label is a non focusable control, no input event
- */
-class _ApiExport Label : public UIElement
+class _ApiExport TextEdit : public UIElement
 {
 public:
-	Label();
-	virtual ~Label();
-	
+	TextEdit();
+	virtual ~TextEdit();
+
+	virtual bool OnDragBegin(const int2& position, uint32_t buttons);
+	virtual bool OnDragMove(const int2& position, uint32_t buttons);
+	virtual bool OnDragEnd(const int2& position);
+
+	virtual bool OnTextInput(uint16_t unicode);
+
 	void SetFont(const shared_ptr<Font>& font);
 	const shared_ptr<Font> GetFont() const			{ return mFont; }
 
@@ -28,19 +29,19 @@ public:
 
 	float GetRowSpacing() const						{ return mRowSpacing; }
 	bool GetWordWrap() const						{ return mWordWrap ; }
-	
+
 	uint32_t GetRowHeight() const					{ return mRowHeight; }
 	const vector<uint32_t>& GetRowWidths() const	{ return mRowWidths; }
 
 	uint32_t GetNumRows() const						{ return mRowWidths.size(); }
 
 protected:
-	void UpdateText();
 
-protected:
-	shared_ptr<Font> mFont;
-
+	uint32_t mSelectStart, mSelectLength;
+	
 	std::wstring mText;
+
+	shared_ptr<Font> mFont;
 
 	vector<uint32_t> mRowWidths;
 	uint32_t mRowHeight;
@@ -55,5 +56,4 @@ protected:
 }
 
 
-
-#endif // Label_h__
+#endif // UITextEdit_h__
