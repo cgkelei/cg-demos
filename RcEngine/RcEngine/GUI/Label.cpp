@@ -21,11 +21,6 @@ void Label::UpdateText()
 
 }
 
-void Label::ValidateSelection()
-{
-
-}
-
 void Label::SetWordWrap( bool enable )
 {
 

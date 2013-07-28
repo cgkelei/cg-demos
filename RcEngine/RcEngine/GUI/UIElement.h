@@ -68,6 +68,8 @@ public:
 
 	virtual bool OnTextInput(uint16_t unicode);
 
+	virtual void OnResize();
+
 	const String& GetName() const				{ return mName; }
 	void SetName(const String& name)			{ mName = name; }
 	

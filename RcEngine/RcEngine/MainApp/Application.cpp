@@ -197,13 +197,46 @@ void Application::Window_UserResized()
 	mMainWindow->UpdateWindowSize();
 	uint32_t width = mMainWindow->GetWidth();
 	uint32_t height = mMainWindow->GetHeight();
+
+
 	//Context::GetSingleton().GetInputSystem().Resize(width, height);
 	Context::GetSingleton().GetRenderDevice().Resize(width, height);	
+	UIManager::GetSingleton().OnWindowResize(width, height);
 }
 
 void Application::Window_Close()
 {
 	mEndGame = true;
+}
+
+void Application::Create()
+{
+	// Create main window
+	mMainWindow = new Window(mAppTitle, mSettings);
+	mMainWindow->UserResizedEvent.bind(this, &Application::Window_UserResized);
+	mMainWindow->PaintEvent.bind(this, &Application::Window_Paint);
+	mMainWindow->SuspendEvent.bind(this, &Application::Window_Suspend);
+	mMainWindow->ResumeEvent.bind(this, &Application::Window_Resume);
+	mMainWindow->ApplicationActivatedEvent.bind(this, &Application::Window_ApplicationActivated);
+	mMainWindow->ApplicationDeactivatedEvent.bind(this, &Application::Window_ApplicationDeactivated);
+	mMainWindow->WindowClose.bind(this, &Application::Window_Close);
+
+	// load all modules
+	LoadAllModules();
+
+	// Create render window
+	Context::GetSingleton().GetRenderDevice().CreateRenderWindow(mSettings);
+
+	// UI Graphics initailize
+	UIManager::GetSingleton().OnGraphicsInitialize();
+
+	// Show main window
+	mMainWindow->ShowWindow();
+}
+
+void Application::Release()
+{
+	
 }
 
 void Application::ReadConfiguration()
@@ -215,7 +248,7 @@ void Application::ReadConfiguration()
 		ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, "App config file " + mConfigFile + " doesn't found!", "Application::ReadConfiguration");
 	}
 
-	
+
 	XMLDoc xmlConfig;
 	XMLNodePtr appNode = xmlConfig.Parse(config);
 
@@ -243,8 +276,6 @@ void Application::ReadConfiguration()
 	{
 		mSettings.SyncInterval = syncNode->Attribute("Interval")->ValueUInt();
 	}
-	
-	
 
 	XMLNodePtr resNode = appNode->FirstNode("Resource");
 	for (XMLNodePtr groupNode = resNode->FirstNode("Group"); groupNode; groupNode = groupNode->NextSibling("Group"))
@@ -257,35 +288,6 @@ void Application::ReadConfiguration()
 			FileSystem::GetSingleton().RegisterPath(pathName, groupName);
 		}
 	}
-}
-
-void Application::Create()
-{
-	// Create main window
-	mMainWindow = new Window(mAppTitle, mSettings);
-	mMainWindow->UserResizedEvent.bind(this, &Application::Window_UserResized);
-	mMainWindow->PaintEvent.bind(this, &Application::Window_Paint);
-	mMainWindow->SuspendEvent.bind(this, &Application::Window_Suspend);
-	mMainWindow->ResumeEvent.bind(this, &Application::Window_Resume);
-	mMainWindow->ApplicationActivatedEvent.bind(this, &Application::Window_ApplicationActivated);
-	mMainWindow->ApplicationDeactivatedEvent.bind(this, &Application::Window_ApplicationDeactivated);
-	mMainWindow->WindowClose.bind(this, &Application::Window_Close);
-	
-	UIManager::GetSingleton().SetMainWindow(mMainWindow);
-
-	// load all modules
-	LoadAllModules();
-
-	// Create render window
-	Context::GetSingleton().GetRenderDevice().CreateRenderWindow(mSettings);
-
-	// Show main window
-	mMainWindow->ShowWindow();
-}
-
-void Application::Release()
-{
-	
 }
 
 

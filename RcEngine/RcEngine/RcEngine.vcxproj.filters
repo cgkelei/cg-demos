@@ -321,6 +321,9 @@
     <ClInclude Include="Input\InputEvent.h">
       <Filter>Input</Filter>
     </ClInclude>
+    <ClInclude Include="GUI\TextEdit.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Context.cpp">
@@ -568,6 +571,9 @@
     </ClCompile>
     <ClCompile Include="MainApp\Window_Win32.cpp">
       <Filter>MainApp</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\TextEdit.cpp">
+      <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -291,5 +291,10 @@ bool UIElement::OnClick( const int2& position, uint32_t buttons )
 	return false;
 }
 
+void UIElement::OnResize()
+{
+
+}
+
 
 }

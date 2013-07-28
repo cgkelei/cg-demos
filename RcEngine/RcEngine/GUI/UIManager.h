@@ -29,16 +29,19 @@ public:
 	~UIManager();
 
 	/**
-	 * Keep track of main window, must called after main window is created.
+	 * Called by Render Device Created
 	 */
-	void SetMainWindow(Window* win)						{ mMainWindow = win; }
+	void OnGraphicsInitialize();
+
+	/**
+	 * Called by window resize
+	 */
+	void OnWindowResize(uint32_t width, uint32_t height);
 
 	void SetFocusElement(UIElement* element);
 	UIElement* GetFocusElement()						{ return mFocusElement; }	
 
-
 	void Update(float delta);
-
 
 	/** 
 	 * Handle GUI Event, if event is handled by GUI, no need to pass to other game object.
@@ -98,6 +101,8 @@ private:
 	UIElement* GetFocusableElement(UIElement* element);
 
 protected:
+
+	bool mInitialize;
 	
 	UIElement* mFocusElement;
 	UIElement* mRootElement;
