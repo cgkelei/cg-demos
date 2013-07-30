@@ -17,22 +17,29 @@ public:
 	Label();
 	virtual ~Label();
 	
-	void SetFont(const shared_ptr<Font>& font);
+	void SetFont(const shared_ptr<Font>& font, int32_t fontSize);
 	const shared_ptr<Font> GetFont() const			{ return mFont; }
 
-	void SetText(const String& text);
+	void SetText(const std::wstring& text);
 	const std::wstring& GetText() const				{ return mText; }
 
 	void SetWordWrap(bool enable);
-	void SetTextAlignment(HorizontalAlignment align);
+	bool GetWorldWrap() const						{ return mWordWrap; }
 
 	float GetRowSpacing() const						{ return mRowSpacing; }
 	bool GetWordWrap() const						{ return mWordWrap ; }
 	
-	uint32_t GetRowHeight() const					{ return mRowHeight; }
-	const vector<uint32_t>& GetRowWidths() const	{ return mRowWidths; }
+	void SetTextAlignment(HorizontalAlignment align);
+	HorizontalAlignment GetTextAlignment() const	{ return mTextAlignment; }
 
-	uint32_t GetNumRows() const						{ return mRowWidths.size(); }
+	int32_t GetRowHeight() const					{ return mRowHeight; }
+	const vector<int32_t>& GetRowWidths() const		{ return mRowWidths; }
+
+	int32_t GetNumRows() const						{ return mRowWidths.size(); }
+
+
+	virtual void Update(float delta);
+	virtual void Draw(SpriteBatch& spriteBatch);
 
 protected:
 	void UpdateText();
@@ -42,8 +49,11 @@ protected:
 
 	std::wstring mText;
 
-	vector<uint32_t> mRowWidths;
-	uint32_t mRowHeight;
+	vector<int32_t> mRowWidths;
+
+	int32_t mFontSize;
+	int32_t mRowHeight;
+
 	float mRowSpacing;
 
 	bool mWordWrap;

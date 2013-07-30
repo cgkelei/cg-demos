@@ -12,19 +12,25 @@ TextEdit::~TextEdit()
 
 }
 
-bool TextEdit::OnDragBegin( const int2& position, uint32_t buttons )
+void TextEdit::OnDragBegin( const int2& position, uint32_t buttons )
 {
 
 }
 
-bool TextEdit::OnDragMove( const int2& position, uint32_t buttons )
+void TextEdit::OnDragMove( const int2& position, uint32_t buttons )
 {
 
 }
 
-bool TextEdit::OnDragEnd( const int2& position )
+void TextEdit::OnDragEnd( const int2& position )
 {
 
 }
+
+bool TextEdit::OnTextInput( uint16_t unicode )
+{
+	return false;
+}
+
 
 }

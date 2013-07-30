@@ -52,7 +52,15 @@ public:
 	//void DrawText(std::wstring& text, uint32_t fontSize, const float2& position, const ColorRGBA& color, float rotation, const float2& origin, float scale, float layerDepth);
 	//void DrawText(std::wstring& text, uint32_t fontSize, const float2& position, const ColorRGBA& color, float rotation, const float2& origin, const float2& scale, float layerDepth);
 
-	void MeasureString(const std::wstring& text,uint32_t fontHeight, uint32_t* widthOut, uint32_t* heightOut);
+	void MeasureString(const std::wstring& text,uint32_t fontSize, uint32_t* widthOut, uint32_t* heightOut);
+
+	int32_t GetFontSize() const   { return mCharSize; }
+	int32_t GetRowHeight() const  { return mRowHeight; }
+
+	/**
+	 * Get row height of specified font size
+	 */
+	int32_t GetRowHeight(int32_t fontSize) const;
 
 protected:
 	void LoadImpl();
