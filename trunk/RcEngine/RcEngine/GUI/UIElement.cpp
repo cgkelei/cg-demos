@@ -188,8 +188,7 @@ void UIElement::FlattenChildren( std::vector<UIElement*>& children) const
 	}
 }
 
-
-void UIElement::Draw()
+void UIElement::Draw( SpriteBatch& spriteBatch )
 {
 
 }

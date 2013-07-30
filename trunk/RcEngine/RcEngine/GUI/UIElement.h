@@ -52,7 +52,9 @@ public:
 	virtual ~UIElement();
 
 	virtual void Update(float delta);
-	virtual void Draw();
+	virtual void Draw(SpriteBatch& spriteBatch);
+
+	virtual void OnResize();
 
 	virtual bool OnMouseHover(const int2& position, uint32_t buttons);
 	virtual bool OnMouseWheel( int32_t delta );
@@ -67,8 +69,7 @@ public:
 	virtual bool OnKeyRelease(uint16_t key);
 
 	virtual bool OnTextInput(uint16_t unicode);
-
-	virtual void OnResize();
+	
 
 	const String& GetName() const				{ return mName; }
 	void SetName(const String& name)			{ mName = name; }

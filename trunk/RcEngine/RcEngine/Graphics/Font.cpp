@@ -350,9 +350,9 @@ void Font::DrawString(SpriteBatch& spriteBatch, std::wstring& text, uint32_t fon
 	}
 }
 
-void Font::MeasureString( const std::wstring& text, uint32_t fontHeight, uint32_t* widthOut, uint32_t* heightOut )
+void Font::MeasureString( const std::wstring& text, uint32_t fontSize, uint32_t* widthOut, uint32_t* heightOut )
 {
-	const float scale = float(fontHeight) / mCharSize;
+	const float scale = float(fontSize) / mCharSize;
 
 	std::vector<uint32_t> rowWidths(1, 0);
 
@@ -371,13 +371,21 @@ void Font::MeasureString( const std::wstring& text, uint32_t fontHeight, uint32_
 	}
 
 	if(widthOut)  *widthOut = *std::max_element(rowWidths.begin(), rowWidths.end());
-	if(heightOut) *heightOut = rowWidths.size() * fontHeight;
+	if(heightOut) *heightOut = static_cast<uint32_t>(rowWidths.size() * mRowHeight * scale);
+}
+
+int32_t Font::GetRowHeight( int32_t fontSize ) const
+{
+	const float scale = float(fontSize) / mCharSize;
+	return static_cast<uint32_t>(mRowHeight * scale);
 }
 
 shared_ptr<Resource> Font::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 {
 	return std::make_shared<Font>(RT_Font, creator, handle, name, group);
 }
+
+
 
 
 

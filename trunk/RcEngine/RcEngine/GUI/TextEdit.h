@@ -12,10 +12,9 @@ public:
 	TextEdit();
 	virtual ~TextEdit();
 
-	virtual bool OnDragBegin(const int2& position, uint32_t buttons);
-	virtual bool OnDragMove(const int2& position, uint32_t buttons);
-	virtual bool OnDragEnd(const int2& position);
-
+	virtual void OnDragBegin(const int2& position, uint32_t buttons);
+	virtual void OnDragMove(const int2& position, uint32_t buttons);
+	virtual void OnDragEnd(const int2& position);
 	virtual bool OnTextInput(uint16_t unicode);
 
 	void SetFont(const shared_ptr<Font>& font);

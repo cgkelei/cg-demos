@@ -122,6 +122,7 @@ class Pipeline;
 class Renderer;
 class Effect;
 class Font;
+class SpriteBatch;
 class RenderQueue;
 class EffectParameter;
 class EffectTechnique;
