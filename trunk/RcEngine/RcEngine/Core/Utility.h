@@ -58,8 +58,37 @@ inline T EndianSwapBytes(T value)
 }
 
 std::wstring& Convert(std::wstring& dest, std::string const & src);
-uint32_t FloatToUint32(float v);
-float Uint32ToFloat(uint32_t v);
+
+/**
+ * Convert float to uint32
+ */
+inline uint32_t FloatToUint32(float v)
+{
+	union 
+	{
+		float f;
+		uint32_t u;
+
+	} helper;
+
+	helper.f = v;
+
+	return helper.u;
+}
+
+inline float Uint32ToFloat(uint32_t v)
+{
+	union 
+	{
+		float f;
+		uint32_t u;
+
+	} helper;
+
+	helper.u = v;
+
+	return helper.f;
+}
 
 }
 

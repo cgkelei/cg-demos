@@ -36,7 +36,6 @@ protected:
 	void LoadImpl();
 	void UnloadImpl();
 
-
 public:
 	static shared_ptr<Resource> FactoryFunc(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 

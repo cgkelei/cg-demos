@@ -6,8 +6,6 @@
 
 namespace RcEngine {
 
-class Font;
-
 /**
  * A text label, label is a non focusable control, no input event
  */
@@ -24,22 +22,14 @@ public:
 	const std::wstring& GetText() const				{ return mText; }
 
 	void SetWordWrap(bool enable);
-	bool GetWorldWrap() const						{ return mWordWrap; }
-
-	float GetRowSpacing() const						{ return mRowSpacing; }
 	bool GetWordWrap() const						{ return mWordWrap ; }
 	
-	void SetTextAlignment(HorizontalAlignment align);
-	HorizontalAlignment GetTextAlignment() const	{ return mTextAlignment; }
-
-	int32_t GetRowHeight() const					{ return mRowHeight; }
-	const vector<int32_t>& GetRowWidths() const		{ return mRowWidths; }
-
-	int32_t GetNumRows() const						{ return mRowWidths.size(); }
-
+	void SetTextAlignment(Alignment align);
+	Alignment GetTextAlignment() const	{ return mTextAlignment; }
 
 	virtual void Update(float delta);
 	virtual void Draw(SpriteBatch& spriteBatch);
+	virtual void OnResize();
 
 protected:
 	void UpdateText();
@@ -48,17 +38,15 @@ protected:
 	shared_ptr<Font> mFont;
 
 	std::wstring mText;
+	std::wstring mPrintText;
 
-	vector<int32_t> mRowWidths;
+	Alignment mTextAlignment;
+
+	vector<float> mRowWidths;
 
 	int32_t mFontSize;
-	int32_t mRowHeight;
 
-	float mRowSpacing;
-
-	bool mWordWrap;
-
-	HorizontalAlignment mTextAlignment;
+	bool mWordWrap;	
 };
 
 

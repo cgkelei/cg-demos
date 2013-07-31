@@ -50,11 +50,6 @@ void RenderDevice::BindFrameBuffer( const shared_ptr<FrameBuffer>& fb )
 	}
 }
 
-RenderFactory* RenderDevice::GetRenderFactory() const
-{
-	return mRenderFactory;
-}
-
 void RenderDevice::Render( EffectTechnique& tech, RenderOperation& op )
 {
 	DoRender(tech, op);

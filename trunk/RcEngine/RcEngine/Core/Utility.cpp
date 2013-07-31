@@ -11,26 +11,4 @@ std::wstring& Convert( std::wstring& dest, std::string const & src )
 	return dest;
 }
 
-uint32_t FloatToUint32( float v )
-{
-	union FNU
-	{
-		float f;
-		uint32_t u;
-	} fnu;
-	fnu.f = v;
-	return static_cast<uint32_t>(fnu.f);
-}
-
-float Uint32ToFloat( uint32_t v )
-{
-	union FNU
-	{
-		float f;
-		uint32_t u;
-	} fnu;
-	fnu.u = v;
-	return static_cast<float>(fnu.f);
-}
-
 }

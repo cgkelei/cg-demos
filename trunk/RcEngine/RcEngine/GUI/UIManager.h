@@ -43,6 +43,8 @@ public:
 
 	void Update(float delta);
 
+	void Render();
+
 	/** 
 	 * Handle GUI Event, if event is handled by GUI, no need to pass to other game object.
 	 * return true if the event is consumed, false if need to pass to others.
@@ -95,8 +97,8 @@ private:
 	bool HandleMouseWheel(const int2& pos, int32_t delta);
 
 
-	UIElement* GetElementFromPoint(const int2& pos);
-	void GetElementFromPoint(UIElement*& result, UIElement* current, const int2& pos);
+	UIElement* GetElementAtPoint(const int2& pos);
+	void GetElementAtPoint(UIElement*& result, UIElement* current, const int2& pos);
 
 	UIElement* GetFocusableElement(UIElement* element);
 
@@ -107,6 +109,11 @@ protected:
 	UIElement* mFocusElement;
 	UIElement* mRootElement;
 	UIElement* mDragElement;
+
+	shared_ptr<SpriteBatch> mSpriteBatch;
+
+	shared_ptr<SpriteBatch> mSpriteBatchFont;
+	shared_ptr<Font> mFont;
 
 	Cursor* mCursor;
 	

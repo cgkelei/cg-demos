@@ -11,27 +11,17 @@ namespace RcEngine {
 
 class Cursor;
 
-enum HorizontalAlignment
+enum Alignment
 {
-	HA_Left = 0,
-	HA_Center,
-	HA_Right
-};
+	AlignLeft     = 1UL << 0,
+	AlignRight    = 1UL << 1,
+	AlignHCenter  = 1UL << 2,
 
-/// UI element vertical alignment.
-enum VerticalAlignment
-{
-	VA_Top = 0,
-	VA_Center,
-	VA_Bottom
-};
+	AlignTop      = 1UL << 3,
+	AlignBottom   = 1UL << 4,
+	AlignVCenter  = 1UL << 5,
 
-enum FocusMode
-{
-	FM_NoFocus = 0,
-	FM_TabFocus = 0x1,
-	FM_ClickFocus = 0x2,
-	FM_Tab_ClickFocus = FM_TabFocus | FM_ClickFocus,
+	AlignCenter   = AlignHCenter | AlignVCenter
 };
 
 enum UIElementState
@@ -56,26 +46,30 @@ public:
 
 	virtual void OnResize();
 
-	virtual bool OnMouseHover(const int2& position, uint32_t buttons);
-	virtual bool OnMouseWheel( int32_t delta );
+	virtual void OnMouseHover(const int2& position);
 	
-	virtual bool OnClick(const int2& position, uint32_t buttons);
-
 	virtual void OnDragBegin(const int2& position, uint32_t buttons);
 	virtual void OnDragMove(const int2& position, uint32_t buttons);
 	virtual void OnDragEnd(const int2& position);
+
+	virtual bool OnMouseButtonPress(const int2& position, uint32_t button);
+	virtual bool OnMouseButtonRelease(const int2& position, uint32_t button);
+	
+	virtual bool OnMouseWheel( int32_t delta );
 
 	virtual bool OnKeyPress(uint16_t key);
 	virtual bool OnKeyRelease(uint16_t key);
 
 	virtual bool OnTextInput(uint16_t unicode);
-	
 
+	virtual bool CanHaveFocus() const;
+	
 	const String& GetName() const				{ return mName; }
 	void SetName(const String& name)			{ mName = name; }
 	
 	void SetPosition(const int2& position);
 	const int2& GetPosition() const			{ return mPosition; }
+	
 	int2 GetScreenPosition();
 
 	void SetSize(const int2& size);
@@ -85,9 +79,6 @@ public:
 	const int2& GetMinSize() const				{ return mMinSize; }
 	const int2& GetMaxSize() const				{ return mMaxSize; }
 	
-	void SetFocusMode(FocusMode mode)			{ mFocusMode = mode; }
-	FocusMode GetFocusMode() const			    { return mFocusMode; }
-
 	void SetVisible(bool visible);
 	bool IsVisible() const						{ return mVisible; }
 
@@ -129,8 +120,6 @@ public:
 
 	void BringToFront();
 
-	
-
 protected:
 	void MarkDirty();
 
@@ -144,6 +133,7 @@ protected:
 	bool mHovering;
 	bool mVisible;
 	bool mEnabled;
+
 	bool mPositionDirty;
 
 	int2 mPosition;
@@ -154,10 +144,6 @@ protected:
 	int2 mMaxSize;
 
 	std::wstring mToolTipText;
-
-	HorizontalAlignment mHorizontalAlignment;
-	VerticalAlignment mVerticalAlignment;
-	FocusMode mFocusMode;
 
 	float mOpacity;
 

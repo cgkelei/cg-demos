@@ -8,7 +8,7 @@
 uniform vec2 WindowSize;
 
 in vec3 iPos;
-in vec2 iTex0;
+in vec2 iTex;
 in vec4 iColor;
 
 out vec2 oTex;
@@ -21,7 +21,13 @@ void main()
 	oPos.xy = vec2(2.0 * iPos.x - WindowSize.x,  WindowSize.y - 2.0 * iPos.y ) / WindowSize;
 	
 	gl_Position = oPos;
-	oTex = iTex0;
+	
+	oTex = iTex;
+	
+#ifndef Direct3D	
+	oTex.y = 1.0 - oTex.y;
+#endif
+
 	oColor = iColor;
 }
 
