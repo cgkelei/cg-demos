@@ -27,7 +27,7 @@ namespace RcEngine {
 OpenGLRenderDevice::OpenGLRenderDevice()
 	: mViewportTop(0), mViewportLeft(0), mViewportWidth(0), mViewportHeight(0)
 {
-	
+	mRenderDeviceType = RD_OpenGL;
 }
 
 

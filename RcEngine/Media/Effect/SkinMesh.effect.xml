@@ -45,7 +45,12 @@ void main()
 	// world normal
 	oNormal = vec3(norm * World);
 	
-	oTex = vec2(Tex.x, 1-Tex.y);
+	oTex = Tex;
+	
+#ifndef Direct3D	
+	oTex.y = 1.0 - oTex.y;
+#endif
+	
 	oLightDir = LightPos - vec3(pos);
 	
 	gl_Position = pos * ViewProj;

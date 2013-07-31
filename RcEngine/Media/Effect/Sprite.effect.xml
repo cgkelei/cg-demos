@@ -9,7 +9,7 @@
 uniform vec2 WindowSize;
 
 in vec3 iPos;
-in vec2 iTex0;
+in vec2 iTex;
 in vec4 iColor;
 
 out vec2 oTex;
@@ -24,7 +24,12 @@ void main()
 	//gl_Position = vec4(iPos, 1) * ProjMat;
 	
 	gl_Position = oPos;
-	oTex = iTex0;
+	
+	oTex = iTex;	
+#ifndef Direct3D		
+	oTex.y = 1.0 - oTex.y;
+#endif
+
 	oColor = iColor;
 }
 

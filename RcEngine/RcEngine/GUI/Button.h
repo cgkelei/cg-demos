@@ -10,17 +10,25 @@ class _ApiExport Button : UIElement
 public:
 	typedef fastdelegate::FastDelegate0<> ButtonClickedEventHandler;
 
-
 public:
 	Button();
 	virtual ~ Button();
 
-	virtual void OnClick(const int2& position, const int2& screenPosition, uint32_t buttons, int qualifiers);
-	
+	virtual bool OnMouseButtonPress(const int2& position, uint32_t button);
+	virtual bool OnMouseButtonRelease(const int2& position, uint32_t button);
+
+	virtual void OnResize();
+	virtual bool CanHaveFocus() const;
+
 	virtual void Update(float delta);
+	virtual void Draw(SpriteBatch& spriteBatch);
 
 	void SetPressedOffset(const int2& offset)	{ mPressedOffset; }
 	const int2& GetPressedOffset() const        { return mPressedOffset; }
+
+private:
+
+	void SetPressed(bool pressed);
 
 public:
 	ButtonClickedEventHandler EventButtonClicked;

@@ -24,7 +24,7 @@ public:
 	const std::wstring& GetText() const				{ return mText; }
 
 	void SetWordWrap(bool enable);
-	void SetTextAlignment(HorizontalAlignment align);
+	//void SetTextAlignment(ui);
 
 	float GetRowSpacing() const						{ return mRowSpacing; }
 	bool GetWordWrap() const						{ return mWordWrap ; }
@@ -33,6 +33,10 @@ public:
 	const vector<uint32_t>& GetRowWidths() const	{ return mRowWidths; }
 
 	uint32_t GetNumRows() const						{ return mRowWidths.size(); }
+
+protected:
+
+	int32_t GetRowStartPos(int32_t rowIdx) const;
 
 protected:
 
@@ -48,7 +52,7 @@ protected:
 
 	bool mWordWrap;
 
-	HorizontalAlignment mTextAlignment;
+	//HorizontalAlignment mTextAlignment;
 };
 
 

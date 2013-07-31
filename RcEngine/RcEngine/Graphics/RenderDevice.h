@@ -11,13 +11,22 @@
 
 namespace RcEngine {
 
+enum RenderDeviceType
+{
+	RD_OpenGL,
+	RD_OpenGL_ES,
+	RD_Direct3D11
+};
+
 class _ApiExport RenderDevice
 {
 public:
 	RenderDevice(void);
 	virtual ~RenderDevice(void);
 
-	RenderFactory* GetRenderFactory() const;
+	RenderDeviceType GetRenderDeviceType() const			{ return mRenderDeviceType; }
+
+	RenderFactory* GetRenderFactory() const					{ return mRenderFactory; }
 
 	shared_ptr<FrameBuffer> GetCurrentFrameBuffer() const	{ return mCurrentFrameBuffer; }
 	shared_ptr<FrameBuffer> GetScreenFrameBuffer() const	{ return mScreenFrameBuffer; }
@@ -47,6 +56,8 @@ protected:
 	virtual void DoRender( EffectTechnique& tech, RenderOperation& op) = 0;
 
 protected:
+	RenderDeviceType mRenderDeviceType;
+
 	uint32_t mWidth, mHeight;
 	PixelFormat mColorFormat;
 	uint32_t mColorBits;

@@ -125,14 +125,18 @@ void TestApp::LoadContent()
 	resMan.AddResource(RT_Font, "Consolas Regular", "General");
 	resMan.LoadAllFromDisk();
 
-	// Sprite 
-	mSpriteBatch = std::make_shared<SpriteBatch>(
+	// Font Sprite 
+	mSpriteBatchFont = std::make_shared<SpriteBatch>(
 		std::static_pointer_cast<Material>(resMan.GetResourceByName(RT_Material, "Font.material.xml", "General")));
-	//mSpriteBatch = std::make_shared<SpriteBatch>();
-
+	
 	// Font
 	mFont = std::static_pointer_cast<Font>(resMan.GetResourceByName(RT_Font,"Consolas Regular", "General"));
 
+	//auto ZY = mFont->GetGlyphInfo(L'Z').SrcY;
+	//auto AY = mFont->GetGlyphInfo(L'A').SrcY;
+
+	mSpriteBatch = std::make_shared<SpriteBatch>();
+	
 	// Entity
 	Entity* dudeEntity = sceneManager->CreateEntity("Dude", "him.mesh",  "Custom");
 	SceneNode* dudeNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
@@ -147,8 +151,7 @@ void TestApp::LoadContent()
 
 	animPlayer->PlayClip("Take 001");
 
-
-	//mTexture = factory->CreateTextureFromFile(FileSystem::GetSingleton().Locate("brick_texture1.dds"));
+	mTexture = factory->CreateTextureFromFile(FileSystem::GetSingleton().Locate("Glass.dds"));
 
 	//String skyTexPath = ;
 	//mTexture = factory->CreateTextureFromFile(skyTexPath);
@@ -178,14 +181,26 @@ void TestApp::Render()
 	float clr = (float)169/255;
 	currentFrameBuffer->Clear(CF_Color | CF_Depth |CF_Stencil, RcEngine::ColorRGBA(clr, clr, clr, 1.0f), 1.0f, 0);
 	
-	mSpriteBatch->Begin();
+	Rectanglef region(100, 100, 300, 300);
+
+	mSpriteBatchFont->Begin();
 
 	wchar_t buffer[100];
 	int cx = swprintf ( buffer, 100, L"FPS: %d", mFramePerSecond );
-	mFont->DrawString(*mSpriteBatch, std::wstring(buffer, cx), 30, float2(20, 580), ColorRGBA(0, 0, 0, 1));
-	mSpriteBatch->End();
+	mFont->DrawString(*mSpriteBatchFont, std::wstring(buffer, cx), 30, float2(20, 580), ColorRGBA(1, 0, 0, 1));
 
-	mSpriteBatch->Flush();
+	std::wstring wstr = L"mFont->DrawString(*mSpriteBatch,\n std::wstring(buffer, cx), 30,\n float2(20, 580), ColorRGBA(0, 0, 0, 1));";
+	
+	//mFont->DrawStringWrap(*mSpriteBatch, wstr, 30, 500, float2(20, 200), ColorRGBA(0, 0, 0, 1));
+	//mFont->DrawString(*mSpriteBatchFont, wstr, 15, Font::AlignLeft | Font::AlignTop, region, ColorRGBA(0, 0, 0, 1));
+
+	mSpriteBatchFont->End();
+	mSpriteBatchFont->Flush();
+
+	//mSpriteBatch->Begin();
+	//mSpriteBatch->Draw(mTexture, region, ColorRGBA(1, 1, 1, 1));
+	//mSpriteBatch->End();
+	//mSpriteBatch->Flush();
 
 	// todo 
 	// Move to engine level

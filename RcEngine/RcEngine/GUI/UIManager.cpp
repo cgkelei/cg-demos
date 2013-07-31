@@ -39,16 +39,16 @@ void UIManager::SetFocusElement( UIElement* element )
 	if (mFocusElement)
 		mFocusElement = nullptr;
 
-	if (element && element->GetFocusMode() != FM_NoFocus)
+	if (element && element->CanHaveFocus())
 	{
 		mFocusElement = element;
 	}
 }
 
-UIElement* UIManager::GetElementFromPoint( const int2& pos )
+UIElement* UIManager::GetElementAtPoint( const int2& pos )
 {
 	UIElement* result = 0;
-	GetElementFromPoint(result, mRootElement, pos);
+	GetElementAtPoint(result, mRootElement, pos);
 	return result;
 }
 
@@ -56,7 +56,7 @@ UIElement* UIManager::GetFocusableElement( UIElement* element )
 {
 	while (element)
 	{
-		if (element->GetFocusMode() != FM_NoFocus)
+		if (element->CanHaveFocus())
 			break;
 		element = element->GetParent();
 	}
@@ -136,7 +136,7 @@ bool UIManager::OnEvent( const InputEvent& event )
 
 }
 
-bool UIManager::HandleMousePress( const int2& pos, uint32_t button )
+bool UIManager::HandleMousePress( const int2& screenPos, uint32_t button )
 {
 	bool mouseVisible = mMainWindow->IsMouseVisible();
 
@@ -146,9 +146,9 @@ bool UIManager::HandleMousePress( const int2& pos, uint32_t button )
 	bool eventConsumed = false;
 
 	// Get UIElemet current mouse cover
-	UIElement* element = GetElementFromPoint(pos);
+	UIElement* element = GetElementAtPoint(screenPos);
 
-	if (element && element->IsVisible())
+	if (element && element->IsVisible() && element->IsEnabled())
 	{
 		 // Handle focusing, bringing to front
 		if (button == MS_LeftButton)
@@ -157,18 +157,17 @@ bool UIManager::HandleMousePress( const int2& pos, uint32_t button )
 			element->BringToFront();
 		}
 
-		eventConsumed = element->OnClick(element->ScreenToClient(pos), button);
+		eventConsumed = element->OnMouseButtonPress(element->ScreenToClient(screenPos), button);
 
-		// if Onclick does't consume event, handle drag 
+		// if button press doesn't consume event, handle drag 
 		if (!eventConsumed && !mDragElement && button == MS_LeftButton)
 		{
 			mDragElement = element;
-			element->OnDragBegin(element->ScreenToClient(pos), button);
+			element->OnDragBegin(element->ScreenToClient(screenPos), button);
 		}
 
 		// Mouse position is in UI region, So there is no need to pass event to other Game Objects
 		eventConsumed = true;
-
 	}
 	else
 	{
@@ -198,6 +197,14 @@ bool UIManager::HandleMouseRelease( const int2& pos, uint32_t button )
 
 		mDragElement = nullptr;
 		eventConsumed = true;
+	}
+	else
+	{
+		if (mFocusElement)
+		{
+			eventConsumed = HandleMouseRelease(mFocusElement->ScreenToClient(pos), button);	
+			eventConsumed = true;
+		}
 	}
 
 	return eventConsumed;
@@ -246,7 +253,7 @@ bool UIManager::HandleMouseWheel( const int2& pos, int32_t delta )
 		 // If no element has actual focus, get the element at cursor
 		if (mouseVisible)
 		{
-			UIElement* element = GetElementFromPoint(pos);
+			UIElement* element = GetElementAtPoint(pos);
 
 			if (element && element->IsVisible())
 			{
@@ -271,44 +278,44 @@ bool UIManager::HandleKeyPress( uint16_t key )
 		eventConsumed = true;
 
 		// Switch focus between focusable elements in the same top level window
-		if (key == KC_Tab)
-		{
-			UIElement* topLevel = element->GetParent();
-			while(topLevel && topLevel->GetParent() != mRootElement)
-				topLevel = topLevel->GetParent();
+		//if (key == KC_Tab)
+		//{
+		//	UIElement* topLevel = element->GetParent();
+		//	while(topLevel && topLevel->GetParent() != mRootElement)
+		//		topLevel = topLevel->GetParent();
 
-			if (topLevel)
-			{
-				vector<UIElement*> children;
-				topLevel->FlattenChildren(children);
+		//	if (topLevel)
+		//	{
+		//		vector<UIElement*> children;
+		//		topLevel->FlattenChildren(children);
 
-				for (size_t i = 0; i < children.size(); ++i)
-				{
-					if ( element == children[i] )
-					{
-						size_t next = (i + 1) % children.size();
+		//		for (size_t i = 0; i < children.size(); ++i)
+		//		{
+		//			if ( element == children[i] )
+		//			{
+		//				size_t next = (i + 1) % children.size();
 
-						while( next != i )
-						{
-							UIElement* nextElement = children[next];
-							FocusMode childFocusPolicy = nextElement->GetFocusMode();
+		//				while( next != i )
+		//				{
+		//					UIElement* nextElement = children[next];
+		//					FocusMode childFocusPolicy = nextElement->GetFocusMode();
 
-							if (childFocusPolicy & FM_TabFocus)
-							{
-								SetFocusElement(nextElement);
-								return eventConsumed;
-							}
-							else
-								next =  (next + 1) % children.size();
-						}
+		//					if (childFocusPolicy & FM_TabFocus)
+		//					{
+		//						SetFocusElement(nextElement);
+		//						return eventConsumed;
+		//					}
+		//					else
+		//						next =  (next + 1) % children.size();
+		//				}
 
-						// no other focusable control
-						break;
-					}			
-				}
-			}
-		}
-		else // If none of the special keys, pass the key to the focused element			
+		//				// no other focusable control
+		//				break;
+		//			}			
+		//		}
+		//	}
+		//}
+		//else // If none of the special keys, pass the key to the focused element			
 			element->OnKeyPress(key);		
 	}
 
@@ -334,7 +341,7 @@ bool UIManager::HandleTextInput( uint16_t unicode )
 	return eventConsumed;
 }
 
-void UIManager::GetElementFromPoint(UIElement*& result, UIElement* current, const int2& pos )
+void UIManager::GetElementAtPoint(UIElement*& result, UIElement* current, const int2& pos )
 {
 	if (!current)
 		return;
@@ -349,7 +356,7 @@ void UIManager::GetElementFromPoint(UIElement*& result, UIElement* current, cons
 				result = element;
 
 			if (hasChildren)
-				GetElementFromPoint(result, element, pos);
+				GetElementAtPoint(result, element, pos);
 		}
 	}
 }

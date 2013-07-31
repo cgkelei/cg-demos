@@ -1,6 +1,7 @@
 #include <GUI/UIElement.h>
 #include <GUI/UIManager.h>
 #include <Math/MathUtil.h>
+#include <Core/Exception.h>
 
 namespace RcEngine {
 
@@ -9,9 +10,7 @@ UIElement::UIElement()
 	  mPositionDirty(false), 
 	  mHovering(false), 
 	  mVisible(true), 
-	  mEnabled(false),
-	  mHorizontalAlignment(HA_Left),
-	  mVerticalAlignment(VA_Top)
+	  mEnabled(false)
 {
 
 
@@ -56,42 +55,13 @@ int2 UIElement::GetScreenPosition()
 	if (mPositionDirty)
 	{
 		int2 pos = mPosition;
-		const UIElement* parent = mParent;
-		const UIElement* current = this;
 
-		while(parent)
+		const UIElement* current = mParent;
+
+		while(current)
 		{
-			switch (current->mHorizontalAlignment)
-			{
-			case HA_Left:
-				pos.X() += parent->mPosition.X();
-				break;
-
-			case HA_Center:
-				pos.X() += parent->mPosition.X() + (parent->mSize.X() - current->mSize.X()) / 2;
-				break;
-
-			case HA_Right:
-				pos.X() += parent->mPosition.X() + (parent->mSize.X() - current->mSize.X());
-				break;
-			}
-
-			switch (current->mVerticalAlignment)
-			{
-			case VA_Top:
-				pos.Y() += parent->mPosition.Y();
-				break;
-
-			case VA_Center:
-				pos.Y() += parent->mPosition.Y() + (parent->mSize.Y() - current->mSize.Y()) / 2;
-				break;
-
-			case VA_Bottom:
-				pos.Y() += parent->mPosition.Y() + (parent->mSize.Y() - current->mSize.Y());
-				break;
-			}
-			current = parent;
-			parent = parent->mParent;
+			pos += current->GetPosition();
+			current = current->mParent;
 		}
 
 		mScreenPosition = pos;
@@ -246,9 +216,9 @@ void UIElement::Update( float delta )
 
 }
 
-bool UIElement::OnMouseHover( const int2& position, uint32_t buttons )
+void UIElement::OnMouseHover( const int2& position )
 {
-	return false;
+	mHovering = true;
 }
 
 bool UIElement::OnMouseWheel( int32_t delta )
@@ -285,14 +255,24 @@ void UIElement::OnDragEnd( const int2& position )
 
 }
 
-bool UIElement::OnClick( const int2& position, uint32_t buttons )
+void UIElement::OnResize()
+{
+
+}
+
+bool UIElement::OnMouseButtonPress( const int2& position, uint32_t button )
 {
 	return false;
 }
 
-void UIElement::OnResize()
+bool UIElement::OnMouseButtonRelease( const int2& position, uint32_t button )
 {
+	return false;
+}
 
+bool UIElement::CanHaveFocus() const
+{
+	return false;
 }
 
 

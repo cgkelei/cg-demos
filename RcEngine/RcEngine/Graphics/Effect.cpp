@@ -2,6 +2,7 @@
 #include <Graphics/EffectTechnique.h>
 #include <Graphics/EffectPass.h>
 #include <Graphics/ShaderProgram.h>
+#include <Graphics/RenderDevice.h>
 #include <Graphics/EffectParameter.h>
 #include <Graphics/RenderFactory.h>
 #include <Graphics/Shader.h>
@@ -489,6 +490,15 @@ void CollectShaderMacro(const XMLNodePtr& node, vector<String>& defines, vector<
 		defines.push_back(name);
 		values.push_back(value);
 	}
+
+	RenderDeviceType rdType = Context::GetSingleton().GetRenderDevice().GetRenderDeviceType();
+	
+	// Deal with OpenGL and Direct3D texcoord Y reverse
+	if (rdType == RD_Direct3D11)
+	{
+		defines.push_back("Direct3D");
+		values.push_back("");
+	}
 }
 
 }
@@ -590,7 +600,6 @@ shared_ptr<Resource> Effect::Clone()
 
 	return retVal;
 }
-
 
 void Effect::LoadImpl()
 {

@@ -129,9 +129,9 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& de
 
 	// Calculate the points on the texture
 	float u1 = (float)srcRect.X / (float)texWidth;
-	float v1 = 1.0f - (float)srcRect.Y / (float)texHeight;
+	float v1 = (float)srcRect.Y / (float)texHeight;
 	float u2 = u1 + (float)srcRect.Width / texWidth;
-	float v2 = v1 - (float)srcRect.Height / texHeight;
+	float v2 = v1 + (float)srcRect.Height / texHeight;
 
 	vector<SpriteVertex>& vertices = spriteEntity->GetVertices();
 	vector<uint16_t>& indices = spriteEntity->GetIndices();
