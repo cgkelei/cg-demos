@@ -2,6 +2,8 @@
 #include <GUI/UIElement.h>
 #include <MainApp/Application.h>
 #include <MainApp/Window.h>
+#include <Graphics/Font.h>
+#include <Graphics/SpriteBatch.h>
 #include <Input/InputSystem.h>
 #include <Input/InputEvent.h>
 #include <Core/Context.h>
@@ -20,6 +22,39 @@ UIManager::UIManager()
 UIManager::~UIManager()
 {
 	SAFE_DELETE(mRootElement);
+	mFocusElement = mDragElement = nullptr;
+}
+
+
+void UIManager::OnGraphicsInitialize()
+{
+	if (!mInitialize)
+	{
+		//Keep track of main window
+		mMainWindow = Context::GetSingleton().GetApplication().GetMainWindow();
+
+		mRootElement = new UIElement();
+		mRootElement->SetSize(int2(mMainWindow->GetWidth(), mMainWindow->GetHeight()));
+
+		mSpriteBatch = std::make_shared<SpriteBatch>();
+
+		mInitialize = true;
+	}
+}
+
+void UIManager::OnGraphicsFinalize()
+{
+	mSpriteBatch = nullptr;
+	mFont = nullptr;
+	mSpriteBatchFont = nullptr;
+}
+
+void UIManager::OnWindowResize( uint32_t width, uint32_t height )
+{
+	if (mRootElement)
+	{
+		mRootElement->SetSize(int2(width, height));
+	}
 }
 
 void UIManager::SetFocusElement( UIElement* element )
@@ -157,13 +192,13 @@ bool UIManager::HandleMousePress( const int2& screenPos, uint32_t button )
 			element->BringToFront();
 		}
 
-		eventConsumed = element->OnMouseButtonPress(element->ScreenToClient(screenPos), button);
+		eventConsumed = element->OnMouseButtonPress(screenPos, button);
 
 		// if button press doesn't consume event, handle drag 
 		if (!eventConsumed && !mDragElement && button == MS_LeftButton)
 		{
 			mDragElement = element;
-			element->OnDragBegin(element->ScreenToClient(screenPos), button);
+			element->OnDragBegin(screenPos, button);
 		}
 
 		// Mouse position is in UI region, So there is no need to pass event to other Game Objects
@@ -179,7 +214,7 @@ bool UIManager::HandleMousePress( const int2& screenPos, uint32_t button )
 	return eventConsumed;
 }
 
-bool UIManager::HandleMouseRelease( const int2& pos, uint32_t button )
+bool UIManager::HandleMouseRelease( const int2& screenPos, uint32_t button )
 {
 	bool mouseVisible = mMainWindow->IsMouseVisible();
 
@@ -192,7 +227,7 @@ bool UIManager::HandleMouseRelease( const int2& pos, uint32_t button )
 	{
 		if (mDragElement->IsEnabled() && mDragElement->IsVisible())
 		{
-			mDragElement->OnDragEnd(mDragElement->ScreenToClient(pos));
+			mDragElement->OnDragEnd(screenPos);
 		}
 
 		mDragElement = nullptr;
@@ -202,7 +237,7 @@ bool UIManager::HandleMouseRelease( const int2& pos, uint32_t button )
 	{
 		if (mFocusElement)
 		{
-			eventConsumed = HandleMouseRelease(mFocusElement->ScreenToClient(pos), button);	
+			eventConsumed = mFocusElement->OnMouseButtonRelease(screenPos, button);
 			eventConsumed = true;
 		}
 	}
@@ -210,7 +245,7 @@ bool UIManager::HandleMouseRelease( const int2& pos, uint32_t button )
 	return eventConsumed;
 }
 
-bool UIManager::HandleMouseMove( const int2& pos, uint32_t buttons )
+bool UIManager::HandleMouseMove( const int2& screenPos, uint32_t buttons )
 {
 	bool mouseVisible = mMainWindow->IsMouseVisible();
 
@@ -223,11 +258,11 @@ bool UIManager::HandleMouseMove( const int2& pos, uint32_t buttons )
 	{
 		if (mDragElement->IsEnabled() && mDragElement->IsVisible())
 		{
-			mDragElement->OnDragMove(mDragElement->ScreenToClient(pos), buttons);
+			mDragElement->OnDragMove(screenPos, buttons);
 		}
 		else
 		{
-			mDragElement->OnDragEnd(mDragElement->ScreenToClient(pos));
+			mDragElement->OnDragEnd(screenPos);
 			mDragElement = nullptr;
 		}	
 
@@ -238,7 +273,7 @@ bool UIManager::HandleMouseMove( const int2& pos, uint32_t buttons )
 	return eventConsumed;
 }
 
-bool UIManager::HandleMouseWheel( const int2& pos, int32_t delta )
+bool UIManager::HandleMouseWheel( const int2& screenPos, int32_t delta )
 {
 	bool eventConsumed = false;
 
@@ -253,7 +288,7 @@ bool UIManager::HandleMouseWheel( const int2& pos, int32_t delta )
 		 // If no element has actual focus, get the element at cursor
 		if (mouseVisible)
 		{
-			UIElement* element = GetElementAtPoint(pos);
+			UIElement* element = GetElementAtPoint(screenPos);
 
 			if (element && element->IsVisible())
 			{
@@ -361,26 +396,9 @@ void UIManager::GetElementAtPoint(UIElement*& result, UIElement* current, const 
 	}
 }
 
-void UIManager::OnGraphicsInitialize()
+void UIManager::Render()
 {
-	if (!mInitialize)
-	{
-		//Keep track of main window
-		mMainWindow = Context::GetSingleton().GetApplication().GetMainWindow();
 
-		mRootElement = new UIElement();
-		mRootElement->SetSize(int2(mMainWindow->GetWidth(), mMainWindow->GetHeight()));
-
-		mInitialize = true;
-	}
-}
-
-void UIManager::OnWindowResize( uint32_t width, uint32_t height )
-{
-	if (mRootElement)
-	{
-		mRootElement->SetSize(int2(width, height));
-	}
 }
 
 }

@@ -4,6 +4,8 @@
 namespace RcEngine {
 
 Button::Button()
+	: mPressedOffset(int2::Zero()),
+	  mHoverOffset(int2::Zero())
 {
 
 }
@@ -16,16 +18,7 @@ Button::~Button()
 void Button::Update( float delta )
 {
 	if (!mHovering && mPressed)
-	{
 		SetPressed(false);
-	}
-
-
-}
-
-void Button::OnResize()
-{
-
 }
 
 void Button::SetPressed( bool pressed )
@@ -38,7 +31,7 @@ bool Button::CanHaveFocus() const
 	return mVisible && mEnabled;
 }
 
-bool Button::OnMouseButtonPress( const int2& position, uint32_t button )
+bool Button::OnMouseButtonPress( const int2& screenPos, uint32_t button )
 {
 	if (button == MS_LeftButton)
 	{
@@ -51,7 +44,7 @@ bool Button::OnMouseButtonPress( const int2& position, uint32_t button )
 	return false;
 }
 
-bool Button::OnMouseButtonRelease( const int2& position, uint32_t button )
+bool Button::OnMouseButtonRelease( const int2& screenPos, uint32_t button )
 {
 	if (button == MS_LeftButton)
 	{
@@ -59,7 +52,7 @@ bool Button::OnMouseButtonRelease( const int2& position, uint32_t button )
 		{
 			SetPressed(false);
 
-			if (IsInside(position, false))
+			if (IsInside(screenPos, true))
 			{
 				if (!EventButtonClicked.empty())
 					EventButtonClicked();
@@ -72,6 +65,20 @@ bool Button::OnMouseButtonRelease( const int2& position, uint32_t button )
 	}
 
 	return false;
+}
+
+void Button::Draw( SpriteBatch& spriteBatch )
+{
+	int2 offset = int2::Zero();
+
+	if (mHovering)
+		offset += mHoverOffset;
+
+	if (mPressed)
+		offset += mPressedOffset;	
+
+	// Reset hovering for next frame
+	mHovering = false;
 }
 
 

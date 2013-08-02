@@ -34,6 +34,11 @@ public:
 	void OnGraphicsInitialize();
 
 	/**
+	 * Called by Render Device Destroyed
+	 */
+	void OnGraphicsFinalize();
+
+	/**
 	 * Called by window resize
 	 */
 	void OnWindowResize(uint32_t width, uint32_t height);

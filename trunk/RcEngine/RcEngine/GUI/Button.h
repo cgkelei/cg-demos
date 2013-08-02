@@ -14,10 +14,9 @@ public:
 	Button();
 	virtual ~ Button();
 
-	virtual bool OnMouseButtonPress(const int2& position, uint32_t button);
-	virtual bool OnMouseButtonRelease(const int2& position, uint32_t button);
+	virtual bool OnMouseButtonPress(const int2& screenPos, uint32_t button);
+	virtual bool OnMouseButtonRelease(const int2& screenPos, uint32_t button);
 
-	virtual void OnResize();
 	virtual bool CanHaveFocus() const;
 
 	virtual void Update(float delta);
@@ -33,12 +32,12 @@ private:
 public:
 	ButtonClickedEventHandler EventButtonClicked;
 
-
 protected:
 
 	bool mPressed;
 
 	int2 mPressedOffset;
+	int2 mHoverOffset;
 
 };
 

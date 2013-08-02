@@ -34,82 +34,79 @@ void UIWindow::SetResizable( bool resizable )
 	mResizable = resizable;
 }
 
-void UIWindow::OnDragBegin( const int2& position, const int2& screenPosition, int buttons, int qualifiers )
+
+void UIWindow::OnDragBegin( const int2& screenPos, uint32_t button )
 {
-	if (buttons != MS_LeftButton)
+	if (button != MS_LeftButton)
 	{
 		mDragMode = Drag_None;
 		return ;
 	}
 
-	mDragMode = GetDragMode(position);
-
+	mDragBeginCurosr = screenPos;
+	mDragBeginPos = GetPosition();
+	mDragBeginSize = GetSize();
+	mDragMode = GetDragMode(ScreenToClient(screenPos));
 	//SetCursorShape(dragMode_, cursor);
-
 }
 
-void UIWindow::OnDragMove( const int2& position, const int2& screenPosition, int buttons, int qualifiers )
+void UIWindow::OnDragMove( const int2& screenPos, uint32_t buttons )
 {
 	if (mDragMode == Drag_None)
 		return;
 
-	const int2& originalScreenPos = GetScreenPosition();
-	const int2& originalSize = GetSize();
-	const int2& originalPos = GetPosition();
-
-	int2 delta = screenPosition - originalScreenPos;
+	int2 delta = screenPos - mDragBeginCurosr;
 
 	switch (mDragMode)
 	{
 	case Drag_Move:
 		{
-			SetPosition(originalPos + delta);
+			SetPosition(mDragBeginPos + delta);
 		}
 		break;
 	case Drag_Resize_TopLeft:
 		{
-			SetPosition(originalPos + delta);
-			SetSize(originalSize - delta);
+			SetPosition(mDragBeginPos + delta);
+			SetSize(mDragBeginSize - delta);
 		}
 		break;
 	case Drag_Resize_Top:
 		{
-			// only affect topleft y 
-			SetPosition( int2(originalPos.X(), originalPos.Y() + delta.Y()));
-			SetSize( int2(originalSize.X(), originalSize.Y() - delta.Y()) );
+			SetPosition( int2(mDragBeginPos.X(), mDragBeginPos.Y() + delta.Y()));
+			SetSize( int2(mDragBeginSize.X(), mDragBeginSize.Y() - delta.Y()) );
 		}
 		break;
 	case Drag_Resize_TopRight:
 		{
-			SetPosition( int2(originalPos.X(), originalPos.Y() + delta.Y()));
-			SetSize( int2(originalSize.X() + delta.X(), originalSize.Y() - delta.Y()) );
+			SetPosition( int2(mDragBeginPos.X(), mDragBeginPos.Y() + delta.Y()));
+			SetSize( int2(mDragBeginSize.X() + delta.X(), mDragBeginSize.Y() - delta.Y()) );
 		}
 		break;
 	case Drag_Resize_BottomRight:
 		{
-			SetSize( originalSize + delta );
+			SetSize( mDragBeginSize + delta );
 		}
 		break;
 	case Drag_Resize_Bottom:
 		{
-			SetSize( int2(originalSize.X(), originalSize.Y() + delta.Y()) );
+			SetSize( int2(mDragBeginSize.X(), mDragBeginSize.Y() + delta.Y()) );
 		}
 		break;
 	case Drag_Resize_BottomLeft:
 		{
-			SetPosition( int2(originalPos.X() + delta.X(), originalPos.Y()));
-			SetSize( int2(originalSize.X() - delta.X(), originalSize.Y() + delta.Y()) );
+			SetPosition( int2(mDragBeginPos.X() + delta.X(), mDragBeginPos.Y()));
+			SetSize( int2(mDragBeginSize.X() - delta.X(), mDragBeginSize.Y() + delta.Y()) );
 		}
 		break;
 	case Drag_Resize_Left:
 		{
-			SetPosition( int2(originalPos.X() + delta.X(), originalPos.Y()));
-			SetSize( int2(originalSize.X() - delta.X(), originalSize.Y()) );
+			SetPosition( int2(mDragBeginPos.X() + delta.X(), mDragBeginPos.Y()));
+			SetSize( int2(mDragBeginSize.X() - delta.X(), mDragBeginSize.Y()) );
 		}
 		break;
 	case Drag_Resize_Right:
 		{
-			SetSize( int2(originalSize.X() + delta.X(), originalSize.Y()) );
+			SetSize( int2(mDragBeginPos.X() + delta.X(), mDragBeginPos.Y()) );
 		}
 		break;
 	default:
@@ -117,17 +114,17 @@ void UIWindow::OnDragMove( const int2& position, const int2& screenPosition, int
 	}
 
 	ValidatePosition();
-
+	//SetCursorShape(dragMode_, cursor);
 }
 
-void UIWindow::OnDragEnd( const int2& position, const int2& screenPosition )
+
+void UIWindow::OnDragEnd( const int2& position )
 {
 	mDragMode = Drag_None;
 }
 
 void UIWindow::Minimize()
 {
-
 	mLastNormalPos = GetPosition();
 	mLastNormalSize = GetSize();
 		
@@ -140,7 +137,6 @@ void UIWindow::Minimize()
 
 	mWindowState = Minimized;
 	mMinimizing = true;
-
 	
 	//SetPosition()
 	//SetSize();
@@ -210,9 +206,7 @@ UIWindow::DragMode UIWindow::GetDragMode( const int2& position )
 void UIWindow::ValidatePosition()
 {
 	if (!mParent)
-	{
 		return;
-	}
 
 	const int2& parentSize = mParent->GetSize();
 	int2 position = GetPosition();
@@ -224,12 +218,15 @@ void UIWindow::ValidatePosition()
 	SetPosition(position);
 }
 
-void UIWindow::Draw()
+void UIWindow::Update( float delta )
 {
-	UIManager& uiMan = UIManager::GetSingleton();
+
 }
 
+void UIWindow::Draw( SpriteBatch& spriteBatch )
+{
 
+}
 
 
 }

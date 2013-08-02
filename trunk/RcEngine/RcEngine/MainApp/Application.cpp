@@ -111,11 +111,16 @@ void Application::Tick()
 	// Process input events
 	ProcessEventQueue();
 
-	// update
-	Update(mTimer.GetDeltaTime());
+	float deltaTime = mTimer.GetDeltaTime();
 
+	// update
+	Update(deltaTime);
+	
 	// update scene graph
-	sceneMan.UpdateSceneGraph(mTimer.GetDeltaTime());
+	sceneMan.UpdateSceneGraph(deltaTime);
+
+	// Update UI
+	UIManager::GetSingleton().Update(deltaTime);
 
 	// render
 	Render();
@@ -236,7 +241,11 @@ void Application::Create()
 
 void Application::Release()
 {
-	
+	UIManager::Finalize();
+	InputSystem::Finalize();
+	FileSystem::Finalize();
+	ResourceManager::Finalize();
+	//ModuleManager::Finalize();	
 }
 
 void Application::ReadConfiguration()

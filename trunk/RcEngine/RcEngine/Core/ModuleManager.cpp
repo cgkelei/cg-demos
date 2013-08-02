@@ -15,7 +15,6 @@ ModuleManager::ModuleManager(void)
 ModuleManager::~ModuleManager(void)
 {
 	UnloadAll();
-	mMoudles.clear();
 }
 
 
@@ -84,6 +83,7 @@ bool ModuleManager::UnloadAll()
 		Unload(*iter);
 		delete *iter;
 	}
+	mMoudles.clear();
 	return true;
 }
 

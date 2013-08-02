@@ -57,6 +57,8 @@ TestApp::~TestApp(void)
 
 void TestApp::Initialize()
 {
+	InitGUI();
+
 	Camera* camera = RcEngine::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
 	
 	float3 up(0, 1, 0);
@@ -163,12 +165,10 @@ void TestApp::LoadContent()
 	//sceneManager->CreateSkyBox(factory->CreateTextureFromFile("../Media/Textures/grassenvmap1024.dds", 0), 5000.0f); 
 }
 
-
 void TestApp::UnloadContent()
 {
 
 }
-
 
 
 void TestApp::Render()
@@ -177,6 +177,8 @@ void TestApp::Render()
 	SceneManager& scenenMan = Context::GetSingleton().GetSceneManager();
 
 	shared_ptr<FrameBuffer> currentFrameBuffer = renderDevice.GetCurrentFrameBuffer();
+
+	renderDevice.BindFrameBuffer(currentFrameBuffer);
 
 	float clr = (float)169/255;
 	currentFrameBuffer->Clear(CF_Color | CF_Depth |CF_Stencil, RcEngine::ColorRGBA(clr, clr, clr, 1.0f), 1.0f, 0);
@@ -208,6 +210,10 @@ void TestApp::Render()
 	scenenMan.RenderScene();
 
 	// Render UI
+	UIManager::GetSingleton().Render();
+
+
+	// Swap Buffer
 	currentFrameBuffer->SwapBuffers();
 
 	CalculateFrameRate();
@@ -221,10 +227,6 @@ void TestApp::Update( float deltaTime )
 
 	//SceneNode* dwarfNode = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf");
 	//dwarfNode->SetRotation(QuaternionFromRotationMatrix(mCameraControler->GetWorldMatrix()));
-
-
-	// Update UI
-	UIManager::GetSingleton().Update(deltaTime);
 }
 
 void TestApp::CalculateFrameRate()
