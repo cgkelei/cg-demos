@@ -325,8 +325,8 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			InputEvent e;
 			e.MouseButton.type = InputEventType::MouseButtonDown;
 			e.MouseButton.button = MS_LeftButton;
-			e.MouseWheel.x = GET_X_LPARAM(lParam); 
-			e.MouseWheel.y = GET_Y_LPARAM(lParam); 
+			e.MouseButton.x = GET_X_LPARAM(lParam); 
+			e.MouseButton.y = GET_Y_LPARAM(lParam); 
 			mInputSystem->FireEvent(e);
 		}
 		break;
@@ -336,8 +336,8 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			InputEvent e;
 			e.MouseButton.type = InputEventType::MouseButtonUp;
 			e.MouseButton.button = MS_LeftButton;
-			e.MouseWheel.x = GET_X_LPARAM(lParam); 
-			e.MouseWheel.y = GET_Y_LPARAM(lParam); 
+			e.MouseButton.x = GET_X_LPARAM(lParam); 
+			e.MouseButton.y = GET_Y_LPARAM(lParam); 
 			mInputSystem->FireEvent(e);
 		}
 		break;
@@ -347,8 +347,8 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			InputEvent e;
 			e.MouseButton.type = InputEventType::MouseButtonDown;
 			e.MouseButton.button = MS_RightButton;
-			e.MouseWheel.x = GET_X_LPARAM(lParam); 
-			e.MouseWheel.y = GET_Y_LPARAM(lParam); 
+			e.MouseButton.x = GET_X_LPARAM(lParam); 
+			e.MouseButton.y = GET_Y_LPARAM(lParam); 
 			mInputSystem->FireEvent(e);
 		}
 		break;
@@ -358,8 +358,8 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			InputEvent e;
 			e.MouseButton.type = InputEventType::MouseButtonUp;
 			e.MouseButton.button = MS_RightButton;
-			e.MouseWheel.x = GET_X_LPARAM(lParam); 
-			e.MouseWheel.y = GET_Y_LPARAM(lParam); 
+			e.MouseButton.x = GET_X_LPARAM(lParam); 
+			e.MouseButton.y = GET_Y_LPARAM(lParam); 
 			mInputSystem->FireEvent(e);
 		}
 	break;
@@ -369,8 +369,8 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			InputEvent e;
 			e.MouseButton.type = InputEventType::MouseButtonDown;
 			e.MouseButton.button = MS_MiddleButton;
-			e.MouseWheel.x = GET_X_LPARAM(lParam); 
-			e.MouseWheel.y = GET_Y_LPARAM(lParam); 
+			e.MouseButton.x = GET_X_LPARAM(lParam); 
+			e.MouseButton.y = GET_Y_LPARAM(lParam); 
 			mInputSystem->FireEvent(e);
 		}
 		break;
@@ -380,8 +380,8 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			InputEvent e;
 			e.MouseButton.type = InputEventType::MouseButtonUp;
 			e.MouseButton.button = MS_MiddleButton;
-			e.MouseWheel.x = GET_X_LPARAM(lParam); 
-			e.MouseWheel.y = GET_Y_LPARAM(lParam); 
+			e.MouseButton.x = GET_X_LPARAM(lParam); 
+			e.MouseButton.y = GET_Y_LPARAM(lParam); 
 			mInputSystem->FireEvent(e);
 		}
 		break;

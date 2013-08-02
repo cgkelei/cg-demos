@@ -216,7 +216,7 @@ void UIElement::Update( float delta )
 
 }
 
-void UIElement::OnMouseHover( const int2& position )
+void UIElement::OnMouseHover( const int2& screenPos )
 {
 	mHovering = true;
 }
@@ -241,16 +241,16 @@ bool UIElement::OnTextInput( uint16_t unicode )
 	return false;
 }
 
-void UIElement::OnDragBegin( const int2& position, uint32_t buttons )
+void UIElement::OnDragBegin( const int2& screenPos, uint32_t buttons )
 {
 }
 
-void UIElement::OnDragMove( const int2& position, uint32_t buttons )
+void UIElement::OnDragMove( const int2& screenPos, uint32_t buttons )
 {
 
 }
 
-void UIElement::OnDragEnd( const int2& position )
+void UIElement::OnDragEnd( const int2& screenPos )
 {
 
 }
@@ -260,12 +260,12 @@ void UIElement::OnResize()
 
 }
 
-bool UIElement::OnMouseButtonPress( const int2& position, uint32_t button )
+bool UIElement::OnMouseButtonPress( const int2& screenPos, uint32_t button )
 {
 	return false;
 }
 
-bool UIElement::OnMouseButtonRelease( const int2& position, uint32_t button )
+bool UIElement::OnMouseButtonRelease( const int2& screenPos, uint32_t button )
 {
 	return false;
 }

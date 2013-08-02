@@ -32,11 +32,14 @@ public:
 
 public:
 	UIWindow();
-	~UIWindow();
+	virtual ~UIWindow();
 
-	void OnDragBegin(const int2& position, const int2& screenPosition, int buttons, int qualifiers);
-	void OnDragMove(const int2& position, const int2& screenPosition, int buttons, int qualifiers);
-	void OnDragEnd(const int2& position, const int2& screenPosition);
+	virtual void OnDragBegin(const int2& screenPos, uint32_t button);
+	virtual void OnDragMove(const int2& screenPos, uint32_t buttons);
+	virtual void OnDragEnd(const int2& screenPos);
+
+	virtual void Update(float delta);
+	virtual void Draw(SpriteBatch& spriteBatch);
 
 	void SetMovable(bool movable);
 	void SetResizable(bool resizable);
@@ -49,7 +52,7 @@ public:
 	void Maximize();
 	void Restore();
 
-	virtual void Draw();
+
 
 protected:
 	DragMode GetDragMode(const int2& position);
@@ -68,6 +71,10 @@ protected:
 
 	int2 mLastNormalPos;
 	int2 mLastNormalSize;
+
+	int2 mDragBeginPos;		// Position in parent region when drag begin
+	int2 mDragBeginSize;    // Window size when drag begin
+	int2 mDragBeginCurosr;  // Cursor position when drag begin
 
 	
 

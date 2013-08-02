@@ -46,14 +46,14 @@ public:
 
 	virtual void OnResize();
 
-	virtual void OnMouseHover(const int2& position);
+	virtual void OnMouseHover(const int2& screenPos);
 	
-	virtual void OnDragBegin(const int2& position, uint32_t buttons);
-	virtual void OnDragMove(const int2& position, uint32_t buttons);
-	virtual void OnDragEnd(const int2& position);
+	virtual void OnDragBegin(const int2& screenPos, uint32_t buttons);
+	virtual void OnDragMove(const int2& screenPos, uint32_t buttons);
+	virtual void OnDragEnd(const int2& screenPos);
 
-	virtual bool OnMouseButtonPress(const int2& position, uint32_t button);
-	virtual bool OnMouseButtonRelease(const int2& position, uint32_t button);
+	virtual bool OnMouseButtonPress(const int2& screenPos, uint32_t button);
+	virtual bool OnMouseButtonRelease(const int2& screenPos, uint32_t button);
 	
 	virtual bool OnMouseWheel( int32_t delta );
 
@@ -68,12 +68,12 @@ public:
 	void SetName(const String& name)			{ mName = name; }
 	
 	void SetPosition(const int2& position);
-	const int2& GetPosition() const			{ return mPosition; }
+	const int2& GetPosition() const				{ return mPosition; }
 	
 	int2 GetScreenPosition();
 
 	void SetSize(const int2& size);
-	const int2& GetSize() const				{ return mSize; }
+	const int2& GetSize() const					{ return mSize; }
 
 	void SetMinSize(const int2& size);
 	const int2& GetMinSize() const				{ return mMinSize; }

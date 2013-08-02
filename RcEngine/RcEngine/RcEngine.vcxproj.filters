@@ -213,9 +213,6 @@
     <ClInclude Include="GUI\ScrollBar.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="GUI\Theme.h">
-      <Filter>GUI</Filter>
-    </ClInclude>
     <ClInclude Include="GUI\UIElement.h">
       <Filter>GUI</Filter>
     </ClInclude>
@@ -322,6 +319,9 @@
       <Filter>Input</Filter>
     </ClInclude>
     <ClInclude Include="GUI\TextEdit.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\GuiSkin.h">
       <Filter>GUI</Filter>
     </ClInclude>
   </ItemGroup>
@@ -494,9 +494,6 @@
     <ClCompile Include="GUI\ScrollBar.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="GUI\Theme.cpp">
-      <Filter>GUI</Filter>
-    </ClCompile>
     <ClCompile Include="GUI\UIElement.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
@@ -573,6 +570,9 @@
       <Filter>MainApp</Filter>
     </ClCompile>
     <ClCompile Include="GUI\TextEdit.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\GuiSkin.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>
