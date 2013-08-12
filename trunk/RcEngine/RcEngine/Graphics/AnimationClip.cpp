@@ -45,8 +45,8 @@ size_t AnimationClip::AnimationTrack::GetKeyFrameIndex( float time ) const
 }
 
 
-AnimationClip::AnimationClip(ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
-	: Resource(resType, creator, handle, name, group)
+AnimationClip::AnimationClip(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
+	: Resource(RT_Animation, creator, handle, name, group)
 {
 
 }
@@ -101,7 +101,7 @@ void AnimationClip::UnloadImpl()
 
 shared_ptr<Resource> AnimationClip::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 {
-	return std::make_shared<AnimationClip>(RT_Animation, creator, handle, name, group);
+	return std::make_shared<AnimationClip>(creator, handle, name, group);
 }
 
 //void AnimationClip::SetAnimationState( AnimationState* state )

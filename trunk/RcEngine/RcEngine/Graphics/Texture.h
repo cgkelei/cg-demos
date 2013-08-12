@@ -64,7 +64,7 @@ protected:
 class _ApiExport TextureResource : public Resource
 {
 public:
-	TextureResource(ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
+	TextureResource(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	~TextureResource();
 
 

@@ -11,7 +11,7 @@ public:
 	typedef fastdelegate::FastDelegate1<bool> StateChangeEventHandler;
 
 public:
-	CheckBox(const int2& pos, const std::wstring& text, bool checked);
+	CheckBox();
 	virtual ~CheckBox();
 
 	virtual bool OnMouseButtonPress(const int2& screenPos, uint32_t button);
@@ -20,19 +20,29 @@ public:
 	virtual bool CanHaveFocus() const;
 
 	virtual void Update(float delta);
-	virtual void Draw(SpriteBatch& spriteBatch);
+	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 
 	void SetChecked(bool enalbe);
 	bool IsChecked() const;
 
-public:
+	void SetText(const std::wstring& text);
 
+protected:
+	void UpdateRect();
+
+public:
 	StateChangeEventHandler EventStateChange;
 	
 protected:
 	
 	bool mPressed;
 	bool mCheched;
+
+	std::wstring mText;
+	
+	// Used for draw
+	Rectanglef mCheckRect;
+	Rectanglef mTextRect;
 };
 
 

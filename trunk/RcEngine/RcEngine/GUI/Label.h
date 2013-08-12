@@ -13,12 +13,13 @@ class _ApiExport Label : public UIElement
 {
 public:
 	Label();
+	Label(const int2& pos, const std::wstring& text, Alignment textAlign = AlignCenter);
 	virtual ~Label();
 	
 	void SetFont(const shared_ptr<Font>& font, int32_t fontSize);
 	const shared_ptr<Font> GetFont() const			{ return mFont; }
 
-	void SetText(const std::wstring& text);
+	void SetText(const std::wstring& text, Alignment textAlign = AlignCenter);
 	const std::wstring& GetText() const				{ return mText; }
 
 	void SetWordWrap(bool enable);
@@ -28,7 +29,7 @@ public:
 	Alignment GetTextAlignment() const	{ return mTextAlignment; }
 
 	virtual void Update(float delta);
-	virtual void Draw(SpriteBatch& spriteBatch);
+	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 	virtual void OnResize();
 
 protected:

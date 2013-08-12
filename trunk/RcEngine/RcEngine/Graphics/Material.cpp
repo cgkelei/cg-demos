@@ -131,8 +131,8 @@ private:
 };
 
 //--------------------------------------------------------------------------------------------------
-Material::Material(ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
-	: Resource(resType, creator, handle, name, group), mTransparent(false)
+Material::Material( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
+	: Resource(RT_Material, creator, handle, name, group), mTransparent(false)
 {
 }
 
@@ -244,7 +244,7 @@ shared_ptr<Resource> Material::Clone()
 {
 	printf("Clone material: %s\n", mMaterialName.c_str());
 
-	shared_ptr<Material> retVal = std::make_shared<Material>(mResourceType, mCreator, mResourceHandle, mName, mGroup);
+	shared_ptr<Material> retVal = std::make_shared<Material>(mCreator, mResourceHandle, mName, mGroup);
 
 	retVal->mMaterialName = mMaterialName;
 
@@ -545,7 +545,7 @@ void Material::UnloadImpl()
 
 shared_ptr<Resource> Material::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 {
-	return std::make_shared<Material>(RT_Material, creator, handle, name, group);
+	return std::make_shared<Material>(creator, handle, name, group);
 }
 
 

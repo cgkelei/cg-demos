@@ -86,7 +86,7 @@ void InputSystem::EndEvents()
 
 	mMouseMove = mMousePos - mLastMousePos;
 
-	if (mainWindow->IsMouseVisible())
+	if (!mainWindow->IsMouseVisible())
 	{
 		mLastMousePos.X() = mainWindow->GetWidth() / 2;
 		mLastMousePos.Y() =  mainWindow->GetHeight() / 2;

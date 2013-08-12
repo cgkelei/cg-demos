@@ -34,7 +34,7 @@ public:
 	};
 
 public:
-	AnimationClip(ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group );
+	AnimationClip(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group );
 	~AnimationClip();
 
 	const String& GetClipName() const { return mClipName; }

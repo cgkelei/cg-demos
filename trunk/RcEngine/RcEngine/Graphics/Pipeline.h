@@ -96,7 +96,7 @@ public:
 	};
 
 public:
-	Pipeline(ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
+	Pipeline(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	~Pipeline();
 
 	shared_ptr<FrameBuffer> GetFrameBuffer(const String& name);

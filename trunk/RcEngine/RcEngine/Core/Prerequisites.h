@@ -145,6 +145,16 @@ class AnimationState;
 class AnimationClip;
 class AnimationController;
 
+class UIElement;
+class Label;
+class Button;
+class Slider;
+class ScrollBar;
+class CheckBox;
+class TextEdit;
+class Menu;
+class UIManager;
+
 
 } // Namespace RcEngine
 

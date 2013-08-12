@@ -95,7 +95,7 @@ void Application::Tick()
 
 	if (!mActice)
 	{
-		// Inatice, Sleep for a while
+		// Inative, Sleep for a while
 		static const std::chrono::milliseconds inactiveSleepTime( 20 );
 		std::this_thread::sleep_for( inactiveSleepTime );
 	}

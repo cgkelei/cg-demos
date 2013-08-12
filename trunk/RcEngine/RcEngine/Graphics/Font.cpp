@@ -7,6 +7,7 @@
 #include <Core/Utility.h>
 #include <IO/FileSystem.h>
 #include <IO/FileStream.h>
+#include <GUI/GuiSkin.h>
 #include <Math/Rectangle.h>
 #include <Resource/ResourceManager.h>
 
@@ -283,8 +284,8 @@ void FontLoader::AddChar( int id, int x, int y, int w, int h, float xoffset, flo
 
 
 ////////////////////////////////////////////////////////////////////////////
-Font::Font( ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
-	: Resource(resType, creator, handle, name, group), mRowHeight(0), mCharSize(0)
+Font::Font(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
+	: Resource(RT_Font, creator, handle, name, group), mRowHeight(0), mCharSize(0)
 {
 	
 }
@@ -379,7 +380,7 @@ int32_t Font::GetRowHeight( int32_t fontSize ) const
 
 shared_ptr<Resource> Font::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 {
-	return std::make_shared<Font>(RT_Font, creator, handle, name, group);
+	return std::make_shared<Font>(creator, handle, name, group);
 }
 
 const Font::Glyph& Font::GetGlyphInfo( wchar_t ch ) const
@@ -392,146 +393,146 @@ const Font::Glyph& Font::GetGlyphInfo( wchar_t ch ) const
 		return it->second;
 }
 
-//float GetRowStartPos(float rowWidth, float maxWidth, uint32_t alignment)
-//{
-//	if (alignment & Font::AlignLeft)
-//		return 0;
-//	else if (alignment & Font::AlignCenter)
-//		return (maxWidth - rowWidth) / 2;
-//	else if (alignment & Font::AlignRight)
-//		return (maxWidth - rowWidth);
-//	else
-//		return 0;
-//}
-//
-//void Font::DrawString( SpriteBatch& spriteBatch, std::wstring& text, int32_t fontSize, uint32_t alignment, const Rectanglef& region, const ColorRGBA& color )
-//{
-//	const float scale = float(fontSize) / mCharSize;
-//	const float rowHeight = mRowHeight * scale;
-//
-//	std::vector<float> rowWidths(1, 0);
-//
-//	// Compute width and height to draw this text
-//	for (size_t i = 0; i < text.length(); ++i)
-//	{
-//		wchar_t ch = text[i];
-//
-//		if (ch != L'\n')
-//			rowWidths.back() += mGlyphs[ch].Advance * scale;
-//		else
-//			rowWidths.push_back(0);
-//	}
-//
-//	float width = *std::max_element(rowWidths.begin(), rowWidths.end());
-//	float heigh = rowWidths.size() * rowHeight;
-//
-//	size_t rowIdx = 0;
-//
-//	float x = region.Left() + GetRowStartPos(rowWidths[rowIdx], region.Width, alignment);
-//	float y;
-//
-//	if (alignment & Font::AlignTop)
-//		y = region.Top() + rowHeight;
-//	else if (alignment & Font::AlignCenter)
-//		y = region.Top() + (region.Height - heigh) / 2 + rowHeight;
-//	else if (alignment & Font::AlignRight)
-//		y = region.Top() + (region.Height - heigh) + rowHeight;
-//	else
-//		y = region.Top() + rowHeight;
-//
-//	for (size_t i = 0; i < text.length(); ++i)
-//	{
-//		wchar_t ch = text[i];
-//
-//		if (ch == L'\n')
-//		{
-//			y += rowHeight;
-//
-//			rowIdx++;
-//			x = region.Left() + GetRowStartPos(rowWidths[rowIdx], region.Width, alignment);
-//		}
-//		else
-//		{
-//			const Glyph& glyph = mGlyphs[ch];
-//
-//			float ch_x = x + glyph.OffsetX * scale;
-//			float ch_y = y - glyph.OffsetY * scale;
-//
-//			float ch_width = glyph.Width * scale;
-//			float ch_height = glyph.Height* scale;
-//
-//			x += glyph.Advance * scale;
-//
-//			// Out of region
-//			if ( (ch_x + ch_width <= region.Left()) ||
-//				(ch_x >= region.Right())           ||
-//				(ch_y >= region.Bottom()) ||
-//				(ch_y + ch_height <= region.Top()) )
-//				continue;
-//
-//			IntRect sourceRect;
-//			Rectanglef destRect;
-//
-//			if (ch_x < region.Left())
-//			{
-//				float ratio = (region.Left() - ch_x) / ch_width;
-//				sourceRect.X = glyph.SrcX + int(glyph.Width * ratio);
-//				sourceRect.Width = int(glyph.Width * (1 - ratio));
-//
-//				destRect.X = region.Left();
-//				destRect.Width = ch_height * (1 - ratio);
-//			}
-//			else if (ch_x + ch_width > region.Right())
-//			{
-//				float ratio = (ch_x + ch_width  - region.Right()) / ch_width;
-//				sourceRect.X = glyph.SrcX;
-//				sourceRect.Width = int(glyph.Width * (1 - ratio));
-//
-//				destRect.X = ch_x;
-//				destRect.SetRight(region.Right());
-//			}
-//			else
-//			{
-//				sourceRect.X = glyph.SrcX;
-//				sourceRect.Width = glyph.Width;
-//
-//				destRect.X = ch_x;
-//				destRect.Width = ch_width;
-//			}
-//
-//			if (ch_y < region.Top())
-//			{
-//				float ratio = (region.Top() - ch_y) / ch_height;
-//
-//				sourceRect.Y = glyph.SrcY + int(glyph.Height * ratio);
-//				sourceRect.Height = int(glyph.Height * (1 - ratio));
-//
-//				destRect.Y = region.Top();
-//				destRect.Height = ch_height * (1 - ratio);
-//			}
-//			else if (ch_y + ch_height > region.Bottom())
-//			{
-//				float ratio = (ch_y + ch_height - region.Bottom()) / ch_height;
-//
-//				sourceRect.Y = glyph.SrcY;
-//				sourceRect.Height = int(glyph.Height * (1 - ratio));
-//
-//				destRect.Y = ch_y;
-//				destRect.SetBottom( region.Bottom() );
-//			}
-//			else
-//			{
-//				sourceRect.Y = glyph.SrcY;
-//				sourceRect.Height = glyph.Height;
-//
-//				destRect.Y = ch_y;
-//				destRect.Height = ch_height;
-//			}
-//
-//			spriteBatch.Draw(mFontTexture, destRect, &sourceRect, color);
-//		}
-//	}
-//}
+static float GetRowStartPos(float rowWidth, float maxWidth, uint32_t alignment)
+{
+	if (alignment & AlignLeft)
+		return 0;
+	else if (alignment & AlignCenter)
+		return (maxWidth - rowWidth) / 2;
+	else if (alignment & AlignRight)
+		return (maxWidth - rowWidth);
+	else
+		return 0;
+}
+
+void Font::DrawString( SpriteBatch& spriteBatch, std::wstring& text, int32_t fontSize, uint32_t alignment, const Rectanglef& region, const ColorRGBA& color )
+{
+	const float scale = float(fontSize) / mCharSize;
+	const float rowHeight = mRowHeight * scale;
+
+	std::vector<float> rowWidths(1, 0);
+
+	// Compute width and height to draw this text
+	for (size_t i = 0; i < text.length(); ++i)
+	{
+		wchar_t ch = text[i];
+
+		if (ch != L'\n')
+			rowWidths.back() += mGlyphs[ch].Advance * scale;
+		else
+			rowWidths.push_back(0);
+	}
+
+	float width = *std::max_element(rowWidths.begin(), rowWidths.end());
+	float height = rowWidths.size() * rowHeight;
+
+	size_t rowIdx = 0;
+
+	float x = region.Left() + GetRowStartPos(rowWidths[rowIdx], region.Width, alignment);
+	float y;
+
+	if (alignment & AlignTop)
+		y = region.Top() + rowHeight;
+	else if (alignment & AlignVCenter)
+		y = region.Top() + (region.Height - height + rowHeight) / 2 + rowHeight * 0.28f;
+	else if (alignment & AlignBottom)
+		y = region.Top() + (region.Height - height) + rowHeight;
+	else
+		y = region.Top() + rowHeight;
+
+	for (size_t i = 0; i < text.length(); ++i)
+	{
+		wchar_t ch = text[i];
+
+		if (ch == L'\n')
+		{
+			y += rowHeight;
+
+			rowIdx++;
+			x = region.Left() + GetRowStartPos(rowWidths[rowIdx], region.Width, alignment);
+		}
+		else
+		{
+			const Glyph& glyph = mGlyphs[ch];
+
+			float ch_x = x + glyph.OffsetX * scale;
+			float ch_y = y - glyph.OffsetY * scale;
+
+			float ch_width = glyph.Width * scale;
+			float ch_height = glyph.Height* scale;
+
+			x += glyph.Advance * scale;
+
+			// Out of region
+			if ( (ch_x + ch_width <= region.Left()) ||
+				(ch_x >= region.Right())           ||
+				(ch_y >= region.Bottom()) ||
+				(ch_y + ch_height <= region.Top()) )
+				continue;
+
+			IntRect sourceRect;
+			Rectanglef destRect;
+
+			if (ch_x < region.Left())
+			{
+				float ratio = (region.Left() - ch_x) / ch_width;
+				sourceRect.X = glyph.SrcX + int(glyph.Width * ratio);
+				sourceRect.Width = int(glyph.Width * (1 - ratio));
+
+				destRect.X = region.Left();
+				destRect.Width = ch_height * (1 - ratio);
+			}
+			else if (ch_x + ch_width > region.Right())
+			{
+				float ratio = (ch_x + ch_width  - region.Right()) / ch_width;
+				sourceRect.X = glyph.SrcX;
+				sourceRect.Width = int(glyph.Width * (1 - ratio));
+
+				destRect.X = ch_x;
+				destRect.SetRight(region.Right());
+			}
+			else
+			{
+				sourceRect.X = glyph.SrcX;
+				sourceRect.Width = glyph.Width;
+
+				destRect.X = ch_x;
+				destRect.Width = ch_width;
+			}
+
+			if (ch_y < region.Top())
+			{
+				float ratio = (region.Top() - ch_y) / ch_height;
+
+				sourceRect.Y = glyph.SrcY + int(glyph.Height * ratio);
+				sourceRect.Height = int(glyph.Height * (1 - ratio));
+
+				destRect.Y = region.Top();
+				destRect.Height = ch_height * (1 - ratio);
+			}
+			else if (ch_y + ch_height > region.Bottom())
+			{
+				float ratio = (ch_y + ch_height - region.Bottom()) / ch_height;
+
+				sourceRect.Y = glyph.SrcY;
+				sourceRect.Height = int(glyph.Height * (1 - ratio));
+
+				destRect.Y = ch_y;
+				destRect.SetBottom( region.Bottom() );
+			}
+			else
+			{
+				sourceRect.Y = glyph.SrcY;
+				sourceRect.Height = glyph.Height;
+
+				destRect.Y = ch_y;
+				destRect.Height = ch_height;
+			}
+
+			spriteBatch.Draw(mFontTexture, destRect, &sourceRect, color);
+		}
+	}
+}
 
 //void Font::DrawStringWrap( SpriteBatch& spriteBatch, std::wstring& text, int32_t fontSize, int32_t maxWidth, const float2& position, const ColorRGBA& color )
 //{	

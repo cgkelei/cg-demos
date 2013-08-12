@@ -506,8 +506,8 @@ void CollectShaderMacro(const XMLNodePtr& node, vector<String>& defines, vector<
 
 namespace RcEngine {
 
-Effect::Effect(ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
-	: Resource(resType, creator, handle, name, group)
+Effect::Effect( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
+	: Resource(RT_Effect, creator, handle, name, group)
 {
 
 }
@@ -579,7 +579,7 @@ shared_ptr<Resource> Effect::Clone()
 {
 	printf("Clone effect: %s\n", mEffectName.c_str());
 
-	shared_ptr<Effect> retVal = std::make_shared<Effect>(mResourceType, mCreator, mResourceHandle, mName, mGroup);
+	shared_ptr<Effect> retVal = std::make_shared<Effect>(mCreator, mResourceHandle, mName, mGroup);
 	
 	retVal->mEffectName = mEffectName;
 
@@ -746,7 +746,7 @@ void Effect::UnloadImpl()
 
 shared_ptr<Resource> Effect::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 {
-	return std::make_shared<Effect>(RT_Effect, creator,handle, name, group);
+	return std::make_shared<Effect>(creator,handle, name, group);
 }
 
 

@@ -324,6 +324,9 @@
     <ClInclude Include="GUI\GuiSkin.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="GUI\Slider.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Context.cpp">
@@ -573,6 +576,9 @@
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\GuiSkin.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\Slider.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>

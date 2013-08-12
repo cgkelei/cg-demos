@@ -1,11 +1,14 @@
 #include <GUI/UIManager.h>
 #include <GUI/UIElement.h>
+#include <GUI/GuiSkin.h>
 #include <MainApp/Application.h>
 #include <MainApp/Window.h>
 #include <Graphics/Font.h>
+#include <Graphics/Material.h>
 #include <Graphics/SpriteBatch.h>
 #include <Input/InputSystem.h>
 #include <Input/InputEvent.h>
+#include <Resource/ResourceManager.h>
 #include <Core/Context.h>
 
 namespace RcEngine {
@@ -14,7 +17,7 @@ SINGLETON_DECL(UIManager)
 
 UIManager::UIManager()
 	: mDragElement(nullptr), mFocusElement(nullptr), mRootElement(nullptr), mMainWindow(nullptr),
-	  mInitialize(false)
+	  mInitialize(false), mDefaultSkin(nullptr)
 {
 
 }
@@ -22,6 +25,7 @@ UIManager::UIManager()
 UIManager::~UIManager()
 {
 	SAFE_DELETE(mRootElement);
+	SAFE_DELETE(mDefaultSkin);
 	mFocusElement = mDragElement = nullptr;
 }
 
@@ -36,7 +40,14 @@ void UIManager::OnGraphicsInitialize()
 		mRootElement = new UIElement();
 		mRootElement->SetSize(int2(mMainWindow->GetWidth(), mMainWindow->GetHeight()));
 
+		ResourceManager& resMan = ResourceManager::GetSingleton();
+
+		mFont = std::static_pointer_cast<Font>(resMan.GetResourceByName(RT_Font,"Consolas Regular", "General"));
+
 		mSpriteBatch = std::make_shared<SpriteBatch>();
+
+		mSpriteBatchFont = std::make_shared<SpriteBatch>( 
+			std::static_pointer_cast<Material>(resMan.GetResourceByName(RT_Material, "Font.material.xml", "General")) );
 
 		mInitialize = true;
 	}
@@ -44,9 +55,10 @@ void UIManager::OnGraphicsInitialize()
 
 void UIManager::OnGraphicsFinalize()
 {
-	mSpriteBatch = nullptr;
-	mFont = nullptr;
-	mSpriteBatchFont = nullptr;
+	mSpriteBatch.reset();
+	mFont.reset();
+	mSpriteBatchFont.reset();
+	SAFE_DELETE(mDefaultSkin);
 }
 
 void UIManager::OnWindowResize( uint32_t width, uint32_t height )
@@ -100,18 +112,27 @@ UIElement* UIManager::GetFocusableElement( UIElement* element )
 
 void UIManager::Update( float delta )
 {
-	/*bool mouseVisible = Context::GetSingleton().GetApplication().GetMainWindow()->IsMouseVisible();
-	
+	bool mouseVisible = mMainWindow->IsMouseVisible();
+
 	int2 mousePos = InputSystem::GetSingleton().GetMousePos();
 
 	if (mouseVisible)
 	{
-		UIElement* element = GetElementFromPoint(mousePos);
+		UIElement* element = GetElementAtPoint(mousePos);
 
-		if (element && element->IsEnabled())
-			element->OnMouseHover(element->ScreenToClient(mousePos));
-	}*/
+		if (element && !mDragElement)
+			element->OnHover(element->ScreenToClient(mousePos));			
+	}
 
+	Update(mRootElement, delta);
+}
+
+void UIManager::Update( UIElement* element, float dt )
+{
+	element->Update(dt);
+	
+	for (auto& child : element->GetChildren())
+		Update(child, dt);
 }
 
 bool UIManager::OnEvent( const InputEvent& event )
@@ -376,7 +397,7 @@ bool UIManager::HandleTextInput( uint16_t unicode )
 	return eventConsumed;
 }
 
-void UIManager::GetElementAtPoint(UIElement*& result, UIElement* current, const int2& pos )
+void UIManager::GetElementAtPoint( UIElement*& result, UIElement* current, const int2& pos )
 {
 	if (!current)
 		return;
@@ -398,7 +419,88 @@ void UIManager::GetElementAtPoint(UIElement*& result, UIElement* current, const 
 
 void UIManager::Render()
 {
+	if (mRootElement)
+	{
+		mSpriteBatchFont->Begin();
+		mSpriteBatch->Begin();
 
+		const int2& rootSize = mRootElement->GetSize();
+		RenderUIElement(mRootElement, IntRect(0, 0, rootSize.X(), rootSize.Y()));
+				
+		mSpriteBatch->End();
+		mSpriteBatchFont->End();
+		
+		mSpriteBatch->Flush();
+		mSpriteBatchFont->Flush();
+	}
+}
+
+void UIManager::RenderUIElement( UIElement* element, const IntRect& currentScissor )
+{
+	std::vector<UIElement*>& children = element->GetChildren();
+
+	// If parent container is not visible, not draw children
+	if (!element->IsVisible())
+		return;
+
+	// Draw container first
+	element->Draw(*mSpriteBatch, *mSpriteBatchFont);
+
+	for (UIElement* child : children)
+	{
+		RenderUIElement(child, currentScissor);
+	}	
+}
+
+GuiSkin* UIManager::GetDefaultSkin()
+{
+	// todo: xml gui skin
+	if (!mDefaultSkin)
+	{
+		mDefaultSkin = new GuiSkin;
+
+		mDefaultSkin->BackColor = ColorRGBA(1, 1, 1, 100.0f / 255);
+		mDefaultSkin->ForeColor = ColorRGBA(1, 1, 1, 200.0f / 255);
+
+		mDefaultSkin->mFont = mFont;
+		mDefaultSkin->mFontSize = 20;
+
+		ResourceManager& resMan = ResourceManager::GetSingleton();
+		mDefaultSkin->mSkinTexAtlas = std::static_pointer_cast<TextureResource>(
+			resMan.GetResourceByName(RT_Texture,"dxutcontrols.dds", "General"))->GetTexture();
+
+		// Button
+		for (int i = 0; i < UI_State_Count; ++i)
+		{
+			mDefaultSkin->Button.StyleStates[i].TexRegion = IntRect(0, 0, 136, 54);
+			mDefaultSkin->Button.StyleStates[i].TexColor = ColorRGBA(1, 1, 1, 150.0f / 255);
+		}
+
+		mDefaultSkin->Button.StyleStates[UI_State_Hover].TexRegion = IntRect(136, 0, 252 - 136, 54);
+
+		// Check Box
+		mDefaultSkin->CheckBox[0].TexRegion = IntRect(0, 54, 27, 27); 
+		mDefaultSkin->CheckBox[0].TexColor = ColorRGBA(1, 1, 1, 150.0f / 255);
+		mDefaultSkin->CheckBox[1].TexRegion = IntRect(27, 54, 27, 27);
+		mDefaultSkin->CheckBox[1].TexColor = ColorRGBA(1, 1, 1, 150.0f / 255);
+
+		// Slider 
+		mDefaultSkin->HSliderTrack.TexRegion.SetLeft(1);
+		mDefaultSkin->HSliderTrack.TexRegion.SetRight(93);
+		mDefaultSkin->HSliderTrack.TexRegion.SetTop(187);
+		mDefaultSkin->HSliderTrack.TexRegion.SetBottom(228);
+		mDefaultSkin->HSliderTrack.TexColor = ColorRGBA(1, 1, 1, 150.0f / 255);
+
+		mDefaultSkin->HSliderThumb.TexRegion.SetLeft(151);
+		mDefaultSkin->HSliderThumb.TexRegion.SetRight(192);
+		mDefaultSkin->HSliderThumb.TexRegion.SetTop(193);
+		mDefaultSkin->HSliderThumb.TexRegion.SetBottom(234);
+		mDefaultSkin->HSliderThumb.TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
+
+	}
+
+
+	return mDefaultSkin;
 }
 
 }

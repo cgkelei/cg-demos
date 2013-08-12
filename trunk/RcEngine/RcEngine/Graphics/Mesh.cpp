@@ -17,7 +17,7 @@
 
 namespace RcEngine {
 
-Mesh::Mesh( uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
+Mesh::Mesh(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 	: Resource(RT_Mesh, creator, handle, name, group), mSkeleton(nullptr)
 {
 
@@ -87,7 +87,7 @@ void Mesh::UnloadImpl()
 shared_ptr<Resource> Mesh::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 {
 	assert(creator != nullptr);
-	return std::make_shared<Mesh>(RT_Mesh, creator, handle, name, group);
+	return std::make_shared<Mesh>(creator, handle, name, group);
 }
 
 
