@@ -10,7 +10,11 @@ UIElement::UIElement()
 	  mPositionDirty(false), 
 	  mHovering(false), 
 	  mVisible(true), 
-	  mEnabled(false)
+	  mEnabled(true),
+	  mPosition(int2::Zero()),
+	  mSize(int2::Zero()),
+	  mMinSize(int2::Zero()), mMaxSize(INT_MAX, INT_MAX),
+	  mGuiSkin(nullptr)
 {
 
 
@@ -40,13 +44,14 @@ void UIElement::SetVisible( bool visible )
 void UIElement::SetSize( const int2& size )
 {
 	int2 validateSize;
-	validateSize.X() = Math<int2::value_type>::Clamp(size.X(), mMinSize.X(), mMaxSize.X());
-	validateSize.Y() = Math<int2::value_type>::Clamp(size.Y(), mMinSize.Y(), mMaxSize.Y());
+	validateSize.X() = Clamp(size.X(), mMinSize.X(), mMaxSize.X());
+	validateSize.Y() = Clamp(size.Y(), mMinSize.Y(), mMaxSize.Y());
 
 	if (mSize != validateSize)
 	{
 		mSize = validateSize;
 		MarkDirty();
+		UpdateRect();
 	}
 }
 
@@ -158,7 +163,7 @@ void UIElement::FlattenChildren( std::vector<UIElement*>& children) const
 	}
 }
 
-void UIElement::Draw( SpriteBatch& spriteBatch )
+void UIElement::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 {
 
 }
@@ -216,7 +221,7 @@ void UIElement::Update( float delta )
 
 }
 
-void UIElement::OnMouseHover( const int2& screenPos )
+void UIElement::OnHover( const int2& screenPos )
 {
 	mHovering = true;
 }
@@ -273,6 +278,16 @@ bool UIElement::OnMouseButtonRelease( const int2& screenPos, uint32_t button )
 bool UIElement::CanHaveFocus() const
 {
 	return false;
+}
+
+void UIElement::SetGuiSkin( GuiSkin* skin )
+{
+	mGuiSkin = skin;
+}
+
+void UIElement::UpdateRect()
+{
+
 }
 
 

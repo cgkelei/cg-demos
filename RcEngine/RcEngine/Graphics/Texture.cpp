@@ -18,8 +18,8 @@ Texture::~Texture()
 
 }
 
-TextureResource::TextureResource( ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
-	: Resource(resType, creator, handle, name, group), mTexture(nullptr)
+TextureResource::TextureResource(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
+	: Resource(RT_Texture, creator, handle, name, group), mTexture(nullptr)
 {
 
 }
@@ -46,7 +46,7 @@ void TextureResource::UnloadImpl()
 
 shared_ptr<Resource> TextureResource::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 {
-	return std::make_shared<TextureResource>(RT_Texture, creator, handle, name, group);
+	return std::make_shared<TextureResource>(creator, handle, name, group);
 }
 
 void _ApiExport SaveTexture( const shared_ptr<Texture> texture, const String& texName )

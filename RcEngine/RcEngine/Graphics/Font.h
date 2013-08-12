@@ -33,12 +33,12 @@ public:
 	typedef std::unordered_map<wchar_t, Glyph> FontMetrics;
 
 public:
-	Font(ResourceTypes resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
+	Font(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	~Font();
 
 	void DrawString(SpriteBatch& spriteBatch, std::wstring& text, int32_t fontSize, const float2& position, const ColorRGBA& color);
 	
-	//void DrawString(SpriteBatch& spriteBatch, std::wstring& text, int32_t fontSize, uint32_t alignment, const Rectanglef& region, const ColorRGBA& color);
+	void DrawString(SpriteBatch& spriteBatch, std::wstring& text, int32_t fontSize, uint32_t alignment, const Rectanglef& region, const ColorRGBA& color);
 
 	//void DrawStringWrap(SpriteBatch& spriteBatch, std::wstring& text, int32_t fontSize, int32_t maxWidth, const float2& position, const ColorRGBA& color);
 

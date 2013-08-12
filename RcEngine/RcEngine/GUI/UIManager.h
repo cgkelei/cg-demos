@@ -9,6 +9,7 @@ namespace RcEngine {
 
 class UIElement;
 class Cursor;
+class GuiSkin;
 union InputEvent;
 
 class _ApiExport UIManager : public Singleton<UIManager>
@@ -43,9 +44,6 @@ public:
 	 */
 	void OnWindowResize(uint32_t width, uint32_t height);
 
-	void SetFocusElement(UIElement* element);
-	UIElement* GetFocusElement()						{ return mFocusElement; }	
-
 	void Update(float delta);
 
 	void Render();
@@ -55,6 +53,18 @@ public:
 	 * return true if the event is consumed, false if need to pass to others.
 	 */
 	bool OnEvent(const InputEvent& event);
+	
+	void SetFocusElement(UIElement* element);
+	UIElement* GetFocusElement()						{ return mFocusElement; }	
+	
+	const shared_ptr<Font>& GetDefaultFont() const      { return mFont; }
+
+	GuiSkin* GetDefaultSkin();
+
+	/**
+	 * Get root UI Element
+	 */
+	UIElement* GetRoot() const { return mRootElement; }
 	
 private:
 
@@ -101,11 +111,16 @@ private:
 	 */
 	bool HandleMouseWheel(const int2& pos, int32_t delta);
 
+private:
 
 	UIElement* GetElementAtPoint(const int2& pos);
 	void GetElementAtPoint(UIElement*& result, UIElement* current, const int2& pos);
 
 	UIElement* GetFocusableElement(UIElement* element);
+
+	void RenderUIElement(UIElement* element, const IntRect& currentScissor);
+
+	void Update(UIElement* elem, float dt);
 
 protected:
 
@@ -115,11 +130,12 @@ protected:
 	UIElement* mRootElement;
 	UIElement* mDragElement;
 
+	shared_ptr<Font> mFont;
+	shared_ptr<SpriteBatch> mSpriteBatchFont;
 	shared_ptr<SpriteBatch> mSpriteBatch;
 
-	shared_ptr<SpriteBatch> mSpriteBatchFont;
-	shared_ptr<Font> mFont;
-
+	GuiSkin* mDefaultSkin;
+	
 	Cursor* mCursor;
 	
 	Window* mMainWindow;

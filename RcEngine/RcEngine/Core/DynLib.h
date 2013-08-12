@@ -25,7 +25,6 @@ const std::string ModuleNames[MT_Count] =
 	"D3D10RenderSystem_d",
 	"InputSystem_d"
 };
-#endif
 #else
 const std::string ModuleNames[MT_Count] =
 {
@@ -33,7 +32,8 @@ const std::string ModuleNames[MT_Count] =
 	"D3D10RenderSystem",
 	"InputSystem"
 };
-#  endif
+#endif
+#endif
 
 class DynLib
 {
@@ -44,11 +44,11 @@ public:
 	void Load();
 	void Unload();
 
-	const std::string& GetName() const { return mName; }
-	void* GetSymbol( const std::string& strName ) const throw();
+	const String& GetName() const { return mName; }
+	void* GetSymbol( const String& strName ) const throw();
 
 private:
-	std::string mName;
+	String mName;
 	HINSTANCE m_hInst;
 
 	std::string DynLibError();

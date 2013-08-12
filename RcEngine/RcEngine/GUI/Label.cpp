@@ -1,4 +1,5 @@
 #include <GUI/Label.h>
+#include <GUI/UIManager.h>
 #include <Graphics/SpriteBatch.h>
 #include <Graphics/Font.h>
 #include <Core/Exception.h>
@@ -6,9 +7,16 @@
 namespace RcEngine {
 
 Label::Label()
-	: mWordWrap(false)
+	: mTextAlignment(AlignCenter)
 {
 
+}
+
+Label::Label( const int2& pos, const std::wstring& text, Alignment textAlign )
+{
+	mTextAlignment = textAlign;
+	SetPosition(pos);
+	SetText(text);
 }
 
 Label::~Label()
@@ -27,7 +35,7 @@ void Label::SetFont( const shared_ptr<Font>& font, int32_t fontSize )
 	}
 }
 
-void Label::SetText( const std::wstring& text )
+void Label::SetText( const std::wstring& text, Alignment textAlign )
 {
 	mText = text;
 	UpdateText();
@@ -214,11 +222,18 @@ void Label::SetWordWrap( bool enable )
 
 void Label::UpdateText()
 {
+	if (!mFont)
+	{
+		mFont = UIManager::GetSingleton().GetDefaultFont();
+		mFontSize = 30;
+	}
+
 	const float scale = float(mFontSize) / mFont->GetFontSize();
 	const float rowHeight = mFont->GetRowHeight() * scale;
 
-	mRowWidths.resize(1, 0);
-
+	mRowWidths.resize(0);
+	mRowWidths.push_back(0);
+	
 	mPrintText = mText;
 
 	// Compute width and height to draw this text
@@ -233,7 +248,7 @@ void Label::UpdateText()
 	}
 }
 
-float GetRowStartPos(float rowWidth, float maxWidth, uint32_t alignment)
+static float GetRowStartPos(float rowWidth, float maxWidth, uint32_t alignment)
 {
 	if (alignment & AlignLeft)
 		return 0;
@@ -256,26 +271,36 @@ void Label::Update( float delta )
 	
 }
 
-void Label::Draw( SpriteBatch& spriteBatch )
+void Label::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 {
-	if (mFont)
+	if (!mFont)
+		return;
+
+	const shared_ptr<Texture>& fontTexture = mFont->GetFontTexture();
+
+	const float scale = float(mFontSize) / mFont->GetFontSize();
+	const float rowHeight = mFont->GetRowHeight() * scale;
+
+	float width = *std::max_element(mRowWidths.begin(), mRowWidths.end());
+	float heigh = mRowWidths.size() * rowHeight;
+
+	size_t rowIdx = 0;
+
+	const int2& ScreenPos = GetScreenPosition();
+	const int2& ScreenSize = GetSize();	
+
+	if (mSize.X() == 0 || mSize.Y() == 0)
+	{		
+		float2 destPos((float)ScreenPos.X(), (float)ScreenPos.Y() + rowHeight); 
+		mFont->DrawString(spriteBatchFont, mText, mFontSize, destPos, ColorRGBA(1, 0, 0, 1));
+	}
+	else
 	{
-		const float scale = float(mFontSize) / mFont->GetFontSize();
-		const float rowHeight = mFont->GetRowHeight() * scale;
-
-		float width = *std::max_element(mRowWidths.begin(), mRowWidths.end());
-		float heigh = mRowWidths.size() * rowHeight;
-
-		size_t rowIdx = 0;
-		
-		const int2& ScreenPos = GetScreenPosition();
-		const int2& ScreenSize = GetSize();
-
 		float x = (float)ScreenPos.X() + GetRowStartPos(mRowWidths[rowIdx], (float)ScreenSize.X(), mTextAlignment);
 		float y = (float)ScreenPos.Y();
 
 		Rectanglef region((float)ScreenPos.X(), (float)ScreenPos.Y(), (float)ScreenSize.X(), (float)ScreenSize.Y());
-		
+
 		if (mTextAlignment & AlignTop)
 			y += rowHeight;
 		else if (mTextAlignment & AlignCenter)
@@ -284,46 +309,47 @@ void Label::Draw( SpriteBatch& spriteBatch )
 			y +=  (ScreenSize.Y() - heigh) + rowHeight;
 		else
 			y +=  rowHeight;
-		
+
 		for (size_t i = 0; i < mPrintText.length(); ++i)
 		{
 			wchar_t ch = mPrintText[i];
-		
+
 			if (ch == L'\n')
 			{
 				y += rowHeight;
-		
+
 				rowIdx++;
 				x = (float)ScreenPos.X() + GetRowStartPos(mRowWidths[rowIdx], (float)ScreenSize.X(), mTextAlignment);
 			}
 			else
 			{
 				const Font::Glyph& glyph = mFont->GetGlyphInfo(ch);
-		
+
 				float ch_x = x + glyph.OffsetX * scale;
 				float ch_y = y - glyph.OffsetY * scale;
-		
+
 				float ch_width = glyph.Width * scale;
 				float ch_height = glyph.Height* scale;
-		
+
 				x += glyph.Advance * scale;
-		
-				// Out of region
-				if ( (ch_x + ch_width <= region.Left()) ||
-					(ch_x >= region.Right())           ||
-					(ch_y >= region.Bottom()) ||
-					(ch_y + ch_height <= region.Top()) )
-					continue;
-		
+
+				//Out of region
+				bool flag[] = { (ch_x + ch_width <= region.Left()), (ch_x >= region.Right()),
+				                (ch_y >= region.Bottom()), (ch_y + ch_height <= region.Top())  };
+
+				if ( (ch_x + ch_width <= region.Left()) || (ch_x >= region.Right())  ||
+					 (ch_y >= region.Bottom()) || (ch_y + ch_height <= region.Top()) )
+					 continue;
+
 				IntRect sourceRect;
 				Rectanglef destRect;
-		
+
 				if (ch_x < region.Left())
 				{
 					float ratio = (region.Left() - ch_x) / ch_width;
 					sourceRect.X = glyph.SrcX + int(glyph.Width * ratio);
 					sourceRect.Width = int(glyph.Width * (1 - ratio));
-		
+
 					destRect.X = region.Left();
 					destRect.Width = ch_height * (1 - ratio);
 				}
@@ -332,7 +358,7 @@ void Label::Draw( SpriteBatch& spriteBatch )
 					float ratio = (ch_x + ch_width  - region.Right()) / ch_width;
 					sourceRect.X = glyph.SrcX;
 					sourceRect.Width = int(glyph.Width * (1 - ratio));
-		
+
 					destRect.X = ch_x;
 					destRect.SetRight(region.Right());
 				}
@@ -340,28 +366,28 @@ void Label::Draw( SpriteBatch& spriteBatch )
 				{
 					sourceRect.X = glyph.SrcX;
 					sourceRect.Width = glyph.Width;
-		
+
 					destRect.X = ch_x;
 					destRect.Width = ch_width;
 				}
-		
+
 				if (ch_y < region.Top())
 				{
 					float ratio = (region.Top() - ch_y) / ch_height;
-		
+
 					sourceRect.Y = glyph.SrcY + int(glyph.Height * ratio);
 					sourceRect.Height = int(glyph.Height * (1 - ratio));
-		
+
 					destRect.Y = region.Top();
 					destRect.Height = ch_height * (1 - ratio);
 				}
 				else if (ch_y + ch_height > region.Bottom())
 				{
 					float ratio = (ch_y + ch_height - region.Bottom()) / ch_height;
-		
+
 					sourceRect.Y = glyph.SrcY;
 					sourceRect.Height = int(glyph.Height * (1 - ratio));
-		
+
 					destRect.Y = ch_y;
 					destRect.SetBottom( region.Bottom() );
 				}
@@ -369,15 +395,18 @@ void Label::Draw( SpriteBatch& spriteBatch )
 				{
 					sourceRect.Y = glyph.SrcY;
 					sourceRect.Height = glyph.Height;
-		
+
 					destRect.Y = ch_y;
 					destRect.Height = ch_height;
 				}
-		
-				spriteBatch.Draw(mFont->GetFontTexture(), destRect, &sourceRect, ColorRGBA(0, 0, 0, 1));
+
+				spriteBatchFont.Draw(fontTexture, destRect, &sourceRect, ColorRGBA(1, 0, 0, 1));
 			}
 		}
 	}
+	
+	// Reset hovering for next frame
+	mHovering = false;
 }
 
 }

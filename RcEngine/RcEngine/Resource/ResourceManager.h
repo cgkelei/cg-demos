@@ -62,9 +62,9 @@ protected:
 
 protected:	
 	uint32_t mNextHandle;
-	std::map< int, ResourceRegEntry >  mRegistry;  // Registry of resource type
+	std::map<int, ResourceRegEntry>  mRegistry;  // Registry of resource type
 	std::map<ResourceHandle, shared_ptr<Resource> > mResourcesByHandle;
-	unordered_map<String, ResourceGroup > mResourcesWithGroup;
+	unordered_map<String, ResourceGroup> mResourcesWithGroup;
 	
 };
 

@@ -18,7 +18,8 @@ enum ResourceTypes
 	RT_Animation,
 	RT_Texture,
 	RT_Pipeline,
-	RT_Font
+	RT_Font,
+	RT_GuiSkin
 };
 
 class _ApiExport Resource

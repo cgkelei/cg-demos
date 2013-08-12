@@ -1,11 +1,14 @@
 #include <GUI/Button.h>
+#include <GUI/UIManager.h>
+#include <Graphics/SpriteBatch.h>
+#include <Graphics/Font.h>
 #include <Input/InputSystem.h>
 
 namespace RcEngine {
 
 Button::Button()
-	: mPressedOffset(int2::Zero()),
-	  mHoverOffset(int2::Zero())
+	: mPressedOffset(1, 2),
+	  mHoverOffset(-1, -2)
 {
 
 }
@@ -67,15 +70,47 @@ bool Button::OnMouseButtonRelease( const int2& screenPos, uint32_t button )
 	return false;
 }
 
-void Button::Draw( SpriteBatch& spriteBatch )
+void Button::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 {
-	int2 offset = int2::Zero();
+	if (!mVisible)
+		return;
 
-	if (mHovering)
-		offset += mHoverOffset;
+	if (!mGuiSkin)
+		SetGuiSkin( UIManager::GetSingleton().GetDefaultSkin() );
 
-	if (mPressed)
-		offset += mPressedOffset;	
+	UIElementState uiState = UI_State_Normal;
+	
+	float offsetX = 0.0f;
+	float offsetY = 0.0f;
+
+	if (mVisible == false)
+		uiState = UI_State_Hidden;
+	else if (mEnabled == false)
+		uiState = UI_State_Disable;
+	else if (mPressed)
+	{
+		uiState = UI_State_Pressed;
+
+		offsetX += mPressedOffset.X();
+		offsetY += mPressedOffset.Y();
+	}
+	else if (mHovering)
+	{
+		uiState = UI_State_Hover;
+
+		offsetX += mHoverOffset.X();
+		offsetY += mHoverOffset.Y();
+	}
+	else if ( HasFocus() )
+		uiState = UI_State_Focus;
+	
+	int2 screenPos = GetScreenPosition();
+
+	Rectanglef btnRegion(screenPos.X() + offsetX, screenPos.Y() + offsetY, (float)mSize.X(), (float)mSize.Y());
+	spriteBatch.Draw(mGuiSkin->mSkinTexAtlas, btnRegion, &mGuiSkin->Button.StyleStates[uiState].TexRegion, mGuiSkin->Button.StyleStates[uiState].TexColor);
+
+	if (mText.length())
+		mGuiSkin->mFont->DrawString(spriteBatchFont, mText, mGuiSkin->mFontSize, AlignCenter, btnRegion, mGuiSkin->ForeColor);
 
 	// Reset hovering for next frame
 	mHovering = false;

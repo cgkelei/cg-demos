@@ -212,8 +212,8 @@ void UIWindow::ValidatePosition()
 	int2 position = GetPosition();
 	int2 halfSize = GetSize() / 2;
 
-	position.X() = Math<int2::value_type>::Clamp(position.X(), -halfSize.X(), parentSize.X() - halfSize.X());
-	position.Y() = Math<int2::value_type>::Clamp(position.X(), -halfSize.Y(), parentSize.Y() - halfSize.Y());
+	position.X() = Clamp(position.X(), -halfSize.X(), parentSize.X() - halfSize.X());
+	position.Y() = Clamp(position.X(), -halfSize.Y(), parentSize.Y() - halfSize.Y());
 
 	SetPosition(position);
 }

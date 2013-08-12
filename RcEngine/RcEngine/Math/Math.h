@@ -1,5 +1,6 @@
 #ifndef Math_h__
 #define Math_h__
+
 #include <cfloat>
 #include <math.h>
 
@@ -37,14 +38,12 @@ public:
 	static const Real SQRT_3;
 	static const Real INV_SQRT_3;
 
-
-	static Real Clamp(Real val, Real min, Real max);
 	static Real ToDegree(Real radian)	{ return radian * RAD_TO_DEG;}
 	static Real ToRadian(Real degree)	{ return degree * DEG_TO_RAD; }
 };
 
 template <typename Real>
-Real Math<Real>::Clamp( Real val, Real min, Real max )
+Real Clamp( Real val, Real min, Real max )
 {
 	if (val < min)	return min;
 	if (val > max)  return max;

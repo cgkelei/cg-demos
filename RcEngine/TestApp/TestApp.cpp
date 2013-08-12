@@ -36,6 +36,11 @@
 #include "Core/XMLDom.h"
 #include "Core/Utility.h"
 #include "GUI/UIManager.h"
+#include "GUI/Label.h"
+#include "GUI/Slider.h"
+#include "GUI/CheckBox.h"
+#include "GUI/ScrollBar.h"
+#include "GUI/Button.h"
 #include "Core/Variant.h"
 #include "Core/StringHash.h"
 
@@ -57,6 +62,8 @@ TestApp::~TestApp(void)
 
 void TestApp::Initialize()
 {
+			printf("Ok\n");
+
 	InitGUI();
 
 	Camera* camera = RcEngine::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
@@ -69,13 +76,6 @@ void TestApp::Initialize()
 	//mCameraControler = new ModelViewerCameraControler();
 	//mCameraControler->SetWindowSize(GetMainWindow()->GetWidth(), GetMainWindow()->GetHeight());
 	mCameraControler->AttachCamera(camera);
-}
-
-void TestApp::InitGUI()
-{
-	UIManager& uiMan = UIManager::GetSingleton();
-
-
 }
 
 //void TestApp::LoadContent()
@@ -170,7 +170,6 @@ void TestApp::UnloadContent()
 
 }
 
-
 void TestApp::Render()
 {
 	RenderDevice& renderDevice = Context::GetSingleton().GetRenderDevice();
@@ -183,21 +182,21 @@ void TestApp::Render()
 	float clr = (float)169/255;
 	currentFrameBuffer->Clear(CF_Color | CF_Depth |CF_Stencil, RcEngine::ColorRGBA(clr, clr, clr, 1.0f), 1.0f, 0);
 	
-	Rectanglef region(100, 100, 300, 300);
+	//Rectanglef region(100, 100, 300, 300);
 
-	mSpriteBatchFont->Begin();
+	//mSpriteBatchFont->Begin();
 
-	wchar_t buffer[100];
-	int cx = swprintf ( buffer, 100, L"FPS: %d", mFramePerSecond );
-	mFont->DrawString(*mSpriteBatchFont, std::wstring(buffer, cx), 30, float2(20, 580), ColorRGBA(1, 0, 0, 1));
+	//wchar_t buffer[100];
+	//int cx = swprintf ( buffer, 100, L"FPS: %d", mFramePerSecond );
+	//mFont->DrawString(*mSpriteBatchFont, std::wstring(buffer, cx), 30, float2(20, mMainWindow->GetHeight() - 30), ColorRGBA(1, 0, 0, 1));
 
-	std::wstring wstr = L"mFont->DrawString(*mSpriteBatch,\n std::wstring(buffer, cx), 30,\n float2(20, 580), ColorRGBA(0, 0, 0, 1));";
-	
-	//mFont->DrawStringWrap(*mSpriteBatch, wstr, 30, 500, float2(20, 200), ColorRGBA(0, 0, 0, 1));
-	//mFont->DrawString(*mSpriteBatchFont, wstr, 15, Font::AlignLeft | Font::AlignTop, region, ColorRGBA(0, 0, 0, 1));
+	//std::wstring wstr = L"mFont->DrawString(*mSpriteBatch,\n std::wstring(buffer, cx), 30,\n float2(20, 580), ColorRGBA(0, 0, 0, 1));";
+	//
+	////mFont->DrawStringWrap(*mSpriteBatch, wstr, 30, 500, float2(20, 200), ColorRGBA(0, 0, 0, 1));
+	////mFont->DrawString(*mSpriteBatchFont, wstr, 15, Font::AlignLeft | Font::AlignTop, region, ColorRGBA(0, 0, 0, 1));
 
-	mSpriteBatchFont->End();
-	mSpriteBatchFont->Flush();
+	//mSpriteBatchFont->End();
+	//mSpriteBatchFont->Flush();
 
 	//mSpriteBatch->Begin();
 	//mSpriteBatch->Draw(mTexture, region, ColorRGBA(1, 1, 1, 1));
@@ -209,16 +208,13 @@ void TestApp::Render()
 	scenenMan.UpdateRenderQueue(currentFrameBuffer->GetCamera(), RO_StateChange);
 	scenenMan.RenderScene();
 
-	// Render UI
-	UIManager::GetSingleton().Render();
-
+	DrawUI();
 
 	// Swap Buffer
 	currentFrameBuffer->SwapBuffers();
 
 	CalculateFrameRate();
 }
-
 
 void TestApp::Update( float deltaTime )
 {
@@ -227,6 +223,49 @@ void TestApp::Update( float deltaTime )
 
 	//SceneNode* dwarfNode = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf");
 	//dwarfNode->SetRotation(QuaternionFromRotationMatrix(mCameraControler->GetWorldMatrix()));
+}
+
+void TestApp::InitGUI()
+{
+	UIElement* rootElem = UIManager::GetSingleton().GetRoot();
+
+	mFPSLabel = new Label();
+	mFPSLabel->SetPosition(int2(20, 100));
+	mFPSLabel->SetSize(int2(100, 40));
+	mFPSLabel->SetFont(UIManager::GetSingleton().GetDefaultFont(), 20);
+	rootElem->AddChild( mFPSLabel );	
+
+	mButton = new Button;
+	mButton->SetPosition(int2(20, 150));
+	mButton->SetSize(int2(100, 40));
+	mButton->SetText(L"Button");
+	mButton->EventButtonClicked.bind(this, &TestApp::ButtonClicked);
+	rootElem->AddChild( mButton );	
+
+	mCheckBox = new CheckBox;
+	mCheckBox->SetPosition(int2(20, 200));
+	mCheckBox->SetSize(int2(150, 27));
+	mCheckBox->SetText(L"CheckBox");
+	mCheckBox->EventStateChange.bind(this, &TestApp::CheckBoxToggle);
+	rootElem->AddChild(mCheckBox);
+
+	mSlider = new Slider();
+	mSlider->SetOrientation(Slider::Horizontal);
+	mSlider->SetPosition(int2(20, 250));
+	mSlider->SetSize(int2(100, 27));
+	mSlider->SetValue(50);
+	mSlider->EventValueChange.bind(this, &TestApp::SliderValueChange);
+	rootElem->AddChild( mSlider );	
+}
+
+void TestApp::DrawUI()
+{
+	wchar_t buffer[100];
+	int cx = swprintf ( buffer, 100, L"FPS: %d", mFramePerSecond );
+	mFPSLabel->SetText(buffer);
+
+	// Render UI
+	UIManager::GetSingleton().Render();
 }
 
 void TestApp::CalculateFrameRate()
@@ -244,7 +283,23 @@ void TestApp::CalculateFrameRate()
 	}
 }
 
+void TestApp::SliderValueChange( int32_t value )
+{
+	printf("Clicked\n");
+}
 
+void TestApp::ButtonClicked()
+{
+	printf("Clicked\n");
+}
+
+void TestApp::CheckBoxToggle( bool checked )
+{
+	if (checked)
+		printf("Checked\n");
+	else
+		printf("Unchecked\n");
+}	
 
 
 int32_t main()

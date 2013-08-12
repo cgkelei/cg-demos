@@ -25,7 +25,12 @@ protected:
 	void CalculateFrameRate();
 
 	void InitGUI();
+	void DrawUI();
 
+protected:
+	void SliderValueChange(int32_t value);
+	void ButtonClicked();
+	void CheckBoxToggle(bool checked);
 
 private:
 	shared_ptr<Effect> mEffect;
@@ -43,7 +48,13 @@ private:
 	shared_ptr<Font> mFont;
 	FPSCameraControler* mCameraControler;
 	int mFramePerSecond;
-	
+
 	//ModelViewerCameraControler* mCameraControler;
+
+
+	Label* mFPSLabel;
+	Slider* mSlider;
+	Button* mButton;
+	CheckBox* mCheckBox;
 };
 

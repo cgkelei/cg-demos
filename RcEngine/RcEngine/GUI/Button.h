@@ -5,9 +5,10 @@
 
 namespace RcEngine {
 
-class _ApiExport Button : UIElement
+class _ApiExport Button : public UIElement
 {
 public:
+	// Button clicked event delegate
 	typedef fastdelegate::FastDelegate0<> ButtonClickedEventHandler;
 
 public:
@@ -20,10 +21,13 @@ public:
 	virtual bool CanHaveFocus() const;
 
 	virtual void Update(float delta);
-	virtual void Draw(SpriteBatch& spriteBatch);
+	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 
 	void SetPressedOffset(const int2& offset)	{ mPressedOffset; }
 	const int2& GetPressedOffset() const        { return mPressedOffset; }
+
+	void SetText(const std::wstring& txt)		{ mText = txt; }
+	const std::wstring& GetText() const         { return mText; }
 
 private:
 
@@ -38,6 +42,8 @@ protected:
 
 	int2 mPressedOffset;
 	int2 mHoverOffset;
+
+	std::wstring mText;
 
 };
 

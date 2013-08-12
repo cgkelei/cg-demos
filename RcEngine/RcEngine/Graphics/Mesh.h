@@ -25,7 +25,7 @@ class MeshPart;
 class _ApiExport Mesh : public Resource
 {
 public:
-	Mesh(uint32_t resType, ResourceManager* creator, ResourceHandle handle, const String& name, const String& group );
+	Mesh(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group );
 	virtual ~Mesh();
 
 	const String& GetName() const								{ return mName; }

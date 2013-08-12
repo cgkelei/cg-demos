@@ -6,34 +6,12 @@
 #include <Math/Vector.h>
 #include <Math/Rectangle.h>
 #include <Math/ColorRGBA.h>
+#include <GUI/GuiSkin.h>
 
 namespace RcEngine {
 
 class Cursor;
-
-enum Alignment
-{
-	AlignLeft     = 1UL << 0,
-	AlignRight    = 1UL << 1,
-	AlignHCenter  = 1UL << 2,
-
-	AlignTop      = 1UL << 3,
-	AlignBottom   = 1UL << 4,
-	AlignVCenter  = 1UL << 5,
-
-	AlignCenter   = AlignHCenter | AlignVCenter
-};
-
-enum UIElementState
-{
-	UI_State_Normal = 0,
-	UI_State_Disable,
-	UI_State_Hidden,
-	UI_State_Focus,
-	UI_State_Selected,
-	UI_State_MouseOver,
-	UI_State_Pressed,
-};
+class GuiSkin;
 
 class _ApiExport UIElement
 {
@@ -42,11 +20,12 @@ public:
 	virtual ~UIElement();
 
 	virtual void Update(float delta);
-	virtual void Draw(SpriteBatch& spriteBatch);
+	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 
+	// Events
 	virtual void OnResize();
 
-	virtual void OnMouseHover(const int2& screenPos);
+	virtual void OnHover(const int2& screenPos);
 	
 	virtual void OnDragBegin(const int2& screenPos, uint32_t buttons);
 	virtual void OnDragMove(const int2& screenPos, uint32_t buttons);
@@ -54,12 +33,10 @@ public:
 
 	virtual bool OnMouseButtonPress(const int2& screenPos, uint32_t button);
 	virtual bool OnMouseButtonRelease(const int2& screenPos, uint32_t button);
-	
 	virtual bool OnMouseWheel( int32_t delta );
 
 	virtual bool OnKeyPress(uint16_t key);
 	virtual bool OnKeyRelease(uint16_t key);
-
 	virtual bool OnTextInput(uint16_t unicode);
 
 	virtual bool CanHaveFocus() const;
@@ -72,6 +49,10 @@ public:
 	
 	int2 GetScreenPosition();
 
+	/**
+	 * Set control size, if this is first time call SetSize, make sure
+	 * control position has been set already. 
+	 */
 	void SetSize(const int2& size);
 	const int2& GetSize() const					{ return mSize; }
 
@@ -120,15 +101,24 @@ public:
 
 	void BringToFront();
 
+	void SetGuiSkin(GuiSkin* skin);
+	GuiSkin* GetGuiSkin() const				{ return mGuiSkin; }
+
 protected:
 	void MarkDirty();
+
+	virtual void UpdateRect();
 
 protected:
 
 	String mName;
 
+	std::wstring mToolTipText;
+
 	UIElement* mParent;
 	std::vector<UIElement*> mChildren;
+
+	GuiSkin* mGuiSkin;
 
 	bool mHovering;
 	bool mVisible;
@@ -143,11 +133,9 @@ protected:
 	int2 mMinSize;
 	int2 mMaxSize;
 
-	std::wstring mToolTipText;
+	IntRect mClipBorder;
 
 	float mOpacity;
-
-	IntRect mClipBorder;
 };
 
 
