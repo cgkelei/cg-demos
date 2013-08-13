@@ -116,7 +116,10 @@ void Button::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	mHovering = false;
 }
 
+void Button::SetGuiStyle( UIElementState uiState, const GuiSkin::SytleImage& styleImage )
+{
 
+}
 
 
 }

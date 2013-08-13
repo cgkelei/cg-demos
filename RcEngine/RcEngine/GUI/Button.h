@@ -8,8 +8,11 @@ namespace RcEngine {
 class _ApiExport Button : public UIElement
 {
 public:
-	// Button clicked event delegate
+	/**
+	 * Button clicked event.
+	 */
 	typedef fastdelegate::FastDelegate0<> ButtonClickedEventHandler;
+	ButtonClickedEventHandler EventButtonClicked;
 
 public:
 	Button();
@@ -23,8 +26,13 @@ public:
 	virtual void Update(float delta);
 	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 
-	void SetPressedOffset(const int2& offset)	{ mPressedOffset; }
+	virtual void SetGuiStyle(UIElementState uiState, const GuiSkin::SytleImage& styleImage);
+
+	void SetPressedOffset(const int2& offset)	{ mPressedOffset = offset; }
 	const int2& GetPressedOffset() const        { return mPressedOffset; }
+
+	void SetHoverOffset(const int2& offset)		{ mHoverOffset = offset; }
+	const int2& GetHoverOffset() const			{ return mHoverOffset; }
 
 	void SetText(const std::wstring& txt)		{ mText = txt; }
 	const std::wstring& GetText() const         { return mText; }
@@ -32,9 +40,6 @@ public:
 private:
 
 	void SetPressed(bool pressed);
-
-public:
-	ButtonClickedEventHandler EventButtonClicked;
 
 protected:
 
@@ -45,6 +50,7 @@ protected:
 
 	std::wstring mText;
 
+	GuiSkin::GuiStyle mGuiStyle;
 };
 
 

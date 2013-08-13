@@ -6,9 +6,10 @@ namespace RcEngine {
 
 Slider::Slider()
 	: mMinimum(0), 
-	  mMaximum(100),
-	  mValue(0),
-	  mPressed(false)
+	mMaximum(100),
+	mValue(0),
+	mDragSlider(false),
+	mThumbHovering(false)
 {
 
 }
@@ -32,6 +33,10 @@ void Slider::OnResize()
 	UpdateSlider();
 }
 
+void Slider::SetOrientation( UIOrientation orient )
+{
+	mOrientation = orient;
+}
 
 void Slider::UpdateSlider()
 {
@@ -39,15 +44,15 @@ void Slider::UpdateSlider()
 
 	float ratio = float(mValue - mMinimum) / (mMaximum - mMinimum);
 
-	if (mOrientation == Horizontal)
-	{
-		mThumbRegion.Width = mThumbRegion.Height = mSize.Y(); 
+	if (mOrientation == UI_Horizontal)
+	{		
+		mThumbRegion.Width = mThumbRegion.Height = mSize.Y();
 		mThumbRegion.X = int32_t( screenPos.X() + ratio * ( mSize.X() - mThumbRegion.Width ) );
 		mThumbRegion.Y = screenPos.Y(); 
 	}
 	else
 	{
-		mThumbRegion.Width = mThumbRegion.Height = mSize.X(); 
+		mThumbRegion.Width = mThumbRegion.Height = mSize.X();
 		mThumbRegion.X = screenPos.X(); 
 		mThumbRegion.Y = int32_t( screenPos.Y() + ratio * ( mSize.Y() - mThumbRegion.Height ) );
 	}
@@ -55,7 +60,7 @@ void Slider::UpdateSlider()
 
 void Slider::UpdateRect()
 {
-	int2 screenPos = GetScreenPosition();
+	UpdateSlider();
 }
 
 void Slider::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
@@ -66,62 +71,61 @@ void Slider::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	if (!mGuiSkin)
 		SetGuiSkin( UIManager::GetSingleton().GetDefaultSkin() );
 
-	UIElementState uiState = UI_State_Normal;
+	UIElementState uiThumbState = UI_State_Normal;
 
+	// Thumb don't have focus state
 	if (mVisible == false)
-		uiState = UI_State_Hidden;
+		uiThumbState = UI_State_Hidden;
 	else if (mEnabled == false)
-		uiState = UI_State_Disable;
-	else if (mPressed)
-		uiState = UI_State_Pressed;
-	else if (mHovering)
-		uiState = UI_State_Hover;
-	else if (HasFocus())
-		uiState = UI_State_Focus;
+		uiThumbState = UI_State_Disable;
+	else if (mDragSlider)
+		uiThumbState = UI_State_Pressed;
+	else if (mThumbHovering)
+		uiThumbState = UI_State_Hover;
+	else 
+		uiThumbState = UI_State_Normal;
 
 	int2 screenPos = GetScreenPosition();
+
+	const GuiSkin::SytleImage& stateStyle = mGuiSkin->SliderThumb[mOrientation].StyleStates[uiThumbState];
 
 	Rectanglef trackRegion, thumbRegion;
 
 	// Draw order: track, thumb
-
-	if (mOrientation == Horizontal)
+	if (mOrientation == UI_Horizontal)
 	{
 		float midY = screenPos.Y() + mSize.Y() * 0.5f;
 
 		trackRegion.X = (float)screenPos.X();
-		trackRegion.Y = midY - mGuiSkin->HSliderTrack.TexRegion.Height * 0.5f;
+		trackRegion.Y = midY - mGuiSkin->HSliderTrack[0].TexRegion.Height * 0.5f;
 		trackRegion.Width = (float)mSize.X();
-		trackRegion.Height = (float)mGuiSkin->HSliderTrack.TexRegion.Height;
-		
-		float ratio = float(mValue - mMinimum) / (mMaximum - mMinimum);
-
-		thumbRegion.X = screenPos.X() + ratio * ( mSize.X() - mGuiSkin->HSliderThumb.TexRegion.Width );
-		thumbRegion.Y = (float)screenPos.Y(); 
-
-		thumbRegion.Width = (float)mSize.Y(); 
-		thumbRegion.Height = (float)mSize.Y();
+		trackRegion.Height = (float)mGuiSkin->HSliderTrack[0].TexRegion.Height;	
 	}
 	else
 	{
 		float midX = screenPos.X() + mSize.X() * 0.5f;
 
-		trackRegion.X = midX - mGuiSkin->HSliderTrack.TexRegion.Width * 0.5f;  
+		trackRegion.X = midX - mGuiSkin->HSliderTrack[0].TexRegion.Width * 0.5f;  
 		trackRegion.Y = (float)screenPos.Y();
-		trackRegion.Width = (float)mGuiSkin->HSliderTrack.TexRegion.Width;
+		trackRegion.Width = (float)mGuiSkin->HSliderTrack[0].TexRegion.Width;
 		trackRegion.Height = (float)mSize.Y();
 
 		float ratio = float(mValue - mMinimum) / (mMaximum - mMinimum);
-
-		thumbRegion.X = (float)screenPos.X();
-		thumbRegion.Y = screenPos.Y() + ratio * ( mSize.Y() - mGuiSkin->HSliderThumb.TexRegion.Height ); 
-
-		thumbRegion.Width = (float)mSize.X(); 
-		thumbRegion.Height = (float)mSize.X();
 	}
+	
+	thumbRegion.X = (float)mThumbRegion.X;
+	thumbRegion.Y = (float)mThumbRegion.Y;
+	thumbRegion.Width = (float)mThumbRegion.Width;
+	thumbRegion.Height = (float)mThumbRegion.Height;
 
-	spriteBatch.Draw(mGuiSkin->mSkinTexAtlas, trackRegion, &mGuiSkin->HSliderTrack.TexRegion, mGuiSkin->HSliderTrack.TexColor);	
-	spriteBatch.Draw(mGuiSkin->mSkinTexAtlas, thumbRegion, &mGuiSkin->HSliderThumb.TexRegion, mGuiSkin->HSliderThumb.TexColor);	
+	// Track
+	if (mDragSlider || mHovering)
+		spriteBatch.Draw(mGuiSkin->mSkinTexAtlas, trackRegion, &mGuiSkin->HSliderTrack[1].TexRegion, mGuiSkin->HSliderTrack[1].TexColor);	
+	else
+		spriteBatch.Draw(mGuiSkin->mSkinTexAtlas, trackRegion, &mGuiSkin->HSliderTrack[0].TexRegion, mGuiSkin->HSliderTrack[0].TexColor);	
+
+	// Thumb
+	spriteBatch.Draw(mGuiSkin->mSkinTexAtlas, thumbRegion, &stateStyle.TexRegion, stateStyle.TexColor);	
 
 	mHovering = false;
 	mThumbHovering = false;
@@ -139,6 +143,7 @@ void Slider::OnDragBegin( const int2& screenPos, uint32_t buttons )
 
 	// Test if in thumb region
 	mDragSlider = mThumbRegion.Contains(screenPos.X(), screenPos.Y());
+	mDragBeginValue = mValue;
 }
 
 void Slider::OnDragMove( const int2& screenPos, uint32_t buttons )
@@ -146,23 +151,14 @@ void Slider::OnDragMove( const int2& screenPos, uint32_t buttons )
 	if (!mDragSlider)
 		return; 
 
-	int32_t newValue;
 	int2 delta = screenPos - mDragBeginPos;
 	
-	if (mOrientation == Horizontal)
-	{
-		int32_t newKnobX = Clamp(mThumbRegion.X + delta.X(), 0, mSize.X() - mThumbRegion.Width);
-		
-		float ratio = (float)newKnobX / float( mSize.X() - mThumbRegion.Width );
-		newValue = mMinimum + int32_t( (mMaximum - mMinimum) * ratio );
-	}
-	else
-	{
-		int32_t newKnobY = Clamp(mThumbRegion.Y + delta.Y(), 0, mSize.Y() - mThumbRegion.Height);
+	int32_t newValue = mDragBeginValue;
 
-		float ratio = (float)newKnobY / float( mSize.Y() - mThumbRegion.Height );
-		newValue = int32_t( mMinimum + (mMaximum - mMinimum) * ratio );
-	}
+	if (mOrientation == UI_Horizontal)
+		newValue += int32_t( delta.X() / float(mSize.X() - mThumbRegion.Width) * float(mMaximum - mMinimum) );
+	else
+		newValue += int32_t( delta.Y() / float(mSize.Y() - mThumbRegion.Height) * float(mMaximum - mMinimum) );
 
 	SetValueInternal(newValue, true);
 }
@@ -228,8 +224,9 @@ void Slider::SetValueInternal( int32_t value, bool fromInput )
 	mValue = value;
 	UpdateSlider();
 
-	if (!EventValueChange.empty() && fromInput)
-		EventValueChange(mValue);
+	if (!EventValueChanged.empty() && fromInput)
+		EventValueChanged(mValue);
 }
+
 
 }

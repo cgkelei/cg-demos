@@ -73,6 +73,7 @@
     <ClInclude Include="GUI\Cursor.h" />
     <ClInclude Include="GUI\GuiSkin.h" />
     <ClInclude Include="GUI\Label.h" />
+    <ClInclude Include="GUI\ListBox.h" />
     <ClInclude Include="GUI\Menu.h" />
     <ClInclude Include="GUI\ScrollBar.h" />
     <ClInclude Include="GUI\Slider.h" />
@@ -169,6 +170,7 @@
     <ClCompile Include="GUI\Cursor.cpp" />
     <ClCompile Include="GUI\GuiSkin.cpp" />
     <ClCompile Include="GUI\Label.cpp" />
+    <ClCompile Include="GUI\ListBox.cpp" />
     <ClCompile Include="GUI\Menu.cpp" />
     <ClCompile Include="GUI\ScrollBar.cpp" />
     <ClCompile Include="GUI\Slider.cpp" />

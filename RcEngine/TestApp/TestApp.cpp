@@ -250,10 +250,10 @@ void TestApp::InitGUI()
 	rootElem->AddChild(mCheckBox);
 
 	mSlider = new Slider();
-	mSlider->SetOrientation(Slider::Horizontal);
+	mSlider->SetOrientation(UI_Horizontal);
 	mSlider->SetPosition(int2(20, 250));
-	mSlider->SetSize(int2(100, 27));
-	mSlider->SetValue(50);
+	mSlider->SetSize(int2(200, 23));
+	mSlider->SetValue(100);
 	mSlider->EventValueChange.bind(this, &TestApp::SliderValueChange);
 	rootElem->AddChild( mSlider );	
 }
@@ -285,20 +285,20 @@ void TestApp::CalculateFrameRate()
 
 void TestApp::SliderValueChange( int32_t value )
 {
-	printf("Clicked\n");
+	printf("Slider value: %d\n", value);
 }
 
 void TestApp::ButtonClicked()
 {
-	printf("Clicked\n");
+	printf("Button: Clicked\n");
 }
 
 void TestApp::CheckBoxToggle( bool checked )
 {
 	if (checked)
-		printf("Checked\n");
+		printf("CheckBox: checked\n");
 	else
-		printf("Unchecked\n");
+		printf("CheckBox: unchecked\n");
 }	
 
 

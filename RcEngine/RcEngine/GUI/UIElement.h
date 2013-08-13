@@ -101,11 +101,12 @@ public:
 
 	void BringToFront();
 
-	void SetGuiSkin(GuiSkin* skin);
+	virtual void SetGuiStyle(GuiSkin::GuiStyle* style);
 	GuiSkin* GetGuiSkin() const				{ return mGuiSkin; }
 
 protected:
 	void MarkDirty();
+	void InitDefaultSkin();
 
 	virtual void UpdateRect();
 

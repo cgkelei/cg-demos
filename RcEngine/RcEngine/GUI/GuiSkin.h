@@ -32,6 +32,12 @@ enum UIElementState
 	UI_State_Count
 };
 
+enum UIOrientation
+{
+	UI_Horizontal,
+	UI_Vertical
+};
+
 /**
  * GuiSkin is a collection of GUIStyles that can be applied to your GUI Controls.
  */
@@ -48,9 +54,7 @@ public:
 	struct GuiStyle
 	{
 		SytleImage StyleStates[UI_State_Count];
-
-		bool WordWrap;
-		Alignment TextAlign;
+		shared_ptr<Texture> StyleTex;
 	};
 
 public:
@@ -83,8 +87,10 @@ public:
 	SytleImage CheckBox[2];
 
 	// Slider
-	SytleImage HSliderTrack, HSliderThumb;
-	SytleImage VSliderTrack, VSliderThumb;
+	SytleImage HSliderTrack[2];  // Normal or hover
+	SytleImage VSliderTrack[2];  // Normal or hover
+
+	GuiStyle SliderThumb[2];     // Horizontal and Vertical
 };
 
 }
