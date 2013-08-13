@@ -392,12 +392,12 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			e.MouseMove.type = InputEventType::MouseMove;
 			e.MouseMove.x = LOWORD( lParam );
 			e.MouseMove.y = HIWORD( lParam );
-
+	
 			// According to WM_MOUSEMOVE on MSDN
 			e.MouseMove.buttons = 0;		
-			if( wParam & 0x0001 ) MouseButtonsMask |= InputEventType::LeftButtonMask;
-			if( wParam & 0x0010 ) MouseButtonsMask |= InputEventType::MiddleButtonMask;
-			if( wParam & 0x0002 ) MouseButtonsMask |= InputEventType::RightButtonMask;
+			if( wParam & 0x0001 ) e.MouseMove.buttons |= InputEventType::LeftButtonMask;
+			if( wParam & 0x0010 ) e.MouseMove.buttons |= InputEventType::MiddleButtonMask;
+			if( wParam & 0x0002 ) e.MouseMove.buttons |= InputEventType::RightButtonMask;
 
 			mInputSystem->FireEvent(e);
 		}

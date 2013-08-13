@@ -87,7 +87,7 @@ void SpriteBatch::End()
 
 }
 
-void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& dest, IntRect* src, const ColorRGBA& color, float rotAngle /*= 0*/, const float2& origin /*= float2::Zero()*/, float layerDepth /*= 0.0f*/ )
+void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& dest, const IntRect* src, const ColorRGBA& color, float rotAngle /*= 0*/, const float2& origin /*= float2::Zero()*/, float layerDepth /*= 0.0f*/ )
 {
 	if (color.A() <= 0)
 		return;
@@ -175,7 +175,7 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const float2& positi
 	Draw(texture, position, nullptr, color);
 }
 
-void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const float2& position, IntRect* sourceRectangle, const ColorRGBA& color )
+void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const float2& position, const IntRect* sourceRectangle, const ColorRGBA& color )
 {
 	Rectanglef destination(position.X(), position.Y(), (float)texture->GetWidth(0), (float)texture->GetHeight(0));
 	Draw(texture, destination, sourceRectangle, color, 0.0f, float2::Zero(), 0.0f);
@@ -186,12 +186,12 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& de
 	Draw(texture, destinationRectangle, NULL, color, 0.0f, float2::Zero(), 0.0f);
 }
 
-void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, IntRect* sourceRectangle, const ColorRGBA& color )
+void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, const IntRect* sourceRectangle, const ColorRGBA& color )
 {
 	Draw(texture, destinationRectangle, sourceRectangle, color, 0.0f, float2::Zero(), 0.0f);
 }
 
-void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const float2& position, IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const float2& origin, float scale, float layerDepth )
+void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const float2& position, const IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const float2& origin, float scale, float layerDepth )
 {
 	int32_t width, height;
 	if (sourceRectangle)
@@ -209,7 +209,7 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const float2& positi
 	Draw(texture, destination, sourceRectangle, color, rotation, float2::Zero(), 0.0f);
 }
 
-void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const float2& position, IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const float2& origin, const float2& scale, float layerDepth )
+void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const float2& position, const IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const float2& origin, const float2& scale, float layerDepth )
 {
 	int32_t width, height;
 	if (sourceRectangle)

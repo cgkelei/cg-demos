@@ -152,6 +152,8 @@ class Slider;
 class ScrollBar;
 class CheckBox;
 class TextEdit;
+class ListBox;
+class ComboBox;
 class Menu;
 class UIManager;
 

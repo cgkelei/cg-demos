@@ -11,15 +11,29 @@ public:
 	ScrollBar();
 	virtual ~ScrollBar();
 
+	virtual void OnResize();
 
+	virtual void OnDragBegin(const int2& screenPos, uint32_t buttons);
+	virtual void OnDragMove(const int2& screenPos, uint32_t buttons);
+	virtual void OnDragEnd(const int2& screenPos);
+
+	void SetOrientation(UIOrientation orient);
+
+protected:
+	void HandleBackButtonPressed();
+	void HandleForwardButtonPressed();
+	void HandleSliderChanged(int32_t value);
+
+	void StepBack();
+	void StepForward();
+
+	void UpdateRect();
 
 protected:
 
 	Button* mForwardButton;
 	Button* mBackButton;
-
-	
-	
+	Slider* mSlider;
 };
 
 

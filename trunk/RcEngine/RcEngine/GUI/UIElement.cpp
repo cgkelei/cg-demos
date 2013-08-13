@@ -22,7 +22,9 @@ UIElement::UIElement()
 
 UIElement::~UIElement()
 {
-
+	for (UIElement* child : mChildren)
+		delete child;
+	mChildren.clear();
 }
 
 void UIElement::SetPosition( const int2& position )
@@ -280,15 +282,11 @@ bool UIElement::CanHaveFocus() const
 	return false;
 }
 
-void UIElement::SetGuiSkin( GuiSkin* skin )
-{
-	mGuiSkin = skin;
-}
-
 void UIElement::UpdateRect()
 {
 
 }
+
 
 
 }

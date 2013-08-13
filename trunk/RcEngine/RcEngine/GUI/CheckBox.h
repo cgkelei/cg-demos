@@ -8,7 +8,11 @@ namespace RcEngine {
 class _ApiExport CheckBox : public UIElement
 {
 public:
-	typedef fastdelegate::FastDelegate1<bool> StateChangeEventHandler;
+	/**
+	 * CheckBox state changed event.
+	 */
+	typedef fastdelegate::FastDelegate1<bool> StateChangedEventHandler;
+	StateChangedEventHandler EventStateChanged;
 
 public:
 	CheckBox();
@@ -29,9 +33,6 @@ public:
 
 protected:
 	void UpdateRect();
-
-public:
-	StateChangeEventHandler EventStateChange;
 	
 protected:
 	

@@ -121,7 +121,7 @@ void UIManager::Update( float delta )
 		UIElement* element = GetElementAtPoint(mousePos);
 
 		if (element && !mDragElement)
-			element->OnHover(element->ScreenToClient(mousePos));			
+			element->OnHover(mousePos);			
 	}
 
 	Update(mRootElement, delta);
@@ -275,7 +275,7 @@ bool UIManager::HandleMouseMove( const int2& screenPos, uint32_t buttons )
 
 	bool eventConsumed = false;
 
-	if (mDragElement && buttons == MS_LeftButton)
+	if (mDragElement && (buttons & InputEventType::LeftButtonMask) )
 	{
 		if (mDragElement->IsEnabled() && mDragElement->IsVisible())
 		{
@@ -485,17 +485,35 @@ GuiSkin* UIManager::GetDefaultSkin()
 		mDefaultSkin->CheckBox[1].TexColor = ColorRGBA(1, 1, 1, 150.0f / 255);
 
 		// Slider 
-		mDefaultSkin->HSliderTrack.TexRegion.SetLeft(1);
-		mDefaultSkin->HSliderTrack.TexRegion.SetRight(93);
-		mDefaultSkin->HSliderTrack.TexRegion.SetTop(187);
-		mDefaultSkin->HSliderTrack.TexRegion.SetBottom(228);
-		mDefaultSkin->HSliderTrack.TexColor = ColorRGBA(1, 1, 1, 150.0f / 255);
+		mDefaultSkin->HSliderTrack[0].TexRegion.SetLeft(1);
+		mDefaultSkin->HSliderTrack[0].TexRegion.SetRight(93);
+		mDefaultSkin->HSliderTrack[0].TexRegion.SetTop(187);
+		mDefaultSkin->HSliderTrack[0].TexRegion.SetBottom(228);
+		mDefaultSkin->HSliderTrack[0].TexColor = ColorRGBA(0.5, 0.5, 0.5, 150.0f / 255);
 
-		mDefaultSkin->HSliderThumb.TexRegion.SetLeft(151);
-		mDefaultSkin->HSliderThumb.TexRegion.SetRight(192);
-		mDefaultSkin->HSliderThumb.TexRegion.SetTop(193);
-		mDefaultSkin->HSliderThumb.TexRegion.SetBottom(234);
-		mDefaultSkin->HSliderThumb.TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
+		mDefaultSkin->HSliderTrack[1].TexRegion.SetLeft(1);
+		mDefaultSkin->HSliderTrack[1].TexRegion.SetRight(93);
+		mDefaultSkin->HSliderTrack[1].TexRegion.SetTop(187);
+		mDefaultSkin->HSliderTrack[1].TexRegion.SetBottom(228);
+		mDefaultSkin->HSliderTrack[1].TexColor = ColorRGBA(1, 1, 1, 150.0f / 255);
+
+		mDefaultSkin->SliderThumb[UI_Horizontal].StyleStates[UI_State_Normal].TexRegion.SetLeft(151);
+		mDefaultSkin->SliderThumb[UI_Horizontal].StyleStates[UI_State_Normal].TexRegion.SetRight(192);
+		mDefaultSkin->SliderThumb[UI_Horizontal].StyleStates[UI_State_Normal].TexRegion.SetTop(193);
+		mDefaultSkin->SliderThumb[UI_Horizontal].StyleStates[UI_State_Normal].TexRegion.SetBottom(234);
+		mDefaultSkin->SliderThumb[UI_Horizontal].StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
+
+		mDefaultSkin->SliderThumb[UI_Horizontal].StyleStates[UI_State_Hover].TexRegion.SetLeft(151);
+		mDefaultSkin->SliderThumb[UI_Horizontal].StyleStates[UI_State_Hover].TexRegion.SetRight(192);
+		mDefaultSkin->SliderThumb[UI_Horizontal].StyleStates[UI_State_Hover].TexRegion.SetTop(193);
+		mDefaultSkin->SliderThumb[UI_Horizontal].StyleStates[UI_State_Hover].TexRegion.SetBottom(234);
+		mDefaultSkin->SliderThumb[UI_Horizontal].StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 0, 1, 255.0 / 255);
+
+		mDefaultSkin->SliderThumb[UI_Horizontal].StyleStates[UI_State_Pressed].TexRegion.SetLeft(151);
+		mDefaultSkin->SliderThumb[UI_Horizontal].StyleStates[UI_State_Pressed].TexRegion.SetRight(192);
+		mDefaultSkin->SliderThumb[UI_Horizontal].StyleStates[UI_State_Pressed].TexRegion.SetTop(193);
+		mDefaultSkin->SliderThumb[UI_Horizontal].StyleStates[UI_State_Pressed].TexRegion.SetBottom(234);
+		mDefaultSkin->SliderThumb[UI_Horizontal].StyleStates[UI_State_Pressed].TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
 
 	}
 

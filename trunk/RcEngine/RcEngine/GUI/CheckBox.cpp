@@ -29,8 +29,8 @@ void CheckBox::SetChecked( bool enalbe )
 	{
 		mCheched = enalbe;
 
-		if (!EventStateChange.empty())
-			EventStateChange(mCheched);
+		if (!EventStateChanged.empty())
+			EventStateChanged(mCheched);
 	}
 }
 
