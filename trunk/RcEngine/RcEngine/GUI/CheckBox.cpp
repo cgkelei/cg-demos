@@ -7,7 +7,7 @@
 namespace RcEngine {
 
 CheckBox::CheckBox( )
-	: mCheched(false), mPressed(false)
+	: mCheched(false), mPressed(false), mStyle(nullptr)
 {
 
 }
@@ -104,9 +104,6 @@ void CheckBox::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	if (!mVisible)
 		return;
 
-	if (!mGuiSkin)
-		SetGuiSkin( UIManager::GetSingleton().GetDefaultSkin() );
-
 	UIElementState uiState = UI_State_Normal;
 
 	if (mVisible == false)
@@ -122,16 +119,30 @@ void CheckBox::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 
 	if (mCheched)
 	{
-		spriteBatch.Draw(mGuiSkin->mSkinTexAtlas, mCheckRect, &mGuiSkin->CheckBox[0].TexRegion, mGuiSkin->BackColor);
-		spriteBatch.Draw(mGuiSkin->mSkinTexAtlas, mCheckRect, &mGuiSkin->CheckBox[1].TexRegion, mGuiSkin->BackColor);
+		spriteBatch.Draw(mStyle->StyleTex, mCheckRect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mStyle->BackColor);
+		spriteBatch.Draw(mStyle->StyleTex, mCheckRect, &mStyle->StyleStates[UI_State_Pressed].TexRegion, mStyle->BackColor);
 	}
 	else
-		spriteBatch.Draw(mGuiSkin->mSkinTexAtlas, mCheckRect, &mGuiSkin->CheckBox[0].TexRegion, mGuiSkin->BackColor);
+		spriteBatch.Draw(mStyle->StyleTex, mCheckRect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mStyle->BackColor);
 
-	mGuiSkin->mFont->DrawString(spriteBatchFont, mText, mGuiSkin->mFontSize, AlignLeft | AlignVCenter, mTextRect, mGuiSkin->ForeColor);
+	mStyle->StyleFont->DrawString(spriteBatchFont, mText, mStyle->StyleFontSize, AlignLeft | AlignVCenter, mTextRect, mStyle->ForeColor);
 
 	// Reset hovering for next frame
 	mHovering = false;
+}
+
+void CheckBox::Initialize( const GuiSkin::StyleMap* styles /*= nullptr*/ )
+{
+	if (!styles)
+	{
+		GuiSkin* defaultSkin = UIManager::GetSingleton().GetDefaultSkin();
+		mStyle = &defaultSkin->CheckBox;
+	}
+	else
+	{
+		GuiSkin::StyleMap::const_iterator iter = styles->find(String("CheckBox Style"));
+		mStyle = iter->second;
+	}
 }
 
 

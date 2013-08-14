@@ -55,7 +55,15 @@ public:
 	{
 		SytleImage StyleStates[UI_State_Count];
 		shared_ptr<Texture> StyleTex;
+
+		shared_ptr<Font> StyleFont;
+		int32_t StyleFontSize;
+
+		ColorRGBA BackColor;
+		ColorRGBA ForeColor; 
 	};
+
+	typedef std::map<String, GuiStyle*> StyleMap;
 
 public:
 	//GuiSkin(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
@@ -77,20 +85,20 @@ public:
 
 	shared_ptr<Texture> mSkinTexAtlas; 
 
-	ColorRGBA BackColor;
-	ColorRGBA ForeColor;
-
 	// Button
 	GuiStyle Button;
 
 	// Check box
-	SytleImage CheckBox[2];
+	GuiStyle CheckBox;
 
 	// Slider
-	SytleImage HSliderTrack[2];  // Normal or hover
-	SytleImage VSliderTrack[2];  // Normal or hover
+	GuiStyle HSliderTrack, HSliderThumb;  // Normal or hover
+	GuiStyle VSliderTrack, VSliderThumb;  // Normal or hover
 
-	GuiStyle SliderThumb[2];     // Horizontal and Vertical
+	// ScrollBar
+	GuiStyle HScrollTrack, HSrollThumb, HSrollForward, HSrollBack;
+	GuiStyle VScrollTrack, VSrollThumb, VSrollForward, VSrollBack;
+
 };
 
 }

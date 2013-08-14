@@ -14,9 +14,13 @@ public:
 	typedef fastdelegate::FastDelegate0<> ButtonClickedEventHandler;
 	ButtonClickedEventHandler EventButtonClicked;
 
+	const static String StyleName;
+
 public:
 	Button();
 	virtual ~ Button();
+
+	virtual void Initialize(const GuiSkin::StyleMap* styles = nullptr);
 
 	virtual bool OnMouseButtonPress(const int2& screenPos, uint32_t button);
 	virtual bool OnMouseButtonRelease(const int2& screenPos, uint32_t button);
@@ -25,8 +29,6 @@ public:
 
 	virtual void Update(float delta);
 	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
-
-	virtual void SetGuiStyle(UIElementState uiState, const GuiSkin::SytleImage& styleImage);
 
 	void SetPressedOffset(const int2& offset)	{ mPressedOffset = offset; }
 	const int2& GetPressedOffset() const        { return mPressedOffset; }
@@ -50,7 +52,7 @@ protected:
 
 	std::wstring mText;
 
-	GuiSkin::GuiStyle mGuiStyle;
+	GuiSkin::GuiStyle* mStyle;
 };
 
 

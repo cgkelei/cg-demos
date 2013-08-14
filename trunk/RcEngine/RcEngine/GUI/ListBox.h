@@ -18,6 +18,14 @@ public:
 	ListBox();
 	virtual ~ListBox();
 
+	virtual void OnResize();
+	virtual void Initialize(const GuiSkin::StyleMap* styles /* = nullptr */);
+
+	virtual void Update(float delta);
+	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
+
+	virtual void UpdateRect();
+
 	void AddItem(const String& text);
 	void InsertItem(int32_t index, const String& text);
 	void RemoveItem(int32_t index);
@@ -30,7 +38,14 @@ protected:
 
 	std::vector<ListBoxItem*> mItems;
 
+	ScrollBar* mHorzScrollBar;
+	ScrollBar* mVertScrollBar;
+
 	int32_t mSelectedIndex;
+
+	int32_t mNumVisibleItems;
+
+	GuiSkin* mBackgroundStyle;
 };
 
 

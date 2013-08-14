@@ -6,6 +6,8 @@
 
 namespace RcEngine {
 
+const String Button::StyleName("Button Style");
+
 Button::Button()
 	: mPressedOffset(1, 2),
 	  mHoverOffset(-1, -2)
@@ -75,9 +77,6 @@ void Button::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	if (!mVisible)
 		return;
 
-	if (!mGuiSkin)
-		SetGuiSkin( UIManager::GetSingleton().GetDefaultSkin() );
-
 	UIElementState uiState = UI_State_Normal;
 	
 	float offsetX = 0.0f;
@@ -107,18 +106,29 @@ void Button::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	int2 screenPos = GetScreenPosition();
 
 	Rectanglef btnRegion(screenPos.X() + offsetX, screenPos.Y() + offsetY, (float)mSize.X(), (float)mSize.Y());
-	spriteBatch.Draw(mGuiSkin->mSkinTexAtlas, btnRegion, &mGuiSkin->Button.StyleStates[uiState].TexRegion, mGuiSkin->Button.StyleStates[uiState].TexColor);
+	spriteBatch.Draw(mStyle->StyleTex, btnRegion, &mStyle->StyleStates[uiState].TexRegion, mStyle->StyleStates[uiState].TexColor);
 
 	if (mText.length())
-		mGuiSkin->mFont->DrawString(spriteBatchFont, mText, mGuiSkin->mFontSize, AlignCenter, btnRegion, mGuiSkin->ForeColor);
+		mStyle->StyleFont->DrawString(spriteBatchFont, mText, mStyle->StyleFontSize, AlignCenter, btnRegion, mStyle->ForeColor);
 
 	// Reset hovering for next frame
 	mHovering = false;
 }
 
-void Button::SetGuiStyle( UIElementState uiState, const GuiSkin::SytleImage& styleImage )
-{
 
+void Button::Initialize( const GuiSkin::StyleMap* styles )
+{
+	if (!styles)
+	{
+		// Use default
+		GuiSkin* defalutSkin = UIManager::GetSingleton().GetDefaultSkin();
+		mStyle = &defalutSkin->Button;
+	}
+	else
+	{
+		GuiSkin::StyleMap::const_iterator iter = styles->find(StyleName);
+		mStyle = iter->second;
+	}
 }
 
 

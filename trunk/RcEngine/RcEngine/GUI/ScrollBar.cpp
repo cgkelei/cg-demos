@@ -1,8 +1,14 @@
 #include <GUI/ScrollBar.h>
 #include <GUI/Slider.h>
 #include <GUI/Button.h>
+#include <GUI/UIManager.h>
 
 namespace RcEngine {
+
+const String ScrollBar::ForwardStyleName("ScrollBar::ForwardStyleName");
+const String ScrollBar::BackStyleName("ScrollBar::BackStyleName");
+const String ScrollBar::ThumbStyleName("ScrollBar::ThumbStyleName");
+const String ScrollBar::TrackStyleName("ScrollBar::TrackStyleName");
 
 ScrollBar::ScrollBar()
 {
@@ -22,10 +28,9 @@ ScrollBar::ScrollBar()
 	// Set default orientation
 	SetOrientation(UI_Vertical);
 
-
 	// Events
-	mForwardButton->EventButtonClicked.bind(this, &ScrollBar::HandleForwardButtonPressed);
-	mBackButton->EventButtonClicked.bind(this, &ScrollBar::HandleBackButtonPressed);
+	mForwardButton->EventButtonClicked.bind(this, &ScrollBar::StepForward);
+	mBackButton->EventButtonClicked.bind(this, &ScrollBar::StepBack);
 	mSlider->EventValueChanged.bind(this, &ScrollBar::HandleSliderChanged);
 }
 
@@ -76,20 +81,66 @@ void ScrollBar::UpdateRect()
 	}
 }
 
-void ScrollBar::HandleBackButtonPressed()
-{
-
-}
-
-void ScrollBar::HandleForwardButtonPressed()
-{
-
-}
-
 void ScrollBar::HandleSliderChanged( int32_t value )
 {
 
 }
 
+void ScrollBar::Initialize( const GuiSkin::StyleMap* styles /* = nullptr */ )
+{
+	if( !styles )
+	{
+		GuiSkin* defalutSkin = UIManager::GetSingleton().GetDefaultSkin();
+
+		GuiSkin::StyleMap styleMap;
+		styleMap[Button::StyleName] = &defalutSkin->HSrollForward;
+		mForwardButton->Initialize(&styleMap);
+
+		styleMap[Button::StyleName] = &defalutSkin->HSrollBack;
+		mBackButton->Initialize(&styleMap);
+
+		styleMap[Slider::TrackStyleName] = &defalutSkin->HScrollTrack;
+		styleMap[Slider::ThumbStyleName] = &defalutSkin->HSrollThumb;
+		mSlider->Initialize(&styleMap);
+	}
+	else
+	{
+		GuiSkin::StyleMap::const_iterator iter;
+		
+		GuiSkin::StyleMap styleMap;
+
+		iter = styles->find(ForwardStyleName);	
+		styleMap[Button::StyleName] = iter->second;
+		mForwardButton->Initialize(&styleMap);
+
+		iter = styles->find(BackStyleName);	
+		styleMap[Button::StyleName] = iter->second;
+		mBackButton->Initialize(&styleMap);
+
+		// Slider
+		iter = styles->find(TrackStyleName);
+		styleMap[Slider::TrackStyleName] = iter->second;
+
+		iter = styles->find(ThumbStyleName);
+		styleMap[Slider::ThumbStyleName] = iter->second;
+
+		mSlider->Initialize(&styleMap);
+	}
+}
+
+void ScrollBar::StepBack()
+{
+	mSlider->StepBack();
+}
+
+void ScrollBar::StepForward()
+{
+	mSlider->StepForward();
+}
+
+void ScrollBar::SetRange( int32_t min, int32_t max )
+{
+	mSlider->SetRange(min, max);
+}
 
 }

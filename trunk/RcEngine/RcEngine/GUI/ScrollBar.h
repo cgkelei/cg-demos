@@ -2,26 +2,35 @@
 #define ScrollBar_h__
 
 #include <GUI/UIElement.h>
+#include <GUI/Slider.h>
 
 namespace RcEngine {
 
 class _ApiExport ScrollBar : public UIElement
 {
 public:
+
+	static const String ForwardStyleName;
+	static const String BackStyleName;
+	static const String ThumbStyleName;
+	static const String TrackStyleName;
+
+public:
 	ScrollBar();
 	virtual ~ScrollBar();
 
-	virtual void OnResize();
+	virtual void Initialize(const GuiSkin::StyleMap* styles /* = nullptr */);
 
-	virtual void OnDragBegin(const int2& screenPos, uint32_t buttons);
-	virtual void OnDragMove(const int2& screenPos, uint32_t buttons);
-	virtual void OnDragEnd(const int2& screenPos);
+	virtual void OnResize();
 
 	void SetOrientation(UIOrientation orient);
 
+	void SetRange(int32_t min, int32_t max);
+	void GetRange(int32_t& min, int32_t& max)	{ mSlider->GetRange(min, max); }
+	
+	inline int32_t GetValue() const	 { return mSlider->GetValue(); }
+
 protected:
-	void HandleBackButtonPressed();
-	void HandleForwardButtonPressed();
 	void HandleSliderChanged(int32_t value);
 
 	void StepBack();
