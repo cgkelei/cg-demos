@@ -125,7 +125,7 @@ void CheckBox::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	else
 		spriteBatch.Draw(mStyle->StyleTex, mCheckRect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mStyle->BackColor);
 
-	mStyle->StyleFont->DrawString(spriteBatchFont, mText, mStyle->StyleFontSize, AlignLeft | AlignVCenter, mTextRect, mStyle->ForeColor);
+	mStyle->Font->DrawString(spriteBatchFont, mText, mStyle->FontSize, AlignLeft | AlignVCenter, mTextRect, mStyle->ForeColor);
 
 	// Reset hovering for next frame
 	mHovering = false;

@@ -57,11 +57,11 @@ void ScrollBar::UpdateRect()
 	if (mSlider->GetOrientation() == UI_Horizontal)
 	{
 		int32_t size = GetSize().Y();
-		mForwardButton->SetPosition(int2(0, 0));
-		mForwardButton->SetSize(int2(size, size));
+		mBackButton->SetPosition(int2(0, 0));
+		mBackButton->SetSize(int2(size, size));
 
 		mForwardButton->SetPosition(int2(mSize.X() - size, 0));
-		mBackButton->SetSize(int2(size, size));
+		mForwardButton->SetSize(int2(size, size));
 
 		mSlider->SetPosition(int2(size, 0));
 		mSlider->SetSize(int2(mSize.X() - size - size, mSize.Y()));
@@ -70,11 +70,11 @@ void ScrollBar::UpdateRect()
 	{
 		int32_t size = GetSize().X();
 
-		mForwardButton->SetPosition(int2(0, 0));
-		mForwardButton->SetSize(int2(size, size));
-
-		mBackButton->SetPosition(int2(0, mSize.Y() - size));
+		mBackButton->SetPosition(int2(0, 0));
 		mBackButton->SetSize(int2(size, size));
+
+		mForwardButton->SetPosition(int2(0, mSize.Y() - size));
+		mForwardButton->SetSize(int2(size, size));
 
 		mSlider->SetPosition(int2(0, size));
 		mSlider->SetSize(int2(mSize.X(), mSize.Y() - size - size));
@@ -141,6 +141,11 @@ void ScrollBar::StepForward()
 void ScrollBar::SetRange( int32_t min, int32_t max )
 {
 	mSlider->SetRange(min, max);
+}
+
+void ScrollBar::Scroll( int32_t delta )
+{
+
 }
 
 }

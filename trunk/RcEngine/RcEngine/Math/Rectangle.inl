@@ -20,6 +20,13 @@ Rectangle<Real>::Rectangle( const Rectangle<Real>& other )
 }
 
 template<typename Real>
+void RcEngine::Rectangle<Real>::Offset( Real offsetLeft, Real offsetTop )
+{
+	X += offsetLeft; Y += offsetTop;
+}
+
+
+template<typename Real>
 bool Rectangle<Real>::Intersects( const Rectangle<Real>& other ) const
 {
 	return Intersects(other.X, other.Y, other.Width, other.Height);

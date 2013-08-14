@@ -56,8 +56,8 @@ public:
 		SytleImage StyleStates[UI_State_Count];
 		shared_ptr<Texture> StyleTex;
 
-		shared_ptr<Font> StyleFont;
-		int32_t StyleFontSize;
+		shared_ptr<Font> Font;
+		int32_t FontSize;
 
 		ColorRGBA BackColor;
 		ColorRGBA ForeColor; 
@@ -90,6 +90,8 @@ public:
 
 	// Check box
 	GuiStyle CheckBox;
+
+	GuiStyle ListBox;
 
 	// Slider
 	GuiStyle HSliderTrack, HSliderThumb;  // Normal or hover

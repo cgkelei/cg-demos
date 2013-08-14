@@ -75,9 +75,6 @@ protected:
 	int2 mDragBeginPos;		// Position in parent region when drag begin
 	int2 mDragBeginSize;    // Window size when drag begin
 	int2 mDragBeginCurosr;  // Cursor position when drag begin
-
-	
-
 };
 
 

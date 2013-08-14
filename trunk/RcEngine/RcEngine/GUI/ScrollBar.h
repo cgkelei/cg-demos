@@ -30,6 +30,8 @@ public:
 	
 	inline int32_t GetValue() const	 { return mSlider->GetValue(); }
 
+	void Scroll(int32_t delta);
+
 protected:
 	void HandleSliderChanged(int32_t value);
 
