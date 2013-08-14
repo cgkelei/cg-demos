@@ -41,6 +41,7 @@
 #include "GUI/CheckBox.h"
 #include "GUI/ScrollBar.h"
 #include "GUI/Button.h"
+#include "GUI/ListBox.h"
 #include "Core/Variant.h"
 #include "Core/StringHash.h"
 
@@ -266,6 +267,17 @@ void TestApp::InitGUI()
 	mScrollBar->SetSize(int2(23, 200));
 	mScrollBar->Initialize(nullptr);
 	rootElem->AddChild( mScrollBar );	
+
+	mListBox = new ListBox;
+	mListBox->SetName("ListBox");
+	mListBox->SetPosition(int2(20, 300));
+	mListBox->SetSize(int2(200, 90));
+	mListBox->AddItem(L"Cryteck");
+	mListBox->AddItem(L"HBAO");
+	mListBox->AddItem(L"Unreal4");
+	mListBox->AddItem(L"Alchemy");
+	mListBox->Initialize(nullptr);
+	rootElem->AddChild(mListBox);
 }
 
 void TestApp::DrawUI()

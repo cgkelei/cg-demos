@@ -474,8 +474,8 @@ GuiSkin* UIManager::GetDefaultSkin()
 		}
 
 		mDefaultSkin->Button.StyleStates[UI_State_Hover].TexRegion = IntRect(136, 0, 252 - 136, 54);
-		mDefaultSkin->Button.StyleFont = mFont;
-		mDefaultSkin->Button.StyleFontSize = 20;
+		mDefaultSkin->Button.Font = mFont;
+		mDefaultSkin->Button.FontSize = 20;
 		mDefaultSkin->Button.BackColor = ColorRGBA(1, 1, 1, 100.0f / 255);
 		mDefaultSkin->Button.ForeColor = ColorRGBA(1, 1, 1, 200.0f / 255);
 		mDefaultSkin->Button.StyleTex = mDefaultSkin->mSkinTexAtlas;
@@ -485,8 +485,8 @@ GuiSkin* UIManager::GetDefaultSkin()
 		mDefaultSkin->CheckBox.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 150.0f / 255);
 		mDefaultSkin->CheckBox.StyleStates[UI_State_Pressed].TexRegion = IntRect(27, 54, 27, 27);
 		mDefaultSkin->CheckBox.StyleStates[UI_State_Pressed].TexColor = ColorRGBA(1, 1, 1, 150.0f / 255);
-		mDefaultSkin->CheckBox.StyleFont = mFont;
-		mDefaultSkin->CheckBox.StyleFontSize = 20;
+		mDefaultSkin->CheckBox.Font = mFont;
+		mDefaultSkin->CheckBox.FontSize = 20;
 		mDefaultSkin->CheckBox.BackColor = ColorRGBA(1, 1, 1, 100.0f / 255);
 		mDefaultSkin->CheckBox.ForeColor = ColorRGBA(1, 1, 1, 200.0f / 255);
 		mDefaultSkin->CheckBox.StyleTex = mDefaultSkin->mSkinTexAtlas;
@@ -536,7 +536,6 @@ GuiSkin* UIManager::GetDefaultSkin()
 		mDefaultSkin->HSrollBack.StyleStates[UI_State_Hover].TexColor = ColorRGBA(0, 1, 1, 150.0f / 255);
 		mDefaultSkin->HSrollForward.StyleStates[UI_State_Hover].TexColor = ColorRGBA(0, 1, 1, 150.0f / 255);
 
-
 		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexRegion.SetLeft(196);
 		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexRegion.SetRight(218);
 		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexRegion.SetTop(212);
@@ -566,7 +565,19 @@ GuiSkin* UIManager::GetDefaultSkin()
 		mDefaultSkin->HScrollTrack.StyleTex = mDefaultSkin->mSkinTexAtlas;
 		mDefaultSkin->HSrollThumb.StyleTex = mDefaultSkin->mSkinTexAtlas;
 
+
+		// List Box
+		mDefaultSkin->ListBox.StyleStates[UI_State_Normal].TexRegion = IntRect(13, 123, 228, 37);
+		mDefaultSkin->ListBox.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 125.0f / 255);
+
+		mDefaultSkin->ListBox.StyleStates[UI_State_Hover].TexRegion = IntRect(16, 166, 224, 17);
+		mDefaultSkin->ListBox.StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
 		
+		mDefaultSkin->ListBox.Font = mFont;
+		mDefaultSkin->ListBox.FontSize = 20;
+		mDefaultSkin->ListBox.BackColor = ColorRGBA(1, 1, 1, 255.0 / 255);
+		mDefaultSkin->ListBox.ForeColor = ColorRGBA(1, 1, 1, 255.0 / 255);
+		mDefaultSkin->ListBox.StyleTex = mDefaultSkin->mSkinTexAtlas;
 	}
 
 

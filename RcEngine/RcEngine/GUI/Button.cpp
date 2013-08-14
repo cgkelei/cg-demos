@@ -109,7 +109,7 @@ void Button::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	spriteBatch.Draw(mStyle->StyleTex, btnRegion, &mStyle->StyleStates[uiState].TexRegion, mStyle->StyleStates[uiState].TexColor);
 
 	if (mText.length())
-		mStyle->StyleFont->DrawString(spriteBatchFont, mText, mStyle->StyleFontSize, AlignCenter, btnRegion, mStyle->ForeColor);
+		mStyle->Font->DrawString(spriteBatchFont, mText, mStyle->FontSize, AlignCenter, btnRegion, mStyle->ForeColor);
 
 	// Reset hovering for next frame
 	mHovering = false;

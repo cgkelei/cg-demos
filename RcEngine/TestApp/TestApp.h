@@ -57,5 +57,6 @@ private:
 	Button* mButton;
 	CheckBox* mCheckBox;
 	ScrollBar* mScrollBar;
+	ListBox* mListBox;
 };
 

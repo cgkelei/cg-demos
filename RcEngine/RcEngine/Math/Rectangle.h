@@ -27,6 +27,8 @@ public:
 	inline void SetRight(Real right);
 	inline void SetBottom(Real bpttom);
 
+	inline void Offset(Real offsetLeft, Real offsetTop);
+
 	inline Vector<Real, 2> TopLeft() const;
 	inline Vector<Real, 2> TopRight() const;
 	inline Vector<Real, 2> BottomLeft() const;
