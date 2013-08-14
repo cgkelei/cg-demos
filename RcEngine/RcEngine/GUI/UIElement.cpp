@@ -13,8 +13,7 @@ UIElement::UIElement()
 	  mEnabled(true),
 	  mPosition(int2::Zero()),
 	  mSize(int2::Zero()),
-	  mMinSize(int2::Zero()), mMaxSize(INT_MAX, INT_MAX),
-	  mGuiSkin(nullptr)
+	  mMinSize(int2::Zero()), mMaxSize(INT_MAX, INT_MAX)
 {
 
 
@@ -283,6 +282,11 @@ bool UIElement::CanHaveFocus() const
 }
 
 void UIElement::UpdateRect()
+{
+
+}
+
+void UIElement::Initialize( const GuiSkin::StyleMap* styles )
 {
 
 }

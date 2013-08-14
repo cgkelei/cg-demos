@@ -14,9 +14,14 @@ public:
 	typedef fastdelegate::FastDelegate1<int32_t> ValueChangedEventHandler;
 	ValueChangedEventHandler EventValueChanged;
 
+	static const String TrackStyleName;
+	static const String ThumbStyleName;
+
 public:
 	Slider();
 	virtual ~Slider();
+
+	virtual void Initialize(const GuiSkin::StyleMap* styles = nullptr);
 
 	virtual void Update(float delta);
 	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
@@ -30,6 +35,15 @@ public:
 
 	virtual bool OnMouseButtonPress(const int2& screenPos, uint32_t button);
 	virtual bool OnMouseButtonRelease(const int2& screenPos, uint32_t button);
+
+	void SetSingleStep(int32_t step);
+	int32_t GetSingleStep() const;
+
+	void StepForward();
+	void StepBack();
+
+	void SetThumbStyle(GuiSkin::GuiStyle* style)  { mThumbStyle = style; }
+	void SetTrackStyle(GuiSkin::GuiStyle* style)  { mTrackStyle = style; }
 
 	void SetOrientation(UIOrientation orient);
 	UIOrientation GetOrientation() const  { return mOrientation; }
@@ -51,6 +65,8 @@ protected:
 	int32_t mValue;
 	int32_t mMinimum, mMaximum;
 
+	int32_t mSingleStep;
+
 	bool mThumbHovering;
 
 	bool mDragSlider;
@@ -58,6 +74,9 @@ protected:
 	int2 mDragBeginPos;		
 
 	IntRect mThumbRegion;
+
+	GuiSkin::GuiStyle* mThumbStyle;
+	GuiSkin::GuiStyle* mTrackStyle;
 };
 
 

@@ -18,6 +18,8 @@ public:
 	CheckBox();
 	virtual ~CheckBox();
 
+	virtual void Initialize(const GuiSkin::StyleMap* styles = nullptr);
+
 	virtual bool OnMouseButtonPress(const int2& screenPos, uint32_t button);
 	virtual bool OnMouseButtonRelease(const int2& screenPos, uint32_t button);
 
@@ -44,6 +46,8 @@ protected:
 	// Used for draw
 	Rectanglef mCheckRect;
 	Rectanglef mTextRect;
+
+	GuiSkin::GuiStyle* mStyle;
 };
 
 

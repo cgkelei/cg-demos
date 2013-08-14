@@ -30,7 +30,7 @@ void ComboBox::SetSelectedIndex( int32_t index )
 
 int32_t ComboBox::GetSelectedIndex() const
 {
-
+	return 0;
 }
 
 }

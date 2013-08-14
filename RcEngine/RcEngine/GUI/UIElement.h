@@ -19,6 +19,8 @@ public:
 	UIElement();
 	virtual ~UIElement();
 
+	virtual void Initialize(const GuiSkin::StyleMap* styles = nullptr);
+
 	virtual void Update(float delta);
 	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 
@@ -101,12 +103,8 @@ public:
 
 	void BringToFront();
 
-	virtual void SetGuiStyle(GuiSkin::GuiStyle* style);
-	GuiSkin* GetGuiSkin() const				{ return mGuiSkin; }
-
 protected:
 	void MarkDirty();
-	void InitDefaultSkin();
 
 	virtual void UpdateRect();
 
@@ -118,8 +116,6 @@ protected:
 
 	UIElement* mParent;
 	std::vector<UIElement*> mChildren;
-
-	GuiSkin* mGuiSkin;
 
 	bool mHovering;
 	bool mVisible;

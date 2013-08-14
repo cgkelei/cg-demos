@@ -239,6 +239,7 @@ void TestApp::InitGUI()
 	mButton->SetPosition(int2(20, 150));
 	mButton->SetSize(int2(100, 40));
 	mButton->SetText(L"Button");
+	mButton->Initialize(nullptr);
 	mButton->EventButtonClicked.bind(this, &TestApp::ButtonClicked);
 	rootElem->AddChild( mButton );	
 
@@ -246,7 +247,8 @@ void TestApp::InitGUI()
 	mCheckBox->SetPosition(int2(20, 200));
 	mCheckBox->SetSize(int2(150, 27));
 	mCheckBox->SetText(L"CheckBox");
-	mCheckBox->EventStateChange.bind(this, &TestApp::CheckBoxToggle);
+	mCheckBox->Initialize(nullptr);
+	mCheckBox->EventStateChanged.bind(this, &TestApp::CheckBoxToggle);
 	rootElem->AddChild(mCheckBox);
 
 	mSlider = new Slider();
@@ -254,8 +256,16 @@ void TestApp::InitGUI()
 	mSlider->SetPosition(int2(20, 250));
 	mSlider->SetSize(int2(200, 23));
 	mSlider->SetValue(100);
-	mSlider->EventValueChange.bind(this, &TestApp::SliderValueChange);
+	mSlider->Initialize(nullptr);
+	mSlider->EventValueChanged.bind(this, &TestApp::SliderValueChange);
 	rootElem->AddChild( mSlider );	
+
+	mScrollBar = new ScrollBar;
+	mScrollBar->SetOrientation(UI_Vertical);
+	mScrollBar->SetPosition(int2(500, 300));
+	mScrollBar->SetSize(int2(23, 200));
+	mScrollBar->Initialize(nullptr);
+	rootElem->AddChild( mScrollBar );	
 }
 
 void TestApp::DrawUI()
