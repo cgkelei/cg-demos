@@ -2,6 +2,7 @@
 #include <GUI/Slider.h>
 #include <GUI/Button.h>
 #include <GUI/UIManager.h>
+#include <Graphics/SpriteBatch.h>
 
 namespace RcEngine {
 
@@ -10,28 +11,36 @@ const String ScrollBar::BackStyleName("ScrollBar::BackStyleName");
 const String ScrollBar::ThumbStyleName("ScrollBar::ThumbStyleName");
 const String ScrollBar::TrackStyleName("ScrollBar::TrackStyleName");
 
+static const float DEFAULT_SCROLL_STEP = 0.1f;
+static const float DEFAULT_REPEAT_DELAY = 0.8f;
+static const float DEFAULT_REPEAT_RATE = 20.0f;
+
 ScrollBar::ScrollBar()
+	: mThumbHovering(false),
+	  mMinValue(0), mMaxValue(100), mValue(0),
+	  mSingleStep(1),
+	  mDragThumb(false),
+	  mThumbStyle(nullptr),
+	  mTrackStyle(nullptr)
 {
 	mForwardButton = new Button;
+	mForwardButton->SetName("ScrollBar Forward Button");
 	mForwardButton->SetPressedOffset(int2::Zero());
 	mForwardButton->SetHoverOffset(int2::Zero());
+	mForwardButton->SetClickedEventRepeat(DEFAULT_REPEAT_DELAY, DEFAULT_REPEAT_RATE);
 
 	mBackButton = new Button;
+	mBackButton->SetName("ScrollBar Back Button");
 	mBackButton->SetPressedOffset(int2::Zero());
 	mBackButton->SetHoverOffset(int2::Zero());
+	mBackButton->SetClickedEventRepeat(DEFAULT_REPEAT_DELAY, DEFAULT_REPEAT_RATE);
 
 	AddChild(mForwardButton);
 	AddChild(mBackButton);
 
-	mSlider = new Slider;
-	AddChild(mSlider);
-	// Set default orientation
-	SetOrientation(UI_Vertical);
-
 	// Events
 	mForwardButton->EventButtonClicked.bind(this, &ScrollBar::StepForward);
 	mBackButton->EventButtonClicked.bind(this, &ScrollBar::StepBack);
-	mSlider->EventValueChanged.bind(this, &ScrollBar::HandleSliderChanged);
 }
 
 ScrollBar::~ScrollBar()
@@ -39,10 +48,18 @@ ScrollBar::~ScrollBar()
 
 }
 
-void ScrollBar::SetOrientation( UIOrientation orient )
+void ScrollBar::SetScrollButtonRepeat( bool enable )
 {
-	mSlider->SetOrientation(orient);
-	UpdateRect();
+	if (enable)
+	{
+		mForwardButton->SetClickedEventRepeat(DEFAULT_REPEAT_DELAY, DEFAULT_REPEAT_RATE);
+		mBackButton->SetClickedEventRepeat(DEFAULT_REPEAT_DELAY, DEFAULT_REPEAT_RATE);
+	}
+	else 
+	{
+		mForwardButton->SetClickedEventRepeat(DEFAULT_REPEAT_DELAY, 0.0f);
+		mBackButton->SetClickedEventRepeat(DEFAULT_REPEAT_DELAY, 0.0f);
+	}
 }
 
 void ScrollBar::OnResize()
@@ -54,7 +71,7 @@ void ScrollBar::UpdateRect()
 {
 	int2 screenPos = GetScreenPosition();
 
-	if (mSlider->GetOrientation() == UI_Horizontal)
+	if (mOrientation == UI_Horizontal)
 	{
 		int32_t size = GetSize().Y();
 		mBackButton->SetPosition(int2(0, 0));
@@ -63,8 +80,10 @@ void ScrollBar::UpdateRect()
 		mForwardButton->SetPosition(int2(mSize.X() - size, 0));
 		mForwardButton->SetSize(int2(size, size));
 
-		mSlider->SetPosition(int2(size, 0));
-		mSlider->SetSize(int2(mSize.X() - size - size, mSize.Y()));
+		mTrackRegion.X = screenPos.X() + size; 
+		mTrackRegion.Width = mSize.X() - size - size;
+		mTrackRegion.Y = screenPos.Y();
+		mTrackRegion.Height = mSize.Y();
 	}
 	else
 	{
@@ -76,19 +95,18 @@ void ScrollBar::UpdateRect()
 		mForwardButton->SetPosition(int2(0, mSize.Y() - size));
 		mForwardButton->SetSize(int2(size, size));
 
-		mSlider->SetPosition(int2(0, size));
-		mSlider->SetSize(int2(mSize.X(), mSize.Y() - size - size));
+		mTrackRegion.X = screenPos.X(); 
+		mTrackRegion.Width = mSize.X();
+		mTrackRegion.Y = screenPos.Y() + size;
+		mTrackRegion.Height = mSize.Y() - size - size;
 	}
-}
 
-void ScrollBar::HandleSliderChanged( int32_t value )
-{
-
+	UpdateThumb();
 }
 
 void ScrollBar::Initialize( const GuiSkin::StyleMap* styles /* = nullptr */ )
 {
-	if( !styles )
+	if( styles == nullptr )
 	{
 		GuiSkin* defalutSkin = UIManager::GetSingleton().GetDefaultSkin();
 
@@ -99,9 +117,8 @@ void ScrollBar::Initialize( const GuiSkin::StyleMap* styles /* = nullptr */ )
 		styleMap[Button::StyleName] = &defalutSkin->HSrollBack;
 		mBackButton->Initialize(&styleMap);
 
-		styleMap[Slider::TrackStyleName] = &defalutSkin->HScrollTrack;
-		styleMap[Slider::ThumbStyleName] = &defalutSkin->HSrollThumb;
-		mSlider->Initialize(&styleMap);
+		mTrackStyle = &defalutSkin->HScrollTrack;
+		mThumbStyle = &defalutSkin->HSrollThumb;
 	}
 	else
 	{
@@ -117,35 +134,200 @@ void ScrollBar::Initialize( const GuiSkin::StyleMap* styles /* = nullptr */ )
 		styleMap[Button::StyleName] = iter->second;
 		mBackButton->Initialize(&styleMap);
 
-		// Slider
 		iter = styles->find(TrackStyleName);
-		styleMap[Slider::TrackStyleName] = iter->second;
+		mTrackStyle = iter->second;	
 
 		iter = styles->find(ThumbStyleName);
-		styleMap[Slider::ThumbStyleName] = iter->second;
-
-		mSlider->Initialize(&styleMap);
+		mThumbStyle = iter->second;
 	}
 }
 
 void ScrollBar::StepBack()
 {
-	mSlider->StepBack();
+	SetScrollValue(mValue - mSingleStep);
 }
 
 void ScrollBar::StepForward()
 {
-	mSlider->StepForward();
+	SetScrollValue(mValue + mSingleStep);
 }
 
-void ScrollBar::SetRange( int32_t min, int32_t max )
-{
-	mSlider->SetRange(min, max);
-}
 
 void ScrollBar::Scroll( int32_t delta )
 {
 
 }
+
+void ScrollBar::GetScrollRange( int32_t* pMinValue, int32_t* pMaxValue )
+{
+	if (pMinValue) *pMinValue = mMinValue;
+	if (pMaxValue) *pMaxValue = mMaxValue;
+}
+
+void ScrollBar::SetScrollRange( int32_t minValue, int32_t maxValue )
+{
+	mMaxValue = maxValue;
+	mMinValue = minValue;
+
+	UpdateThumb();
+}
+
+void ScrollBar::SetScrollValue( int32_t value )
+{
+	value = Clamp(value, mMinValue, mMaxValue);
+
+	if (value == mValue)
+		return;
+
+	mValue = value;
+	UpdateThumb();
+
+	//if (!EventValueChanged.empty() && fromInput)
+	//	EventValueChanged(mValue);
+}
+
+void ScrollBar::UpdateThumb()
+{
+	float ratio = float(mValue - mMinValue) / (mMaxValue - mMinValue);
+
+	if (mOrientation == UI_Horizontal)
+	{		
+		mThumbRegion.Width = mThumbRegion.Height = mSize.Y();
+		mThumbRegion.X = int32_t( mTrackRegion.X + ratio * ( mTrackRegion.Width - mThumbRegion.Width ) );
+		mThumbRegion.Y = mTrackRegion.Y; 
+	}
+	else
+	{
+		mThumbRegion.Width = mThumbRegion.Height = mSize.X();
+		mThumbRegion.X = mTrackRegion.X; 
+		mThumbRegion.Y = int32_t( mTrackRegion.Y + ratio * ( mTrackRegion.Height - mThumbRegion.Height ) );
+	}
+}
+
+void ScrollBar::Update( float delta )
+{
+	if (mDragThumb)
+	{
+		mHovering = true;
+		mThumbHovering = true;
+	}
+}
+
+void ScrollBar::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
+{
+	UIElementState uiThumbState = UI_State_Normal;
+
+	// Thumb don't have focus state
+	if (mVisible == false)
+		uiThumbState = UI_State_Hidden;
+	else if (mEnabled == false)
+		uiThumbState = UI_State_Disable;
+	else if (mDragThumb)
+		uiThumbState = UI_State_Pressed;
+	else if (mThumbHovering)
+		uiThumbState = UI_State_Hover;
+	else 
+		uiThumbState = UI_State_Normal;
+
+	const GuiSkin::SytleImage& stateStyle = mThumbStyle->StyleStates[uiThumbState];
+
+	// Draw order: track, thumb
+	Rectanglef trackRegion((float)mTrackRegion.X, (float)mTrackRegion.Y, (float)mTrackRegion.Width, (float)mTrackRegion.Height);
+	Rectanglef thumbRegion((float)mThumbRegion.X, (float)mThumbRegion.Y, (float)mThumbRegion.Width, (float)mThumbRegion.Height);
+	
+	// Track
+	if (mDragThumb || mHovering)
+		spriteBatch.Draw(mTrackStyle->StyleTex, trackRegion, &mTrackStyle->StyleStates[UI_State_Hover].TexRegion, mTrackStyle->StyleStates[UI_State_Hover].TexColor);	
+	else
+		spriteBatch.Draw(mTrackStyle->StyleTex, trackRegion, &mTrackStyle->StyleStates[UI_State_Normal].TexRegion, mTrackStyle->StyleStates[UI_State_Normal].TexColor);	
+
+	// Thumb
+	spriteBatch.Draw(mThumbStyle->StyleTex, thumbRegion, &stateStyle.TexRegion, stateStyle.TexColor);	
+
+	mHovering = false;
+	mThumbHovering = false;
+}
+
+void ScrollBar::OnHover( const int2& screenPos )
+{
+	UIElement::OnHover(screenPos);
+	mThumbHovering = mThumbRegion.Contains(screenPos.X(), screenPos.Y());
+}
+
+void ScrollBar::OnDragBegin( const int2& screenPos, uint32_t buttons )
+{
+	mDragBeginPos = screenPos;
+
+	// Test if in thumb region
+	mDragThumb = mThumbRegion.Contains(screenPos.X(), screenPos.Y());
+	mDragBeginValue = mValue;
+}
+
+void ScrollBar::OnDragMove( const int2& screenPos, uint32_t buttons )
+{
+	if (!mDragThumb)
+		return; 
+
+	int2 delta = screenPos - mDragBeginPos;
+
+	int32_t newValue = mDragBeginValue;
+
+	if (mOrientation == UI_Horizontal)
+		newValue += int32_t( delta.X() / float(mTrackRegion.Width- mThumbRegion.Width) * float(mMaxValue - mMinValue) );
+	else
+		newValue += int32_t( delta.Y() / float(mTrackRegion.Height - mThumbRegion.Height) * float(mMaxValue - mMinValue) );
+
+	SetScrollValue(newValue);
+}
+
+void ScrollBar::OnDragEnd( const int2& screenPos )
+{
+	mDragThumb = false;
+}
+
+bool ScrollBar::OnMouseButtonPress( const int2& screenPos, uint32_t button )
+{
+	bool eventConsumed = false;
+
+	// if in thumb region, OnDragBegin will handle it.
+	if (mThumbRegion.Contains(screenPos.X(), screenPos.Y()))
+		return false;
+
+	if (mTrackRegion.Contains(screenPos.X(), screenPos.Y()))
+	{
+		if (mOrientation == UI_Horizontal)
+		{
+			if (screenPos.X() > mThumbRegion.X)
+				StepForward();
+			else
+				StepBack();
+		}
+		else
+		{
+			if (screenPos.Y() > mThumbRegion.Y)
+				StepForward();
+			else
+				StepBack();
+		}
+
+		eventConsumed = true;
+	}
+
+	return eventConsumed;
+}
+
+bool ScrollBar::OnMouseButtonRelease( const int2& screenPos, uint32_t button )
+{
+	bool eventConsumed = false;
+
+	if (mTrackRegion.Contains(screenPos.X(), screenPos.Y()))
+	{
+		eventConsumed = true;
+	}
+
+	return eventConsumed;
+}
+
+
 
 }

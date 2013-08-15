@@ -39,6 +39,10 @@ void UIElement::SetPosition( const int2& position )
 void UIElement::SetVisible( bool visible )
 {
 	mVisible = visible;
+
+	// Set all child to visible
+	for (UIElement* child : mChildren)
+		child->SetVisible(visible);
 }
 
 

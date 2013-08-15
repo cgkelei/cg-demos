@@ -19,32 +19,73 @@ public:
 	ScrollBar();
 	virtual ~ScrollBar();
 
-	virtual void Initialize(const GuiSkin::StyleMap* styles /* = nullptr */);
+	virtual void Initialize(const GuiSkin::StyleMap* styles = nullptr);
 
 	virtual void OnResize();
 
-	void SetOrientation(UIOrientation orient);
+	virtual void Update(float delta);
+	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 
-	void SetRange(int32_t min, int32_t max);
-	void GetRange(int32_t& min, int32_t& max)	{ mSlider->GetRange(min, max); }
+	virtual void OnHover(const int2& screenPos);
+	virtual void OnDragBegin(const int2& screenPos, uint32_t buttons);
+	virtual void OnDragMove(const int2& screenPos, uint32_t buttons);
+	virtual void OnDragEnd(const int2& screenPos);
+
+	virtual bool OnMouseButtonPress(const int2& screenPos, uint32_t button);
+	virtual bool OnMouseButtonRelease(const int2& screenPos, uint32_t button);
+
+	void SetOrientation(UIOrientation orient)						{ mOrientation = orient; }
+	UIOrientation GetOrientation() const							{ return mOrientation; }
+
+	void SetScrollValue(int32_t value);
+	int32_t GetScrollValue() const									{ return mValue; }
+
+	void SetScrollRange(int32_t minValue, int32_t maxValue);
+	void GetScrollRange(int32_t* pMinValue, int32_t* pMaxValue);
+
+	void SetPageStep(int32_t pageStep)								{ mPageStep = pageStep; }
+	int32_t GetPageStep() const										{ return mPageStep; }
 	
-	inline int32_t GetValue() const	 { return mSlider->GetValue(); }
+	void SetSingleStep(int32_t singleSize) 							{ mSingleStep = singleSize; }	
+	int32_t GetSingleStep() const									{ return mSingleStep; }
+
+	void SetScrollButtonRepeat(bool enable);
 
 	void Scroll(int32_t delta);
 
 protected:
-	void HandleSliderChanged(int32_t value);
 
 	void StepBack();
 	void StepForward();
 
 	void UpdateRect();
+	void UpdateThumb();
 
 protected:
 
 	Button* mForwardButton;
 	Button* mBackButton;
-	Slider* mSlider;
+	
+	UIOrientation mOrientation;
+
+	// Thumb
+	int32_t mValue;
+	int32_t mMinValue, mMaxValue;
+
+	int32_t mSingleStep;
+	int32_t mPageStep;
+
+	bool mThumbHovering;
+
+	bool mDragThumb;
+	int32_t mDragBeginValue;
+	int2 mDragBeginPos;		
+
+	IntRect mThumbRegion;
+	IntRect mTrackRegion;
+
+	GuiSkin::GuiStyle* mThumbStyle;
+	GuiSkin::GuiStyle* mTrackStyle;
 };
 
 

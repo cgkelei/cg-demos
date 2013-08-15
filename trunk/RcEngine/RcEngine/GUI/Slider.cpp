@@ -111,11 +111,9 @@ void Slider::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 		trackRegion.X = midX - mTrackStyle->StyleStates[UI_State_Normal].TexRegion.Width * 0.5f;  
 		trackRegion.Y = (float)screenPos.Y();
 		trackRegion.Width = (float)mTrackStyle->StyleStates[UI_State_Normal].TexRegion.Width;
-		trackRegion.Height = (float)mSize.Y();
-
-		float ratio = float(mValue - mMinimum) / (mMaximum - mMinimum);
+		trackRegion.Height = (float)mSize.Y();	
 	}
-	
+
 	thumbRegion.X = (float)mThumbRegion.X;
 	thumbRegion.Y = (float)mThumbRegion.Y;
 	thumbRegion.Width = (float)mThumbRegion.Width;

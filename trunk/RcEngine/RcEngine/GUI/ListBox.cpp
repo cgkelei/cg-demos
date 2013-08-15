@@ -16,7 +16,7 @@ ListBox::ListBox()
 {
 	mVertScrollBar = new ScrollBar();
 	mVertScrollBar->SetOrientation( UI_Vertical );
-	//mVertScrollBar->SetVisible(false);
+	mVertScrollBar->SetScrollButtonRepeat(false);
 
 	AddChild(mVertScrollBar);
 }
@@ -29,13 +29,13 @@ ListBox::~ListBox()
 void ListBox::AddItem( const std::wstring& text )
 {
 	mItems.push_back(text);
-	mVertScrollBar->SetRange(0, (int)mItems.size());
+	mVertScrollBar->SetScrollRange(0, (int)mItems.size());
 }
 
 void ListBox::InsertItem( int32_t index, const std::wstring& text )
 {
 	mItems.insert(mItems.begin() + index, text);
-	mVertScrollBar->SetRange(0, (int)mItems.size());
+	mVertScrollBar->SetScrollRange(0, (int)mItems.size());
 }
 
 void ListBox::RemoveItem( int32_t index )
@@ -44,7 +44,7 @@ void ListBox::RemoveItem( int32_t index )
 		return;
 
 	mItems.erase(mItems.begin() + index);
-	mVertScrollBar->SetRange(0, (int)mItems.size());
+	mVertScrollBar->SetScrollRange(0, (int)mItems.size());
 
 	if( mSelectedIndex >= ( int )mItems.size() )
 		mSelectedIndex = mItems.size() - 1;
@@ -113,14 +113,14 @@ void ListBox::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	if (mItems.size())
 	{
 		int mimItem, maxItem;
-		mVertScrollBar->GetRange(mimItem, maxItem);
+		mVertScrollBar->GetScrollRange(&mimItem, &maxItem);
 
 		IntRect rc = mTextRegion;
 		rc.SetBottom( rc.Y + mTextRowHeight);
 
 		//mSelectedIndex =1;
 
-		for (int i = mVertScrollBar->GetValue(); i < maxItem; ++i)
+		for (int i = mVertScrollBar->GetScrollValue(); i < maxItem; ++i)
 		{		
 			if (rc.Bottom() > mTextRegion.Bottom())
 				break;
@@ -215,7 +215,7 @@ bool ListBox::OnMouseButtonRelease( const int2& screenPos, uint32_t button )
 		{
 			if (mSelectionRegion.Contains(screenPos.X(), screenPos.Y()))
 			{
-				SetSelectedIndex( mVertScrollBar->GetValue() + (screenPos.Y() - mSelectionRegion.Top()) / mTextRowHeight );			
+				SetSelectedIndex( mVertScrollBar->GetScrollValue() + (screenPos.Y() - mSelectionRegion.Top()) / mTextRowHeight );			
 			}	
 
 			mPressed = false;

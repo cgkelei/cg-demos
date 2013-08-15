@@ -32,6 +32,26 @@ bool TextEdit::OnTextInput( uint16_t unicode )
 	return false;
 }
 
+void TextEdit::SetTextAlignment( Alignment align )
+{
+
+}
+
+void TextEdit::Initialize( const GuiSkin::StyleMap* styles /* = nullptr */ )
+{
+
+}
+
+void TextEdit::Update()
+{
+
+}
+
+void TextEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
+{
+
+}
+
 
 
 }
