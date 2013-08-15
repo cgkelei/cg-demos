@@ -1,7 +1,6 @@
 #ifndef UITextEdit_h__
 #define UITextEdit_h__
 
-#include <Core/Prerequisites.h>
 #include <GUI/UIElement.h>
 
 namespace RcEngine {
@@ -12,19 +11,21 @@ public:
 	TextEdit();
 	virtual ~TextEdit();
 
+	virtual void Update();
+	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
+
+	virtual void Initialize(const GuiSkin::StyleMap* styles /* = nullptr */);
+
 	virtual void OnDragBegin(const int2& position, uint32_t buttons);
 	virtual void OnDragMove(const int2& position, uint32_t buttons);
 	virtual void OnDragEnd(const int2& position);
 	virtual bool OnTextInput(uint16_t unicode);
 
-	void SetFont(const shared_ptr<Font>& font);
-	const shared_ptr<Font> GetFont() const			{ return mFont; }
-
 	void SetText(const String& text);
 	const std::wstring& GetText() const				{ return mText; }
 
 	void SetWordWrap(bool enable);
-	//void SetTextAlignment(ui);
+	void SetTextAlignment(Alignment align);
 
 	float GetRowSpacing() const						{ return mRowSpacing; }
 	bool GetWordWrap() const						{ return mWordWrap ; }
@@ -52,7 +53,7 @@ protected:
 
 	bool mWordWrap;
 
-	//HorizontalAlignment mTextAlignment;
+	Alignment mTextAlignment;
 };
 
 

@@ -10,7 +10,10 @@ const String Button::StyleName("Button Style");
 
 Button::Button()
 	: mPressedOffset(1, 2),
-	  mHoverOffset(-1, -2)
+	  mHoverOffset(-1, -2),
+	  mRepeatDelay(1.0f),
+	  mRepeatRate(0.0f),
+	  mRepeatTimer(0.0f)
 {
 
 }
@@ -20,10 +23,27 @@ Button::~Button()
 
 }
 
-void Button::Update( float delta )
+void Button::Update( float dt )
 {
 	if (!mHovering && mPressed)
 		SetPressed(false);
+	
+	//if (mName == "ScrollBar Back Button")
+	//	if (mHovering && mPressed)
+	//		std::cout << "Hovering && Pressed" << std::endl;
+
+	// Send repeat events if pressed
+	if (mPressed && mRepeatRate > 0.0f)
+	{
+		mRepeatTimer -= dt;
+		if (mRepeatTimer <= 0.0f)
+		{
+			mRepeatTimer += 1.0f / mRepeatRate;
+
+			if (!EventButtonClicked.empty())
+				EventButtonClicked();
+		}
+	}
 }
 
 void Button::SetPressed( bool pressed )
@@ -34,6 +54,12 @@ void Button::SetPressed( bool pressed )
 bool Button::CanHaveFocus() const
 {
 	return mVisible && mEnabled;
+}
+
+void Button::SetClickedEventRepeat( float delayTime, float rate )
+{
+	 mRepeatDelay = (std::max)(delayTime, 0.0f);
+	 mRepeatRate = (std::max)(rate, 0.0f);
 }
 
 bool Button::OnMouseButtonPress( const int2& screenPos, uint32_t button )
@@ -115,7 +141,6 @@ void Button::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	mHovering = false;
 }
 
-
 void Button::Initialize( const GuiSkin::StyleMap* styles )
 {
 	if (!styles)
@@ -130,6 +155,8 @@ void Button::Initialize( const GuiSkin::StyleMap* styles )
 		mStyle = iter->second;
 	}
 }
+
+
 
 
 }

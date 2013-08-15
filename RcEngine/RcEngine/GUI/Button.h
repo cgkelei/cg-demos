@@ -39,18 +39,23 @@ public:
 	void SetText(const std::wstring& txt)		{ mText = txt; }
 	const std::wstring& GetText() const         { return mText; }
 
+	void SetClickedEventRepeat(float delayTime, float rate);
+
 private:
 
 	void SetPressed(bool pressed);
 
 protected:
-
-	bool mPressed;
+	std::wstring mText;
 
 	int2 mPressedOffset;
 	int2 mHoverOffset;
 
-	std::wstring mText;
+	bool mPressed;
+
+	float mRepeatDelay;		// repeat fire clicked event after delayed time when button is pressed
+	float mRepeatRate;
+	float mRepeatTimer;
 
 	GuiSkin::GuiStyle* mStyle;
 };

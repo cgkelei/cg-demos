@@ -46,10 +46,10 @@ public:
 	void SetTrackStyle(GuiSkin::GuiStyle* style)  { mTrackStyle = style; }
 
 	void SetOrientation(UIOrientation orient);
-	UIOrientation GetOrientation() const  { return mOrientation; }
+	UIOrientation GetOrientation() const		  { return mOrientation; }
 	
 	void SetValue(int32_t value);
-	int32_t GetValue() const			{ return mValue; }
+	int32_t GetValue() const					  { return mValue; }
 	
 	void SetRange(int32_t  min, int32_t  max);
 	void GetRange(int32_t& min, int32_t& max);
