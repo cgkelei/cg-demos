@@ -263,7 +263,7 @@ void TestApp::InitGUI()
 
 	mScrollBar = new ScrollBar;
 	mScrollBar->SetOrientation(UI_Vertical);
-	mScrollBar->SetPosition(int2(500, 300));
+	mScrollBar->SetPosition(int2(250, 200));
 	mScrollBar->SetSize(int2(23, 200));
 	mScrollBar->Initialize(nullptr);
 	rootElem->AddChild( mScrollBar );	
