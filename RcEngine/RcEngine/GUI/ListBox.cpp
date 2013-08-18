@@ -7,10 +7,12 @@
 
 namespace RcEngine {
 
+static const int32_t ScrollBarWidth = 20;
+
 ListBox::ListBox()
 	: mSelectedIndex(-1),
 	  mNumVisibleItems(0),
-	  mScrollBarWidth(16),
+	  mScrollBarWidth(ScrollBarWidth),
 	  mBorder(6), mMargin(5),
 	  mPressed(false)
 {

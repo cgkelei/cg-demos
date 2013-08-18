@@ -578,6 +578,15 @@ GuiSkin* UIManager::GetDefaultSkin()
 		mDefaultSkin->ListBox.BackColor = ColorRGBA(1, 1, 1, 255.0 / 255);
 		mDefaultSkin->ListBox.ForeColor = ColorRGBA(1, 1, 1, 255.0 / 255);
 		mDefaultSkin->ListBox.StyleTex = mDefaultSkin->mSkinTexAtlas;
+
+		// TextEdit
+		mDefaultSkin->TextEdit.Font = mFont;
+		mDefaultSkin->TextEdit.FontSize = 20;
+
+		// Background
+		mDefaultSkin->TextEdit.StyleStates[UI_State_Normal].TexRegion = IntRect(14, 90, 227, 23);
+		mDefaultSkin->TextEdit.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 125.0f / 255);
+		mDefaultSkin->TextEdit.StyleTex = mDefaultSkin->mSkinTexAtlas;
 	}
 
 
