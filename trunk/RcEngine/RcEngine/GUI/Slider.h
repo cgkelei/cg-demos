@@ -29,7 +29,7 @@ public:
 	virtual void OnResize();
 
 	virtual void OnHover(const int2& screenPos);
-	virtual void OnDragBegin(const int2& screenPos, uint32_t buttons);
+	virtual void OnDragBegin(const int2& screenPos, uint32_t button);
 	virtual void OnDragMove(const int2& screenPos, uint32_t buttons);
 	virtual void OnDragEnd(const int2& screenPos);
 

@@ -15,7 +15,7 @@ public:
 	TextEdit();
 	virtual ~TextEdit();
 
-	virtual void Update();
+	virtual void Update(float dt);
 	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 
 	virtual void Initialize(const GuiSkin::StyleMap* styles /* = nullptr */);
@@ -32,25 +32,24 @@ public:
 	
 	virtual bool CanHaveFocus() const;
 
-	void SetText(const String& text);
+	void SetText(const std::wstring& text);
 	const std::wstring& GetText() const				    { return mText; }
 
 	void SetBorderWidth(int32_t border)					{ mBorder = border; UpdateRect(); }
+	void SetMultiLine(bool enable)						{ mMultiLine = enable; }
 
 	void SetTextColor(const ColorRGBA& color)			{ mTextColor = color; }
 	void SetSelectedTextColor(const ColorRGBA& color)	{ mSelTextColor = color; }
-
-	void SetTextAlignment(Alignment align);
 
 protected:
 
 	int32_t GetRowStartPos(int32_t rowIdx) const;
 
-	int32_t GetCharPos(const int2& screenPos) const;
+	void GetCharPos(const int2& screenPos, int32_t& rowIndex, int32_t& columnIndex);
 
 	void DeleteSlectedText();
 
-	void PlaceCaret(int32_t charPos);
+	void PlaceCaret(int32_t rowIndex, int32_t columnIndex);
 
 	void UpdateRect();
 	void UpdateText();
@@ -62,12 +61,19 @@ protected:
 	std::wstring mText;
 	
 	IntRect mTextRect;
+	IntRect mBackRect;
 
-	std::vector<int2> mCharPositions;
+
+	struct CaretPair
+	{
+		float Start;
+		float Half;
+	};
+	std::vector< std::vector<CaretPair> > mCharPositions;
 
 	int32_t mBorder;
+	int32_t mRowHeight;
 
-	int32_t mCaretPos;       // Caret position, in characters
 	int32_t mSelectStart, mSelectLength;
 	
 	ColorRGBA mTextColor;
@@ -75,16 +81,19 @@ protected:
 	ColorRGBA mSelBkColor;
 	ColorRGBA mCaretColor;
 
+	ScrollBar* mVertScrollBar;
+	int32_t mScrollBarWidth;
+
 	bool mDragMouse;
 
-	// Caret blink rate.
-	float cursorBlinkRate_;
-	// Caret blink timer.
-	float cursorBlinkTimer_;
+	float mCaretBlinkRate;
+	float mCaretBlinkTimer;
+	bool mCaretOn;
 
-	Alignment mTextAlignment;
+	int32_t mCaretRowIndex;
+	int32_t mCaretColumnIndex;
 
-	GuiSkin::GuiStyle* mStyle;
+	GuiSkin::GuiStyle* mTextEditStyle;
 };
 
 

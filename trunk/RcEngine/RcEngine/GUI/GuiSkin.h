@@ -93,6 +93,8 @@ public:
 
 	GuiStyle ListBox;
 
+	GuiStyle TextEdit;
+
 	// Slider
 	GuiStyle HSliderTrack, HSliderThumb;  // Normal or hover
 	GuiStyle VSliderTrack, VSliderThumb;  // Normal or hover
