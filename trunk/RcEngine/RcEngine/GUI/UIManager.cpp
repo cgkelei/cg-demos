@@ -176,12 +176,12 @@ bool UIManager::OnEvent( const InputEvent& event )
 		break;
 	case InputEventType::KeyUp:
 		{
-			eventConsumed = HandleKeyPress(event.Key.key);
+			eventConsumed = HandleKeyRelease(event.Key.key);
 		}
 		break;
 	case InputEventType::Char:
 		{
-			eventConsumed = HandleKeyPress(event.Char.unicode);
+			eventConsumed = HandleTextInput(event.Char.unicode);
 		}
 		break;
 	default:

@@ -5,8 +5,6 @@
 #include "Graphics/SimpleGeometry.h"
 #include "Graphics/CameraControler.h"
 
-#pragma comment(lib, "RcEngine.lib")
-
 using namespace RcEngine;
 
 class TestApp : public RcEngine::Application
@@ -58,5 +56,6 @@ private:
 	CheckBox* mCheckBox;
 	ScrollBar* mScrollBar;
 	ListBox* mListBox;
+	TextEdit* mTextEdit;
 };
 
