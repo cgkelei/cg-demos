@@ -37,6 +37,7 @@
 #include "Core/Utility.h"
 #include "GUI/UIManager.h"
 #include "GUI/Label.h"
+#include "GUI/TextEdit.h"
 #include "GUI/Slider.h"
 #include "GUI/CheckBox.h"
 #include "GUI/ScrollBar.h"
@@ -278,6 +279,15 @@ void TestApp::InitGUI()
 	mListBox->AddItem(L"Alchemy");
 	mListBox->Initialize(nullptr);
 	rootElem->AddChild(mListBox);
+
+	mTextEdit = new TextEdit;
+	mTextEdit->SetName("TextEdit");
+	mTextEdit->SetPosition(int2(20, 430));
+	mTextEdit->SetSize(int2(200, 90));
+	mTextEdit->SetMultiLine(true);
+	mTextEdit->SetText(L"mTextEdit\n->SetSize\n(int2(200, 90))");
+	mTextEdit->Initialize(nullptr);
+	rootElem->AddChild(mTextEdit);
 }
 
 void TestApp::DrawUI()

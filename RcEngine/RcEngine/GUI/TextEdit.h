@@ -45,14 +45,18 @@ protected:
 
 	int32_t GetRowStartPos(int32_t rowIdx) const;
 
-	void GetCharPos(const int2& screenPos, int32_t& rowIndex, int32_t& columnIndex);
+	void GetCharPos(const int2& screenPos, size_t& rowIndex, size_t& columnIndex);
 
 	void DeleteSlectedText();
+	void DeleteChar();
 
-	void PlaceCaret(int32_t rowIndex, int32_t columnIndex);
+	void PlaceCaret(size_t newCaretX, size_t newCaretY);
 
 	void UpdateRect();
 	void UpdateText();
+
+
+
 
 protected:
 
@@ -74,8 +78,6 @@ protected:
 	int32_t mBorder;
 	int32_t mRowHeight;
 
-	int32_t mSelectStart, mSelectLength;
-	
 	ColorRGBA mTextColor;
 	ColorRGBA mSelTextColor;
 	ColorRGBA mSelBkColor;
@@ -90,8 +92,10 @@ protected:
 	float mCaretBlinkTimer;
 	bool mCaretOn;
 
-	int32_t mCaretRowIndex;
-	int32_t mCaretColumnIndex;
+	// Caret Position, measured in char index
+	size_t mCaretY, mCaretX;
+
+	size_t mSelectStartX, mSelectStartY;
 
 	GuiSkin::GuiStyle* mTextEditStyle;
 };
