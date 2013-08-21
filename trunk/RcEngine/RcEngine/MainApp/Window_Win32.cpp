@@ -157,10 +157,20 @@ static void MakeKeyEvent(int vkCode, int lParam, InputEvent& e)
 
 	if (vkCode == VK_SHIFT)
 	{
-		if( GetKeyState(VK_RSHIFT) & 0x8000)
-			e.Key.key = KC_RightShift;
-		else if( GetKeyState(VK_LSHIFT) & 0x8000)
+		if (e.EventType == InputEventType::KeyDown)
+		{
 			e.Key.key = KC_LeftShift;
+
+			if( GetKeyState(VK_RSHIFT) & 0x8000)
+				e.Key.key = KC_RightShift;
+		}
+		else
+		{
+			e.Key.key = KC_LeftShift;
+
+			if (InputSystem::GetSingleton().KeyDown(KC_RightShift))
+				e.Key.key = KC_RightShift;
+		}	
 	}
 	else if (vkCode == VK_CONTROL)
 	{
@@ -430,7 +440,7 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			InputEvent e;
 			e.Key.type = InputEventType::KeyUp;
 			MakeKeyEvent(wParam, lParam, e);
-			mInputSystem->FireEvent(e);
+			mInputSystem->FireEvent(e);		
 		}
 		break;
 

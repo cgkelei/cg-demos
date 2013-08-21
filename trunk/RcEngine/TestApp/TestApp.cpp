@@ -285,6 +285,7 @@ void TestApp::InitGUI()
 	mTextEdit->SetPosition(int2(20, 430));
 	mTextEdit->SetSize(int2(200, 90));
 	mTextEdit->SetMultiLine(true);
+	//mTextEdit->SetText(L"mTextEdit\n->SetSize\n(int2(200, 90))");
 	mTextEdit->SetText(L"mTextEdit\n->SetSize\n(int2(200, 90))");
 	mTextEdit->Initialize(nullptr);
 	rootElem->AddChild(mTextEdit);
