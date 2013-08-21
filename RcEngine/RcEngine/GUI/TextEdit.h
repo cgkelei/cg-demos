@@ -47,43 +47,43 @@ protected:
 
 	void GetCharPos(const int2& screenPos, size_t& rowIndex, size_t& columnIndex);
 
+	size_t GetCharIndex(size_t rowIndex, size_t columnIndex);
+
 	void DeleteSlectedText();
-	void DeleteChar();
+	void DeletePreChar();
+	void DeleteNextChar();
 
 	void PlaceCaret(size_t newCaretX, size_t newCaretY);
 
 	void UpdateRect();
 	void UpdateText();
 
-
-
-
+	void UpdateVScrollBar();
+	void HandleVScrollBar(int32_t value);
+	
 protected:
 
 	bool mMultiLine;
 
 	std::wstring mText;
-	
+	std::wstring mPrintText;
+	size_t mFirstVisibleLine;
+
 	IntRect mTextRect;
 	IntRect mBackRect;
 
-
-	struct CaretPair
-	{
-		float Start;
-		float Half;
-	};
-	std::vector< std::vector<CaretPair> > mCharPositions;
+	std::vector< std::vector<float> > mCharPositions;
 
 	int32_t mBorder;
 	int32_t mRowHeight;
-
+	
 	ColorRGBA mTextColor;
 	ColorRGBA mSelTextColor;
 	ColorRGBA mSelBkColor;
 	ColorRGBA mCaretColor;
 
 	ScrollBar* mVertScrollBar;
+	
 	int32_t mScrollBarWidth;
 
 	bool mDragMouse;

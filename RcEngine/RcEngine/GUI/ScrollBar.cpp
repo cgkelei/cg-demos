@@ -182,8 +182,8 @@ void ScrollBar::SetScrollValue( int32_t value )
 	mValue = value;
 	UpdateThumb();
 
-	//if (!EventValueChanged.empty() && fromInput)
-	//	EventValueChanged(mValue);
+	if (!EventValueChanged.empty())
+		EventValueChanged(mValue);
 }
 
 void ScrollBar::UpdateThumb()

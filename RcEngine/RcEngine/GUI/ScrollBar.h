@@ -10,6 +10,13 @@ class _ApiExport ScrollBar : public UIElement
 {
 public:
 
+	// Scroll value changed event
+	typedef fastdelegate::FastDelegate1<int32_t> ValueChangedEventHandler;
+	ValueChangedEventHandler EventValueChanged;
+	
+	/**
+	 * ScrollBar styles name
+	 */
 	static const String ForwardStyleName;
 	static const String BackStyleName;
 	static const String ThumbStyleName;

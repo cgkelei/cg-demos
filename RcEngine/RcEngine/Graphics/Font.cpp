@@ -432,11 +432,11 @@ void Font::DrawString( SpriteBatch& spriteBatch, std::wstring& text, int32_t fon
 	float y;
 
 	if (alignment & AlignTop)
-		y = region.Top() + rowHeight;
+		y = region.Top() + rowHeight * 0.78f;  // Hack, todo: rewrite font
 	else if (alignment & AlignVCenter)
 		y = region.Top() + (region.Height - height + rowHeight) / 2 + rowHeight * 0.28f;
 	else if (alignment & AlignBottom)
-		y = region.Top() + (region.Height - height) + rowHeight;
+		y = region.Top() + (region.Height - height) + rowHeight * 0.28f;
 	else
 		y = region.Top() + rowHeight;
 

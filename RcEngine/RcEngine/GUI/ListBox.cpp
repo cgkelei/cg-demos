@@ -120,8 +120,6 @@ void ListBox::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 		IntRect rc = mTextRegion;
 		rc.SetBottom( rc.Y + mTextRowHeight);
 
-		//mSelectedIndex =1;
-
 		for (int i = mVertScrollBar->GetScrollValue(); i < maxItem; ++i)
 		{		
 			if (rc.Bottom() > mTextRegion.Bottom())

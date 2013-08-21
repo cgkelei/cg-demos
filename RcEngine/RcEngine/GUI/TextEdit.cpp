@@ -31,8 +31,9 @@ TextEdit::TextEdit()
 
 	mVertScrollBar = new ScrollBar();
 	mVertScrollBar->SetOrientation( UI_Vertical );
-	mVertScrollBar->SetScrollButtonRepeat(false);
+	mVertScrollBar->SetScrollButtonRepeat(true);
 	mVertScrollBar->SetVisible(false);
+	mVertScrollBar->EventValueChanged.bind(this, &TextEdit::HandleVScrollBar);
 
 	AddChild(mVertScrollBar);
 }
@@ -63,6 +64,10 @@ void TextEdit::Initialize( const GuiSkin::StyleMap* styles /* = nullptr */ )
 		// background in Normal State
 		mTextEditStyle = &defaultSkin->TextEdit;
 	}
+
+	// Init row height
+	const float fontScale = (float)mTextEditStyle->FontSize / mTextEditStyle->Font->GetFontSize();
+	mRowHeight = static_cast<int32_t>( mTextEditStyle->Font->GetRowHeight() * fontScale );
 
 	UpdateText();
 }
@@ -102,67 +107,34 @@ void TextEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 		Rectanglef rect;
 		rect.Height = (float)mRowHeight;
 
-		if (start.Y() < end.Y())
+		if (start.Y() != end.Y())
 		{
 			// First Line
-			if (start.X() < mCharPositions[start.Y()].size())
-			{
-				const CaretPair& last = mCharPositions[start.Y()].back();
-				
-				rect.SetLeft( mCharPositions[start.Y()][start.X()].Start );
-				rect.SetRight( last.Start + (last.Half - last.Start) * 2.0f );
-				rect.SetTop( float(mTextRect.Y + mRowHeight * start.Y()) );		
+			rect.SetLeft( mCharPositions[start.Y()][start.X()] );
+			rect.SetRight( mCharPositions[start.Y()].back() );
+			rect.SetTop( float(mTextRect.Y + mRowHeight * start.Y()) );		
+			spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));
+			
+			// Last Line
+			rect.SetLeft( mCharPositions[end.Y()].front() );
+			rect.SetRight( mCharPositions[end.Y()][end.X()] );
+			rect.SetTop( float(mTextRect.Y + mRowHeight * end.Y()) );		
+			spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));
 
+			for (size_t i = start.Y() + 1; i < end.Y(); ++i)
+			{
+				rect.SetLeft( mCharPositions[i].front() );
+				rect.SetRight( mCharPositions[i].back() );
+				rect.SetTop( float(mTextRect.Y + mRowHeight * i) );	
 				spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));
 			}
-
-			// Last Line
-			if (end.X() > 0)
-			{
-				rect.SetTop( float(mTextRect.Y + mRowHeight * end.Y()) );
-				rect.SetLeft(mCharPositions[end.Y()][0].Start);
-
-				if (end.X() >= mCharPositions[end.Y()].size())
-				{
-					const CaretPair& last = mCharPositions[end.Y()].back();
-					rect.SetRight( last.Start + (last.Half - last.Start) * 2.0f );
-				}
-				else
-				{
-					rect.SetRight( mCharPositions[end.Y()][end.X()].Start );
-				}
-			}
-			
-
-			spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));
 		}
 		else
 		{
-			rect.SetTop( float(mTextRect.Y + mRowHeight * start.Y()) );
-			rect.SetLeft( mCharPositions[start.Y()][start.X()].Start );
-
-			if (end.X() >= mCharPositions[end.Y()].size())
-			{
-				const CaretPair& last = mCharPositions[end.Y()].back();
-				rect.SetRight( last.Start + (last.Half - last.Start) * 2.0f );
-			}
-			else
-			{
-				rect.SetRight( mCharPositions[end.Y()][end.X()].Start );
-			}
-
-			spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));			
-		}
-
-		for (size_t y = start.Y() + 1; y < end.Y(); ++y)
-		{
-			const CaretPair& last = mCharPositions[y].back();
-
-			rect.SetLeft( mCharPositions[y][0].Start );
-			rect.SetRight( last.Start + (last.Half - last.Start) * 2.0f );
-			rect.SetTop( float(mTextRect.Y + mRowHeight * y) );
-
-			spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));			
+			rect.SetLeft( mCharPositions[start.Y()][start.X()] );
+			rect.SetRight( mCharPositions[end.Y()][end.X()] );
+			rect.SetTop( float(mTextRect.Y + mRowHeight * start.Y()) );		
+			spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));
 		}
 	}
 
@@ -175,16 +147,7 @@ void TextEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	{
 		Rectanglef caretRC;
 
-		if (mCaretX >= mCharPositions[mCaretY].size())
-		{
-			const CaretPair& pair = mCharPositions[mCaretY].back();
-			caretRC.X = pair.Start + (pair.Half - pair.Start) * 2.0f;
-		}
-		else
-		{
-			caretRC.X = (float)mCharPositions[mCaretY][mCaretX].Start;
-		}
-		
+		caretRC.X = mCharPositions[mCaretY][mCaretX];
 		caretRC.Y = mTextRect.Y + (float)mCaretY * mRowHeight;
 		caretRC.Width = 1.0f;
 		caretRC.Height = (float)mRowHeight;
@@ -236,22 +199,32 @@ void TextEdit::GetCharPos( const int2& screenPos, size_t& rowIndex, size_t& colu
 	{
 		rowIndex = 0;
 
-		columnIndex = 0;
-		for (columnIndex = 0; columnIndex < mCharPositions[rowIndex].size(); ++columnIndex)
+		columnIndex = mCharPositions[rowIndex].size() - 1;
+		for (size_t i = 0; i < mCharPositions[rowIndex].size() - 1; ++i)
 		{
-			if (mCharPositions[rowIndex][columnIndex].Half > (float)screenPos.X())
+			float half = (mCharPositions[rowIndex][i] + mCharPositions[rowIndex][i+1]) * 0.5f;
+
+			if ((float)screenPos.X() < half)
+			{
+				columnIndex = i;
 				break;
+			}
 		}
 	}
 	else
 	{
 		rowIndex = Clamp(size_t(screenPos.Y() - mTextRect.Y) / mRowHeight, size_t(0), mCharPositions.size() - 1);
 
-		columnIndex = 0;
-		for (columnIndex = 0; columnIndex < mCharPositions[rowIndex].size(); ++columnIndex)
+		columnIndex = mCharPositions[rowIndex].size() - 1;
+		for (size_t i = 0; i < mCharPositions[rowIndex].size() - 1; ++i)
 		{
-			if (mCharPositions[rowIndex][columnIndex].Half > (float)screenPos.X())
+			float half = (mCharPositions[rowIndex][i] + mCharPositions[rowIndex][i+1]) * 0.5f;
+		
+			if ((float)screenPos.X() < half)
+			{
+				columnIndex = i;
 				break;
+			}
 		}
 	}
 }
@@ -309,15 +282,19 @@ void TextEdit::UpdateText()
 	if (!mTextEditStyle)
 		return;
 
+	// Update ScrollBar
+	UpdateVScrollBar();
+	
+	//mPrintText
+
 	const float fontScale = (float)mTextEditStyle->FontSize / mTextEditStyle->Font->GetFontSize();
-	mRowHeight = static_cast<int32_t>( mTextEditStyle->Font->GetRowHeight() * fontScale );
-
-	mCharPositions.clear();
-
-	size_t numRow = 0;
-	mCharPositions.resize(numRow+1);
 
 	float charX = (float)mTextRect.X;
+
+	mCharPositions.resize(1);
+	mCharPositions[0].resize(1, charX);
+
+	size_t numRow = 0;
 	for (size_t i = 0; i < mText.length(); ++i)
 	{
 		wchar_t ch = mText[i];
@@ -327,34 +304,18 @@ void TextEdit::UpdateText()
 			numRow++;
 			mCharPositions.resize(numRow+1);
 			charX = (float)mTextRect.X;
+
+			mCharPositions.back().push_back(charX);
 		}
 		else
 		{
 			const Font::Glyph& glyph = mTextEditStyle->Font->GetGlyphInfo(ch);
 
-			CaretPair pair;
-			pair.Start = charX;
-			pair.Half = charX + glyph.Advance * fontScale / 2;
-			mCharPositions[numRow].push_back(pair);
-
 			charX += glyph.Advance * fontScale;
+			mCharPositions[numRow].push_back(charX);		
 		}
 	}
 
-	//int32_t numLines = std::count(mText.begin(), mText.end(), L'\n') + 1;
-	int32_t numLines = mCharPositions.size();
-
-	if (mMultiLine && (numLines * mRowHeight) > mTextRect.Height )
-	{
-		mVertScrollBar->SetVisible(true);
-		mVertScrollBar->SetPosition(int2(mSize.X() - mScrollBarWidth, 0));
-		mVertScrollBar->SetSize(int2(mScrollBarWidth, mSize.Y()));
-		mVertScrollBar->SetScrollRange(0, numLines);
-
-		mTextRect.Width -= mScrollBarWidth;
-
-		mBackRect.Width -= mScrollBarWidth;
-	}
 }
 
 void TextEdit::SetText( const std::wstring& text )
@@ -380,7 +341,7 @@ bool TextEdit::OnKeyPress( uint16_t key )
 
 	case KC_RightArrow:
 		{
-			if (mCaretX < mCharPositions[mCaretY].size())
+			if (mCaretX < mCharPositions[mCaretY].size() - 1)
 				PlaceCaret(mCaretX + 1, mCaretY);
 			else 
 			{
@@ -393,14 +354,35 @@ bool TextEdit::OnKeyPress( uint16_t key )
 	case KC_UpArrow:
 		{
 			if (mCaretY> 0)
-				PlaceCaret(mCaretX, mCaretY-1);
+				PlaceCaret((std::min)(mCaretX, mCharPositions[mCaretY-1].size()-1), mCaretY-1);
 		}
 		break;
 
 	case KC_DownArrow:
 		{
 			if (mCaretY < mCharPositions.size() - 1)
-				PlaceCaret(mCaretX, mCaretY+1);
+				PlaceCaret((std::min)(mCaretX, mCharPositions[mCaretY+1].size()-1), mCaretY+1);
+		}
+		break;
+
+	case KC_Home:
+		{
+			PlaceCaret(0, mCaretY);
+		}
+		break;
+
+	case KC_End:
+		{
+			PlaceCaret(mCharPositions[mCaretY].size()-1 , mCaretY);
+		}
+		break;
+
+	case KC_Delete:
+		{
+			if (mSelectStartX != mCaretX || mSelectStartY != mCaretY)
+				DeleteSlectedText();
+			else
+				DeleteNextChar();
 		}
 		break;
 
@@ -409,7 +391,7 @@ bool TextEdit::OnKeyPress( uint16_t key )
 			if (mSelectStartX != mCaretX || mSelectStartY != mCaretY)
 				DeleteSlectedText();
 			else
-				DeleteChar();
+				DeletePreChar();
 		}
 		break;
 
@@ -417,7 +399,11 @@ bool TextEdit::OnKeyPress( uint16_t key )
 		{
 			if( mMultiLine )
 			{
+				size_t caretIdx = GetCharIndex(mCaretY, mCaretX);
 
+				mText.insert(mText.begin() + caretIdx, L'\n');
+				UpdateText();		
+				PlaceCaret(0, mCaretY + 1);
 			}
 			else
 			{
@@ -428,11 +414,7 @@ bool TextEdit::OnKeyPress( uint16_t key )
 		}
 		break;
 
-	case KC_Home:
-		{
-
-		}
-		break;
+	
 
 	default:
 		break;
@@ -443,11 +425,55 @@ bool TextEdit::OnKeyPress( uint16_t key )
 
 bool TextEdit::OnTextInput( uint16_t unicode )
 {
-	bool eventConsumed = false;
+	bool eventConsumed = true;
+	
+	if (HasFocus() && unicode >= 0x20)
+	{
+		if (mSelectStartX != mCaretX || mSelectStartY != mCaretY)
+		{
+			Vector<size_t, 2> start(mSelectStartX, mSelectStartY);
+			Vector<size_t, 2> end(mCaretX, mCaretY);
 
+			if ( (mSelectStartY > mCaretY) || (mSelectStartY == mCaretY && mSelectStartX > mCaretX) )
+				std::swap(start, end);
 
+			size_t delStart = GetCharIndex(start.Y(), start.X());
+			size_t delEnd = GetCharIndex(end.Y(), end.X());
+
+			mText.replace(delStart, delEnd - delStart, 1, (wchar_t)unicode);
+
+			UpdateText();		
+			PlaceCaret(start.X() + 1, start.Y());
+
+		}
+		else
+		{
+			size_t caretIdx = GetCharIndex(mCaretY, mCaretX);
+
+			mText.insert(mText.begin() + caretIdx, (wchar_t)unicode);
+
+			UpdateText();		
+			PlaceCaret(mCaretX + 1, mCaretY);
+		}
+	}
 
 	return eventConsumed;
+}
+
+size_t TextEdit::GetCharIndex( size_t rowIndex, size_t columnIndex )
+{
+	size_t retVal = 0;
+
+	size_t i = 0;
+	while (i < rowIndex)
+	{
+		retVal += mCharPositions[i].size();
+		i++;
+	}
+
+	retVal += columnIndex;
+
+	return retVal;
 }
 
 void TextEdit::DeleteSlectedText()
@@ -460,30 +486,9 @@ void TextEdit::DeleteSlectedText()
 	if ( (mSelectStartY > mCaretY) || (mSelectStartY == mCaretY && mSelectStartX > mCaretX) )
 		std::swap(start, end);
 
-	size_t delStart = 0;
-	size_t delEnd = 0;
+	size_t delStart = GetCharIndex(start.Y(), start.X());
+	size_t delEnd = GetCharIndex(end.Y(), end.X());
 
-	for (size_t i = 0; i < mText.length(); ++i)
-	{
-		wchar_t ch = mText[i];
-
-		if (x == start.X() && y == start.Y())
-			delStart = i;
-
-		if (x == end.X() && y == end.Y())
-		{
-			delEnd = i;
-			break;
-		}
-
-		x++;
-
-		if (ch == L'\n')
-		{
-			y++;
-			x = 0;
-		}
-	}
 
 	mText.erase(delStart, delEnd - delStart);
 	UpdateText();
@@ -491,9 +496,76 @@ void TextEdit::DeleteSlectedText()
 	PlaceCaret(start.X(), start.Y());
 }
 
-void TextEdit::DeleteChar()
+void TextEdit::DeleteNextChar()
 {
+	size_t delStart = GetCharIndex(mCaretY, mCaretX);
+	mText.erase(delStart, 1);
+	UpdateText();
+	PlaceCaret(mCaretX, mCaretY);
+}
 
+void TextEdit::DeletePreChar()
+{
+	size_t delStart = GetCharIndex(mCaretY, mCaretX);
+	if (delStart != 0)
+	{
+		mText.erase(delStart-1, 1);
+		UpdateText();
+
+		if (mCaretX > 0)
+			PlaceCaret(mCaretX - 1, mCaretY);
+		else if (mCaretX == 0 && mCaretY > 0)
+		{
+			size_t i = 0;
+			while (i < mCaretY - 1)
+			{
+				delStart -= mCharPositions[i].size();
+				i++;
+			}
+
+			PlaceCaret(delStart-1, mCaretY-1);
+		}
+	}
+}
+
+void TextEdit::UpdateVScrollBar()
+{
+	int32_t numLines = std::count(mText.begin(), mText.end(), L'\n') + 1;
+
+	/*if ( mMultiLine && (numLines * mRowHeight) > mTextRect.Height )
+	{
+		if ( mVertScrollBar->IsVisible() == false )
+		{
+			mVertScrollBar->SetVisible(true);
+			mVertScrollBar->SetPosition(int2(mSize.X() - mScrollBarWidth, 0));
+			mVertScrollBar->SetSize(int2(mScrollBarWidth, mSize.Y()));
+			
+			int32_t remain = numLines - mTextRect.Height / mRowHeight;
+			mVertScrollBar->SetScrollRange(0, remain);
+
+			mTextRect.Width -= mScrollBarWidth;
+			mBackRect.Width -= mScrollBarWidth;
+		}	
+	}
+	else
+	{
+		if ( mVertScrollBar->IsVisible() )
+		{
+			mVertScrollBar->SetVisible(false);
+			mTextRect.Width += mScrollBarWidth;
+			mBackRect.Width += mScrollBarWidth;
+		}
+	}*/
+}
+
+void TextEdit::HandleVScrollBar( int32_t value )
+{
+	int32_t minValue, maxValue;
+	mVertScrollBar->GetScrollRange(&minValue, &maxValue);
+
+	mFirstVisibleLine = (size_t)value;
+
+	UpdateText();
 }
 
 
