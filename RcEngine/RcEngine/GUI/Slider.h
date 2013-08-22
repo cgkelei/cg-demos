@@ -18,10 +18,10 @@ public:
 	static const String ThumbStyleName;
 
 public:
-	Slider();
+	Slider(UIOrientation orient);
 	virtual ~Slider();
 
-	virtual void Initialize(const GuiSkin::StyleMap* styles = nullptr);
+	virtual void InitGuiStyle(const GuiSkin::StyleMap* styles = nullptr);
 
 	virtual void Update(float delta);
 	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
@@ -45,7 +45,6 @@ public:
 	void SetThumbStyle(GuiSkin::GuiStyle* style)  { mThumbStyle = style; }
 	void SetTrackStyle(GuiSkin::GuiStyle* style)  { mTrackStyle = style; }
 
-	void SetOrientation(UIOrientation orient);
 	UIOrientation GetOrientation() const		  { return mOrientation; }
 	
 	void SetValue(int32_t value);

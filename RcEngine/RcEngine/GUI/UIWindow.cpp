@@ -228,5 +228,10 @@ void UIWindow::Draw( SpriteBatch& spriteBatch )
 
 }
 
+void UIWindow::InitGuiStyle( const GuiSkin::StyleMap* styles /*= nullptr*/ )
+{
+
+}
+
 
 }

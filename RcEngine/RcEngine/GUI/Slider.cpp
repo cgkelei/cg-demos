@@ -7,15 +7,16 @@ namespace RcEngine {
 const String Slider::TrackStyleName("Slider::TrackStyleName");
 const String Slider::ThumbStyleName("Slider::ThumbStyleName");
 
-Slider::Slider()
-	: mMinimum(0), 
-	mMaximum(100),
-	mValue(0),
-	mSingleStep(1),
-	mDragSlider(false),
-	mThumbHovering(false),
-	mThumbStyle(nullptr),
-	mTrackStyle(nullptr)
+Slider::Slider( UIOrientation orient )
+	: mOrientation(orient),
+	  mMinimum(0), 
+	  mMaximum(100),
+	  mValue(0),
+	  mSingleStep(1),
+	  mDragSlider(false),
+	  mThumbHovering(false),
+	  mThumbStyle(nullptr),
+	  mTrackStyle(nullptr)
 {
 
 }
@@ -37,11 +38,6 @@ void Slider::Update( float delta )
 void Slider::OnResize()
 {
 	UpdateSlider();
-}
-
-void Slider::SetOrientation( UIOrientation orient )
-{
-	mOrientation = orient;
 }
 
 void Slider::UpdateSlider()
@@ -254,7 +250,7 @@ void Slider::SetValueInternal( int32_t value, bool fromInput )
 		EventValueChanged(mValue);
 }
 
-void Slider::Initialize( const GuiSkin::StyleMap* styles /*= nullptr*/ )
+void Slider::InitGuiStyle( const GuiSkin::StyleMap* styles /*= nullptr*/ )
 {
 	if (!styles)
 	{

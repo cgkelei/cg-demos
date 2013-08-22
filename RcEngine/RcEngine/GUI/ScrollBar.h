@@ -23,10 +23,12 @@ public:
 	static const String TrackStyleName;
 
 public:
-	ScrollBar();
+	ScrollBar(UIOrientation orient);
 	virtual ~ScrollBar();
 
-	virtual void Initialize(const GuiSkin::StyleMap* styles = nullptr);
+	virtual void InitGuiStyle(const GuiSkin::StyleMap* styles = nullptr);
+
+	virtual bool CanHaveFocus() const;
 
 	virtual void OnResize();
 
@@ -41,7 +43,8 @@ public:
 	virtual bool OnMouseButtonPress(const int2& screenPos, uint32_t button);
 	virtual bool OnMouseButtonRelease(const int2& screenPos, uint32_t button);
 
-	void SetOrientation(UIOrientation orient)						{ mOrientation = orient; }
+	virtual bool HasCombinedFocus() const;
+
 	UIOrientation GetOrientation() const							{ return mOrientation; }
 
 	void SetScrollValue(int32_t value);

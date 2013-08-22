@@ -34,6 +34,8 @@ public:
 	UIWindow();
 	virtual ~UIWindow();
 
+	virtual void InitGuiStyle(const GuiSkin::StyleMap* styles = nullptr);
+
 	virtual void OnDragBegin(const int2& screenPos, uint32_t button);
 	virtual void OnDragMove(const int2& screenPos, uint32_t buttons);
 	virtual void OnDragEnd(const int2& screenPos);
@@ -51,8 +53,6 @@ public:
 	void Minimize();
 	void Maximize();
 	void Restore();
-
-
 
 protected:
 	DragMode GetDragMode(const int2& position);

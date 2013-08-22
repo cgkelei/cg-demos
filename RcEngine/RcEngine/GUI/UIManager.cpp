@@ -402,17 +402,29 @@ void UIManager::GetElementAtPoint( UIElement*& result, UIElement* current, const
 	if (!current)
 		return;
 
+	current->SortChildren();
+
 	for ( UIElement* element : current->GetChildren() )
 	{
 		bool hasChildren = (element->GetNumChildren() > 0);
 
-		if (element->IsVisible())
+		if (element->IsVisible() && element->IsEnabled())
 		{
-			if (element->IsInside(pos, true) && element->IsEnabled())
+			if (element->IsInside(pos, true))
+			{
 				result = element;
 
-			if (hasChildren)
-				GetElementAtPoint(result, element, pos);
+				if (hasChildren)
+					GetElementAtPoint(result, element, pos);	
+			}
+			else
+			{
+				if (hasChildren && element->CanChildOutside())
+				{
+					if (element->IsInsideCombined(pos, true))
+						GetElementAtPoint(result, element, pos);	
+				}
+			}
 		}
 	}
 }
@@ -437,8 +449,6 @@ void UIManager::Render()
 
 void UIManager::RenderUIElement( UIElement* element, const IntRect& currentScissor )
 {
-	std::vector<UIElement*>& children = element->GetChildren();
-
 	// If parent container is not visible, not draw children
 	if (!element->IsVisible())
 		return;
@@ -446,6 +456,8 @@ void UIManager::RenderUIElement( UIElement* element, const IntRect& currentSciss
 	// Draw container first
 	element->Draw(*mSpriteBatch, *mSpriteBatchFont);
 
+	element->SortChildren();
+	std::vector<UIElement*>& children = element->GetChildren();
 	for (UIElement* child : children)
 	{
 		RenderUIElement(child, currentScissor);
@@ -568,25 +580,69 @@ GuiSkin* UIManager::GetDefaultSkin()
 
 		// List Box
 		mDefaultSkin->ListBox.StyleStates[UI_State_Normal].TexRegion = IntRect(13, 123, 228, 37);
-		mDefaultSkin->ListBox.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 125.0f / 255);
+		mDefaultSkin->ListBox.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
 
 		mDefaultSkin->ListBox.StyleStates[UI_State_Hover].TexRegion = IntRect(16, 166, 224, 17);
 		mDefaultSkin->ListBox.StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
 		
 		mDefaultSkin->ListBox.Font = mFont;
 		mDefaultSkin->ListBox.FontSize = 20;
-		mDefaultSkin->ListBox.BackColor = ColorRGBA(1, 1, 1, 255.0 / 255);
-		mDefaultSkin->ListBox.ForeColor = ColorRGBA(1, 1, 1, 255.0 / 255);
+		mDefaultSkin->ListBox.BackColor = ColorRGBA(0, 0, 0, 255.0 / 255);
+		mDefaultSkin->ListBox.ForeColor = ColorRGBA(0, 0, 0, 255.0 / 255);
 		mDefaultSkin->ListBox.StyleTex = mDefaultSkin->mSkinTexAtlas;
 
 		// TextEdit
 		mDefaultSkin->TextEdit.Font = mFont;
 		mDefaultSkin->TextEdit.FontSize = 20;
 
-		// Background
+		// TextEdit Background
 		mDefaultSkin->TextEdit.StyleStates[UI_State_Normal].TexRegion = IntRect(14, 90, 227, 23);
-		mDefaultSkin->TextEdit.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 125.0f / 255);
+		mDefaultSkin->TextEdit.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
 		mDefaultSkin->TextEdit.StyleTex = mDefaultSkin->mSkinTexAtlas;
+
+		// ComboBox
+		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Normal].TexRegion = IntRect(7, 81, 240, 42);
+		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Normal].TexColor = ColorRGBA(200/ 255.0f, 200/ 255.0f, 200/ 255.0f, 150 /255.0f);
+
+		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Focus].TexRegion = IntRect(7, 81, 240, 42);
+	    mDefaultSkin->ComboDropButton.StyleStates[UI_State_Focus].TexColor = ColorRGBA(230/ 255.0f, 230/ 255.0f, 230/ 255.0f, 170 /255.0f);
+
+		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Disable].TexRegion = IntRect(7, 81, 240, 42);
+		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Disable].TexColor = ColorRGBA(200/ 255.0f, 200/ 255.0f, 200/ 255.0f, 70 /255.0f);
+
+		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Hover].TexRegion = IntRect(7, 81, 240, 42);
+		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Hover].TexColor = ColorRGBA(200/ 255.0f, 200/ 255.0f, 200/ 255.0f, 150 /255.0f);
+
+		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Pressed].TexRegion = IntRect(7, 81, 240, 42);
+		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Pressed].TexColor = ColorRGBA(200/ 255.0f, 200/ 255.0f, 200/ 255.0f, 150 /255.0f);
+
+		mDefaultSkin->ComboDropButton.Font = mFont;
+		mDefaultSkin->ComboDropButton.FontSize = 20;
+		mDefaultSkin->ComboDropButton.BackColor = ColorRGBA(1, 1, 1, 255.0 / 255);
+		mDefaultSkin->ComboDropButton.ForeColor = ColorRGBA(1, 1, 1, 255.0 / 255);
+		mDefaultSkin->ComboDropButton.StyleTex = mDefaultSkin->mSkinTexAtlas;
+
+		//// ComboBox
+		//SetRect( &rcTexture, 98, 189, 151, 238 );
+		//Element.SetTexture( 0, &rcTexture );
+		//Element.TextureColor.States[ DXUT_STATE_NORMAL ] = D3DCOLOR_ARGB( 150, 255, 255, 255 );
+		//Element.TextureColor.States[ DXUT_STATE_PRESSED ] = D3DCOLOR_ARGB( 255, 150, 150, 150 );
+		//Element.TextureColor.States[ DXUT_STATE_FOCUS ] = D3DCOLOR_ARGB( 200, 255, 255, 255 );
+		//Element.TextureColor.States[ DXUT_STATE_DISABLED ] = D3DCOLOR_ARGB( 70, 255, 255, 255 );
+
+		//// Assign the Element
+		//SetDefaultElement( DXUT_CONTROL_COMBOBOX, 1, &Element );
+
+
+		////-------------------------------------
+		//// CDXUTComboBox - Selection
+		////-------------------------------------
+		//SetRect( &rcTexture, 12, 163, 239, 183 );
+		//Element.SetTexture( 0, &rcTexture );
+		//Element.SetFont( 0, D3DCOLOR_ARGB( 255, 255, 255, 255 ), DT_LEFT | DT_TOP );
+
+		//// Assign the Element
+		//SetDefaultElement( DXUT_CONTROL_COMBOBOX, 3, &Element );
 	}
 
 
@@ -594,3 +650,4 @@ GuiSkin* UIManager::GetDefaultSkin()
 }
 
 }
+

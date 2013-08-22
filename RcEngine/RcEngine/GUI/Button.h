@@ -20,7 +20,7 @@ public:
 	Button();
 	virtual ~ Button();
 
-	virtual void Initialize(const GuiSkin::StyleMap* styles = nullptr);
+	virtual void InitGuiStyle(const GuiSkin::StyleMap* styles = nullptr);
 
 	virtual bool OnMouseButtonPress(const int2& screenPos, uint32_t button);
 	virtual bool OnMouseButtonRelease(const int2& screenPos, uint32_t button);
@@ -36,7 +36,7 @@ public:
 	void SetHoverOffset(const int2& offset)		{ mHoverOffset = offset; }
 	const int2& GetHoverOffset() const			{ return mHoverOffset; }
 
-	void SetText(const std::wstring& txt)		{ mText = txt; }
+	void SetText(const std::wstring& txt);
 	const std::wstring& GetText() const         { return mText; }
 
 	void SetClickedEventRepeat(float delayTime, float rate);

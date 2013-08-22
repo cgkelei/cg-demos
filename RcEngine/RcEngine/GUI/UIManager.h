@@ -56,6 +56,7 @@ public:
 	
 	void SetFocusElement(UIElement* element);
 	UIElement* GetFocusElement()						{ return mFocusElement; }	
+
 	
 	const shared_ptr<Font>& GetDefaultFont() const      { return mFont; }
 

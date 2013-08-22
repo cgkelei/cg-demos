@@ -5,6 +5,13 @@
 
 namespace RcEngine {
 
+/**
+ * TextEdit: a single line or multiple line GUI control.
+ *
+ * Todo:  Add Word Wrap, ScrollBar.
+ *
+ */
+
 class _ApiExport TextEdit : public UIElement
 {
 public:
@@ -18,7 +25,7 @@ public:
 	virtual void Update(float dt);
 	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 
-	virtual void Initialize(const GuiSkin::StyleMap* styles /* = nullptr */);
+	virtual void InitGuiStyle(const GuiSkin::StyleMap* styles = nullptr);
 
 	virtual bool OnMouseButtonPress(const int2& screenPos, uint32_t button);
 	virtual bool OnMouseButtonRelease(const int2& screenPos, uint32_t button);

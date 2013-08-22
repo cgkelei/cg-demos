@@ -15,7 +15,12 @@ public:
 	Label();
 	Label(const int2& pos, const std::wstring& text, Alignment textAlign = AlignCenter);
 	virtual ~Label();
-	
+
+	virtual void InitGuiStyle(const GuiSkin::StyleMap* styles = nullptr);
+	virtual void OnResize();
+	virtual void Update(float delta);
+	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
+
 	void SetFont(const shared_ptr<Font>& font, int32_t fontSize);
 	const shared_ptr<Font> GetFont() const			{ return mFont; }
 
@@ -28,10 +33,7 @@ public:
 	void SetTextAlignment(Alignment align);
 	Alignment GetTextAlignment() const	{ return mTextAlignment; }
 
-	virtual void Update(float delta);
-	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
-	virtual void OnResize();
-
+	
 protected:
 	void UpdateText();
 

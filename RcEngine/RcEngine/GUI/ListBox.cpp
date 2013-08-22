@@ -16,9 +16,9 @@ ListBox::ListBox()
 	  mBorder(6), mMargin(5),
 	  mPressed(false)
 {
-	mVertScrollBar = new ScrollBar();
-	mVertScrollBar->SetOrientation( UI_Vertical );
+	mVertScrollBar = new ScrollBar(UI_Vertical);
 	mVertScrollBar->SetScrollButtonRepeat(false);
+	mVertScrollBar->SetVisible(false);
 
 	AddChild(mVertScrollBar);
 }
@@ -28,16 +28,32 @@ ListBox::~ListBox()
 	RemoveAllItems();
 }
 
+bool ListBox::CanHaveFocus() const
+{
+	return mVisible && mEnabled;
+}
+
+bool ListBox::HasCombinedFocus() const
+{
+	if (!mVisible || !mEnabled)
+		return false;
+
+	if (mVertScrollBar->HasCombinedFocus())
+		return true;
+	else 
+		return HasFocus();
+}
+
 void ListBox::AddItem( const std::wstring& text )
 {
 	mItems.push_back(text);
-	mVertScrollBar->SetScrollRange(0, (int)mItems.size());
+	UpdateRect();
 }
 
 void ListBox::InsertItem( int32_t index, const std::wstring& text )
 {
 	mItems.insert(mItems.begin() + index, text);
-	mVertScrollBar->SetScrollRange(0, (int)mItems.size());
+	UpdateRect();
 }
 
 void ListBox::RemoveItem( int32_t index )
@@ -46,10 +62,11 @@ void ListBox::RemoveItem( int32_t index )
 		return;
 
 	mItems.erase(mItems.begin() + index);
-	mVertScrollBar->SetScrollRange(0, (int)mItems.size());
 
 	if( mSelectedIndex >= ( int )mItems.size() )
 		mSelectedIndex = mItems.size() - 1;
+
+	UpdateRect();
 }
 
 void ListBox::RemoveAllItems()
@@ -64,19 +81,50 @@ void ListBox::UpdateRect()
 	int2 screenPos = GetScreenPosition();
 
 	mSelectionRegion.X = screenPos.X() + mBorder;
-	mSelectionRegion.Width = mSize.X() - mScrollBarWidth - mBorder - mBorder;
+	mSelectionRegion.Width = mSize.X() - mBorder - mBorder;
 	mSelectionRegion.Y = screenPos.Y() + mBorder;
 	mSelectionRegion.Height = mSize.Y() - mBorder - mBorder;
+
+	UpdateVScrollBar();
 
 	mTextRegion = mSelectionRegion;
 	mTextRegion.SetLeft( mSelectionRegion.X  + mMargin );
 	mTextRegion.SetRight( mSelectionRegion.Right() - mMargin );
-
-	mVertScrollBar->SetPosition(int2(mSize.X() - mScrollBarWidth, 0));
-	mVertScrollBar->SetSize(int2(mScrollBarWidth, mSize.Y()));
 }
 
-void ListBox::Initialize( const GuiSkin::StyleMap* styles /* = nullptr */ )
+void ListBox::UpdateVScrollBar()
+{
+	if (mLisBoxStyle)
+	{
+		mNumVisibleItems = mSelectionRegion.Height / mTextRowHeight;
+
+		if ((int)mItems.size() > mNumVisibleItems)
+		{
+			if (mVertScrollBar->IsVisible() == false)
+			{
+				mVertScrollBar->SetVisible(true);
+				mVertScrollBar->SetPosition(int2(mSize.X() - mScrollBarWidth, 0));
+				mVertScrollBar->SetSize(int2(mScrollBarWidth, mSize.Y()));
+				mVertScrollBar->SetScrollRange(0, (int)mItems.size() - mNumVisibleItems);
+
+				mSelectionRegion.Width -= mScrollBarWidth;
+			}
+			else
+				mVertScrollBar->SetScrollRange(0, (int)mItems.size() - mNumVisibleItems);
+		}
+		else
+		{
+			if (mVertScrollBar->IsVisible())
+			{
+				mVertScrollBar->SetVisible(false);
+				mSelectionRegion.Width += mScrollBarWidth;
+			}
+		}
+	}
+}
+
+
+void ListBox::InitGuiStyle( const GuiSkin::StyleMap* styles /* = nullptr */ )
 {
 	if (styles)
 	{
@@ -86,14 +134,13 @@ void ListBox::Initialize( const GuiSkin::StyleMap* styles /* = nullptr */ )
 	{
 		// use defualt
 		GuiSkin* defaultSkin = UIManager::GetSingleton().GetDefaultSkin();
-		mVertScrollBar->Initialize(nullptr);
+		mVertScrollBar->InitGuiStyle(nullptr);
 
 		mLisBoxStyle = &defaultSkin->ListBox;
 	}
 
 	float fontScale = mLisBoxStyle->FontSize / float(mLisBoxStyle->Font->GetFontSize());
 	mTextRowHeight = int32_t(fontScale * mLisBoxStyle->Font->GetRowHeight());
-
 }
 
 void ListBox::Update( float delta )
@@ -120,7 +167,7 @@ void ListBox::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 		IntRect rc = mTextRegion;
 		rc.SetBottom( rc.Y + mTextRowHeight);
 
-		for (int i = mVertScrollBar->GetScrollValue(); i < maxItem; ++i)
+		for (int i = mVertScrollBar->GetScrollValue(); i < maxItem + mNumVisibleItems; ++i)
 		{		
 			if (rc.Bottom() > mTextRegion.Bottom())
 				break;
@@ -157,7 +204,7 @@ void ListBox::OnResize()
 
 }
 
-int32_t ListBox::GetSelectecIndex() const
+int32_t ListBox::GetSelectedIndex() const
 {
 	if (mItems.size() == 0)
 		return -1;
@@ -165,17 +212,17 @@ int32_t ListBox::GetSelectecIndex() const
 		return mSelectedIndex;
 }
 
-void ListBox::SetSelectedIndex( int32_t index )
+void ListBox::SetSelectedIndex( int32_t index, bool fromInput /*= false*/ )
 {
 	int32_t oldSelectedIndex = mSelectedIndex;
 
 	mSelectedIndex = Clamp(index, 0, (int32_t)mItems.size());
 
-	if (mSelectedIndex != oldSelectedIndex)
-	{
-		// Adjust scroll bar
-		//mVertScrollBar->set
-	}
+	if (!EventSelection.empty())
+		EventSelection(mSelectedIndex);
+
+	if (!EventSelectionChanged.empty() && mSelectedIndex != oldSelectedIndex)
+		EventSelectionChanged(mSelectedIndex);
 }
 
 void ListBox::SetScrollBarWidth( int32_t width )
@@ -215,7 +262,8 @@ bool ListBox::OnMouseButtonRelease( const int2& screenPos, uint32_t button )
 		{
 			if (mSelectionRegion.Contains(screenPos.X(), screenPos.Y()))
 			{
-				SetSelectedIndex( mVertScrollBar->GetScrollValue() + (screenPos.Y() - mSelectionRegion.Top()) / mTextRowHeight );			
+				int32_t selIndex = mVertScrollBar->GetScrollValue() + (screenPos.Y() - mSelectionRegion.Top()) / mTextRowHeight;
+				SetSelectedIndex(selIndex, true);			
 			}	
 
 			mPressed = false;
@@ -225,12 +273,5 @@ bool ListBox::OnMouseButtonRelease( const int2& screenPos, uint32_t button )
 
 	return eventConsumed;
 }
-
-bool ListBox::CanHaveFocus() const
-{
-	return mVisible && mEnabled;
-}
-
-
 
 }

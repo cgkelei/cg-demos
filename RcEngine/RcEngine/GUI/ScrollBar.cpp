@@ -15,12 +15,15 @@ static const float DEFAULT_SCROLL_STEP = 0.1f;
 static const float DEFAULT_REPEAT_DELAY = 0.8f;
 static const float DEFAULT_REPEAT_RATE = 20.0f;
 
-ScrollBar::ScrollBar()
-	: mThumbHovering(false),
-	  mMinValue(0), mMaxValue(100), mValue(0),
-	  mSingleStep(1),
+ScrollBar::ScrollBar( UIOrientation orient )
+	: mOrientation(orient),
+	  mThumbHovering(false), 
 	  mDragThumb(false),
-	  mThumbStyle(nullptr),
+	  mMinValue(0), 
+	  mMaxValue(100), 
+	  mValue(0),  
+	  mSingleStep(1), 
+	  mThumbStyle(nullptr), 
 	  mTrackStyle(nullptr)
 {
 	mForwardButton = new Button;
@@ -46,6 +49,21 @@ ScrollBar::ScrollBar()
 ScrollBar::~ScrollBar()
 {
 
+}
+
+bool ScrollBar::CanHaveFocus() const
+{
+	return mEnabled && mVisible;
+}
+
+bool ScrollBar::HasCombinedFocus() const
+{
+	if (!mVisible || !mEnabled)
+		return false;
+
+	UIElement* focusElem = UIManager::GetSingleton().GetFocusElement();
+	bool hasFocus = (focusElem == this || focusElem == mForwardButton || focusElem == mBackButton);
+	return hasFocus;
 }
 
 void ScrollBar::SetScrollButtonRepeat( bool enable )
@@ -104,7 +122,7 @@ void ScrollBar::UpdateRect()
 	UpdateThumb();
 }
 
-void ScrollBar::Initialize( const GuiSkin::StyleMap* styles /* = nullptr */ )
+void ScrollBar::InitGuiStyle( const GuiSkin::StyleMap* styles /* = nullptr */ )
 {
 	if( styles == nullptr )
 	{
@@ -112,10 +130,10 @@ void ScrollBar::Initialize( const GuiSkin::StyleMap* styles /* = nullptr */ )
 
 		GuiSkin::StyleMap styleMap;
 		styleMap[Button::StyleName] = &defalutSkin->HSrollForward;
-		mForwardButton->Initialize(&styleMap);
+		mForwardButton->InitGuiStyle(&styleMap);
 
 		styleMap[Button::StyleName] = &defalutSkin->HSrollBack;
-		mBackButton->Initialize(&styleMap);
+		mBackButton->InitGuiStyle(&styleMap);
 
 		mTrackStyle = &defalutSkin->HScrollTrack;
 		mThumbStyle = &defalutSkin->HSrollThumb;
@@ -128,11 +146,11 @@ void ScrollBar::Initialize( const GuiSkin::StyleMap* styles /* = nullptr */ )
 
 		iter = styles->find(ForwardStyleName);	
 		styleMap[Button::StyleName] = iter->second;
-		mForwardButton->Initialize(&styleMap);
+		mForwardButton->InitGuiStyle(&styleMap);
 
 		iter = styles->find(BackStyleName);	
 		styleMap[Button::StyleName] = iter->second;
-		mBackButton->Initialize(&styleMap);
+		mBackButton->InitGuiStyle(&styleMap);
 
 		iter = styles->find(TrackStyleName);
 		mTrackStyle = iter->second;	

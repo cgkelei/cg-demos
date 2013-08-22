@@ -131,7 +131,7 @@ void CheckBox::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	mHovering = false;
 }
 
-void CheckBox::Initialize( const GuiSkin::StyleMap* styles /*= nullptr*/ )
+void CheckBox::InitGuiStyle( const GuiSkin::StyleMap* styles /*= nullptr*/ )
 {
 	if (!styles)
 	{

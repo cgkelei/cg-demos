@@ -28,10 +28,6 @@ void Button::Update( float dt )
 	if (!mHovering && mPressed)
 		SetPressed(false);
 	
-	//if (mName == "ScrollBar Back Button")
-	//	if (mHovering && mPressed)
-	//		std::cout << "Hovering && Pressed" << std::endl;
-
 	// Send repeat events if pressed
 	if (mPressed && mRepeatRate > 0.0f)
 	{
@@ -141,7 +137,7 @@ void Button::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	mHovering = false;
 }
 
-void Button::Initialize( const GuiSkin::StyleMap* styles )
+void Button::InitGuiStyle( const GuiSkin::StyleMap* styles )
 {
 	if (!styles)
 	{
@@ -154,6 +150,11 @@ void Button::Initialize( const GuiSkin::StyleMap* styles )
 		GuiSkin::StyleMap::const_iterator iter = styles->find(StyleName);
 		mStyle = iter->second;
 	}
+}
+
+void Button::SetText( const std::wstring& txt )
+{
+	mText = txt;
 }
 
 
