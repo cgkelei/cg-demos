@@ -11,6 +11,9 @@ UIElement::UIElement()
 	  mHovering(false), 
 	  mVisible(true), 
 	  mEnabled(true),
+	  mPriority(0),
+	  mSortOrderDirty(false),
+	  mChildOutside(false),
 	  mPosition(int2::Zero()),
 	  mSize(int2::Zero()),
 	  mMinSize(int2::Zero()), mMaxSize(INT_MAX, INT_MAX)
@@ -81,16 +84,28 @@ int2 UIElement::GetScreenPosition()
 	return mScreenPosition;
 }
 
-IntRect UIElement::GetArea() const
+IntRect UIElement::GetRect() const
 {
 	return IntRect(mPosition.X(), mPosition.Y(), mSize.X(), mSize.Y());
 }
 
-IntRect UIElement::GetGlobalArea()
+IntRect UIElement::GetScreenRect()
 {
 	int2 screenPos = GetScreenPosition();
 	return IntRect(screenPos.X(), screenPos.Y(), mSize.X(), mSize.Y());
 }
+
+IntRect UIElement::GetCombinedScreenRect()
+{
+	IntRect rect = GetScreenRect();
+
+	for (UIElement* child : mChildren)
+		rect = Union(rect, child->GetCombinedScreenRect());
+
+	return rect;
+}
+
+
 
 void UIElement::MarkDirty()
 {
@@ -157,6 +172,15 @@ bool UIElement::IsInside(int2 position, bool isScreen )
 	return position.X() >= 0 && position.Y() >= 0 && position.X() < mSize.X() && position.Y() < mSize.Y();
 }
 
+bool UIElement::IsInsideCombined( int2 position, bool isScreen )
+{
+	if (!isScreen)
+		position = ClientToScreen(position);
+
+	return GetCombinedScreenRect().Contains(position.X(), position.Y());
+}
+
+
 void UIElement::FlattenChildren( std::vector<UIElement*>& children) const
 {
 	for (UIElement* element : mChildren)
@@ -168,9 +192,14 @@ void UIElement::FlattenChildren( std::vector<UIElement*>& children) const
 	}
 }
 
-void UIElement::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
+void UIElement::SortChildren()
 {
-
+	if (mSortOrderDirty)
+	{
+		std::sort(mChildren.begin(), mChildren.end(), [](UIElement* lhs, UIElement* rhs){
+					return lhs->mPriority < rhs->mPriority;});
+		mSortOrderDirty = false;
+	}
 }
 
 
@@ -186,16 +215,9 @@ void UIElement::RemoveChild( UIElement* child )
 		if ((*iter) == child)
 		{
 			mChildren.erase(iter);
+			mSortOrderDirty = true;
 			return;
 		}
-	}
-}
-
-void UIElement::Remove()
-{
-	if (mParent)
-	{
-		mParent->RemoveChild(this);
 	}
 }
 
@@ -203,11 +225,19 @@ void UIElement::AddChild( UIElement* child )
 {
 	if (child)
 	{
-		child->Remove();
+		child->RemoveFromParent();
 		child->mParent = this;
 		child->MarkDirty();
 		mChildren.push_back(child);
+
+		mSortOrderDirty = true;
 	}
+}
+
+void UIElement::RemoveFromParent()
+{
+	if (mParent)
+		mParent->RemoveChild(this);
 }
 
 void UIElement::SetParent( UIElement* parent )
@@ -216,9 +246,21 @@ void UIElement::SetParent( UIElement* parent )
 		parent->AddChild(this);
 }
 
+void UIElement::SetPriority( int32_t priority )
+{
+	mPriority = priority;
+	if (mParent)
+		mParent->mSortOrderDirty = true;
+}
+
 bool UIElement::HasFocus() const
 {
 	return UIManager::GetSingleton().GetFocusElement() == this;
+}
+
+bool UIElement::HasCombinedFocus() const
+{
+	return HasFocus();
 }
 
 void UIElement::Update( float delta )
@@ -290,10 +332,18 @@ void UIElement::UpdateRect()
 
 }
 
-void UIElement::Initialize( const GuiSkin::StyleMap* styles )
+void UIElement::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
+{
+	mHovering = false;
+}
+
+void UIElement::InitGuiStyle( const GuiSkin::StyleMap* styles )
 {
 
 }
+
+
+
 
 
 

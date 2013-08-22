@@ -154,3 +154,22 @@ Vector<Real, 2> Rectangle<Real>::TopLeft() const
 {
 	return Vector<Real, 2>(X, Y);
 }
+
+template<typename Real>
+Rectangle<Real> Union( const Rectangle<Real>& lhs, const Rectangle<Real>& rhs )
+{
+	Real left = (std::min)(lhs.Left(), rhs.Left());
+	Real top = (std::min)(lhs.Top(), rhs.Top());
+	Real right = (std::max)(lhs.Right(), rhs.Right());
+	Real bottom = (std::max)(lhs.Bottom(), rhs.Bottom());
+	return Rectangle<Real>(left, top, right - left, bottom - top);
+}
+
+//template<typename Real>
+//Rectangle<Real> Intersect( const Rectangle<Real>& lhs, const Rectangle<Real>& rhs )
+//{
+//	if (rhs.Left() >= lhs.Right() || rhs.Left() >= lhs.Right())
+//	{
+//
+//	}
+//}

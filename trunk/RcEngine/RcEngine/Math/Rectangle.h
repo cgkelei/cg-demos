@@ -46,17 +46,17 @@ public:
 	Real Width, Height;
 };
 
-///**
-// * Creates a Rectangle defining the area where one rectangle overlaps with another rectangle.
-// */
+/**
+ * Creates a Rectangle defining the area where one rectangle overlaps with another rectangle.
+ */
 //template<typename Real>
 //Rectangle<Real> Intersect(const Rectangle<Real>& lhs, const Rectangle<Real>& rhs);
-//
-///**
-// * Creates a Rectangle defining the area which cover both rectangle.
-// */
-//template<typename Real>
-//Rectangle<Real> Union(const Rectangle<Real>& lhs, const Rectangle<Real>& rhs);
+
+/**
+ * Creates a Rectangle defining the area which cover both rectangle.
+ */
+template<typename Real>
+Rectangle<Real> Union(const Rectangle<Real>& lhs, const Rectangle<Real>& rhs);
 
 #include <Math/Rectangle.inl>
 
@@ -64,6 +64,7 @@ typedef Rectangle<float> Rectanglef;
 typedef Rectangle<int32_t> IntRect;
 
 }
+
 
 
 

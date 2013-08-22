@@ -103,6 +103,8 @@ public:
 	GuiStyle HScrollTrack, HSrollThumb, HSrollForward, HSrollBack;
 	GuiStyle VScrollTrack, VSrollThumb, VSrollForward, VSrollBack;
 
+	// ComboBox
+	GuiStyle ComboDropButton;
 };
 
 }

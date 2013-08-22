@@ -13,13 +13,20 @@ namespace RcEngine {
 class Cursor;
 class GuiSkin;
 
+#define UI_CursorPriority     INT_MAX
+#define UI_DropPopPriority    (UI_CursorPriority - 1)
+#define UI_TopMostPriority    (UI_DropPopPriority - 1)
+
 class _ApiExport UIElement
 {
 public:
 	UIElement();
 	virtual ~UIElement();
 
-	virtual void Initialize(const GuiSkin::StyleMap* styles = nullptr);
+	/**
+	 * Init GUI Style. NULL for default GUI style.
+	 */
+	virtual void InitGuiStyle(const GuiSkin::StyleMap* styles = nullptr);
 
 	virtual void Update(float delta);
 	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
@@ -66,6 +73,14 @@ public:
 	bool IsVisible() const						{ return mVisible; }
 
 	bool HasFocus() const;
+
+	/**
+	 * Some Control may build based on other controls.
+	 * So HasFocus will return false while the focus in on the internal controls.
+	 * HasCombinedFocus will consider those internal controls.
+	 */
+	virtual bool HasCombinedFocus() const;
+
 	bool IsMouseHover() const					{ return mHovering; }
 
 	void SetEnable(bool enable)					{ mEnabled = enable; }
@@ -74,16 +89,30 @@ public:
 	const std::wstring& GetToolTip() const		{ return mToolTipText; }
 	void SetToolTip(const std::wstring& txt)    { mToolTipText = txt; }
 
-	IntRect GetArea() const;
-	IntRect GetGlobalArea();
-		
+	IntRect GetRect() const;
+	IntRect GetScreenRect();
+
+	/**
+	 * Screen rect contains all child 
+	 */
+	IntRect GetCombinedScreenRect();
+
+	bool IsInside(int2 position, bool isScreen);
+	bool IsInsideCombined(int2 position, bool isScreen);
+	
 	void SetParent(UIElement* parent);
+	void RemoveFromParent();
 	UIElement* GetParent() const				{ return mParent; }
 
 	uint32_t GetNumChildren(bool recursive = false) const;
 	
 	UIElement* GetChild(const String& name, bool recursive = false) const;
 	UIElement* GetChild(uint32_t index) const;
+
+	/**
+	 * Sort children according to priority.
+	 */
+	void SortChildren();
 
 	std::vector<UIElement*>& GetChildren()						{ return mChildren; }
 	const std::vector<UIElement*>& GetChildren() const			{ return mChildren; }
@@ -92,16 +121,16 @@ public:
 
 	void AddChild(UIElement* child);
 	void RemoveChild(UIElement* child);
-	
-	// Remove from parent
-	void Remove();
 
 	int2 ScreenToClient(const int2& screenPosition);
 	int2 ClientToScreen(const int2& position);
 
-	bool IsInside(int2 position, bool isScreen);
+	bool CanChildOutside() const { return mChildOutside; }
 
 	void BringToFront();
+	
+	void SetPriority(int32_t priority);
+	int32_t GetPriority() const { return mPriority; }
 
 protected:
 	void MarkDirty();
@@ -117,11 +146,23 @@ protected:
 	UIElement* mParent;
 	std::vector<UIElement*> mChildren;
 
+	/*
+	 * 一般跟控件Z顺序有关，优先级高的控件先获得消息，
+	 * 绘制的时候也画在其他低优先级控件上面.
+	 */
+	int32_t mPriority;
+
+	bool mSortOrderDirty;
+	bool mPositionDirty;
+
 	bool mHovering;
 	bool mVisible;
 	bool mEnabled;
 
-	bool mPositionDirty;
+	/**
+	 * 有一些控件可以需要Child画在外面
+	 */
+	bool mChildOutside;
 
 	int2 mPosition;
 	int2 mScreenPosition;

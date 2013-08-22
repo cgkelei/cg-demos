@@ -57,5 +57,6 @@ private:
 	ScrollBar* mScrollBar;
 	ListBox* mListBox;
 	TextEdit* mTextEdit;
+	ComboBox* mComboBox;
 };
 

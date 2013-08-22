@@ -8,21 +8,29 @@ namespace RcEngine {
 class _ApiExport ListBox : public UIElement
 {
 public:
+
+	// Selection changed event
+	typedef fastdelegate::FastDelegate1<int32_t> SelChangedEventHandler;
+	SelChangedEventHandler EventSelectionChanged;
+
+	typedef fastdelegate::FastDelegate1<int32_t> SelEventHandler;
+	SelEventHandler EventSelection;
+
+public:
 	ListBox();
 	virtual ~ListBox();
 
 	virtual void OnResize();
-	virtual void Initialize(const GuiSkin::StyleMap* styles /* = nullptr */);
+	virtual void InitGuiStyle(const GuiSkin::StyleMap* styles  = nullptr );
 
 	virtual bool CanHaveFocus() const;
+	virtual bool HasCombinedFocus() const;
 
 	virtual void Update(float delta);
 	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 
 	virtual bool OnMouseButtonPress(const int2& screenPos, uint32_t button);
 	virtual bool OnMouseButtonRelease(const int2& screenPos, uint32_t button);
-
-	virtual void UpdateRect();
 
 	void SetBorder(int32_t border, int32_t margin);
 	void SetScrollBarWidth(int32_t width);
@@ -32,8 +40,17 @@ public:
 	void RemoveItem(int32_t index);
 	void RemoveAllItems();
 
-	void SetSelectedIndex(int32_t index); 
-	int32_t GetSelectecIndex() const;
+	void SetSelectedIndex(int32_t index, bool fromInput = false); 
+	int32_t GetSelectedIndex() const;
+
+	const std::wstring& GetItem(int32_t index)  { return mItems[index]; }
+	const std::wstring& GetSelectedItem() const { return mItems[GetSelectedIndex()]; }
+	
+	int32_t GetNumItems() const { return (int32_t)mItems.size();}
+
+protected:
+	void UpdateRect();
+	void UpdateVScrollBar();
 
 protected:
 

@@ -11,22 +11,47 @@ public:
 	/**
 	 * ComboBox selected item changed event
 	 */
-	typedef fastdelegate::FastDelegate1<bool> SelectionChangedEventHandler;
+	typedef fastdelegate::FastDelegate1<int32_t> SelectionChangedEventHandler;
 	SelectionChangedEventHandler EventSelectionChanged;
+
+	static const String DropButtonStyleName;
+	static const String ComboBoxStyleName;
 
 public:
 	ComboBox();
 	virtual ~ComboBox();
 
-	void AddItem(const String& text);
-	void InsertItem(int32_t index, const String& text);
+	virtual void InitGuiStyle(const GuiSkin::StyleMap* styles = nullptr);
+
+	virtual void Update(float dt);
+
+	virtual void OnHover(const int2& screenPos);
+
+	// Child Control will handle focus
+	virtual bool CanHaveFocus() const;
+	virtual bool HasCombinedFocus() const;
+	
+	void AddItem(const std::wstring& text);
+	void InsertItem(int32_t index, const std::wstring& text);
+
+	void SetDropHeight(int32_t height);
 
 	void SetSelectedIndex(int32_t index);
 	int32_t GetSelectedIndex() const;
 
 protected:
-	std::list<String> mItems;
+	void UpdateRect();
+	void ToggleDropDownList();
+	void HandleSelection(int32_t selIdx);
 
+protected:
+	ListBox* mItemList;
+	Button* mDropButton;
+
+	int32_t mSelectedIndex;
+	int32_t mDropHeight;
+
+	GuiSkin::GuiStyle* mMainStyle;	
 };
 
 

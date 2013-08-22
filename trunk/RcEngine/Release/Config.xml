@@ -12,6 +12,7 @@
 			<Path Name="../Media/Pipiline"/>
 			<Path Name="../Media/Texture"/>
 			<Path Name="../Media/Font"/>
+			<Path Name="../Media/GuiSkin"/>
 		</Group>
 		
 		<Group Name="Custom">

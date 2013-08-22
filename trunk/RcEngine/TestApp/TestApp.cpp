@@ -38,6 +38,7 @@
 #include "GUI/UIManager.h"
 #include "GUI/Label.h"
 #include "GUI/TextEdit.h"
+#include "GUI/ComboBox.h"
 #include "GUI/Slider.h"
 #include "GUI/CheckBox.h"
 #include "GUI/ScrollBar.h"
@@ -232,69 +233,86 @@ void TestApp::InitGUI()
 	UIElement* rootElem = UIManager::GetSingleton().GetRoot();
 
 	mFPSLabel = new Label();
-	mFPSLabel->SetPosition(int2(20, 100));
-	mFPSLabel->SetSize(int2(100, 40));
+	mFPSLabel->SetName("FPSLabel");
+	mFPSLabel->SetPosition(int2(500, 500));
+	mFPSLabel->SetSize(int2(300, 100));
 	mFPSLabel->SetFont(UIManager::GetSingleton().GetDefaultFont(), 20);
 	rootElem->AddChild( mFPSLabel );	
 
 	mButton = new Button;
-	mButton->SetPosition(int2(20, 150));
+	mButton->SetName("Button");
+	mButton->InitGuiStyle(nullptr);
+	mButton->SetPosition(int2(20, 30));
 	mButton->SetSize(int2(100, 40));
 	mButton->SetText(L"Button");
-	mButton->Initialize(nullptr);
 	mButton->EventButtonClicked.bind(this, &TestApp::ButtonClicked);
 	rootElem->AddChild( mButton );	
 
 	mCheckBox = new CheckBox;
-	mCheckBox->SetPosition(int2(20, 200));
+	mCheckBox->SetName("CheckBox");
+	mCheckBox->InitGuiStyle(nullptr);
+	mCheckBox->SetPosition(int2(20, 100));
 	mCheckBox->SetSize(int2(150, 27));
 	mCheckBox->SetText(L"CheckBox");
-	mCheckBox->Initialize(nullptr);
 	mCheckBox->EventStateChanged.bind(this, &TestApp::CheckBoxToggle);
 	rootElem->AddChild(mCheckBox);
 
-	mSlider = new Slider();
-	mSlider->SetOrientation(UI_Horizontal);
-	mSlider->SetPosition(int2(20, 250));
+	mSlider = new Slider(UI_Horizontal);
+	mSlider->SetName("Slider");
+	mSlider->InitGuiStyle(nullptr);
+	mSlider->SetPosition(int2(20, 150));
 	mSlider->SetSize(int2(200, 23));
 	mSlider->SetValue(100);
-	mSlider->Initialize(nullptr);
 	mSlider->EventValueChanged.bind(this, &TestApp::SliderValueChange);
 	rootElem->AddChild( mSlider );	
 
-	mScrollBar = new ScrollBar;
-	mScrollBar->SetOrientation(UI_Vertical);
-	mScrollBar->SetPosition(int2(250, 200));
-	mScrollBar->SetSize(int2(23, 200));
-	mScrollBar->Initialize(nullptr);
+	mScrollBar = new ScrollBar(UI_Vertical);
+	mScrollBar->SetName("ScrollBar");
+	mScrollBar->InitGuiStyle(nullptr);
+	mScrollBar->SetPosition(int2(600, 100));
+	mScrollBar->SetSize(int2(23, 400));
 	rootElem->AddChild( mScrollBar );	
 
 	mListBox = new ListBox;
+	mListBox->InitGuiStyle(nullptr);
 	mListBox->SetName("ListBox");
-	mListBox->SetPosition(int2(20, 300));
+	mListBox->SetPosition(int2(20, 200));
 	mListBox->SetSize(int2(200, 90));
-	mListBox->AddItem(L"Cryteck");
+	mListBox->AddItem(L"ListBox");
 	mListBox->AddItem(L"HBAO");
 	mListBox->AddItem(L"Unreal4");
-	mListBox->AddItem(L"Alchemy");
-	mListBox->Initialize(nullptr);
+	mListBox->AddItem(L"Alchemy");	
+	mListBox->SetSelectedIndex(1);
 	rootElem->AddChild(mListBox);
 
 	mTextEdit = new TextEdit;
+	mTextEdit->InitGuiStyle(nullptr);
 	mTextEdit->SetName("TextEdit");
-	mTextEdit->SetPosition(int2(20, 430));
-	mTextEdit->SetSize(int2(200, 90));
+	mTextEdit->SetPosition(int2(20, 330));
+	mTextEdit->SetSize(int2(270, 90));
 	mTextEdit->SetMultiLine(true);
 	//mTextEdit->SetText(L"mTextEdit\n->SetSize\n(int2(200, 90))");
-	mTextEdit->SetText(L"mTextEdit\n->SetSize\n(int2(200, 90))");
-	mTextEdit->Initialize(nullptr);
+	mTextEdit->SetText(L"mButton->EventButton\nClicked.bind(this, \n&TestApp::ButtonClicked);");
 	rootElem->AddChild(mTextEdit);
+
+	mComboBox = new ComboBox;
+	mComboBox->InitGuiStyle(nullptr);
+	mComboBox->SetName("ComboBox");
+	mComboBox->SetPosition(int2(20, 450));
+	mComboBox->SetSize(int2(200, 30));
+	//mComboBox->SetDropHeight(60);
+	mComboBox->AddItem(L"Cryteck");
+	mComboBox->AddItem(L"HBAO");
+	mComboBox->AddItem(L"Unreal4");
+	mComboBox->AddItem(L"Alchemy");	
+	mComboBox->SetSelectedIndex(0);
+	rootElem->AddChild(mComboBox);
 }
 
 void TestApp::DrawUI()
 {
 	wchar_t buffer[100];
-	int cx = swprintf ( buffer, 100, L"FPS: %d", mFramePerSecond );
+	int cx = swprintf ( buffer, 100, L"Graphics Demo FPS: %d", mFramePerSecond );
 	mFPSLabel->SetText(buffer);
 
 	// Render UI

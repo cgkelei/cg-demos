@@ -409,4 +409,9 @@ void Label::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	mHovering = false;
 }
 
+void Label::InitGuiStyle( const GuiSkin::StyleMap* styles /*= nullptr*/ )
+{
+
+}
+
 }

@@ -5,6 +5,7 @@
 #include <Graphics/Font.h>
 #include <Input/InputEvent.h>
 #include <Input/InputSystem.h>
+#include <Core/Exception.h>
 
 namespace RcEngine {
 
@@ -29,8 +30,7 @@ TextEdit::TextEdit()
 	mSelectStartX = mSelectStartY = 0;
 	mCaretY = mCaretX = 0;
 
-	mVertScrollBar = new ScrollBar();
-	mVertScrollBar->SetOrientation( UI_Vertical );
+	mVertScrollBar = new ScrollBar(UI_Vertical);
 	mVertScrollBar->SetScrollButtonRepeat(true);
 	mVertScrollBar->SetVisible(false);
 	mVertScrollBar->EventValueChanged.bind(this, &TextEdit::HandleVScrollBar);
@@ -48,7 +48,7 @@ bool TextEdit::CanHaveFocus() const
 	return mVisible && mEnabled;
 }
 
-void TextEdit::Initialize( const GuiSkin::StyleMap* styles /* = nullptr */ )
+void TextEdit::InitGuiStyle( const GuiSkin::StyleMap* styles /* = nullptr */ )
 {
 	if (styles)
 	{
@@ -58,7 +58,7 @@ void TextEdit::Initialize( const GuiSkin::StyleMap* styles /* = nullptr */ )
 	{
 		// use default
 		GuiSkin* defaultSkin = UIManager::GetSingleton().GetDefaultSkin();
-		mVertScrollBar->Initialize(nullptr);
+		mVertScrollBar->InitGuiStyle(nullptr);
 
 
 		// background in Normal State
@@ -68,8 +68,6 @@ void TextEdit::Initialize( const GuiSkin::StyleMap* styles /* = nullptr */ )
 	// Init row height
 	const float fontScale = (float)mTextEditStyle->FontSize / mTextEditStyle->Font->GetFontSize();
 	mRowHeight = static_cast<int32_t>( mTextEditStyle->Font->GetRowHeight() * fontScale );
-
-	UpdateText();
 }
 
 void TextEdit::Update(float dt)
@@ -280,12 +278,10 @@ void TextEdit::UpdateRect()
 void TextEdit::UpdateText()
 {
 	if (!mTextEditStyle)
-		return;
+		ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Init Gui Style First!", "TextEdit::UpdateText");
 
 	// Update ScrollBar
 	UpdateVScrollBar();
-	
-	//mPrintText
 
 	const float fontScale = (float)mTextEditStyle->FontSize / mTextEditStyle->Font->GetFontSize();
 
@@ -499,9 +495,13 @@ void TextEdit::DeleteSlectedText()
 void TextEdit::DeleteNextChar()
 {
 	size_t delStart = GetCharIndex(mCaretY, mCaretX);
-	mText.erase(delStart, 1);
-	UpdateText();
-	PlaceCaret(mCaretX, mCaretY);
+
+	if (delStart < mText.size())
+	{
+		mText.erase(delStart, 1);
+		UpdateText();
+		PlaceCaret(mCaretX, mCaretY);
+	}	
 }
 
 void TextEdit::DeletePreChar()
