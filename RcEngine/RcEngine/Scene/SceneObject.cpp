@@ -10,7 +10,7 @@ static const BoundingBoxf UnDefineBoundingBox;
 
 
 SceneObject::SceneObject( const String& name, SceneObejctType type, bool renderable /*= false*/ )
-	: mName(name), mType(type), mRenderable(renderable), mParentNode(nullptr)
+	: mName(name), mType(type), mRenderable(renderable), mParentNode(nullptr), mVisible(true)
 {
 
 }

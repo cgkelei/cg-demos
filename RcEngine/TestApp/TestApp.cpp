@@ -57,7 +57,6 @@ TestApp::TestApp( const String& config )
 	//param[StringHash("Test")] = var;
 }
 
-
 TestApp::~TestApp(void)
 {
 	delete mCameraControler;
@@ -65,8 +64,6 @@ TestApp::~TestApp(void)
 
 void TestApp::Initialize()
 {
-			printf("Ok\n");
-
 	InitGUI();
 
 	Camera* camera = RcEngine::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
@@ -125,23 +122,13 @@ void TestApp::LoadContent()
 	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
-	/*resMan.AddResource(RT_Material, "Sprite.material.xml", "General");
-	resMan.AddResource(RT_Mesh, "him.mesh", "Custom");*/
-	resMan.AddResource(RT_Font, "Consolas Regular", "General");
-	resMan.LoadAllFromDisk();
-
-	// Font Sprite 
-	mSpriteBatchFont = std::make_shared<SpriteBatch>(
-		std::static_pointer_cast<Material>(resMan.GetResourceByName(RT_Material, "Font.material.xml", "General")));
-	
-	// Font
-	mFont = std::static_pointer_cast<Font>(resMan.GetResourceByName(RT_Font,"Consolas Regular", "General"));
-
-	//auto ZY = mFont->GetGlyphInfo(L'Z').SrcY;
-	//auto AY = mFont->GetGlyphInfo(L'A').SrcY;
+	resMan.AddResource(RT_Material, "Sprite.material.xml", "General");
+	//resMan.AddResource(RT_Mesh, "him.mesh", "Custom");
+	//resMan.AddResource(RT_Font, "Consolas Regular", "General");
+	//resMan.LoadAllFromDisk();
 
 	mSpriteBatch = std::make_shared<SpriteBatch>();
-	
+	//
 	// Entity
 	Entity* dudeEntity = sceneManager->CreateEntity("Dude", "him.mesh",  "Custom");
 	SceneNode* dudeNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
@@ -156,8 +143,8 @@ void TestApp::LoadContent()
 
 	animPlayer->PlayClip("Take 001");
 
-	mTexture = factory->CreateTextureFromFile(FileSystem::GetSingleton().Locate("Glass.dds"));
-
+	//mTexture = factory->CreateTextureFromFile(FileSystem::GetSingleton().Locate("Glass.dds"));
+	
 	//String skyTexPath = ;
 	//mTexture = factory->CreateTextureFromFile(skyTexPath);
 	//factory->SaveTexture2D("Test.dds", texture, 0, 0);
@@ -187,24 +174,14 @@ void TestApp::Render()
 	
 	//Rectanglef region(100, 100, 300, 300);
 
-	//mSpriteBatchFont->Begin();
-
-	//wchar_t buffer[100];
-	//int cx = swprintf ( buffer, 100, L"FPS: %d", mFramePerSecond );
-	//mFont->DrawString(*mSpriteBatchFont, std::wstring(buffer, cx), 30, float2(20, mMainWindow->GetHeight() - 30), ColorRGBA(1, 0, 0, 1));
 
 	//std::wstring wstr = L"mFont->DrawString(*mSpriteBatch,\n std::wstring(buffer, cx), 30,\n float2(20, 580), ColorRGBA(0, 0, 0, 1));";
-	//
-	////mFont->DrawStringWrap(*mSpriteBatch, wstr, 30, 500, float2(20, 200), ColorRGBA(0, 0, 0, 1));
-	////mFont->DrawString(*mSpriteBatchFont, wstr, 15, Font::AlignLeft | Font::AlignTop, region, ColorRGBA(0, 0, 0, 1));
+	
+	//mFont->DrawStringWrap(*mSpriteBatch, wstr, 30, 500, float2(20, 200), ColorRGBA(0, 0, 0, 1));
+	//mFont->DrawString(*mSpriteBatchFont, wstr, 15, Font::AlignLeft | Font::AlignTop, region, ColorRGBA(0, 0, 0, 1));
 
 	//mSpriteBatchFont->End();
 	//mSpriteBatchFont->Flush();
-
-	//mSpriteBatch->Begin();
-	//mSpriteBatch->Draw(mTexture, region, ColorRGBA(1, 1, 1, 1));
-	//mSpriteBatch->End();
-	//mSpriteBatch->Flush();
 
 	// todo 
 	// Move to engine level
@@ -292,7 +269,7 @@ void TestApp::InitGUI()
 	mTextEdit->SetSize(int2(270, 90));
 	mTextEdit->SetMultiLine(true);
 	//mTextEdit->SetText(L"mTextEdit\n->SetSize\n(int2(200, 90))");
-	mTextEdit->SetText(L"mButton->EventButton\nClicked.bind(this, \n&TestApp::ButtonClicked);");
+	mTextEdit->SetText(L"mButton->EventButtonClicked.bind(this, &TestApp::ButtonClicked);");
 	rootElem->AddChild(mTextEdit);
 
 	mComboBox = new ComboBox;
@@ -351,7 +328,6 @@ void TestApp::CheckBoxToggle( bool checked )
 	else
 		printf("CheckBox: unchecked\n");
 }	
-
 
 int32_t main()
 {

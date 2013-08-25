@@ -242,6 +242,7 @@ void SpriteBatch::Flush()
 		if (!iter->second->Empty())
 		{
 			//iter->second->SetProjectionMatrix(mProjectionMatrix);
+			iter->second->SetVisible(true);
 		}	
 		else
 		{

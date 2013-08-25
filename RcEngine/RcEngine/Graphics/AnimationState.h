@@ -69,9 +69,7 @@ public:
 
 	uint8_t GetLayer() const { return mLayer; }
 	
-
 	void SetFadeLength(float fadeLength);
-
 
 	/**
 	 * Applies an animation track to the designated target. 
@@ -93,8 +91,6 @@ private:
 	AnimationPlayer& mAnimation;
 
 	uint8_t mStateBits;
-
-	
 
 	bool mEnable;
 

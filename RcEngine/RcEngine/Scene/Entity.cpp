@@ -28,10 +28,9 @@ Entity::Entity( const String& name, const shared_ptr<Mesh>& mesh )
 
 Entity::~Entity()
 {
-	for (auto iter = mSubEntityList.begin(); iter != mSubEntityList.end(); ++iter)
-	{
-		SAFE_DELETE(*iter);
-	}
+	for (SubEntity* subEntiry : mSubEntityList)
+		SAFE_DELETE(subEntiry);
+
 	mSubEntityList.clear();
 	mChildAttachedObjects.clear();
 
@@ -313,15 +312,13 @@ SceneObject* Entity::FactoryFunc( const String& name, const NameValuePairList* p
 	// must have mesh parameter
 	shared_ptr<Mesh> pMesh;
 
-	if (params != 0)
+	if (params)
 	{
 		String groupName = "General";
 
-		auto found = params->find("ResourceGroup");
+		NameValuePairList::const_iterator found = params->find("ResourceGroup");
 		if (found != params->end())
-		{
 			groupName = found->second;
-		}
 
 		found = params->find("Mesh");
 		if (found != params->end())
@@ -331,11 +328,8 @@ SceneObject* Entity::FactoryFunc( const String& name, const NameValuePairList* p
 				ResourceManager::GetSingleton().GetResourceByName(RT_Mesh, found->second, groupName));	
 		}
 	}
-
-	if (!pMesh)
-	{
+	else
 		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Create entity failed.", "Entity::FactoryFunc");
-	}
 
 	return new Entity(name, pMesh);
 }

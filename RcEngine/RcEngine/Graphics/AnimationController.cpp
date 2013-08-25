@@ -6,6 +6,7 @@
 namespace RcEngine {
 
 AnimationController::AnimationController()
+	: mState(Idle)
 {
 
 }
@@ -37,9 +38,7 @@ void AnimationController::Update( float elapsedTime )
 void AnimationController::Schedule(AnimationState* clipState)
 {
 	if (mRunningClips.empty())
-	{
 		mState = Running;
-	}
 
 	assert(clipState);
 	mRunningClips.push_back(clipState);
@@ -50,9 +49,7 @@ void AnimationController::Unschedule(AnimationState* clipState)
 	auto found = std::find(mRunningClips.begin(), mRunningClips.end(), clipState);
 
 	if (found != mRunningClips.end())
-	{
 		mRunningClips.erase(found);
-	}
 
 	if (mRunningClips.empty())
 		mState = Idle;

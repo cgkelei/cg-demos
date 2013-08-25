@@ -64,13 +64,9 @@ ResourceHandle ResourceManager::AddResource( uint32_t type, const String& name, 
 		auto resIter = resourceGroup.Resources.find(name);
 
 		if (resIter != resourceGroup.Resources.end())
-		{
-			retVal = resIter->second->GetResourceHandle();; 
-		}
+			retVal = resIter->second->GetResourceHandle();
 		else
-		{
 			retVal = AddNonExitingResouce(type, name, group);
-		}
 	}
 	else
 	{

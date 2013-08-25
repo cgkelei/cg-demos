@@ -81,6 +81,7 @@
     <ClInclude Include="GUI\UIElement.h" />
     <ClInclude Include="GUI\UIManager.h" />
     <ClInclude Include="GUI\UIWindow.h" />
+    <ClInclude Include="GUI\WordWrap.h" />
     <ClInclude Include="Input\InputEvent.h" />
     <ClInclude Include="Input\InputSystem.h" />
     <ClInclude Include="IO\FileStream.h" />
@@ -178,6 +179,7 @@
     <ClCompile Include="GUI\UIElement.cpp" />
     <ClCompile Include="GUI\UIManager.cpp" />
     <ClCompile Include="GUI\UIWindow.cpp" />
+    <ClCompile Include="GUI\WordWrap.cpp" />
     <ClCompile Include="Input\InputSystem.cpp" />
     <ClCompile Include="IO\FileStream.cpp" />
     <ClCompile Include="IO\FileSystem.cpp" />

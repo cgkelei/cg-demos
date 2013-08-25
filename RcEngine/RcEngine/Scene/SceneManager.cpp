@@ -22,7 +22,8 @@
 namespace RcEngine {
 
 SceneManager::SceneManager()
-	: mSkyBox(nullptr), mSkyBoxNode(nullptr), mAnimationController(new AnimationController)
+	: mSkyBox(nullptr), 
+	  mSkyBoxNode(nullptr)
 {
 	Context::GetSingleton().SetSceneManager(this);
 
@@ -31,12 +32,14 @@ SceneManager::SceneManager()
 	RegisterType(SOT_Light, "Light Type", nullptr, nullptr, Light::FactoryFunc);
 	RegisterType(SOT_Sprite, "Sprite Type", nullptr, nullptr, SpriteEntity::FactoryFunc);
 
+	mAnimationController = new AnimationController;
 	mRenderQueue = new RenderQueue;
 }
 
 SceneManager::~SceneManager()
 {
 	ClearScene();
+	SAFE_DELETE(mAnimationController);
 	SAFE_DELETE(mRenderQueue);
 }
 
@@ -147,9 +150,7 @@ SpriteEntity* SceneManager::CreateSpriteEntity( const shared_ptr<Texture>& tex, 
 {
 	auto factoryIter = mRegistry.find(SOT_Sprite);
 	if (factoryIter == mRegistry.end())
-	{
 		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Entity type haven't Registed", "SceneManager::CreateSpriteEntity");
-	}
 
 	SpriteEntity* entity = static_cast<SpriteEntity*>((factoryIter->second.factoryFunc)(mat->GetName(), NULL));
 	entity->SetSpriteContent(tex, mat);
@@ -217,7 +218,7 @@ void SceneManager::UpdateSceneGraph( float delta )
 void SceneManager::RenderScene()
 {
 	auto& renderBuckets = mRenderQueue->GetAllRenderBuckets();
-
+	
 	for (auto iter = renderBuckets.begin(); iter != renderBuckets.end(); ++iter)
 	{
 		RenderBucket& renderBucket = *(iter->second);
@@ -240,8 +241,6 @@ void SceneManager::RenderScene()
 
 void SceneManager::ClearScene()
 {
-	SAFE_DELETE(mAnimationController);
-
 	// clear all scene node
 	for (auto iter = mAllSceneNodes.begin(); iter != mAllSceneNodes.end(); ++iter)
 	{

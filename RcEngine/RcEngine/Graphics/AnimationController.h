@@ -22,7 +22,6 @@ public:
 public:
 	AnimationController();
 	~AnimationController();
-
 	
 	State GetState() const	{ return mState; }
 
