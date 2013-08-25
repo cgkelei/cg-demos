@@ -212,13 +212,6 @@ void OpenGLRenderDevice::SetBlendState( const shared_ptr<BlendState>& state, con
 			auto src11 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlendAlpha);
 			auto dst11 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlendAlpha);
 
-			int a = 102;
-			char dest[256];
-			sprintf(dest, "0x%x",src1);
-			sprintf(dest, "0x%x",dst1);
-			sprintf(dest, "0x%x",src11);
-			sprintf(dest, "0x%x",dst11);
-
 			glBlendFuncSeparate(OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlend), 
 				OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlend),
 				OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlendAlpha), 

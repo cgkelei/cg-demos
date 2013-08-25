@@ -330,6 +330,9 @@
     <ClInclude Include="GUI\ListBox.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="GUI\WordWrap.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Context.cpp">
@@ -585,6 +588,9 @@
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\ListBox.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\WordWrap.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>

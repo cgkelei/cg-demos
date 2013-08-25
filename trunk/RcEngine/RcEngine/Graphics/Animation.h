@@ -24,24 +24,20 @@ public:
 	void StopClip(const String& clipName);
 	void StopAll();
 
-
 	AnimationState* GetClip( const String& clip ) const;
 	const unordered_map<String, AnimationState*>& GetAllClip() const { return mAnimationStates; }
 
 	AnimationState* AddClip( const shared_ptr<AnimationClip>& clip );
-
-
-	EventHandler& EventCompleted() { return mEventCompleted; }
 
 	AnimationController* GetAnimationController() const { return mController; }
 
 public:
 	static shared_ptr<AnimationPlayer> LoadFrom(Mesh& parentMesh, Stream& source);
 
+	// Events
+	EventHandler EventAnimationCompleted;
 
 protected:
-
-	EventHandler mEventCompleted;
 
 	AnimationController* mController; 
 

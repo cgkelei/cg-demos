@@ -12,6 +12,7 @@
 namespace RcEngine {
 
 AnimationPlayer::AnimationPlayer( )
+	: mCurrentClipState(nullptr)
 {
 	mController = Context::GetSingleton().GetSceneManager().GetAnimationController();
 }
@@ -19,9 +20,8 @@ AnimationPlayer::AnimationPlayer( )
 AnimationPlayer::~AnimationPlayer()
 {
 	for (auto iter = mAnimationStates.begin(); iter != mAnimationStates.end(); ++iter)
-	{
 		delete iter->second;
-	}
+
 	mAnimationStates.clear();
 }
 
@@ -41,9 +41,7 @@ AnimationState* AnimationPlayer::AddClip( const shared_ptr<AnimationClip>& clip 
 	auto found = mAnimationStates.find(clip->GetClipName());
 
 	if (found != mAnimationStates.end())
-	{
 		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Same animation clip exits", "Animation::AddClip");
-	}
 
 	if (!clip->IsLoaded())
 		clip->Load();
@@ -73,9 +71,7 @@ void AnimationPlayer::PlayClip( const String& clipName )
 	auto found = mAnimationStates.find(clipName);
 
 	if (found == mAnimationStates.end())
-	{
 		return;
-	}
 
 	AnimationState* clipState = found->second;
 
@@ -100,9 +96,7 @@ void AnimationPlayer::PauseClip( const String& clipName )
 	auto found = mAnimationStates.find(clipName);
 
 	if (found == mAnimationStates.end())
-	{
 		return;
-	}
 
 	AnimationState* clipState = found->second;
 
@@ -118,9 +112,7 @@ void AnimationPlayer::ResumeClip( const String& clipName )
 	auto found = mAnimationStates.find(clipName);
 
 	if (found == mAnimationStates.end())
-	{
 		return;
-	}
 
 	AnimationState* clipState = found->second;
 
@@ -135,12 +127,9 @@ bool AnimationPlayer::IsPlaying( const String& clipName ) const
 	auto found = mAnimationStates.find(clipName);
 
 	if (found == mAnimationStates.end())
-	{
 		return false;
-	}
 
 	AnimationState* clipState = found->second;
-
 	return clipState->IsClipStateBitSet(AnimationState::Clip_Is_Playing_Bit);
 }
 
@@ -149,9 +138,7 @@ void AnimationPlayer::StopClip( const String& clipName )
 	auto found = mAnimationStates.find(clipName);
 
 	if (found == mAnimationStates.end())
-	{
 		return;
-	}
 
 	AnimationState* clipState = found->second;
 

@@ -59,7 +59,7 @@ void Mesh::LoadImpl()
 	{
 		shared_ptr<MeshPart> subMesh = std::make_shared<MeshPart>(*this);
 		subMesh->Load(source);
-		
+
 		// add mesh part material resource
 		ResourceManager::GetSingleton().AddResource(RT_Material, subMesh->mMaterialName, mGroup);
 

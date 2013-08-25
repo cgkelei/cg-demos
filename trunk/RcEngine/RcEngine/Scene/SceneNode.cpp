@@ -141,19 +141,16 @@ void SceneNode::OnUpdateRenderQueues(Camera* camera,  RenderOrder order)
 		return;
 	}*/
 
-	for (auto iter = mAttachedObjects.begin(); iter != mAttachedObjects.end(); ++iter)
+	for (SceneObject* pSceneObject : mAttachedObjects)
 	{
-		SceneObject* object = *iter;
-		if (object->Renderable() && object->IsVisible())
-		{
-			object->OnUpdateRenderQueue(mScene->GetRenderQueue(), camera, order);
-		}	
+		if (pSceneObject->Renderable() && pSceneObject->IsVisible())
+			pSceneObject->OnUpdateRenderQueue(mScene->GetRenderQueue(), camera, order);
 	}
 
 	// recursively call children
-	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
+	for (Node* node : mChildren)
 	{
-		SceneNode* child = static_cast<SceneNode*>(*iter);
+		SceneNode* child = static_cast<SceneNode*>(node);
 		child->OnUpdateRenderQueues(camera, order);
 	}
 }

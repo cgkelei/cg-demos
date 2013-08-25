@@ -214,7 +214,7 @@ protected:
 
 	Node* mParent;
 
-	vector<Node*> mChildren;
+	std::vector<Node*> mChildren;
 
 	String mName;
 

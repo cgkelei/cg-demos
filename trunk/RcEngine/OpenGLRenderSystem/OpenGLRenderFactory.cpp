@@ -488,7 +488,30 @@ void OpenGLRenderFactory::SaveTexture2D( const String& texFile, const shared_ptr
 				imageData[j*w+i].a = a;
 			}
 
-		WriteTGA("E:/test.tga", &imageData[0], w, h);
+		WriteTGA(texFile.c_str(), &imageData[0], w, h);
+	}
+	else if (texture->GetTextureFormat() == PF_R8G8B8)
+	{
+		void* pData;
+		uint32_t rowPitch;
+		texture->Map2D(arrayIndex, level, TMA_Read_Only, 0, 0, 0, 0, pData, rowPitch);
+
+		uint8_t* pixel = (uint8_t*)pData;
+		vector<Pixel32> imageData(w*h);
+		for (uint32_t j = 0; j < h; j++)
+			for(uint32_t i = 0; i < w; i ++)
+			{
+				uint8_t b = pixel[((h-j -1) * w + i)*3 + 0];
+				uint8_t g = pixel[((h-j-1) * w + i)*3 +1];
+				uint8_t r = pixel[((h-j-1) * w + i)*3 +2];
+
+				imageData[j*w+i].r = r;
+				imageData[j*w+i].g = g;
+				imageData[j*w+i].b = b;
+				imageData[j*w+i].a = 255;
+			}
+
+			WriteTGA(texFile.c_str(), &imageData[0], w, h);
 	}
 	else if (texture->GetTextureFormat() == PF_Alpha8)
 	{
@@ -512,7 +535,7 @@ void OpenGLRenderFactory::SaveTexture2D( const String& texFile, const shared_ptr
 				imageData[j*w+i].a = a;
 			}
 
-			WriteTGA("E:/font.tga", &imageData[0], w, h);
+			WriteTGA(texFile.c_str(), &imageData[0], w, h);
 	}
 }
 

@@ -9,8 +9,14 @@
 namespace RcEngine {
 
 AnimationState::AnimationState( AnimationPlayer& animation, const shared_ptr<AnimationClip> clip )
-	: mAnimation(animation), mClip(clip), mTime(0), BlendWeight(1.0f), PlayBackSpeed(1.0f), WrapMode(Wrap_Once),
-	mStateBits(0x00)
+	: mAnimation(animation),
+	  mClip(clip),
+	  mTime(0), 
+	  BlendWeight(1.0f), 
+	  PlayBackSpeed(1.0f), 
+	  WrapMode(Wrap_Once),
+	  mStateBits(0x00),
+	  mEnable(true)
 {
 
 }

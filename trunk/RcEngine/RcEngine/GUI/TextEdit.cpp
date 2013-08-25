@@ -6,6 +6,7 @@
 #include <Input/InputEvent.h>
 #include <Input/InputSystem.h>
 #include <Core/Exception.h>
+#include <GUI/WordWrap.h>
 
 namespace RcEngine {
 
@@ -316,7 +317,10 @@ void TextEdit::UpdateText()
 
 void TextEdit::SetText( const std::wstring& text )
 {
-	mText = text;
+	//mText = text;
+	WordWrap* wrap = WordWrap::WrapText(text, mTextRect, *(mTextEditStyle->Font), mTextEditStyle->FontSize);
+	mText = wrap->GetWrappedText();
+	delete wrap;
 	UpdateText();
 }
 
