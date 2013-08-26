@@ -78,7 +78,6 @@ protected:
 	void WrapText();
 	void UpdateVisisbleText();
 
-	void UpdateVScrollBar();
 	void HandleVScrollBar(int32_t value);
 	
 protected:
@@ -101,7 +100,7 @@ protected:
 	std::vector<int32_t> mWrappedBreakAt;
 
 	int32_t mBorder;
-	int32_t mRowHeight;
+	float mRowHeight;
 	
 	ColorRGBA mTextColor;
 	ColorRGBA mSelTextColor;
@@ -120,7 +119,6 @@ protected:
 
 	// Caret Position, measured in char index
 	size_t mCaretY, mCaretX;
-
 	size_t mSelectStartX, mSelectStartY;
 
 	GuiSkin::GuiStyle* mTextEditStyle;

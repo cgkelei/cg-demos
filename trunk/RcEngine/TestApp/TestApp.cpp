@@ -128,14 +128,14 @@ void TestApp::LoadContent()
 	//resMan.LoadAllFromDisk();
 
 	mSpriteBatch = std::make_shared<SpriteBatch>();
-	//
+
 	// Entity
 	Entity* dudeEntity = sceneManager->CreateEntity("Dude", "him.mesh",  "Custom");
 	SceneNode* dudeNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
 	dudeNode->SetPosition(float3(0, 0, 0));
 	dudeNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(180.0f), 0.0f, 0.0f));
 	dudeNode->AttachObject(dudeEntity);
-
+	//dudeEntity->SetVisible(false);
 
 	AnimationPlayer* animPlayer = dudeEntity->GetAnimationPlayer();
 	AnimationState* takeClip = animPlayer->GetClip("Take 001");
@@ -246,7 +246,7 @@ void TestApp::InitGUI()
 	mScrollBar = new ScrollBar(UI_Vertical);
 	mScrollBar->SetName("ScrollBar");
 	mScrollBar->InitGuiStyle(nullptr);
-	mScrollBar->SetPosition(int2(300, 100));
+	mScrollBar->SetPosition(int2(250, 100));
 	mScrollBar->SetSize(int2(23, 400));
 	rootElem->AddChild( mScrollBar );	
 
