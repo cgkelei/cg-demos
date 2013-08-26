@@ -13,7 +13,7 @@ const String ScrollBar::TrackStyleName("ScrollBar::TrackStyleName");
 
 static const float DEFAULT_SCROLL_STEP = 0.1f;
 static const float DEFAULT_REPEAT_DELAY = 0.8f;
-static const float DEFAULT_REPEAT_RATE = 20.0f;
+static const float DEFAULT_REPEAT_RATE = 10.0f;
 
 ScrollBar::ScrollBar( UIOrientation orient )
 	: mOrientation(orient),
@@ -186,6 +186,7 @@ void ScrollBar::SetScrollRange( int32_t minValue, int32_t maxValue )
 {
 	mMaxValue = maxValue;
 	mMinValue = minValue;
+	mValue = Clamp(mValue, mMinValue, mMaxValue);
 
 	UpdateThumb();
 }
