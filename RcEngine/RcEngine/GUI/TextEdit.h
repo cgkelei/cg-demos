@@ -52,9 +52,20 @@ protected:
 
 	int32_t GetRowStartPos(int32_t rowIdx) const;
 
-	void GetCharPos(const int2& screenPos, size_t& rowIndex, size_t& columnIndex);
-
-	size_t GetCharIndex(size_t rowIndex, size_t columnIndex);
+	/**
+	 * Calculate caret position from screen position.
+	 */
+	void GetCaretAt(const int2& screenPos, size_t& caretX, size_t& caretY);
+	
+	/**
+	 * Calculate caret position from char index in original text.
+	 */
+	void GetCaretPos(size_t index, size_t& caretX, size_t& caretY);
+	
+	/**
+	 * Calculate char index based on caret pos (x, y).
+	 */
+	size_t GetCharIndex(size_t caretX, size_t caretY);
 
 	void DeleteSlectedText();
 	void DeletePreChar();
@@ -64,6 +75,8 @@ protected:
 
 	void UpdateRect();
 	void UpdateText();
+	void WrapText();
+	void UpdateVisisbleText();
 
 	void UpdateVScrollBar();
 	void HandleVScrollBar(int32_t value);
@@ -71,15 +84,21 @@ protected:
 protected:
 
 	bool mMultiLine;
+	bool mWordWrap;
 
 	std::wstring mText;
+	std::wstring mWrappedText;
 	std::wstring mPrintText;
+
 	size_t mFirstVisibleLine;
+	size_t mNumVisibleLines;
+	size_t mNumLines;
 
 	IntRect mTextRect;
 	IntRect mBackRect;
 
 	std::vector< std::vector<float> > mCharPositions;
+	std::vector<int32_t> mWrappedBreakAt;
 
 	int32_t mBorder;
 	int32_t mRowHeight;
