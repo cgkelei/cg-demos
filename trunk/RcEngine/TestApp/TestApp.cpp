@@ -246,7 +246,7 @@ void TestApp::InitGUI()
 	mScrollBar = new ScrollBar(UI_Vertical);
 	mScrollBar->SetName("ScrollBar");
 	mScrollBar->InitGuiStyle(nullptr);
-	mScrollBar->SetPosition(int2(600, 100));
+	mScrollBar->SetPosition(int2(300, 100));
 	mScrollBar->SetSize(int2(23, 400));
 	rootElem->AddChild( mScrollBar );	
 
@@ -262,14 +262,16 @@ void TestApp::InitGUI()
 	mListBox->SetSelectedIndex(1);
 	rootElem->AddChild(mListBox);
 
+	auto text = L"I'll cover a very simple method of reflection that can be very powerful, developed in my spare time as Reflectabit, with a similar implementation written for Splinter Cell: Conviction. The main selling points of the implementation are the ease with which you can replicate anything over a network connection and the extra bonus of being able to live-edit your C++ code while the game is running.";
+	
 	mTextEdit = new TextEdit;
 	mTextEdit->InitGuiStyle(nullptr);
 	mTextEdit->SetName("TextEdit");
-	mTextEdit->SetPosition(int2(20, 330));
-	mTextEdit->SetSize(int2(270, 90));
+	mTextEdit->SetPosition(int2(470, 50));
+	mTextEdit->SetSize(int2(300, 200));
 	mTextEdit->SetMultiLine(true);
 	//mTextEdit->SetText(L"mTextEdit\n->SetSize\n(int2(200, 90))");
-	mTextEdit->SetText(L"mButton->EventButtonClicked.bind(this, &TestApp::ButtonClicked);");
+	mTextEdit->SetText(text);
 	rootElem->AddChild(mTextEdit);
 
 	mComboBox = new ComboBox;
