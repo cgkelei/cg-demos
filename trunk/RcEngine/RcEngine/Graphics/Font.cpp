@@ -465,8 +465,8 @@ void Font::DrawString( SpriteBatch& spriteBatch, std::wstring& text, int32_t fon
 
 			// Out of region
 			if ( (ch_x + ch_width <= region.Left()) ||
-				(ch_x >= region.Right())           ||
-				(ch_y >= region.Bottom()) ||
+				(ch_x >= region.Right())            ||
+				(ch_y >= region.Bottom())           ||
 				(ch_y + ch_height <= region.Top()) )
 				continue;
 

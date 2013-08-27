@@ -6,7 +6,6 @@
 #include <Input/InputEvent.h>
 #include <Input/InputSystem.h>
 #include <Core/Exception.h>
-#include <GUI/WordWrap.h>
 #include <cctype>
 
 namespace RcEngine {
@@ -14,8 +13,9 @@ namespace RcEngine {
 static const int32_t BorderWidth = 8;
 static const int32_t ScrollBarWidth = 20;
 
-TextEdit::TextEdit()
-	: mMultiLine(false),
+TextEdit::TextEdit(TextEditType type)
+	: mEditType(type),
+	  mMultiLine(false),
 	  mDragMouse(false),
 	  mWordWrap(true),
 	  mCaretBlinkRate(1.0f),
@@ -23,29 +23,44 @@ TextEdit::TextEdit()
 	  mBorder(BorderWidth),
 	  mScrollBarWidth(ScrollBarWidth),
 	  mTextEditStyle(nullptr),
-	  mCaretOn(false)
+	  mVertScrollBar(nullptr),
+	  mCaretOn(false),
+	  mNumLines(0),
+	  mFirstVisibleY(0),
+	  mNumVisibleY(0),
+	  mCaretPos(0, 0),
+	  mSelectStartPos(0, 0)
 {
 	mTextColor = ColorRGBA( 1.0f, 0.06f, 0.06f, 0.06f );
 	mSelTextColor = ColorRGBA( 1.0f, 1.0f, 1.0f, 1.0f );
 	mSelBkColor = ColorRGBA( 1.0f, 0.156f, 0.196f, 0.36f );
 	mCaretColor = ColorRGBA( 1.0f, 0, 0, 0 );
 
-	mSelectStartX = mSelectStartY = 0;
-	mCaretY = mCaretX = 0;
+	if (mEditType == LineEdit)
+		mTextAlign = AlignLeft | AlignVCenter;
+	else
+		mTextAlign = AlignLeft | AlignTop;
 
-	mFirstVisibleLine = 0;
+	if (mEditType == TextBox)
+	{
+		mVertScrollBar = new ScrollBar(UI_Vertical);
+		mVertScrollBar->SetScrollButtonRepeat(true);
+		mVertScrollBar->SetVisible(false);
+		mVertScrollBar->EventValueChanged.bind(this, &TextEdit::HandleVScrollBar);
 
-	mVertScrollBar = new ScrollBar(UI_Vertical);
-	mVertScrollBar->SetScrollButtonRepeat(true);
-	mVertScrollBar->SetVisible(false);
-	mVertScrollBar->EventValueChanged.bind(this, &TextEdit::HandleVScrollBar);
-
-	AddChild(mVertScrollBar);
+		AddChild(mVertScrollBar);
+	}
 }
 
 TextEdit::~TextEdit()
 {
 
+}
+
+void TextEdit::SetText( const std::wstring& text )
+{
+	mText = text;
+	UpdateText();
 }
 
 bool TextEdit::CanHaveFocus() const
@@ -63,9 +78,10 @@ void TextEdit::InitGuiStyle( const GuiSkin::StyleMap* styles /* = nullptr */ )
 	{
 		// use default
 		GuiSkin* defaultSkin = UIManager::GetSingleton().GetDefaultSkin();
-		mVertScrollBar->InitGuiStyle(nullptr);
 
-
+		if (mEditType == TextBox)
+			mVertScrollBar->InitGuiStyle(nullptr);
+	
 		// background in Normal State
 		mTextEditStyle = &defaultSkin->TextEdit;
 	}
@@ -95,67 +111,48 @@ void TextEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	int2 screenPos = GetScreenPosition();
 
 	// Draw background first
-	Rectanglef backRC((float)screenPos.X(), (float)screenPos.Y(), (float)mSize.X(), (float)mSize.Y());
-	spriteBatch.Draw(mTextEditStyle->StyleTex, backRC, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, mTextEditStyle->StyleStates[UI_State_Normal].TexColor);
+	spriteBatch.Draw(mTextEditStyle->StyleTex, mBackRect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, mTextEditStyle->StyleStates[UI_State_Normal].TexColor);
 
 	// Draw selected background if has selection
-	if (mSelectStartX != mCaretX || mSelectStartY != mCaretY)
-	{	
-		Vector<size_t, 2> start(mSelectStartX, mSelectStartY);
-		Vector<size_t, 2> end(mCaretX, mCaretY);
-
-		if ( (mSelectStartY > mCaretY) || (mSelectStartY == mCaretY && mSelectStartX > mCaretX) )
-			std::swap(start, end);
-
-		Rectanglef rect;
-		rect.Height = mRowHeight;
-
-		if (start.Y() != end.Y())
-		{
-			// First Line
-			rect.SetLeft( mCharPositions[start.Y()][start.X()] );
-			rect.SetRight( mCharPositions[start.Y()].back() );
-			rect.SetTop( float(mTextRect.Y + mRowHeight * (start.Y()-mFirstVisibleLine)) );		
-			spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));
-			
-			// Last Line
-			rect.SetLeft( mCharPositions[end.Y()].front() );
-			rect.SetRight( mCharPositions[end.Y()][end.X()] );
-			rect.SetTop( float(mTextRect.Y + mRowHeight * (end.Y()-mFirstVisibleLine)) );		
-			spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));
-
-			for (size_t i = start.Y() + 1; i < end.Y(); ++i)
-			{
-				rect.SetLeft( mCharPositions[i].front() );
-				rect.SetRight( mCharPositions[i].back() );
-				rect.SetTop( float(mTextRect.Y + mRowHeight * (i-mFirstVisibleLine)));	
-				spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));
-			}
-		}
-		else
-		{
-			rect.SetLeft( mCharPositions[start.Y()][start.X()] );
-			rect.SetRight( mCharPositions[end.Y()][end.X()] );
-			rect.SetTop( float(mTextRect.Y + mRowHeight * (start.Y()-mFirstVisibleLine)) );		
-			spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));
-		}
-	}
+	DrawSelection(spriteBatch, spriteBatchFont);
 
 	// Draw Text
-	Rectanglef textRC((float)mTextRect.X, (float)mTextRect.Y, (float)mTextRect.Width, (float)mTextRect.Height);
-	mTextEditStyle->Font->DrawString(spriteBatchFont, mPrintText, mTextEditStyle->FontSize, AlignTop | AlignLeft, textRC, mTextColor);
+	if (mPrintText.size())
+	{
+		DrawText(spriteBatch, spriteBatchFont);
+	}
 
 	// Draw Caret
 	if (mCaretOn)
 	{
-		Rectanglef caretRC;
+		if (mEditType == LineEdit)
+		{
+			Rectanglef caretRC;
 
-		caretRC.X = mCharPositions[mCaretY][mCaretX];
-		caretRC.Y = mTextRect.Y + (float)(mCaretY - mFirstVisibleLine) * mRowHeight;
-		caretRC.Width = 1.0f;
-		caretRC.Height = (float)mRowHeight;
+			caretRC.X = mCharPositions[0][mCaretPos.X()];
+			caretRC.Y = mTextRect.Y;
+			caretRC.Width = 1.0f;
+			caretRC.Height = mRowHeight;
 
-		spriteBatch.Draw(mTextEditStyle->StyleTex, caretRC, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 0, 1));
+			spriteBatch.Draw(mTextEditStyle->StyleTex, caretRC, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 0, 1));
+		}
+		else
+		{
+			int32_t line = mCaretPos.Y() - mFirstVisibleY;
+
+			if (line >= 0 && line < mNumVisibleY)
+			{
+				Rectanglef caretRC;
+
+				caretRC.X = mCharPositions[mCaretPos.Y()][mCaretPos.X()];
+				caretRC.Y = mTextRect.Y + line * mRowHeight;
+				caretRC.Width = 1.0f;
+				caretRC.Height = mRowHeight;
+
+				spriteBatch.Draw(mTextEditStyle->StyleTex, caretRC, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 0, 1));
+			}
+		}
+		
 	}
 
 	// Reset
@@ -163,29 +160,145 @@ void TextEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	mCaretOn = false;
 }
 
+void TextEdit::DrawText( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
+{
+	mTextEditStyle->Font->DrawString(spriteBatchFont, mPrintText, mTextEditStyle->FontSize, mTextAlign, mTextRect, mTextColor);
+}
+
+void TextEdit::DrawSelection( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
+{
+	if (mCaretPos != mSelectStartPos)
+	{	
+		int2 start(mSelectStartPos);
+		int2 end(mCaretPos);
+
+		if ( (start.Y() > end.Y()) || (start.Y() == end.Y() && start.X() > end.X()) )
+			std::swap(start, end);
+
+		if (mEditType == LineEdit)
+		{
+			
+		}
+		else
+		{
+			Rectanglef rect;
+			rect.Height = mRowHeight;
+
+			if (start.Y() != end.Y())
+			{
+				int32_t line;
+
+				// First Line
+				line = start.Y() - mFirstVisibleY;
+				if (line >= 0 && line < mNumVisibleY)
+				{
+					rect.SetLeft( mCharPositions[start.Y()][start.X()] );
+					rect.SetRight( mCharPositions[start.Y()].back() );
+					rect.SetTop( mTextRect.Y + mRowHeight * line );		
+					spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));
+				}
+
+				// Last Line
+				line = end.Y() - mFirstVisibleY;
+				if (line >= 0 && line < mNumVisibleY)
+				{
+
+					rect.SetLeft( mCharPositions[end.Y()].front() );
+					rect.SetRight( mCharPositions[end.Y()][end.X()] );
+					rect.SetTop( mTextRect.Y + mRowHeight * line );		
+					spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));
+				}
+
+				for (int32_t i = start.Y() + 1; i < end.Y(); ++i)
+				{
+					line = i - mFirstVisibleY;
+					if (line >= 0 && line < mNumVisibleY)
+					{
+						rect.SetLeft( mCharPositions[i].front() );
+						rect.SetRight( mCharPositions[i].back() );
+						rect.SetTop( mTextRect.Y + mRowHeight * line);	
+						spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));
+					}
+				}
+			}
+			else
+			{
+				int32_t line = start.Y() - mFirstVisibleY;
+				if (line >= 0 && line < mNumVisibleY)
+				{
+					rect.SetLeft( mCharPositions[start.Y()][start.X()] );
+					rect.SetRight( mCharPositions[end.Y()][end.X()] );
+					rect.SetTop( mTextRect.Y + mRowHeight * line );		
+					spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));
+				}
+			}
+		}
+	}
+}
+
 void TextEdit::OnDragBegin( const int2& screenPos, uint32_t button )
 {
-	if (button == MS_LeftButton)
+	if (button == MS_LeftButton && mNumLines > 0)
 	{
-		if (mBackRect.Contains(screenPos.X(), screenPos.Y()))
+		if (mTextRect.Contains((float)screenPos.X(), (float)screenPos.Y()) )
 		{
-			GetCaretAt(screenPos, mCaretX, mCaretY);
-
+			mCaretPos = GetCaretAt(screenPos);
 			mDragMouse = true;
-
-			mSelectStartX = mCaretX;
-			mSelectStartY = mCaretY;
+			mSelectStartPos = mCaretPos;
 		}
 	}
 }
 
 void TextEdit::OnDragMove( const int2& screenPos, uint32_t buttons )
 {
-	if ( mDragMouse && (buttons & InputEventType::LeftButtonMask) )
+	if ( mDragMouse && (buttons & InputEventType::LeftButtonMask) && mNumLines > 0 )
 	{
-		if (mBackRect.Contains(screenPos.X(), screenPos.Y()))
+		if (mEditType == TextBox)
 		{
-			GetCaretAt(screenPos, mCaretX, mCaretY);
+			if ((float)screenPos.Y() < mTextRect.Top())
+			{
+				if (mVertScrollBar->IsVisible())
+					mVertScrollBar->Scroll(-1);
+
+				mCaretPos.Y() = (std::max)(0, mCaretPos.Y() - 1);
+				mCaretPos.X() = (std::min)(mCaretPos.X(), (int32_t)mCharPositions[mCaretPos.Y()].size() - 1);
+			}
+			else if (screenPos.Y() > (float)mTextRect.Bottom())
+			{
+				if (mVertScrollBar->IsVisible())
+					mVertScrollBar->Scroll(1);
+
+				mCaretPos.Y() = (std::min)(mNumLines-1, mCaretPos.Y() + 1);
+				mCaretPos.X() = (std::min)(mCaretPos.X(), (int32_t)mCharPositions[mCaretPos.Y()].size() - 1);
+			}
+			else
+			{
+				if (mTextRect.Contains(Clamp((float)screenPos.X(), mTextRect.Left(), mTextRect.Right()), (float)screenPos.Y()))
+					mCaretPos = GetCaretAt(screenPos);
+			}	
+		}
+		else
+		{
+			//// Line Edit
+			//if ((float)screenPos.X() < mTextRect.Left() && mFirstVisibleX > 0)
+			//{
+			//	mFirstVisibleX -= 1;
+			//	mTextAlign = AlignLeft | AlignVCenter;
+			//	UpdateText();
+			//}
+			//else if ((float)screenPos.X() > mTextRect.Right())
+			//{
+			//	mFirstVisibleX += 1;
+			//	mTextAlign = AlignRight | AlignVCenter;
+			//	UpdateText();
+			//}
+			//else 
+			//{
+			//	float x = Clamp((float)screenPos.X(), mTextRect.Left(), mTextRect.Right());
+			//	float y = Clamp((float)screenPos.Y(), mTextRect.Top(), mTextRect.Bottom());
+			//	//if (mTextRect.Contains(x))
+			//		mCaretPos = GetCaretAt(screenPos);
+			//}
 		}
 	}
 }
@@ -195,118 +308,238 @@ void TextEdit::OnDragEnd( const int2& position )
 	mDragMouse = false;
 }
 
-void TextEdit::GetCaretAt( const int2& screenPos, size_t& caretX, size_t& caretY )
+bool TextEdit::OnMouseWheel( int32_t delta )
 {
-	if (!mMultiLine)
-	{
-		caretY = 0;
-
-		caretX = mCharPositions[caretY].size() - 1;
-		for (size_t i = 0; i < mCharPositions[caretY].size() - 1; ++i)
-		{
-			float half = (mCharPositions[caretY][i] + mCharPositions[caretY][i+1]) * 0.5f;
-
-			if ((float)screenPos.X() < half)
-			{
-				caretX = i;
-				break;
-			}
-		}
-	}
-	else
-	{
-		caretY = Clamp((size_t)floorf((screenPos.Y() - mTextRect.Y) / mRowHeight), size_t(0), mNumVisibleLines - 1);
-		caretY += mFirstVisibleLine;
-
-		caretX = mCharPositions[caretY].size() - 1;
-		for (size_t i = 0; i < mCharPositions[caretY].size() - 1; ++i)
-		{
-			float half = (mCharPositions[caretY][i] + mCharPositions[caretY][i+1]) * 0.5f;
-		
-			if ((float)screenPos.X() < half)
-			{
-				caretX = i;
-				break;
-			}
-		}
-	}
-}
-
-void TextEdit::GetCaretPos( size_t index, size_t& caretX, size_t& caretY )
-{
-	size_t wrappedIndex = index;
-	for (size_t i = 0; i < mWrappedBreakAt.size(); ++i)
-	{
-		if ((int32_t)index > mWrappedBreakAt[i]+1)
-			wrappedIndex++;
-		else
-			break;
-	}
-
-	caretX = caretY = 0;
-	for (size_t i = 0; i < wrappedIndex; ++i)
-	{
-		if (mWrappedText[i] == L'\n')
-		{
-			caretY++;
-			caretX = 0;
-		}
-		else
-			caretX++;
-	}
-}
-
-size_t TextEdit::GetCharIndex( size_t caretX, size_t caretY )
-{
-	size_t wrappedIndex = 0;
-	for (size_t i = 0; i < caretY; ++i)
-		wrappedIndex += mCharPositions[i].size();
-
-	wrappedIndex += caretX;
-
-	size_t textIdx = wrappedIndex;
-	size_t numPadding = 1;
-	for (size_t i = 0; i < mWrappedBreakAt.size(); ++i)
-	{
-		if (mWrappedBreakAt[i] + numPadding < (int32_t)wrappedIndex)
-		{
-			textIdx--;
-			numPadding++;
-		}
-		else
-			break;
-	}
-	return textIdx;
-}
-
-bool TextEdit::OnMouseButtonPress( const int2& screenPos, uint32_t button )
-{
-	mDragMouse = true;
-
-	return false;
-}
-
-bool TextEdit::OnMouseButtonRelease( const int2& screenPos, uint32_t button )
-{
-	mDragMouse = false;
+	if (mEditType == TextBox && mVertScrollBar->IsVisible())
+		mVertScrollBar->Scroll(-delta);
 
 	return true;
 }
 
-void TextEdit::PlaceCaret( size_t newCaretX, size_t newCaretY )
+bool TextEdit::OnKeyPress( uint16_t key )
 {
-	if (newCaretY != mCaretY)
+	switch (key)
 	{
-		mCaretY = Clamp(newCaretY, size_t(0), mCharPositions.size());
+	case KC_LeftArrow:
+		{
+			if (mEditType == LineEdit)
+			{
+				if (mCaretPos.X() > 0)
+					PlaceCaret(mCaretPos.X() - 1, mCaretPos.Y());
+			}
+			else
+			{
+				if (mCaretPos.X() > 0)
+					PlaceCaret(mCaretPos.X() - 1, mCaretPos.Y());
+				else if (mCaretPos.X() == 0 && mCaretPos.Y() > 0)
+				{
+					if (mCaretPos.Y() == mFirstVisibleY && mVertScrollBar->IsVisible())
+						mVertScrollBar->Scroll(-1);
+
+					PlaceCaret(mCharPositions[mCaretPos.Y()-1].size() - 1, mCaretPos.Y()-1);
+				}
+			}	
+		}
+		break;
+
+	case KC_RightArrow:
+		{
+			if (mCaretPos.X() < (int32_t)mCharPositions[mCaretPos.Y()].size() - 1)
+				PlaceCaret(mCaretPos.X() + 1, mCaretPos.Y());
+			else 
+			{
+				if (mCaretPos.Y() < (int32_t)mCharPositions.size() - 1)
+				{
+					if ( (mCaretPos.Y() == mFirstVisibleY + mNumVisibleY - 1) && mVertScrollBar->IsVisible() )
+						mVertScrollBar->Scroll(1);
+
+					PlaceCaret(0, mCaretPos.Y()+1);
+				}
+			}
+		}
+		break;
+
+	case KC_UpArrow:
+		{
+			if (mMultiLine && mCaretPos.Y() > 0)
+			{
+				if (mCaretPos.Y() == mFirstVisibleY && mVertScrollBar->IsVisible())
+					mVertScrollBar->Scroll(-1);
+
+				PlaceCaret((std::min)(mCaretPos.X(), (int32_t)mCharPositions[mCaretPos.Y()-1].size()-1), mCaretPos.Y()-1);
+			}
+		}
+		break;
+
+	case KC_DownArrow:
+		{
+			if (mMultiLine && (mCaretPos.Y() < (int32_t)mCharPositions.size() - 1) )
+			{
+				if ( (mCaretPos.Y() == mFirstVisibleY + mNumVisibleY - 1) && mVertScrollBar->IsVisible() )
+					mVertScrollBar->Scroll(1);
+
+				PlaceCaret((std::min)(mCaretPos.X(), (int32_t)mCharPositions[mCaretPos.Y()+1].size()-1), mCaretPos.Y()+1);
+			}
+		}
+		break;
+
+	case KC_PageDown:
+		{
+			if (mMultiLine && (mFirstVisibleY < mNumLines - mNumVisibleY) && mVertScrollBar->IsVisible() )
+				mVertScrollBar->Scroll(mNumVisibleY);
+		}
+		break;
+
+	case KC_PageUp:
+		{
+			if (mMultiLine && (mFirstVisibleY > 0) && mVertScrollBar->IsVisible() )
+				mVertScrollBar->Scroll(-mNumVisibleY);
+		}
+		break;
+
+	case KC_Home:
+		PlaceCaret(0, mCaretPos.Y());
+		break;
+
+	case KC_End:
+		PlaceCaret(mCharPositions[mCaretPos.Y()].size()-1 , mCaretPos.Y());
+		break;
+
+	case KC_Delete:
+		{
+			if (mCaretPos != mSelectStartPos)
+				DeleteSlectedText();
+			else
+				DeleteNextChar();
+		}
+		break;
+
+	case KC_BackSpace:
+		{
+			if (mCaretPos != mSelectStartPos)
+				DeleteSlectedText();
+			else
+				DeletePreChar();
+		}
+		break;
+
+	case KC_Enter:
+		{
+			if( mMultiLine )
+			{
+				size_t caretIdx = GetCharIndex(mCaretPos);
+
+				mText.insert(mText.begin() + caretIdx, L'\n');
+				UpdateText();		
+				PlaceCaret(0, mCaretPos.Y() + 1);
+			}
+			else
+			{
+				if (!EventReturnPressed.empty())
+					EventReturnPressed(L"");
+			}
+
+		}
+		break;
+	default:
+		break;
 	}
 
-	if (newCaretX != mCaretX)
+	return true;
+}
+
+bool TextEdit::OnTextInput( uint16_t unicode )
+{
+	bool eventConsumed = true;
+
+	if (HasFocus() && unicode >= 0x20)
 	{
-		mCaretX = Clamp(newCaretX, size_t(0), mCharPositions[mCaretY].size());
+		if (mSelectStartPos != mCaretPos)
+		{
+			int2 start(mSelectStartPos);
+			int2 end(mCaretPos);
+
+			if ( (start.Y() > end.Y()) || (start.Y() == end.Y() && start.X() > end.X()) )
+				std::swap(start, end);
+
+			size_t delStart = GetCharIndex(start);
+			size_t delEnd = GetCharIndex(end);
+
+			mText.replace(delStart, delEnd - delStart, 1, (wchar_t)unicode);
+
+			UpdateText();		
+			PlaceCaret(start.X() + 1, start.Y());
+
+		}
+		else
+		{
+			size_t start = GetCharIndex(mCaretPos);
+			mText.insert(mText.begin() + start, (wchar_t)unicode);
+			UpdateText();	
+
+			int2 newCaretPos = GetCaretPos(start+1);		
+			PlaceCaret(newCaretPos);
+
+			if (mEditType == TextBox)
+			{
+				if (mVertScrollBar->IsVisible() &&  mCaretPos.Y() >= mFirstVisibleY + mNumVisibleY )
+					mVertScrollBar->Scroll(1);
+			}
+			else
+			{
+				//if (mCaretPos.X() > mFirstVisibleX + mNumVisibleX)
+				//{
+				//	float ww = 0;
+				//	mNumVisibleX = 0;
+				//	int32_t i;
+				//	for (i = mCaretPos.X(); i > 0; --i, ++mNumVisibleX)
+				//	{
+				//		if (ww > mTextRect.Width)
+				//			break;
+
+				//		ww += mCharPositions[0][i] - mCharPositions[0][i-1];
+				//	}
+
+				//	mFirstVisibleX = i;
+				//	mTextAlign = AlignRight | AlignVCenter;
+
+				//	UpdateVisisbleText();
+				//}
+			}
+		}
 	}
 
-	mSelectStartX = mCaretX;
-	mSelectStartY = mCaretY;
+	return eventConsumed;
+}
+
+void TextEdit::PlaceCaret( const int2& newCaretPos )
+{
+	if (newCaretPos.Y() != mCaretPos.Y())
+	{
+		mCaretPos.Y() = Clamp(newCaretPos.Y(), 0, (int32_t)mCharPositions.size());
+	}
+
+	if (newCaretPos.X() != mCaretPos.X())
+	{
+		mCaretPos.X() = Clamp(newCaretPos.X(), 0, (int32_t)mCharPositions[mCaretPos.Y()].size());
+	}
+
+	mSelectStartPos = mCaretPos;
+}
+
+void TextEdit::PlaceCaret( int32_t newCaretX, int32_t newCaretY )
+{
+	if (newCaretY != mCaretPos.Y())
+	{
+		mCaretPos.Y() = Clamp(newCaretY, 0, (int32_t)mCharPositions.size());
+	}
+
+	if (newCaretX != mCaretPos.X())
+	{
+		mCaretPos.X() = Clamp(newCaretX, 0, (int32_t)mCharPositions[mCaretPos.Y()].size());
+	}
+
+	mSelectStartPos = mCaretPos;
 }
 
 void TextEdit::UpdateRect()
@@ -318,20 +551,26 @@ void TextEdit::UpdateRect()
 
 	int2 screenPos = GetScreenPosition();
 
-	mBackRect.X = screenPos.X();
-	mBackRect.Y = screenPos.Y();
-	mBackRect.Width = mSize.X();
-	mBackRect.Height = mSize.Y();
+	mBackRect.X = (float)screenPos.X();
+	mBackRect.Y = (float)screenPos.Y();
+	mBackRect.Width = (float)mSize.X();
+	mBackRect.Height = (float)mSize.Y();
 
-	mTextRect.X = screenPos.X() + mBorder;
-	mTextRect.Width = mSize.X() - mBorder - mBorder;
+	mTextRect.X = (float)screenPos.X() + mBorder;
+	mTextRect.Width = (float)mSize.X() - mBorder - mBorder;
 
-	mTextRect.Y = screenPos.Y() + mBorder;
-	mTextRect.Height = mSize.Y() - mBorder - mBorder;
+	mTextRect.Y = (float)screenPos.Y() + mBorder;
+	mTextRect.Height = (float)mSize.Y() - mBorder - mBorder;
 
-	mNumVisibleLines = (int32_t)floor(mTextRect.Height / mRowHeight);
-	
-	int32_t shrink = (int32_t)floor( mTextRect.Height - mNumVisibleLines * mRowHeight );
+	if (mEditType == TextBox)
+		mNumVisibleY = (int32_t)floor(mTextRect.Height / mRowHeight);
+	else
+		mNumVisibleY = 1;
+
+	/*if (mEditType == LineEdit || (mEditType == TextBox && !mWordWrap))
+		mLineStartX = mTextRect.Left();*/
+
+	int32_t shrink = (int32_t)floor( mTextRect.Height - mNumVisibleY * mRowHeight );
 
 	mTextRect.Height -= shrink;
 	mBackRect.Height -= shrink;
@@ -346,13 +585,11 @@ void TextEdit::UpdateText()
 	const float fontScale = (float)mTextEditStyle->FontSize / mTextEditStyle->Font->GetFontSize();
 	const float rowHeight = fontScale * mTextEditStyle->Font->GetRowHeight();
 
-	mNumVisibleLines = (int32_t)floor(mTextRect.Height / rowHeight);
-
-	if (mMultiLine)
+	if (mEditType == TextBox)
 	{
 		WrapText();
-		
-		if (mNumLines > mNumVisibleLines)
+
+		if (mNumLines > mNumVisibleY)
 		{
 			if ( mVertScrollBar->IsVisible() == false )
 			{
@@ -360,7 +597,7 @@ void TextEdit::UpdateText()
 				mVertScrollBar->SetPosition(int2(mSize.X() - mScrollBarWidth, 0));
 				mVertScrollBar->SetSize(int2(mScrollBarWidth, mSize.Y()));
 
-				int32_t remain = mNumLines - mNumVisibleLines;
+				int32_t remain = mNumLines - mNumVisibleY;
 				mVertScrollBar->SetScrollRange(0, remain);
 
 				mTextRect.Width -= mScrollBarWidth;
@@ -371,10 +608,10 @@ void TextEdit::UpdateText()
 			}	
 			else 
 			{
-				int32_t remain = mNumLines - mNumVisibleLines;
+				int32_t remain = mNumLines - mNumVisibleY;
 				
-				if (mFirstVisibleLine > remain)
-					mFirstVisibleLine = remain;
+				if (mFirstVisibleY > remain)
+					mFirstVisibleY = remain;
 
 				mVertScrollBar->SetScrollRange(0, remain);		
 			}
@@ -390,28 +627,29 @@ void TextEdit::UpdateText()
 				if (mWordWrap)
 					WrapText();
 
-				mFirstVisibleLine = 0;
+				mFirstVisibleY = 0;
 			}
 		}
 	}
-	
+	else
+	{
+		mWrappedText = mText;
+		mNumLines = std::count(mWrappedText.begin(), mWrappedText.end(), L'\n') + 1;
+	}
+
 	// Keep track of every line char start pos
-	float charX = (float)mTextRect.X;
-
+	float charX = mTextRect.X;
 	mCharPositions.resize(1);
-	mCharPositions[0].resize(1, charX);
-
-	size_t numRow = 0;
+	mCharPositions.back().resize(1, charX);
 	for (size_t i = 0; i < mWrappedText.length(); ++i)
 	{
 		wchar_t ch = mWrappedText[i];
 
 		if (ch == L'\n')
 		{
-			numRow++;
-			mCharPositions.resize(numRow+1);
-			charX = (float)mTextRect.X;
+			mCharPositions.resize(mCharPositions.size() + 1);
 
+			charX = (float)mTextRect.X;
 			mCharPositions.back().push_back(charX);
 		}
 		else
@@ -419,9 +657,74 @@ void TextEdit::UpdateText()
 			const Font::Glyph& glyph = mTextEditStyle->Font->GetGlyphInfo(ch);
 
 			charX += glyph.Advance * fontScale;
-			mCharPositions[numRow].push_back(charX);		
+			mCharPositions.back().push_back(charX);		
 		}
 	}
+	
+	//if (mEditType == LineEdit && mWrappedText.length())
+	//{
+	//	mNumVisibleX = 0;
+	//	for (int32_t i = mFirstVisibleX; i < (int32_t)mWrappedText.length(); ++i, mNumVisibleX++)
+	//	{
+	//		if (mCharPositions[0][i+1] > mTextRect.Right())
+	//			break;
+	//	}
+	//}
+
+	UpdateVisisbleText();
+}
+
+void TextEdit::UpdateVisisbleText()
+{
+	if (mEditType == LineEdit)
+	{
+		//mPrintText = mWrappedText.substr(mFirstVisibleX, mNumVisibleX);
+	}
+	else
+	{
+		size_t start = 0;
+		size_t end = mWrappedText.length() - 1;
+
+		if (mFirstVisibleY > 0)
+		{
+			size_t lineIdx = 0;
+			for (size_t i = 0; i < mWrappedText.length(); ++i)
+			{
+				if (mWrappedText[i] == L'\n')
+				{
+					if (++lineIdx == mFirstVisibleY)
+					{
+						start = i+1;
+						break;
+					}
+				}
+			}
+		}
+
+		// Update print text
+		size_t numLines = (std::min)(mNumVisibleY, mNumLines);
+		for (size_t i = start; i < mWrappedText.length(); ++i)
+		{
+			if (mWrappedText[i] == L'\n')
+			{
+				if (--numLines == 0)
+				{
+					end = i;
+					break;
+				}
+			}	
+		}
+
+		mPrintText = mWrappedText.substr(start, end - start + 1);
+	}
+}
+
+void TextEdit::HandleVScrollBar( int32_t value )
+{
+	int32_t minValue, maxValue;
+	mVertScrollBar->GetScrollRange(&minValue, &maxValue);
+
+	mFirstVisibleY = (size_t)value;
 
 	UpdateVisisbleText();
 }
@@ -429,16 +732,17 @@ void TextEdit::UpdateText()
 void TextEdit::WrapText()
 {
 	const float fontScale = (float)mTextEditStyle->FontSize / mTextEditStyle->Font->GetFontSize();
-	const float rowHeight = fontScale * mTextEditStyle->Font->GetRowHeight();
 
-	mNumVisibleLines = (int32_t)floor(mTextRect.Height / rowHeight);
 	mNumLines = 0;
 
 	mWrappedText.clear();
 	mWrappedBreakAt.clear();
 
+	if (mText.empty())
+		return;
+
 	// Wrap Text if enable
-	if (mWordWrap)
+	if (mWordWrap && mEditType == TextBox)
 	{
 		bool isBreakable = false;
 		bool wasBreakable = false; // value of isBreakable for last char (i-1)
@@ -506,7 +810,7 @@ void TextEdit::WrapText()
 					mNumLines++;
 
 					textwidth = (std::max)(textwidth, thisLineWidth);
-					x = 0; y += rowHeight;
+					x = 0; y += mRowHeight;
 
 					wasBreakable = true;
 					wasParens = false;
@@ -533,7 +837,7 @@ void TextEdit::WrapText()
 				mWrappedText += mText.substr(start, i-start+1);
 				start = i + 1;
 
-				x = 0; y += rowHeight;
+				x = 0; y += mRowHeight;
 				wasBreakable = false;
 				wasParens = false;
 				lastBreak = -1;
@@ -545,189 +849,149 @@ void TextEdit::WrapText()
 
 		mNumLines++;
 		textwidth = (std::max)(textwidth, x);
-		y += rowHeight;
+		y += mRowHeight;
 		mWrappedText += mText.substr( start );
 	}
 	else
-		mWrappedText = mText;
-
-}
-
-void TextEdit::SetText( const std::wstring& text )
-{
-	mText = text;
-	UpdateText();
-}
-
-bool TextEdit::OnKeyPress( uint16_t key )
-{
-	switch (key)
 	{
-	case KC_LeftArrow:
+		mWrappedText = mText;
+		mNumLines = std::count(mWrappedText.begin(), mWrappedText.end(), L'\n') + 1;
+	}
+}
+
+int2 TextEdit::GetCaretAt( const int2& screenPos) const
+{
+	int2 caret(0, 0);
+
+	if (mEditType == LineEdit)
+	{
+		float actualX = (screenPos.X() );
+
+		caret.X() = mCharPositions[0].size() - 1;
+		for (size_t i = 0; i < mCharPositions[0].size() - 1; ++i)
 		{
-			if (mCaretX > 0)
-				PlaceCaret(mCaretX - 1, mCaretY);
-			else if (mCaretX == 0 && mCaretY > 0)
+			float half = (mCharPositions[0][i] + mCharPositions[0][i+1]) * 0.5f;
+
+			if (actualX < half)
 			{
-				PlaceCaret(mCharPositions[mCaretY-1].size() - 1, mCaretY-1);
+				caret.X() = (int32_t)i;
+				break;
 			}
 		}
-		break;
+	}
+	else
+	{
+		float actualX;
 
-	case KC_RightArrow:
+		/*if (!mWordWrap)	
+			actualX = mFirstVisibleX + (screenPos.X() - mTextRect.Left()); 
+		else
+			actualX = screenPos.X();*/
+
+		actualX = screenPos.X();
+
+		caret.Y() = Clamp((int32_t)floorf((screenPos.Y() - mTextRect.Y) / mRowHeight), 0, mNumVisibleY - 1);
+		caret.Y() = Clamp( caret.Y() + mFirstVisibleY, 0, mNumLines-1);
+
+		caret.X() = mCharPositions[caret.Y()].size() - 1;
+		for (size_t i = 0; i < mCharPositions[caret.Y()].size() - 1; ++i)
 		{
-			if (mCaretX < mCharPositions[mCaretY].size() - 1)
-				PlaceCaret(mCaretX + 1, mCaretY);
-			else 
+			float half = (mCharPositions[caret.Y()][i] + mCharPositions[caret.Y()][i+1]) * 0.5f;
+
+			if (actualX < half)
 			{
-				if (mCaretY < mCharPositions.size() - 1)
-					PlaceCaret(0, mCaretY+1);
+				caret.X() = (int32_t)i;
+				break;
 			}
 		}
-		break;
-
-	case KC_UpArrow:
-		{
-			if (mCaretY> 0)
-				PlaceCaret((std::min)(mCaretX, mCharPositions[mCaretY-1].size()-1), mCaretY-1);
-		}
-		break;
-
-	case KC_DownArrow:
-		{
-			if (mCaretY < mCharPositions.size() - 1)
-				PlaceCaret((std::min)(mCaretX, mCharPositions[mCaretY+1].size()-1), mCaretY+1);
-		}
-		break;
-
-	case KC_Home:
-		{
-			PlaceCaret(0, mCaretY);
-		}
-		break;
-
-	case KC_End:
-		{
-			PlaceCaret(mCharPositions[mCaretY].size()-1 , mCaretY);
-		}
-		break;
-
-	case KC_Delete:
-		{
-			if (mSelectStartX != mCaretX || mSelectStartY != mCaretY)
-				DeleteSlectedText();
-			else
-				DeleteNextChar();
-		}
-		break;
-
-	case KC_BackSpace:
-		{
-			if (mSelectStartX != mCaretX || mSelectStartY != mCaretY)
-				DeleteSlectedText();
-			else
-				DeletePreChar();
-		}
-		break;
-
-	case KC_Enter:
-		{
-			if( mMultiLine )
-			{
-				size_t caretIdx = GetCharIndex(mCaretX, mCaretY);
-
-				mText.insert(mText.begin() + caretIdx, L'\n');
-				UpdateText();		
-				PlaceCaret(0, mCaretY + 1);
-			}
-			else
-			{
-				if (!EventReturnPressed.empty())
-					EventReturnPressed(L"");
-			}
-
-		}
-		break;
-	default:
-		break;
 	}
 
-	return true;
+	return caret;
 }
 
-bool TextEdit::OnTextInput( uint16_t unicode )
+int2 TextEdit::GetCaretPos( int32_t index ) const
 {
-	bool eventConsumed = true;
-	
-	if (HasFocus() && unicode >= 0x20)
+	int2 caret(0, 0);
+
+	size_t wrappedIndex = index;
+	for (size_t i = 0; i < mWrappedBreakAt.size(); ++i)
 	{
-		if (mSelectStartX != mCaretX || mSelectStartY != mCaretY)
+		if ((int32_t)index > mWrappedBreakAt[i]+1)
+			wrappedIndex++;
+		else
+			break;
+	}
+
+	for (size_t i = 0; i < wrappedIndex; ++i)
+	{
+		if (mWrappedText[i] == L'\n')
 		{
-			Vector<size_t, 2> start(mSelectStartX, mSelectStartY);
-			Vector<size_t, 2> end(mCaretX, mCaretY);
-
-			if ( (mSelectStartY > mCaretY) || (mSelectStartY == mCaretY && mSelectStartX > mCaretX) )
-				std::swap(start, end);
-
-			size_t delStart = GetCharIndex(start.Y(), start.X());
-			size_t delEnd = GetCharIndex(end.Y(), end.X());
-
-			mText.replace(delStart, delEnd - delStart, 1, (wchar_t)unicode);
-
-			UpdateText();		
-			PlaceCaret(start.X() + 1, start.Y());
-
+			caret.Y()++;
+			caret.X() = 0;
 		}
 		else
-		{
-			size_t start = GetCharIndex(mCaretX, mCaretY);
-			mText.insert(mText.begin() + start, (wchar_t)unicode);
-			UpdateText();		
-
-			size_t newCaretX, newCaretY;
-			GetCaretPos(start+1, newCaretX, newCaretY);
-			PlaceCaret(newCaretX,newCaretY);
-		}
+			caret.X()++;
 	}
 
-	return eventConsumed;
+	return caret;
+}
+
+size_t TextEdit::GetCharIndex( const int2& caret ) const
+{
+	size_t wrappedIndex = 0;
+	for (int32_t i = 0; i < caret.Y(); ++i)
+		wrappedIndex += mCharPositions[i].size();
+
+	wrappedIndex += caret.X();
+
+	size_t textIdx = wrappedIndex;
+	size_t numPadding = 1;
+	for (size_t i = 0; i < mWrappedBreakAt.size(); ++i)
+	{
+		if (mWrappedBreakAt[i] + numPadding < (int32_t)wrappedIndex)
+		{
+			textIdx--;
+			numPadding++;
+		}
+		else
+			break;
+	}
+	return textIdx;
 }
 
 void TextEdit::DeleteSlectedText()
 {
 	size_t x = 0, y = 0;
 	
-	Vector<size_t, 2> start(mSelectStartX, mSelectStartY);
-	Vector<size_t, 2> end(mCaretX, mCaretY);
-	
-	if ( (mSelectStartY > mCaretY) || (mSelectStartY == mCaretY && mSelectStartX > mCaretX) )
-		std::swap(start, end);
+	int2 start(mSelectStartPos);
+	int2 end(mCaretPos);
 
-	size_t delStart = GetCharIndex( start.X(), start.Y());
-	size_t delEnd = GetCharIndex(end.X(), end.Y());
+	if ( (start.Y() > end.Y()) || (start.Y() == end.Y() && start.X() > end.X()) )
+		std::swap(start, end);
+		
+	size_t delStart = GetCharIndex(start);
+	size_t delEnd = GetCharIndex(end);
 
 	mText.erase(delStart, delEnd - delStart);
 	UpdateText();
+	
+	int2 newCaretPos = GetCaretPos(delStart);		
+	PlaceCaret(newCaretPos);
 
-	size_t newCaretX, newCaretY;
-	GetCaretPos(delStart, newCaretX, newCaretY);
-	PlaceCaret(newCaretX,newCaretY);
-
-	std::wcout << mText << std::endl;
+	//std::wcout << mText << std::endl;
 }
 
 void TextEdit::DeleteNextChar()
 {
-	size_t delStart = GetCharIndex(mCaretX, mCaretY);
+	size_t delStart = GetCharIndex(mCaretPos);
 
 	if (delStart < mText.size())
 	{
 		mText.erase(delStart, 1);
 		UpdateText();
 
-		size_t newCaretX, newCaretY;
-		GetCaretPos(delStart, newCaretX, newCaretY);
-		PlaceCaret(newCaretX,newCaretY);
+		int2 newCaretPos = GetCaretPos(delStart);		
+		PlaceCaret(newCaretPos);
 	}	
 
 	//std::wcout << mText << std::endl;
@@ -735,7 +999,7 @@ void TextEdit::DeleteNextChar()
 
 void TextEdit::DeletePreChar()
 {
-	size_t delStart = GetCharIndex(mCaretX, mCaretY);
+	size_t delStart = GetCharIndex(mCaretPos);
 	if (delStart > 0)
 	{
 		auto c = mText[delStart-1];
@@ -743,64 +1007,12 @@ void TextEdit::DeletePreChar()
 		mText.erase(delStart-1, 1);
 		UpdateText();
 
-		size_t newCaretX, newCaretY;
-		GetCaretPos(delStart-1, newCaretX, newCaretY);
-		PlaceCaret(newCaretX,newCaretY);
+		int2 newCaretPos = GetCaretPos(delStart-1);		
+		PlaceCaret(newCaretPos);
 	}
 
 	//std::wcout << mText << std::endl;
 }
-
-void TextEdit::HandleVScrollBar( int32_t value )
-{
-	int32_t minValue, maxValue;
-	mVertScrollBar->GetScrollRange(&minValue, &maxValue);
-
-	mFirstVisibleLine = (size_t)value;
-	
-	UpdateVisisbleText();
-}
-
-void TextEdit::UpdateVisisbleText()
-{
-	size_t start = 0;
-	size_t end = mWrappedText.length() - 1;
-
-	if (mFirstVisibleLine > 0)
-	{
-		size_t lineIdx = 0;
-		for (size_t i = 0; i < mWrappedText.length(); ++i)
-		{
-			if (mWrappedText[i] == L'\n')
-			{
-				if (++lineIdx == mFirstVisibleLine)
-				{
-					start = i+1;
-					break;
-				}
-			}
-		}
-	}
-
-	// Update print text
-	size_t numLines = (std::min)(mNumVisibleLines, mNumLines);
-	for (size_t i = start; i < mWrappedText.length(); ++i)
-	{
-		if (mWrappedText[i] == L'\n')
-		{
-			if (--numLines == 0)
-			{
-				end = i;
-				break;
-			}
-		}	
-	}
-
-	mPrintText = mWrappedText.substr(start, end - start + 1);
-}
-
-
-
 
 
 

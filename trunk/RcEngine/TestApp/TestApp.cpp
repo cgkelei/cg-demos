@@ -264,15 +264,24 @@ void TestApp::InitGUI()
 
 	auto text = L"I'll cover a very simple method of reflection that can be very powerful, developed in my spare time as Reflectabit, with a similar implementation written for Splinter Cell: Conviction. The main selling points of the implementation are the ease with which you can replicate anything over a network connection and the extra bonus of being able to live-edit your C++ code while the game is running.";
 	
-	mTextEdit = new TextEdit;
+	mTextEdit = new TextEdit(TextEdit::TextBox);
 	mTextEdit->InitGuiStyle(nullptr);
 	mTextEdit->SetName("TextEdit");
 	mTextEdit->SetPosition(int2(470, 50));
-	mTextEdit->SetSize(int2(300, 200));
+	mTextEdit->SetSize(int2(300, 350));
 	mTextEdit->SetMultiLine(true);
 	//mTextEdit->SetText(L"mTextEdit\n->SetSize\n(int2(200, 90))");
 	mTextEdit->SetText(text);
 	rootElem->AddChild(mTextEdit);
+
+	mLineEdit = new TextEdit(TextEdit::LineEdit);
+	mLineEdit->InitGuiStyle(nullptr);
+	mLineEdit->SetName("LineEdit");
+	mLineEdit->SetPosition(int2(20, 300));
+	mLineEdit->SetSize(int2(200, 40));
+	mLineEdit->SetMultiLine(false);
+	mLineEdit->SetText(L"mLineEdit = new TextEdit(TextEdit::LineEdit);");
+	rootElem->AddChild(mLineEdit);
 
 	mComboBox = new ComboBox;
 	mComboBox->InitGuiStyle(nullptr);

@@ -7,9 +7,6 @@ namespace RcEngine {
 
 /**
  * TextEdit: a single line or multiple line GUI control.
- *
- * Todo:  Add Word Wrap, ScrollBar.
- *
  */
 
 class _ApiExport TextEdit : public UIElement
@@ -18,8 +15,21 @@ public:
 	typedef fastdelegate::FastDelegate1<std::wstring> ReturnEventHandler;
 	ReturnEventHandler EventReturnPressed;
 
+	enum TextEditType
+	{
+		/**
+		 * Single line edit control.
+		 */
+		LineEdit,
+		
+		/**
+		 * Multiple line edit box with horizontal and vertical ScrollBar.
+		 */
+		TextBox
+	};
+
 public:
-	TextEdit();
+	TextEdit(TextEditType type);
 	virtual ~TextEdit();
 
 	virtual void Update(float dt);
@@ -27,8 +37,7 @@ public:
 
 	virtual void InitGuiStyle(const GuiSkin::StyleMap* styles = nullptr);
 
-	virtual bool OnMouseButtonPress(const int2& screenPos, uint32_t button);
-	virtual bool OnMouseButtonRelease(const int2& screenPos, uint32_t button);
+	virtual bool OnMouseWheel( int32_t delta );
 
 	virtual void OnDragBegin(const int2& position, uint32_t buttons);
 	virtual void OnDragMove(const int2& position, uint32_t buttons);
@@ -50,28 +59,30 @@ public:
 
 protected:
 
-	int32_t GetRowStartPos(int32_t rowIdx) const;
-
 	/**
 	 * Calculate caret position from screen position.
 	 */
-	void GetCaretAt(const int2& screenPos, size_t& caretX, size_t& caretY);
+	int2 GetCaretAt(const int2& screenPos) const;
 	
 	/**
 	 * Calculate caret position from char index in original text.
 	 */
-	void GetCaretPos(size_t index, size_t& caretX, size_t& caretY);
+	int2 GetCaretPos(int32_t index) const;
 	
 	/**
 	 * Calculate char index based on caret pos (x, y).
 	 */
-	size_t GetCharIndex(size_t caretX, size_t caretY);
+	size_t GetCharIndex(const int2& caret) const;
+
+	void DrawSelection(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
+	void DrawText(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 
 	void DeleteSlectedText();
 	void DeletePreChar();
 	void DeleteNextChar();
 
-	void PlaceCaret(size_t newCaretX, size_t newCaretY);
+	void PlaceCaret(const int2& newCaretPos);
+	void PlaceCaret(int32_t newCaretX, int32_t newCaretY);
 
 	void UpdateRect();
 	void UpdateText();
@@ -82,22 +93,27 @@ protected:
 	
 protected:
 
-	bool mMultiLine;
-	bool mWordWrap;
+	TextEditType mEditType;
 
 	std::wstring mText;
 	std::wstring mWrappedText;
 	std::wstring mPrintText;
+	
+	bool mMultiLine;
+	bool mWordWrap;
 
-	size_t mFirstVisibleLine;
-	size_t mNumVisibleLines;
-	size_t mNumLines;
+	int32_t mFirstVisibleY;
+	int32_t mNumVisibleY;
 
-	IntRect mTextRect;
-	IntRect mBackRect;
+	int32_t mNumLines;
 
-	std::vector< std::vector<float> > mCharPositions;
+	Rectanglef mTextRect;
+	Rectanglef mBackRect;
+
 	std::vector<int32_t> mWrappedBreakAt;
+	std::vector< std::vector<float> > mCharPositions;
+	
+	uint32_t mTextAlign;
 
 	int32_t mBorder;
 	float mRowHeight;
@@ -107,8 +123,8 @@ protected:
 	ColorRGBA mSelBkColor;
 	ColorRGBA mCaretColor;
 
+	ScrollBar* mHorzScrollBar;
 	ScrollBar* mVertScrollBar;
-	
 	int32_t mScrollBarWidth;
 
 	bool mDragMouse;
@@ -118,8 +134,8 @@ protected:
 	bool mCaretOn;
 
 	// Caret Position, measured in char index
-	size_t mCaretY, mCaretX;
-	size_t mSelectStartX, mSelectStartY;
+	int2 mCaretPos;
+	int2 mSelectStartPos;
 
 	GuiSkin::GuiStyle* mTextEditStyle;
 };
