@@ -40,6 +40,7 @@ public:
 	virtual void OnDragMove(const int2& screenPos, uint32_t buttons);
 	virtual void OnDragEnd(const int2& screenPos);
 
+	virtual bool OnMouseWheel( int32_t delta );
 	virtual bool OnMouseButtonPress(const int2& screenPos, uint32_t button);
 	virtual bool OnMouseButtonRelease(const int2& screenPos, uint32_t button);
 

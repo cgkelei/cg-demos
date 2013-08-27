@@ -48,6 +48,7 @@ static void InitVKMapping()
 	VKMapping[VK_END]       = KC_End;
 	VKMapping[VK_DELETE]	= KC_Delete;
 	VKMapping[VK_NEXT]      = KC_PageDown;
+	VKMapping[VK_PRIOR]     = KC_PageUp;
 	VKMapping[VK_SCROLL]    = KC_ScrollLock;
 	VKMapping[VK_NUMLOCK]   = KC_NumLock;
 
@@ -417,7 +418,7 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 		{
 			InputEvent e;
 			e.MouseWheel.type = InputEventType::MouseWheel;
-			e.MouseWheel.wheel = GET_WHEEL_DELTA_WPARAM(wParam);
+			e.MouseWheel.wheel = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
 			e.MouseWheel.x = GET_X_LPARAM(lParam); 
 			e.MouseWheel.y = GET_Y_LPARAM(lParam); 
 			mInputSystem->FireEvent(e);

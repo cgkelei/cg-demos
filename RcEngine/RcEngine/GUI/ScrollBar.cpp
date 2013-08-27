@@ -13,7 +13,7 @@ const String ScrollBar::TrackStyleName("ScrollBar::TrackStyleName");
 
 static const float DEFAULT_SCROLL_STEP = 0.1f;
 static const float DEFAULT_REPEAT_DELAY = 0.8f;
-static const float DEFAULT_REPEAT_RATE = 10.0f;
+static const float DEFAULT_REPEAT_RATE = 5.0f;
 
 ScrollBar::ScrollBar( UIOrientation orient )
 	: mOrientation(orient),
@@ -173,7 +173,7 @@ void ScrollBar::StepForward()
 
 void ScrollBar::Scroll( int32_t delta )
 {
-
+	SetScrollValue(mValue + delta);
 }
 
 void ScrollBar::GetScrollRange( int32_t* pMinValue, int32_t* pMaxValue )
@@ -345,6 +345,13 @@ bool ScrollBar::OnMouseButtonRelease( const int2& screenPos, uint32_t button )
 	}
 
 	return eventConsumed;
+}
+
+bool ScrollBar::OnMouseWheel( int32_t delta )
+{
+	Scroll(-delta);
+
+	return true;
 }
 
 
