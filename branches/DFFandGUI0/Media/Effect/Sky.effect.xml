@@ -1,0 +1,115 @@
+<Effect name="Sky">
+
+<Shader name="VS" stage="Vertex" entry="main">
+<ShaderSource>
+<![CDATA[
+
+#version 330
+
+in vec3 Position;
+in vec3 Tex;
+
+out vec3 oTex;
+
+uniform mat4 World;
+uniform mat4 ViewProj;
+
+void main()
+{
+	gl_Position = vec4(Position, 1.0) * World * ViewProj;
+	oTex = vec3(Tex.x, 1-Tex.y, Tex.z);
+}
+
+]]>
+</ShaderSource>
+</Shader>
+
+<Shader name="PS" stage="Pixel" entry="main">
+<ShaderSource>
+<![CDATA[
+
+#version 330
+#extension GL_EXT_gpu_shader4 : enable 
+
+in vec3 oTex;
+
+out vec4 FragColor;
+
+uniform sampler2DArray SkyPlaneMaps;
+
+void main()
+{
+	vec3 tex = vec3(oTex.xy, floor(oTex.z));
+	vec4 diffuse = texture(SkyPlaneMaps, oTex);
+	FragColor = diffuse;
+}
+
+]]>
+</ShaderSource>
+</Shader>
+
+<Shader name="VSCubeMap" stage="Vertex" entry="main">
+<ShaderSource>
+<![CDATA[
+
+#version 330
+
+in vec3 Position;
+
+out vec3 oTex;
+
+uniform mat4 World;
+uniform mat4 ViewProj;
+
+void main()
+{
+	vec4 posH = vec4(Position, 1.0) * World * ViewProj;
+	
+	oTex = Position.xyz;
+
+	// we set z = w so that z/w == 1, always on far plane
+	gl_Position = posH.xyww;
+}
+]]>
+</ShaderSource>
+</Shader>
+
+<Shader name="PSCubeMap" stage="Pixel" entry="main">
+<ShaderSource>
+<![CDATA[
+
+#version 330
+
+in vec3 oTex;
+
+out vec4 FragColor;
+
+uniform samplerCube SkyCubeMap;
+
+void main()
+{
+	FragColor = texture(SkyCubeMap, oTex);
+}
+
+]]>
+</ShaderSource>
+</Shader>
+
+<Technique name="SkyBoxPlane">
+	<Pass name="p0">
+		<VertexShader name="VS"/>
+		<PixelShader name="PS"/>
+	</Pass>
+</Technique>
+
+<Technique name="SkyCubeMap">
+	<Pass name="p0">
+		<!-- Make sure we set depth func to LessEqual, Otherwise normalized 
+ 		     z value 1 will fail depth test -->
+		<State name="DepthFunc" value="LessEqual"/>
+		<VertexShader name="VSCubeMap"/>
+		<PixelShader name="PSCubeMap"/>
+	</Pass>
+</Technique>
+
+</Effect>
