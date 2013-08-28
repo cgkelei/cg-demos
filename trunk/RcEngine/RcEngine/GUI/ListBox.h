@@ -62,7 +62,7 @@ protected:
 
 	int32_t mSelectedIndex;
 
-	int32_t mTextRowHeight;
+	float mTextRowHeight;
 
 	int32_t mNumVisibleItems;
 

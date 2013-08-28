@@ -472,7 +472,7 @@ GuiSkin* UIManager::GetDefaultSkin()
 		mDefaultSkin = new GuiSkin;
 
 		mDefaultSkin->mFont = mFont;
-		mDefaultSkin->mFontSize = 20;
+		mDefaultSkin->mFontSize = 25.0f;
 
 		ResourceManager& resMan = ResourceManager::GetSingleton();
 		mDefaultSkin->mSkinTexAtlas = std::static_pointer_cast<TextureResource>(
@@ -487,7 +487,7 @@ GuiSkin* UIManager::GetDefaultSkin()
 
 		mDefaultSkin->Button.StyleStates[UI_State_Hover].TexRegion = IntRect(136, 0, 252 - 136, 54);
 		mDefaultSkin->Button.Font = mFont;
-		mDefaultSkin->Button.FontSize = 20;
+		mDefaultSkin->Button.FontSize = mDefaultSkin->mFontSize;
 		mDefaultSkin->Button.BackColor = ColorRGBA(1, 1, 1, 100.0f / 255);
 		mDefaultSkin->Button.ForeColor = ColorRGBA(1, 1, 1, 200.0f / 255);
 		mDefaultSkin->Button.StyleTex = mDefaultSkin->mSkinTexAtlas;
@@ -498,7 +498,7 @@ GuiSkin* UIManager::GetDefaultSkin()
 		mDefaultSkin->CheckBox.StyleStates[UI_State_Pressed].TexRegion = IntRect(27, 54, 27, 27);
 		mDefaultSkin->CheckBox.StyleStates[UI_State_Pressed].TexColor = ColorRGBA(1, 1, 1, 150.0f / 255);
 		mDefaultSkin->CheckBox.Font = mFont;
-		mDefaultSkin->CheckBox.FontSize = 20;
+		mDefaultSkin->CheckBox.FontSize = mDefaultSkin->mFontSize;
 		mDefaultSkin->CheckBox.BackColor = ColorRGBA(1, 1, 1, 100.0f / 255);
 		mDefaultSkin->CheckBox.ForeColor = ColorRGBA(1, 1, 1, 200.0f / 255);
 		mDefaultSkin->CheckBox.StyleTex = mDefaultSkin->mSkinTexAtlas;
@@ -586,14 +586,14 @@ GuiSkin* UIManager::GetDefaultSkin()
 		mDefaultSkin->ListBox.StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
 		
 		mDefaultSkin->ListBox.Font = mFont;
-		mDefaultSkin->ListBox.FontSize = 20;
+		mDefaultSkin->ListBox.FontSize = mDefaultSkin->mFontSize;
 		mDefaultSkin->ListBox.BackColor = ColorRGBA(0, 0, 0, 255.0 / 255);
 		mDefaultSkin->ListBox.ForeColor = ColorRGBA(0, 0, 0, 255.0 / 255);
 		mDefaultSkin->ListBox.StyleTex = mDefaultSkin->mSkinTexAtlas;
 
 		// TextEdit
 		mDefaultSkin->TextEdit.Font = mFont;
-		mDefaultSkin->TextEdit.FontSize = 20;
+		mDefaultSkin->TextEdit.FontSize = mDefaultSkin->mFontSize;
 
 		// TextEdit Background
 		mDefaultSkin->TextEdit.StyleStates[UI_State_Normal].TexRegion = IntRect(14, 90, 227, 23);
@@ -617,7 +617,7 @@ GuiSkin* UIManager::GetDefaultSkin()
 		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Pressed].TexColor = ColorRGBA(200/ 255.0f, 200/ 255.0f, 200/ 255.0f, 150 /255.0f);
 
 		mDefaultSkin->ComboDropButton.Font = mFont;
-		mDefaultSkin->ComboDropButton.FontSize = 20;
+		mDefaultSkin->ComboDropButton.FontSize = mDefaultSkin->mFontSize;
 		mDefaultSkin->ComboDropButton.BackColor = ColorRGBA(1, 1, 1, 255.0 / 255);
 		mDefaultSkin->ComboDropButton.ForeColor = ColorRGBA(1, 1, 1, 255.0 / 255);
 		mDefaultSkin->ComboDropButton.StyleTex = mDefaultSkin->mSkinTexAtlas;

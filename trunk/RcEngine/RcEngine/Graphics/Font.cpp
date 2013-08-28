@@ -262,26 +262,25 @@ void Font::LoadTXT(const String& fileName)
 		else if( token == "char" )
 		{
 			int32_t unicode = InterpretChar(line, pos2, charGlyph);
-			mGlyphs[unicode] = charGlyph;
+			mFontMetrics[unicode] = charGlyph;
 
 			mAscent = (std::max)(mAscent, charGlyph.OffsetY);
 			mDescent = (std::min)(mDescent, charGlyph.OffsetY - charGlyph.Height);
 		}
 	}
+	file.close();
 
-	mCharSize = 68;
-
-	assert(numChars == mGlyphs.size());
-
+	assert(numChars == mFontMetrics.size());
 	mRowHeight = mAscent - mDescent;
+	mFontSize = mRowHeight;
 }
 
-void Font::DrawString(SpriteBatch& spriteBatch, std::wstring& text, int32_t fontSize, const float2& position, const ColorRGBA& color)
+void Font::DrawString(SpriteBatch& spriteBatch, std::wstring& text, float fontSize, const float2& position, const ColorRGBA& color)
 {
 	float x = position.X();
 	float y = position.Y();
 
-	const float scale = float(fontSize) / float(mCharSize);
+	const float scale = fontSize / mFontSize;
 
 	for (auto iter = text.begin(); iter != text.end(); ++iter)
 	{
@@ -294,7 +293,7 @@ void Font::DrawString(SpriteBatch& spriteBatch, std::wstring& text, int32_t font
 		}
 		else
 		{
-			const Glyph& glyph = mGlyphs[ch];
+			const Glyph& glyph = mFontMetrics[ch];
 
 			float ch_x = x + glyph.OffsetX * scale;
 			float ch_y = y - glyph.OffsetY * scale;
@@ -309,9 +308,9 @@ void Font::DrawString(SpriteBatch& spriteBatch, std::wstring& text, int32_t font
 	}
 }
 
-void Font::MeasureString( const std::wstring& text, int32_t fontSize, float* widthOut, float* heightOut )
+void Font::MeasureString( const std::wstring& text, float fontSize, float* widthOut, float* heightOut )
 {
-	const float scale = float(fontSize) / mCharSize;
+	const float scale = fontSize / mFontSize;
 
 	std::vector<float> rowWidths(1, 0);
 
@@ -320,7 +319,7 @@ void Font::MeasureString( const std::wstring& text, int32_t fontSize, float* wid
 		wchar_t ch = text[i];
 
 		if (ch != L'\n')
-			rowWidths.back() += mGlyphs[ch].Advance * scale;
+			rowWidths.back() += mFontMetrics[ch].Advance * scale;
 		else
 			rowWidths.push_back(0);
 	}
@@ -330,11 +329,6 @@ void Font::MeasureString( const std::wstring& text, int32_t fontSize, float* wid
 
 }
 
-float Font::GetRowHeight( int32_t fontSize ) const
-{
-	return mRowHeight * float(fontSize) / mCharSize;
-}
-
 shared_ptr<Resource> Font::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 {
 	return std::make_shared<Font>(creator, handle, name, group);
@@ -342,10 +336,10 @@ shared_ptr<Resource> Font::FactoryFunc( ResourceManager* creator, ResourceHandle
 
 const Font::Glyph& Font::GetGlyphInfo( wchar_t ch ) const
 {
-	FontMetrics::const_iterator it = mGlyphs.find(ch);
+	FontMetrics::const_iterator it = mFontMetrics.find(ch);
 
-	if (it == mGlyphs.end())
-		return (mGlyphs.begin())->second;
+	if (it == mFontMetrics.end())
+		return (mFontMetrics.begin())->second;
 	else
 		return it->second;
 }
@@ -362,9 +356,9 @@ static float GetRowStartPos(float rowWidth, float maxWidth, uint32_t alignment)
 		return 0;
 }
 
-void Font::DrawString( SpriteBatch& spriteBatch, std::wstring& text, int32_t fontSize, uint32_t alignment, const Rectanglef& region, const ColorRGBA& color )
+void Font::DrawString( SpriteBatch& spriteBatch, std::wstring& text, float fontSize, uint32_t alignment, const Rectanglef& region, const ColorRGBA& color )
 {
-	const float scale = float(fontSize) / mCharSize;
+	const float scale = fontSize / mFontSize;
 	const float rowHeight = mRowHeight * scale;
 
 	std::vector<float> rowWidths(1, 0);
@@ -375,7 +369,7 @@ void Font::DrawString( SpriteBatch& spriteBatch, std::wstring& text, int32_t fon
 		wchar_t ch = text[i];
 
 		if (ch != L'\n')
-			rowWidths.back() += mGlyphs[ch].Advance * scale;
+			rowWidths.back() += mFontMetrics[ch].Advance * scale;
 		else
 			rowWidths.push_back(0);
 	}
@@ -416,7 +410,7 @@ void Font::DrawString( SpriteBatch& spriteBatch, std::wstring& text, int32_t fon
 		}
 		else
 		{
-			const Glyph& glyph = mGlyphs[ch];
+			const Glyph& glyph = mFontMetrics[ch];
 
 			float ch_x = x + glyph.OffsetX * scale;
 			float ch_y = y - glyph.OffsetY * scale;
@@ -502,124 +496,5 @@ void Font::LoadBinary( const String& fileName )
 
 }
 
-//void Font::DrawStringWrap( SpriteBatch& spriteBatch, std::wstring& text, int32_t fontSize, int32_t maxWidth, const float2& position, const ColorRGBA& color )
-//{	
-//	std::wstring mPrintText;
-//
-//	std::vector<size_t> printToText;
-//
-//	// Font Scale
-//	const float scale = float(fontSize) / float(mCharSize);
-//
-//	int32_t rowWidth = 0;
-//	int32_t rowHeight = mRowHeight;
-//
-//	printToText.reserve(mPrintText.length());
-//
-//	size_t nextBreak = 0;
-//	size_t lineStart = 0;
-//
-//	size_t i, j;
-//	for (i = 0; i < text.length(); ++i)
-//	{
-//		wchar_t ch = text[i];
-//
-//		if (ch != L'\n')
-//		{
-//			bool ok = true;
-//
-//			if (nextBreak <= i)
-//			{
-//				int32_t futureRowWidth = rowWidth;
-//
-//				// Find next blank or line break
-//				for (j = i; j < text.length(); ++j)
-//				{
-//					if (text[j] == L' ' || text[j] == L'\n')
-//					{
-//						nextBreak = j;
-//						break;
-//					}
-//
-//					futureRowWidth += static_cast<int32_t>( mGlyphs[text[j]].Advance * scale);
-//
-//					if (futureRowWidth > maxWidth)
-//					{
-//						ok = false;
-//						break;
-//					}
-//				}
-//			}
-//
-//			if (!ok)
-//			{
-//				if (lineStart == nextBreak)
-//				{
-//					// If did not find any breaks on the line
-//					while (i < j)
-//					{
-//						mPrintText.push_back(text[i]);
-//						printToText.push_back(i);
-//						++i;
-//					}
-//				}
-//
-//				mPrintText.push_back(L'\n');
-//				printToText.push_back( min(i, text.length() - 1) );
-//
-//				rowWidth = 0;
-//				nextBreak = lineStart = i;
-//			}
-//
-//			if (i < text.length())
-//			{
-//				ch = text[i];
-//
-//				rowWidth +=  static_cast<int32_t>( mGlyphs[text[j]].Advance * scale);
-//				if (rowWidth <= maxWidth)
-//				{
-//					mPrintText.push_back(ch);
-//					printToText.push_back(i);
-//				}
-//			}
-//		}
-//		else
-//		{
-//			mPrintText.push_back(L'\n');
-//			printToText.push_back(i);
-//
-//			rowWidth = 0;
-//			nextBreak = lineStart = i;
-//		}
-//	}
-//
-//	float x = position.X();
-//	float y = position.Y();
-//
-//	for (auto iter = mPrintText.begin(); iter != mPrintText.end(); ++iter)
-//	{
-//		wchar_t ch = *iter;
-//
-//		if (ch == L'\n')
-//		{
-//			y += mRowHeight * scale;
-//			x = position.X();
-//		}
-//		else
-//		{
-//			const Glyph& glyph = mGlyphs[uint32_t(ch)];
-//
-//			float ch_x = x + glyph.OffsetX * scale;
-//			float ch_y = y - glyph.OffsetY * scale;
-//
-//			IntRect sourceRect(glyph.SrcX, glyph.SrcY, glyph.Width, glyph.Height);
-//			Rectanglef destRect(ch_x, ch_y, glyph.Width * scale, glyph.Height* scale);
-//
-//			spriteBatch.Draw(mFontTexture, destRect, &sourceRect, color);
-//
-//			x += glyph.Advance * scale;
-//		}
-//	}
-//}
 
 }

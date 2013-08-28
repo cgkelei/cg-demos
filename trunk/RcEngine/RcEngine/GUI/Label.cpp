@@ -12,19 +12,12 @@ Label::Label()
 
 }
 
-Label::Label( const int2& pos, const std::wstring& text, Alignment textAlign )
-{
-	mTextAlignment = textAlign;
-	SetPosition(pos);
-	SetText(text);
-}
-
 Label::~Label()
 {
 
 }
 
-void Label::SetFont( const shared_ptr<Font>& font, int32_t fontSize )
+void Label::SetFont( const shared_ptr<Font>& font, float fontSize )
 {
 	if (font != mFont && fontSize != mFontSize)
 	{
