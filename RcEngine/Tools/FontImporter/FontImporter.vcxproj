@@ -90,7 +90,6 @@
     <None Include="distance-field.vert" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="edtaa3func.h" />
     <ClInclude Include="pfm.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -11,92 +11,11 @@
 #include <Math/Rectangle.h>
 #include <Resource/ResourceManager.h>
 
-namespace RcEngine {
+namespace {
 
-class FontLoader
-{
-public:
-	FontLoader(const String& fontFile, Font* fnt)
-		: mFontFile(fontFile), mFont(fnt)
-	{ 
-		mTextureWidth = (float)mFont->mFontTexture->GetWidth(0);
-		mTextureHeight = (float)mFont->mFontTexture->GetHeight(0);
-	}
+using RcEngine::Font;
 
-	bool Load();
-
-protected:
-	int SkipWhiteSpace(std::string &str, int start);
-	int FindEndOfToken(std::string &str, int start);
-
-	void InterpretInfo(std::string &str, int start);
-	void InterpretChars(std::string &str, int start);
-	void InterpretChar(std::string &str, int start);
-
-	void AddChar(int id, int x, int y, int w, int h, float xoffset, float yoffset, float xadvance, int page, int chnl);
-
-private:
-	String mFontFile;
-	String mFontName;
-	size_t mNumChars;
-	float mTextureWidth;
-	float mTextureHeight;
-	Font* mFont;
-};
-
-bool FontLoader::Load()
-{
-	std::string line;
-
-	FILE* file = fopen(mFontFile.c_str(), "r");
-	if (!file)
-		return false;
-
-	while( !feof(file) )
-	{
-		// Read until line feed (or EOF)
-		line = "";
-		line.reserve(256);
-		while( !feof(file) )
-		{
-			char ch;
-			if( fread(&ch, 1, 1, file) )
-			{
-				if( ch != '\n' ) 
-					line += ch; 
-				else
-					break;
-			}
-		}
-
-		if (line.empty())
-			break;
-
-		// Skip white spaces
-		int pos = SkipWhiteSpace(line, 0);
-
-		// Read token
-		int pos2 = FindEndOfToken(line, pos);
-		std::string token = line.substr(pos, pos2-pos);
-
-		// Interpret line
-		if( token == "info" )
-			InterpretInfo(line, pos2);
-		else if( token == "chars" )
-			InterpretChars(line, pos2);
-		else if( token == "char" )
-			InterpretChar(line, pos2);
-	}
-
-	fclose(file);
-
-	assert(mNumChars == mFont->mGlyphs.size());
-
-	// Success
-	return 1;
-}
-
-int FontLoader::SkipWhiteSpace( std::string &str, int start )
+int SkipWhiteSpace( std::string &str, int start )
 {
 	size_t n = start;
 	while( n < str.size() )
@@ -114,7 +33,7 @@ int FontLoader::SkipWhiteSpace( std::string &str, int start )
 	return n;
 }
 
-int FontLoader::FindEndOfToken( std::string &str, int start )
+int FindEndOfToken( std::string &str, int start )
 {
 	size_t n = start;
 	if( str[n] == '"' )
@@ -151,7 +70,7 @@ int FontLoader::FindEndOfToken( std::string &str, int start )
 	return n;
 }
 
-void FontLoader::InterpretChar( std::string &str, int start )
+int32_t InterpretChar( std::string &str, int start, Font::Glyph& glyph)
 {
 	// Read all attributes
 	int id = 0;
@@ -206,11 +125,18 @@ void FontLoader::InterpretChar( std::string &str, int start )
 			break;
 	}
 
-	// Store the attributes
-	AddChar(id, x, y, width, height, xoffset, yoffset, xadvance, page, chnl);	
+	glyph.SrcX = x;
+	glyph.SrcY = y;
+	glyph.Width = width;
+	glyph.Height = height;
+	glyph.Advance = xadvance;
+	glyph.OffsetX = xoffset;
+	glyph.OffsetY = yoffset;
+
+	return id;
 }
 
-void FontLoader::InterpretChars( std::string &str, int start )
+int32_t InterpretChars( std::string &str, int start )
 {
 	int pos, pos2 = start;
 	while( true )
@@ -229,16 +155,18 @@ void FontLoader::InterpretChars( std::string &str, int start )
 		std::string value = str.substr(pos, pos2-pos);
 
 		if (token == "count")
-		{
-			mNumChars = (size_t)strtol(value.c_str(), 0, 10);
-		}
+			return (size_t)strtol(value.c_str(), 0, 10);
 
 		if( pos2 == str.size() ) break;
 	}
+
+	return 0;
 }
 
-void FontLoader::InterpretInfo( std::string &str, int start )
+std::string InterpretInfo( std::string &str, int start )
 {
+	std::string fontName;
+
 	int pos, pos2 = start;
 	while( true )
 	{
@@ -256,39 +184,27 @@ void FontLoader::InterpretInfo( std::string &str, int start )
 		std::string value = str.substr(pos, pos2-pos);
 
 		if (token == "face")
-			mFont->mFontName = value;
-		else if (token == "size")
-			mFont->mCharSize = (int)strtol(value.c_str(), 0, 10);
+			return value;
 
+			
 		if( pos2 == str.size() ) break;
 	}
+
+	return std::string("");
 }
 
-void FontLoader::AddChar( int id, int x, int y, int w, int h, float xoffset, float yoffset, float xadvance, int page, int chnl )
+}
+
+namespace RcEngine {
+
+Font::Font(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
+	: Resource(RT_Font, creator, handle, name, group), mRowHeight(0.0f), mDescent(0.0f), mAscent(0.0f)
 {
-	if( id >= 0 )
-	{
-		Font::Glyph glyph;
-		glyph.SrcX = x;
-		glyph.SrcY = y;
-		glyph.Width = w;
-		glyph.Height = h;
-		glyph.Advance = xadvance;
-		glyph.OffsetX = xoffset;
-		glyph.OffsetY = yoffset;
-		
-		mFont->mRowHeight = (std::max)(mFont->mRowHeight, h);
-		mFont->mGlyphs.insert(std::make_pair(wchar_t(id), glyph));
-	}
+
 }
 
 
 ////////////////////////////////////////////////////////////////////////////
-Font::Font(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
-	: Resource(RT_Font, creator, handle, name, group), mRowHeight(0), mCharSize(0)
-{
-	
-}
 
 Font::~Font()
 {
@@ -308,14 +224,56 @@ void Font::LoadImpl()
 
 	// description file
 	String filePath = fileSystem.Locate(mName + ".sdff.txt", mGroup)  ;
-	FontLoader loader(filePath, this);
-	if (!loader.Load())
-		ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, filePath + "not found!", "Font::LoadImpl");
+
+	if (filePath.find(".txt") != std::string::npos)
+		LoadTXT(filePath);
+	else
+		LoadBinary(filePath);
 }
 
 void Font::UnloadImpl()
 {
 
+}
+
+void Font::LoadTXT(const String& fileName)
+{
+	std::string line;
+
+	int32_t numChars;
+	
+	Glyph charGlyph;
+
+	std::ifstream file(fileName);
+	while (std::getline(file, line))
+	{
+		// Skip white spaces
+		int pos = SkipWhiteSpace(line, 0);
+		
+		// Read token
+		int pos2 = FindEndOfToken(line, pos);
+		std::string token = line.substr(pos, pos2-pos);
+		
+		// Interpret line
+		if( token == "info" )
+			mFontName = InterpretInfo(line, pos2);
+		else if( token == "chars" )
+			numChars = InterpretChars(line, pos2);
+		else if( token == "char" )
+		{
+			int32_t unicode = InterpretChar(line, pos2, charGlyph);
+			mGlyphs[unicode] = charGlyph;
+
+			mAscent = (std::max)(mAscent, charGlyph.OffsetY);
+			mDescent = (std::min)(mDescent, charGlyph.OffsetY - charGlyph.Height);
+		}
+	}
+
+	mCharSize = 68;
+
+	assert(numChars == mGlyphs.size());
+
+	mRowHeight = mAscent - mDescent;
 }
 
 void Font::DrawString(SpriteBatch& spriteBatch, std::wstring& text, int32_t fontSize, const float2& position, const ColorRGBA& color)
@@ -372,10 +330,9 @@ void Font::MeasureString( const std::wstring& text, int32_t fontSize, float* wid
 
 }
 
-int32_t Font::GetRowHeight( int32_t fontSize ) const
+float Font::GetRowHeight( int32_t fontSize ) const
 {
-	const float scale = float(fontSize) / mCharSize;
-	return static_cast<int32_t>(mRowHeight * scale);
+	return mRowHeight * float(fontSize) / mCharSize;
 }
 
 shared_ptr<Resource> Font::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
@@ -432,13 +389,19 @@ void Font::DrawString( SpriteBatch& spriteBatch, std::wstring& text, int32_t fon
 	float y;
 
 	if (alignment & AlignTop)
-		y = region.Top() + rowHeight * 0.78f;  // Hack, todo: rewrite font
+	{
+		y = region.Top() + GetBaseLine(scale);
+	}
 	else if (alignment & AlignVCenter)
-		y = region.Top() + (region.Height - height + rowHeight) / 2 + rowHeight * 0.28f;
+	{
+		y = region.Top() + (region.Height - height) * 0.5f + GetBaseLine(scale);
+	}
 	else if (alignment & AlignBottom)
-		y = region.Top() + (region.Height - height) + rowHeight * 0.28f;
+	{
+		y = (region.Bottom() - height) + GetBaseLine(scale);
+	}
 	else
-		y = region.Top() + rowHeight;
+		y = region.Top() + GetBaseLine(scale);
 
 	for (size_t i = 0; i < text.length(); ++i)
 	{
@@ -532,6 +495,11 @@ void Font::DrawString( SpriteBatch& spriteBatch, std::wstring& text, int32_t fon
 			spriteBatch.Draw(mFontTexture, destRect, &sourceRect, color);
 		}
 	}
+}
+
+void Font::LoadBinary( const String& fileName )
+{
+
 }
 
 //void Font::DrawStringWrap( SpriteBatch& spriteBatch, std::wstring& text, int32_t fontSize, int32_t maxWidth, const float2& position, const ColorRGBA& color )

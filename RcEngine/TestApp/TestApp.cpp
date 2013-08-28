@@ -172,16 +172,6 @@ void TestApp::Render()
 	float clr = (float)169/255;
 	currentFrameBuffer->Clear(CF_Color | CF_Depth |CF_Stencil, RcEngine::ColorRGBA(clr, clr, clr, 1.0f), 1.0f, 0);
 	
-	//Rectanglef region(100, 100, 300, 300);
-
-
-	//std::wstring wstr = L"mFont->DrawString(*mSpriteBatch,\n std::wstring(buffer, cx), 30,\n float2(20, 580), ColorRGBA(0, 0, 0, 1));";
-	
-	//mFont->DrawStringWrap(*mSpriteBatch, wstr, 30, 500, float2(20, 200), ColorRGBA(0, 0, 0, 1));
-	//mFont->DrawString(*mSpriteBatchFont, wstr, 15, Font::AlignLeft | Font::AlignTop, region, ColorRGBA(0, 0, 0, 1));
-
-	//mSpriteBatchFont->End();
-	//mSpriteBatchFont->Flush();
 
 	// todo 
 	// Move to engine level
@@ -262,15 +252,17 @@ void TestApp::InitGUI()
 	mListBox->SetSelectedIndex(1);
 	rootElem->AddChild(mListBox);
 
-	auto text = L"I'll cover a very simple method of reflection that can be very powerful, developed in my spare time as Reflectabit, with a similar implementation written for Splinter Cell: Conviction. The main selling points of the implementation are the ease with which you can replicate anything over a network connection and the extra bonus of being able to live-edit your C++ code while the game is running.";
-	
+	std::wfstream file(L"Config.xml");
+	std::wstring text((std::istreambuf_iterator<wchar_t>(file)),
+		std::istreambuf_iterator<wchar_t>());
+	file.close();
+
 	mTextEdit = new TextEdit(TextEdit::TextBox);
 	mTextEdit->InitGuiStyle(nullptr);
 	mTextEdit->SetName("TextEdit");
 	mTextEdit->SetPosition(int2(470, 50));
-	mTextEdit->SetSize(int2(300, 350));
+	mTextEdit->SetSize(int2(300, 450));
 	mTextEdit->SetMultiLine(true);
-	//mTextEdit->SetText(L"mTextEdit\n->SetSize\n(int2(200, 90))");
 	mTextEdit->SetText(text);
 	rootElem->AddChild(mTextEdit);
 

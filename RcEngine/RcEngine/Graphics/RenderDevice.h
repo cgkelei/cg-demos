@@ -24,32 +24,31 @@ public:
 	RenderDevice(void);
 	virtual ~RenderDevice(void);
 
-	RenderDeviceType GetRenderDeviceType() const			{ return mRenderDeviceType; }
-
-	RenderFactory* GetRenderFactory() const					{ return mRenderFactory; }
-
-	shared_ptr<FrameBuffer> GetCurrentFrameBuffer() const	{ return mCurrentFrameBuffer; }
-	shared_ptr<FrameBuffer> GetScreenFrameBuffer() const	{ return mScreenFrameBuffer; }
-
-	void BindFrameBuffer(const shared_ptr<FrameBuffer>& fb);
-
-	void Render( EffectTechnique& tech, RenderOperation& op);
-	void Resize(uint32_t width, uint32_t height);
-
-	virtual void SetSamplerState(ShaderType stage, uint32_t unit, const shared_ptr<SamplerState>& state) = 0;
-	virtual void SetBlendState(const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask) = 0;
-	virtual void SetRasterizerState(const shared_ptr<RasterizerState>& state) = 0;
-	virtual void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0) = 0;
-
-	shared_ptr<DepthStencilState> GetCurrentDepthStencilState() const { return mCurrentDepthStencilState; }
-	shared_ptr<BlendState> GetCurrentBlendState() const { return mCurrentBlendState; }
-	
 	virtual void Create() = 0;
 	virtual void Release() = 0;
 	virtual void ToggleFullscreen(bool fs) = 0;
 	virtual bool Fullscreen() const = 0;
 	virtual void CreateRenderWindow(const RenderSettings& settings) = 0;	
 	virtual void AdjustProjectionMatrix(float4x4& pOut) = 0;
+
+	void Render( EffectTechnique& tech, RenderOperation& op);
+	void Resize(uint32_t width, uint32_t height);
+
+	void BindFrameBuffer(const shared_ptr<FrameBuffer>& fb);
+
+	RenderDeviceType GetRenderDeviceType() const			{ return mRenderDeviceType; }
+	RenderFactory* GetRenderFactory() const					{ return mRenderFactory; }
+
+	shared_ptr<FrameBuffer> GetCurrentFrameBuffer() const	{ return mCurrentFrameBuffer; }
+	shared_ptr<FrameBuffer> GetScreenFrameBuffer() const	{ return mScreenFrameBuffer; }
+
+	shared_ptr<DepthStencilState> GetCurrentDepthStencilState() const	{ return mCurrentDepthStencilState; }
+	shared_ptr<BlendState> GetCurrentBlendState() const					{ return mCurrentBlendState; }
+
+	virtual void SetSamplerState(ShaderType stage, uint32_t unit, const shared_ptr<SamplerState>& state) = 0;
+	virtual void SetBlendState(const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask) = 0;
+	virtual void SetRasterizerState(const shared_ptr<RasterizerState>& state) = 0;
+	virtual void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0) = 0;
 
 protected:
 	virtual void DoBindFrameBuffer(const shared_ptr<FrameBuffer>& fb) = 0;
@@ -79,8 +78,7 @@ protected:
 	ColorRGBA mCurrentBlendFactor;
 	uint32_t mCurrentSampleMask;
 
-	uint16_t mCurrentFrontStencilRef, mCurrentBackStencilRef;
-		
+	uint16_t mCurrentFrontStencilRef, mCurrentBackStencilRef;	
 };
 
 } // Namespace RcEngine

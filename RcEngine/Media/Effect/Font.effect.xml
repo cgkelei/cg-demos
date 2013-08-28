@@ -38,18 +38,27 @@ void main()
 <Shader name="FontPS" stage="Pixel" entry="main">
 <ShaderSource>
 <![CDATA[
-
 uniform sampler2D SpriteTexture;
+
 
 in vec2 oTex;
 in vec4 oColor;
 
+const float Gamma = 2.2;
+const float Smoothness = 96.0;
+
 void main()
 {
     float dist = texture2D(SpriteTexture, oTex).a;
-    float width = fwidth(dist);
-    float alpha = smoothstep(0.5-width, 0.5+width, dist);
-    gl_FragColor = vec4(oColor.xyz, alpha);
+	
+    //float w = fwidth(dist);	
+	
+	// perform adaptive anti-aliasing of the edges\n
+	float w = clamp( Smoothness * (abs(dFdx(oTex.x)) + abs(dFdy(oTex.y))), 0.0, 0.5);
+	
+	float alpha = smoothstep(0.5-w, 0.5+w, dist);
+	alpha = pow(alpha, 1.0/Gamma);
+	gl_FragColor = vec4(oColor.xyz, oColor.a * alpha);
 }
 
 ]]>

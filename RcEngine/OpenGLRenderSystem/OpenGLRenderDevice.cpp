@@ -137,13 +137,9 @@ void OpenGLRenderDevice::SetBlendState( const shared_ptr<BlendState>& state, con
 		if (currDesc.AlphaToCoverageEnable != stateDesc.AlphaToCoverageEnable)
 		{
 			if (stateDesc.AlphaToCoverageEnable)
-			{
 				glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-			}
 			else
-			{
 				glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-			}
 		}
 
 		if( GLEW_EXT_draw_buffers2 ) 
@@ -153,13 +149,9 @@ void OpenGLRenderDevice::SetBlendState( const shared_ptr<BlendState>& state, con
 				if(currDesc.RenderTarget[i].BlendEnable != stateDesc.RenderTarget[i].BlendEnable)
 				{
 					if (stateDesc.RenderTarget[i].BlendEnable)
-					{
 						glEnableIndexedEXT(GL_BLEND, i);
-					}
 					else
-					{
 						glDisableIndexedEXT(GL_BLEND, i);
-					}
 				}
 
 				if (currDesc.RenderTarget[i].ColorWriteMask != stateDesc.RenderTarget[i].ColorWriteMask)
@@ -177,13 +169,9 @@ void OpenGLRenderDevice::SetBlendState( const shared_ptr<BlendState>& state, con
 			if (currDesc.RenderTarget[0].BlendEnable != stateDesc.RenderTarget[0].BlendEnable)
 			{
 				if (stateDesc.RenderTarget[0].BlendEnable)
-				{
 					glEnable(GL_BLEND);
-				}
 				else
-				{
 					glDisable(GL_BLEND);
-				}
 			}
 
 			if (currDesc.RenderTarget[0].ColorWriteMask != stateDesc.RenderTarget[0].ColorWriteMask)
@@ -193,8 +181,7 @@ void OpenGLRenderDevice::SetBlendState( const shared_ptr<BlendState>& state, con
 					(stateDesc.RenderTarget[0].ColorWriteMask & CWM_Blue) != 0,
 					(stateDesc.RenderTarget[0].ColorWriteMask & CWM_Alpha) != 0 );
 			}
-		}
-				
+		}				
 
 		if (currDesc.RenderTarget[0].BlendOp != stateDesc.RenderTarget[0].BlendOp)
 		{
@@ -207,15 +194,15 @@ void OpenGLRenderDevice::SetBlendState( const shared_ptr<BlendState>& state, con
 			|| (currDesc.RenderTarget[0].SrcBlendAlpha != stateDesc.RenderTarget[0].SrcBlendAlpha)
 			|| (currDesc.RenderTarget[0].DestBlendAlpha != stateDesc.RenderTarget[0].DestBlendAlpha) )
 		{
-			auto src1 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlend);
-			auto dst1 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlend);
-			auto src11 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlendAlpha);
-			auto dst11 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlendAlpha);
+			//auto src1 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlend);
+			//auto dst1 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlend);
+			//auto src11 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlendAlpha);
+			//auto dst11 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlendAlpha);
 
 			glBlendFuncSeparate(OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlend), 
-				OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlend),
-				OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlendAlpha), 
-				OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlendAlpha));
+				                OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlend),
+								OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlendAlpha), 
+								OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlendAlpha));
 		}
 
 		// Set Current

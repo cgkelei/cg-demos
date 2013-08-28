@@ -139,10 +139,9 @@ Material::Material( ResourceManager* creator, ResourceHandle handle, const Strin
 
 Material::~Material(void)
 {
-	for(size_t i = 0; i < mCachedEffectParams.size(); ++i)
-	{
-		delete mCachedEffectParams[i];
-	}
+	for (MaterialParameter* param : mCachedEffectParams)
+		delete param;
+
 	mCachedEffectParams.clear();
 }
 
@@ -202,39 +201,25 @@ void Material::ApplyMaterial()
 			}
 		}
 	}
-
-		if (mDepthStencilState)
-			renderDevice->SetDepthStencilState(mDepthStencilState);
-
-	/*if (mBlendState)
-		renderDevice->SetBlendState(mBlendState);*/
-	
-	/*if (mRasterizerState)
-		renderDevice->SetRasterizerState(mRasterizerState);*/
-
 }
 
-EffectParameter* Material::GetCustomParameter( EffectParameterUsage usage )
+EffectParameter* Material::GetCustomParameter( EffectParameterUsage usage ) const
 {
-	for (size_t i = 0; i < mCachedEffectParams.size(); ++i)
+	for (MaterialParameter* param : mCachedEffectParams)
 	{
-		if (mCachedEffectParams[i]->Usage == usage)
-		{
-			return mCachedEffectParams[i]->EffectParam;
-		}
+		if (param->Usage == usage)
+			return param->EffectParam;
 	}
 
 	return nullptr;
 }
 
-EffectParameter* Material::GetCustomParameter( const String& name )
+EffectParameter* Material::GetCustomParameter( const String& name ) const
 {
-	for (size_t i = 0; i < mCachedEffectParams.size(); ++i)
+	for (MaterialParameter* param : mCachedEffectParams)
 	{
-		if (mCachedEffectParams[i]->Name == name)
-		{
-			return mCachedEffectParams[i]->EffectParam;
-		}
+		if (param->Name == name)
+			return param->EffectParam;
 	}
 	
 	return mEffect->GetParameterByName(name);
@@ -254,23 +239,19 @@ shared_ptr<Resource> Material::Clone()
 	retVal->mEmissive = mEmissive;
 	retVal->mPower = mPower;
 
-	retVal->mDepthStencilState = mDepthStencilState;
-	retVal->mBlendState = mBlendState;
-	retVal->mRasterizerState = mRasterizerState;
-
 	retVal->mEffect = std::static_pointer_cast<Effect>(mEffect->Clone());
 
 	retVal->mTextures = mTextures;
 
-	for (auto iter = mCachedEffectParams.begin(); iter != mCachedEffectParams.end(); ++iter)
+	for (MaterialParameter* param : mCachedEffectParams)
 	{
-		MaterialParameter* param = new MaterialParameter;
-		param->EffectParam = retVal->mEffect->GetParameterByName((*iter)->Name);
-		param->Usage = (*iter)->Usage;
-		param->IsSemantic = (*iter)->IsSemantic;
-		param->Name = (*iter)->Name;
-		param->Type = (*iter)->Type;
-		retVal->mCachedEffectParams.push_back(param);
+		MaterialParameter* paramCloned = new MaterialParameter;
+		paramCloned->EffectParam = retVal->mEffect->GetParameterByName(param->Name);
+		paramCloned->Usage = param->Usage;
+		paramCloned->IsSemantic = param->IsSemantic;
+		paramCloned->Name = param->Name;
+		paramCloned->Type = param->Type;
+		retVal->mCachedEffectParams.push_back(paramCloned);
 	}
 
 	retVal->SetLoadState(Resource::Loaded);
@@ -458,27 +439,21 @@ void Material::LoadImpl()
 			layer.TexUnit = paramNode->Attribute("texUnit")->ValueUInt();
 
 			String samplerValue = paramNode->Attribute("sampler")->ValueString();
-			auto found = mSamplerStates.find(samplerValue) ;
-			if (found == mSamplerStates.end())
-			{
-				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Sampler: " + samplerValue + "doesn't exit",
-					"Material::LoadFrom");
-			}
-			layer.Sampler = found->second;
+			auto samplerIter = mSamplerStates.find(samplerValue) ;
+			if (samplerIter == mSamplerStates.end())
+				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Sampler: " + samplerValue + "doesn't exit", "Material::LoadFrom");
+			layer.Sampler = samplerIter->second;
 
 			String texFile = paramNode->AttributeString("value", "");
 			if (!texFile.empty())
 			{
-				/*String texFullPath = FileSystem::GetSingleton().Locate(texFile);
-				layer.Texture = factory.CreateTextureFromFile(texFullPath, 0);*/
-
 				shared_ptr<TextureResource> textureRes = std::static_pointer_cast<TextureResource>(
 					resMan.GetResourceByName(RT_Texture, texFile, mGroup));
 				textureRes->Load();
 
 				layer.Texture = textureRes->GetTexture();
-
 			}
+
 			mTextures[parameter->Name] = layer;
 		}
 

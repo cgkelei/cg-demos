@@ -32,8 +32,8 @@ public:
 	const shared_ptr<Effect>& GetEffect() const			{ return mEffect; }
 	EffectTechnique* GetCurrentTechnique() const;
 			
-	EffectParameter* GetCustomParameter(EffectParameterUsage usage);
-	EffectParameter* GetCustomParameter(const String& name);
+	EffectParameter* GetCustomParameter(EffectParameterUsage usage) const;
+	EffectParameter* GetCustomParameter(const String& name) const;
 
 	void SetAmbientColor(const ColorRGBA& ambient)		{ mAmbient = ambient; }
 	void SetDiffuseColor(const ColorRGBA& diffuse)		{ mDiffuse = diffuse; }
@@ -63,9 +63,6 @@ protected:
 
 	vector<MaterialParameter*> mCachedEffectParams;
 
-	shared_ptr<DepthStencilState> mDepthStencilState;
-	shared_ptr<BlendState> mBlendState;
-	shared_ptr<RasterizerState> mRasterizerState;
 	unordered_map<String, shared_ptr<SamplerState> > mSamplerStates;
 
 	ColorRGBA mAmbient;

@@ -35,13 +35,13 @@ void Label::SetFont( const shared_ptr<Font>& font, int32_t fontSize )
 	}
 }
 
-void Label::SetText( const std::wstring& text, Alignment textAlign )
+void Label::SetText( const std::wstring& text )
 {
 	mText = text;
 	UpdateText();
 }
 
-void Label::SetTextAlignment( Alignment align )
+void Label::SetTextAlignment( uint32_t align )
 {
 	if (mTextAlignment != align)
 	{

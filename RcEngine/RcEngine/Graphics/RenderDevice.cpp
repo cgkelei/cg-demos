@@ -12,9 +12,16 @@
 namespace RcEngine {
 
 RenderDevice::RenderDevice(void)
-	: mRenderFactory(nullptr), mCurrentFrameBuffer(nullptr), mScreenFrameBuffer(nullptr),
-		mCurrentBlendState(nullptr), mCurrentRasterizerState(nullptr), mCurrentDepthStencilState(nullptr),
-		mCurrentFrontStencilRef(0), mCurrentBackStencilRef(0)
+	: mRenderFactory(nullptr),
+	  mCurrentFrameBuffer(nullptr),
+	  mScreenFrameBuffer(nullptr),
+	  mCurrentBlendState(nullptr),
+	  mCurrentRasterizerState(nullptr), 
+	  mCurrentDepthStencilState(nullptr),
+	  mCurrentFrontStencilRef(0),
+	  mCurrentBackStencilRef(0),
+	  mCurrentBlendFactor(ColorRGBA::Black),
+	  mCurrentSampleMask(0)
 {
 	Context::GetSingleton().SetRenderDevice(this);
 }
