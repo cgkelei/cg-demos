@@ -1,0 +1,74 @@
+<Effect name="PhongLighting">
+
+<Shader name="VS" stage="Vertex" entry="main">
+<![CDATA[
+
+#version 330
+	
+in vec4 Position;
+in vec3 Normal;
+in vec2 Tex;
+
+out vec3 oNormal;
+out vec2 oTex;
+out vec3 oLightDir;
+
+uniform mat4 World;
+uniform mat4 ViewProj;
+
+vec3 LightPos = vec3(100, 100, 100);
+		
+void main(void)
+{
+	vec4 worldPos = Position * World ;
+	
+	oNormal = Normal * mat3(World);
+	oLightDir = LightPos - vec3(worldPos);
+	oTex = vec2(Tex.x, Tex.y);
+	
+	gl_Position = worldPos * ViewProj;
+}
+
+]]>
+</Shader>
+
+<Shader name="PS" stage="Pixel" entry="main">
+<![CDATA[
+
+#version 330
+
+in vec3 oNormal;
+in vec2 oTex;
+in vec3 oLightDir;
+
+out vec4 FragColor;
+
+uniform sampler2D DiffuseMap; 
+	
+void main()
+{
+	vec3 normal = normalize(oNormal);
+	vec3 light = normalize(oLightDir);
+	
+	vec3 diffuse = vec3( texture(DiffuseMap, oTex) );
+	
+	float diffuseFactor = max( dot(normal, light), 0);
+	
+	FragColor = vec4( diffuse * diffuseFactor, 1.0);
+}
+
+]]>
+</Shader>
+
+<Technique name="PhongLight">
+	<Pass name="p0">
+		<VertexShader name="VS"/>
+		<PixelShader name="PS"/>
+	</Pass>
+</Technique>
+
+</Effect>
+	
+
+
+
