@@ -57,7 +57,7 @@ public:
 		shared_ptr<Texture> StyleTex;
 
 		shared_ptr<Font> Font;
-		int32_t FontSize;
+		float FontSize;
 
 		ColorRGBA BackColor;
 		ColorRGBA ForeColor; 
@@ -81,7 +81,7 @@ public:
 public:
 	
 	shared_ptr<Font> mFont;
-	int32_t mFontSize;
+	float mFontSize;
 
 	shared_ptr<Texture> mSkinTexAtlas; 
 

@@ -203,7 +203,7 @@ void TestApp::InitGUI()
 	mFPSLabel->SetName("FPSLabel");
 	mFPSLabel->SetPosition(int2(500, 500));
 	mFPSLabel->SetSize(int2(300, 100));
-	mFPSLabel->SetFont(UIManager::GetSingleton().GetDefaultFont(), 20);
+	mFPSLabel->SetFont(UIManager::GetSingleton().GetDefaultFont(), 20.0f);
 	rootElem->AddChild( mFPSLabel );	
 
 	mButton = new Button;
@@ -253,8 +253,7 @@ void TestApp::InitGUI()
 	rootElem->AddChild(mListBox);
 
 	std::wfstream file(L"Config.xml");
-	std::wstring text((std::istreambuf_iterator<wchar_t>(file)),
-		std::istreambuf_iterator<wchar_t>());
+	std::wstring text((std::istreambuf_iterator<wchar_t>(file)), std::istreambuf_iterator<wchar_t>());
 	file.close();
 
 	mTextEdit = new TextEdit(TextEdit::TextBox);

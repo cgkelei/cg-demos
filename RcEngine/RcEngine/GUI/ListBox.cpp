@@ -96,7 +96,7 @@ void ListBox::UpdateVScrollBar()
 {
 	if (mLisBoxStyle)
 	{
-		mNumVisibleItems = mSelectionRegion.Height / mTextRowHeight;
+		mNumVisibleItems = (int32_t)floorf(mSelectionRegion.Height / mTextRowHeight);
 
 		if ((int)mItems.size() > mNumVisibleItems)
 		{
@@ -140,7 +140,7 @@ void ListBox::InitGuiStyle( const GuiSkin::StyleMap* styles /* = nullptr */ )
 	}
 
 	float fontScale = mLisBoxStyle->FontSize / float(mLisBoxStyle->Font->GetFontSize());
-	mTextRowHeight = int32_t(fontScale * mLisBoxStyle->Font->GetRowHeight());
+	mTextRowHeight = mLisBoxStyle->Font->GetRowHeight(fontScale);
 }
 
 void ListBox::Update( float delta )
@@ -164,12 +164,12 @@ void ListBox::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 		int mimItem, maxItem;
 		mVertScrollBar->GetScrollRange(&mimItem, &maxItem);
 
-		IntRect rc = mTextRegion;
+		Rectanglef rc((float)mTextRegion.X, (float)mTextRegion.Y, (float)mTextRegion.Width, (float)mTextRegion.Height);
 		rc.SetBottom( rc.Y + mTextRowHeight);
 
 		for (int i = mVertScrollBar->GetScrollValue(); i < maxItem + mNumVisibleItems; ++i)
 		{		
-			if (rc.Bottom() > mTextRegion.Bottom())
+			if (rc.Bottom() > (float)mTextRegion.Bottom())
 				break;
 
 			bool selectedStyle = false;
@@ -190,9 +190,9 @@ void ListBox::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 			}
 
 			// draw text
-			Rectanglef region((float)rc.X, (float)rc.Y, (float)rc.Width, (float)rc.Height);
+			//Rectanglef region((float)rc.X, (float)rc.Y, (float)rc.Width, (float)rc.Height);
 			mLisBoxStyle->Font->DrawString(spriteBatchFont, mItems[i], mLisBoxStyle->FontSize,
-					 AlignVCenter, region, mLisBoxStyle->ForeColor); 
+					 AlignVCenter, rc, mLisBoxStyle->ForeColor); 
 
 			rc.Offset(0, mTextRowHeight);
 		}
@@ -262,7 +262,7 @@ bool ListBox::OnMouseButtonRelease( const int2& screenPos, uint32_t button )
 		{
 			if (mSelectionRegion.Contains(screenPos.X(), screenPos.Y()))
 			{
-				int32_t selIndex = mVertScrollBar->GetScrollValue() + (screenPos.Y() - mSelectionRegion.Top()) / mTextRowHeight;
+				int32_t selIndex = mVertScrollBar->GetScrollValue() + (int32_t)floorf((screenPos.Y() - mSelectionRegion.Top()) / mTextRowHeight);
 				SetSelectedIndex(selIndex, true);			
 			}	
 

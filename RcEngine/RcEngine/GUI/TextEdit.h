@@ -62,17 +62,17 @@ protected:
 	/**
 	 * Calculate caret position from screen position.
 	 */
-	int2 GetCaretAt(const int2& screenPos) const;
+	int2 GetCaretFromPoint(float screenX, float screenY) const;
 	
 	/**
 	 * Calculate caret position from char index in original text.
 	 */
-	int2 GetCaretPos(int32_t index) const;
+	int2 GetCaretFromChar(int32_t index) const;
 	
 	/**
-	 * Calculate char index based on caret pos (x, y).
+	 * Calculate char index at caret pos (x, y).
 	 */
-	size_t GetCharIndex(const int2& caret) const;
+	size_t GetCharFromCaret(const int2& caret) const;
 
 	void DrawSelection(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 	void DrawText(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
@@ -104,6 +104,9 @@ protected:
 
 	int32_t mFirstVisibleY;
 	int32_t mNumVisibleY;
+
+	float mVisibleStartX;
+	float mVisibleStartY;
 
 	int32_t mNumLines;
 

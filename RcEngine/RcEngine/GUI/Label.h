@@ -13,7 +13,6 @@ class _ApiExport Label : public UIElement
 {
 public:
 	Label();
-	Label(const int2& pos, const std::wstring& text, Alignment textAlign = AlignCenter);
 	virtual ~Label();
 
 	virtual void InitGuiStyle(const GuiSkin::StyleMap* styles = nullptr);
@@ -21,8 +20,8 @@ public:
 	virtual void Update(float delta);
 	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 
-	void SetFont(const shared_ptr<Font>& font, int32_t fontSize);
-	const shared_ptr<Font> GetFont() const			{ return mFont; }
+	void SetFont(const shared_ptr<Font>& font, float fontSize);
+	const shared_ptr<Font>& GetFont() const			{ return mFont; }
 
 	void SetText(const std::wstring& text );
 	const std::wstring& GetText() const				{ return mText; }
@@ -47,7 +46,7 @@ protected:
 
 	vector<float> mRowWidths;
 
-	int32_t mFontSize;
+	float mFontSize;
 
 	bool mWordWrap;	
 };
