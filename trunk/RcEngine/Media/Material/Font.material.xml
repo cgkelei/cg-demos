@@ -1,7 +1,7 @@
 <Material name="Font">
 
 	<Sampler name="LinearSampler">
-		<State name="Filter" value="Min_Mag_Mip_Linear"/>
+		<State name="Filter" value="Min_Mag_Linear_Mip_Point"/>
 		<State name="AddressU" value="Clamp"/>
 		<State name="AddressV" value="Clamp"/>
 	</Sampler>

@@ -24,14 +24,14 @@ public:
 	void SetFont(const shared_ptr<Font>& font, int32_t fontSize);
 	const shared_ptr<Font> GetFont() const			{ return mFont; }
 
-	void SetText(const std::wstring& text, Alignment textAlign = AlignCenter);
+	void SetText(const std::wstring& text );
 	const std::wstring& GetText() const				{ return mText; }
 
 	void SetWordWrap(bool enable);
 	bool GetWordWrap() const						{ return mWordWrap ; }
 	
-	void SetTextAlignment(Alignment align);
-	Alignment GetTextAlignment() const	{ return mTextAlignment; }
+	void SetTextAlignment(uint32_t align);
+	uint32_t GetTextAlignment() const	{ return mTextAlignment; }
 
 	
 protected:
@@ -43,7 +43,7 @@ protected:
 	std::wstring mText;
 	std::wstring mPrintText;
 
-	Alignment mTextAlignment;
+	uint32_t mTextAlignment;
 
 	vector<float> mRowWidths;
 

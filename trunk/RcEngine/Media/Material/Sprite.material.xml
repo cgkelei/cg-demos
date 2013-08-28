@@ -1,7 +1,7 @@
 <Material name="Sprite">
 
 	<Sampler name="LinearSampler">
-		<State name="Filter" value="Min_Mag_Mip_Linear"/>
+		<State name="Filter" value="Min_Mag_Linear_Mip_Point"/>
 		<State name="AddressU" value="Wrap"/>
 		<State name="AddressV" value="Wrap"/>
 	</Sampler>

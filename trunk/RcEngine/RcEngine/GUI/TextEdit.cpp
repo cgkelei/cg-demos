@@ -31,7 +31,7 @@ TextEdit::TextEdit(TextEditType type)
 	  mCaretPos(0, 0),
 	  mSelectStartPos(0, 0)
 {
-	mTextColor = ColorRGBA( 1.0f, 0.06f, 0.06f, 0.06f );
+	mTextColor = ColorRGBA( 0.0f, 0.0f, 0.0f, 1.0f );
 	mSelTextColor = ColorRGBA( 1.0f, 1.0f, 1.0f, 1.0f );
 	mSelBkColor = ColorRGBA( 1.0f, 0.156f, 0.196f, 0.36f );
 	mCaretColor = ColorRGBA( 1.0f, 0, 0, 0 );
@@ -111,7 +111,7 @@ void TextEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	int2 screenPos = GetScreenPosition();
 
 	// Draw background first
-	spriteBatch.Draw(mTextEditStyle->StyleTex, mBackRect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, mTextEditStyle->StyleStates[UI_State_Normal].TexColor);
+	//spriteBatch.Draw(mTextEditStyle->StyleTex, mBackRect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, mTextEditStyle->StyleStates[UI_State_Normal].TexColor);
 
 	// Draw selected background if has selection
 	DrawSelection(spriteBatch, spriteBatchFont);

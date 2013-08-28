@@ -37,9 +37,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="edtaa3func.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pfm.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -18,16 +18,16 @@ public:
 
 	struct Glyph
 	{
+		// Start Position in Texture
+		int32_t SrcX, SrcY;
+
 		int32_t Width, Height;
 
 		// Glyph X, Y offset from origin.
 		float OffsetX, OffsetY;
 
 		// the horizontal advance value for the glyph. 
-		float Advance;
-
-		// Start Position in Texture
-		int32_t SrcX, SrcY;
+		float Advance;	
 	};
 
 	typedef std::unordered_map<wchar_t, Glyph> FontMetrics;
@@ -47,15 +47,17 @@ public:
 
 	void MeasureString(const std::wstring& text, int32_t fontSize, float* widthOut, float* heightOut);
 
-	int32_t GetFontSize() const   { return mCharSize; }
-	int32_t GetRowHeight() const  { return mRowHeight; }
+	int32_t GetFontSize() const { return mCharSize; }
+	inline float GetRowHeight(float yScale = 1.0) const  	{ return mRowHeight * yScale; }
+	inline float GetBaseLine(float yScale = 1.0) const	    { return mAscent * yScale; }
+
 
 	const shared_ptr<Texture>& GetFontTexture() const { return mFontTexture; }
 
 	/**
 	 * Get row height of specified font size
 	 */
-	int32_t GetRowHeight(int32_t fontSize) const;
+	float GetRowHeight(int32_t fontSize) const;
 	
 	const FontMetrics& GetFontMetrics() const { return mGlyphs; }
 
@@ -65,22 +67,26 @@ protected:
 	void LoadImpl();
 	void UnloadImpl();
 
+	void LoadTXT(const String& fileName);
+	void LoadBinary(const String& fileName);
+
 public:
 	static shared_ptr<Resource> FactoryFunc(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 
 protected:
 
-	friend class FontLoader;
-	
 	String mFontName;
 
-	/// Point size.
+	FontMetrics mGlyphs;
+
 	int32_t mCharSize;
 
-	/// Row height.
-	int32_t mRowHeight;
-
-	FontMetrics mGlyphs;
+	// maximal font ascender (pixels above the baseline)
+	float mAscent;
+	// maximal font descender (negative pixels below the baseline)
+	float mDescent;
+	// Row height. (ascender - descender) 
+	float mRowHeight;
 
 	shared_ptr<Texture> mFontTexture;
 };
