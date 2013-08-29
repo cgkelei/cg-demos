@@ -433,7 +433,7 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			MakeKeyEvent(wParam, lParam, e);
 			mInputSystem->FireEvent(e);
 
-			printf("wParam = %d WM_KEYDOWN at clock:%d\n", wParam, clock()); 
+			//printf("wParam = %d WM_KEYDOWN at clock:%d\n", wParam, clock()); 
 		}
 		break;
 
