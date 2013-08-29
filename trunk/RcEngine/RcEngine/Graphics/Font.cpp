@@ -193,6 +193,16 @@ std::string InterpretInfo( std::string &str, int start )
 	return std::string("");
 }
 
+void ReplaceTabWithSpace(std::wstring& str, int numSpace)
+{
+	std::wstring tab(numSpace, L' ');
+	for (size_t i = str.length() - 1; i >=0; i--)
+	{
+		if (str[i] == L'\t')
+			str.replace(i, 1, tab);
+	}
+}
+
 }
 
 namespace RcEngine {
@@ -229,6 +239,8 @@ void Font::LoadImpl()
 		LoadTXT(filePath);
 	else
 		LoadBinary(filePath);
+	
+	mSpaceAdvance = mFontMetrics[L' '].Advance;
 }
 
 void Font::UnloadImpl()
@@ -275,7 +287,7 @@ void Font::LoadTXT(const String& fileName)
 	mFontSize = mRowHeight;
 }
 
-void Font::DrawString(SpriteBatch& spriteBatch, std::wstring& text, float fontSize, const float2& position, const ColorRGBA& color)
+void Font::DrawString(SpriteBatch& spriteBatch, const std::wstring& text, float fontSize, const float2& position, const ColorRGBA& color)
 {
 	float x = position.X();
 	float y = position.Y();
@@ -293,6 +305,18 @@ void Font::DrawString(SpriteBatch& spriteBatch, std::wstring& text, float fontSi
 		}
 		else
 		{
+			if (ch == L' ')					// Special Case
+			{
+				x += mSpaceAdvance * scale;
+				continue;
+			}
+
+			if (ch == L'\t')               // Special Case
+			{
+				x += mSpaceAdvance * scale * 4;
+				continue;
+			}
+
 			const Glyph& glyph = mFontMetrics[ch];
 
 			float ch_x = x + glyph.OffsetX * scale;
@@ -318,10 +342,15 @@ void Font::MeasureString( const std::wstring& text, float fontSize, float* width
 	{
 		wchar_t ch = text[i];
 
-		if (ch != L'\n')
-			rowWidths.back() += mFontMetrics[ch].Advance * scale;
-		else
+		if (ch == L'\n')
 			rowWidths.push_back(0);
+		else
+		{
+			if (ch == L'\t')
+				rowWidths.back() += mSpaceAdvance * scale * 4;
+			else
+				rowWidths.back() += mFontMetrics[ch].Advance * scale;
+		}	
 	}
 
 	if(widthOut)  *widthOut = *std::max_element(rowWidths.begin(), rowWidths.end());
@@ -356,7 +385,7 @@ static float GetRowStartPos(float rowWidth, float maxWidth, uint32_t alignment)
 		return 0;
 }
 
-void Font::DrawString( SpriteBatch& spriteBatch, std::wstring& text, float fontSize, uint32_t alignment, const Rectanglef& region, const ColorRGBA& color )
+void Font::DrawString( SpriteBatch& spriteBatch, const std::wstring& text, float fontSize, uint32_t alignment, const Rectanglef& region, const ColorRGBA& color )
 {
 	const float scale = fontSize / mFontSize;
 	const float rowHeight = mRowHeight * scale;
@@ -368,10 +397,15 @@ void Font::DrawString( SpriteBatch& spriteBatch, std::wstring& text, float fontS
 	{
 		wchar_t ch = text[i];
 
-		if (ch != L'\n')
-			rowWidths.back() += mFontMetrics[ch].Advance * scale;
-		else
+		if (ch == L'\n')
 			rowWidths.push_back(0);
+		else
+		{
+			if (ch == L'\t')
+				rowWidths.back() += mSpaceAdvance * scale * 4;
+			else
+				rowWidths.back() += mFontMetrics[ch].Advance * scale;
+		}	
 	}
 
 	float width = *std::max_element(rowWidths.begin(), rowWidths.end());
@@ -383,17 +417,11 @@ void Font::DrawString( SpriteBatch& spriteBatch, std::wstring& text, float fontS
 	float y;
 
 	if (alignment & AlignTop)
-	{
 		y = region.Top() + GetBaseLine(scale);
-	}
 	else if (alignment & AlignVCenter)
-	{
 		y = region.Top() + (region.Height - height) * 0.5f + GetBaseLine(scale);
-	}
 	else if (alignment & AlignBottom)
-	{
 		y = (region.Bottom() - height) + GetBaseLine(scale);
-	}
 	else
 		y = region.Top() + GetBaseLine(scale);
 
@@ -404,12 +432,23 @@ void Font::DrawString( SpriteBatch& spriteBatch, std::wstring& text, float fontS
 		if (ch == L'\n')
 		{
 			y += rowHeight;
-
-			rowIdx++;
-			x = region.Left() + GetRowStartPos(rowWidths[rowIdx], region.Width, alignment);
+			x = region.Left() + GetRowStartPos(rowWidths[++rowIdx], region.Width, alignment);
 		}
 		else
 		{
+			if (ch == L' ')					// Special Case
+			{
+				x += mSpaceAdvance * scale;
+				continue;
+			}
+			
+			if (ch == L'\t')               // Special Case
+			{
+				x += mSpaceAdvance * scale * 4;
+				continue;
+			}
+
+
 			const Glyph& glyph = mFontMetrics[ch];
 
 			float ch_x = x + glyph.OffsetX * scale;
@@ -421,10 +460,8 @@ void Font::DrawString( SpriteBatch& spriteBatch, std::wstring& text, float fontS
 			x += glyph.Advance * scale;
 
 			// Out of region
-			if ( (ch_x + ch_width <= region.Left()) ||
-				(ch_x >= region.Right())            ||
-				(ch_y >= region.Bottom())           ||
-				(ch_y + ch_height <= region.Top()) )
+			if ( (ch_x + ch_width <= region.Left()) || (ch_x >= region.Right()) ||
+				 (ch_y >= region.Bottom()) || (ch_y + ch_height <= region.Top()) )
 				continue;
 
 			IntRect sourceRect;
@@ -437,7 +474,7 @@ void Font::DrawString( SpriteBatch& spriteBatch, std::wstring& text, float fontS
 				sourceRect.Width = int(glyph.Width * (1 - ratio));
 
 				destRect.X = region.Left();
-				destRect.Width = ch_height * (1 - ratio);
+				destRect.Width = ch_width * (1 - ratio);
 			}
 			else if (ch_x + ch_width > region.Right())
 			{

@@ -36,20 +36,21 @@ public:
 	Font(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	~Font();
 
-	void DrawString(SpriteBatch& spriteBatch, std::wstring& text, float fontSize, const float2& position, const ColorRGBA& color);
+	void DrawString(SpriteBatch& spriteBatch, const std::wstring& text, float fontSize, const float2& position, const ColorRGBA& color);
 	
-	void DrawString(SpriteBatch& spriteBatch, std::wstring& text, float fontSize, uint32_t alignment, const Rectanglef& region, const ColorRGBA& color);
+	void DrawString(SpriteBatch& spriteBatch, const std::wstring& text, float fontSize, uint32_t alignment, const Rectanglef& region, const ColorRGBA& color);
 
 	void MeasureString(const std::wstring& text, float fontSize, float* widthOut, float* heightOut);
 
 	inline float GetRowHeight(float yScale = 1.0) const  	{ return mRowHeight * yScale; }
 	inline float GetBaseLine(float yScale = 1.0) const	    { return mAscent * yScale; }
 
-	float GetFontSize() const								{ return mFontSize; }	
+	inline float GetFontSize() const								{ return mFontSize; }	
+	inline float GetSpaceAdvance() const							{ return mSpaceAdvance; }
+	
+	inline const shared_ptr<Texture>& GetFontTexture() const		{ return mFontTexture; }
 
-	const shared_ptr<Texture>& GetFontTexture() const		{ return mFontTexture; }
-
-	const FontMetrics& GetFontMetrics() const				{ return mFontMetrics; }
+	const FontMetrics& GetFontMetrics() const						{ return mFontMetrics; }
 	const Glyph& GetGlyphInfo(wchar_t ch) const;
 
 protected:
@@ -76,6 +77,8 @@ protected:
 	float mDescent;
 	// Row height. (ascender - descender) 
 	float mRowHeight;
+
+	float mSpaceAdvance;
 
 	shared_ptr<Texture> mFontTexture;
 };

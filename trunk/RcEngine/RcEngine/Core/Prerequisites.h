@@ -154,6 +154,7 @@ class CheckBox;
 class TextEdit;
 class ListBox;
 class ComboBox;
+class LineEdit;
 class Menu;
 class UIManager;
 

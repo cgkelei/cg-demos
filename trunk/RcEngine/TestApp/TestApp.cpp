@@ -44,6 +44,7 @@
 #include "GUI/ScrollBar.h"
 #include "GUI/Button.h"
 #include "GUI/ListBox.h"
+#include "GUI/LineEdit.h"
 #include "Core/Variant.h"
 #include "Core/StringHash.h"
 
@@ -256,21 +257,21 @@ void TestApp::InitGUI()
 	std::wstring text((std::istreambuf_iterator<wchar_t>(file)), std::istreambuf_iterator<wchar_t>());
 	file.close();
 
-	mTextEdit = new TextEdit(TextEdit::TextBox);
+	mTextEdit = new TextEdit();
 	mTextEdit->InitGuiStyle(nullptr);
 	mTextEdit->SetName("TextEdit");
 	mTextEdit->SetPosition(int2(470, 50));
 	mTextEdit->SetSize(int2(300, 450));
-	mTextEdit->SetMultiLine(true);
+	//mTextEdit->SetPosition(int2(20, 50));
+	//mTextEdit->SetSize(int2(750, 450));
 	mTextEdit->SetText(text);
 	rootElem->AddChild(mTextEdit);
 
-	mLineEdit = new TextEdit(TextEdit::LineEdit);
+	mLineEdit = new LineEdit();
 	mLineEdit->InitGuiStyle(nullptr);
 	mLineEdit->SetName("LineEdit");
 	mLineEdit->SetPosition(int2(20, 300));
 	mLineEdit->SetSize(int2(200, 40));
-	mLineEdit->SetMultiLine(false);
 	mLineEdit->SetText(L"mLineEdit = new TextEdit(TextEdit::LineEdit);");
 	rootElem->AddChild(mLineEdit);
 
