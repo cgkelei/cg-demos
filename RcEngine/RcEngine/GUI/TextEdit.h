@@ -5,31 +5,10 @@
 
 namespace RcEngine {
 
-/**
- * TextEdit: a single line or multiple line GUI control.
- */
-
 class _ApiExport TextEdit : public UIElement
 {
 public:
-	typedef fastdelegate::FastDelegate1<std::wstring> ReturnEventHandler;
-	ReturnEventHandler EventReturnPressed;
-
-	enum TextEditType
-	{
-		/**
-		 * Single line edit control.
-		 */
-		LineEdit,
-		
-		/**
-		 * Multiple line edit box with horizontal and vertical ScrollBar.
-		 */
-		TextBox
-	};
-
-public:
-	TextEdit(TextEditType type);
+	TextEdit();
 	virtual ~TextEdit();
 
 	virtual void Update(float dt);
@@ -52,17 +31,16 @@ public:
 	const std::wstring& GetText() const				    { return mText; }
 
 	void SetBorderWidth(int32_t border)					{ mBorder = border; UpdateRect(); }
-	void SetMultiLine(bool enable)						{ mMultiLine = enable; }
 
 	void SetTextColor(const ColorRGBA& color)			{ mTextColor = color; }
 	void SetSelectedTextColor(const ColorRGBA& color)	{ mSelTextColor = color; }
 
 protected:
-
+	
 	/**
 	 * Calculate caret position from screen position.
 	 */
-	int2 GetCaretFromPoint(float screenX, float screenY) const;
+	int2 GetCaretAtCursor(float screenX, float screenY) const;
 	
 	/**
 	 * Calculate caret position from char index in original text.
@@ -75,8 +53,7 @@ protected:
 	size_t GetCharFromCaret(const int2& caret) const;
 
 	void DrawSelection(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
-	void DrawText(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
-
+	
 	void DeleteSlectedText();
 	void DeletePreChar();
 	void DeleteNextChar();
@@ -89,24 +66,24 @@ protected:
 	void WrapText();
 	void UpdateVisisbleText();
 
+	bool HasSelection() const { return mCaretPos != mSelectStartPos; }
+	void ClearSelection()     { mSelectStartPos = mCaretPos; }
+
 	void HandleVScrollBar(int32_t value);
 	
 protected:
-
-	TextEditType mEditType;
 
 	std::wstring mText;
 	std::wstring mWrappedText;
 	std::wstring mPrintText;
 	
-	bool mMultiLine;
 	bool mWordWrap;
 
 	int32_t mFirstVisibleY;
 	int32_t mNumVisibleY;
 
-	float mVisibleStartX;
-	float mVisibleStartY;
+	//float mVisibleStartX;
+	//float mVisibleStartY;
 
 	int32_t mNumLines;
 

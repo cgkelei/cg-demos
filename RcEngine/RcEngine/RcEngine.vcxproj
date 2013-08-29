@@ -74,6 +74,7 @@
     <ClInclude Include="GUI\Cursor.h" />
     <ClInclude Include="GUI\GuiSkin.h" />
     <ClInclude Include="GUI\Label.h" />
+    <ClInclude Include="GUI\LineEdit.h" />
     <ClInclude Include="GUI\ListBox.h" />
     <ClInclude Include="GUI\Menu.h" />
     <ClInclude Include="GUI\ScrollBar.h" />
@@ -172,6 +173,7 @@
     <ClCompile Include="GUI\Cursor.cpp" />
     <ClCompile Include="GUI\GuiSkin.cpp" />
     <ClCompile Include="GUI\Label.cpp" />
+    <ClCompile Include="GUI\LineEdit.cpp" />
     <ClCompile Include="GUI\ListBox.cpp" />
     <ClCompile Include="GUI\Menu.cpp" />
     <ClCompile Include="GUI\ScrollBar.cpp" />
@@ -278,6 +280,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;BUILD_DLL;RcWindows;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>./;../3rdParty</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

@@ -65,8 +65,12 @@ public:
 	/**
 	 * Get root UI Element
 	 */
-	UIElement* GetRoot() const { return mRootElement; }
-	
+	UIElement* GetRoot() const								{ return mRootElement; }
+
+	void SetClipBoardText(const std::wstring& text)			{ mClipBoardText = text; }
+	const std::wstring& GetClipBoardText() const			{ return mClipBoardText; }
+	void ClearClipBoardText()								{ mClipBoardText.clear(); }
+
 private:
 
 	/**
@@ -134,6 +138,8 @@ protected:
 	shared_ptr<Font> mFont;
 	shared_ptr<SpriteBatch> mSpriteBatchFont;
 	shared_ptr<SpriteBatch> mSpriteBatch;
+
+	std::wstring mClipBoardText;
 
 	GuiSkin* mDefaultSkin;
 	

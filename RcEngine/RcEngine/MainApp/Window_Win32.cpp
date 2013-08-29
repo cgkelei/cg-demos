@@ -373,7 +373,7 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			e.MouseButton.y = GET_Y_LPARAM(lParam); 
 			mInputSystem->FireEvent(e);
 		}
-	break;
+		break;
 
 	case WM_MBUTTONDOWN:
 		{
@@ -432,6 +432,8 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			e.Key.type = InputEventType::KeyDown;
 			MakeKeyEvent(wParam, lParam, e);
 			mInputSystem->FireEvent(e);
+
+			printf("wParam = %d WM_KEYDOWN at clock:%d\n", wParam, clock()); 
 		}
 		break;
 

@@ -333,6 +333,9 @@
     <ClInclude Include="GUI\Console.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="GUI\LineEdit.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Context.cpp">
@@ -591,6 +594,9 @@
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\Console.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\LineEdit.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>
