@@ -30,6 +30,13 @@ public:
 		Drag_Resize_Right,
 	};
 
+	enum BorderStyle
+	{
+		Border_None,
+		Border_Fixed,
+		Border_Resizable
+	};
+
 public:
 	UIWindow();
 	virtual ~UIWindow();
@@ -44,28 +51,40 @@ public:
 	virtual void Draw(SpriteBatch& spriteBatch);
 
 	void SetMovable(bool movable);
-	void SetResizable(bool resizable);
-	void SetResizeBorderSize(int32_t size);
 
-	bool IsMovable() const	{ return mMovable; }
-	bool IsResizable() const { return mResizable; }
+	void SetBorderStyle(BorderStyle style);
+	void SetBorderThickness(int32_t thickness);
+
+	inline bool IsMinimizing() const {return mMinimizing; }
+	inline bool IsMovable() const	 { return mMovable; }
+	inline bool IsResizable() const  { return mBorderStyle == Border_Resizable; }
 
 	void Minimize();
 	void Maximize();
 	void Restore();
+	void Close();
 
 protected:
+
+	void UpdateRect();
+
+	void DrawButtons();
+
 	DragMode GetDragMode(const int2& position);
 	void ValidatePosition();
 
+	void SetCursorShape();
+
 protected:
+
+	std::wstring mTitle;
+
+	BorderStyle mBorderStyle;
 	WindowState mWindowState;
 	DragMode mDragMode;
 
 	bool mMovable;
-	bool mResizable;
-
-	int32_t mResizeBorderSize;
+	int32_t mBorderThickness;
 
 	bool mMinimizing; 
 
@@ -75,6 +94,12 @@ protected:
 	int2 mDragBeginPos;		// Position in parent region when drag begin
 	int2 mDragBeginSize;    // Window size when drag begin
 	int2 mDragBeginCurosr;  // Cursor position when drag begin
+
+	Button* mCloseBtn;
+	Button* mMinimizeBtn;
+	Button* mMaximizeBtn;
+	Button* mRestoreBtn;
+
 };
 
 
