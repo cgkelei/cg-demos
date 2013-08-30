@@ -1,6 +1,7 @@
 #include <GUI/UIManager.h>
 #include <GUI/UIElement.h>
 #include <GUI/GuiSkin.h>
+#include <GUI/UIWindow.h>
 #include <MainApp/Application.h>
 #include <MainApp/Window.h>
 #include <Graphics/Font.h>
@@ -647,6 +648,18 @@ GuiSkin* UIManager::GetDefaultSkin()
 
 
 	return mDefaultSkin;
+}
+
+bool UIManager::GetMinimizedPosition( UIWindow* window, int2* pos )
+{
+	for (UIWindow* win : mMinimizingWindow)
+	{
+		if (win != window && win->IsMinimizing())
+			return false;
+	}
+
+
+
 }
 
 }

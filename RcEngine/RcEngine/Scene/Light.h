@@ -43,7 +43,6 @@ public:
 	float GetSpotlightFalloff() const				{ return mSpotFalloff; }
 	float GetSpotlightNearClipDistance() const		{ return mSpotNearClip; }
 
-
 	const float3& GetDerivedPosition() const;
 	const float3& GetDerivedDirection() const;
 

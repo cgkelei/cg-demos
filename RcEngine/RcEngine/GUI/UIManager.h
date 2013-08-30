@@ -56,8 +56,14 @@ public:
 	
 	void SetFocusElement(UIElement* element);
 	UIElement* GetFocusElement()						{ return mFocusElement; }	
-
 	
+	/**
+	 * Calculate a minimized windows position for current minimizing windows.
+	 * If there exits another minimizing window, return false. 
+	 */
+	bool GetMinimizedPosition(UIWindow* window, int2* pos);
+	
+
 	const shared_ptr<Font>& GetDefaultFont() const      { return mFont; }
 
 	GuiSkin* GetDefaultSkin();
@@ -145,7 +151,11 @@ protected:
 	
 	Cursor* mCursor;
 	
+	// Platform Window
 	Window* mMainWindow;
+
+	// InGame UI Window
+	std::list<UIWindow*> mMinimizingWindow;
 };
 
 }
