@@ -38,6 +38,20 @@ enum UIOrientation
 	UI_Vertical
 };
 
+enum NinePatch
+{
+	NP_Top_Left = 0,
+	NP_Top,
+	NP_Top_Right,
+	NP_Right,
+	NP_Bottom_Right,
+	NP_Bottom,
+	NP_Bottom_Left,
+	NP_Left,
+	NP_Fill,
+	NP_Count
+};
+
 /**
  * GuiSkin is a collection of GUIStyles that can be applied to your GUI Controls.
  */
@@ -47,8 +61,19 @@ public:
 
 	struct SytleImage
 	{
-		IntRect   TexRegion;  
-		ColorRGBA TexColor;
+		/**
+		 * Only fill patch or all 9 patch.
+		 */
+		IntRect TexRegion;
+
+		IntRect* OtherPatch;
+
+		ColorRGBA  TexColor;
+
+		SytleImage() : TexColor(ColorRGBA::White), OtherPatch(nullptr) {}
+		~SytleImage() { if (OtherPatch) delete[] OtherPatch; }
+
+		inline bool NinePath() const { return OtherPatch != nullptr; }
 	};
 
 	struct GuiStyle
@@ -105,6 +130,10 @@ public:
 
 	// ComboBox
 	GuiStyle ComboDropButton;
+
+	// UIWindow
+	GuiStyle WindowBorder;
+	GuiStyle WindowCloseBtn, WindowMinimizeBtn, WindowRestoreBtn, WindowMaximizeBtn;
 };
 
 }

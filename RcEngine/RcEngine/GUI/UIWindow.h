@@ -48,7 +48,7 @@ public:
 	virtual void OnDragEnd(const int2& screenPos);
 
 	virtual void Update(float delta);
-	virtual void Draw(SpriteBatch& spriteBatch);
+	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 
 	void SetMovable(bool movable);
 
@@ -58,6 +58,8 @@ public:
 	inline bool IsMinimizing() const {return mMinimizing; }
 	inline bool IsMovable() const	 { return mMovable; }
 	inline bool IsResizable() const  { return mBorderStyle == Border_Resizable; }
+	
+	inline WindowState GetWindowState() const { return mWindowState; }
 
 	void Minimize();
 	void Maximize();
@@ -67,8 +69,9 @@ public:
 protected:
 
 	void UpdateRect();
+	void UpdateState();
 
-	void DrawButtons();
+	void DrawBorder(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 
 	DragMode GetDragMode(const int2& position);
 	void ValidatePosition();
@@ -87,9 +90,13 @@ protected:
 	int32_t mBorderThickness;
 
 	bool mMinimizing; 
+	bool mMaximizing;
 
 	int2 mLastNormalPos;
 	int2 mLastNormalSize;
+
+	int2 mMinimizedPos;
+	int2 mMaximumSize;
 
 	int2 mDragBeginPos;		// Position in parent region when drag begin
 	int2 mDragBeginSize;    // Window size when drag begin
@@ -99,6 +106,8 @@ protected:
 	Button* mMinimizeBtn;
 	Button* mMaximizeBtn;
 	Button* mRestoreBtn;
+
+	GuiSkin::GuiStyle* mStyle;
 
 };
 
