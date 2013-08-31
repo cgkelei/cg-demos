@@ -126,6 +126,11 @@ void UIManager::Update( float delta )
 	}
 
 	Update(mRootElement, delta);
+
+	// Remove all window not in Minimized state
+	mMinimizeWindows.erase( std::remove_if( mMinimizeWindows.begin(), mMinimizeWindows.end(), [](UIWindow* win){
+								return win->GetWindowState() != UIWindow::Minimized;}), 
+		                    mMinimizeWindows.end() ); 
 }
 
 void UIManager::Update( UIElement* element, float dt )
@@ -504,6 +509,7 @@ GuiSkin* UIManager::GetDefaultSkin()
 		mDefaultSkin->CheckBox.ForeColor = ColorRGBA(1, 1, 1, 200.0f / 255);
 		mDefaultSkin->CheckBox.StyleTex = mDefaultSkin->mSkinTexAtlas;
 
+
 		// Slider 
 		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Normal].TexRegion.SetLeft(1);
 		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Normal].TexRegion.SetRight(93);
@@ -623,43 +629,100 @@ GuiSkin* UIManager::GetDefaultSkin()
 		mDefaultSkin->ComboDropButton.ForeColor = ColorRGBA(1, 1, 1, 255.0 / 255);
 		mDefaultSkin->ComboDropButton.StyleTex = mDefaultSkin->mSkinTexAtlas;
 
-		//// ComboBox
-		//SetRect( &rcTexture, 98, 189, 151, 238 );
-		//Element.SetTexture( 0, &rcTexture );
-		//Element.TextureColor.States[ DXUT_STATE_NORMAL ] = D3DCOLOR_ARGB( 150, 255, 255, 255 );
-		//Element.TextureColor.States[ DXUT_STATE_PRESSED ] = D3DCOLOR_ARGB( 255, 150, 150, 150 );
-		//Element.TextureColor.States[ DXUT_STATE_FOCUS ] = D3DCOLOR_ARGB( 200, 255, 255, 255 );
-		//Element.TextureColor.States[ DXUT_STATE_DISABLED ] = D3DCOLOR_ARGB( 70, 255, 255, 255 );
+		shared_ptr<Texture> windowTex = std::static_pointer_cast<TextureResource>(
+			resMan.GetResourceByName(RT_Texture,"xWinForm.png", "General"))->GetTexture();
 
-		//// Assign the Element
-		//SetDefaultElement( DXUT_CONTROL_COMBOBOX, 1, &Element );
+		// UIWindow
+		mDefaultSkin->WindowBorder.StyleStates[UI_State_Normal].TexRegion = IntRect(44, 2, 1, 1);
+		mDefaultSkin->WindowBorder.StyleTex = windowTex;
 
+		IntRect*& otherPath = mDefaultSkin->WindowBorder.StyleStates[UI_State_Normal].OtherPatch;
+		otherPath = new IntRect[8];
 
-		////-------------------------------------
-		//// CDXUTComboBox - Selection
-		////-------------------------------------
-		//SetRect( &rcTexture, 12, 163, 239, 183 );
-		//Element.SetTexture( 0, &rcTexture );
-		//Element.SetFont( 0, D3DCOLOR_ARGB( 255, 255, 255, 255 ), DT_LEFT | DT_TOP );
+		otherPath[NP_Top_Left] = IntRect(60, 24, 15, 20);
+		otherPath[NP_Top] = IntRect(94, 38, 1, 20);
+		otherPath[NP_Top_Right] = IntRect(97, 20, 15, 20);
+		otherPath[NP_Right] = IntRect(44, 69, 15, 1);
+		otherPath[NP_Bottom_Right] = IntRect(60, 46, 15, 20);
+		otherPath[NP_Bottom] = IntRect(94, 60, 1, 20);
+		otherPath[NP_Bottom_Left] = IntRect(97, 42, 15, 20);
+		otherPath[NP_Left] = IntRect(77, 60, 15, 1);	
 
-		//// Assign the Element
-		//SetDefaultElement( DXUT_CONTROL_COMBOBOX, 3, &Element );
+	
+		// Close Button
+		mDefaultSkin->WindowCloseBtn.StyleStates[UI_State_Normal].TexRegion = IntRect(44, 54, 13, 13);
+		mDefaultSkin->WindowCloseBtn.StyleTex = windowTex;
+
+		// Maximize
+		mDefaultSkin->WindowMaximizeBtn.StyleStates[UI_State_Normal].TexRegion = IntRect(44, 39, 13, 13);
+		mDefaultSkin->WindowMaximizeBtn.StyleTex = windowTex;
+
+		// Minimize
+		mDefaultSkin->WindowMinimizeBtn.StyleStates[UI_State_Normal].TexRegion = IntRect(44, 24, 13, 13);
+		mDefaultSkin->WindowMinimizeBtn.StyleTex = windowTex;
+
+		// Restore
+		mDefaultSkin->WindowRestoreBtn.StyleStates[UI_State_Normal].TexRegion = IntRect(44, 9, 13, 13);
+		mDefaultSkin->WindowRestoreBtn.StyleTex = windowTex;
 	}
 
 
 	return mDefaultSkin;
 }
 
-bool UIManager::GetMinimizedPosition( UIWindow* window, int2* pos )
+bool UIManager::GetMinimizedPosition( UIWindow* window, int2* pos ) const
 {
-	for (UIWindow* win : mMinimizingWindow)
+	for (UIWindow* win : mMinimizeWindows)
 	{
 		if (win != window && win->IsMinimizing())
 			return false;
 	}
+	
+	const int32_t width = mRootElement->GetSize().X();
+	const int32_t height = mRootElement->GetSize().Y();
 
+	//using MinimumSize from the Form Class (100 by 40)
+	for (int32_t y = height - 20; y > 0; y -= 20)
+	{
+		for (int32_t x = 0; x < width - 99; x += 100)
+		{
+			bool isOccupied = false;
+			for (UIWindow* win : mMinimizeWindows)
+			{
+				if (win != window && win->IsVisible() && win->GetPosition().X() == x && win->GetPosition().Y() == y)
+				{
+					isOccupied = true;
+					break;
+				}
+			}
 
+			if (!isOccupied)
+			{
+				pos->X() = x;
+				pos->Y() = y;
+				return true;
+			}
+		}
+	}
 
+	return false;
+}
+
+int2 UIManager::GetMaximizedSize( UIWindow* window ) const
+{
+	int2 maxSize = mRootElement->GetSize();
+
+	for (UIWindow* win : mMinimizeWindows)
+	{
+		if (win != window && win->IsVisible() && win->GetWindowState() == UIWindow::Minimized)
+		{
+			int32_t top = win->GetPosition().Y();
+			if (top < maxSize.Y())
+				maxSize.Y() = top;
+		}
+	}
+
+	return maxSize;
 }
 
 }

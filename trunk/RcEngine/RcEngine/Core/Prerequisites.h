@@ -145,7 +145,7 @@ class AnimationState;
 class AnimationClip;
 class AnimationController;
 
-class UIElement;
+class UIWindow;
 class Label;
 class Button;
 class Slider;

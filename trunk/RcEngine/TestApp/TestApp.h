@@ -57,5 +57,6 @@ private:
 	TextEdit* mTextEdit;
 	LineEdit* mLineEdit;
 	ComboBox* mComboBox;
+	UIWindow* mWindow;
 };
 

@@ -1,18 +1,24 @@
 #include <GUI/UIWindow.h>
 #include <GUI/UIManager.h>
 #include <GUI/Button.h>
+#include <Graphics/SpriteBatch.h>
+#include <Graphics/Font.h>
 #include <Math/Math.h>
 #include <Input/InputSystem.h>
 
-static const int DEFAULT_RESIZE_BORDER = 4;
-
 namespace RcEngine {
+
+static const int DEFAULT_RESIZE_BORDER = 4;
+static const int2 MinimizedSize(100, 20);
+static const int2 MaximizedPos(0, 0);
 
 UIWindow::UIWindow()
 	: mBorderThickness(DEFAULT_RESIZE_BORDER),
 	  mWindowState(UIWindow::Normal),
 	  mDragMode(UIWindow::Drag_None),
-	  mMovable(true)
+	  mMovable(true),
+	  mMaximizing(false),
+	  mMinimizing(false)
 {
 	mCloseBtn = new Button();
 	mCloseBtn->SetVisible(false);
@@ -145,23 +151,80 @@ void UIWindow::OnDragEnd( const int2& position )
 	mDragMode = Drag_None;
 }
 
+void UIWindow::Close()
+{
+	RemoveFromParent();
+	delete this;
+}
+
 void UIWindow::Minimize()
 {
-	mLastNormalPos = GetPosition();
-	mLastNormalSize = GetSize();
-		
-	// invisible all child
-	for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
+	int2 minPos;
+	if (UIManager::GetSingleton().GetMinimizedPosition(this, &minPos))
+		mMinimizedPos = minPos;
+	else 
+		return;
+
+	if (mWindowState == Normal)
 	{
-		UIElement* element = *iter;
-		element->SetVisible(false);
+		mLastNormalPos = GetPosition();
+		mLastNormalSize = GetSize();
 	}
 
 	mWindowState = Minimized;
 	mMinimizing = true;
+		
+	// invisible all child
+	for (UIElement* child : mChildren)
+		child->SetVisible(false);
+
+	mMinimizeBtn->SetVisible(false);	
 	
-	//SetPosition()
-	//SetSize();
+	// Replace minimize button with restore button
+	mRestoreBtn->SetPosition(mMinimizeBtn->GetPosition());
+	mRestoreBtn->SetVisible(true);
+}
+
+void UIWindow::Maximize()
+{
+	if (mWindowState == Normal)
+	{
+		mLastNormalPos = GetPosition();
+		mLastNormalSize = GetSize();
+	}
+
+	if (mWindowState == Minimized)
+	{
+		for (UIElement* child : mChildren)
+			child->SetVisible(true);
+	}
+
+	// Bring to topmost
+	BringToFront();
+	mMaximumSize = UIManager::GetSingleton().GetMaximizedSize(this);
+	mWindowState = Maximized;
+	mMaximizing = true;
+
+	mMaximizeBtn->SetVisible(false);
+
+	// Replace maximize button with restore button
+	mRestoreBtn->SetPosition(mMaximizeBtn->GetPosition());
+	mRestoreBtn->SetVisible(true);
+}
+
+void UIWindow::Restore()
+{
+	if (mWindowState == Minimized)
+	{
+		for (UIElement* child : mChildren)
+			child->SetVisible(true);
+	}
+
+	mWindowState = Normal;
+
+	mRestoreBtn->SetVisible(false);
+	mMinimizeBtn->SetVisible(true);
+	mMaximizeBtn->SetVisible(true);
 }
 
 UIWindow::DragMode UIWindow::GetDragMode( const int2& position )
@@ -239,27 +302,170 @@ void UIWindow::ValidatePosition()
 
 void UIWindow::Update( float delta )
 {
+	UpdateState();
+}
+
+
+void UIWindow::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
+{
+	if (!mVisible)
+		return;
+
+	UIElementState uiState = UI_State_Normal;
+
+	DrawBorder(spriteBatch, spriteBatchFont);
+
+	//UpdateRects(position, size);
+
+	/*if (size.Y > texture[0].Height)
+	DrawShadow(spriteBatch, position + Vector2.One * 15f, shadowAlpha);*/
+ 
+
 
 }
 
-void UIWindow::Draw( SpriteBatch& spriteBatch )
+void UIWindow::DrawBorder( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 {
+	UIElementState uiState = UI_State_Normal;
 
+	int2 screenPos = GetScreenPosition();
+
+	Rectanglef destRect;
+	IntRect sourceRectL, sourceRectM, sourceRectR;
+
+	float topHeight = (float)mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top].Height;
+	float bottomHeight = (float)mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom].Height;
+
+	// Draw Top
+	sourceRectL = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left];
+	sourceRectM = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top];
+	sourceRectR = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Right];
+
+	destRect.X = (float)screenPos.X();
+	destRect.Y = (float)screenPos.X();
+	destRect.Width = (float)sourceRectL.Width;
+	destRect.Height = (float)sourceRectL.Height;
+	spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectL, mStyle->StyleStates[UI_State_Normal].TexColor);
+
+	destRect.X = destRect.Right();
+	destRect.Width = (float)mSize.X() - (sourceRectL.Width + sourceRectR.Width);
+	spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectM, mStyle->StyleStates[UI_State_Normal].TexColor);
+
+	destRect.X = destRect.Right();
+	destRect.Width = (float)sourceRectR.Width;
+	spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectR, mStyle->StyleStates[UI_State_Normal].TexColor);
+	
+	if (mSize.Y() > sourceRectL.Height)
+	{
+		// Draw Middle
+		sourceRectL = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Left];
+		sourceRectM = mStyle->StyleStates[UI_State_Normal].TexRegion;
+		sourceRectR = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Right];
+
+		destRect.X = (float)screenPos.X();
+		destRect.Y = destRect.Bottom();
+		destRect.Width = (float)sourceRectL.Width;
+		destRect.Height = mSize.Y() - (topHeight + bottomHeight);
+		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectL, mStyle->StyleStates[UI_State_Normal].TexColor);
+
+		destRect.X = destRect.Right();
+		destRect.Width = (float)mSize.X() - (sourceRectL.Width + sourceRectR.Width);
+		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectM, mStyle->StyleStates[UI_State_Normal].TexColor);
+
+		destRect.X = destRect.Right();
+		destRect.Width = (float)sourceRectR.Width;
+		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectR, mStyle->StyleStates[UI_State_Normal].TexColor);
+	}
+
+	if (mSize.Y() > sourceRectL.Height)
+	{
+		// Draw Bottom
+		sourceRectL = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom_Left];
+		sourceRectM = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom];
+		sourceRectR = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom_Right];
+
+		float topHeight = (float)mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top].Height;
+		float bottomHeight = (float)mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom].Height;
+
+		destRect.X = (float)screenPos.X();
+		destRect.Y = destRect.Bottom();
+		destRect.Width = (float)sourceRectL.Width;
+		if (mSize.Y() > topHeight + bottomHeight)
+			destRect.Height = bottomHeight;
+		else 
+		{
+			destRect.Y = screenPos.Y() + topHeight;
+			destRect.Height = mSize.Y() - bottomHeight;
+		}
+		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectL, mStyle->StyleStates[UI_State_Normal].TexColor);
+
+		destRect.X = destRect.Right();
+		destRect.Width = (float)mSize.X() - (sourceRectL.Width + sourceRectR.Width);
+		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectM, mStyle->StyleStates[UI_State_Normal].TexColor);
+
+		destRect.X = destRect.Right();
+		destRect.Width = (float)sourceRectR.Width;
+		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectR, mStyle->StyleStates[UI_State_Normal].TexColor);
+	}
+  
 }
 
 void UIWindow::InitGuiStyle( const GuiSkin::StyleMap* styles /*= nullptr*/ )
 {
+	if (styles)
+	{
+	}
+	else
+	{
+		GuiSkin* defalutSkin = UIManager::GetSingleton().GetDefaultSkin();
+		mStyle =&defalutSkin->WindowBorder;
 
+		int2 size;
+
+		GuiSkin::StyleMap styleMap;
+		styleMap[Button::StyleName] = &defalutSkin->WindowCloseBtn;
+		mCloseBtn->InitGuiStyle(&styleMap);
+
+		size.X() = defalutSkin->WindowCloseBtn.StyleStates[UI_State_Normal].TexRegion.Width;
+		size.Y() = defalutSkin->WindowCloseBtn.StyleStates[UI_State_Normal].TexRegion.Height;
+		mCloseBtn->SetSize(size);
+
+		styleMap[Button::StyleName] = &defalutSkin->WindowMaximizeBtn;
+		mMaximizeBtn->InitGuiStyle(&styleMap);
+
+		size.X() = defalutSkin->WindowMaximizeBtn.StyleStates[UI_State_Normal].TexRegion.Width;
+		size.Y() = defalutSkin->WindowMaximizeBtn.StyleStates[UI_State_Normal].TexRegion.Height;
+		mMaximizeBtn->SetSize(size);
+
+		styleMap[Button::StyleName] = &defalutSkin->WindowMinimizeBtn;
+		mMinimizeBtn->InitGuiStyle(&styleMap);
+
+		size.X() = defalutSkin->WindowMinimizeBtn.StyleStates[UI_State_Normal].TexRegion.Width;
+		size.Y() = defalutSkin->WindowMinimizeBtn.StyleStates[UI_State_Normal].TexRegion.Height;
+		mMinimizeBtn->SetSize(size);
+
+		styleMap[Button::StyleName] = &defalutSkin->WindowRestoreBtn;
+		mRestoreBtn->InitGuiStyle(&styleMap);
+
+		size.X() = defalutSkin->WindowRestoreBtn.StyleStates[UI_State_Normal].TexRegion.Width;
+		size.Y() = defalutSkin->WindowRestoreBtn.StyleStates[UI_State_Normal].TexRegion.Height;
+		mRestoreBtn->SetSize(size);
+	}
 }
 
 void UIWindow::SetBorderThickness( int32_t thickness )
 {
-
+	mBorderThickness = thickness;
+	UpdateRect();
 }
 
 void UIWindow::UpdateRect()
 {
-	
+	int32_t width = mSize.X();
+
+	mCloseBtn->SetPosition(int2(width - 22, 4));
+	mMaximizeBtn->SetPosition(int2(width - 37, 4));
+	mMinimizeBtn->SetPosition(int2(width - 52, 4));
 }
 
 void UIWindow::SetBorderStyle( BorderStyle style )
@@ -268,16 +474,9 @@ void UIWindow::SetBorderStyle( BorderStyle style )
 	{
 	case Border_None:
 		{
-			mCloseBtn->SetEnable(false);
 			mCloseBtn->SetVisible(false);
-
-			mMinimizeBtn->SetEnable(false);
 			mMinimizeBtn->SetVisible(false);
-
-			mMaximizeBtn->SetEnable(false);
 			mMaximizeBtn->SetVisible(false);
-
-			mRestoreBtn->SetEnable(false);
 			mRestoreBtn->SetVisible(false);
 
 			SetBorderThickness(0);
@@ -286,16 +485,9 @@ void UIWindow::SetBorderStyle( BorderStyle style )
 
 	case Border_Fixed:
 		{
-			mCloseBtn->SetEnable(true);
 			mCloseBtn->SetVisible(true);
-
-			mMinimizeBtn->SetEnable(false);
 			mMinimizeBtn->SetVisible(false);
-
-			mMaximizeBtn->SetEnable(false);
 			mMaximizeBtn->SetVisible(false);
-
-			mRestoreBtn->SetEnable(false);
 			mRestoreBtn->SetVisible(false);
 		}
 		break;
@@ -303,84 +495,100 @@ void UIWindow::SetBorderStyle( BorderStyle style )
 	case Border_Resizable:
 	default:
 		{
-			mCloseBtn->SetEnable(true);
 			mCloseBtn->SetVisible(true);
-
-			mMinimizeBtn->SetEnable(true);
 			mMinimizeBtn->SetVisible(true);
-
-			mMaximizeBtn->SetEnable(true);
 			mMaximizeBtn->SetVisible(true);
-
-			mRestoreBtn->SetEnable(true);
-			mRestoreBtn->SetVisible(true);
+			mRestoreBtn->SetVisible(false);
 		}
 		break;
 	}
 }
 
-//void UIWindow::DrawButtons()
-//{
-//	if (mBorderStyle != Border_None)
-//	{
-//		mCloseBtn->setp
-//
-//		mb.Left = Size.X - 22;
-//		btClose.Top = 4;
-//		btClose.Draw(spriteBatch, Position);
-//	}
-//
-//	if (this.style == BorderStyle.Sizable)
-//	{
-//		if (hasMaximizeButton)
-//		{
-//			if (state != WindowState.Maximized)
-//			{
-//				btMaximize.Left = Size.X - 37;
-//				btMaximize.Top = 4;
-//				btMaximize.Draw(spriteBatch, Position);
-//			}
-//			else
-//			{
-//				btRestore.Left = Size.X - 37;
-//				btRestore.Top = 4;
-//				btRestore.Draw(spriteBatch, Position);
-//			}
-//
-//			if (hasMinimizeButton)
-//			{
-//				if (state != WindowState.Minimized)
-//				{
-//					btMinimize.Left = Size.X - 52;
-//					btMinimize.Top = 4;
-//					btMinimize.Draw(spriteBatch, Position);
-//				}
-//				else
-//				{
-//					btRestore.Left = Size.X - 52;
-//					btRestore.Top = 4;
-//					btRestore.Draw(spriteBatch, Position);
-//				}
-//			}
-//		}
-//		else if (hasMinimizeButton)
-//		{
-//			if (state != WindowState.Minimized)
-//			{
-//				btMinimize.Left = Size.X - 37;
-//				btMinimize.Top = 4;
-//				btMinimize.Draw(spriteBatch, Position);
-//			}
-//			else
-//			{
-//				btRestore.Left = Size.X - 37;
-//				btRestore.Top = 4;
-//				btRestore.Draw(spriteBatch, Position);
-//			}
-//		}
-//}
-//
-//
-//}
+void UIWindow::UpdateState()
+{
+	 float2 diff;
+
+	 //Restore the window to its original size and position
+	 if (mWindowState == UIWindow::Normal && (mMaximizing || mMinimizing))
+	 { 
+		 diff = float2(float(mLastNormalPos.X() - mPosition.X()), float(mLastNormalPos.Y() - mPosition.Y()));
+		 if (LengthSquared(diff) > 4.0f)
+		 {
+			 float2 advance = diff * 0.2f;
+			 SetPosition(mPosition + int2((int32_t)advance.X(), (int32_t)advance.Y()));
+		 }
+		 else
+			 SetPosition(mLastNormalPos);
+
+		 diff = float2(float(mLastNormalSize.X() - mSize.X()), float(mLastNormalSize.Y() - mSize.Y()));
+		 if (LengthSquared(diff) > 4.0f)
+		 {
+			 float2 advance = diff * 0.2f;
+			 SetSize(mSize + int2((int32_t)advance.X(), (int32_t)advance.Y()));
+		 }
+		 else
+			SetSize(mLastNormalSize);
+	 }
+	 //Minimize the window
+	 else if (mWindowState == UIWindow::Minimized && mMinimizing)
+	 {
+		 diff = float2(float(mMinimizedPos.X() - mPosition.X()), float(mMinimizedPos.Y() - mPosition.Y()));
+		 if (LengthSquared(diff) > 4.0f)
+		 {
+			 float2 advance = diff * 0.2f;
+			 SetPosition(mPosition + int2((int32_t)advance.X(), (int32_t)advance.Y()));
+		 }
+		 else
+			 SetPosition(mMinimizedPos);
+
+		 diff = float2(float(MinimizedSize.X() - mSize.X()), float(MinimizedSize.Y() - mSize.Y()));
+		 if (LengthSquared(diff) > 4.0f)
+		 {
+			 float2 advance = diff * 0.2f;
+			 SetSize(mSize + int2((int32_t)advance.X(), (int32_t)advance.Y()));
+		 }
+		 else
+			 SetSize(MinimizedSize);	
+
+		 if (mPosition == mMinimizedPos && mSize == MinimizedSize)
+		 {
+			 mMinimizing = false;
+			 //for (UIElement* child : mChildren)
+				//child->OnResize();
+		 }
+	 }
+	 //Maximize the window
+	 else if (mWindowState == UIWindow::Maximized && mMaximizing)
+	 {
+		 diff = float2(float(MaximizedPos.X() - mPosition.X()), float(MaximizedPos.Y() - mPosition.Y()));
+		 if (LengthSquared(diff) > 4.0f)
+		 {
+			 float2 advance = diff * 0.2f;
+			 SetPosition(mPosition + int2((int32_t)advance.X(), (int32_t)advance.Y()));
+		 }
+		 else
+			 SetPosition(MaximizedPos);
+
+		 diff = float2(float(mMaximumSize.X() - mSize.X()), float(mMaximumSize.Y() - mSize.Y()));
+		 if (LengthSquared(diff) > 4.0f)
+		 {
+			 float2 advance = diff * 0.2f;
+			 SetSize(mSize + int2((int32_t)advance.X(), (int32_t)advance.Y()));
+		 }
+		 else
+			 SetSize(mMaximumSize);	
+
+		 if (mPosition == MaximizedPos && mSize == MinimizedSize)
+		 {
+			 mMaximizing = false;
+			 for (UIElement* child : mChildren)
+				 child->OnResize();
+		 }
+	 }
+}
+
+
+
+
 
 }

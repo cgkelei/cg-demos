@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker http://www.codeandweb.com/texturepacker-->
+<!-- $TexturePacker:SmartUpdate:b64e7ed5b97b22ed5b31de9a183cf1cd:1/1$ -->
+<Imageset Name="xWinForm" Imagefile="xWinForm.png" NativeHorzRes="128" NativeVertRes="128" AutoScaled="false">
+    <Image Name="Controls/Button/close" XPos="44" YPos="54" Width="13" Height="13"/>
+    <Image Name="Controls/Button/custombutton1" XPos="2" YPos="44" Width="40" Height="40"/>
+    <Image Name="Controls/Button/default" XPos="58" YPos="87" Width="5" Height="20"/>
+    <Image Name="Controls/Button/maximize" XPos="44" YPos="39" Width="13" Height="13"/>
+    <Image Name="Controls/Button/minimize" XPos="44" YPos="24" Width="13" Height="13"/>
+    <Image Name="Controls/Button/restore" XPos="44" YPos="9" Width="13" Height="13"/>
+    <Image Name="Controls/Checkbox/checked" XPos="79" YPos="20" Width="16" Height="16"/>
+    <Image Name="Controls/Checkbox/unchecked" XPos="97" YPos="2" Width="16" Height="16"/>
+    <Image Name="Controls/ComboBox/button" XPos="60" YPos="2" Width="17" Height="20"/>
+    <Image Name="Controls/Form/default_lowercenter" XPos="94" YPos="60" Width="1" Height="20"/>
+    <Image Name="Controls/Form/default_lowerleft" XPos="97" YPos="42" Width="15" Height="20"/>
+    <Image Name="Controls/Form/default_lowerright" XPos="60" YPos="46" Width="15" Height="20"/>
+    <Image Name="Controls/Form/default_lowerright_resize" XPos="77" YPos="38" Width="15" Height="20"/>
+    <Image Name="Controls/Form/default_midcenter" XPos="44" YPos="2" Width="1" Height="1"/>
+    <Image Name="Controls/Form/default_midleft" XPos="77" YPos="60" Width="15" Height="1"/>
+    <Image Name="Controls/Form/default_midright" XPos="44" YPos="69" Width="15" Height="1"/>
+    <Image Name="Controls/Form/default_uppercenter" XPos="94" YPos="38" Width="1" Height="20"/>
+    <Image Name="Controls/Form/default_upperleft" XPos="60" YPos="24" Width="15" Height="20"/>
+    <Image Name="Controls/Form/default_upperright" XPos="97" YPos="20" Width="15" Height="20"/>
+    <Image Name="Controls/RadioButton/checked" XPos="79" YPos="2" Width="16" Height="16"/>
+    <Image Name="Controls/RadioButton/unchecked" XPos="42" YPos="110" Width="16" Height="16"/>
+    <Image Name="Controls/Scrollbar/base" XPos="115" YPos="14" Width="10" Height="8"/>
+    <Image Name="Controls/Scrollbar/button" XPos="115" YPos="2" Width="10" Height="10"/>
+    <Image Name="Controls/Scrollbar/hscrollbar_back" XPos="111" YPos="64" Width="1" Height="12"/>
+    <Image Name="Controls/Scrollbar/hscrollbar_button" XPos="114" YPos="73" Width="12" Height="12"/>
+    <Image Name="Controls/Scrollbar/hscrollbar_cursor" XPos="61" YPos="68" Width="7" Height="12"/>
+    <Image Name="Controls/Scrollbar/hscrollbar_highlight_left" XPos="78" YPos="71" Width="6" Height="6"/>
+    <Image Name="Controls/Scrollbar/hscrollbar_highlight_middle" XPos="58" YPos="72" Width="1" Height="6"/>
+    <Image Name="Controls/Scrollbar/hscrollbar_highlight_right" XPos="85" YPos="63" Width="6" Height="6"/>
+    <Image Name="Controls/Scrollbar/hscrollbar_left" XPos="70" YPos="68" Width="6" Height="6"/>
+    <Image Name="Controls/Scrollbar/hscrollbar_middle" XPos="39" YPos="110" Width="1" Height="6"/>
+    <Image Name="Controls/Scrollbar/hscrollbar_right" XPos="34" YPos="120" Width="6" Height="6"/>
+    <Image Name="Controls/Scrollbar/scrollbar_cursor" XPos="97" YPos="64" Width="12" Height="12"/>
+    <Image Name="Controls/Scrollbar/scroller" XPos="50" YPos="2" Width="8" Height="5"/>
+    <Image Name="Controls/Scrollbar/vscrollbar_back" XPos="50" YPos="84" Width="12" Height="1"/>
+    <Image Name="Controls/Scrollbar/vscrollbar_bottom" XPos="26" YPos="120" Width="6" Height="6"/>
+    <Image Name="Controls/Scrollbar/vscrollbar_button" XPos="114" YPos="59" Width="12" Height="12"/>
+    <Image Name="Controls/Scrollbar/vscrollbar_cursor" XPos="97" YPos="78" Width="12" Height="7"/>
+    <Image Name="Controls/Scrollbar/vscrollbar_highlight_bottom" XPos="18" YPos="120" Width="6" Height="6"/>
+    <Image Name="Controls/Scrollbar/vscrollbar_highlight_middle" XPos="77" YPos="63" Width="6" Height="1"/>
+    <Image Name="Controls/Scrollbar/vscrollbar_highlight_top" XPos="10" YPos="120" Width="6" Height="6"/>
+    <Image Name="Controls/Scrollbar/vscrollbar_middle" XPos="64" YPos="82" Width="6" Height="1"/>
+    <Image Name="Controls/Scrollbar/vscrollbar_top" XPos="2" YPos="120" Width="6" Height="6"/>
+    <Image Name="Controls/Slider/slider_center" XPos="36" YPos="110" Width="1" Height="8"/>
+    <Image Name="Controls/Slider/slider_cursor" XPos="114" YPos="45" Width="12" Height="12"/>
+    <Image Name="Controls/Slider/slider_left" XPos="51" YPos="72" Width="5" Height="8"/>
+    <Image Name="Controls/arrow" XPos="44" YPos="73" Width="5" Height="9"/>
+    <Image Name="Controls/potentiometer" XPos="2" YPos="86" Width="32" Height="32"/>
+    <Image Name="Controls/textbox" XPos="50" YPos="87" Width="6" Height="20"/>
+    <Image Name="Cursors/circle" XPos="2" YPos="2" Width="40" Height="40"/>
+    <Image Name="Cursors/default" XPos="36" YPos="86" Width="12" Height="22"/>
+    <Image Name="Cursors/resize" XPos="114" YPos="24" Width="12" Height="19"/>
+</Imageset>
