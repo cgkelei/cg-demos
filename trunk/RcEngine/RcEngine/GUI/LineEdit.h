@@ -37,6 +37,8 @@ protected:
 	void UpdateRect();
 	void UpdateText();
 
+	void DrawBackground(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
+
 	bool HasSelection() const   { return mSelectStartPos != mCaretPos; }
 	void ClearSelection()       { mSelectStartPos = mCaretPos; }
 

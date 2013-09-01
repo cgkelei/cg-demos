@@ -143,6 +143,9 @@ void UIWindow::OnDragMove( const int2& screenPos, uint32_t buttons )
 		break;
 	}
 
+	for (UIElement* child : mChildren)
+		child->OnResize();
+
 	//SetCursorShape(dragMode_, cursor);
 }
 
@@ -280,7 +283,7 @@ UIWindow::DragMode UIWindow::GetDragMode( const int2& position )
 
 void UIWindow::Update( float delta )
 {
-	UpdateState();
+	UpdateState(delta);
 }
 
 void UIWindow::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
@@ -333,9 +336,9 @@ void UIWindow::DrawBorder( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFon
 		if (mWindowState == Minimized)
 			align = AlignTop | AlignLeft;
 
-		std::wstring title = mTitle + std::to_wstring(mPriority);
+		//std::wstring title = mTitle + std::to_wstring(mPriority);
 
-		mStyle->Font->DrawString(spriteBatchFont, title, (float)mBorderThickness, align, rect, ColorRGBA::Black, zOrder);
+		mStyle->Font->DrawString(spriteBatchFont, mTitle, (float)mBorderThickness, align, rect, ColorRGBA::Black, zOrder);
 	}
 	
 
@@ -493,7 +496,7 @@ void UIWindow::SetBorderStyle( BorderStyle style )
 	}
 }
 
-void UIWindow::UpdateState()
+void UIWindow::UpdateState(float dt)
 {
 	 int2 diff, advance;
 
@@ -514,12 +517,13 @@ void UIWindow::UpdateState()
 		 else 
 			 SetSize(mLastNormalSize);	
 		
+		 for (UIElement* child : mChildren)
+			 child->OnResize();
+
 		 if (mPosition == mLastNormalPos && mSize == mLastNormalSize)
 		 {	
 			 mMinimized = false;
 			 mMinimized = false;
-			 //for (UIElement* child : mChildren)
-			 //child->OnResize();
 		 }
 	 }
 	 //Minimize the window
@@ -540,6 +544,9 @@ void UIWindow::UpdateState()
 		 else 
 			 SetSize(MinimizedSize);	
 
+		 for (UIElement* child : mChildren)
+			 child->OnResize();
+
 		 if (mPosition == mMinimizedPos && mSize == MinimizedSize)
 		 {	
 			 mMinimized = true;
@@ -548,9 +555,6 @@ void UIWindow::UpdateState()
 			 mRestoreBtn->SetPosition(mMinimizeBtn->GetPosition());
 			 mRestoreBtn->SetVisible(true);
 			 mMinimizeBtn->SetVisible(false);
-
-			 //for (UIElement* child : mChildren)
-				//child->OnResize();
 		 }
 	 }
 	 //Maximize the window
@@ -571,6 +575,9 @@ void UIWindow::UpdateState()
 		 else 
 			 SetSize(mMaximumSize);	
 
+		 for (UIElement* child : mChildren)
+			 child->OnResize();
+
 		 if (mPosition == MaximizedPos && mSize == mMaximumSize)
 		 {
 			 mMaximized = true;
@@ -579,9 +586,6 @@ void UIWindow::UpdateState()
 			 mRestoreBtn->SetPosition(mMaximizeBtn->GetPosition());
 			 mRestoreBtn->SetVisible(true);
 			 mMaximizeBtn->SetVisible(false);
-
-			 /* for (UIElement* child : mChildren)
-			 child->OnResize();*/
 		 }
 	 }
 }
