@@ -72,7 +72,7 @@ public:
 protected:
 
 	void UpdateRect();
-	void UpdateState();
+	void UpdateState(float dt);
 
 	void DrawBorder(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 

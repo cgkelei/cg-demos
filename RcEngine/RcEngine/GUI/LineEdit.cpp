@@ -48,10 +48,12 @@ void LineEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	int2 screenPos = GetScreenPosition();
 
 	float zOrder = GetDepthLayer();
+	float zOrder2 = float(UI_MaxPriority - mPriority - 0.5f) / UI_MaxPriority;
 
 	// Draw background first
 	Rectanglef rect((float)screenPos.X(), (float)screenPos.Y(), (float)mSize.X(), (float)mSize.Y());
-	spriteBatch.Draw(mStyle->StyleTex, rect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
+	//spriteBatch.Draw(mStyle->StyleTex, rect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
+	DrawBackground(spriteBatch, spriteBatchFont);
 
 	if (HasSelection())
 	{
@@ -69,7 +71,7 @@ void LineEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 		rect.Y = mTextRect.Top() + (mTextRect.Height - mRowHeight) / 2;
 		rect.Height = mRowHeight;
 
-		spriteBatch.Draw(mStyle->StyleTex, rect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mSelBkColor, zOrder);
+		spriteBatch.Draw(mStyle->StyleTex, rect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mSelBkColor, zOrder2);
 	}
 
 	// Draw Text
@@ -141,7 +143,7 @@ void LineEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 			destRect.Y = ch_y;
 			destRect.Height = ch_height;
 
-			spriteBatch.Draw(fontTex, destRect, &sourceRect, mTextColor, zOrder);
+			spriteBatch.Draw(fontTex, destRect, &sourceRect, mTextColor, zOrder2);
 		}
 	}
 
@@ -153,7 +155,7 @@ void LineEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 		rect.Width = 1.0f;
 		rect.Height = mRowHeight;
 
-		spriteBatch.Draw(mStyle->StyleTex, rect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mCaretColor, zOrder);
+		spriteBatch.Draw(mStyle->StyleTex, rect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mCaretColor, zOrder2);
 	}
 }
 
@@ -169,6 +171,10 @@ void LineEdit::InitGuiStyle( const GuiSkin::StyleMap* styles /*= nullptr*/ )
 
 		// background in Normal State
 		mStyle = &defaultSkin->TextEdit;
+
+		if (mStyle->StyleStates[UI_State_Normal].NinePath())
+			mBorder = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left].Width;
+		
 	}
 
 	// Init row height
@@ -393,7 +399,8 @@ void LineEdit::UpdateText()
 
 	// Keep track of every line char start pos
 	float charX = mTextRect.Left();
-	mCharPositions.resize(1, charX);
+	mCharPositions.clear();
+	mCharPositions.push_back(charX);
 	for (size_t i = 0; i < mText.length(); ++i)
 	{
 		wchar_t ch = mText[i];
@@ -439,6 +446,88 @@ void LineEdit::PlaceCaret( int32_t caret )
 void LineEdit::OnResize()
 {
 	UpdateRect();
+}
+
+void LineEdit::DrawBackground( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
+{
+	int2 screenPos = GetScreenPosition();
+
+	Rectanglef destRect;
+	IntRect sourceRectL, sourceRectM, sourceRectR;
+
+	float topHeight = fabsf((float)mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top].Height);
+	float bottomHeight = fabsf((float)mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom].Height);
+
+	float zOrder = GetDepthLayer();
+
+	// Draw Top
+	sourceRectL = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left];
+	sourceRectM = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top];
+	sourceRectR = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Right];
+
+	destRect.X = (float)screenPos.X();
+	destRect.Y = (float)screenPos.Y();
+	destRect.Width = fabsf((float)sourceRectL.Width);
+	destRect.Height = (float)sourceRectL.Height;
+	spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectL, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
+
+	destRect.X = destRect.Right();
+	destRect.Width = (float)mSize.X() - (fabsf((float)sourceRectL.Width) + fabsf((float)sourceRectR.Width));
+	spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectM, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
+
+	destRect.X = destRect.Right();
+	destRect.Width = fabsf((float)sourceRectR.Width);
+	spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectR, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
+
+	if (mSize.Y() > sourceRectL.Height)
+	{
+		// Draw Middle
+		sourceRectL = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Left];
+		sourceRectM = mStyle->StyleStates[UI_State_Normal].TexRegion;
+		sourceRectR = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Right];
+
+		destRect.X = (float)screenPos.X();
+		destRect.Y = destRect.Bottom();
+		destRect.Width = fabsf((float)sourceRectL.Width);
+		destRect.Height = mSize.Y() - (topHeight + bottomHeight);
+		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectL, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
+
+		destRect.X = destRect.Right();
+		destRect.Width = (float)mSize.X() - (fabsf((float)sourceRectL.Width) + fabsf((float)sourceRectR.Width));
+		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectM, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
+
+		destRect.X = destRect.Right();
+		destRect.Width = fabsf((float)sourceRectR.Width);
+		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectR, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
+	}
+
+	if (mSize.Y() > sourceRectL.Height)
+	{
+		// Draw Bottom
+		sourceRectL = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom_Left];
+		sourceRectM = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom];
+		sourceRectR = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom_Right];
+
+		destRect.X = (float)screenPos.X();
+		destRect.Y = destRect.Bottom();
+		destRect.Width = fabsf((float)sourceRectL.Width);
+		if (mSize.Y() > topHeight + bottomHeight)
+			destRect.Height = bottomHeight;
+		else 
+		{
+			destRect.Y = screenPos.Y() + topHeight;
+			destRect.Height = mSize.Y() - bottomHeight;
+		}
+		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectL, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
+
+		destRect.X = destRect.Right();
+		destRect.Width = (float)mSize.X() - (fabsf((float)sourceRectL.Width) + fabsf((float)sourceRectR.Width));
+		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectM, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
+
+		destRect.X = destRect.Right();
+		destRect.Width = fabsf((float)sourceRectR.Width);
+		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectR, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
+	}
 }
 
 }

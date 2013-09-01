@@ -300,17 +300,16 @@ void TestApp::InitGUI()
 	mLineEdit = new LineEdit();
 	mLineEdit->InitGuiStyle(nullptr);
 	mLineEdit->SetName("LineEdit");
-	mWindow->AddChild(mLineEdit);
 	mLineEdit->SetPosition(int2(20, 120));
 	mLineEdit->SetSize(int2(200, 40));
 	mLineEdit->SetText(L"mLineEdit = new TextEdit(TextEdit::LineEdit);");
-	//rootElem->AddChild(mLineEdit);
+	mWindow->AddChild(mLineEdit);
 	
 	mWindow->AddChild(mCheckBox);
 	//mWindow->AddChild(mLineEdit);
 	
 
-	mWindow = new UIWindow;
+	/*mWindow = new UIWindow;
 	mWindow->InitGuiStyle(nullptr);
 	mWindow->SetName("Window1");
 	mWindow->SetTitle(L"Window Title");
@@ -324,7 +323,7 @@ void TestApp::InitGUI()
 	mWindow->SetTitle(L"Window Title");
 	mWindow->SetPosition(int2(200, 100));
 	mWindow->SetSize(int2(300, 300));
-	rootElem->AddChild( mWindow );	
+	rootElem->AddChild( mWindow );	*/
 }
 
 void TestApp::DrawUI()

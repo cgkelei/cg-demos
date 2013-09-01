@@ -670,15 +670,29 @@ GuiSkin* UIManager::GetDefaultSkin()
 		mDefaultSkin->CheckBox.ForeColor = ColorRGBA::Black;
 		mDefaultSkin->CheckBox.StyleTex = windowTex;
 
+		// Text Edit
+		{		
+			mDefaultSkin->TextEdit.StyleTex = windowTex;
+			mDefaultSkin->TextEdit.FontSize = mDefaultSkin->mFontSize;
+			mDefaultSkin->TextEdit.Font = mFont;
+			mDefaultSkin->TextEdit.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 1);
 
-		// TextEdit
-		mDefaultSkin->TextEdit.Font = mFont;
-		mDefaultSkin->TextEdit.FontSize = mDefaultSkin->mFontSize;
+			IntRect*& otherPath = mDefaultSkin->TextEdit.StyleStates[UI_State_Normal].OtherPatch;
+			otherPath = new IntRect[8];
 
-		// TextEdit Background
-		mDefaultSkin->TextEdit.StyleStates[UI_State_Normal].TexRegion = IntRect(58, 47, 6, 20);
-		mDefaultSkin->TextEdit.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 1);
-		mDefaultSkin->TextEdit.StyleTex = windowTex;	
+			otherPath[NP_Top_Left] = IntRect(58, 47, 5, 10);
+			otherPath[NP_Top] = IntRect(63, 47, 1, 10);
+			otherPath[NP_Top_Right] = IntRect(63, 47, -5, 10);
+
+			otherPath[NP_Left] = IntRect(58, 57, 5, 1);	
+			mDefaultSkin->TextEdit.StyleStates[UI_State_Normal].TexRegion = IntRect(63, 57, 1, 1);
+			otherPath[NP_Right] = IntRect(63, 57, -5, 1);
+
+			otherPath[NP_Bottom_Left] = IntRect(58, 57, 5, -10);	
+			otherPath[NP_Bottom] = IntRect(63, 57, 1, -10);	
+			otherPath[NP_Bottom_Right] = IntRect(63, 57, -5, -10);
+		}
+		
 	}
 
 
