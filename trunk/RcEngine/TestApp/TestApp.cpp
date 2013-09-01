@@ -262,18 +262,18 @@ void TestApp::InitGUI()
 	//mListBox->SetSelectedIndex(1);
 	//rootElem->AddChild(mListBox);
 
-	//std::wfstream file(L"Config.xml");
-	//std::wstring text((std::istreambuf_iterator<wchar_t>(file)), std::istreambuf_iterator<wchar_t>());
-	//file.close();
+	std::wfstream file(L"Config.xml");
+	std::wstring text((std::istreambuf_iterator<wchar_t>(file)), std::istreambuf_iterator<wchar_t>());
+	file.close();
 
-	//mTextEdit = new TextEdit();
-	//mTextEdit->InitGuiStyle(nullptr);
-	//mTextEdit->SetName("TextEdit");
-	//mTextEdit->SetPosition(int2(470, 50));
-	//mTextEdit->SetSize(int2(300, 450));
-	////mTextEdit->SetPosition(int2(20, 50));
-	////mTextEdit->SetSize(int2(750, 450));
-	//mTextEdit->SetText(text);
+	mTextEdit = new TextEdit();
+	mTextEdit->InitGuiStyle(nullptr);
+	mTextEdit->SetName("TextEdit");
+	mTextEdit->SetPosition(int2(20, 180));
+	mTextEdit->SetSize(int2(300, 300));
+	//mTextEdit->SetPosition(int2(20, 50));
+	//mTextEdit->SetSize(int2(750, 450));
+	mTextEdit->SetText(text);
 	//rootElem->AddChild(mTextEdit);
 
 	//mComboBox = new ComboBox;
@@ -293,8 +293,8 @@ void TestApp::InitGUI()
 	mWindow->InitGuiStyle(nullptr);
 	mWindow->SetName("Window0");
 	mWindow->SetTitle(L"Window Title");
-	mWindow->SetPosition(int2(100, 100));
-	mWindow->SetSize(int2(300, 300));
+	mWindow->SetPosition(int2(50, 50));
+	mWindow->SetSize(int2(500, 500));
 	rootElem->AddChild( mWindow );	
 
 	mLineEdit = new LineEdit();
@@ -305,6 +305,7 @@ void TestApp::InitGUI()
 	mLineEdit->SetText(L"mLineEdit = new TextEdit(TextEdit::LineEdit);");
 	mWindow->AddChild(mLineEdit);
 	
+	mWindow->AddChild(mTextEdit);
 	mWindow->AddChild(mCheckBox);
 	//mWindow->AddChild(mLineEdit);
 	

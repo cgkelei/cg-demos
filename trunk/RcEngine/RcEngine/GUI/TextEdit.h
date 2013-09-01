@@ -53,6 +53,8 @@ protected:
 	size_t GetCharFromCaret(const int2& caret) const;
 
 	void DrawSelection(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
+
+	void DrawBackground(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 	
 	void DeleteSlectedText();
 	void DeletePreChar();
