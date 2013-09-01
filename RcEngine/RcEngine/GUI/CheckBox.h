@@ -32,9 +32,6 @@ public:
 	bool IsChecked() const;
 
 	void SetText(const std::wstring& text);
-
-protected:
-	void UpdateRect();
 	
 protected:
 	
@@ -42,10 +39,6 @@ protected:
 	bool mCheched;
 
 	std::wstring mText;
-	
-	// Used for draw
-	Rectanglef mCheckRect;
-	Rectanglef mTextRect;
 
 	GuiSkin::GuiStyle* mStyle;
 };

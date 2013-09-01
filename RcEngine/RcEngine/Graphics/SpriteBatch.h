@@ -58,16 +58,21 @@ public:
 	 * @param layerDepth: The depth of a layer. By default, 0 represents the front layer and 1 represents
 	 * a back layer. Use SpriteSortMode if you want sprites to be sorted during drawing.
 	 */
-	void Draw(const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, const IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const float2& origin, float layerDepth);
+	void Draw(const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, const IntRect* sourceRectangle, 
+		      const ColorRGBA& color, float rotation, const float2& origin, float layerDepth = 0.0f);
 
-	void Draw(const shared_ptr<Texture>& texture, const float2& position, const IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const float2& origin, float scale, float layerDepth);
-	void Draw(const shared_ptr<Texture>& texture, const float2& position, const IntRect* sourceRectangle, const ColorRGBA& color, float rotation, const float2& origin, const float2& scale, float layerDepth);
+	void Draw(const shared_ptr<Texture>& texture, const float2& position, const IntRect* sourceRectangle, 
+		      const ColorRGBA& color, float rotation, const float2& origin, float scale, float layerDepth = 0.0f);
 
-	void Draw(const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, const ColorRGBA& color);
-	void Draw(const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, const IntRect* sourceRectangle, const ColorRGBA& color);
-	
-	void Draw(const shared_ptr<Texture>& texture, const float2& position, const ColorRGBA& color);
-	void Draw(const shared_ptr<Texture>& texture, const float2& position, const IntRect* sourceRectangle, const ColorRGBA& color);
+	void Draw(const shared_ptr<Texture>& texture, const float2& position, const IntRect* sourceRectangle, 
+		      const ColorRGBA& color, float rotation, const float2& origin, const float2& scale, float layerDepth = 0.0f);
+
+	void Draw(const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, const ColorRGBA& color, float layerDepth = 0.0f);
+	void Draw(const shared_ptr<Texture>& texture, const Rectanglef& destinationRectangle, const IntRect* sourceRectangle, 
+		      const ColorRGBA& color, float layerDepth = 0.0f);
+
+	void Draw(const shared_ptr<Texture>& texture, const float2& position, const ColorRGBA& color, float layerDepth = 0.0f);
+	void Draw(const shared_ptr<Texture>& texture, const float2& position, const IntRect* sourceRectangle, const ColorRGBA& color, float layerDepth = 0.0f);
 
 private:
 	uint32_t mSortMode;

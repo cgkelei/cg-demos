@@ -55,9 +55,12 @@ public:
 	void SetBorderStyle(BorderStyle style);
 	void SetBorderThickness(int32_t thickness);
 
-	inline bool IsMinimizing() const {return mMinimizing; }
-	inline bool IsMovable() const	 { return mMovable; }
+	void SetTitle(const std::wstring& title)	{ mTitle = title; }
+
+	inline bool IsMinimizing() const { return mWindowState == Minimized && !mMinimized; }
+	inline bool IsMaximizing() const { return mWindowState == Maximized && !mMaximized; }
 	inline bool IsResizable() const  { return mBorderStyle == Border_Resizable; }
+	inline bool IsMovable() const	 { return mMovable; }
 	
 	inline WindowState GetWindowState() const { return mWindowState; }
 
@@ -74,7 +77,6 @@ protected:
 	void DrawBorder(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 
 	DragMode GetDragMode(const int2& position);
-	void ValidatePosition();
 
 	void SetCursorShape();
 
@@ -89,14 +91,15 @@ protected:
 	bool mMovable;
 	int32_t mBorderThickness;
 
-	bool mMinimizing; 
-	bool mMaximizing;
+	bool mMinimized; 
+	bool mMaximized;
 
 	int2 mLastNormalPos;
 	int2 mLastNormalSize;
 
 	int2 mMinimizedPos;
 	int2 mMaximumSize;
+	float2 mAnimationPos;
 
 	int2 mDragBeginPos;		// Position in parent region when drag begin
 	int2 mDragBeginSize;    // Window size when drag begin

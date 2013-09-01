@@ -287,7 +287,7 @@ void Font::LoadTXT(const String& fileName)
 	mFontSize = mRowHeight;
 }
 
-void Font::DrawString(SpriteBatch& spriteBatch, const std::wstring& text, float fontSize, const float2& position, const ColorRGBA& color)
+void Font::DrawString(SpriteBatch& spriteBatch, const std::wstring& text, float fontSize, const float2& position, const ColorRGBA& color, float layerDepth)
 {
 	float x = position.X();
 	float y = position.Y();
@@ -325,7 +325,7 @@ void Font::DrawString(SpriteBatch& spriteBatch, const std::wstring& text, float 
 			IntRect sourceRect(glyph.SrcX, glyph.SrcY, glyph.Width, glyph.Height);
 			Rectanglef destRect(ch_x, ch_y, glyph.Width * scale, glyph.Height* scale);
 			
-			spriteBatch.Draw(mFontTexture, destRect, &sourceRect, color);
+			spriteBatch.Draw(mFontTexture, destRect, &sourceRect, color, layerDepth);
 		
 			x += glyph.Advance * scale;
 		}
@@ -385,7 +385,7 @@ static float GetRowStartPos(float rowWidth, float maxWidth, uint32_t alignment)
 		return 0;
 }
 
-void Font::DrawString( SpriteBatch& spriteBatch, const std::wstring& text, float fontSize, uint32_t alignment, const Rectanglef& region, const ColorRGBA& color )
+void Font::DrawString( SpriteBatch& spriteBatch, const std::wstring& text, float fontSize, uint32_t alignment, const Rectanglef& region, const ColorRGBA& color , float layerDepth)
 {
 	const float scale = fontSize / mFontSize;
 	const float rowHeight = mRowHeight * scale;
@@ -523,7 +523,7 @@ void Font::DrawString( SpriteBatch& spriteBatch, const std::wstring& text, float
 				destRect.Height = ch_height;
 			}
 
-			spriteBatch.Draw(mFontTexture, destRect, &sourceRect, color);
+			spriteBatch.Draw(mFontTexture, destRect, &sourceRect, color, layerDepth);
 		}
 	}
 }
