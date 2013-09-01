@@ -11,9 +11,10 @@ UIElement::UIElement()
 	  mHovering(false), 
 	  mVisible(true), 
 	  mEnabled(true),
-	  mPriority(0),
+	  mPriority(UI_NormalPriority),
 	  mSortOrderDirty(false),
 	  mChildOutside(false),
+	  mBringToFront(false),
 	  mPosition(int2::Zero()),
 	  mSize(int2::Zero()),
 	  mMinSize(int2::Zero()), mMaxSize(INT_MAX, INT_MAX)
@@ -205,7 +206,60 @@ void UIElement::SortChildren()
 
 void UIElement::BringToFront()
 {
+	// Follow the parent chain to the top level window. If it has BringToFront mode, bring it to front now
+	UIElement* root = GetRoot();
+	// If element is detached from hierarchy, this must be a no-op
+	if (!root)
+		return;
 
+	UIElement* ptr = this;
+	while (ptr && ptr->GetParent() != root)
+		ptr = ptr->GetParent();
+	if (!ptr || !ptr->CanBringToFront())
+		return;
+
+	// Get the highest priority used by all other top level elements, assign that to the new front element
+	// and decrease others' priority where necessary. However, take into account only input-enabled
+	// elements and those which have the BringToBack flag set
+	unordered_set<int32_t> usedPriorities;
+
+	int32_t maxPriority = UI_MinPriority;
+	for (UIElement* other : root->GetChildren())
+	{
+		if (other->IsEnabled() && other != ptr)
+		{
+			int32_t priority = other->GetPriority();
+			usedPriorities.insert(priority);
+			maxPriority = (std::max)(priority, maxPriority);
+		}
+	}
+
+	if (maxPriority != UI_MinPriority && maxPriority >= ptr->GetPriority())
+	{
+		ptr->SetPriority(maxPriority);
+
+		int32_t minPriority = maxPriority;
+		while (usedPriorities.find(minPriority) != usedPriorities.end())
+			--minPriority;
+
+		for (UIElement* other : root->GetChildren())
+		{
+			int priority = other->GetPriority();
+
+			if (other->IsEnabled()  && other != ptr && priority >= minPriority && priority <= maxPriority)
+				other->SetPriority(priority - 1);
+		}
+	}
+}
+
+UIElement* UIElement::GetRoot() const
+{
+	UIElement* root = mParent;
+	if (!root)
+		return 0;
+	while (root->GetParent())
+		root = root->GetParent();
+	return root;
 }
 
 void UIElement::RemoveChild( UIElement* child )
@@ -228,8 +282,9 @@ void UIElement::AddChild( UIElement* child )
 		child->RemoveFromParent();
 		child->mParent = this;
 		child->MarkDirty();
-		mChildren.push_back(child);
+		child->SetPriority(mPriority);
 
+		mChildren.push_back(child);
 		mSortOrderDirty = true;
 	}
 }
@@ -251,6 +306,9 @@ void UIElement::SetPriority( int32_t priority )
 	mPriority = priority;
 	if (mParent)
 		mParent->mSortOrderDirty = true;
+
+	for (UIElement* child : mChildren)
+		child->SetPriority(priority);
 }
 
 bool UIElement::HasFocus() const
@@ -341,6 +399,8 @@ void UIElement::InitGuiStyle( const GuiSkin::StyleMap* styles )
 {
 
 }
+
+
 
 
 

@@ -61,7 +61,7 @@ public:
 	 * Calculate a minimized windows position for current minimizing windows.
 	 * If there exits another minimizing window, return false. 
 	 */
-	bool GetMinimizedPosition(UIWindow* window, int2* pos) const;
+	bool GetMinimizedPosition(UIWindow* window, int2* pos);
 
 	int2 GetMaximizedSize(UIWindow* window) const;
 	

@@ -47,9 +47,11 @@ void LineEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 
 	int2 screenPos = GetScreenPosition();
 
+	float zOrder = GetDepthLayer();
+
 	// Draw background first
 	Rectanglef rect((float)screenPos.X(), (float)screenPos.Y(), (float)mSize.X(), (float)mSize.Y());
-	spriteBatch.Draw(mStyle->StyleTex, rect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mStyle->StyleStates[UI_State_Normal].TexColor);
+	spriteBatch.Draw(mStyle->StyleTex, rect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 
 	if (HasSelection())
 	{
@@ -67,7 +69,7 @@ void LineEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 		rect.Y = mTextRect.Top() + (mTextRect.Height - mRowHeight) / 2;
 		rect.Height = mRowHeight;
 
-		spriteBatch.Draw(mStyle->StyleTex, rect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mSelBkColor);
+		spriteBatch.Draw(mStyle->StyleTex, rect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mSelBkColor, zOrder);
 	}
 
 	// Draw Text
@@ -139,7 +141,7 @@ void LineEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 			destRect.Y = ch_y;
 			destRect.Height = ch_height;
 
-			spriteBatch.Draw(fontTex, destRect, &sourceRect, mTextColor);
+			spriteBatch.Draw(fontTex, destRect, &sourceRect, mTextColor, zOrder);
 		}
 	}
 
@@ -151,7 +153,7 @@ void LineEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 		rect.Width = 1.0f;
 		rect.Height = mRowHeight;
 
-		spriteBatch.Draw(mStyle->StyleTex, rect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mCaretColor);
+		spriteBatch.Draw(mStyle->StyleTex, rect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mCaretColor, zOrder);
 	}
 }
 
@@ -432,6 +434,11 @@ void LineEdit::PlaceCaret( int32_t caret )
 	}
 
 	ClearSelection();
+}
+
+void LineEdit::OnResize()
+{
+	UpdateRect();
 }
 
 }

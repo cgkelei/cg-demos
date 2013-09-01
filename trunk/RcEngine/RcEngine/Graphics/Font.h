@@ -36,9 +36,9 @@ public:
 	Font(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	~Font();
 
-	void DrawString(SpriteBatch& spriteBatch, const std::wstring& text, float fontSize, const float2& position, const ColorRGBA& color);
+	void DrawString(SpriteBatch& spriteBatch, const std::wstring& text, float fontSize, const float2& position, const ColorRGBA& color, float layerDepth = 0.0f);
 	
-	void DrawString(SpriteBatch& spriteBatch, const std::wstring& text, float fontSize, uint32_t alignment, const Rectanglef& region, const ColorRGBA& color);
+	void DrawString(SpriteBatch& spriteBatch, const std::wstring& text, float fontSize, uint32_t alignment, const Rectanglef& region, const ColorRGBA& color, float layerDepth = 0.0f);
 
 	void MeasureString(const std::wstring& text, float fontSize, float* widthOut, float* heightOut);
 

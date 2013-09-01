@@ -145,7 +145,7 @@ void TestApp::LoadContent()
 
 	animPlayer->PlayClip("Take 001");
 
-	//mTexture = factory->CreateTextureFromFile(FileSystem::GetSingleton().Locate("Glass.dds"));
+	mTexture = factory->CreateTextureFromFile(FileSystem::GetSingleton().Locate("xWinForm.png"));
 	
 	//String skyTexPath = ;
 	//mTexture = factory->CreateTextureFromFile(skyTexPath);
@@ -174,6 +174,14 @@ void TestApp::Render()
 	float clr = (float)169/255;
 	currentFrameBuffer->Clear(CF_Color | CF_Depth |CF_Stencil, RcEngine::ColorRGBA(clr, clr, clr, 1.0f), 1.0f, 0);
 	
+	//mSpriteBatch->Begin();
+
+	//Rectanglef dest(100, 100, 400, 400);
+	//IntRect src(94, 60, 1, 20);
+	//mSpriteBatch->Draw(mTexture, dest, &src, ColorRGBA::White);
+	////mSpriteBatch->Draw(mTexture, dest, nullptr, ColorRGBA::White);
+	//mSpriteBatch->End();
+	//mSpriteBatch->Flush();
 
 	// todo 
 	// Move to engine level
@@ -201,18 +209,12 @@ void TestApp::InitGUI()
 {
 	UIElement* rootElem = UIManager::GetSingleton().GetRoot();
 
-	mWindow = new UIWindow;
-	mWindow->InitGuiStyle(nullptr);
-	mWindow->SetPosition(int2(100, 100));
-	mWindow->SetSize(int2(400, 400));
-	rootElem->AddChild( mWindow );	
-
-	//mFPSLabel = new Label();
-	//mFPSLabel->SetName("FPSLabel");
-	//mFPSLabel->SetPosition(int2(500, 500));
-	//mFPSLabel->SetSize(int2(300, 100));
-	//mFPSLabel->SetFont(UIManager::GetSingleton().GetDefaultFont(), 20.0f);
-	//rootElem->AddChild( mFPSLabel );	
+	mFPSLabel = new Label();
+	mFPSLabel->SetName("FPSLabel");
+	mFPSLabel->SetPosition(int2(500, 500));
+	mFPSLabel->SetSize(int2(300, 100));
+	mFPSLabel->SetFont(UIManager::GetSingleton().GetDefaultFont(), 20.0f);
+	rootElem->AddChild( mFPSLabel );	
 
 	//mButton = new Button;
 	//mButton->SetName("Button");
@@ -223,13 +225,13 @@ void TestApp::InitGUI()
 	//mButton->EventButtonClicked.bind(this, &TestApp::ButtonClicked);
 	//rootElem->AddChild( mButton );	
 
-	//mCheckBox = new CheckBox;
-	//mCheckBox->SetName("CheckBox");
-	//mCheckBox->InitGuiStyle(nullptr);
-	//mCheckBox->SetPosition(int2(20, 100));
-	//mCheckBox->SetSize(int2(150, 27));
-	//mCheckBox->SetText(L"CheckBox");
-	//mCheckBox->EventStateChanged.bind(this, &TestApp::CheckBoxToggle);
+	mCheckBox = new CheckBox;
+	mCheckBox->SetName("CheckBox");
+	mCheckBox->InitGuiStyle(nullptr);
+	mCheckBox->SetPosition(int2(20, 60));
+	mCheckBox->SetSize(int2(150, 27));
+	mCheckBox->SetText(L"CheckBox");
+	mCheckBox->EventStateChanged.bind(this, &TestApp::CheckBoxToggle);
 	//rootElem->AddChild(mCheckBox);
 
 	//mSlider = new Slider(UI_Horizontal);
@@ -274,14 +276,6 @@ void TestApp::InitGUI()
 	//mTextEdit->SetText(text);
 	//rootElem->AddChild(mTextEdit);
 
-	//mLineEdit = new LineEdit();
-	//mLineEdit->InitGuiStyle(nullptr);
-	//mLineEdit->SetName("LineEdit");
-	//mLineEdit->SetPosition(int2(20, 300));
-	//mLineEdit->SetSize(int2(200, 40));
-	//mLineEdit->SetText(L"mLineEdit = new TextEdit(TextEdit::LineEdit);");
-	//rootElem->AddChild(mLineEdit);
-
 	//mComboBox = new ComboBox;
 	//mComboBox->InitGuiStyle(nullptr);
 	//mComboBox->SetName("ComboBox");
@@ -294,13 +288,50 @@ void TestApp::InitGUI()
 	//mComboBox->AddItem(L"Alchemy");	
 	//mComboBox->SetSelectedIndex(0);
 	//rootElem->AddChild(mComboBox);
+
+	mWindow = new UIWindow;
+	mWindow->InitGuiStyle(nullptr);
+	mWindow->SetName("Window0");
+	mWindow->SetTitle(L"Window Title");
+	mWindow->SetPosition(int2(100, 100));
+	mWindow->SetSize(int2(300, 300));
+	rootElem->AddChild( mWindow );	
+
+	mLineEdit = new LineEdit();
+	mLineEdit->InitGuiStyle(nullptr);
+	mLineEdit->SetName("LineEdit");
+	mWindow->AddChild(mLineEdit);
+	mLineEdit->SetPosition(int2(20, 120));
+	mLineEdit->SetSize(int2(200, 40));
+	mLineEdit->SetText(L"mLineEdit = new TextEdit(TextEdit::LineEdit);");
+	//rootElem->AddChild(mLineEdit);
+	
+	mWindow->AddChild(mCheckBox);
+	//mWindow->AddChild(mLineEdit);
+	
+
+	mWindow = new UIWindow;
+	mWindow->InitGuiStyle(nullptr);
+	mWindow->SetName("Window1");
+	mWindow->SetTitle(L"Window Title");
+	mWindow->SetPosition(int2(450, 100));
+	mWindow->SetSize(int2(300, 300));
+	rootElem->AddChild( mWindow );	
+
+	mWindow = new UIWindow;
+	mWindow->InitGuiStyle(nullptr);
+	mWindow->SetName("Window1");
+	mWindow->SetTitle(L"Window Title");
+	mWindow->SetPosition(int2(200, 100));
+	mWindow->SetSize(int2(300, 300));
+	rootElem->AddChild( mWindow );	
 }
 
 void TestApp::DrawUI()
 {
 	wchar_t buffer[100];
 	int cx = swprintf ( buffer, 100, L"Graphics Demo FPS: %d", mFramePerSecond );
-	//mFPSLabel->SetText(buffer);
+	mFPSLabel->SetText(buffer);
 
 	// Render UI
 	UIManager::GetSingleton().Render();

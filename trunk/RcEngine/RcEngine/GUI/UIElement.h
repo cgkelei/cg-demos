@@ -13,7 +13,10 @@ namespace RcEngine {
 class Cursor;
 class GuiSkin;
 
-#define UI_CursorPriority     INT_MAX
+#define UI_MinPriority         0
+#define UI_MaxPriority        100
+#define UI_NormalPriority     50
+#define UI_CursorPriority     100
 #define UI_DropPopPriority    (UI_CursorPriority - 1)
 #define UI_TopMostPriority    (UI_DropPopPriority - 1)
 
@@ -85,7 +88,8 @@ public:
 
 	void SetEnable(bool enable)					{ mEnabled = enable; }
 	bool IsEnabled() const						{ return mEnabled; }
-	
+	bool CanBringToFront() const				{ return mBringToFront; }
+
 	const std::wstring& GetToolTip() const		{ return mToolTipText; }
 	void SetToolTip(const std::wstring& txt)    { mToolTipText = txt; }
 
@@ -108,6 +112,8 @@ public:
 	
 	UIElement* GetChild(const String& name, bool recursive = false) const;
 	UIElement* GetChild(uint32_t index) const;
+
+	UIElement* GetRoot() const;
 
 	/**
 	 * Sort children according to priority.
@@ -135,6 +141,8 @@ public:
 protected:
 	void MarkDirty();
 
+	float GetDepthLayer() const { return float(UI_MaxPriority - mPriority) / UI_MaxPriority; }
+
 	virtual void UpdateRect();
 
 protected:
@@ -151,6 +159,8 @@ protected:
 	 * 绘制的时候也画在其他低优先级控件上面.
 	 */
 	int32_t mPriority;
+
+	bool mBringToFront;
 
 	bool mSortOrderDirty;
 	bool mPositionDirty;

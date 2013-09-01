@@ -84,48 +84,39 @@ void CheckBox::SetText( const std::wstring& text )
 	mText = text;
 }
 
-void CheckBox::UpdateRect()
-{
-	const int2& screenPos = GetScreenPosition();
-
-	mCheckRect.X = (float)screenPos.X();
-	mCheckRect.Y = (float)screenPos.Y();
-	mCheckRect.Width = mCheckRect.Height = float(mSize.Y());
-
-	mTextRect.SetLeft( mCheckRect.Right() + 0.25f * mCheckRect.Width );
-	mTextRect.SetRight( float(screenPos.X() + mSize.X()) );
-
-	mTextRect.Y = (float)screenPos.Y();
-	mTextRect.Height = float(mSize.Y());
-}
-
 void CheckBox::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 {
 	if (!mVisible)
 		return;
 
-	UIElementState uiState = UI_State_Normal;
+	float zOrder = GetDepthLayer();
 
-	if (mVisible == false)
-		uiState = UI_State_Hidden;
-	else if (mEnabled == false)
-		uiState = UI_State_Disable;
-	else if (mPressed)
-		uiState = UI_State_Pressed;
-	else if (mHovering)
-		uiState = UI_State_Hover;
-	else if (HasFocus())
-		uiState = UI_State_Focus;
+	int2 screenPos = GetScreenPosition();
+	
+	Rectanglef destRect;
+
+	destRect.X = (float)screenPos.X();
+	destRect.Y = (float)screenPos.Y();
+	destRect.Width = destRect.Height = float(mSize.Y());
 
 	if (mCheched)
 	{
-		spriteBatch.Draw(mStyle->StyleTex, mCheckRect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mStyle->BackColor);
-		spriteBatch.Draw(mStyle->StyleTex, mCheckRect, &mStyle->StyleStates[UI_State_Pressed].TexRegion, mStyle->BackColor);
+		//spriteBatch.Draw(mStyle->StyleTex, mCheckRect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mStyle->BackColor);
+		spriteBatch.Draw(mStyle->StyleTex, destRect, &mStyle->StyleStates[UI_State_Pressed].TexRegion, mStyle->StyleStates[UI_State_Pressed].TexColor, zOrder);
 	}
 	else
-		spriteBatch.Draw(mStyle->StyleTex, mCheckRect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mStyle->BackColor);
+	{
+		spriteBatch.Draw(mStyle->StyleTex, destRect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
+	}
+	
+	// Text
+	destRect.SetLeft( destRect.Right() + 0.25f * destRect.Width );
+	destRect.SetRight( float(screenPos.X() + mSize.X()) );
 
-	mStyle->Font->DrawString(spriteBatchFont, mText, mStyle->FontSize, AlignLeft | AlignVCenter, mTextRect, mStyle->ForeColor);
+	destRect.Y = (float)screenPos.Y();
+	destRect.Height = float(mSize.Y());
+
+	mStyle->Font->DrawString(spriteBatchFont, mText, mStyle->FontSize, AlignLeft | AlignVCenter, destRect, mStyle->ForeColor, zOrder);
 
 	// Reset hovering for next frame
 	mHovering = false;

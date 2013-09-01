@@ -17,6 +17,7 @@ public:
 
 	virtual void Update(float dt);
 	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
+	virtual void OnResize();
 
 	virtual void InitGuiStyle(const GuiSkin::StyleMap* styles = nullptr);
 
