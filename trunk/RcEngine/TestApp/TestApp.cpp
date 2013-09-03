@@ -310,7 +310,7 @@ void TestApp::InitGUI()
 	//mWindow->AddChild(mLineEdit);
 	
 
-	/*mWindow = new UIWindow;
+	mWindow = new UIWindow;
 	mWindow->InitGuiStyle(nullptr);
 	mWindow->SetName("Window1");
 	mWindow->SetTitle(L"Window Title");
@@ -324,7 +324,7 @@ void TestApp::InitGUI()
 	mWindow->SetTitle(L"Window Title");
 	mWindow->SetPosition(int2(200, 100));
 	mWindow->SetSize(int2(300, 300));
-	rootElem->AddChild( mWindow );	*/
+	rootElem->AddChild( mWindow );	
 }
 
 void TestApp::DrawUI()

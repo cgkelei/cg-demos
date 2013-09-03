@@ -254,14 +254,16 @@ void ScrollBar::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	Rectanglef trackRegion((float)mTrackRegion.X, (float)mTrackRegion.Y, (float)mTrackRegion.Width, (float)mTrackRegion.Height);
 	Rectanglef thumbRegion((float)mThumbRegion.X, (float)mThumbRegion.Y, (float)mThumbRegion.Width, (float)mThumbRegion.Height);
 	
+	float zOrder = GetDepthLayer();
+
 	// Track
 	if (mDragThumb || mHovering)
-		spriteBatch.Draw(mTrackStyle->StyleTex, trackRegion, &mTrackStyle->StyleStates[UI_State_Hover].TexRegion, mTrackStyle->StyleStates[UI_State_Hover].TexColor);	
+		spriteBatch.Draw(mTrackStyle->StyleTex, trackRegion, &mTrackStyle->StyleStates[UI_State_Hover].TexRegion, mTrackStyle->StyleStates[UI_State_Hover].TexColor, zOrder);	
 	else
-		spriteBatch.Draw(mTrackStyle->StyleTex, trackRegion, &mTrackStyle->StyleStates[UI_State_Normal].TexRegion, mTrackStyle->StyleStates[UI_State_Normal].TexColor);	
+		spriteBatch.Draw(mTrackStyle->StyleTex, trackRegion, &mTrackStyle->StyleStates[UI_State_Normal].TexRegion, mTrackStyle->StyleStates[UI_State_Normal].TexColor, zOrder);	
 
 	// Thumb
-	spriteBatch.Draw(mThumbStyle->StyleTex, thumbRegion, &stateStyle.TexRegion, stateStyle.TexColor);	
+	spriteBatch.Draw(mThumbStyle->StyleTex, thumbRegion, &stateStyle.TexRegion, stateStyle.TexColor, zOrder);		
 
 	mHovering = false;
 	mThumbHovering = false;

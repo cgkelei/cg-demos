@@ -41,10 +41,14 @@ public:
 	inline bool Intersects(Real x, Real y, Real width, Real height) const;
 	inline bool Intersects(const Rectangle& other) const;
 
+	inline bool operator == (const Rectangle& other) const;
+	inline bool operator != (const Rectangle& other) const;
+
 public:
 	Real X, Y;
 	Real Width, Height;
 };
+
 
 /**
  * Creates a Rectangle defining the area where one rectangle overlaps with another rectangle.

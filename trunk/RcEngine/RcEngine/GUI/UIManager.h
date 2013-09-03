@@ -143,6 +143,8 @@ protected:
 	UIElement* mRootElement;
 	UIElement* mDragElement;
 
+	int32_t mWidth, mHeight;
+
 	shared_ptr<Font> mFont;
 	shared_ptr<SpriteBatch> mSpriteBatchFont;
 	shared_ptr<SpriteBatch> mSpriteBatch;

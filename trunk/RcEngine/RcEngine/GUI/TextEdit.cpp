@@ -95,8 +95,13 @@ void TextEdit::Update(float dt)
 	else
 		mCaretBlinkTimer = 0.0f;
 
-	if (HasFocus() && mCaretBlinkTimer > 0.5f)
-		mCaretOn = true;
+	if (HasFocus())
+		mCaretOn = (mCaretBlinkTimer > 0.5f);
+	else 
+	{
+		mCaretOn = false;
+		ClearSelection();
+	}
 }
 
 void TextEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
@@ -105,6 +110,8 @@ void TextEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 		return;
 
 	int2 screenPos = GetScreenPosition();
+
+	float zOrder = GetDepthLayer();
 
 	// Draw background first
 	//spriteBatch.Draw(mTextEditStyle->StyleTex, mBackRect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, mTextEditStyle->StyleStates[UI_State_Normal].TexColor);
@@ -116,7 +123,7 @@ void TextEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 
 	// Draw Text
 	if (mPrintText.size())
-		mTextEditStyle->Font->DrawString(spriteBatchFont, mPrintText, mTextEditStyle->FontSize, mTextAlign, mTextRect, mTextColor);
+		mTextEditStyle->Font->DrawString(spriteBatchFont, mPrintText, mTextEditStyle->FontSize, mTextAlign, mTextRect, mTextColor, zOrder);
 
 	// Draw Caret
 	if (mCaretOn)
@@ -132,7 +139,7 @@ void TextEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 			caretRC.Width = 1.0f;
 			caretRC.Height = mRowHeight;
 
-			spriteBatch.Draw(mTextEditStyle->StyleTex, caretRC, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 0, 1));
+			spriteBatch.Draw(mTextEditStyle->StyleTex, caretRC, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA::Black, zOrder);
 		}
 		
 	}
@@ -155,6 +162,8 @@ void TextEdit::DrawSelection( SpriteBatch& spriteBatch, SpriteBatch& spriteBatch
 		Rectanglef rect;
 		rect.Height = mRowHeight;
 
+		float zOrder = GetDepthLayer();
+
 		if (start.Y() != end.Y())
 		{
 			int32_t line;
@@ -166,7 +175,7 @@ void TextEdit::DrawSelection( SpriteBatch& spriteBatch, SpriteBatch& spriteBatch
 				rect.SetLeft( mCharPositions[start.Y()][start.X()] );
 				rect.SetRight( mCharPositions[start.Y()].back() );
 				rect.SetTop( mTextRect.Y + mRowHeight * line );		
-				spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));
+				spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1), zOrder);
 			}
 
 			// Last Line
@@ -177,7 +186,7 @@ void TextEdit::DrawSelection( SpriteBatch& spriteBatch, SpriteBatch& spriteBatch
 				rect.SetLeft( mCharPositions[end.Y()].front() );
 				rect.SetRight( mCharPositions[end.Y()][end.X()] );
 				rect.SetTop( mTextRect.Y + mRowHeight * line );		
-				spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));
+				spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1), zOrder);
 			}
 
 			for (int32_t i = start.Y() + 1; i < end.Y(); ++i)
@@ -188,7 +197,7 @@ void TextEdit::DrawSelection( SpriteBatch& spriteBatch, SpriteBatch& spriteBatch
 					rect.SetLeft( mCharPositions[i].front() );
 					rect.SetRight( mCharPositions[i].back() );
 					rect.SetTop( mTextRect.Y + mRowHeight * line);	
-					spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));
+					spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1), zOrder);
 				}
 			}
 		}
@@ -200,7 +209,7 @@ void TextEdit::DrawSelection( SpriteBatch& spriteBatch, SpriteBatch& spriteBatch
 				rect.SetLeft( mCharPositions[start.Y()][start.X()] );
 				rect.SetRight( mCharPositions[end.Y()][end.X()] );
 				rect.SetTop( mTextRect.Y + mRowHeight * line );		
-				spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1));
+				spriteBatch.Draw(mTextEditStyle->StyleTex, rect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, ColorRGBA(0, 0, 1, 1), zOrder);
 			}
 		}
 	}
@@ -572,6 +581,14 @@ void TextEdit::UpdateRect()
 	mTextRect.Height -= shrink;
 	mBackRect.Height -= shrink;
 	mSize.Y() -= shrink;
+
+	if (mVertScrollBar->IsVisible())
+	{
+		mTextRect.Width -= mScrollBarWidth;
+		mBackRect.Width -= mScrollBarWidth;
+	}
+
+	UpdateText();
 }
 
 void TextEdit::UpdateText()
@@ -637,7 +654,8 @@ void TextEdit::UpdateText()
 	// Keep track of every line char start pos
 	float charX = mTextRect.X;
 	mCharPositions.resize(1);
-	mCharPositions.back().resize(1, charX);
+	mCharPositions.back().clear();
+	mCharPositions.back().push_back(charX);
 	for (size_t i = 0; i < mWrappedText.length(); ++i)
 	{
 		wchar_t ch = mWrappedText[i];
@@ -1072,6 +1090,14 @@ void TextEdit::DrawBackground( SpriteBatch& spriteBatch, SpriteBatch& spriteBatc
 		destRect.Width = fabsf((float)sourceRectR.Width);
 		spriteBatch.Draw(mTextEditStyle->StyleTex, destRect, &sourceRectR, mTextEditStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 	}
+}
+
+void TextEdit::OnResize()
+{
+	UpdateRect();
+
+	for (UIElement* child : mChildren)
+		child->OnResize();
 }
 
 

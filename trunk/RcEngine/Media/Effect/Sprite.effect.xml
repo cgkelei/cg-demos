@@ -1,4 +1,4 @@
-<Effect name="SkinMesh">
+<Effect name="Sprite">
 
 <Shader name="SpriteVS" stage="Vertex" entry="main">
 <ShaderSource>
