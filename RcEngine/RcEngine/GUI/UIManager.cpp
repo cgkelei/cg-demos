@@ -68,6 +68,18 @@ void UIManager::OnWindowResize( uint32_t width, uint32_t height )
 	{
 		mRootElement->SetSize(int2(width, height));
 	}
+
+	if (!mMinimizeWindows.empty())
+	{
+		for (UIWindow* win : mMinimizeWindows)
+		{
+			int2 previousPos = win->GetPosition();
+			win->SetPosition(int2(previousPos.X(), previousPos.Y() + height - (int32_t)mHeight));
+		}
+	}
+
+	mWidth = width;
+	mHeight = height;
 }
 
 void UIManager::SetFocusElement( UIElement* element )
@@ -131,7 +143,24 @@ void UIManager::Update( float delta )
 	mMinimizeWindows.erase( std::remove_if( mMinimizeWindows.begin(), mMinimizeWindows.end(), [](UIWindow* win){
 								return win->GetWindowState() != UIWindow::Minimized;}), 
 		                    mMinimizeWindows.end() ); 
+							
+	/*auto restore = std::find_if(mMinimizeWindows.begin(), mMinimizeWindows.end(), [](UIWindow* win){ return win->GetWindowState() != UIWindow::Minimized;});
+	
+	if (restore != mMinimizeWindows.end())
+	{
+		auto next = restore;
+		next++;
+		while(next != mMinimizeWindows.end())
+		{
+			int2 currPos = (*next)->GetPosition();
+			(*next)->SetPosition(currPos - int2(100, 0));
+			next++;
+		}
+		
+		mMinimizeWindows.erase(restore);
+	}*/
 }
+
 
 void UIManager::Update( UIElement* element, float dt )
 {
@@ -535,36 +564,36 @@ GuiSkin* UIManager::GetDefaultSkin()
 		for (int i = 0; i < UI_State_Count; ++i)
 		{
 			mDefaultSkin->HSrollBack.StyleStates[i].TexRegion = IntRect(196, 192, 22, 20);
-			mDefaultSkin->HSrollBack.StyleStates[i].TexColor = ColorRGBA(1, 1, 1, 150.0f / 255);
+			mDefaultSkin->HSrollBack.StyleStates[i].TexColor = ColorRGBA(1, 1, 1, 1);
 
 			mDefaultSkin->HSrollForward.StyleStates[i].TexRegion = IntRect(196, 223, 22, 21);
-			mDefaultSkin->HSrollForward.StyleStates[i].TexColor = ColorRGBA(1, 1, 1, 150.0f / 255);
+			mDefaultSkin->HSrollForward.StyleStates[i].TexColor = ColorRGBA(1, 1, 1, 1);
 		}
-		mDefaultSkin->HSrollBack.StyleStates[UI_State_Hover].TexColor = ColorRGBA(0, 1, 1, 150.0f / 255);
-		mDefaultSkin->HSrollForward.StyleStates[UI_State_Hover].TexColor = ColorRGBA(0, 1, 1, 150.0f / 255);
+		mDefaultSkin->HSrollBack.StyleStates[UI_State_Hover].TexColor = ColorRGBA(0, 1, 1, 1);
+		mDefaultSkin->HSrollForward.StyleStates[UI_State_Hover].TexColor = ColorRGBA(0, 1, 1, 1);
 
 		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexRegion.SetLeft(196);
 		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexRegion.SetRight(218);
 		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexRegion.SetTop(212);
 		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexRegion.SetBottom(223);
-		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexColor = ColorRGBA(0.5, 0.5, 0.5, 150.0f / 255);
+		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 1);
 
 		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Hover].TexRegion.SetLeft(196);
 		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Hover].TexRegion.SetRight(218);
 		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Hover].TexRegion.SetTop(212);
 		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Hover].TexRegion.SetBottom(223);
-		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 1, 1, 150.0f / 255);
+		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 1, 1, 1);
 		mDefaultSkin->HScrollTrack.StyleTex = mDefaultSkin->mSkinTexAtlas;
 
 
 		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Normal].TexRegion = IntRect(220, 192, 18, 42);
-		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
+		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 2, 2, 1);
 
 		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Hover].TexRegion = IntRect(220, 192, 18, 42);
-		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 0, 1, 255.0 / 255);
+		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 0, 1, 1);
 
 		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Pressed].TexRegion = IntRect(220, 192, 18, 42);
-		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Pressed].TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
+		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Pressed].TexColor = ColorRGBA(1, 1, 1, 1);
 		
 
 		mDefaultSkin->HSrollBack.StyleTex = mDefaultSkin->mSkinTexAtlas;

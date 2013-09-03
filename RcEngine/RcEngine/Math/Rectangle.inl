@@ -156,6 +156,18 @@ Vector<Real, 2> Rectangle<Real>::TopLeft() const
 }
 
 template<typename Real>
+bool Rectangle<Real>::operator !=( const Rectangle& other ) const
+{
+	return (X != other.X || Y != other.Y || Width != other.Width || Height != other.Height);
+}
+
+template<typename Real>
+bool Rectangle<Real>::operator==( const Rectangle& other ) const
+{
+	return (X == other.X && Y == other.Y && Width == other.Width && Height == other.Height);
+}
+
+template<typename Real>
 Rectangle<Real> Union( const Rectangle<Real>& lhs, const Rectangle<Real>& rhs )
 {
 	Real left = (std::min)(lhs.Left(), rhs.Left());

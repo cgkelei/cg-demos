@@ -4,6 +4,7 @@
 #include <Graphics/FrameBuffer.h>
 #include <Graphics/Camera.h>
 #include <Graphics/Effect.h>
+#include <Graphics/EffectTechnique.h>
 #include <Graphics/EffectParameter.h>
 #include <Graphics/DepthStencilState.h>
 #include <Graphics/SamplerState.h>
@@ -132,7 +133,7 @@ private:
 
 //--------------------------------------------------------------------------------------------------
 Material::Material( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
-	: Resource(RT_Material, creator, handle, name, group), mTransparent(false)
+	: Resource(RT_Material, creator, handle, name, group), mTransparent(false), mCurrentTech(nullptr)
 {
 }
 
@@ -232,7 +233,7 @@ shared_ptr<Resource> Material::Clone()
 	shared_ptr<Material> retVal = std::make_shared<Material>(mCreator, mResourceHandle, mName, mGroup);
 
 	retVal->mMaterialName = mMaterialName;
-
+	
 	retVal->mAmbient = mEmissive;
 	retVal->mDiffuse = mDiffuse;
 	retVal->mSpecular = mSpecular;
@@ -240,7 +241,7 @@ shared_ptr<Resource> Material::Clone()
 	retVal->mPower = mPower;
 
 	retVal->mEffect = std::static_pointer_cast<Effect>(mEffect->Clone());
-
+	retVal->mCurrentTech = retVal->mEffect->GetTechniqueByName(mCurrentTech->GetTechniqueName());
 	retVal->mTextures = mTextures;
 
 	for (MaterialParameter* param : mCachedEffectParams)
@@ -271,12 +272,6 @@ void Material::SetTexture( const String& texUint, const shared_ptr<Texture>& tex
 		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Texture Unit: "+texUint +"doesn't exit!", "Material::SetTexture");
 	}
 }
-
-EffectTechnique* Material::GetCurrentTechnique() const
-{
-	return mEffect->GetTechniqueByIndex(0);
-}
-
 
 void Material::LoadImpl()
 {
@@ -311,17 +306,10 @@ void Material::LoadImpl()
 		effectFlags.push_back(flag);
 	}
 
-	String effectResGroup;
+	String effectResGroup = "General";
 	// Test if a effect exits in group as material
 	if( fileSystem.Exits(effecFile, mGroup) )
-	{
 		effectResGroup = mGroup;
-	}
-	else
-	{
-		// use engine group
-		effectResGroup = "General";
-	}
 	
 	// load effect
 	{
@@ -330,6 +318,7 @@ void Material::LoadImpl()
 
 		// if use material animation, use effect clone
 		mEffect = std::static_pointer_cast<Effect>(effectProtype->Clone());
+		mCurrentTech = mEffect->GetTechniqueByIndex(0);  
 	}
 	
 
@@ -521,6 +510,29 @@ void Material::UnloadImpl()
 shared_ptr<Resource> Material::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 {
 	return std::make_shared<Material>(creator, handle, name, group);
+}
+
+void Material::SetCurrentTechnique( const String& techName )
+{
+	EffectTechnique* tech = mEffect->GetTechniqueByName(techName);
+
+	if (!tech)
+		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, techName + " deosn't exit in" + mEffect->GetName(), "Material::SetCurrentTechnique");
+
+	mCurrentTech = tech;
+}
+
+void Material::SetCurrentTechnique( uint32_t index )
+{
+	EffectTechnique* tech = mEffect->GetTechniqueByIndex(index);
+
+	if (!tech)
+	{
+		String err = mEffect->GetName() + " doesn't have" + std::to_string(index) + " technique";
+		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, err, "Material::SetCurrentTechnique");
+	}
+
+	mCurrentTech = tech;
 }
 
 

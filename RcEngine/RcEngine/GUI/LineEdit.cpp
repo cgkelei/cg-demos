@@ -36,8 +36,13 @@ void LineEdit::Update( float dt )
 	else
 		mCaretBlinkTimer = 0.0f;
 
-	if (HasFocus() && mCaretBlinkTimer > 0.5f)
-		mCaretOn = true;
+	if (HasFocus())
+		mCaretOn = (mCaretBlinkTimer > 0.5f);
+	else 
+	{
+		mCaretOn = false;
+		ClearSelection();
+	}
 }
 
 void LineEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )

@@ -30,7 +30,10 @@ public:
 	const String& GetName() const						{ return mName; }
 
 	const shared_ptr<Effect>& GetEffect() const			{ return mEffect; }
-	EffectTechnique* GetCurrentTechnique() const;
+	EffectTechnique* GetCurrentTechnique() const		{ return mCurrentTech; }
+
+	void SetCurrentTechnique(const String& techName);
+	void SetCurrentTechnique(uint32_t index);
 			
 	EffectParameter* GetCustomParameter(EffectParameterUsage usage) const;
 	EffectParameter* GetCustomParameter(const String& name) const;
@@ -60,6 +63,7 @@ protected:
 	String mMaterialName;
 
 	shared_ptr<Effect> mEffect;
+	EffectTechnique* mCurrentTech;
 
 	vector<MaterialParameter*> mCachedEffectParams;
 

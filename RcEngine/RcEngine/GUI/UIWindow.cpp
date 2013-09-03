@@ -177,6 +177,9 @@ void UIWindow::Minimize()
 	mWindowState = Minimized;
 	mMinimized = false;
 
+	//mAnimationPos = float2(mPosition.X(), mPosition.Y());
+	//mAnimationSize = float2(mSize.X(), mSize.Y());
+
 	// invisible all child
 	for (UIElement* child : mChildren)
 		child->SetVisible(false);
@@ -346,7 +349,7 @@ void UIWindow::DrawBorder( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFon
 	destRect.Width = (float)sourceRectR.Width;
 	spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectR, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 	
-	if (mSize.Y() > sourceRectL.Height)
+	if (mSize.Y() > topHeight +  bottomHeight)
 	{
 		// Draw Middle
 		sourceRectL = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Left];
@@ -368,7 +371,7 @@ void UIWindow::DrawBorder( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFon
 		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectR, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 	}
 
-	if (mSize.Y() > sourceRectL.Height)
+	if (mSize.Y() > topHeight +  bottomHeight)
 	{
 		// Draw Bottom
 		sourceRectL = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom_Left];
@@ -523,15 +526,43 @@ void UIWindow::UpdateState(float dt)
 		 if (mPosition == mLastNormalPos && mSize == mLastNormalSize)
 		 {	
 			 mMinimized = false;
-			 mMinimized = false;
+			 mMinimized = false;	
 		 }
 	 }
 	 //Minimize the window
 	 else if (mWindowState == UIWindow::Minimized && !mMinimized)
 	 {
+		 //float2 diff = float2(mMinimizedPos.X() - mAnimationPos.X(), mMinimizedPos.Y() - mAnimationPos.Y());
+		 //float2 advance = diff * 5.0f * dt;
+
+		 //if (LengthSquared(diff) > 4.0f)
+		 //{
+			// mAnimationPos += advance;
+			// SetPosition(int2((int32_t)mAnimationPos.X(), (int32_t)mAnimationPos.Y()));  
+		 //}
+		 //else
+		 //{
+			// mAnimationPos = float2(mMinimizedPos.X(), mMinimizedPos.Y());
+			// SetPosition(mMinimizedPos);
+		 //}
+
+		 //diff = float2(MinimizedSize.X() - mSize.X(), MinimizedSize.Y() - mSize.Y());
+		 //advance = diff * 5.0f * dt;
+		 //if (LengthSquared(diff) > 4.0f)
+		 //{
+			//mAnimationSize += advance;
+			//SetSize(int2((int32_t)mAnimationSize.X(), (int32_t)mAnimationSize.Y()));
+		 //}
+		 //else
+		 //{
+			// mAnimationSize = float2(MinimizedSize.X(), MinimizedSize.Y());
+			// SetSize(MinimizedSize);
+		 //}
+	 
 		 diff = mMinimizedPos - mPosition;
 		 advance = int2(diff.X() / 5, diff.Y() / 5);
-		 if(advance.X() != 0 || advance.Y() != 0)
+
+	     if(advance.X() != 0 || advance.Y() != 0)
 			SetPosition(mPosition + int2((int32_t)advance.X(), (int32_t)advance.Y()));  
 		 else 
 			SetPosition(mMinimizedPos);
@@ -588,6 +619,11 @@ void UIWindow::UpdateState(float dt)
 			 mMaximizeBtn->SetVisible(false);
 		 }
 	 }
+}
+
+bool UIWindow::CanHaveFocus() const
+{
+	return mVisible && mEnabled;
 }
 
 

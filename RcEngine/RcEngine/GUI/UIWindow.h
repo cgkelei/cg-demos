@@ -50,6 +50,8 @@ public:
 	virtual void Update(float delta);
 	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 
+	virtual bool CanHaveFocus() const;
+
 	void SetMovable(bool movable);
 
 	void SetBorderStyle(BorderStyle style);
@@ -99,7 +101,9 @@ protected:
 
 	int2 mMinimizedPos;
 	int2 mMaximumSize;
+
 	float2 mAnimationPos;
+	float2 mAnimationSize;
 
 	int2 mDragBeginPos;		// Position in parent region when drag begin
 	int2 mDragBeginSize;    // Window size when drag begin
