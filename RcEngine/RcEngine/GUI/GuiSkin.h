@@ -95,6 +95,8 @@ public:
 	GuiSkin();
 	~GuiSkin();
 
+	void TestLoad() { LoadImpl(); }
+
 protected:
 	void LoadImpl();
 	void UnloadImpl();
@@ -104,6 +106,8 @@ public:
 
 
 public:
+
+	String mName;
 	
 	shared_ptr<Font> mFont;
 	float mFontSize;

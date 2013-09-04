@@ -980,20 +980,8 @@ void FbxProcesser::CollectMaterials( FbxScene* pScene )
 		FbxSurfaceMaterial* pSurfaceMaterial = pScene->GetMaterial(i);
 
 		MaterialData matData;
-
-<<<<<<< .mine
-		float3 AmbientColor;
-		float3 EmissiveColor;
-		float3 DiffuseColor;
-		float3 SpecularColor;
-=======
 		matData.Name = pSurfaceMaterial->GetName();
 
-		Vector3f AmbientColor;
-		Vector3f EmissiveColor;
-		Vector3f DiffuseColor;
-		Vector3f SpecularColor;
->>>>>>> .r178
 		float fSpecularPower = 1.0f;
 		float fTransparency = 1.0f;
 
@@ -1048,16 +1036,7 @@ void FbxProcesser::CollectMaterials( FbxScene* pScene )
 				}  
 			}  
 		}  
-
-		MaterialData matData;
-
-		matData.Name = matName;
-		matData.Ambient = ColorRGBA(AmbientColor.X(), AmbientColor.Y(), AmbientColor.Z(), 1.0f);
-		matData.Diffuse = ColorRGBA(DiffuseColor.X(), DiffuseColor.Y(), DiffuseColor.Z(), 1.0f);
-		matData.Specular = ColorRGBA(SpecularColor.X(), SpecularColor.Y(), SpecularColor.Z(), 1.0f);
-		matData.Emissive = ColorRGBA(EmissiveColor.X(), EmissiveColor.Y(), EmissiveColor.Z(), 1.0f);
-		matData.Power = fSpecularPower;
-
+		
 		mMaterials.push_back(matData);
 	}
 }

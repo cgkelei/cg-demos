@@ -128,15 +128,31 @@ void ScrollBar::InitGuiStyle( const GuiSkin::StyleMap* styles /* = nullptr */ )
 	{
 		GuiSkin* defalutSkin = UIManager::GetSingleton().GetDefaultSkin();
 
-		GuiSkin::StyleMap styleMap;
-		styleMap[Button::StyleName] = &defalutSkin->HSrollForward;
-		mForwardButton->InitGuiStyle(&styleMap);
+		if (mOrientation == UI_Horizontal)
+		{
+			GuiSkin::StyleMap styleMap;
+			styleMap[Button::StyleName] = &defalutSkin->HSrollForward;
+			mForwardButton->InitGuiStyle(&styleMap);
 
-		styleMap[Button::StyleName] = &defalutSkin->HSrollBack;
-		mBackButton->InitGuiStyle(&styleMap);
+			styleMap[Button::StyleName] = &defalutSkin->HSrollBack;
+			mBackButton->InitGuiStyle(&styleMap);
 
-		mTrackStyle = &defalutSkin->HScrollTrack;
-		mThumbStyle = &defalutSkin->HSrollThumb;
+			mTrackStyle = &defalutSkin->HScrollTrack;
+			mThumbStyle = &defalutSkin->HSrollThumb;
+		}
+		else
+		{
+			GuiSkin::StyleMap styleMap;
+			styleMap[Button::StyleName] = &defalutSkin->VSrollForward;
+			mForwardButton->InitGuiStyle(&styleMap);
+
+			styleMap[Button::StyleName] = &defalutSkin->VSrollBack;
+			mBackButton->InitGuiStyle(&styleMap);
+
+			mTrackStyle = &defalutSkin->VScrollTrack;
+			mThumbStyle = &defalutSkin->VSrollThumb;
+		}
+		
 	}
 	else
 	{
