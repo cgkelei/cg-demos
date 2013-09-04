@@ -1,4 +1,103 @@
 #include <GUI/GuiSkin.h>
+#include <IO/FileSystem.h>
+#include <Graphics/Font.h>
+#include <Resource/ResourceManager.h>
+#include <Core/Context.h>
+#include <Core/XMLDom.h>
+#include <Core/Exception.h>
+
+namespace {
+
+using namespace RcEngine;
+
+class GuiSkinDefs
+{
+public:
+	GuiSkinDefs()
+	{
+		mNinePathDefs.insert(std::make_pair("TopLeft", NP_Top_Left));
+		mNinePathDefs.insert(std::make_pair("Top",  NP_Top));
+		mNinePathDefs.insert(std::make_pair("TopRight", NP_Top_Right));
+		mNinePathDefs.insert(std::make_pair("Right", NP_Right));
+		mNinePathDefs.insert(std::make_pair("BottomRight", NP_Bottom_Right));
+		mNinePathDefs.insert(std::make_pair("Bottom", NP_Bottom));
+		mNinePathDefs.insert(std::make_pair("BottomLeft", NP_Bottom_Left));
+		mNinePathDefs.insert(std::make_pair("Left", NP_Left));
+		mNinePathDefs.insert(std::make_pair("Fill", NP_Fill));
+
+		mStateDefs.insert(std::make_pair("Normal", UI_State_Normal));
+		mStateDefs.insert(std::make_pair("Disable", UI_State_Disable));
+		mStateDefs.insert(std::make_pair("Hidden", UI_State_Hidden));
+		mStateDefs.insert(std::make_pair("Focus", UI_State_Focus));
+		mStateDefs.insert(std::make_pair("Hover", UI_State_Hover));
+		mStateDefs.insert(std::make_pair("Pressed", UI_State_Pressed));
+	}
+
+	~GuiSkinDefs()
+	{
+	}
+
+	static GuiSkinDefs& GetInstance()
+	{
+		static GuiSkinDefs singleton;
+		return singleton;
+	}
+
+
+	void ReadStateStyles(XMLNodePtr node, GuiSkin::SytleImage& styleImage)
+	{
+		XMLNodePtr patchNode = node->FirstNode("NinePatch");
+		if (patchNode)
+		{
+			styleImage.OtherPatch = new IntRect[8];
+			for ( ; patchNode; patchNode = patchNode->NextSibling("NinePatch") )
+			{
+				String patchName = patchNode->AttributeString("name", "");
+				std::cout << patchName << " " << patchNode->AttributeInt("xPos", 0) << std::endl;
+
+				if (mNinePathDefs[patchName] == NP_Fill)
+				{
+					styleImage.TexRegion.X = patchNode->AttributeInt("xPos", 0);
+					styleImage.TexRegion.Y = patchNode->AttributeInt("yPos", 0);
+					styleImage.TexRegion.Width = patchNode->AttributeInt("width", 0);
+					styleImage.TexRegion.Height = patchNode->AttributeInt("height", 0);
+				}
+				else
+				{
+					styleImage.OtherPatch[mNinePathDefs[patchName]].X = patchNode->AttributeInt("xPos", 0);
+					styleImage.OtherPatch[mNinePathDefs[patchName]].Y = patchNode->AttributeInt("yPos", 0);
+					styleImage.OtherPatch[mNinePathDefs[patchName]].Width = patchNode->AttributeInt("width", 0);
+					styleImage.OtherPatch[mNinePathDefs[patchName]].Height = patchNode->AttributeInt("height", 0);
+				}
+				
+			}
+		}
+		else
+		{
+			styleImage.TexRegion.X = node->AttributeInt("xPos", 0);
+			styleImage.TexRegion.Y = node->AttributeInt("yPos", 0);
+			styleImage.TexRegion.Width = node->AttributeInt("width", 0);
+			styleImage.TexRegion.Height = node->AttributeInt("height", 0);
+		}
+	}
+
+private:
+	unordered_map<String, NinePatch> mNinePathDefs;
+
+public:
+	unordered_map<String, UIElementState> mStateDefs;
+};
+
+ColorRGBA ReadColor(const String& str)
+{
+	ColorRGBA color;
+	if ( sscanf(str.c_str(), "%f %f %f %f", &color[0], &color[1], &color[2], &color[3]) != 4 )
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Input is not ColorRGBA", "ReadColor");
+
+	return color;
+}
+
+}
 
 namespace RcEngine {
 
@@ -19,7 +118,275 @@ GuiSkin::~GuiSkin()
 
 void GuiSkin::LoadImpl()
 {
+	FileSystem& fileSystem = FileSystem::GetSingleton();
+	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
+	ResourceManager& resMan = ResourceManager::GetSingleton();
+	GuiSkinDefs& skinDefs = GuiSkinDefs::GetInstance();
 
+	String mName = "Default.skin.xml";
+	String mGroup = "General";
+
+	shared_ptr<Stream> matStream = fileSystem.OpenStream(mName, mGroup);
+	Stream& source = *matStream;	
+
+	XMLDoc doc;
+	XMLNodePtr node, root = doc.Parse(source);
+
+	mName = root->AttributeString("name", "");
+	
+	String textureFile = root->AttributeString("texture", "");
+	if (fileSystem.Exits(textureFile))
+	{
+		mSkinTexAtlas = std::static_pointer_cast<TextureResource>(
+			resMan.GetResourceByName(RT_Texture, textureFile, "General"))->GetTexture();
+	}
+
+
+	// Font
+	{
+		node = root->FirstNode("Font");
+		String fontName = node->AttributeString("name", "");
+		mFont = std::static_pointer_cast<Font>(resMan.GetResourceByName(RT_Font, fontName, "General"));
+		mFont->Load();
+	}
+	
+
+	// Check Box
+	{
+		if( node = root->FirstNode("CheckBox") )
+		{
+			for (XMLNodePtr stateNode = node->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+			{
+				String stateName = stateNode->AttributeString("name", "");
+				UIElementState uiState = skinDefs.mStateDefs[stateName];
+
+				skinDefs.ReadStateStyles(stateNode, CheckBox.StyleStates[uiState]);
+
+				CheckBox.StyleStates[uiState].TexColor = ReadColor(stateNode->AttributeString("color", ""));
+			}
+
+			XMLNodePtr fontNode = node->FirstNode("Font");
+			if (fontNode)
+			{
+				String fontName = fontNode->AttributeString("name", "");
+				CheckBox.Font = mFont;
+				CheckBox.FontSize = fontNode->AttributeFloat("fontSize", 25.0f);
+			}
+
+			XMLNodePtr backNode = node->FirstNode("BackColor");
+			if (backNode)
+			{
+				CheckBox.BackColor = ReadColor(backNode->AttributeString("color", ""));
+			}
+
+			XMLNodePtr foreNode = node->FirstNode("ForeColor");
+			if (foreNode)
+			{
+				CheckBox.ForeColor = ReadColor(foreNode->AttributeString("color", ""));
+			}
+
+			CheckBox.StyleTex = mSkinTexAtlas;
+		}
+		
+	}
+
+	// Button
+	{
+		/*if ( node = root->FirstNode("Button") )
+		{
+		for (XMLNodePtr stateNode = node->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+		{
+		String stateName = stateNode->AttributeString("name", "");
+		UIElementState uiState = skinDefs.mStateDefs[stateName];
+		skinDefs.ReadStateStyles(stateNode, CheckBox.StyleStates[uiState]);
+		}
+
+		XMLNodePtr fontNode = node->FirstNode("Font");
+		if (fontNode)
+		{
+		String fontName = fontNode->AttributeString("name", "");
+		CheckBox.Font = mFont;
+		CheckBox.FontSize = fontNode->AttributeFloat("fontSize", 25.0f);
+		}
+		}*/
+	}
+
+	// Slider
+	{
+		/*node = root->FirstNode("Button");
+		if (node)
+		{
+			for (XMLNodePtr stateNode = node->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+			{
+				String stateName = stateNode->AttributeString("name", "");
+				UIElementState uiState = skinDefs.mStateDefs[stateName];
+				skinDefs.ReadStateStyles(stateNode, CheckBox.StyleStates[uiState]);
+			}
+		}*/
+	}
+
+
+	// TextEdit
+	{
+		if ( node = root->FirstNode("TextEdit") )
+		{
+			for (XMLNodePtr stateNode = node->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+			{
+				String stateName = stateNode->AttributeString("name", "");
+				UIElementState uiState = skinDefs.mStateDefs[stateName];
+				skinDefs.ReadStateStyles(stateNode, TextEdit.StyleStates[uiState]);
+
+				TextEdit.StyleStates[uiState].TexColor = ReadColor(stateNode->AttributeString("color", ""));
+			}
+
+			XMLNodePtr fontNode = node->FirstNode("Font");
+			if (fontNode)
+			{
+				String fontName = fontNode->AttributeString("name", "");
+				TextEdit.Font = mFont;
+				TextEdit.FontSize = fontNode->AttributeFloat("fontSize", 25.0f);
+			}
+
+			TextEdit.StyleTex = mSkinTexAtlas;
+		}
+	}
+
+	// UIWindow
+	{
+		node = root->FirstNode("UIWindow");
+		if (node)
+		{
+			for (XMLNodePtr stateNode = node->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+			{
+				String stateName = stateNode->AttributeString("name", "");
+
+				UIElementState uiState = skinDefs.mStateDefs[stateName];
+				skinDefs.ReadStateStyles(stateNode, WindowBorder.StyleStates[uiState]);
+
+				WindowBorder.StyleStates[uiState].TexColor  = ReadColor(stateNode->AttributeString("color", ""));
+			}
+
+			XMLNodePtr fontNode = node->FirstNode("Font");
+			if (fontNode)
+			{
+				String fontName = fontNode->AttributeString("name", "");
+				WindowBorder.Font = mFont;
+				WindowBorder.FontSize = fontNode->AttributeFloat("fontSize", 25.0f);
+			}
+
+			WindowBorder.StyleTex = mSkinTexAtlas;
+		}
+
+		if ( node = root->FirstNode("CloseButton") )
+		{
+			for (XMLNodePtr stateNode = node->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+			{
+				String stateName = stateNode->AttributeString("name", "");
+				UIElementState uiState = skinDefs.mStateDefs[stateName];
+				skinDefs.ReadStateStyles(stateNode, WindowCloseBtn.StyleStates[uiState]);
+
+				WindowCloseBtn.StyleStates[uiState].TexColor = ReadColor(stateNode->AttributeString("color", ""));
+			}
+
+			WindowCloseBtn.StyleTex = mSkinTexAtlas;
+		}
+
+		if ( node = root->FirstNode("MaximizeButton") )
+		{
+			for (XMLNodePtr stateNode = node->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+			{
+				String stateName = stateNode->AttributeString("name", "");
+				UIElementState uiState = skinDefs.mStateDefs[stateName];
+				skinDefs.ReadStateStyles(stateNode, WindowMaximizeBtn.StyleStates[uiState]);
+
+				WindowMaximizeBtn.StyleStates[uiState].TexColor = ReadColor(stateNode->AttributeString("color", ""));
+			}
+
+			WindowMaximizeBtn.StyleTex = mSkinTexAtlas;
+		}
+
+		if ( node = root->FirstNode("MinimizeButton") )
+		{
+			for (XMLNodePtr stateNode = node->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+			{
+				String stateName = stateNode->AttributeString("name", "");
+				UIElementState uiState = skinDefs.mStateDefs[stateName];
+				skinDefs.ReadStateStyles(stateNode, WindowMinimizeBtn.StyleStates[uiState]);
+
+				WindowMinimizeBtn.StyleStates[uiState].TexColor = ReadColor(stateNode->AttributeString("color", ""));
+			}
+
+			WindowMinimizeBtn.StyleTex = mSkinTexAtlas;
+		}
+
+		if ( node = root->FirstNode("RestoreButton") )
+		{
+			for (XMLNodePtr stateNode = node->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+			{
+				String stateName = stateNode->AttributeString("name", "");
+				UIElementState uiState = skinDefs.mStateDefs[stateName];
+				skinDefs.ReadStateStyles(stateNode, WindowRestoreBtn.StyleStates[uiState]);
+
+				WindowRestoreBtn.StyleStates[uiState].TexColor = ReadColor(stateNode->AttributeString("color", ""));
+			}
+
+			WindowRestoreBtn.StyleTex = mSkinTexAtlas;
+		}
+	}
+
+	// ScrollBar
+	{
+		if ( node = root->FirstNode("VScrollBar") )
+		{
+			XMLNodePtr trackNode = node->FirstNode("Track");
+			for (XMLNodePtr stateNode = trackNode->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+			{
+				String stateName = stateNode->AttributeString("name", "");
+				UIElementState uiState = skinDefs.mStateDefs[stateName];
+				skinDefs.ReadStateStyles(stateNode, VScrollTrack.StyleStates[uiState]);
+
+				VScrollTrack.StyleStates[uiState].TexColor = ReadColor(stateNode->AttributeString("color", ""));
+			}
+
+			XMLNodePtr thumbNode = node->FirstNode("Thumb");
+			for (XMLNodePtr stateNode = thumbNode->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+			{
+				String stateName = stateNode->AttributeString("name", "");
+				UIElementState uiState = skinDefs.mStateDefs[stateName];
+				skinDefs.ReadStateStyles(stateNode, VSrollThumb.StyleStates[uiState]);
+
+				VSrollThumb.StyleStates[uiState].TexColor = ReadColor(stateNode->AttributeString("color", ""));
+			}
+
+			XMLNodePtr forwardNode = node->FirstNode("ForwardButton");
+			for (XMLNodePtr stateNode = forwardNode->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+			{
+				String stateName = stateNode->AttributeString("name", "");
+				UIElementState uiState = skinDefs.mStateDefs[stateName];
+				skinDefs.ReadStateStyles(stateNode, VSrollForward.StyleStates[uiState]);
+
+				VSrollForward.StyleStates[uiState].TexColor = ReadColor(stateNode->AttributeString("color", ""));
+			}
+
+			XMLNodePtr backNode = node->FirstNode("BackButton");
+			for (XMLNodePtr stateNode = backNode->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+			{
+				String stateName = stateNode->AttributeString("name", "");
+				UIElementState uiState = skinDefs.mStateDefs[stateName];
+				skinDefs.ReadStateStyles(stateNode, VSrollBack.StyleStates[uiState]);
+
+				VSrollBack.StyleStates[uiState].TexColor = ReadColor(stateNode->AttributeString("color", ""));
+			}
+
+			auto tex = std::static_pointer_cast<TextureResource>(
+						resMan.GetResourceByName(RT_Texture,"dxutcontrols.dds", "General"))->GetTexture();
+
+			VSrollBack.StyleTex = tex;
+			VSrollForward.StyleTex = tex;
+			VScrollTrack.StyleTex = tex;
+			VSrollThumb.StyleTex = tex;
+		}
+	}
 }
 
 void GuiSkin::UnloadImpl()

@@ -28,10 +28,10 @@ public:
 			: MaterialFlags(0) { }
 
 		String Name;
-		Vector3f Ambient;
-		Vector3f Diffuse;
-		Vector3f Specular;
-		Vector3f Emissive;
+		float3 Ambient;
+		float3 Diffuse;
+		float3 Specular;
+		float3 Emissive;
 		float Power;
 
 		uint32_t MaterialFlags;

@@ -499,234 +499,247 @@ void UIManager::RenderUIElement( UIElement* element, const IntRect& currentSciss
 	}	
 }
 
+//GuiSkin* UIManager::GetDefaultSkin()
+//{
+//	// todo: xml gui skin
+//	if (!mDefaultSkin)
+//	{
+//		mDefaultSkin = new GuiSkin;
+//
+//		mDefaultSkin->mFont = mFont;
+//		mDefaultSkin->mFontSize = 25.0f;
+//
+//		ResourceManager& resMan = ResourceManager::GetSingleton();
+//		mDefaultSkin->mSkinTexAtlas = std::static_pointer_cast<TextureResource>(
+//			resMan.GetResourceByName(RT_Texture,"dxutcontrols.dds", "General"))->GetTexture();
+//
+//		// Button
+//		for (int i = 0; i < UI_State_Count; ++i)
+//		{
+//			mDefaultSkin->Button.StyleStates[i].TexRegion = IntRect(0, 0, 136, 54);
+//			mDefaultSkin->Button.StyleStates[i].TexColor = ColorRGBA(1, 1, 1, 150.0f / 255);
+//		}
+//
+//		mDefaultSkin->Button.StyleStates[UI_State_Hover].TexRegion = IntRect(136, 0, 252 - 136, 54);
+//		mDefaultSkin->Button.Font = mFont;
+//		mDefaultSkin->Button.FontSize = mDefaultSkin->mFontSize;
+//		mDefaultSkin->Button.BackColor = ColorRGBA(1, 1, 1, 100.0f / 255);
+//		mDefaultSkin->Button.ForeColor = ColorRGBA(1, 1, 1, 200.0f / 255);
+//		mDefaultSkin->Button.StyleTex = mDefaultSkin->mSkinTexAtlas;
+//
+//		// Slider 
+//		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Normal].TexRegion.SetLeft(1);
+//		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Normal].TexRegion.SetRight(93);
+//		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Normal].TexRegion.SetTop(187);
+//		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Normal].TexRegion.SetBottom(228);
+//		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Normal].TexColor = ColorRGBA(0.5, 0.5, 0.5, 150.0f / 255);
+//
+//		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Hover].TexRegion.SetLeft(1);
+//		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Hover].TexRegion.SetRight(93);
+//		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Hover].TexRegion.SetTop(187);
+//		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Hover].TexRegion.SetBottom(228);
+//		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 1, 1, 150.0f / 255);
+//		mDefaultSkin->HSliderTrack.StyleTex = mDefaultSkin->mSkinTexAtlas;
+//
+//		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Normal].TexRegion.SetLeft(151);
+//		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Normal].TexRegion.SetRight(192);
+//		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Normal].TexRegion.SetTop(193);
+//		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Normal].TexRegion.SetBottom(234);
+//		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
+//
+//		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Hover].TexRegion.SetLeft(151);
+//		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Hover].TexRegion.SetRight(192);
+//		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Hover].TexRegion.SetTop(193);
+//		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Hover].TexRegion.SetBottom(234);
+//		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 0, 1, 255.0 / 255);
+//
+//		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Pressed].TexRegion.SetLeft(151);
+//		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Pressed].TexRegion.SetRight(192);
+//		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Pressed].TexRegion.SetTop(193);
+//		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Pressed].TexRegion.SetBottom(234);
+//		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Pressed].TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
+//		mDefaultSkin->HSliderThumb.StyleTex = mDefaultSkin->mSkinTexAtlas;
+//
+//		// Scroll bar
+//		for (int i = 0; i < UI_State_Count; ++i)
+//		{
+//			mDefaultSkin->HSrollBack.StyleStates[i].TexRegion = IntRect(196, 192, 22, 20);
+//			mDefaultSkin->HSrollBack.StyleStates[i].TexColor = ColorRGBA(1, 1, 1, 1);
+//
+//			mDefaultSkin->HSrollForward.StyleStates[i].TexRegion = IntRect(196, 223, 22, 21);
+//			mDefaultSkin->HSrollForward.StyleStates[i].TexColor = ColorRGBA(1, 1, 1, 1);
+//		}
+//		mDefaultSkin->HSrollBack.StyleStates[UI_State_Hover].TexColor = ColorRGBA(0, 1, 1, 1);
+//		mDefaultSkin->HSrollForward.StyleStates[UI_State_Hover].TexColor = ColorRGBA(0, 1, 1, 1);
+//
+//		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexRegion.SetLeft(196);
+//		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexRegion.SetRight(218);
+//		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexRegion.SetTop(212);
+//		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexRegion.SetBottom(223);
+//		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 1);
+//
+//		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Hover].TexRegion.SetLeft(196);
+//		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Hover].TexRegion.SetRight(218);
+//		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Hover].TexRegion.SetTop(212);
+//		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Hover].TexRegion.SetBottom(223);
+//		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 1, 1, 1);
+//		mDefaultSkin->HScrollTrack.StyleTex = mDefaultSkin->mSkinTexAtlas;
+//
+//
+//		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Normal].TexRegion = IntRect(220, 192, 18, 42);
+//		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 2, 2, 1);
+//
+//		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Hover].TexRegion = IntRect(220, 192, 18, 42);
+//		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 0, 1, 1);
+//
+//		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Pressed].TexRegion = IntRect(220, 192, 18, 42);
+//		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Pressed].TexColor = ColorRGBA(1, 1, 1, 1);
+//		
+//
+//		mDefaultSkin->HSrollBack.StyleTex = mDefaultSkin->mSkinTexAtlas;
+//		mDefaultSkin->HSrollForward.StyleTex = mDefaultSkin->mSkinTexAtlas;
+//		mDefaultSkin->HScrollTrack.StyleTex = mDefaultSkin->mSkinTexAtlas;
+//		mDefaultSkin->HSrollThumb.StyleTex = mDefaultSkin->mSkinTexAtlas;
+//
+//
+//		// List Box
+//		mDefaultSkin->ListBox.StyleStates[UI_State_Normal].TexRegion = IntRect(13, 123, 228, 37);
+//		mDefaultSkin->ListBox.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
+//
+//		mDefaultSkin->ListBox.StyleStates[UI_State_Hover].TexRegion = IntRect(16, 166, 224, 17);
+//		mDefaultSkin->ListBox.StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
+//		
+//		mDefaultSkin->ListBox.Font = mFont;
+//		mDefaultSkin->ListBox.FontSize = mDefaultSkin->mFontSize;
+//		mDefaultSkin->ListBox.BackColor = ColorRGBA(0, 0, 0, 255.0 / 255);
+//		mDefaultSkin->ListBox.ForeColor = ColorRGBA(0, 0, 0, 255.0 / 255);
+//		mDefaultSkin->ListBox.StyleTex = mDefaultSkin->mSkinTexAtlas;
+//
+//
+//		// ComboBox
+//		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Normal].TexRegion = IntRect(7, 81, 240, 42);
+//		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Normal].TexColor = ColorRGBA(200/ 255.0f, 200/ 255.0f, 200/ 255.0f, 150 /255.0f);
+//
+//		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Focus].TexRegion = IntRect(7, 81, 240, 42);
+//	    mDefaultSkin->ComboDropButton.StyleStates[UI_State_Focus].TexColor = ColorRGBA(230/ 255.0f, 230/ 255.0f, 230/ 255.0f, 170 /255.0f);
+//
+//		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Disable].TexRegion = IntRect(7, 81, 240, 42);
+//		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Disable].TexColor = ColorRGBA(200/ 255.0f, 200/ 255.0f, 200/ 255.0f, 70 /255.0f);
+//
+//		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Hover].TexRegion = IntRect(7, 81, 240, 42);
+//		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Hover].TexColor = ColorRGBA(200/ 255.0f, 200/ 255.0f, 200/ 255.0f, 150 /255.0f);
+//
+//		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Pressed].TexRegion = IntRect(7, 81, 240, 42);
+//		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Pressed].TexColor = ColorRGBA(200/ 255.0f, 200/ 255.0f, 200/ 255.0f, 150 /255.0f);
+//
+//		mDefaultSkin->ComboDropButton.Font = mFont;
+//		mDefaultSkin->ComboDropButton.FontSize = mDefaultSkin->mFontSize;
+//		mDefaultSkin->ComboDropButton.BackColor = ColorRGBA(1, 1, 1, 255.0 / 255);
+//		mDefaultSkin->ComboDropButton.ForeColor = ColorRGBA(1, 1, 1, 255.0 / 255);
+//		mDefaultSkin->ComboDropButton.StyleTex = mDefaultSkin->mSkinTexAtlas;
+//
+//		shared_ptr<Texture> windowTex = std::static_pointer_cast<TextureResource>(
+//			resMan.GetResourceByName(RT_Texture,"xWinForm.png", "General"))->GetTexture();
+//
+//		// UIWindow
+//		mDefaultSkin->WindowBorder.StyleStates[UI_State_Normal].TexRegion = IntRect(97, 121, 1, 1);
+//		mDefaultSkin->WindowBorder.StyleTex = windowTex;
+//		mDefaultSkin->WindowBorder.Font = mFont;
+//
+//		IntRect*& otherPath = mDefaultSkin->WindowBorder.StyleStates[UI_State_Normal].OtherPatch;
+//		otherPath = new IntRect[8];
+//
+//		otherPath[NP_Top_Left] = IntRect(39, 47, 15, 20);
+//		otherPath[NP_Top] = IntRect(62, 71, 1, 20);
+//		otherPath[NP_Top_Right] = IntRect(24, 83, 15, 20);
+//		otherPath[NP_Right] = IntRect(43, 124, 15, 1);
+//		otherPath[NP_Bottom_Right] = IntRect(66, 3, 15, 20);
+//		otherPath[NP_Bottom] = IntRect(67, 71, 1, 20);
+//		otherPath[NP_Bottom_Left] = IntRect(43, 83, 15, 20);
+//		otherPath[NP_Left] = IntRect(62, 124, 15, 1);	
+//	
+//		// Close Button
+//		for (size_t i = 0; i < UI_State_Count; ++i)
+//		{
+//			mDefaultSkin->WindowCloseBtn.StyleStates[i].TexRegion = IntRect(68, 47, 13, 13);
+//			mDefaultSkin->WindowCloseBtn.StyleStates[i].TexColor = ColorRGBA(182.0f/255, 182.0f/255, 182.0f/255, 1.0f);
+//			
+//			// Maximize
+//			mDefaultSkin->WindowMaximizeBtn.StyleStates[i].TexRegion = IntRect(77, 106, 13, 13);
+//			mDefaultSkin->WindowMaximizeBtn.StyleStates[i].TexColor = ColorRGBA(182.0f/255, 182.0f/255, 182.0f/255, 1.0f);
+//			
+//			// Minimize
+//			mDefaultSkin->WindowMinimizeBtn.StyleStates[i].TexRegion = IntRect(60, 107, 13, 13);
+//			mDefaultSkin->WindowMinimizeBtn.StyleStates[i].TexColor = ColorRGBA(182.0f/255, 182.0f/255, 182.0f/255, 1.0f);
+//			mDefaultSkin->WindowMinimizeBtn.StyleTex = windowTex;
+//
+//			// Restore
+//			mDefaultSkin->WindowRestoreBtn.StyleStates[i].TexRegion = IntRect(43, 107, 13, 13);
+//			mDefaultSkin->WindowRestoreBtn.StyleStates[i].TexColor = ColorRGBA(182.0f/255, 182.0f/255, 182.0f/255, 1.0f);
+//			
+//		}
+//
+//		mDefaultSkin->WindowCloseBtn.StyleStates[UI_State_Hover].TexColor = ColorRGBA(200.0f/255, 200.0f/255, 200.0f/255, 1.0f);
+//		mDefaultSkin->WindowMaximizeBtn.StyleStates[UI_State_Hover].TexColor = ColorRGBA(200.0f/255, 200.0f/255, 200.0f/255, 1.0f);
+//		mDefaultSkin->WindowRestoreBtn.StyleStates[UI_State_Hover].TexColor = ColorRGBA(200.0f/255, 200.0f/255, 200.0f/255, 1.0f);
+//
+//		mDefaultSkin->WindowCloseBtn.StyleTex = windowTex;
+//		mDefaultSkin->WindowMaximizeBtn.StyleTex = windowTex;
+//		mDefaultSkin->WindowRestoreBtn.StyleTex = windowTex;
+//
+//
+//		// Check Box
+//		mDefaultSkin->CheckBox.StyleStates[UI_State_Normal].TexRegion = IntRect(47, 27, 16, 16); 
+//		mDefaultSkin->CheckBox.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 1);
+//		mDefaultSkin->CheckBox.StyleStates[UI_State_Pressed].TexRegion = IntRect(67, 27, 16, 16); 
+//		mDefaultSkin->CheckBox.StyleStates[UI_State_Pressed].TexColor = ColorRGBA(1, 1, 1, 1);
+//		mDefaultSkin->CheckBox.Font = mFont;
+//		mDefaultSkin->CheckBox.FontSize = mDefaultSkin->mFontSize;
+//		mDefaultSkin->CheckBox.BackColor = ColorRGBA::Black;
+//		mDefaultSkin->CheckBox.ForeColor = ColorRGBA::Black;
+//		mDefaultSkin->CheckBox.StyleTex = windowTex;
+//
+//		// Text Edit
+//		{		
+//			mDefaultSkin->TextEdit.StyleTex = windowTex;
+//			mDefaultSkin->TextEdit.FontSize = mDefaultSkin->mFontSize;
+//			mDefaultSkin->TextEdit.Font = mFont;
+//			mDefaultSkin->TextEdit.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 1);
+//
+//			IntRect*& otherPath = mDefaultSkin->TextEdit.StyleStates[UI_State_Normal].OtherPatch;
+//			otherPath = new IntRect[8];
+//
+//			otherPath[NP_Top_Left] = IntRect(58, 47, 5, 10);
+//			otherPath[NP_Top] = IntRect(63, 47, 1, 10);
+//			otherPath[NP_Top_Right] = IntRect(63, 47, -5, 10);
+//
+//			otherPath[NP_Left] = IntRect(58, 57, 5, 1);	
+//			mDefaultSkin->TextEdit.StyleStates[UI_State_Normal].TexRegion = IntRect(63, 57, 1, 1);
+//			otherPath[NP_Right] = IntRect(63, 57, -5, 1);
+//
+//			otherPath[NP_Bottom_Left] = IntRect(58, 57, 5, -10);	
+//			otherPath[NP_Bottom] = IntRect(63, 57, 1, -10);	
+//			otherPath[NP_Bottom_Right] = IntRect(63, 57, -5, -10);
+//		}
+//		
+//	}
+//
+//
+//	return mDefaultSkin;
+//}
+
 GuiSkin* UIManager::GetDefaultSkin()
 {
 	// todo: xml gui skin
 	if (!mDefaultSkin)
 	{
 		mDefaultSkin = new GuiSkin;
-
-		mDefaultSkin->mFont = mFont;
-		mDefaultSkin->mFontSize = 25.0f;
-
-		ResourceManager& resMan = ResourceManager::GetSingleton();
-		mDefaultSkin->mSkinTexAtlas = std::static_pointer_cast<TextureResource>(
-			resMan.GetResourceByName(RT_Texture,"dxutcontrols.dds", "General"))->GetTexture();
-
-		// Button
-		for (int i = 0; i < UI_State_Count; ++i)
-		{
-			mDefaultSkin->Button.StyleStates[i].TexRegion = IntRect(0, 0, 136, 54);
-			mDefaultSkin->Button.StyleStates[i].TexColor = ColorRGBA(1, 1, 1, 150.0f / 255);
-		}
-
-		mDefaultSkin->Button.StyleStates[UI_State_Hover].TexRegion = IntRect(136, 0, 252 - 136, 54);
-		mDefaultSkin->Button.Font = mFont;
-		mDefaultSkin->Button.FontSize = mDefaultSkin->mFontSize;
-		mDefaultSkin->Button.BackColor = ColorRGBA(1, 1, 1, 100.0f / 255);
-		mDefaultSkin->Button.ForeColor = ColorRGBA(1, 1, 1, 200.0f / 255);
-		mDefaultSkin->Button.StyleTex = mDefaultSkin->mSkinTexAtlas;
-
-		// Slider 
-		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Normal].TexRegion.SetLeft(1);
-		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Normal].TexRegion.SetRight(93);
-		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Normal].TexRegion.SetTop(187);
-		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Normal].TexRegion.SetBottom(228);
-		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Normal].TexColor = ColorRGBA(0.5, 0.5, 0.5, 150.0f / 255);
-
-		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Hover].TexRegion.SetLeft(1);
-		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Hover].TexRegion.SetRight(93);
-		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Hover].TexRegion.SetTop(187);
-		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Hover].TexRegion.SetBottom(228);
-		mDefaultSkin->HSliderTrack.StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 1, 1, 150.0f / 255);
-		mDefaultSkin->HSliderTrack.StyleTex = mDefaultSkin->mSkinTexAtlas;
-
-		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Normal].TexRegion.SetLeft(151);
-		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Normal].TexRegion.SetRight(192);
-		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Normal].TexRegion.SetTop(193);
-		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Normal].TexRegion.SetBottom(234);
-		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
-
-		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Hover].TexRegion.SetLeft(151);
-		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Hover].TexRegion.SetRight(192);
-		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Hover].TexRegion.SetTop(193);
-		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Hover].TexRegion.SetBottom(234);
-		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 0, 1, 255.0 / 255);
-
-		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Pressed].TexRegion.SetLeft(151);
-		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Pressed].TexRegion.SetRight(192);
-		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Pressed].TexRegion.SetTop(193);
-		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Pressed].TexRegion.SetBottom(234);
-		mDefaultSkin->HSliderThumb.StyleStates[UI_State_Pressed].TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
-		mDefaultSkin->HSliderThumb.StyleTex = mDefaultSkin->mSkinTexAtlas;
-
-		// Scroll bar
-		for (int i = 0; i < UI_State_Count; ++i)
-		{
-			mDefaultSkin->HSrollBack.StyleStates[i].TexRegion = IntRect(196, 192, 22, 20);
-			mDefaultSkin->HSrollBack.StyleStates[i].TexColor = ColorRGBA(1, 1, 1, 1);
-
-			mDefaultSkin->HSrollForward.StyleStates[i].TexRegion = IntRect(196, 223, 22, 21);
-			mDefaultSkin->HSrollForward.StyleStates[i].TexColor = ColorRGBA(1, 1, 1, 1);
-		}
-		mDefaultSkin->HSrollBack.StyleStates[UI_State_Hover].TexColor = ColorRGBA(0, 1, 1, 1);
-		mDefaultSkin->HSrollForward.StyleStates[UI_State_Hover].TexColor = ColorRGBA(0, 1, 1, 1);
-
-		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexRegion.SetLeft(196);
-		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexRegion.SetRight(218);
-		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexRegion.SetTop(212);
-		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexRegion.SetBottom(223);
-		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 1);
-
-		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Hover].TexRegion.SetLeft(196);
-		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Hover].TexRegion.SetRight(218);
-		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Hover].TexRegion.SetTop(212);
-		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Hover].TexRegion.SetBottom(223);
-		mDefaultSkin->HScrollTrack.StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 1, 1, 1);
-		mDefaultSkin->HScrollTrack.StyleTex = mDefaultSkin->mSkinTexAtlas;
-
-
-		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Normal].TexRegion = IntRect(220, 192, 18, 42);
-		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 2, 2, 1);
-
-		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Hover].TexRegion = IntRect(220, 192, 18, 42);
-		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 0, 1, 1);
-
-		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Pressed].TexRegion = IntRect(220, 192, 18, 42);
-		mDefaultSkin->HSrollThumb.StyleStates[UI_State_Pressed].TexColor = ColorRGBA(1, 1, 1, 1);
-		
-
-		mDefaultSkin->HSrollBack.StyleTex = mDefaultSkin->mSkinTexAtlas;
-		mDefaultSkin->HSrollForward.StyleTex = mDefaultSkin->mSkinTexAtlas;
-		mDefaultSkin->HScrollTrack.StyleTex = mDefaultSkin->mSkinTexAtlas;
-		mDefaultSkin->HSrollThumb.StyleTex = mDefaultSkin->mSkinTexAtlas;
-
-
-		// List Box
-		mDefaultSkin->ListBox.StyleStates[UI_State_Normal].TexRegion = IntRect(13, 123, 228, 37);
-		mDefaultSkin->ListBox.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
-
-		mDefaultSkin->ListBox.StyleStates[UI_State_Hover].TexRegion = IntRect(16, 166, 224, 17);
-		mDefaultSkin->ListBox.StyleStates[UI_State_Hover].TexColor = ColorRGBA(1, 1, 1, 255.0 / 255);
-		
-		mDefaultSkin->ListBox.Font = mFont;
-		mDefaultSkin->ListBox.FontSize = mDefaultSkin->mFontSize;
-		mDefaultSkin->ListBox.BackColor = ColorRGBA(0, 0, 0, 255.0 / 255);
-		mDefaultSkin->ListBox.ForeColor = ColorRGBA(0, 0, 0, 255.0 / 255);
-		mDefaultSkin->ListBox.StyleTex = mDefaultSkin->mSkinTexAtlas;
-
-
-		// ComboBox
-		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Normal].TexRegion = IntRect(7, 81, 240, 42);
-		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Normal].TexColor = ColorRGBA(200/ 255.0f, 200/ 255.0f, 200/ 255.0f, 150 /255.0f);
-
-		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Focus].TexRegion = IntRect(7, 81, 240, 42);
-	    mDefaultSkin->ComboDropButton.StyleStates[UI_State_Focus].TexColor = ColorRGBA(230/ 255.0f, 230/ 255.0f, 230/ 255.0f, 170 /255.0f);
-
-		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Disable].TexRegion = IntRect(7, 81, 240, 42);
-		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Disable].TexColor = ColorRGBA(200/ 255.0f, 200/ 255.0f, 200/ 255.0f, 70 /255.0f);
-
-		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Hover].TexRegion = IntRect(7, 81, 240, 42);
-		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Hover].TexColor = ColorRGBA(200/ 255.0f, 200/ 255.0f, 200/ 255.0f, 150 /255.0f);
-
-		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Pressed].TexRegion = IntRect(7, 81, 240, 42);
-		mDefaultSkin->ComboDropButton.StyleStates[UI_State_Pressed].TexColor = ColorRGBA(200/ 255.0f, 200/ 255.0f, 200/ 255.0f, 150 /255.0f);
-
-		mDefaultSkin->ComboDropButton.Font = mFont;
-		mDefaultSkin->ComboDropButton.FontSize = mDefaultSkin->mFontSize;
-		mDefaultSkin->ComboDropButton.BackColor = ColorRGBA(1, 1, 1, 255.0 / 255);
-		mDefaultSkin->ComboDropButton.ForeColor = ColorRGBA(1, 1, 1, 255.0 / 255);
-		mDefaultSkin->ComboDropButton.StyleTex = mDefaultSkin->mSkinTexAtlas;
-
-		shared_ptr<Texture> windowTex = std::static_pointer_cast<TextureResource>(
-			resMan.GetResourceByName(RT_Texture,"xWinForm.png", "General"))->GetTexture();
-
-		// UIWindow
-		mDefaultSkin->WindowBorder.StyleStates[UI_State_Normal].TexRegion = IntRect(97, 121, 1, 1);
-		mDefaultSkin->WindowBorder.StyleTex = windowTex;
-		mDefaultSkin->WindowBorder.Font = mFont;
-
-		IntRect*& otherPath = mDefaultSkin->WindowBorder.StyleStates[UI_State_Normal].OtherPatch;
-		otherPath = new IntRect[8];
-
-		otherPath[NP_Top_Left] = IntRect(39, 47, 15, 20);
-		otherPath[NP_Top] = IntRect(62, 71, 1, 20);
-		otherPath[NP_Top_Right] = IntRect(24, 83, 15, 20);
-		otherPath[NP_Right] = IntRect(43, 124, 15, 1);
-		otherPath[NP_Bottom_Right] = IntRect(66, 3, 15, 20);
-		otherPath[NP_Bottom] = IntRect(67, 71, 1, 20);
-		otherPath[NP_Bottom_Left] = IntRect(43, 83, 15, 20);
-		otherPath[NP_Left] = IntRect(62, 124, 15, 1);	
-	
-		// Close Button
-		for (size_t i = 0; i < UI_State_Count; ++i)
-		{
-			mDefaultSkin->WindowCloseBtn.StyleStates[i].TexRegion = IntRect(68, 47, 13, 13);
-			mDefaultSkin->WindowCloseBtn.StyleStates[i].TexColor = ColorRGBA(182.0f/255, 182.0f/255, 182.0f/255, 1.0f);
-			
-			// Maximize
-			mDefaultSkin->WindowMaximizeBtn.StyleStates[i].TexRegion = IntRect(77, 106, 13, 13);
-			mDefaultSkin->WindowMaximizeBtn.StyleStates[i].TexColor = ColorRGBA(182.0f/255, 182.0f/255, 182.0f/255, 1.0f);
-			
-			// Minimize
-			mDefaultSkin->WindowMinimizeBtn.StyleStates[i].TexRegion = IntRect(60, 107, 13, 13);
-			mDefaultSkin->WindowMinimizeBtn.StyleStates[i].TexColor = ColorRGBA(182.0f/255, 182.0f/255, 182.0f/255, 1.0f);
-			mDefaultSkin->WindowMinimizeBtn.StyleTex = windowTex;
-
-			// Restore
-			mDefaultSkin->WindowRestoreBtn.StyleStates[i].TexRegion = IntRect(43, 107, 13, 13);
-			mDefaultSkin->WindowRestoreBtn.StyleStates[i].TexColor = ColorRGBA(182.0f/255, 182.0f/255, 182.0f/255, 1.0f);
-			
-		}
-
-		mDefaultSkin->WindowCloseBtn.StyleStates[UI_State_Hover].TexColor = ColorRGBA(200.0f/255, 200.0f/255, 200.0f/255, 1.0f);
-		mDefaultSkin->WindowMaximizeBtn.StyleStates[UI_State_Hover].TexColor = ColorRGBA(200.0f/255, 200.0f/255, 200.0f/255, 1.0f);
-		mDefaultSkin->WindowRestoreBtn.StyleStates[UI_State_Hover].TexColor = ColorRGBA(200.0f/255, 200.0f/255, 200.0f/255, 1.0f);
-
-		mDefaultSkin->WindowCloseBtn.StyleTex = windowTex;
-		mDefaultSkin->WindowMaximizeBtn.StyleTex = windowTex;
-		mDefaultSkin->WindowRestoreBtn.StyleTex = windowTex;
-
-
-		// Check Box
-		mDefaultSkin->CheckBox.StyleStates[UI_State_Normal].TexRegion = IntRect(47, 27, 16, 16); 
-		mDefaultSkin->CheckBox.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 1);
-		mDefaultSkin->CheckBox.StyleStates[UI_State_Pressed].TexRegion = IntRect(67, 27, 16, 16); 
-		mDefaultSkin->CheckBox.StyleStates[UI_State_Pressed].TexColor = ColorRGBA(1, 1, 1, 1);
-		mDefaultSkin->CheckBox.Font = mFont;
-		mDefaultSkin->CheckBox.FontSize = mDefaultSkin->mFontSize;
-		mDefaultSkin->CheckBox.BackColor = ColorRGBA::Black;
-		mDefaultSkin->CheckBox.ForeColor = ColorRGBA::Black;
-		mDefaultSkin->CheckBox.StyleTex = windowTex;
-
-		// Text Edit
-		{		
-			mDefaultSkin->TextEdit.StyleTex = windowTex;
-			mDefaultSkin->TextEdit.FontSize = mDefaultSkin->mFontSize;
-			mDefaultSkin->TextEdit.Font = mFont;
-			mDefaultSkin->TextEdit.StyleStates[UI_State_Normal].TexColor = ColorRGBA(1, 1, 1, 1);
-
-			IntRect*& otherPath = mDefaultSkin->TextEdit.StyleStates[UI_State_Normal].OtherPatch;
-			otherPath = new IntRect[8];
-
-			otherPath[NP_Top_Left] = IntRect(58, 47, 5, 10);
-			otherPath[NP_Top] = IntRect(63, 47, 1, 10);
-			otherPath[NP_Top_Right] = IntRect(63, 47, -5, 10);
-
-			otherPath[NP_Left] = IntRect(58, 57, 5, 1);	
-			mDefaultSkin->TextEdit.StyleStates[UI_State_Normal].TexRegion = IntRect(63, 57, 1, 1);
-			otherPath[NP_Right] = IntRect(63, 57, -5, 1);
-
-			otherPath[NP_Bottom_Left] = IntRect(58, 57, 5, -10);	
-			otherPath[NP_Bottom] = IntRect(63, 57, 1, -10);	
-			otherPath[NP_Bottom_Right] = IntRect(63, 57, -5, -10);
-		}
-		
+		mDefaultSkin->TestLoad();
 	}
-
 
 	return mDefaultSkin;
 }
+
 
 bool UIManager::GetMinimizedPosition( UIWindow* window, int2* pos )
 {
