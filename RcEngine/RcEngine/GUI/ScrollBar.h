@@ -46,6 +46,13 @@ public:
 
 	virtual bool HasCombinedFocus() const;
 
+	/**
+	 * In most case, there is no need to call SetSize, just keep the default HScrollBar's height or
+	 * VScrollBar's Width in skin texture. So only need to set track length.
+	 */
+	void SetTrackLength(int32_t length);
+	int32_t GetTrackExtext() const									{ return mExtent; }
+
 	UIOrientation GetOrientation() const							{ return mOrientation; }
 
 	void SetScrollValue(int32_t value);
@@ -85,6 +92,8 @@ protected:
 
 	int32_t mSingleStep;
 	int32_t mPageStep;
+
+	int32_t mExtent;
 
 	bool mThumbHovering;
 

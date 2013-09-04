@@ -3,6 +3,7 @@
 #include <GUI/Button.h>
 #include <GUI/UIManager.h>
 #include <Graphics/SpriteBatch.h>
+#include <Core/Exception.h>
 
 namespace RcEngine {
 
@@ -22,7 +23,8 @@ ScrollBar::ScrollBar( UIOrientation orient )
 	  mMinValue(0), 
 	  mMaxValue(100), 
 	  mValue(0),  
-	  mSingleStep(1), 
+	  mSingleStep(1),
+	  mExtent(0),
 	  mThumbStyle(nullptr), 
 	  mTrackStyle(nullptr)
 {
@@ -139,6 +141,8 @@ void ScrollBar::InitGuiStyle( const GuiSkin::StyleMap* styles /* = nullptr */ )
 
 			mTrackStyle = &defalutSkin->HScrollTrack;
 			mThumbStyle = &defalutSkin->HSrollThumb;
+
+			mExtent = defalutSkin->HSrollForward.StyleStates[UI_State_Normal].TexRegion.Height;
 		}
 		else
 		{
@@ -151,6 +155,8 @@ void ScrollBar::InitGuiStyle( const GuiSkin::StyleMap* styles /* = nullptr */ )
 
 			mTrackStyle = &defalutSkin->VScrollTrack;
 			mThumbStyle = &defalutSkin->VSrollThumb;
+
+			mExtent = defalutSkin->VSrollForward.StyleStates[UI_State_Normal].TexRegion.Width;
 		}
 		
 	}
@@ -370,6 +376,17 @@ bool ScrollBar::OnMouseWheel( int32_t delta )
 	Scroll(-delta);
 
 	return true;
+}
+
+void ScrollBar::SetTrackLength( int32_t length )
+{
+	if (mExtent == 0)
+		ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Init Gui Style first", "ScrollBar::SetTrackLength");
+
+	if (mOrientation == UI_Horizontal)
+		SetSize(int2(length, mExtent));
+	else 
+		SetSize(int2(mExtent, length));
 }
 
 

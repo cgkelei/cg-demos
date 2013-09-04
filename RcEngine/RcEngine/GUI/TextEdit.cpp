@@ -80,6 +80,7 @@ void TextEdit::InitGuiStyle( const GuiSkin::StyleMap* styles /* = nullptr */ )
 		if (mTextEditStyle->StyleStates[UI_State_Normal].NinePath())
 			mBorder = mTextEditStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left].Width;
 
+		mScrollBarWidth = mVertScrollBar->GetTrackExtext();
 	}
 
 	// Init row height

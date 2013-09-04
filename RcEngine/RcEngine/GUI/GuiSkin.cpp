@@ -53,7 +53,6 @@ public:
 			for ( ; patchNode; patchNode = patchNode->NextSibling("NinePatch") )
 			{
 				String patchName = patchNode->AttributeString("name", "");
-				std::cout << patchName << " " << patchNode->AttributeInt("xPos", 0) << std::endl;
 
 				if (mNinePathDefs[patchName] == NP_Fill)
 				{
