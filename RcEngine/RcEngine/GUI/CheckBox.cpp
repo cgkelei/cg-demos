@@ -116,7 +116,7 @@ void CheckBox::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	destRect.Y = (float)screenPos.Y();
 	destRect.Height = float(mSize.Y());
 
-	mStyle->Font->DrawString(spriteBatchFont, mText, mStyle->FontSize, AlignLeft | AlignVCenter, destRect, mStyle->ForeColor, zOrder);
+	mStyle->Font->DrawString(spriteBatchFont, mText, float(mSize.Y() * 1.2f), AlignLeft | AlignVCenter, destRect, mStyle->ForeColor, zOrder);
 
 	// Reset hovering for next frame
 	mHovering = false;

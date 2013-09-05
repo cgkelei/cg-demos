@@ -32,9 +32,6 @@ public:
 	virtual bool OnMouseButtonPress(const int2& screenPos, uint32_t button);
 	virtual bool OnMouseButtonRelease(const int2& screenPos, uint32_t button);
 
-	void SetBorder(int32_t border, int32_t margin);
-	void SetScrollBarWidth(int32_t width);
-
 	void AddItem(const std::wstring& text);
 	void InsertItem(int32_t index, const std::wstring& text);
 	void RemoveItem(int32_t index);
@@ -61,10 +58,13 @@ protected:
 	int32_t mScrollBarWidth;
 
 	int32_t mSelectedIndex;
+	int32_t mHoveredIndex;
 
 	float mTextRowHeight;
 
 	int32_t mNumVisibleItems;
+
+	float mVisibleStartX;
 
 	/**
 	 * Hack:
@@ -76,7 +76,8 @@ protected:
 	IntRect mTextRegion;
 	IntRect mSelectionRegion;
 
-	int32_t mBorder, mMargin;
+	int32_t mBorderArr[4];
+	int32_t mBorder;
 
 	bool mPressed;
 };

@@ -53,6 +53,11 @@ public:
 	void SetTrackLength(int32_t length);
 	int32_t GetTrackExtext() const									{ return mExtent; }
 
+	/**
+	 * The size of the visible area of the scrollable content.
+	 */
+	void SetScrollableSize(int32_t size); 
+
 	UIOrientation GetOrientation() const							{ return mOrientation; }
 
 	void SetScrollValue(int32_t value);
@@ -66,6 +71,7 @@ public:
 	
 	void SetSingleStep(int32_t singleSize) 							{ mSingleStep = singleSize; }	
 	int32_t GetSingleStep() const									{ return mSingleStep; }
+
 
 	void SetScrollButtonRepeat(bool enable);
 
@@ -94,6 +100,7 @@ protected:
 	int32_t mPageStep;
 
 	int32_t mExtent;
+	int32_t mScrollableExtent;
 
 	bool mThumbHovering;
 

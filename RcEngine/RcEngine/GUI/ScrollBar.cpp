@@ -25,6 +25,7 @@ ScrollBar::ScrollBar( UIOrientation orient )
 	  mValue(0),  
 	  mSingleStep(1),
 	  mExtent(0),
+	  mScrollableExtent(0),
 	  mThumbStyle(nullptr), 
 	  mTrackStyle(nullptr)
 {
@@ -239,7 +240,11 @@ void ScrollBar::UpdateThumb()
 	}
 	else
 	{
-		mThumbRegion.Width = mThumbRegion.Height = mSize.X();
+		float thumbSize = ((float)mScrollableExtent/(mMaxValue - mMinValue + mScrollableExtent)) * mTrackRegion.Height;
+
+		mThumbRegion.Height = (int32_t)thumbSize;
+		mThumbRegion.Width = mSize.X();
+
 		mThumbRegion.X = mTrackRegion.X; 
 		mThumbRegion.Y = int32_t( mTrackRegion.Y + ratio * ( mTrackRegion.Height - mThumbRegion.Height ) );
 	}
@@ -387,6 +392,11 @@ void ScrollBar::SetTrackLength( int32_t length )
 		SetSize(int2(length, mExtent));
 	else 
 		SetSize(int2(mExtent, length));
+}
+
+void ScrollBar::SetScrollableSize( int32_t size )
+{
+	mScrollableExtent = size;
 }
 
 
