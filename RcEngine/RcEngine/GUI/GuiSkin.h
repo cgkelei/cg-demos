@@ -86,6 +86,8 @@ public:
 
 		ColorRGBA BackColor;
 		ColorRGBA ForeColor; 
+
+		void DrawNinePatch(SpriteBatch& spriteBatch, UIElementState uiState, const Rectanglef& rect, float zOrder);
 	};
 
 	typedef std::map<String, GuiStyle*> StyleMap;

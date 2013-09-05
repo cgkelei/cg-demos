@@ -58,8 +58,8 @@ void LineEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 
 	// Draw background first
 	Rectanglef rect((float)screenPos.X(), (float)screenPos.Y(), (float)mSize.X(), (float)mSize.Y());
-	//spriteBatch.Draw(mStyle->StyleTex, rect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
-	DrawBackground(spriteBatch, spriteBatchFont);
+	//DrawBackground(spriteBatch, spriteBatchFont);
+	mStyle->DrawNinePatch(spriteBatch, UI_State_Normal, rect, zOrder);
 
 	if (HasSelection())
 	{

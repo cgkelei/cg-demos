@@ -115,9 +115,8 @@ void TextEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	float zOrder = GetDepthLayer();
 
 	// Draw background first
-	//spriteBatch.Draw(mTextEditStyle->StyleTex, mBackRect, &mTextEditStyle->StyleStates[UI_State_Normal].TexRegion, mTextEditStyle->StyleStates[UI_State_Normal].TexColor);
-	DrawBackground(spriteBatch, spriteBatchFont);
-
+	//DrawBackground(spriteBatch, spriteBatchFont);
+	mTextEditStyle->DrawNinePatch(spriteBatch, UI_State_Normal, mBackRect, zOrder);
 
 	// Draw selected background if has selection
 	DrawSelection(spriteBatch, spriteBatchFont);
@@ -584,10 +583,7 @@ void TextEdit::UpdateRect()
 	mSize.Y() -= shrink;
 
 	if (mVertScrollBar->IsVisible())
-	{
 		mTextRect.Width -= mScrollBarWidth;
-		mBackRect.Width -= mScrollBarWidth;
-	}
 
 	UpdateText();
 }

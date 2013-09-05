@@ -139,12 +139,12 @@ public:
 	int32_t GetPriority() const { return mPriority; }
 
 protected:
+	virtual void UpdateRect();
+
 	void MarkDirty();
 
 	float GetDepthLayer() const { return float(UI_MaxPriority - mPriority) / UI_MaxPriority; }
-
-	virtual void UpdateRect();
-
+	
 protected:
 
 	String mName;
@@ -185,7 +185,6 @@ protected:
 
 	float mOpacity;
 };
-
 
 }
 

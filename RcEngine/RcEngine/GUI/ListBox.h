@@ -64,8 +64,6 @@ protected:
 
 	int32_t mNumVisibleItems;
 
-	float mVisibleStartX;
-
 	/**
 	 * Hack:
 	 *  Normal: background image
@@ -73,11 +71,11 @@ protected:
 	 */
 	GuiSkin::GuiStyle* mLisBoxStyle;
 
-	IntRect mTextRegion;
-	IntRect mSelectionRegion;
+	Rectanglef mTextRegion;
+	Rectanglef mSelectionRegion;
 
-	int32_t mBorderArr[4];
-	int32_t mBorder;
+	int32_t mBorder[4];
+	int32_t mMargin;
 
 	bool mPressed;
 };
