@@ -80,7 +80,7 @@ void TextEdit::InitGuiStyle( const GuiSkin::StyleMap* styles /* = nullptr */ )
 		if (mTextEditStyle->StyleStates[UI_State_Normal].NinePath())
 			mBorder = mTextEditStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left].Width;
 
-		mScrollBarWidth = mVertScrollBar->GetTrackExtext();
+		mScrollBarWidth = mVertScrollBar->GetTrackExtext() + 1;
 	}
 
 	// Init row height
@@ -609,12 +609,14 @@ void TextEdit::UpdateText()
 			if ( mVertScrollBar->IsVisible() == false )
 			{
 				mVertScrollBar->SetVisible(true);
-				mVertScrollBar->SetPosition(int2(mSize.X() - mScrollBarWidth, 0));
-				mVertScrollBar->SetSize(int2(mScrollBarWidth, mSize.Y()));
+				mVertScrollBar->SetPosition(int2(mSize.X() - mScrollBarWidth, 1));
+				mVertScrollBar->SetSize(int2(mScrollBarWidth-1, mSize.Y() - 2));
+					
+				mVertScrollBar->SetScrollableSize(mNumLines);
 
 				int32_t remain = mNumLines - mNumVisibleY;
 				mVertScrollBar->SetScrollRange(0, remain);
-
+				
 				mTextRect.Width -= mScrollBarWidth;
 				mBackRect.Width -= mScrollBarWidth;
 
@@ -623,11 +625,13 @@ void TextEdit::UpdateText()
 			}	
 			else 
 			{
+				mVertScrollBar->SetScrollableSize(mNumLines);
 				int32_t remain = mNumLines - mNumVisibleY;
 				
 				if (mFirstVisibleY > remain)
 					mFirstVisibleY = remain;
 
+				
 				mVertScrollBar->SetScrollRange(0, remain);		
 			}
 		}
@@ -1018,8 +1022,8 @@ void TextEdit::DrawBackground( SpriteBatch& spriteBatch, SpriteBatch& spriteBatc
 	Rectanglef destRect;
 	IntRect sourceRectL, sourceRectM, sourceRectR;
 
-	float topHeight = fabsf((float)mTextEditStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top].Height);
-	float bottomHeight = fabsf((float)mTextEditStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom].Height);
+	float topHeight = (float)mTextEditStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top].Height;
+	float bottomHeight = (float)mTextEditStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom].Height;
 
 	float zOrder = GetDepthLayer();
 
@@ -1030,16 +1034,16 @@ void TextEdit::DrawBackground( SpriteBatch& spriteBatch, SpriteBatch& spriteBatc
 
 	destRect.X = mBackRect.Left();
 	destRect.Y = mBackRect.Top();
-	destRect.Width = fabsf((float)sourceRectL.Width);
+	destRect.Width = (float)sourceRectL.Width;
 	destRect.Height = (float)sourceRectL.Height;
 	spriteBatch.Draw(mTextEditStyle->StyleTex, destRect, &sourceRectL, mTextEditStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 
 	destRect.X = destRect.Right();
-	destRect.Width = (float)mSize.X() - (fabsf((float)sourceRectL.Width) + fabsf((float)sourceRectR.Width));
+	destRect.Width = (float)mSize.X() - (sourceRectL.Width + sourceRectR.Width);
 	spriteBatch.Draw(mTextEditStyle->StyleTex, destRect, &sourceRectM, mTextEditStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 
 	destRect.X = destRect.Right();
-	destRect.Width = fabsf((float)sourceRectR.Width);
+	destRect.Width = (float)sourceRectR.Width;
 	spriteBatch.Draw(mTextEditStyle->StyleTex, destRect, &sourceRectR, mTextEditStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 
 	if (mBackRect.Height > sourceRectL.Height)
@@ -1051,16 +1055,16 @@ void TextEdit::DrawBackground( SpriteBatch& spriteBatch, SpriteBatch& spriteBatc
 
 		destRect.X = (float)screenPos.X();
 		destRect.Y = destRect.Bottom();
-		destRect.Width = fabsf((float)sourceRectL.Width);
+		destRect.Width = (float)sourceRectL.Width;
 		destRect.Height = mSize.Y() - (topHeight + bottomHeight);
 		spriteBatch.Draw(mTextEditStyle->StyleTex, destRect, &sourceRectL, mTextEditStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 
 		destRect.X = destRect.Right();
-		destRect.Width = (float)mSize.X() - (fabsf((float)sourceRectL.Width) + fabsf((float)sourceRectR.Width));
+		destRect.Width = (float)mSize.X() - (sourceRectL.Width + sourceRectR.Width);
 		spriteBatch.Draw(mTextEditStyle->StyleTex, destRect, &sourceRectM, mTextEditStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 
 		destRect.X = destRect.Right();
-		destRect.Width = fabsf((float)sourceRectR.Width);
+		destRect.Width = (float)sourceRectR.Width;
 		spriteBatch.Draw(mTextEditStyle->StyleTex, destRect, &sourceRectR, mTextEditStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 	}
 
@@ -1073,7 +1077,7 @@ void TextEdit::DrawBackground( SpriteBatch& spriteBatch, SpriteBatch& spriteBatc
 
 		destRect.X = (float)screenPos.X();
 		destRect.Y = destRect.Bottom();
-		destRect.Width = fabsf((float)sourceRectL.Width);
+		destRect.Width = (float)sourceRectL.Width;
 		if (mSize.Y() > topHeight + bottomHeight)
 			destRect.Height = bottomHeight;
 		else 
@@ -1084,11 +1088,11 @@ void TextEdit::DrawBackground( SpriteBatch& spriteBatch, SpriteBatch& spriteBatc
 		spriteBatch.Draw(mTextEditStyle->StyleTex, destRect, &sourceRectL, mTextEditStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 
 		destRect.X = destRect.Right();
-		destRect.Width = (float)mSize.X() - (fabsf((float)sourceRectL.Width) + fabsf((float)sourceRectR.Width));
+		destRect.Width = (float)mSize.X() - (sourceRectL.Width + sourceRectR.Width);
 		spriteBatch.Draw(mTextEditStyle->StyleTex, destRect, &sourceRectM, mTextEditStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 
 		destRect.X = destRect.Right();
-		destRect.Width = fabsf((float)sourceRectR.Width);
+		destRect.Width = (float)sourceRectR.Width;
 		spriteBatch.Draw(mTextEditStyle->StyleTex, destRect, &sourceRectR, mTextEditStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 	}
 }

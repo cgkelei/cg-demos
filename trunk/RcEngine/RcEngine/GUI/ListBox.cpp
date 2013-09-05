@@ -13,7 +13,8 @@ ListBox::ListBox()
 	: mSelectedIndex(-1),
 	  mNumVisibleItems(0),
 	  mScrollBarWidth(ScrollBarWidth),
-	  mBorder(6), mMargin(5),
+	  mBorder(6),
+	  mVisibleStartX(0),
 	  mPressed(false)
 {
 	mVertScrollBar = new ScrollBar(UI_Vertical);
@@ -88,15 +89,18 @@ void ListBox::UpdateRect()
 	UpdateVScrollBar();
 
 	mTextRegion = mSelectionRegion;
-	mTextRegion.SetLeft( mSelectionRegion.X  + mMargin );
-	mTextRegion.SetRight( mSelectionRegion.Right() - mMargin );
+	mTextRegion.SetLeft( mSelectionRegion.X);
+	mTextRegion.SetRight( mSelectionRegion.Right() );
 }
 
 void ListBox::UpdateVScrollBar()
 {
 	if (mLisBoxStyle)
 	{
-		mNumVisibleItems = (int32_t)floorf(mSelectionRegion.Height / mTextRowHeight);
+		//mNumVisibleItems = (int32_t)floorf(mSelectionRegion.Height / mTextRowHeight);
+
+		float total = mItems.size() * mTextRowHeight;
+
 
 		if ((int)mItems.size() > mNumVisibleItems)
 		{
@@ -137,6 +141,16 @@ void ListBox::InitGuiStyle( const GuiSkin::StyleMap* styles /* = nullptr */ )
 		mVertScrollBar->InitGuiStyle(nullptr);
 
 		mLisBoxStyle = &defaultSkin->ListBox;
+
+		if (mLisBoxStyle->StyleStates[UI_State_Normal].NinePath())
+		{
+			mBorder = mLisBoxStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left].Width;
+		
+			mBorderArr[0] = mLisBoxStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left].Width;
+			mBorderArr[1] = mLisBoxStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left].Height;
+			mBorderArr[2] = mLisBoxStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom_Right].Width;
+			mBorderArr[3] = mLisBoxStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom_Right].Height;
+		}
 	}
 
 	float fontScale = mLisBoxStyle->FontSize / float(mLisBoxStyle->Font->GetFontSize());
@@ -223,18 +237,6 @@ void ListBox::SetSelectedIndex( int32_t index, bool fromInput /*= false*/ )
 
 	if (!EventSelectionChanged.empty() && mSelectedIndex != oldSelectedIndex)
 		EventSelectionChanged(mSelectedIndex);
-}
-
-void ListBox::SetScrollBarWidth( int32_t width )
-{
-	mScrollBarWidth = width;
-	UpdateRect();
-}
-
-void ListBox::SetBorder( int32_t border, int32_t margin )
-{
-	mBorder = border;
-	mMargin = margin;
 }
 
 bool ListBox::OnMouseButtonPress( const int2& screenPos, uint32_t button )

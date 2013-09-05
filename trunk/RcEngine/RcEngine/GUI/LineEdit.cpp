@@ -15,7 +15,8 @@ LineEdit::LineEdit()
 	  mDragCursor(false),
 	  mStyle(nullptr),
 	  mCaretBlinkRate(1.0f),
-	  mCaretBlinkTimer(0.0f)
+	  mCaretBlinkTimer(0.0f),
+	  mVisibleStartX(0.0f)
 {
 	mTextColor = ColorRGBA( 1.0f, 0.0f, 0.0f, 1.0f );
 	mSelTextColor = ColorRGBA( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -460,8 +461,8 @@ void LineEdit::DrawBackground( SpriteBatch& spriteBatch, SpriteBatch& spriteBatc
 	Rectanglef destRect;
 	IntRect sourceRectL, sourceRectM, sourceRectR;
 
-	float topHeight = fabsf((float)mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top].Height);
-	float bottomHeight = fabsf((float)mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom].Height);
+	float topHeight = (float)mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top].Height;
+	float bottomHeight = (float)mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom].Height;
 
 	float zOrder = GetDepthLayer();
 
@@ -472,16 +473,16 @@ void LineEdit::DrawBackground( SpriteBatch& spriteBatch, SpriteBatch& spriteBatc
 
 	destRect.X = (float)screenPos.X();
 	destRect.Y = (float)screenPos.Y();
-	destRect.Width = fabsf((float)sourceRectL.Width);
+	destRect.Width = (float)sourceRectL.Width;
 	destRect.Height = (float)sourceRectL.Height;
 	spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectL, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 
 	destRect.X = destRect.Right();
-	destRect.Width = (float)mSize.X() - (fabsf((float)sourceRectL.Width) + fabsf((float)sourceRectR.Width));
+	destRect.Width = (float)mSize.X() - (sourceRectL.Width + sourceRectR.Width);
 	spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectM, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 
 	destRect.X = destRect.Right();
-	destRect.Width = fabsf((float)sourceRectR.Width);
+	destRect.Width = (float)sourceRectR.Width;
 	spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectR, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 
 	if (mSize.Y() > sourceRectL.Height)
@@ -493,16 +494,16 @@ void LineEdit::DrawBackground( SpriteBatch& spriteBatch, SpriteBatch& spriteBatc
 
 		destRect.X = (float)screenPos.X();
 		destRect.Y = destRect.Bottom();
-		destRect.Width = fabsf((float)sourceRectL.Width);
+		destRect.Width = (float)sourceRectL.Width;
 		destRect.Height = mSize.Y() - (topHeight + bottomHeight);
 		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectL, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 
 		destRect.X = destRect.Right();
-		destRect.Width = (float)mSize.X() - (fabsf((float)sourceRectL.Width) + fabsf((float)sourceRectR.Width));
+		destRect.Width = (float)mSize.X() - (sourceRectL.Width + sourceRectR.Width);
 		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectM, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 
 		destRect.X = destRect.Right();
-		destRect.Width = fabsf((float)sourceRectR.Width);
+		destRect.Width = (float)sourceRectR.Width;
 		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectR, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 	}
 
@@ -515,7 +516,7 @@ void LineEdit::DrawBackground( SpriteBatch& spriteBatch, SpriteBatch& spriteBatc
 
 		destRect.X = (float)screenPos.X();
 		destRect.Y = destRect.Bottom();
-		destRect.Width = fabsf((float)sourceRectL.Width);
+		destRect.Width = (float)sourceRectL.Width;
 		if (mSize.Y() > topHeight + bottomHeight)
 			destRect.Height = bottomHeight;
 		else 
@@ -526,11 +527,11 @@ void LineEdit::DrawBackground( SpriteBatch& spriteBatch, SpriteBatch& spriteBatc
 		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectL, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 
 		destRect.X = destRect.Right();
-		destRect.Width = (float)mSize.X() - (fabsf((float)sourceRectL.Width) + fabsf((float)sourceRectR.Width));
+		destRect.Width = (float)mSize.X() - (sourceRectL.Width + sourceRectR.Width);
 		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectM, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 
 		destRect.X = destRect.Right();
-		destRect.Width = fabsf((float)sourceRectR.Width);
+		destRect.Width = (float)sourceRectR.Width;
 		spriteBatch.Draw(mStyle->StyleTex, destRect, &sourceRectR, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
 	}
 }

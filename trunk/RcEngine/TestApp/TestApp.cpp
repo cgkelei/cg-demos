@@ -229,7 +229,7 @@ void TestApp::InitGUI()
 	mCheckBox->SetName("CheckBox");
 	mCheckBox->InitGuiStyle(nullptr);
 	mCheckBox->SetPosition(int2(20, 60));
-	mCheckBox->SetSize(int2(150, 27));
+	mCheckBox->SetSize(int2(150, 16));
 	mCheckBox->SetText(L"CheckBox");
 	mCheckBox->EventStateChanged.bind(this, &TestApp::CheckBoxToggle);
 	//rootElem->AddChild(mCheckBox);
@@ -243,25 +243,6 @@ void TestApp::InitGUI()
 	//mSlider->EventValueChanged.bind(this, &TestApp::SliderValueChange);
 	//rootElem->AddChild( mSlider );	
 
-	//mScrollBar = new ScrollBar(UI_Vertical);
-	//mScrollBar->SetName("ScrollBar");
-	//mScrollBar->InitGuiStyle(nullptr);
-	//mScrollBar->SetPosition(int2(250, 100));
-	//mScrollBar->SetSize(int2(23, 400));
-	//rootElem->AddChild( mScrollBar );	
-
-	//mListBox = new ListBox;
-	//mListBox->InitGuiStyle(nullptr);
-	//mListBox->SetName("ListBox");
-	//mListBox->SetPosition(int2(20, 200));
-	//mListBox->SetSize(int2(200, 90));
-	//mListBox->AddItem(L"ListBox");
-	//mListBox->AddItem(L"HBAO");
-	//mListBox->AddItem(L"Unreal4");
-	//mListBox->AddItem(L"Alchemy");	
-	//mListBox->SetSelectedIndex(1);
-	//rootElem->AddChild(mListBox);
-
 	std::wfstream file(L"Config.xml");
 	std::wstring text((std::istreambuf_iterator<wchar_t>(file)), std::istreambuf_iterator<wchar_t>());
 	file.close();
@@ -269,7 +250,7 @@ void TestApp::InitGUI()
 	mTextEdit = new TextEdit();
 	mTextEdit->InitGuiStyle(nullptr);
 	mTextEdit->SetName("TextEdit");
-	mTextEdit->SetPosition(int2(20, 180));
+	mTextEdit->SetPosition(int2(20, 130));
 	mTextEdit->SetSize(int2(300, 300));
 	//mTextEdit->SetPosition(int2(20, 50));
 	//mTextEdit->SetSize(int2(750, 450));
@@ -289,42 +270,47 @@ void TestApp::InitGUI()
 	//mComboBox->SetSelectedIndex(0);
 	//rootElem->AddChild(mComboBox);
 
-	mWindow = new UIWindow;
-	mWindow->InitGuiStyle(nullptr);
-	mWindow->SetName("Window0");
-	mWindow->SetTitle(L"Window Title");
-	mWindow->SetPosition(int2(50, 50));
-	mWindow->SetSize(int2(500, 500));
-	rootElem->AddChild( mWindow );	
+	mWindow1 = new UIWindow;
+	mWindow1->InitGuiStyle(nullptr);
+	mWindow1->SetName("Window0");
+	mWindow1->SetTitle(L"Window Title");
+	mWindow1->SetPosition(int2(20, 50));
+	mWindow1->SetSize(int2(380, 450));
+	rootElem->AddChild( mWindow1 );	
 
 	mLineEdit = new LineEdit();
 	mLineEdit->InitGuiStyle(nullptr);
 	mLineEdit->SetName("LineEdit");
-	mLineEdit->SetPosition(int2(20, 120));
-	mLineEdit->SetSize(int2(200, 40));
+	mLineEdit->SetPosition(int2(150, 60));
+	mLineEdit->SetSize(int2(180, 40));
 	mLineEdit->SetText(L"mLineEdit = new TextEdit(TextEdit::LineEdit);");
-	mWindow->AddChild(mLineEdit);
+	mWindow1->AddChild(mLineEdit);
 	
-	mWindow->AddChild(mTextEdit);
-	mWindow->AddChild(mCheckBox);
-	//mWindow->AddChild(mLineEdit);
-	
+	mWindow1->AddChild(mTextEdit);
+	mWindow1->AddChild(mCheckBox);
+	mWindow1->AddChild(mLineEdit);
 
-	mWindow = new UIWindow;
-	mWindow->InitGuiStyle(nullptr);
-	mWindow->SetName("Window1");
-	mWindow->SetTitle(L"Window Title");
-	mWindow->SetPosition(int2(450, 100));
-	mWindow->SetSize(int2(300, 300));
-	rootElem->AddChild( mWindow );	
 
-	mWindow = new UIWindow;
-	mWindow->InitGuiStyle(nullptr);
-	mWindow->SetName("Window1");
-	mWindow->SetTitle(L"Window Title");
-	mWindow->SetPosition(int2(200, 100));
-	mWindow->SetSize(int2(300, 300));
-	rootElem->AddChild( mWindow );	
+
+	mWindow2 = new UIWindow;
+	mWindow2->InitGuiStyle(nullptr);
+	mWindow2->SetName("Window1");
+	mWindow2->SetTitle(L"Window Title");
+	mWindow2->SetPosition(int2(420, 100));
+	mWindow2->SetSize(int2(350, 350));
+	rootElem->AddChild( mWindow2 );	
+
+	mListBox = new ListBox;
+	mListBox->InitGuiStyle(nullptr);
+	mListBox->SetName("ListBox");
+	mListBox->SetPosition(int2(20, 20));
+	mListBox->SetSize(int2(200, 90));
+	mListBox->AddItem(L"ListBox");
+	mListBox->AddItem(L"HBAO");
+	mListBox->AddItem(L"Unreal4");
+	mListBox->AddItem(L"Alchemy");	
+	mListBox->SetSelectedIndex(1);
+	mWindow2->AddChild(mListBox);
 }
 
 void TestApp::DrawUI()

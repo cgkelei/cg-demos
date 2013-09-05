@@ -122,7 +122,7 @@ void GuiSkin::LoadImpl()
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 	GuiSkinDefs& skinDefs = GuiSkinDefs::GetInstance();
 
-	String mName = "Default.skin.xml";
+	String mName = "Default.skin1.xml";
 	String mGroup = "General";
 
 	shared_ptr<Stream> matStream = fileSystem.OpenStream(mName, mGroup);
@@ -380,10 +380,10 @@ void GuiSkin::LoadImpl()
 			auto tex = std::static_pointer_cast<TextureResource>(
 						resMan.GetResourceByName(RT_Texture,"dxutcontrols.dds", "General"))->GetTexture();
 
-			VSrollBack.StyleTex = tex;
-			VSrollForward.StyleTex = tex;
-			VScrollTrack.StyleTex = tex;
-			VSrollThumb.StyleTex = tex;
+			VSrollBack.StyleTex = mSkinTexAtlas;
+			VSrollForward.StyleTex = mSkinTexAtlas;
+			VScrollTrack.StyleTex = mSkinTexAtlas;
+			VSrollThumb.StyleTex = mSkinTexAtlas;
 		}
 	}
 }
