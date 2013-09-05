@@ -290,8 +290,6 @@ void TestApp::InitGUI()
 	mWindow1->AddChild(mCheckBox);
 	mWindow1->AddChild(mLineEdit);
 
-
-
 	mWindow2 = new UIWindow;
 	mWindow2->InitGuiStyle(nullptr);
 	mWindow2->SetName("Window1");
@@ -303,7 +301,7 @@ void TestApp::InitGUI()
 	mListBox = new ListBox;
 	mListBox->InitGuiStyle(nullptr);
 	mListBox->SetName("ListBox");
-	mListBox->SetPosition(int2(20, 20));
+	mListBox->SetPosition(int2(20, 50));
 	mListBox->SetSize(int2(200, 90));
 	mListBox->AddItem(L"ListBox");
 	mListBox->AddItem(L"HBAO");

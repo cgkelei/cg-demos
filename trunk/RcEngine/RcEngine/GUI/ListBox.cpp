@@ -7,15 +7,13 @@
 
 namespace RcEngine {
 
-static const int32_t ScrollBarWidth = 20;
+static const int32_t BorderWidth = 6;
 
 ListBox::ListBox()
 	: mSelectedIndex(-1),
 	  mNumVisibleItems(0),
-	  mScrollBarWidth(ScrollBarWidth),
-	  mBorder(6),
-	  mVisibleStartX(0),
-	  mPressed(false)
+	  mPressed(false),
+	  mMargin(5)
 {
 	mVertScrollBar = new ScrollBar(UI_Vertical);
 	mVertScrollBar->SetScrollButtonRepeat(false);
@@ -48,13 +46,13 @@ bool ListBox::HasCombinedFocus() const
 void ListBox::AddItem( const std::wstring& text )
 {
 	mItems.push_back(text);
-	UpdateRect();
+	UpdateVScrollBar();
 }
 
 void ListBox::InsertItem( int32_t index, const std::wstring& text )
 {
 	mItems.insert(mItems.begin() + index, text);
-	UpdateRect();
+	UpdateVScrollBar();
 }
 
 void ListBox::RemoveItem( int32_t index )
@@ -67,7 +65,7 @@ void ListBox::RemoveItem( int32_t index )
 	if( mSelectedIndex >= ( int )mItems.size() )
 		mSelectedIndex = mItems.size() - 1;
 
-	UpdateRect();
+	UpdateVScrollBar();
 }
 
 void ListBox::RemoveAllItems()
@@ -81,48 +79,51 @@ void ListBox::UpdateRect()
 
 	int2 screenPos = GetScreenPosition();
 
-	mSelectionRegion.X = screenPos.X() + mBorder;
-	mSelectionRegion.Width = mSize.X() - mBorder - mBorder;
-	mSelectionRegion.Y = screenPos.Y() + mBorder;
-	mSelectionRegion.Height = mSize.Y() - mBorder - mBorder;
+	mSelectionRegion.X = (float)screenPos.X();
+	mSelectionRegion.Width = (float)mSize.X();
+	mSelectionRegion.Y = (float)screenPos.Y() + mBorder[1];
+	mSelectionRegion.Height = (float)mSize.Y() - mBorder[1] - mBorder[3];
+	
+	float oldHeigt = mSelectionRegion.Height;
 
+	mNumVisibleItems = (int32_t)floor(mSelectionRegion.Height / mTextRowHeight + 0.5f);
+	mSelectionRegion.Height = mTextRowHeight * mNumVisibleItems;
+
+	mSize.Y() += int32_t(ceilf(mSelectionRegion.Height) - oldHeigt);
+	
 	UpdateVScrollBar();
 
 	mTextRegion = mSelectionRegion;
-	mTextRegion.SetLeft( mSelectionRegion.X);
-	mTextRegion.SetRight( mSelectionRegion.Right() );
+	mTextRegion.SetLeft( mSelectionRegion.X + mBorder[0]);
+	mTextRegion.SetRight( mSelectionRegion.Right() - mBorder[2]);
 }
 
 void ListBox::UpdateVScrollBar()
 {
-	if (mLisBoxStyle)
+	if ((int32_t)mItems.size() > mNumVisibleItems)
 	{
-		//mNumVisibleItems = (int32_t)floorf(mSelectionRegion.Height / mTextRowHeight);
+		mVertScrollBar->SetScrollableSize(mItems.size());
 
-		float total = mItems.size() * mTextRowHeight;
-
-
-		if ((int)mItems.size() > mNumVisibleItems)
+		if (mVertScrollBar->IsVisible() == false)
 		{
-			if (mVertScrollBar->IsVisible() == false)
-			{
-				mVertScrollBar->SetVisible(true);
-				mVertScrollBar->SetPosition(int2(mSize.X() - mScrollBarWidth, 0));
-				mVertScrollBar->SetSize(int2(mScrollBarWidth, mSize.Y()));
-				mVertScrollBar->SetScrollRange(0, (int)mItems.size() - mNumVisibleItems);
-
-				mSelectionRegion.Width -= mScrollBarWidth;
-			}
-			else
-				mVertScrollBar->SetScrollRange(0, (int)mItems.size() - mNumVisibleItems);
+			mVertScrollBar->SetVisible(true);
+			mVertScrollBar->SetPosition(int2(mSize.X() - mScrollBarWidth, 1));
+			mVertScrollBar->SetSize(int2(mScrollBarWidth-1, mSize.Y()-2));
+			mSelectionRegion.Width -= mScrollBarWidth;
 		}
-		else
+		else 
 		{
-			if (mVertScrollBar->IsVisible())
-			{
-				mVertScrollBar->SetVisible(false);
-				mSelectionRegion.Width += mScrollBarWidth;
-			}
+			mSelectionRegion.Width -= mScrollBarWidth;
+			mVertScrollBar->SetScrollRange(0, (int)mItems.size() - mNumVisibleItems);	
+		}
+		
+	}
+	else
+	{
+		if (mVertScrollBar->IsVisible())
+		{
+			mVertScrollBar->SetVisible(false);
+			mSelectionRegion.Width += mScrollBarWidth;
 		}
 	}
 }
@@ -144,13 +145,18 @@ void ListBox::InitGuiStyle( const GuiSkin::StyleMap* styles /* = nullptr */ )
 
 		if (mLisBoxStyle->StyleStates[UI_State_Normal].NinePath())
 		{
-			mBorder = mLisBoxStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left].Width;
-		
-			mBorderArr[0] = mLisBoxStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left].Width;
-			mBorderArr[1] = mLisBoxStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left].Height;
-			mBorderArr[2] = mLisBoxStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom_Right].Width;
-			mBorderArr[3] = mLisBoxStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom_Right].Height;
+			mBorder[0] = mLisBoxStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left].Width;
+			mBorder[1] = mLisBoxStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left].Height;
+			mBorder[2] = mLisBoxStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom_Right].Width;
+			mBorder[3] = mLisBoxStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Bottom_Right].Height;
 		}
+		else 
+		{
+			for (size_t i = 0; i < 4; ++i)
+				mBorder[i] = BorderWidth;
+		}
+		
+		mScrollBarWidth = mVertScrollBar->GetTrackExtext() + 1;
 	}
 
 	float fontScale = mLisBoxStyle->FontSize / float(mLisBoxStyle->Font->GetFontSize());
@@ -169,9 +175,11 @@ void ListBox::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 
 	int2 screenPos = GetScreenPosition();
 
+	float zOrder = GetDepthLayer();
+
 	// Draw background first
 	Rectanglef backRC((float)screenPos.X(), (float)screenPos.Y(), (float)mSize.X(), (float)mSize.Y());
-	spriteBatch.Draw(mLisBoxStyle->StyleTex, backRC, &mLisBoxStyle->StyleStates[UI_State_Normal].TexRegion, mLisBoxStyle->StyleStates[UI_State_Normal].TexColor);
+	mLisBoxStyle->DrawNinePatch(spriteBatch, UI_State_Normal, backRC, zOrder);
 
 	if (mItems.size())
 	{
@@ -186,27 +194,23 @@ void ListBox::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 			if (rc.Bottom() > (float)mTextRegion.Bottom())
 				break;
 
-			bool selectedStyle = false;
-
-			if (i == mSelectedIndex)
-				selectedStyle = true;
-
-			if( selectedStyle )
+			if( i == mSelectedIndex )
 			{
 				// Draw selected highlight
 				Rectanglef rcSel;
-				rcSel.SetLeft((float)mSelectionRegion.Left());
-				rcSel.SetRight((float)mSelectionRegion.Right());
+
+				rcSel.SetLeft(mSelectionRegion.Left());
+				rcSel.SetRight(mSelectionRegion.Right());
 				rcSel.SetTop((float)rc.Top());
 				rcSel.SetBottom((float)rc.Bottom());
 				
-				spriteBatch.Draw(mLisBoxStyle->StyleTex, rcSel, &mLisBoxStyle->StyleStates[UI_State_Hover].TexRegion, mLisBoxStyle->StyleStates[UI_State_Hover].TexColor);
+				spriteBatch.Draw(mLisBoxStyle->StyleTex, rcSel, &mLisBoxStyle->StyleStates[UI_State_Hover].TexRegion,
+					mLisBoxStyle->StyleStates[UI_State_Hover].TexColor, zOrder);
 			}
 
 			// draw text
 			//Rectanglef region((float)rc.X, (float)rc.Y, (float)rc.Width, (float)rc.Height);
-			mLisBoxStyle->Font->DrawString(spriteBatchFont, mItems[i], mLisBoxStyle->FontSize,
-					 AlignVCenter, rc, mLisBoxStyle->ForeColor); 
+			mLisBoxStyle->Font->DrawString(spriteBatchFont, mItems[i], mLisBoxStyle->FontSize, AlignVCenter, rc, mLisBoxStyle->ForeColor, zOrder);
 
 			rc.Offset(0, mTextRowHeight);
 		}
@@ -215,7 +219,10 @@ void ListBox::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 
 void ListBox::OnResize()
 {
+	UpdateRect();
 
+	for (UIElement* child : mChildren)
+		child->OnResize();
 }
 
 int32_t ListBox::GetSelectedIndex() const
@@ -262,7 +269,7 @@ bool ListBox::OnMouseButtonRelease( const int2& screenPos, uint32_t button )
 	{
 		if (mPressed)
 		{
-			if (mSelectionRegion.Contains(screenPos.X(), screenPos.Y()))
+			if (mSelectionRegion.Contains((float)screenPos.X(), (float)screenPos.Y()))
 			{
 				int32_t selIndex = mVertScrollBar->GetScrollValue() + (int32_t)floorf((screenPos.Y() - mSelectionRegion.Top()) / mTextRowHeight);
 				SetSelectedIndex(selIndex, true);			
