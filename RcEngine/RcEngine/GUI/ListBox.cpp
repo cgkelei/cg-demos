@@ -47,12 +47,18 @@ void ListBox::AddItem( const std::wstring& text )
 {
 	mItems.push_back(text);
 	UpdateVScrollBar();
+
+	if (mVertScrollBar->IsVisible())
+		mVertScrollBar->SetScrollValue(mItems.size() - mNumVisibleItems);
 }
 
 void ListBox::InsertItem( int32_t index, const std::wstring& text )
 {
 	mItems.insert(mItems.begin() + index, text);
 	UpdateVScrollBar();
+
+	if (mVertScrollBar->IsVisible() && index > mNumVisibleItems)
+		mVertScrollBar->SetScrollValue(index - mNumVisibleItems);
 }
 
 void ListBox::RemoveItem( int32_t index )
@@ -199,7 +205,7 @@ void ListBox::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 				// Draw selected highlight
 				Rectanglef rcSel;
 
-				rcSel.SetLeft(mSelectionRegion.Left());
+				rcSel.SetLeft(mSelectionRegion.Left()+1);
 				rcSel.SetRight(mSelectionRegion.Right());
 				rcSel.SetTop((float)rc.Top());
 				rcSel.SetBottom((float)rc.Bottom());
@@ -281,6 +287,14 @@ bool ListBox::OnMouseButtonRelease( const int2& screenPos, uint32_t button )
 	}
 
 	return eventConsumed;
+}
+
+bool ListBox::OnMouseWheel( int32_t delta )
+{
+	if (mVertScrollBar->IsVisible())
+		mVertScrollBar->Scroll(-delta);
+
+	return true;
 }
 
 }

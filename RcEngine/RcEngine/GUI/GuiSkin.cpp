@@ -192,23 +192,40 @@ void GuiSkin::LoadImpl()
 
 	// Button
 	{
-		/*if ( node = root->FirstNode("Button") )
+		if( node = root->FirstNode("Button") )
 		{
-		for (XMLNodePtr stateNode = node->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
-		{
-		String stateName = stateNode->AttributeString("name", "");
-		UIElementState uiState = skinDefs.mStateDefs[stateName];
-		skinDefs.ReadStateStyles(stateNode, CheckBox.StyleStates[uiState]);
-		}
+			for (XMLNodePtr stateNode = node->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+			{
+				String stateName = stateNode->AttributeString("name", "");
+				UIElementState uiState = skinDefs.mStateDefs[stateName];
 
-		XMLNodePtr fontNode = node->FirstNode("Font");
-		if (fontNode)
-		{
-		String fontName = fontNode->AttributeString("name", "");
-		CheckBox.Font = mFont;
-		CheckBox.FontSize = fontNode->AttributeFloat("fontSize", 25.0f);
+				skinDefs.ReadStateStyles(stateNode, Button.StyleStates[uiState]);
+
+				Button.StyleStates[uiState].TexColor = ReadColor(stateNode->AttributeString("color", ""));
+			}
+
+			XMLNodePtr fontNode = node->FirstNode("Font");
+			if (fontNode)
+			{
+				String fontName = fontNode->AttributeString("name", "");
+				Button.Font = mFont;
+				Button.FontSize = fontNode->AttributeFloat("fontSize", 25.0f);
+			}
+
+			XMLNodePtr backNode = node->FirstNode("BackColor");
+			if (backNode)
+			{
+				Button.BackColor = ReadColor(backNode->AttributeString("color", ""));
+			}
+
+			XMLNodePtr foreNode = node->FirstNode("ForeColor");
+			if (foreNode)
+			{
+				Button.ForeColor = ReadColor(foreNode->AttributeString("color", ""));
+			}
+
+			Button.StyleTex = mSkinTexAtlas;
 		}
-		}*/
 	}
 
 	// Slider
@@ -415,6 +432,27 @@ void GuiSkin::LoadImpl()
 				ListBox.ForeColor = ReadColor(foreNode->AttributeString("color", ""));
 
 			ListBox.StyleTex = mSkinTexAtlas;
+		}
+	}
+
+	// ComboBox
+	{
+		if ( node = root->FirstNode("ComboBox") )
+		{
+			XMLNodePtr dropdwonNode = node->FirstNode("DropDwonButton");
+			if (dropdwonNode)
+			{
+				for (XMLNodePtr stateNode = dropdwonNode->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+				{
+					String stateName = stateNode->AttributeString("name", "");
+					UIElementState uiState = skinDefs.mStateDefs[stateName];
+					skinDefs.ReadStateStyles(stateNode, ComboDropButton.StyleStates[uiState]);
+
+					ComboDropButton.StyleStates[uiState].TexColor = ReadColor(stateNode->AttributeString("color", ""));
+				}
+
+				ComboDropButton.StyleTex = mSkinTexAtlas;	
+			}
 		}
 	}
 }

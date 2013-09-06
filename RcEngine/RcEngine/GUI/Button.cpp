@@ -9,8 +9,10 @@ namespace RcEngine {
 const String Button::StyleName("Button Style");
 
 Button::Button()
-	: mPressedOffset(1, 2),
-	  mHoverOffset(-1, -2),
+	:/* mPressedOffset(1, 2),
+	 mHoverOffset(-1, -2),*/
+	  mPressedOffset(0, 0),
+	  mHoverOffset(0, 0),
 	  mRepeatDelay(1.0f),
 	  mRepeatRate(0.0f),
 	  mRepeatTimer(0.0f)
@@ -130,7 +132,11 @@ void Button::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	float zOrder = GetDepthLayer();
 
 	Rectanglef btnRegion(screenPos.X() + offsetX, screenPos.Y() + offsetY, (float)mSize.X(), (float)mSize.Y());
-	spriteBatch.Draw(mStyle->StyleTex, btnRegion, &mStyle->StyleStates[uiState].TexRegion, mStyle->StyleStates[uiState].TexColor, zOrder);
+
+	if (mStyle->StyleStates[uiState].NinePath())
+		mStyle->DrawNinePatch(spriteBatch, uiState, btnRegion, zOrder);
+	else 
+		spriteBatch.Draw(mStyle->StyleTex, btnRegion, &mStyle->StyleStates[uiState].TexRegion, mStyle->StyleStates[uiState].TexColor, zOrder);
 
 	if (mText.length())
 		mStyle->Font->DrawString(spriteBatchFont, mText, mStyle->FontSize, AlignCenter, btnRegion, mStyle->ForeColor, zOrder);

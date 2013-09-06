@@ -216,15 +216,6 @@ void TestApp::InitGUI()
 	mFPSLabel->SetFont(UIManager::GetSingleton().GetDefaultFont(), 20.0f);
 	rootElem->AddChild( mFPSLabel );	
 
-	//mButton = new Button;
-	//mButton->SetName("Button");
-	//mButton->InitGuiStyle(nullptr);
-	//mButton->SetPosition(int2(20, 30));
-	//mButton->SetSize(int2(100, 40));
-	//mButton->SetText(L"Button");
-	//mButton->EventButtonClicked.bind(this, &TestApp::ButtonClicked);
-	//rootElem->AddChild( mButton );	
-
 	mCheckBox = new CheckBox;
 	mCheckBox->SetName("CheckBox");
 	mCheckBox->InitGuiStyle(nullptr);
@@ -257,38 +248,17 @@ void TestApp::InitGUI()
 	mTextEdit->SetText(text);
 	//rootElem->AddChild(mTextEdit);
 
-	//mComboBox = new ComboBox;
-	//mComboBox->InitGuiStyle(nullptr);
-	//mComboBox->SetName("ComboBox");
-	//mComboBox->SetPosition(int2(20, 450));
-	//mComboBox->SetSize(int2(200, 30));
-	////mComboBox->SetDropHeight(60);
-	//mComboBox->AddItem(L"Cryteck");
-	//mComboBox->AddItem(L"HBAO");
-	//mComboBox->AddItem(L"Unreal4");
-	//mComboBox->AddItem(L"Alchemy");	
-	//mComboBox->SetSelectedIndex(0);
-	//rootElem->AddChild(mComboBox);
-
 	mWindow1 = new UIWindow;
 	mWindow1->InitGuiStyle(nullptr);
 	mWindow1->SetName("Window0");
 	mWindow1->SetTitle(L"Window Title");
 	mWindow1->SetPosition(int2(20, 50));
 	mWindow1->SetSize(int2(380, 450));
-	rootElem->AddChild( mWindow1 );	
-
-	mLineEdit = new LineEdit();
-	mLineEdit->InitGuiStyle(nullptr);
-	mLineEdit->SetName("LineEdit");
-	mLineEdit->SetPosition(int2(150, 60));
-	mLineEdit->SetSize(int2(180, 40));
-	mLineEdit->SetText(L"mLineEdit = new TextEdit(TextEdit::LineEdit);");
-	mWindow1->AddChild(mLineEdit);
+	//rootElem->AddChild( mWindow1 );	
 	
 	mWindow1->AddChild(mTextEdit);
 	mWindow1->AddChild(mCheckBox);
-	mWindow1->AddChild(mLineEdit);
+
 
 	mWindow2 = new UIWindow;
 	mWindow2->InitGuiStyle(nullptr);
@@ -298,17 +268,47 @@ void TestApp::InitGUI()
 	mWindow2->SetSize(int2(350, 350));
 	rootElem->AddChild( mWindow2 );	
 
-	mListBox = new ListBox;
-	mListBox->InitGuiStyle(nullptr);
-	mListBox->SetName("ListBox");
-	mListBox->SetPosition(int2(20, 50));
-	mListBox->SetSize(int2(200, 90));
-	mListBox->AddItem(L"ListBox");
-	mListBox->AddItem(L"HBAO");
-	mListBox->AddItem(L"Unreal4");
-	mListBox->AddItem(L"Alchemy");	
-	mListBox->SetSelectedIndex(1);
-	mWindow2->AddChild(mListBox);
+	//mListBox = new ListBox;
+	//mListBox->InitGuiStyle(nullptr);
+	//mListBox->SetName("ListBox");
+	//mListBox->SetPosition(int2(20, 50));
+	//mListBox->SetSize(int2(200, 90));
+	//mListBox->AddItem(L"ListBox");
+	//mListBox->AddItem(L"HBAO");
+	//mListBox->AddItem(L"Unreal4");
+	//mListBox->AddItem(L"Alchemy");	
+	//mListBox->SetSelectedIndex(1);
+	//mWindow2->AddChild(mListBox);
+
+	//mButton = new Button;
+	//mButton->SetName("Button");
+	//mButton->InitGuiStyle(nullptr);
+	//mButton->SetPosition(int2(220, 175));
+	//mButton->SetSize(int2(100, 40));
+	//mButton->SetText(L"Button");
+	//mButton->EventButtonClicked.bind(this, &TestApp::ButtonClicked);
+	//mWindow2->AddChild( mButton );	
+
+	//mLineEdit = new LineEdit();
+	//mLineEdit->InitGuiStyle(nullptr);
+	//mLineEdit->SetName("LineEdit");
+	//mLineEdit->SetPosition(int2(20, 175));
+	//mLineEdit->SetSize(int2(180, 40));
+	//mLineEdit->SetText(L"mLineEdit = new TextEdit(TextEdit::LineEdit);");
+	//mWindow2->AddChild(mLineEdit);
+
+	mComboBox = new ComboBox;
+	mComboBox->InitGuiStyle(nullptr);
+	mComboBox->SetName("ComboBox");
+	mComboBox->SetPosition(int2(20, 240));
+	mComboBox->SetSize(int2(100, 30));
+	//mComboBox->SetDropHeight(60);
+	mComboBox->AddItem(L"Cryteck");
+	mComboBox->AddItem(L"HBAO");
+	mComboBox->AddItem(L"Unreal4");
+	mComboBox->AddItem(L"Alchemy");	
+	mComboBox->SetSelectedIndex(0);
+	mWindow2->AddChild(mComboBox);
 }
 
 void TestApp::DrawUI()
@@ -343,7 +343,8 @@ void TestApp::SliderValueChange( int32_t value )
 
 void TestApp::ButtonClicked()
 {
-	printf("Button: Clicked\n");
+	const std::wstring& text = mLineEdit->GetText();
+	mListBox->AddItem(text);
 }
 
 void TestApp::CheckBoxToggle( bool checked )

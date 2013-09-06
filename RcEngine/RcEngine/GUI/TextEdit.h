@@ -36,6 +36,9 @@ public:
 	void SetTextColor(const ColorRGBA& color)			{ mTextColor = color; }
 	void SetSelectedTextColor(const ColorRGBA& color)	{ mSelTextColor = color; }
 
+	void SetEditLevel(TextEditLevel level)				{ mTextEditLevel = level; }
+	TextEditLevel GetEditLevel() const					{ return mTextEditLevel; }
+
 protected:
 	
 	/**
@@ -81,10 +84,11 @@ protected:
 	std::wstring mPrintText;
 	
 	bool mWordWrap;
+	TextEditLevel mTextEditLevel;
 
 	int32_t mFirstVisibleY;
 	int32_t mNumVisibleY;
-
+	
 	//float mVisibleStartX;
 	//float mVisibleStartY;
 

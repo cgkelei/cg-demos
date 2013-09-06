@@ -24,6 +24,7 @@ public:
 	virtual void InitGuiStyle(const GuiSkin::StyleMap* styles = nullptr);
 
 	virtual void Update(float dt);
+	virtual void OnResize();
 
 	virtual void OnHover(const int2& screenPos);
 
@@ -46,6 +47,7 @@ protected:
 
 protected:
 	ListBox* mItemList;
+	LineEdit* mText;
 	Button* mDropButton;
 
 	int32_t mSelectedIndex;

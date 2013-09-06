@@ -52,6 +52,13 @@ enum NinePatch
 	NP_Count
 };
 
+enum TextEditLevel
+{
+	TEL_Label,
+	TEL_NoEdit,
+	TEL_Edit
+};
+
 /**
  * GuiSkin is a collection of GUIStyles that can be applied to your GUI Controls.
  */
