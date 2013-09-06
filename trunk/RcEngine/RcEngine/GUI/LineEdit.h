@@ -30,6 +30,9 @@ public:
 
 	virtual bool CanHaveFocus() const;
 
+	void SetEditLevel(TextEditLevel level)				{ mTextEditLevel = level; }
+	TextEditLevel GetEditLevel() const					{ return mTextEditLevel; }
+
 	void SetText(const std::wstring& text);
 	const std::wstring& GetText() const				    { return mText; }
 
@@ -64,6 +67,8 @@ protected:
 	float mCaretBlinkTimer;
 	bool mCaretOn;
 	bool mDragCursor;
+
+	TextEditLevel mTextEditLevel;
 
 	float mRowHeight;
 

@@ -13,6 +13,7 @@ LineEdit::LineEdit()
 	  mBorder(4),
 	  mCaretOn(false),
 	  mDragCursor(false),
+	  mTextEditLevel(TEL_Edit),
 	  mStyle(nullptr),
 	  mCaretBlinkRate(1.0f),
 	  mCaretBlinkTimer(0.0f),
@@ -37,7 +38,7 @@ void LineEdit::Update( float dt )
 	else
 		mCaretBlinkTimer = 0.0f;
 
-	if (HasFocus())
+	if (mTextEditLevel != TEL_Label && HasFocus())
 		mCaretOn = (mCaretBlinkTimer > 0.5f);
 	else 
 	{
@@ -190,7 +191,7 @@ void LineEdit::InitGuiStyle( const GuiSkin::StyleMap* styles /*= nullptr*/ )
 
 void LineEdit::OnDragBegin( const int2& screenPos, uint32_t button )
 {
-	if (button == MS_LeftButton && mText.size())
+	if (button == MS_LeftButton && mTextEditLevel != TEL_Label && mText.size())
 	{
 		if (this->IsInside(screenPos, true))
 		{
@@ -234,6 +235,9 @@ void LineEdit::OnDragEnd( const int2& screenPos )
 
 bool LineEdit::OnKeyPress( uint16_t key )
 {
+	if (mTextEditLevel == TEL_Label)
+		return true;	// Pass, no editing
+
 	switch (key)
 	{
 	case KC_LeftArrow:
@@ -272,7 +276,7 @@ bool LineEdit::OnKeyPress( uint16_t key )
 					mText.erase(mCaretPos, 1);
 					UpdateText();
 				}
-			}	
+			}		
 		}
 		break;
 
@@ -328,6 +332,10 @@ bool LineEdit::OnTextInput( uint16_t unicode )
 {
 	bool eventConsumed = true;
 
+	if (mTextEditLevel == TEL_Label)
+		return eventConsumed;
+
+
 	if (HasFocus() && unicode >= 0x20)
 	{
 		if (HasSelection())
@@ -375,7 +383,6 @@ void LineEdit::UpdateRect()
 	mTextRect.Height = float( mSize.Y() - mBorder / 2 - mBorder / 2 );
 
 	mVisibleStartX = 0;
-
 	UpdateText();
 }
 
@@ -400,7 +407,9 @@ int32_t LineEdit::GetCaretAtCuror( float screenX ) const
 
 void LineEdit::UpdateText()
 {
-	
+	if (!mStyle)
+		return;
+
 	const float fontScale = mStyle->FontSize / mStyle->Font->GetFontSize();
 
 	// Keep track of every line char start pos

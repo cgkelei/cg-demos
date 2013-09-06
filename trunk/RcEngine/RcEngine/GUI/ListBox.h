@@ -31,6 +31,7 @@ public:
 
 	virtual bool OnMouseButtonPress(const int2& screenPos, uint32_t button);
 	virtual bool OnMouseButtonRelease(const int2& screenPos, uint32_t button);
+	virtual bool OnMouseWheel( int32_t delta );
 
 	void AddItem(const std::wstring& text);
 	void InsertItem(int32_t index, const std::wstring& text);

@@ -23,6 +23,7 @@ TextEdit::TextEdit()
 	  mTextEditStyle(nullptr),
 	  mVertScrollBar(nullptr),
 	  mCaretOn(false),
+	  mTextEditLevel(TEL_Edit),
 	  mNumLines(0),
 	  mFirstVisibleY(0),
 	  mNumVisibleY(0),
@@ -591,7 +592,7 @@ void TextEdit::UpdateRect()
 void TextEdit::UpdateText()
 {
 	if (!mTextEditStyle)
-		ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Init Gui Style First!", "TextEdit::UpdateText");
+		return;
 
 	const float fontScale = (float)mTextEditStyle->FontSize / mTextEditStyle->Font->GetFontSize();
 	const float rowHeight = mTextEditStyle->Font->GetRowHeight(fontScale);
