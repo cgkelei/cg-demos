@@ -281,13 +281,11 @@ void UIElement::AddChild( UIElement* child )
 	{
 		child->RemoveFromParent();
 		child->mParent = this;
+
 		child->MarkDirty();
 		child->SetPriority(mPriority);
 
-		child->UpdateRect();
-
-		for (UIElement* childs : child->GetChildren())
-			childs->UpdateRect();
+		child->OnResize();
 
 		mChildren.push_back(child);
 		mSortOrderDirty = true;

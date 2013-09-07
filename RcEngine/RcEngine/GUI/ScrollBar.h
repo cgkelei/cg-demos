@@ -51,7 +51,7 @@ public:
 	 * VScrollBar's Width in skin texture. So only need to set track length.
 	 */
 	void SetTrackLength(int32_t length);
-	int32_t GetTrackExtext() const									{ return mExtent; }
+	int32_t GetTrackExtext() const									{ return mTrackExtent; }
 
 	/**
 	 * The size of the visible area of the scrollable content.
@@ -99,7 +99,7 @@ protected:
 	int32_t mSingleStep;
 	int32_t mPageStep;
 
-	int32_t mExtent;
+	int32_t mTrackExtent;
 	int32_t mScrollableExtent;
 
 	bool mThumbHovering;

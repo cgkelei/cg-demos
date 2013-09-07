@@ -78,7 +78,7 @@ void TextEdit::InitGuiStyle( const GuiSkin::StyleMap* styles /* = nullptr */ )
 		// background in Normal State
 		mTextEditStyle = &defaultSkin->TextEdit;
 
-		if (mTextEditStyle->StyleStates[UI_State_Normal].NinePath())
+		if (mTextEditStyle->StyleStates[UI_State_Normal].HasOtherPatch())
 			mBorder = mTextEditStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left].Width;
 
 		mScrollBarWidth = mVertScrollBar->GetTrackExtext() + 1;

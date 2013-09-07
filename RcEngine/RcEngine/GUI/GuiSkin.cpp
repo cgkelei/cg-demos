@@ -123,7 +123,7 @@ void GuiSkin::LoadImpl()
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 	GuiSkinDefs& skinDefs = GuiSkinDefs::GetInstance();
 
-	String mName = "Default.skin1.xml";
+	String mName = "xWinForm.skin.xml";
 	String mGroup = "General";
 
 	shared_ptr<Stream> matStream = fileSystem.OpenStream(mName, mGroup);
@@ -227,21 +227,6 @@ void GuiSkin::LoadImpl()
 			Button.StyleTex = mSkinTexAtlas;
 		}
 	}
-
-	// Slider
-	{
-		/*node = root->FirstNode("Button");
-		if (node)
-		{
-			for (XMLNodePtr stateNode = node->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
-			{
-				String stateName = stateNode->AttributeString("name", "");
-				UIElementState uiState = skinDefs.mStateDefs[stateName];
-				skinDefs.ReadStateStyles(stateNode, CheckBox.StyleStates[uiState]);
-			}
-		}*/
-	}
-
 
 	// TextEdit
 	{
@@ -349,6 +334,34 @@ void GuiSkin::LoadImpl()
 
 			WindowRestoreBtn.StyleTex = mSkinTexAtlas;
 		}
+	}
+
+	{
+		if ( node = root->FirstNode("HSlider") )
+		{
+			XMLNodePtr trackNode = node->FirstNode("Track");
+			for (XMLNodePtr stateNode = trackNode->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+			{
+				String stateName = stateNode->AttributeString("name", "");
+				UIElementState uiState = skinDefs.mStateDefs[stateName];
+				skinDefs.ReadStateStyles(stateNode, HSliderTrack.StyleStates[uiState]);
+
+				HSliderTrack.StyleStates[uiState].TexColor = ReadColor(stateNode->AttributeString("color", ""));
+			}
+
+			XMLNodePtr thumbNode = node->FirstNode("Thumb");
+			for (XMLNodePtr stateNode = thumbNode->FirstNode("State"); stateNode; stateNode = stateNode->NextSibling("State"))
+			{
+				String stateName = stateNode->AttributeString("name", "");
+				UIElementState uiState = skinDefs.mStateDefs[stateName];
+				skinDefs.ReadStateStyles(stateNode, HSliderThumb.StyleStates[uiState]);
+
+				HSliderThumb.StyleStates[uiState].TexColor = ReadColor(stateNode->AttributeString("color", ""));
+			}
+		}
+
+		HSliderTrack.StyleTex = mSkinTexAtlas;
+		HSliderThumb.StyleTex = mSkinTexAtlas;
 	}
 
 	// ScrollBar
@@ -470,42 +483,23 @@ void GuiSkin::UnloadImpl()
 
 void GuiSkin::GuiStyle::DrawNinePatch( SpriteBatch& spriteBatch, UIElementState uiState, const Rectanglef& rect, float zOrder )
 {
-	Rectanglef destRect;
-	IntRect sourceRectL, sourceRectM, sourceRectR;
-
-	float topHeight = (float)StyleStates[uiState].OtherPatch[NP_Top].Height;
-	float bottomHeight = (float)StyleStates[uiState].OtherPatch[NP_Bottom].Height;
-
-	// Draw Top
-	sourceRectL = StyleStates[uiState].OtherPatch[NP_Top_Left];
-	sourceRectM = StyleStates[uiState].OtherPatch[NP_Top];
-	sourceRectR = StyleStates[uiState].OtherPatch[NP_Top_Right];
-
-	destRect.X = rect.Left();
-	destRect.Y = rect.Top();
-	destRect.Width = (float)sourceRectL.Width;
-	destRect.Height = (float)sourceRectL.Height;
-	spriteBatch.Draw(StyleTex, destRect, &sourceRectL, StyleStates[uiState].TexColor, zOrder);
-
-	destRect.X = destRect.Right();
-	destRect.Width = rect.Width - (sourceRectL.Width + sourceRectR.Width);
-	spriteBatch.Draw(StyleTex, destRect, &sourceRectM, StyleStates[uiState].TexColor, zOrder);
-
-	destRect.X = destRect.Right();
-	destRect.Width = (float)sourceRectR.Width;
-	spriteBatch.Draw(StyleTex, destRect, &sourceRectR, StyleStates[uiState].TexColor, zOrder);
-
-	if (rect.Height > topHeight + bottomHeight)
+	if (StyleStates[uiState].HasOtherPatch())
 	{
-		// Draw Middle
-		sourceRectL = StyleStates[uiState].OtherPatch[NP_Left];
-		sourceRectM = StyleStates[uiState].TexRegion;
-		sourceRectR = StyleStates[uiState].OtherPatch[NP_Right];
+		Rectanglef destRect;
+		IntRect sourceRectL, sourceRectM, sourceRectR;
+
+		float topHeight = (float)StyleStates[uiState].OtherPatch[NP_Top].Height;
+		float bottomHeight = (float)StyleStates[uiState].OtherPatch[NP_Bottom].Height;
+
+		// Draw Top
+		sourceRectL = StyleStates[uiState].OtherPatch[NP_Top_Left];
+		sourceRectM = StyleStates[uiState].OtherPatch[NP_Top];
+		sourceRectR = StyleStates[uiState].OtherPatch[NP_Top_Right];
 
 		destRect.X = rect.Left();
-		destRect.Y = destRect.Bottom();
+		destRect.Y = rect.Top();
 		destRect.Width = (float)sourceRectL.Width;
-		destRect.Height = rect.Height - (topHeight + bottomHeight);
+		destRect.Height = (float)sourceRectL.Height;
 		spriteBatch.Draw(StyleTex, destRect, &sourceRectL, StyleStates[uiState].TexColor, zOrder);
 
 		destRect.X = destRect.Right();
@@ -515,34 +509,117 @@ void GuiSkin::GuiStyle::DrawNinePatch( SpriteBatch& spriteBatch, UIElementState 
 		destRect.X = destRect.Right();
 		destRect.Width = (float)sourceRectR.Width;
 		spriteBatch.Draw(StyleTex, destRect, &sourceRectR, StyleStates[uiState].TexColor, zOrder);
-	}
 
-	if (rect.Height > sourceRectL.Height)
-	{
-		// Draw Bottom
-		sourceRectL = StyleStates[uiState].OtherPatch[NP_Bottom_Left];
-		sourceRectM = StyleStates[uiState].OtherPatch[NP_Bottom];
-		sourceRectR = StyleStates[uiState].OtherPatch[NP_Bottom_Right];
-
-		destRect.X = rect.X;
-		destRect.Y = destRect.Bottom();
-		destRect.Width = (float)sourceRectL.Width;
 		if (rect.Height > topHeight + bottomHeight)
-			destRect.Height = bottomHeight;
-		else 
 		{
-			destRect.Y = rect.Y + topHeight;
-			destRect.Height = rect.Height - topHeight;
+			// Draw Middle
+			sourceRectL = StyleStates[uiState].OtherPatch[NP_Left];
+			sourceRectM = StyleStates[uiState].TexRegion;
+			sourceRectR = StyleStates[uiState].OtherPatch[NP_Right];
+
+			destRect.X = rect.Left();
+			destRect.Y = destRect.Bottom();
+			destRect.Width = (float)sourceRectL.Width;
+			destRect.Height = rect.Height - (topHeight + bottomHeight);
+			spriteBatch.Draw(StyleTex, destRect, &sourceRectL, StyleStates[uiState].TexColor, zOrder);
+
+			destRect.X = destRect.Right();
+			destRect.Width = rect.Width - (sourceRectL.Width + sourceRectR.Width);
+			spriteBatch.Draw(StyleTex, destRect, &sourceRectM, StyleStates[uiState].TexColor, zOrder);
+
+			destRect.X = destRect.Right();
+			destRect.Width = (float)sourceRectR.Width;
+			spriteBatch.Draw(StyleTex, destRect, &sourceRectR, StyleStates[uiState].TexColor, zOrder);
 		}
-		spriteBatch.Draw(StyleTex, destRect, &sourceRectL, StyleStates[uiState].TexColor, zOrder);
 
-		destRect.X = destRect.Right();
-		destRect.Width = (float)rect.Width - (sourceRectL.Width + sourceRectR.Width);
-		spriteBatch.Draw(StyleTex, destRect, &sourceRectM, StyleStates[uiState].TexColor, zOrder);
+		if (rect.Height > sourceRectL.Height)
+		{
+			// Draw Bottom
+			sourceRectL = StyleStates[uiState].OtherPatch[NP_Bottom_Left];
+			sourceRectM = StyleStates[uiState].OtherPatch[NP_Bottom];
+			sourceRectR = StyleStates[uiState].OtherPatch[NP_Bottom_Right];
 
-		destRect.X = destRect.Right();
-		destRect.Width = (float)sourceRectR.Width;
-		spriteBatch.Draw(StyleTex, destRect, &sourceRectR, StyleStates[uiState].TexColor, zOrder);
+			destRect.X = rect.X;
+			destRect.Y = destRect.Bottom();
+			destRect.Width = (float)sourceRectL.Width;
+			if (rect.Height > topHeight + bottomHeight)
+				destRect.Height = bottomHeight;
+			else 
+			{
+				destRect.Y = rect.Y + topHeight;
+				destRect.Height = rect.Height - topHeight;
+			}
+			spriteBatch.Draw(StyleTex, destRect, &sourceRectL, StyleStates[uiState].TexColor, zOrder);
+
+			destRect.X = destRect.Right();
+			destRect.Width = (float)rect.Width - (sourceRectL.Width + sourceRectR.Width);
+			spriteBatch.Draw(StyleTex, destRect, &sourceRectM, StyleStates[uiState].TexColor, zOrder);
+
+			destRect.X = destRect.Right();
+			destRect.Width = (float)sourceRectR.Width;
+			spriteBatch.Draw(StyleTex, destRect, &sourceRectR, StyleStates[uiState].TexColor, zOrder);
+		}
+	}
+	else
+	{
+		// Direct Fill
+		spriteBatch.Draw(StyleTex, rect, &StyleStates[uiState].TexRegion, StyleStates[uiState].TexColor, zOrder);
+	}
+}
+
+void GuiSkin::GuiStyle::DrawThreePatch( SpriteBatch& spriteBatch, UIElementState uiState, UIOrientation orient, const Rectanglef& rect, float zOrder )
+{
+	if (StyleStates[uiState].HasOtherPatch())
+	{
+		Rectanglef destRect;
+		IntRect sourceRect[3];
+
+		if (orient == UI_Horizontal)
+		{
+			sourceRect[0] = StyleStates[uiState].OtherPatch[NP_Left];
+			sourceRect[1] = StyleStates[uiState].TexRegion;
+			sourceRect[2] = StyleStates[uiState].OtherPatch[NP_Right];
+
+			destRect.X = rect.X;
+			destRect.Width = (float)sourceRect[0].Width;
+			destRect.Y = rect.Y;
+			destRect.Height = rect.Height;
+			spriteBatch.Draw(StyleTex, destRect, &sourceRect[0], StyleStates[uiState].TexColor, zOrder);
+
+			destRect.X = destRect.Right();
+			destRect.Width = rect.Width - sourceRect[0].Width - sourceRect[2].Width + 1;
+			spriteBatch.Draw(StyleTex, destRect, &sourceRect[1], StyleStates[uiState].TexColor, zOrder);
+
+			destRect.X = destRect.Right();
+			destRect.Width = (float)sourceRect[2].Width;
+			spriteBatch.Draw(StyleTex, destRect, &sourceRect[2], StyleStates[uiState].TexColor, zOrder);		
+		}
+		else
+		{
+			sourceRect[0] = StyleStates[uiState].OtherPatch[NP_Top];
+			sourceRect[1] = StyleStates[uiState].TexRegion;
+			sourceRect[2] = StyleStates[uiState].OtherPatch[NP_Bottom];
+
+			destRect.X = rect.X;
+			destRect.Width = rect.Width;
+
+			destRect.Y = rect.Y;
+			destRect.Height = (float)sourceRect[0].Height;
+			spriteBatch.Draw(StyleTex, destRect, &sourceRect[0], StyleStates[uiState].TexColor, zOrder);
+
+			destRect.Y = destRect.Bottom();
+			destRect.Height = rect.Height - sourceRect[0].Height - sourceRect[2].Height;
+			spriteBatch.Draw(StyleTex, destRect, &sourceRect[1], StyleStates[uiState].TexColor, zOrder);
+
+			destRect.X = destRect.Bottom();
+			destRect.Width = (float)sourceRect[2].Height;
+			spriteBatch.Draw(StyleTex, destRect, &sourceRect[2], StyleStates[uiState].TexColor, zOrder);
+		}
+	}
+	else
+	{
+		// Direct Fill
+		spriteBatch.Draw(StyleTex, rect, &StyleStates[uiState].TexRegion, StyleStates[uiState].TexColor, zOrder);
 	}
 }
 

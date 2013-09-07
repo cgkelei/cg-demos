@@ -132,14 +132,10 @@ void Button::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	float zOrder = GetDepthLayer();
 
 	Rectanglef btnRegion(screenPos.X() + offsetX, screenPos.Y() + offsetY, (float)mSize.X(), (float)mSize.Y());
-
-	if (mStyle->StyleStates[uiState].NinePath())
-		mStyle->DrawNinePatch(spriteBatch, uiState, btnRegion, zOrder);
-	else 
-		spriteBatch.Draw(mStyle->StyleTex, btnRegion, &mStyle->StyleStates[uiState].TexRegion, mStyle->StyleStates[uiState].TexColor, zOrder);
+	mStyle->DrawNinePatch(spriteBatch, uiState, btnRegion, zOrder);
 
 	if (mText.length())
-		mStyle->Font->DrawString(spriteBatchFont, mText, mStyle->FontSize, AlignCenter, btnRegion, mStyle->ForeColor, zOrder);
+		mStyle->Font->DrawString(spriteBatchFont, mText, mSize.Y() * 0.7f, AlignCenter, btnRegion, mStyle->ForeColor, zOrder);
 
 	// Reset hovering for next frame
 	mHovering = false;
@@ -157,6 +153,15 @@ void Button::InitGuiStyle( const GuiSkin::StyleMap* styles )
 	{
 		GuiSkin::StyleMap::const_iterator iter = styles->find(StyleName);
 		mStyle = iter->second;
+	}
+
+	// if don't use nine patch, set default size
+	if (!mStyle->StyleStates[UI_State_Normal].HasOtherPatch())
+	{
+		int2 size;
+		size.X() = mStyle->StyleStates[UI_State_Normal].TexRegion.Width;
+		size.Y() = mStyle->StyleStates[UI_State_Normal].TexRegion.Height;
+		SetSize(size);
 	}
 }
 

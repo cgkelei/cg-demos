@@ -140,13 +140,13 @@ void ComboBox::ToggleDropDownList()
 {
 	if (mItemList->IsVisible())
 	{
-		SetPriority(0);
+		mItemList->SetPriority(mPriority);
 		mItemList->SetVisible(false);
 	}
 	else
 	{
 		// temporary promote ComBoBox priority
-		SetPriority(UI_DropPopPriority);
+		mItemList->SetPriority(UI_DropPopPriority);
 		mItemList->SetVisible(true);
 	}
 

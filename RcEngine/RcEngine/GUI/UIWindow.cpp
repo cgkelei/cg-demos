@@ -415,36 +415,18 @@ void UIWindow::InitGuiStyle( const GuiSkin::StyleMap* styles /*= nullptr*/ )
 		mStyle =&defalutSkin->WindowBorder;
 		mBorderThickness = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top].Height;
 
-		int2 size;
-
 		GuiSkin::StyleMap styleMap;
 		styleMap[Button::StyleName] = &defalutSkin->WindowCloseBtn;
 		mCloseBtn->InitGuiStyle(&styleMap);
 
-		size.X() = defalutSkin->WindowCloseBtn.StyleStates[UI_State_Normal].TexRegion.Width;
-		size.Y() = defalutSkin->WindowCloseBtn.StyleStates[UI_State_Normal].TexRegion.Height;
-		mCloseBtn->SetSize(size);
-
 		styleMap[Button::StyleName] = &defalutSkin->WindowMaximizeBtn;
 		mMaximizeBtn->InitGuiStyle(&styleMap);
-
-		size.X() = defalutSkin->WindowMaximizeBtn.StyleStates[UI_State_Normal].TexRegion.Width;
-		size.Y() = defalutSkin->WindowMaximizeBtn.StyleStates[UI_State_Normal].TexRegion.Height;
-		mMaximizeBtn->SetSize(size);
 
 		styleMap[Button::StyleName] = &defalutSkin->WindowMinimizeBtn;
 		mMinimizeBtn->InitGuiStyle(&styleMap);
 
-		size.X() = defalutSkin->WindowMinimizeBtn.StyleStates[UI_State_Normal].TexRegion.Width;
-		size.Y() = defalutSkin->WindowMinimizeBtn.StyleStates[UI_State_Normal].TexRegion.Height;
-		mMinimizeBtn->SetSize(size);
-
 		styleMap[Button::StyleName] = &defalutSkin->WindowRestoreBtn;
 		mRestoreBtn->InitGuiStyle(&styleMap);
-
-		size.X() = defalutSkin->WindowRestoreBtn.StyleStates[UI_State_Normal].TexRegion.Width;
-		size.Y() = defalutSkin->WindowRestoreBtn.StyleStates[UI_State_Normal].TexRegion.Height;
-		mRestoreBtn->SetSize(size);
 	}
 }
 

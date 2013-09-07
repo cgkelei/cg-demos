@@ -36,6 +36,9 @@ public:
 	virtual bool OnMouseButtonPress(const int2& screenPos, uint32_t button);
 	virtual bool OnMouseButtonRelease(const int2& screenPos, uint32_t button);
 
+	void SetTrackLength(int32_t length);
+	int32_t GetTrackExtext() const									{ return mTrackExtent; }
+
 	void SetSingleStep(int32_t step);
 	int32_t GetSingleStep() const;
 
@@ -65,6 +68,7 @@ protected:
 	int32_t mMinimum, mMaximum;
 
 	int32_t mSingleStep;
+	int32_t mTrackExtent;
 
 	bool mThumbHovering;
 
@@ -72,7 +76,7 @@ protected:
 	int32_t mDragBeginValue;
 	int2 mDragBeginPos;		
 
-	IntRect mThumbRegion;
+	Rectanglef mThumbRegion;
 
 	GuiSkin::GuiStyle* mThumbStyle;
 	GuiSkin::GuiStyle* mTrackStyle;
