@@ -223,16 +223,6 @@ void TestApp::InitGUI()
 	mCheckBox->SetSize(int2(150, 16));
 	mCheckBox->SetText(L"CheckBox");
 	mCheckBox->EventStateChanged.bind(this, &TestApp::CheckBoxToggle);
-	//rootElem->AddChild(mCheckBox);
-
-	//mSlider = new Slider(UI_Horizontal);
-	//mSlider->SetName("Slider");
-	//mSlider->InitGuiStyle(nullptr);
-	//mSlider->SetPosition(int2(20, 150));
-	//mSlider->SetSize(int2(200, 23));
-	//mSlider->SetValue(100);
-	//mSlider->EventValueChanged.bind(this, &TestApp::SliderValueChange);
-	//rootElem->AddChild( mSlider );	
 
 	std::wfstream file(L"Config.xml");
 	std::wstring text((std::istreambuf_iterator<wchar_t>(file)), std::istreambuf_iterator<wchar_t>());
@@ -243,10 +233,7 @@ void TestApp::InitGUI()
 	mTextEdit->SetName("TextEdit");
 	mTextEdit->SetPosition(int2(20, 130));
 	mTextEdit->SetSize(int2(300, 300));
-	//mTextEdit->SetPosition(int2(20, 50));
-	//mTextEdit->SetSize(int2(750, 450));
 	mTextEdit->SetText(text);
-	//rootElem->AddChild(mTextEdit);
 
 	mWindow1 = new UIWindow;
 	mWindow1->InitGuiStyle(nullptr);
@@ -254,7 +241,7 @@ void TestApp::InitGUI()
 	mWindow1->SetTitle(L"Window Title");
 	mWindow1->SetPosition(int2(20, 50));
 	mWindow1->SetSize(int2(380, 450));
-	//rootElem->AddChild( mWindow1 );	
+	rootElem->AddChild( mWindow1 );	
 	
 	mWindow1->AddChild(mTextEdit);
 	mWindow1->AddChild(mCheckBox);
@@ -268,34 +255,34 @@ void TestApp::InitGUI()
 	mWindow2->SetSize(int2(350, 350));
 	rootElem->AddChild( mWindow2 );	
 
-	//mListBox = new ListBox;
-	//mListBox->InitGuiStyle(nullptr);
-	//mListBox->SetName("ListBox");
-	//mListBox->SetPosition(int2(20, 50));
-	//mListBox->SetSize(int2(200, 90));
-	//mListBox->AddItem(L"ListBox");
-	//mListBox->AddItem(L"HBAO");
-	//mListBox->AddItem(L"Unreal4");
-	//mListBox->AddItem(L"Alchemy");	
-	//mListBox->SetSelectedIndex(1);
-	//mWindow2->AddChild(mListBox);
+	mListBox = new ListBox;
+	mListBox->InitGuiStyle(nullptr);
+	mListBox->SetName("ListBox");
+	mListBox->SetPosition(int2(20, 50));
+	mListBox->SetSize(int2(200, 90));
+	mListBox->AddItem(L"ListBox");
+	mListBox->AddItem(L"HBAO");
+	mListBox->AddItem(L"Unreal4");
+	mListBox->AddItem(L"Alchemy");	
+	mListBox->SetSelectedIndex(1);
+	mWindow2->AddChild(mListBox);
 
-	//mButton = new Button;
-	//mButton->SetName("Button");
-	//mButton->InitGuiStyle(nullptr);
-	//mButton->SetPosition(int2(220, 175));
-	//mButton->SetSize(int2(100, 40));
-	//mButton->SetText(L"Button");
-	//mButton->EventButtonClicked.bind(this, &TestApp::ButtonClicked);
-	//mWindow2->AddChild( mButton );	
+	mButton = new Button;
+	mButton->SetName("Button");
+	mButton->InitGuiStyle(nullptr);
+	mButton->SetPosition(int2(220, 175));
+	mButton->SetSize(int2(100, 40));
+	mButton->SetText(L"Button");
+	mButton->EventButtonClicked.bind(this, &TestApp::ButtonClicked);
+	mWindow2->AddChild( mButton );	
 
-	//mLineEdit = new LineEdit();
-	//mLineEdit->InitGuiStyle(nullptr);
-	//mLineEdit->SetName("LineEdit");
-	//mLineEdit->SetPosition(int2(20, 175));
-	//mLineEdit->SetSize(int2(180, 40));
-	//mLineEdit->SetText(L"mLineEdit = new TextEdit(TextEdit::LineEdit);");
-	//mWindow2->AddChild(mLineEdit);
+	mLineEdit = new LineEdit();
+	mLineEdit->InitGuiStyle(nullptr);
+	mLineEdit->SetName("LineEdit");
+	mLineEdit->SetPosition(int2(20, 175));
+	mLineEdit->SetSize(int2(180, 40));
+	mLineEdit->SetText(L"mLineEdit = new TextEdit(TextEdit::LineEdit);");
+	mWindow2->AddChild(mLineEdit);
 
 	mComboBox = new ComboBox;
 	mComboBox->InitGuiStyle(nullptr);
@@ -309,6 +296,15 @@ void TestApp::InitGUI()
 	mComboBox->AddItem(L"Alchemy");	
 	mComboBox->SetSelectedIndex(0);
 	mWindow2->AddChild(mComboBox);
+
+	mSlider = new Slider(UI_Horizontal);
+	mSlider->InitGuiStyle(nullptr);
+	mSlider->SetName("Slider");	
+	mSlider->SetPosition(int2(20, 270));
+	mSlider->SetTrackLength(200);
+	mSlider->SetValue(100);
+	mSlider->EventValueChanged.bind(this, &TestApp::SliderValueChange);
+	mWindow2->AddChild( mSlider );	
 }
 
 void TestApp::DrawUI()

@@ -69,7 +69,7 @@ public:
 	struct SytleImage
 	{
 		/**
-		 * Only fill patch or all 9 patch.
+		 * Only fill patch or all 9 patch, 3 patch.
 		 */
 		IntRect TexRegion;
 
@@ -80,7 +80,7 @@ public:
 		SytleImage() : TexColor(ColorRGBA::White), OtherPatch(nullptr) {}
 		~SytleImage() { if (OtherPatch) delete[] OtherPatch; }
 
-		inline bool NinePath() const { return OtherPatch != nullptr; }
+		inline bool HasOtherPatch() const { return OtherPatch != nullptr; }
 	};
 
 	struct GuiStyle
@@ -94,6 +94,7 @@ public:
 		ColorRGBA BackColor;
 		ColorRGBA ForeColor; 
 
+		void DrawThreePatch(SpriteBatch& spriteBatch, UIElementState uiState, UIOrientation orient, const Rectanglef& rect, float zOrder);
 		void DrawNinePatch(SpriteBatch& spriteBatch, UIElementState uiState, const Rectanglef& rect, float zOrder);
 	};
 

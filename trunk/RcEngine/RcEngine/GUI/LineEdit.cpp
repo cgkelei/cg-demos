@@ -72,7 +72,14 @@ void LineEdit::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 
 		float left = (mCharPositions[selStart] - mVisibleStartX);
 		float right = (mCharPositions[selEnd] - mVisibleStartX);
-			
+
+		//if (left < mTextRect.Left())
+		//{
+		//	left = mCharPositions[selStart];
+		//	mVisibleStartX = 0.0f;
+		//	right = mCharPositions[selEnd];
+		//}
+
 		rect.SetLeft((std::max)(left, mTextRect.Left()));
 		rect.SetRight((std::min)(right, mTextRect.Right()));
 		rect.Y = mTextRect.Top() + (mTextRect.Height - mRowHeight) / 2;
@@ -179,7 +186,7 @@ void LineEdit::InitGuiStyle( const GuiSkin::StyleMap* styles /*= nullptr*/ )
 		// background in Normal State
 		mStyle = &defaultSkin->TextEdit;
 
-		if (mStyle->StyleStates[UI_State_Normal].NinePath())
+		if (mStyle->StyleStates[UI_State_Normal].HasOtherPatch())
 			mBorder = mStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left].Width;
 		
 	}

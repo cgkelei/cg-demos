@@ -48,15 +48,13 @@ void Slider::UpdateSlider()
 
 	if (mOrientation == UI_Horizontal)
 	{		
-		mThumbRegion.Width = mThumbRegion.Height = mSize.Y();
-		mThumbRegion.X = int32_t( screenPos.X() + ratio * ( mSize.X() - mThumbRegion.Width ) );
-		mThumbRegion.Y = screenPos.Y(); 
+		mThumbRegion.X = screenPos.X() + ratio * ( mSize.X() - mThumbRegion.Width );
+		mThumbRegion.Y = (float)screenPos.Y(); 
 	}
 	else
 	{
-		mThumbRegion.Width = mThumbRegion.Height = mSize.X();
-		mThumbRegion.X = screenPos.X(); 
-		mThumbRegion.Y = int32_t( screenPos.Y() + ratio * ( mSize.Y() - mThumbRegion.Height ) );
+		mThumbRegion.X = (float)screenPos.X(); 
+		mThumbRegion.Y = screenPos.Y() + ratio * ( mSize.Y() - mThumbRegion.Height );
 	}
 }
 
@@ -85,44 +83,26 @@ void Slider::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 		uiThumbState = UI_State_Normal;
 
 	int2 screenPos = GetScreenPosition();
+	float zOrder = GetDepthLayer();
 
 	const GuiSkin::SytleImage& stateStyle = mThumbStyle->StyleStates[uiThumbState];
 
-	Rectanglef trackRegion, thumbRegion;
-
 	// Draw order: track, thumb
-	if (mOrientation == UI_Horizontal)
-	{
-		float midY = screenPos.Y() + mSize.Y() * 0.5f;
-
-		trackRegion.X = (float)screenPos.X();
-		trackRegion.Y = midY - mTrackStyle->StyleStates[UI_State_Normal].TexRegion.Height * 0.5f;
-		trackRegion.Width = (float)mSize.X();
-		trackRegion.Height = (float)mTrackStyle->StyleStates[UI_State_Normal].TexRegion.Height;	
-	}
-	else
-	{
-		float midX = screenPos.X() + mSize.X() * 0.5f;
-
-		trackRegion.X = midX - mTrackStyle->StyleStates[UI_State_Normal].TexRegion.Width * 0.5f;  
-		trackRegion.Y = (float)screenPos.Y();
-		trackRegion.Width = (float)mTrackStyle->StyleStates[UI_State_Normal].TexRegion.Width;
-		trackRegion.Height = (float)mSize.Y();	
-	}
-
-	thumbRegion.X = (float)mThumbRegion.X;
-	thumbRegion.Y = (float)mThumbRegion.Y;
-	thumbRegion.Width = (float)mThumbRegion.Width;
-	thumbRegion.Height = (float)mThumbRegion.Height;
-
+	Rectanglef trackRegion((float)screenPos.X(), (float)screenPos.Y(), (float)mSize.X(), (float)mSize.Y());
+	
 	// Track
 	if (mDragSlider || mHovering)
-		spriteBatch.Draw(mTrackStyle->StyleTex, trackRegion, &mTrackStyle->StyleStates[UI_State_Hover].TexRegion, mTrackStyle->StyleStates[UI_State_Hover].TexColor);	
+		mTrackStyle->DrawThreePatch(spriteBatch, UI_State_Hover, mOrientation, trackRegion, zOrder);
 	else
-		spriteBatch.Draw(mTrackStyle->StyleTex, trackRegion, &mTrackStyle->StyleStates[UI_State_Normal].TexRegion, mTrackStyle->StyleStates[UI_State_Normal].TexColor);	
+		mTrackStyle->DrawThreePatch(spriteBatch, UI_State_Normal, mOrientation, trackRegion, zOrder);
 
 	// Thumb
-	spriteBatch.Draw(mThumbStyle->StyleTex, thumbRegion, &stateStyle.TexRegion, stateStyle.TexColor);	
+	{
+		Rectanglef rect = mThumbRegion;
+		rect.Y = trackRegion.Y + (trackRegion.Height - mThumbRegion.Height) * 0.5f;
+		spriteBatch.Draw(mThumbStyle->StyleTex, rect, &stateStyle.TexRegion, stateStyle.TexColor);	
+	}
+	
 
 	mHovering = false;
 	mThumbHovering = false;
@@ -131,7 +111,7 @@ void Slider::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 void Slider::OnHover( const int2& screenPos )
 {
 	UIElement::OnHover(screenPos);
-	mThumbHovering = mThumbRegion.Contains(screenPos.X(), screenPos.Y());
+	mThumbHovering = mThumbRegion.Contains((float)screenPos.X(), (float)screenPos.Y());
 }
 
 void Slider::OnDragBegin( const int2& screenPos, uint32_t buttons )
@@ -139,7 +119,7 @@ void Slider::OnDragBegin( const int2& screenPos, uint32_t buttons )
 	mDragBeginPos = screenPos;
 
 	// Test if in thumb region
-	mDragSlider = mThumbRegion.Contains(screenPos.X(), screenPos.Y());
+	mDragSlider = mThumbRegion.Contains((float)screenPos.X(), (float)screenPos.Y());
 	mDragBeginValue = mValue;
 }
 
@@ -180,7 +160,7 @@ bool Slider::OnMouseButtonPress( const int2& screenPos, uint32_t button )
 	bool eventConsumed = false;
 
 	// if in thumb region, OnDragBegin will handle it.
-	if (mThumbRegion.Contains(screenPos.X(), screenPos.Y()))
+	if (mThumbRegion.Contains((float)screenPos.X(), (float)screenPos.Y()))
 		return false;
 
 	if (IsInside(screenPos, true))
@@ -276,6 +256,23 @@ void Slider::InitGuiStyle( const GuiSkin::StyleMap* styles /*= nullptr*/ )
 		iter = styles->find(TrackStyleName);
 		mTrackStyle = iter->second;
 	}
+
+	if (mOrientation == UI_Horizontal)
+		mTrackExtent = mTrackStyle->StyleStates[UI_State_Normal].TexRegion.Height;
+	else
+		mTrackExtent = mTrackStyle->StyleStates[UI_State_Normal].TexRegion.Width;
+
+	// Use the extent defined in skin texture
+	mThumbRegion.Width = (float)mThumbStyle->StyleStates[UI_State_Normal].TexRegion.Height;
+	mThumbRegion.Height = (float)mThumbStyle->StyleStates[UI_State_Normal].TexRegion.Height;
+}
+
+void Slider::SetTrackLength( int32_t length )
+{
+	if (mOrientation == UI_Horizontal)
+		SetSize(int2(length, mTrackExtent));
+	else 
+		SetSize(int2(mTrackExtent, length));
 }
 
 

@@ -149,7 +149,7 @@ void ListBox::InitGuiStyle( const GuiSkin::StyleMap* styles /* = nullptr */ )
 
 		mLisBoxStyle = &defaultSkin->ListBox;
 
-		if (mLisBoxStyle->StyleStates[UI_State_Normal].NinePath())
+		if (mLisBoxStyle->StyleStates[UI_State_Normal].HasOtherPatch())
 		{
 			mBorder[0] = mLisBoxStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left].Width;
 			mBorder[1] = mLisBoxStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left].Height;
