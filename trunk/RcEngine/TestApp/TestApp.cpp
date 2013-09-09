@@ -235,14 +235,27 @@ void TestApp::InitGUI()
 	mCheckBox->EventStateChanged.bind(this, &TestApp::CheckBoxToggle);
 	mWindow1->AddChild(mCheckBox);
 
+	RadioButtonGroup* group = new RadioButtonGroup;
+
 	mRadioButton = new RadioButton;
 	mRadioButton->InitGuiStyle(nullptr);
-	mRadioButton->SetName("RadioButton");
+	mRadioButton->SetName("RadioButton1");
 	mRadioButton->SetPosition(int2(20, 85));
 	mRadioButton->SetSize(int2(150, mRadioButton->GetSize().Y()));
-	mRadioButton->SetText(L"RadioButton");
+	mRadioButton->SetText(L"RadioButton1");
 	mWindow1->AddChild(mRadioButton);
+	group->AddButton(mRadioButton);
 
+	mRadioButton = new RadioButton;
+	mRadioButton->InitGuiStyle(nullptr);
+	mRadioButton->SetName("RadioButton2");
+	mRadioButton->SetPosition(int2(200, 85));
+	mRadioButton->SetSize(int2(150, mRadioButton->GetSize().Y()));
+	mRadioButton->SetText(L"RadioButton2");
+	mRadioButton->SetChecked(true);
+	mWindow1->AddChild(mRadioButton);
+	group->AddButton(mRadioButton);
+	
 	std::wfstream file(L"Config.xml");
 	std::wstring text((std::istreambuf_iterator<wchar_t>(file)), std::istreambuf_iterator<wchar_t>());
 	file.close();

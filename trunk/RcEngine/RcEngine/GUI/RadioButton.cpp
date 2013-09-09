@@ -120,6 +120,9 @@ bool RadioButton::OnMouseButtonRelease( const int2& screenPos, uint32_t button )
 			if (IsInside(screenPos, true))
 			{
 				Toggle();
+
+				if (!EventButtonClicked.empty())
+					EventButtonClicked(this);
 			}	
 			else
 				mHovering = false;
@@ -138,6 +141,7 @@ bool RadioButton::CanHaveFocus() const
 
 //----------------------------------------------------------------------------------------------
 RadioButtonGroup::RadioButtonGroup()
+	: mSelectedIndex(-1)
 {
 
 }
@@ -175,23 +179,57 @@ int32_t RadioButtonGroup::CheckedIndex() const
 	return -1;
 }
 
-void RadioButtonGroup::AddButton( RadioButton* btn )
+void RadioButtonGroup::AddButton( RadioButton* button )
 {
-	btn->EventButtonClicked.bind(this, &HandleButtonClicked);
-	mRadioButtons.push_back(btn);
+	button->EventButtonClicked.bind(this, &RadioButtonGroup::HandleButtonClicked);
+	button->mCanUncheck = false;
 
-	
+	if (button->IsChecked())
+		mSelectedIndex = mRadioButtons.size();
+
+	mRadioButtons.push_back(button);
 }
 
-void RadioButtonGroup::AddButton( RadioButton* btn, int32_t idx )
+void RadioButtonGroup::AddButton( RadioButton* button, int32_t idx )
 {
-	btn->EventButtonClicked.bind(this, &HandleButtonClicked);
-	mRadioButtons.push_back(btn);
+	button->EventButtonClicked.bind(this, &RadioButtonGroup::HandleButtonClicked);
+	button->mCanUncheck = false;
+
+	auto where = mRadioButtons.begin();
+	std::advance(where, idx);
+
+	if (button->IsChecked())
+		mSelectedIndex = idx;
+
+	mRadioButtons.insert(where, button);
 }
 
-void RadioButtonGroup::HandleButtonClicked( RadioButton* btn )
-{
 
+void RadioButtonGroup::HandleButtonClicked( RadioButton* sender )
+{      
+	int32_t checkIndex = -1;
+	for (size_t i = 0; i < mRadioButtons.size(); ++i)
+	{
+		if (mRadioButtons[i] == sender)
+		{
+			checkIndex = i;
+			break;
+		}
+	}
+
+	if(checkIndex != mSelectedIndex)
+	{
+		if (!EventSelectionChanged.empty())
+			EventSelectionChanged(sender->mText);
+	}
+
+	mSelectedIndex = checkIndex;
+
+	for (size_t i = 0; i < mRadioButtons.size(); i++)
+	{
+		if (i != checkIndex)
+			mRadioButtons[i]->mChecked = false;
+	}
 }
 
 
