@@ -37,6 +37,9 @@ protected:
 
 	GuiSkin::GuiStyle* mStyle;
 
+private:
+	fastdelegate::FastDelegate1<RadioButton*> EventButtonClicked;
+
 	friend class RadioButtonGroup;
 };
 
@@ -59,6 +62,9 @@ public:
 
 	const std::list<RadioButton*>& GetButtons() const			{ return mRadioButtons; }
 	
+protected:
+	void HandleButtonClicked(RadioButton* btn);
+
 
 protected:
 

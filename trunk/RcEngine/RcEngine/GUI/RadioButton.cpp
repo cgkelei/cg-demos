@@ -149,10 +149,47 @@ RadioButtonGroup::~RadioButtonGroup()
 
 RadioButton* RadioButtonGroup::CheckedButton() const
 {
+	for (RadioButton* btn : mRadioButtons)
+	{
+		if (btn->mChecked)
+			return btn;
+	}
 
+	return nullptr;
 }
 
 int32_t RadioButtonGroup::CheckedIndex() const
+{
+	auto iter = mRadioButtons.begin();
+	int32_t index = 0;
+
+	while (iter != mRadioButtons.end())
+	{
+		if ( (*iter)->mChecked )
+			return index;
+
+		++index;
+		++iter;
+	}
+
+	return -1;
+}
+
+void RadioButtonGroup::AddButton( RadioButton* btn )
+{
+	btn->EventButtonClicked.bind(this, &HandleButtonClicked);
+	mRadioButtons.push_back(btn);
+
+	
+}
+
+void RadioButtonGroup::AddButton( RadioButton* btn, int32_t idx )
+{
+	btn->EventButtonClicked.bind(this, &HandleButtonClicked);
+	mRadioButtons.push_back(btn);
+}
+
+void RadioButtonGroup::HandleButtonClicked( RadioButton* btn )
 {
 
 }
