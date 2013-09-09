@@ -25,6 +25,9 @@ public:
 
 	virtual bool CanHaveFocus() const;
 
+	bool IsChecked() const			{ return mChecked; }
+	void SetChecked(bool enable)	{ mChecked = enable; }
+
 	void Toggle();
 	void SetText(const std::wstring& text);
 
@@ -43,32 +46,31 @@ private:
 	friend class RadioButtonGroup;
 };
 
-
-class _ApiExport RadioButtonGroup : public UIElement
+class _ApiExport RadioButtonGroup 
 {
 public:
-	typedef fastdelegate::FastDelegate1<int32_t> SelChangedEventHandler;
+	typedef fastdelegate::FastDelegate1<std::wstring> SelChangedEventHandler;
 	SelChangedEventHandler EventSelectionChanged;
 
 public:
 	RadioButtonGroup();
 	~RadioButtonGroup();
-
-	void AddButton(RadioButton* btn);
-	void AddButton(RadioButton* btn, int32_t idx);
+	
+	void AddButton(RadioButton* button);
+	void AddButton(RadioButton* button, int32_t idx);
 
 	RadioButton* CheckedButton() const;
 	int32_t	CheckedIndex() const;
 
-	const std::list<RadioButton*>& GetButtons() const			{ return mRadioButtons; }
+	const std::vector<RadioButton*>& GetButtons() const			{ return mRadioButtons; }
 	
 protected:
 	void HandleButtonClicked(RadioButton* btn);
 
 
 protected:
-
-	std::list<RadioButton*> mRadioButtons;	
+	std::vector<RadioButton*> mRadioButtons;	
+	int32_t mSelectedIndex;
 };
 
 
