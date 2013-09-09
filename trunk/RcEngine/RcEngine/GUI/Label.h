@@ -12,43 +12,36 @@ namespace RcEngine {
 class _ApiExport Label : public UIElement
 {
 public:
+	const static String StyleName;
+
+public:
 	Label();
 	virtual ~Label();
 
 	virtual void InitGuiStyle(const GuiSkin::StyleMap* styles = nullptr);
-	virtual void OnResize();
-	virtual void Update(float delta);
 	virtual void Draw(SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont);
 
-	void SetFont(const shared_ptr<Font>& font, float fontSize);
-	const shared_ptr<Font>& GetFont() const			{ return mFont; }
+	void SetTextColor(const ColorRGBA& color)		{ mTextColor = color; }
+	const ColorRGBA& GetTextColor() const			{ return mTextColor; }
 
-	void SetText(const std::wstring& text );
+	void SetFontSize(float fontSize)				{ mFontSize = fontSize; }
+	float GetFontSize() const						{ return mFontSize; }
+
+	void SetText(const std::wstring& text )			{ mText = text; }
 	const std::wstring& GetText() const				{ return mText; }
-
-	void SetWordWrap(bool enable);
-	bool GetWordWrap() const						{ return mWordWrap ; }
 	
-	void SetTextAlignment(uint32_t align);
-	uint32_t GetTextAlignment() const	{ return mTextAlignment; }
-
-	
-protected:
-	void UpdateText();
+	void SetTextAlignment(uint32_t align)			{ mTextAlignment = align; }
+	uint32_t GetTextAlignment() const				{ return mTextAlignment; }
 
 protected:
+	GuiSkin::GuiStyle* mStyle;
 	shared_ptr<Font> mFont;
 
 	std::wstring mText;
-	std::wstring mPrintText;
-
 	uint32_t mTextAlignment;
-
-	vector<float> mRowWidths;
-
+	
+	ColorRGBA mTextColor;
 	float mFontSize;
-
-	bool mWordWrap;	
 };
 
 

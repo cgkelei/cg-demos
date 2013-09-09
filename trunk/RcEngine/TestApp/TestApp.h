@@ -59,5 +59,6 @@ private:
 	ComboBox* mComboBox;
 	UIWindow* mWindow1;
 	UIWindow* mWindow2;
+	RadioButton* mRadioButton;
 };
 

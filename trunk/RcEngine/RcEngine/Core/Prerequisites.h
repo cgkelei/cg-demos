@@ -155,8 +155,11 @@ class TextEdit;
 class ListBox;
 class ComboBox;
 class LineEdit;
+class RadioButton;
+class RadioButtonGroup;
 class Menu;
 class UIManager;
+
 
 
 } // Namespace RcEngine
