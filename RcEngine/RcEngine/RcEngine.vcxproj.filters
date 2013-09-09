@@ -336,6 +336,9 @@
     <ClInclude Include="GUI\LineEdit.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="GUI\RadioButton.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Context.cpp">
@@ -597,6 +600,9 @@
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\LineEdit.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\RadioButton.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>

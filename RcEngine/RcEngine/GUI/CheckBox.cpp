@@ -99,16 +99,9 @@ void CheckBox::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	destRect.Y = (float)screenPos.Y();
 	destRect.Width = destRect.Height = float(mSize.Y());
 
-	if (mCheched)
-	{
-		//spriteBatch.Draw(mStyle->StyleTex, mCheckRect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mStyle->BackColor);
-		spriteBatch.Draw(mStyle->StyleTex, destRect, &mStyle->StyleStates[UI_State_Pressed].TexRegion, mStyle->StyleStates[UI_State_Pressed].TexColor, zOrder);
-	}
-	else
-	{
-		spriteBatch.Draw(mStyle->StyleTex, destRect, &mStyle->StyleStates[UI_State_Normal].TexRegion, mStyle->StyleStates[UI_State_Normal].TexColor, zOrder);
-	}
-	
+	UIElementState uiState = (mCheched ? UI_State_Pressed : UI_State_Normal);
+	spriteBatch.Draw(mStyle->StyleTex, destRect, &mStyle->StyleStates[uiState].TexRegion, mStyle->StyleStates[uiState].TexColor, zOrder);
+		
 	// Text
 	destRect.SetLeft( destRect.Right() + 0.25f * destRect.Width );
 	destRect.SetRight( float(screenPos.X() + mSize.X()) );
@@ -134,6 +127,9 @@ void CheckBox::InitGuiStyle( const GuiSkin::StyleMap* styles /*= nullptr*/ )
 		GuiSkin::StyleMap::const_iterator iter = styles->find(String("CheckBox Style"));
 		mStyle = iter->second;
 	}
+
+	mSize.X() = mStyle->StyleStates[UI_State_Normal].TexRegion.Width;
+	mSize.Y() = mStyle->StyleStates[UI_State_Normal].TexRegion.Height;
 }
 
 

@@ -77,6 +77,7 @@
     <ClInclude Include="GUI\LineEdit.h" />
     <ClInclude Include="GUI\ListBox.h" />
     <ClInclude Include="GUI\Menu.h" />
+    <ClInclude Include="GUI\RadioButton.h" />
     <ClInclude Include="GUI\ScrollBar.h" />
     <ClInclude Include="GUI\Slider.h" />
     <ClInclude Include="GUI\TextEdit.h" />
@@ -176,6 +177,7 @@
     <ClCompile Include="GUI\LineEdit.cpp" />
     <ClCompile Include="GUI\ListBox.cpp" />
     <ClCompile Include="GUI\Menu.cpp" />
+    <ClCompile Include="GUI\RadioButton.cpp" />
     <ClCompile Include="GUI\ScrollBar.cpp" />
     <ClCompile Include="GUI\Slider.cpp" />
     <ClCompile Include="GUI\TextEdit.cpp" />

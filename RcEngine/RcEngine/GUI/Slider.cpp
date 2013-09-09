@@ -100,7 +100,7 @@ void Slider::Draw( SpriteBatch& spriteBatch, SpriteBatch& spriteBatchFont )
 	{
 		Rectanglef rect = mThumbRegion;
 		rect.Y = trackRegion.Y + (trackRegion.Height - mThumbRegion.Height) * 0.5f;
-		spriteBatch.Draw(mThumbStyle->StyleTex, rect, &stateStyle.TexRegion, stateStyle.TexColor);	
+		spriteBatch.Draw(mThumbStyle->StyleTex, rect, &stateStyle.TexRegion, stateStyle.TexColor, zOrder);
 	}
 	
 

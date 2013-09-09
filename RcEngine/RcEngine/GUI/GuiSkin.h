@@ -124,11 +124,16 @@ public:
 
 	shared_ptr<Texture> mSkinTexAtlas; 
 
+	GuiStyle Label;
+
 	// Button
 	GuiStyle Button;
 
 	// Check box
 	GuiStyle CheckBox;
+
+	// RadioButton
+	GuiStyle RadioButton;
 
 	GuiStyle ListBox;
 

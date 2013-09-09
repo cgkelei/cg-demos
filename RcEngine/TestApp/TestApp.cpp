@@ -46,6 +46,7 @@
 #include "GUI/ListBox.h"
 #include "GUI/LineEdit.h"
 #include "GUI/UIWindow.h"
+#include "GUI/RadioButton.h"
 #include "Core/Variant.h"
 #include "Core/StringHash.h"
 
@@ -210,30 +211,12 @@ void TestApp::InitGUI()
 	UIElement* rootElem = UIManager::GetSingleton().GetRoot();
 
 	mFPSLabel = new Label();
+	mFPSLabel->InitGuiStyle(nullptr);
 	mFPSLabel->SetName("FPSLabel");
 	mFPSLabel->SetPosition(int2(500, 500));
 	mFPSLabel->SetSize(int2(300, 100));
-	mFPSLabel->SetFont(UIManager::GetSingleton().GetDefaultFont(), 20.0f);
+	//mFPSLabel->SetFont(UIManager::GetSingleton().GetDefaultFont(), 20.0f);
 	rootElem->AddChild( mFPSLabel );	
-
-	mCheckBox = new CheckBox;
-	mCheckBox->SetName("CheckBox");
-	mCheckBox->InitGuiStyle(nullptr);
-	mCheckBox->SetPosition(int2(20, 60));
-	mCheckBox->SetSize(int2(150, 16));
-	mCheckBox->SetText(L"CheckBox");
-	mCheckBox->EventStateChanged.bind(this, &TestApp::CheckBoxToggle);
-
-	std::wfstream file(L"Config.xml");
-	std::wstring text((std::istreambuf_iterator<wchar_t>(file)), std::istreambuf_iterator<wchar_t>());
-	file.close();
-
-	mTextEdit = new TextEdit();
-	mTextEdit->InitGuiStyle(nullptr);
-	mTextEdit->SetName("TextEdit");
-	mTextEdit->SetPosition(int2(20, 130));
-	mTextEdit->SetSize(int2(300, 300));
-	mTextEdit->SetText(text);
 
 	mWindow1 = new UIWindow;
 	mWindow1->InitGuiStyle(nullptr);
@@ -242,10 +225,36 @@ void TestApp::InitGUI()
 	mWindow1->SetPosition(int2(20, 50));
 	mWindow1->SetSize(int2(380, 450));
 	rootElem->AddChild( mWindow1 );	
-	
-	mWindow1->AddChild(mTextEdit);
+
+	mCheckBox = new CheckBox;
+	mCheckBox->InitGuiStyle(nullptr);
+	mCheckBox->SetName("CheckBox");
+	mCheckBox->SetPosition(int2(20, 60));
+	mCheckBox->SetSize(int2(150, mCheckBox->GetSize().Y()));
+	mCheckBox->SetText(L"CheckBox");
+	mCheckBox->EventStateChanged.bind(this, &TestApp::CheckBoxToggle);
 	mWindow1->AddChild(mCheckBox);
 
+	mRadioButton = new RadioButton;
+	mRadioButton->InitGuiStyle(nullptr);
+	mRadioButton->SetName("RadioButton");
+	mRadioButton->SetPosition(int2(20, 85));
+	mRadioButton->SetSize(int2(150, mRadioButton->GetSize().Y()));
+	mRadioButton->SetText(L"RadioButton");
+	mWindow1->AddChild(mRadioButton);
+
+	std::wfstream file(L"Config.xml");
+	std::wstring text((std::istreambuf_iterator<wchar_t>(file)), std::istreambuf_iterator<wchar_t>());
+	file.close();
+
+	mTextEdit = new TextEdit();
+	mTextEdit->InitGuiStyle(nullptr);
+	mTextEdit->SetName("TextEdit");
+	mTextEdit->SetPosition(int2(20, 150));
+	mTextEdit->SetSize(int2(300, 300));
+	mTextEdit->SetText(text);
+	mWindow1->AddChild(mTextEdit);
+	
 
 	mWindow2 = new UIWindow;
 	mWindow2->InitGuiStyle(nullptr);
