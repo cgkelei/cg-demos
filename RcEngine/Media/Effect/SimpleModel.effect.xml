@@ -5,9 +5,8 @@
 	<![CDATA[
 #version 330
 
-uniform mat4 WorldMat;
-uniform mat4 WorldNormalMat;
-uniform mat4 ViewProjMat;
+uniform mat4 World;
+uniform mat4 ViewProj;
 uniform vec3 ViewerPos;
 
 in vec3 iPos;
@@ -21,12 +20,12 @@ out vec3 oNormalWS;
 
 void main()
 {
-	vec3 normal = normalize(iNormal * mat3(WorldNormalMat));
-	oPosWS = vec4(iPos, 1.0) * WorldMat;
+	vec3 normal = normalize(iNormal * mat3(World));
+	oPosWS = vec4(iPos, 1.0) * World;
 
 	oNormalWS = normal;
 	oTex = iTex0;
-	gl_Position = oPosWS * ViewProjMat;
+	gl_Position = oPosWS * ViewProj;
 }
 	]]>
 	</ShaderSource>
@@ -96,7 +95,7 @@ void main()
 	}
 #endif
 
-	gl_FragColor = vec4(finalColor.rg, 1.0, 1.0);
+	gl_FragColor = vec4(DiffuseColor, finalColor.r);
 	
 }
 	]]>
