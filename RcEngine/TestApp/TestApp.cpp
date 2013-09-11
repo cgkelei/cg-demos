@@ -51,7 +51,10 @@
 #include "Core/StringHash.h"
 
 TestApp::TestApp( const String& config )
-	:Application(config), mFramePerSecond(0)
+	:Application(config), 
+	mFramePerSecond(0), 
+	mRadioButtonGroup(0),
+	mCameraControler(0)
 {
 	//Variant var(true);
 
@@ -62,7 +65,8 @@ TestApp::TestApp( const String& config )
 
 TestApp::~TestApp(void)
 {
-	delete mCameraControler;
+	SAFE_DELETE(mCameraControler);
+	SAFE_DELETE(mRadioButtonGroup);
 }
 
 void TestApp::Initialize()
@@ -223,7 +227,7 @@ void TestApp::InitGUI()
 	mWindow1->SetName("Window0");
 	mWindow1->SetTitle(L"Window Title");
 	mWindow1->SetPosition(int2(20, 50));
-	mWindow1->SetSize(int2(380, 450));
+	mWindow1->SetSize(int2(350, 420));
 	rootElem->AddChild( mWindow1 );	
 
 	mCheckBox = new CheckBox;
@@ -235,26 +239,29 @@ void TestApp::InitGUI()
 	mCheckBox->EventStateChanged.bind(this, &TestApp::CheckBoxToggle);
 	mWindow1->AddChild(mCheckBox);
 
-	RadioButtonGroup* group = new RadioButtonGroup;
+	mRadioButtonGroup = new RadioButtonGroup(L"Group");
+	mRadioButtonGroup->EventSelectionChanged.bind(this, &TestApp::RadioButtonChanged);
 
-	mRadioButton = new RadioButton;
-	mRadioButton->InitGuiStyle(nullptr);
-	mRadioButton->SetName("RadioButton1");
-	mRadioButton->SetPosition(int2(20, 85));
-	mRadioButton->SetSize(int2(150, mRadioButton->GetSize().Y()));
-	mRadioButton->SetText(L"RadioButton1");
-	mWindow1->AddChild(mRadioButton);
-	group->AddButton(mRadioButton);
+	mRadioButton1 = new RadioButton;
+	mRadioButton1->InitGuiStyle(nullptr);
+	mRadioButton1->SetName("RadioButton1");
+	mRadioButton1->SetPosition(int2(20, 85));
+	mRadioButton1->SetSize(int2(150, mRadioButton1->GetSize().Y()));
+	mRadioButton1->SetText(L"RadioButton1");
+	mRadioButtonGroup->AddButton(mRadioButton1);
 
-	mRadioButton = new RadioButton;
-	mRadioButton->InitGuiStyle(nullptr);
-	mRadioButton->SetName("RadioButton2");
-	mRadioButton->SetPosition(int2(200, 85));
-	mRadioButton->SetSize(int2(150, mRadioButton->GetSize().Y()));
-	mRadioButton->SetText(L"RadioButton2");
-	mRadioButton->SetChecked(true);
-	mWindow1->AddChild(mRadioButton);
-	group->AddButton(mRadioButton);
+	mRadioButton2 = new RadioButton;
+	mRadioButton2->InitGuiStyle(nullptr);
+	mRadioButton2->SetName("RadioButton2");
+	mRadioButton2->SetPosition(int2(200, 85));
+	mRadioButton2->SetSize(int2(150, mRadioButton2->GetSize().Y()));
+	mRadioButton2->SetText(L"RadioButton2");
+	mRadioButton2->SetChecked(true);
+	mRadioButtonGroup->AddButton(mRadioButton2);
+
+	mWindow1->AddChild(mRadioButton1);
+	mWindow1->AddChild(mRadioButton2);
+	
 	
 	std::wfstream file(L"Config.xml");
 	std::wstring text((std::istreambuf_iterator<wchar_t>(file)), std::istreambuf_iterator<wchar_t>());
@@ -263,7 +270,7 @@ void TestApp::InitGUI()
 	mTextEdit = new TextEdit();
 	mTextEdit->InitGuiStyle(nullptr);
 	mTextEdit->SetName("TextEdit");
-	mTextEdit->SetPosition(int2(20, 150));
+	mTextEdit->SetPosition(int2(20, 120));
 	mTextEdit->SetSize(int2(300, 300));
 	mTextEdit->SetText(text);
 	mWindow1->AddChild(mTextEdit);
@@ -372,6 +379,11 @@ void TestApp::CheckBoxToggle( bool checked )
 	else
 		printf("CheckBox: unchecked\n");
 }	
+
+void TestApp::RadioButtonChanged( std::wstring text )
+{
+	std::wcout << text.c_str() << std::endl;
+}
 
 int32_t main()
 {

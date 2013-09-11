@@ -59,6 +59,16 @@ enum TextEditLevel
 	TEL_Edit
 };
 
+// Border
+enum Border
+{
+	Border_Left = 0,
+	Border_Top,
+	Border_Right,
+	Border_Bottom,
+	Border_Count
+};
+
 /**
  * GuiSkin is a collection of GUIStyles that can be applied to your GUI Controls.
  */

@@ -1,5 +1,6 @@
 #include <GUI/GuiSkin.h>
 #include <IO/FileSystem.h>
+#include <Graphics/Texture.h>
 #include <Graphics/Font.h>
 #include <Graphics/SpriteBatch.h>
 #include <Resource/ResourceManager.h>

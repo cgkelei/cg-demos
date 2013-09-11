@@ -3,6 +3,7 @@
 #include <Graphics/RenderFactory.h>
 #include <Graphics/FrameBuffer.h>
 #include <Graphics/Camera.h>
+#include <Graphics/Texture.h>
 #include <Graphics/Effect.h>
 #include <Graphics/EffectTechnique.h>
 #include <Graphics/EffectParameter.h>
@@ -18,7 +19,9 @@
 #include <Resource/ResourceManager.h>
 
 
-namespace RcEngine {
+namespace {
+
+using namespace RcEngine;
 
 class EffectParamsUsageDefs
 {
@@ -48,10 +51,6 @@ public:
 		mDefs.insert(std::make_pair("SpecularLight", EPU_Light_Specular));
 		mDefs.insert(std::make_pair("DirLight", EPU_Light_Dir));
 		mDefs.insert(std::make_pair("PositionLight", EPU_Light_Position));
-	}
-
-	~EffectParamsUsageDefs()
-	{
 	}
 
 	static EffectParamsUsageDefs& GetInstance()
@@ -131,7 +130,10 @@ private:
 	unordered_map<String, uint32_t> mDefs;
 };
 
-//--------------------------------------------------------------------------------------------------
+}
+
+namespace RcEngine {
+
 Material::Material( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 	: Resource(RT_Material, creator, handle, name, group), mTransparent(false), mCurrentTech(nullptr)
 {
@@ -168,13 +170,13 @@ void Material::ApplyMaterial()
 			break;
 		case EPU_Material_Ambient_Color:
 			{
-				float4 color(mAmbient.R(), mAmbient.G(), mAmbient.B(), mAmbient.A());
+				float3 color(mAmbient.R(), mAmbient.G(), mAmbient.B());
 				param->EffectParam->SetValue(color);
 			}
 			break;
 		case EPU_Material_Diffuse_Color:
 			{
-				float4 color(mDiffuse.R(), mDiffuse.G(), mDiffuse.B(), mDiffuse.A());
+				float3 color(mDiffuse.R(), mDiffuse.G(), mDiffuse.B());
 				param->EffectParam->SetValue(color);
 			}
 			break;
@@ -292,9 +294,9 @@ void Material::LoadImpl()
 	XMLNodePtr effectNode = root->FirstNode("Effect");
 	String effecFile =  effectNode->AttributeString("name", "");		// file name
 	
-	/* effect name is unique resource ID, but with the effect shader macro, we can define 
-     * different effect with the same file, so effect name is the effect file string + shader macro,
-	 * by this way, we can distinction effects
+	/* Effect name is unique resource ID, but with the effect shader macro, we can define different effect
+	 * with the same file. So the full effect name is the effect file string + shader macro. By this way, 
+	 * we can distinction effects.
 	 */
 	String effectName = effecFile;
 
@@ -307,7 +309,7 @@ void Material::LoadImpl()
 	}
 
 	String effectResGroup = "General";
-	// Test if a effect exits in group as material
+	// Test if a effect exits in the same group as material
 	if( fileSystem.Exits(effecFile, mGroup) )
 		effectResGroup = mGroup;
 	

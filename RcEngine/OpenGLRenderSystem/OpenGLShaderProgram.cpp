@@ -393,10 +393,8 @@ void OpenGLShaderProgram::Bind()
 {
 	glUseProgram(mOGLProgramObject);
 
-	for (auto iter = mParameterBinds.begin(); iter != mParameterBinds.end(); ++iter)
-	{
-		(iter->ShaderParamSetFunc)();
-	}
+	for (ParameterBind& paramBind : mParameterBinds)
+		paramBind.ShaderParamSetFunc();
 }
 
 void OpenGLShaderProgram::Unbind()

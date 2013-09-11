@@ -8,6 +8,9 @@ namespace RcEngine {
 class _ApiExport TextEdit : public UIElement
 {
 public:
+	static const String StyleName;
+
+public:
 	TextEdit();
 	virtual ~TextEdit();
 
@@ -30,8 +33,6 @@ public:
 
 	void SetText(const std::wstring& text);
 	const std::wstring& GetText() const				    { return mText; }
-
-	void SetBorderWidth(int32_t border)					{ mBorder = border; UpdateRect(); }
 
 	void SetTextColor(const ColorRGBA& color)			{ mTextColor = color; }
 	void SetSelectedTextColor(const ColorRGBA& color)	{ mSelTextColor = color; }
@@ -102,7 +103,7 @@ protected:
 	
 	uint32_t mTextAlign;
 
-	int32_t mBorder;
+	int32_t mBorder[Border_Count];
 	float mRowHeight;
 	
 	ColorRGBA mTextColor;

@@ -1,6 +1,7 @@
 <Effect name="PhongLighting">
 
 <Shader name="VS" stage="Vertex" entry="main">
+<ShaderSource>
 <![CDATA[
 
 #version 330
@@ -30,9 +31,11 @@ void main(void)
 }
 
 ]]>
+</ShaderSource>
 </Shader>
 
 <Shader name="PS" stage="Pixel" entry="main">
+<ShaderSource>
 <![CDATA[
 
 #version 330
@@ -58,6 +61,7 @@ void main()
 }
 
 ]]>
+</ShaderSource>
 </Shader>
 
 <Technique name="PhongLight">

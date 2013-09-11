@@ -2,6 +2,7 @@
 #include <Graphics/Renderable.h>
 #include <Graphics/RenderDevice.h>
 #include <Graphics/Material.h>
+#include <Graphics/Effect.h>
 #include <Graphics/FrameBuffer.h>
 #include <Graphics/Texture.h>
 #include <Graphics/GraphicBuffer.h>

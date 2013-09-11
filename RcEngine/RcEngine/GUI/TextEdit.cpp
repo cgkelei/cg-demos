@@ -13,12 +13,13 @@ namespace RcEngine {
 static const int32_t BorderWidth = 8;
 static const int32_t ScrollBarWidth = 20;
 
+const String TextEdit::StyleName("TextEdit::TextEdit");
+
 TextEdit::TextEdit()
 	: mDragMouse(false),
 	  mWordWrap(true),
 	  mCaretBlinkRate(1.0f),
 	  mCaretBlinkTimer(0.0f),
-	  mBorder(BorderWidth),
 	  mScrollBarWidth(ScrollBarWidth),
 	  mTextEditStyle(nullptr),
 	  mVertScrollBar(nullptr),
@@ -35,6 +36,8 @@ TextEdit::TextEdit()
 	mSelBkColor = ColorRGBA( 1.0f, 0.156f, 0.196f, 0.36f );
 	mCaretColor = ColorRGBA( 1.0f, 0, 0, 0 );
 
+	for (size_t i = 0; i < 4; ++i)
+		 mBorder[i] = BorderWidth;
 
 	mTextAlign = AlignLeft | AlignTop;
 
@@ -66,7 +69,10 @@ void TextEdit::InitGuiStyle( const GuiSkin::StyleMap* styles /* = nullptr */ )
 {
 	if (styles)
 	{
+		GuiSkin::StyleMap::const_iterator iter = styles->find(TextEdit::StyleName);
+		mTextEditStyle = iter->second;
 
+		mVertScrollBar->InitGuiStyle(styles);
 	}
 	else
 	{
@@ -77,12 +83,16 @@ void TextEdit::InitGuiStyle( const GuiSkin::StyleMap* styles /* = nullptr */ )
 	
 		// background in Normal State
 		mTextEditStyle = &defaultSkin->TextEdit;
-
-		if (mTextEditStyle->StyleStates[UI_State_Normal].HasOtherPatch())
-			mBorder = mTextEditStyle->StyleStates[UI_State_Normal].OtherPatch[NP_Top_Left].Width;
-
-		mScrollBarWidth = mVertScrollBar->GetTrackExtext() + 1;
 	}
+
+	// Hack: store border in UI_State_Pressed
+	mBorder[Border_Left] = mTextEditStyle->StyleStates[UI_State_Pressed].TexRegion.X;
+	mBorder[Border_Right] = mTextEditStyle->StyleStates[UI_State_Pressed].TexRegion.Width;
+	mBorder[Border_Top] = mTextEditStyle->StyleStates[UI_State_Pressed].TexRegion.Y;
+	mBorder[Border_Bottom] = mTextEditStyle->StyleStates[UI_State_Pressed].TexRegion.Height;
+
+	// Scroll bar
+	mScrollBarWidth = mVertScrollBar->GetTrackExtext() + 1;
 
 	// Init row height
 	const float fontScale = (float)mTextEditStyle->FontSize / mTextEditStyle->Font->GetFontSize();
@@ -569,11 +579,11 @@ void TextEdit::UpdateRect()
 	mBackRect.Width = (float)mSize.X();
 	mBackRect.Height = (float)mSize.Y();
 
-	mTextRect.X = (float)screenPos.X() + mBorder;
-	mTextRect.Width = (float)mSize.X() - mBorder - mBorder;
+	mTextRect.X = (float)screenPos.X() + mBorder[Border_Left];
+	mTextRect.Width = (float)mSize.X() - mBorder[Border_Left] - mBorder[Border_Right];
 
-	mTextRect.Y = (float)screenPos.Y() + mBorder;
-	mTextRect.Height = (float)mSize.Y() - mBorder - mBorder;
+	mTextRect.Y = (float)screenPos.Y() + mBorder[Border_Top];
+	mTextRect.Height = (float)mSize.Y() - mBorder[Border_Top] - mBorder[Border_Bottom];
 
 	mNumVisibleY = (int32_t)floor(mTextRect.Height / mRowHeight);
 

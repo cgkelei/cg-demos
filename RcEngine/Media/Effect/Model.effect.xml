@@ -9,7 +9,6 @@
 	#define _NormalMapping
 #endif
 
-// uniforms
 // skin model will bake the world matrix into skin matrices
 // we not support non-uniform scale, so the normal matrix is 
 // simply the up 3x3 mat.
@@ -211,7 +210,8 @@ void main()
 	}
 #endif
 
-	gl_FragColor = vec4(finalColor, diffuse.a);
+	gl_FragColor = vec4(finalColor.rg, 1.0, 1.0);
+	//gl_FragColor = vec4(finalColor, diffuse.a);
 	
 }
 	]]>

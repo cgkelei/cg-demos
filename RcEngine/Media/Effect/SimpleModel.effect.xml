@@ -1,0 +1,134 @@
+<Effect name="Simple">
+
+<Shader name="ModelVS" stage="Vertex" entry="main">
+	<ShaderSource>
+	<![CDATA[
+#version 330
+
+uniform mat4 WorldMat;
+uniform mat4 WorldNormalMat;
+uniform mat4 ViewProjMat;
+uniform vec3 ViewerPos;
+
+in vec3 iPos;
+in vec3 iNormal;
+in vec2 iTex0;
+
+// shader out put
+out vec4 oPosWS;
+out vec2 oTex;
+out vec3 oNormalWS;
+
+void main()
+{
+	vec3 normal = normalize(iNormal * mat3(WorldNormalMat));
+	oPosWS = vec4(iPos, 1.0) * WorldMat;
+
+	oNormalWS = normal;
+	oTex = iTex0;
+	gl_Position = oPosWS * ViewProjMat;
+}
+	]]>
+	</ShaderSource>
+</Shader>
+	
+<Shader name="ModelPS" stage="Pixel" entry="main">
+	<Include name="LightingUtil.include.xml"/>
+	<ShaderSource>
+	<![CDATA[
+uniform vec3 ViewerPos;
+uniform vec4 LightPos;		// w dimension is spot light inner cone cos angle
+uniform vec4 LightDir;		// w dimension is spot light outer cone cos angle
+uniform vec3 LightColor;
+uniform vec3 LightFalloff; 
+
+uniform vec3 AmbientColor;
+uniform vec3 DiffuseColor;
+
+in vec4 oPosWS;
+in vec2 oTex;
+in vec3 oNormalWS;
+
+
+void main()
+{
+	vec2 newTex = oTex ;
+	vec3 normal = normalize(oNormalWS);
+	
+	vec3 diffuse = DiffuseColor;
+
+#ifdef SPOTLIGHT
+	float spot = SpotLighting(LightPos.xyz, LightDir.xyz, vec2(LightPos.w, LightDir.w), oPosWS.xyz);
+#endif
+
+	vec3 finalColor = vec3(0.0);
+
+#ifdef SPOTLIGHT
+	if(spot > 0.0)
+	{
+#endif
+		
+		// calculate  light vector
+	#ifdef DIRLIGHT
+		vec3 lightVec = normalize(-LightDir.xyz);
+	#else
+		vec3 lightVec = normalize(LightPos.xyz - oPosWS.xyz);
+	#endif
+
+		vec3 viewVec = normalize(ViewerPos- oPosWS.xyz);
+		vec3 halfVec = normalize((viewVec + lightVec) / 2.0);
+		
+		// calculate attenuation
+		float atten = 1.0;
+	#ifdef SPOTLIGHT 
+		atten = spot * CalcAttenuation(LightPos.xyz, oPosWS.xyz, LightFalloff);
+	#elseif POINTLIGHT
+		atten = CalcAttenuation(LightPos.xyz, oPosWS.xyz, LightFalloff);
+	#endif
+
+		float NdotL = dot(lightVec, normal);
+		if (NdotL > 0.0)
+		{
+			finalColor += atten * diffuse.rgb * LightColor;
+		}
+
+#ifdef SPOTLIGHT
+	}
+#endif
+
+	gl_FragColor = vec4(finalColor.rg, 1.0, 1.0);
+	
+}
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Technique name="PointLighting">
+	<Pass name="p0">
+		<VertexShader name="ModelVS"/>
+		<PixelShader name="ModelPS">
+			<Macro name="POINTLIGHT"/>
+		</PixelShader>
+	</Pass>
+</Technique>
+
+<Technique name="DirectionalLighting">
+	<Pass name="p0">
+		<VertexShader name="ModelVS"/>
+		<PixelShader name="ModelPS">
+			<Macro name="DIRLIGHT"/>
+		</PixelShader>
+	</Pass>
+</Technique>
+
+<Technique name="SpotLighting">
+	<Pass name="p0">
+		<VertexShader name="ModelVS"/>
+		<PixelShader name="ModelPS"/>
+			<Macro name="SPOTLIGHT">
+		</PixelShader>
+	</Pass>
+</Technique>
+
+</Effect>
+	

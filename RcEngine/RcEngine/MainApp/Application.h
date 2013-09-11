@@ -3,6 +3,7 @@
 
 #include <Core/Prerequisites.h>
 #include <Core/Timer.h>
+#include <Core/Context.h>
 #include <Graphics/RenderSettings.h>
 
 namespace RcEngine {

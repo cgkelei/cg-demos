@@ -460,6 +460,11 @@ enum EffectParameterUsage
 	 * Position of light, for point light or spot light
 	 */
 	EPU_Light_Position,
+
+	/**
+	 * Position of camera.
+	 */
+	EPU_Camera_Position
 };
 
 

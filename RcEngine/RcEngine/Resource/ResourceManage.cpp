@@ -1,9 +1,4 @@
 #include <Resource/ResourceManager.h>
-#include <Graphics/Mesh.h>
-#include <Graphics/AnimationClip.h>
-#include <Graphics/Material.h>
-#include <Graphics/Effect.h> 
-#include <Graphics/Texture.h>
 #include <IO/FileSystem.h>
 #include <Core/Exception.h>
 

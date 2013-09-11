@@ -43,8 +43,6 @@ private:
 	Application* mApplication;
 };
 
-
-
 } // Namespace RcEngine
 
 #endif // EngineContext_h__

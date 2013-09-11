@@ -6,6 +6,8 @@
 
 namespace RcEngine {
 
+const String CheckBox::StyleName("CheckBox::CheckBox");
+
 CheckBox::CheckBox( )
 	: mCheched(false), mPressed(false), mStyle(nullptr)
 {
@@ -124,7 +126,7 @@ void CheckBox::InitGuiStyle( const GuiSkin::StyleMap* styles /*= nullptr*/ )
 	}
 	else
 	{
-		GuiSkin::StyleMap::const_iterator iter = styles->find(String("CheckBox Style"));
+		GuiSkin::StyleMap::const_iterator iter = styles->find(CheckBox::StyleName);
 		mStyle = iter->second;
 	}
 
