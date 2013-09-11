@@ -16,9 +16,9 @@
 	uniform mat4 WorldMatrices[64];
 #endif
 
-	uniform mat4 WorldMat;
-	uniform mat4 WorldNormalMat;
-	uniform mat4 ViewProjMat;
+	uniform mat4 World;
+	uniform mat4 WorldNormal;
+	uniform mat4 ViewProj;
 	uniform vec3 ViewerPos;
 
 // shader input
@@ -43,7 +43,7 @@ out vec4 oPosWS;
 out vec2 oTex;
 
 #ifdef _NormalMapping
-	out mat3 oTangentToWorldMat;
+	out mat3 oTangentToWorld;
 #else
 	out vec3 oNormalWS;
 #endif
@@ -55,54 +55,54 @@ out vec2 oTex;
 void main()
 {
 #ifdef _Skinning
-	mat4 SkinningWorldMat = WorldMatrices[iBlendIndices[0]] * iBlendWeights[0] +
+	mat4 SkinningWorld = WorldMatrices[iBlendIndices[0]] * iBlendWeights[0] +
 							WorldMatrices[iBlendIndices[1]] * iBlendWeights[1] +
 							WorldMatrices[iBlendIndices[2]] * iBlendWeights[2] +
 							WorldMatrices[iBlendIndices[3]] * iBlendWeights[3];
 
-	mat3 SkinningNormalMat = mat3(SkinningWorldMat);
+	mat3 SkinningNormal = mat3(SkinningWorld);
 #endif
 
 	// calculate world normal.
 #ifdef _Skinning
-	vec3 normal = normalize(iNormal * SkinningNormalMat);
+	vec3 normal = normalize(iNormal * SkinningWorld);
 #else
-	vec3 normal = normalize(iNormal * mat3(WorldNormalMat));
+	vec3 normal = normalize(iNormal * mat3(WorldNormal));
 #endif
 
 	// calculate position in world space:
 #ifdef _Skinning
-	oPosWS = vec4(iPos, 1.0)* SkinningWorldMat;
+	oPosWS = vec4(iPos, 1.0)* SkinningWorld;
 #else
-	oPosWS = vec4(iPos, 1.0) * WorldMat;
+	oPosWS = vec4(iPos, 1.0) * World;
 #endif
 
 	// calculate tangent and binormal.
 #ifdef _NormalMapping
 	#ifdef _Skinning
-		vec3 tangent = normalize(iTangent * SkinningNormalMat);
-		vec3 binormal = normalize(iBinormal * SkinningNormalMat);
+		vec3 tangent = normalize(iTangent * SkinningNormal);
+		vec3 binormal = normalize(iBinormal * SkinningNormal);
 	#else
-		vec3 tangent = normalize(iTangent * mat3(WorldNormalMat));
-		vec3 binormal = normalize(iBinormal * mat3(WorldNormalMat));
+		vec3 tangent = normalize(iTangent * mat3(WorldNormal));
+		vec3 binormal = normalize(iBinormal * mat3(WorldNormal));
 	#endif
 
 	// actualy this is a world to tangent matrix, because we always use V * Mat.
-	oTangentToWorldMat = mat3( tangent, binormal, normal);
+	oTangentToWorld = mat3( tangent, binormal, normal);
 
 	#ifdef _ParallaxMapping
-		oViewTS = (ViewerPos - oPosWS) * oTangentToWorldMat;
+		oViewTS = (ViewerPos - oPosWS) * oTangentToWorld;
 	#endif
 
 	// transpose to get tangent to world matrix
-	oTangentToWorldMat = transpose(oTangentToWorldMat);
+	oTangentToWorld = transpose(oTangentToWorld);
 
 #else
 	oNormalWS = normal;
 #endif
 
 	oTex = iTex0;
-	gl_Position = oPosWS * ViewProjMat;
+	gl_Position = oPosWS * ViewProj;
 }
 	]]>
 	</ShaderSource>
@@ -128,7 +128,7 @@ in vec4 oPosWS;
 in vec2 oTex;
 
 #ifdef _NormalMapping
-	in mat3 oTangentToWorldMat;
+	in mat3 oTangentToWorld;
 #else
 	in vec3 oNormalWS;
 #endif
@@ -166,7 +166,7 @@ void main()
 
 #ifdef _NormalMapping
 	vec3 normal = texture2D( NormalMap, newTex ).rgb * 2.0 - 1.0;
-	normal = normal * oTangentToWorldMat;
+	normal = normal * oTangentToWorld;
 #else
 	vec3 normal = oNormalWS;
 #endif	
@@ -210,8 +210,9 @@ void main()
 	}
 #endif
 
-	gl_FragColor = vec4(finalColor.rg, 1.0, 1.0);
+	//gl_FragColor = vec4(finalColor.rg, 1.0, 1.0);
 	//gl_FragColor = vec4(finalColor, diffuse.a);
+	gl_FragColor = vec4(diffuse.rgb, finalColor.r);
 	
 }
 	]]>
