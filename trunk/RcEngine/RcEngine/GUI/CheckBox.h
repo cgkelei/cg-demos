@@ -8,6 +8,9 @@ namespace RcEngine {
 class _ApiExport CheckBox : public UIElement
 {
 public:
+
+	static const String StyleName;
+
 	/**
 	 * CheckBox state changed event.
 	 */

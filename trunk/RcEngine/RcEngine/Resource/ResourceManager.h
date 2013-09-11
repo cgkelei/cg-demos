@@ -4,11 +4,6 @@
 #include <Core/Prerequisites.h>
 #include <Core/Singleton.h>
 #include <Resource/Resource.h>
-#include <Graphics/Mesh.h>
-#include <Graphics/AnimationClip.h>
-#include <Graphics/Material.h>
-#include <Graphics/Effect.h> 
-#include <Graphics/Texture.h>
 
 namespace RcEngine {
 

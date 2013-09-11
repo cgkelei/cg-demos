@@ -171,13 +171,10 @@ shared_ptr<Stream> FileSystem::OpenStream( const String& file, const String& gro
 
 bool FileSystem::Exits( const String& name, const String& group/*="General"*/ )
 {
-	auto groupIter = mResouceGroups.find(group);
-	if (groupIter == mResouceGroups.end())
-	{
+	if (mResouceGroups.find(group) == mResouceGroups.end())
 		return false;
-	}
 
-	vector<String>& paths = groupIter->second;
+	vector<String>& paths = mResouceGroups[group];
 	for (auto iter = paths.begin(); iter != paths.end(); ++iter)
 	{
 		String fileName = PathUtil::GetFileNameAndExtension(name);

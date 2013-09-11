@@ -19,7 +19,6 @@ RadioButton::RadioButton()
 
 RadioButton::~RadioButton()
 {
-
 }
 
 void RadioButton::InitGuiStyle( const GuiSkin::StyleMap* styles /* = nullptr */ )
@@ -140,8 +139,8 @@ bool RadioButton::CanHaveFocus() const
 }
 
 //----------------------------------------------------------------------------------------------
-RadioButtonGroup::RadioButtonGroup()
-	: mSelectedIndex(-1)
+RadioButtonGroup::RadioButtonGroup(const std::wstring& name)
+	: mSelectedIndex(-1), mGroupName(name)
 {
 
 }
@@ -205,12 +204,12 @@ void RadioButtonGroup::AddButton( RadioButton* button, int32_t idx )
 }
 
 
-void RadioButtonGroup::HandleButtonClicked( RadioButton* sender )
+void RadioButtonGroup::HandleButtonClicked( RadioButton* radioBtn )
 {      
 	int32_t checkIndex = -1;
 	for (size_t i = 0; i < mRadioButtons.size(); ++i)
 	{
-		if (mRadioButtons[i] == sender)
+		if (mRadioButtons[i] == radioBtn)
 		{
 			checkIndex = i;
 			break;
@@ -220,7 +219,7 @@ void RadioButtonGroup::HandleButtonClicked( RadioButton* sender )
 	if(checkIndex != mSelectedIndex)
 	{
 		if (!EventSelectionChanged.empty())
-			EventSelectionChanged(sender->mText);
+			EventSelectionChanged(radioBtn->mText);
 	}
 
 	mSelectedIndex = checkIndex;

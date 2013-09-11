@@ -101,13 +101,10 @@ void SceneManager::DestroySceneNode( SceneNode* node )
 
 Light* SceneManager::CreateLight( const String& name )
 {
-	auto lightFactoryIter = mRegistry.find(SOT_Light);
-	if (lightFactoryIter == mRegistry.end())
-	{
+	if (mRegistry.find(SOT_Light) == mRegistry.end())
 		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Light type haven't Registed", "SceneManager::CreateEntity");
-	}
 
-	Light* light = static_cast<Light*>((lightFactoryIter->second.factoryFunc)(name, nullptr));
+	Light* light = static_cast<Light*>((mRegistry[SOT_Light].factoryFunc)(name, nullptr));
 	mSceneObjectCollections[SOT_Light].push_back(light);
 
 	// keep track of light
@@ -136,13 +133,12 @@ Entity* SceneManager::CreateEntity( const String& entityName, const String& mesh
 
 SceneNode* SceneManager::FindSceneNode( const String& name ) const
 {
-	for (size_t i = 0; i < mAllSceneNodes.size(); ++i)
+	for (SceneNode* sceneNode : mAllSceneNodes)
 	{
-		if (mAllSceneNodes[i]->GetName() == name)
-		{
-			return mAllSceneNodes[i];
-		}
+		if (sceneNode->GetName() == name)
+			return sceneNode;
 	}
+
 	return nullptr;
 }
 
@@ -217,47 +213,36 @@ void SceneManager::UpdateSceneGraph( float delta )
 
 void SceneManager::RenderScene()
 {
-	auto& renderBuckets = mRenderQueue->GetAllRenderBuckets();
-	
-	for (auto iter = renderBuckets.begin(); iter != renderBuckets.end(); ++iter)
+	for (auto& kv : mRenderQueue->GetAllRenderBuckets())
 	{
-		RenderBucket& renderBucket = *(iter->second);
+		RenderBucket& renderBucket = *kv.second;
 
 		if (renderBucket.size())
 		{
-			std::sort(renderBucket.begin(), renderBucket.end(), [](const RenderQueueItem& lhs, const RenderQueueItem& rhs)
-			{
-				return lhs.SortKey < rhs.SortKey;
-			});
+			std::sort(renderBucket.begin(), renderBucket.end(), [](const RenderQueueItem& lhs, const RenderQueueItem& rhs) {
+				return lhs.SortKey < rhs.SortKey; });
 
-			for (auto renderableIter = renderBucket.begin(); renderableIter != renderBucket.end(); ++renderableIter)
-			{
-				renderableIter->Renderable->Render();
-			}
+				for (const RenderQueueItem& renderItem : renderBucket)
+					renderItem.Renderable->Render();
 		}
-		
 	}
 }
 
 void SceneManager::ClearScene()
 {
 	// clear all scene node
-	for (auto iter = mAllSceneNodes.begin(); iter != mAllSceneNodes.end(); ++iter)
-	{
-		SAFE_DELETE(*iter);
-	}
+	for (SceneNode* node : mAllSceneNodes) 
+		delete node;
+
 	mAllSceneNodes.clear();
 
 	// clear all scene object
-	for (auto iIter = mSceneObjectCollections.begin(); iIter != mSceneObjectCollections.end(); ++iIter)
+	for (auto& kv : mSceneObjectCollections)
 	{
-		for (auto jIter = iIter->second.begin(); jIter != iIter->second.end(); ++jIter)
-		{
-			SAFE_DELETE(*jIter);
-		}
+		for (SceneObject* object : kv.second)
+			delete object;
 	}
 	mSceneObjectCollections.clear();
-
 
 	// lights has delete by mSceneObjectCollections
 	mAllSceneLights.clear();

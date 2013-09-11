@@ -143,9 +143,14 @@ bool FileStream::Open( const String& fileName, FileMode mode /*= FILE_READ*/ )
 	mPosition = 0;
 
 	mFileHandle = fopen(fileName.c_str(), OpenMode[mFileMode]);
+
+	if (!mFileHandle)
+		return false;
+
 	fseek((FILE*)mFileHandle, 0, SEEK_END);
 	mSize = ftell((FILE*)mFileHandle);
 	fseek((FILE*)mFileHandle, 0, SEEK_SET);
+
 	return true;
 }
 

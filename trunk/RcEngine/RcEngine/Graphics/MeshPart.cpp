@@ -66,6 +66,9 @@ void MeshPart::Load(  Stream& source )
 		elements[i].UsageIndex = source.ReadUShort();
 	}
 
+	//printf("%s, %s, %d\n", mName.c_str(), mMaterialName.c_str(), vertexSize);
+
+
 	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 
 	// create vertex declaration

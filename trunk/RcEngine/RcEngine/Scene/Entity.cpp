@@ -4,6 +4,7 @@
 #include <Scene/SceneManager.h>
 #include <Graphics/Mesh.h>
 #include <Graphics/MeshPart.h>
+#include <Graphics/Effect.h>
 #include <Graphics/RenderOperation.h>
 #include <Graphics/Camera.h>
 #include <Graphics/Material.h>
@@ -20,7 +21,10 @@
 namespace RcEngine {
 
 Entity::Entity( const String& name, const shared_ptr<Mesh>& mesh )
-	: SceneObject(name, SOT_Entity, true), mNumSkinMatrices(0), mMesh(mesh),
+	: SceneObject(name, SOT_Entity, true),
+	mNumSkinMatrices(0), 
+	mMesh(mesh), 
+	mAnimationPlayer(nullptr),
 	mSkeleton( mesh->GetSkeleton() ? mesh->GetSkeleton()->Clone() : 0 )
 {
 	Initialize();
@@ -144,9 +148,8 @@ AnimationPlayer* Entity::GetAnimationPlayer() const
 void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, Camera* camera, RenderOrder order)
 {
 	// Add each visible SubEntity to the queue
-	for (auto iter= mSubEntityList.begin(); iter != mSubEntityList.end(); ++iter)
+	for (SubEntity* subEntity : mSubEntityList)
 	{
-		SubEntity* subEntity = *iter;
 		BoundingBoxf subWorldBoud = Transform(subEntity->GetBoundingBox(), mParentNode->GetWorldTransform());
 
 		// tode  mesh part world bounding has some bugs.
@@ -190,9 +193,9 @@ void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, Camera* camera, Rende
 	{
 		UpdateAnimation();
 
-		for(auto iter = mChildAttachedObjects.begin(); iter != mChildAttachedObjects.end(); ++iter)
+		for (auto& kv : mChildAttachedObjects)
 		{
-			SceneObject* child = iter->second;
+			SceneObject* child = kv.second;
 
 			bool visible = camera->Visible(child->GetWorldBoundingBox());
 
@@ -202,7 +205,7 @@ void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, Camera* camera, Rende
 
 				//The child is connected to a joint
 				Bone* bone = static_cast<Bone*>(child->GetParentNode());
-				
+
 				if (bone && !GetSkeleton()->GetBone( bone->GetName()) )
 				{
 					//Current LOD entity does not have the bone that the

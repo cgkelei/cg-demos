@@ -29,6 +29,7 @@ protected:
 	void SliderValueChange(int32_t value);
 	void ButtonClicked();
 	void CheckBoxToggle(bool checked);
+	void RadioButtonChanged(std::wstring text);
 
 private:
 	shared_ptr<Effect> mEffect;
@@ -59,6 +60,8 @@ private:
 	ComboBox* mComboBox;
 	UIWindow* mWindow1;
 	UIWindow* mWindow2;
-	RadioButton* mRadioButton;
+	RadioButton* mRadioButton1;
+	RadioButton* mRadioButton2;
+	RadioButtonGroup* mRadioButtonGroup;
 };
 

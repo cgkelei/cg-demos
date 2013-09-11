@@ -32,7 +32,7 @@ public:
 	void SetText(const std::wstring& text);
 
 protected:
-	
+
 	std::wstring mText;
 	bool mChecked;
 	bool mPressed;
@@ -40,10 +40,9 @@ protected:
 
 	GuiSkin::GuiStyle* mStyle;
 
-private:
 	fastdelegate::FastDelegate1<RadioButton*> EventButtonClicked;
-
-	friend class RadioButtonGroup;
+	 
+	friend class RadioButtonGroup;	
 };
 
 class _ApiExport RadioButtonGroup 
@@ -53,7 +52,7 @@ public:
 	SelChangedEventHandler EventSelectionChanged;
 
 public:
-	RadioButtonGroup();
+	RadioButtonGroup(const std::wstring& name = L"");
 	~RadioButtonGroup();
 	
 	void AddButton(RadioButton* button);
@@ -71,6 +70,7 @@ protected:
 protected:
 	std::vector<RadioButton*> mRadioButtons;	
 	int32_t mSelectedIndex;
+	std::wstring mGroupName;
 };
 
 

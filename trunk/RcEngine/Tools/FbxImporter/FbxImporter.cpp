@@ -1740,21 +1740,18 @@ void FbxProcesser::ProcessAnimation( FbxAnimStack* pStack, FbxNode* pNode, doubl
 	}
 }
 
-
-
 int main()
 {
-
 	FbxProcesser fbxProcesser;
 	fbxProcesser.Initialize();
 
-	if (fbxProcesser.LoadScene("PointLightSphere.fbx"))
+	if (fbxProcesser.LoadScene("Sponza.fbx"))
 	{
 		fbxProcesser.ProcessScene(0);
 		fbxProcesser.BuildAndSaveXML();
 		fbxProcesser.BuildAndSaveBinary();
+		fbxProcesser.ExportMaterial();
 	}
-
 
 	return 0;
 }

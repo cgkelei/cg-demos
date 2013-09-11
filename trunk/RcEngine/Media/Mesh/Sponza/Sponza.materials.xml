@@ -1,0 +1,219 @@
+<materials>
+	<material material="leaf">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_thorn_diff.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_thorn_diff.dds"/>
+		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_thorn_ddn.dds"/>
+		<TransparentColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_thorn_mask.dds"/>
+	</material>
+	<material material="Material__57">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_plant.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_plant.dds"/>
+		<TransparentColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_plant_mask.dds"/>
+	</material>
+	<material material="vase_round">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_round.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_round.dds"/>
+		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_round_ddn.dds"/>
+	</material>
+	<material material="Material__298">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\background.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\background.dds"/>
+		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\background_ddn.dds"/>
+	</material>
+	<material material="16___Default">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+	</material>
+	<material material="bricks">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\spnza_bricks_a_diff.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\spnza_bricks_a_diff.dds"/>
+		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\spnza_bricks_a_ddn.dds"/>
+	</material>
+	<material material="arch">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_arch_diff.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_arch_diff.dds"/>
+	</material>
+	<material material="ceiling">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_ceiling_a_diff.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_ceiling_a_diff.dds"/>
+	</material>
+	<material material="column_a">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_a_diff.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_a_diff.dds"/>
+		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_a_ddn.dds"/>
+	</material>
+	<material material="floor">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_floor_a_diff.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_floor_a_diff.dds"/>
+	</material>
+	<material material="column_c">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_c_diff.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_c_diff.dds"/>
+		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_c_ddn.dds"/>
+	</material>
+	<material material="details">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_details_diff.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_details_diff.dds"/>
+	</material>
+	<material material="column_b">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_b_diff.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_b_diff.dds"/>
+		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_b_ddn.dds"/>
+	</material>
+	<material material="Material__47">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+	</material>
+	<material material="flagpole">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_flagpole_diff.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_flagpole_diff.dds"/>
+	</material>
+	<material material="fabric_e">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_fabric_green_diff.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_fabric_green_diff.dds"/>
+	</material>
+	<material material="fabric_d">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_fabric_blue_diff.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_fabric_blue_diff.dds"/>
+	</material>
+	<material material="fabric_a">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_fabric_diff.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_fabric_diff.dds"/>
+	</material>
+	<material material="fabric_g">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_curtain_blue_diff.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_curtain_blue_diff.dds"/>
+	</material>
+	<material material="fabric_c">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_curtain_diff.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_curtain_diff.dds"/>
+	</material>
+	<material material="fabric_f">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_curtain_green_diff.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_curtain_green_diff.dds"/>
+	</material>
+	<material material="chain">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\chain_texture.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\chain_texture.dds"/>
+		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\chain_texture_ddn.dds"/>
+		<TransparentColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\chain_texture_mask.dds"/>
+	</material>
+	<material material="vase_hanging">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_hanging.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_hanging.dds"/>
+	</material>
+	<material material="vase">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_dif.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_dif.dds"/>
+	</material>
+	<material material="Material__25">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\lion.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\lion.dds"/>
+		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\lion_ddn.dds"/>
+	</material>
+	<material material="roof">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_roof_diff.dds"/>
+		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_roof_diff.dds"/>
+	</material>
+</materials>
+

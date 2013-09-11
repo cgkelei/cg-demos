@@ -641,6 +641,7 @@ void Effect::LoadImpl()
 		shaderStage.Stage = shaderNode->AttributeString("stage", "");	
 		shaderStage.Entry = shaderNode->AttributeString("entry", "");
 
+		// Parse shader include headers
 		vector<String> includes;
 		for (XMLNodePtr includeNode = shaderNode->FirstNode("Include");  includeNode; includeNode = includeNode->NextSibling("Include"))
 		{
@@ -651,23 +652,24 @@ void Effect::LoadImpl()
 
 			XMLDoc includeDoc;
 			XMLNodePtr includeSourceNode = includeDoc.Parse(includeStream)->FirstNode("ShaderSource")->FirstNode();
-			assert (includeSourceNode->NodeType() == XML_Node_CData);
+
+			if (includeSourceNode->NodeType() != XML_Node_CData)
+				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Effect shader include source(CDATA) does't exit", "Effect::LoadImpl");
+
 			
 			String includeSource = includeSourceNode->ValueString(); 
 			shaderStage.Includes.push_back(includeSource);
 		}
 
+		// Parse shader source
 		XMLNodePtr shaderSourceNode = shaderNode->FirstNode("ShaderSource")->FirstNode();
 		if (shaderSourceNode->NodeType() == XML_Node_CData)
-		{
 			shaderStage.Source =  shaderSourceNode->ValueString();	
-		}
 		else
-		{
-			assert(false);
-		}
+			ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Effect shader include source(CDATA) does't exit", "Effect::LoadImpl");	
 	}
 
+	// Parse effect technique
 	XMLNodePtr technqueNode;
 	for (technqueNode = root->FirstNode("Technique");  technqueNode; technqueNode = technqueNode->NextSibling("Technique"))
 	{
@@ -685,7 +687,7 @@ void Effect::LoadImpl()
 			BlendStateDesc blendDesc;
 			RasterizerStateDesc rasDesc;
 
-			CollectRenderStates(passNode, dsDesc, blendDesc, rasDesc, 
+			CollectRenderStates(passNode, dsDesc, blendDesc, rasDesc,  
 				pass->mBlendColor, pass->mSampleMask, pass->mFrontStencilRef, pass->mBackStencilRef);
 
 			pass->mDepthStencilState = factory.CreateDepthStencilState(dsDesc);
@@ -708,6 +710,11 @@ void Effect::LoadImpl()
 				}
 				program->AttachShader(CompileShader(shaderStages[vertexName], defines, values));
 			}
+			else
+			{
+				String err = "VS( " + vertexName + " ) not found!";
+				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, err, "Effect::Load");
+			}
 
 			XMLNodePtr pixelNode = passNode->FirstNode("PixelShader");
 			String pixelName = pixelNode->AttributeString("name", "");
@@ -721,6 +728,11 @@ void Effect::LoadImpl()
 					values.push_back(String(""));
 				}
 				program->AttachShader(CompileShader(shaderStages[pixelName], defines, values));
+			}
+			else
+			{
+				String err = "PS( " + pixelName + " ) not found!";
+				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, err, "Effect::Load");
 			}
 
 			if (!program->LinkProgram())
