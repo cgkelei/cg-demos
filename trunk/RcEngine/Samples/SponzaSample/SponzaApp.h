@@ -3,6 +3,7 @@
 #define SponzaApp_h__
 
 #include <MainApp/Application.h>
+#include <Graphics/CameraControler.h>
 
 using namespace RcEngine;
 
@@ -21,7 +22,7 @@ protected:
 	void Update(float deltaTime);
 
 protected:
-
+	FPSCameraControler* mCameraControler;
 
 };
 

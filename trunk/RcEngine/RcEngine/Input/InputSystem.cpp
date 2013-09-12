@@ -153,4 +153,129 @@ bool InputSystem::MouseButtonRelease( MouseCode button ) const
 	return false;
 }
 
+void InputSystem::DispatchActions(float delata) const
+{
+	for (auto& kv : mActions)
+	{
+		// KeyCode kv.first
+		bool value = (std::find(mJustPressed.begin(), mJustPressed.end(), kv.first) != mJustPressed.end());
+
+		// action kv.second
+		auto foundHandler = mActionHandlers.find(kv.second);
+		if ( foundHandler != mActionHandlers.end() && !foundHandler->second.empty())
+			foundHandler->second(kv.second, value, delata);
+	}
+
+}
+
+void InputSystem::DispatchStates(float delata) const
+{
+	for (auto& kv : mStates)
+	{
+		bool value = mKeyState[kv.first];
+
+		auto foundHandler = mStateHandlers.find(kv.second);
+		if ( foundHandler != mStateHandlers.end() && !foundHandler->second.empty())
+			foundHandler->second(kv.second, value, delata);
+	}
+}
+
+void InputSystem::DispatchRanges(float delata) const
+{
+	for (auto iter = mRanges.begin(); iter != mRanges.end(); ++iter)
+	{
+		int32_t value;
+
+		switch(iter->first)
+		{
+		case MS_X:
+			value = mMousePos.X();
+			break;
+		case MS_Y:
+			value = mMousePos.Y();
+			break;
+		case MS_XDelta:
+			value = mMouseMove.X();
+			break;
+		case MS_YDelta:
+			value = mMouseMove.Y();
+			break;
+		default:
+			assert(false);
+		}
+
+		auto foundHandler = mRangeHandlers.find(iter->second);
+		if ( foundHandler != mRangeHandlers.end() && !foundHandler->second.empty())
+			foundHandler->second(iter->second, value, delata);
+	}
+}
+
+
+void InputSystem::AddActionHandler( uint32_t action, InputActionHandler handler )
+{
+	if (HasAction(action))
+	{
+		mActionHandlers[action] = handler;
+	}
+}
+
+void InputSystem::AddStateHandler(uint32_t state, InputStateHandler handler)
+{
+	if (HasState(state))
+	{
+		mStateHandlers[state] = handler;
+	}
+}
+
+void InputSystem::AddRangeHandler(uint32_t range, InputRangeHandler handler)
+{
+	if (HasRange(range))
+	{
+		mRangeHandlers[range] = handler;
+	}
+}
+
+bool InputSystem::HasAction( uint32_t action ) const
+{
+	for (auto iter = mActions.begin(); iter != mActions.end(); ++iter)
+	{
+		if (iter->second == action)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool InputSystem::HasState(uint32_t state) const
+{
+	for (auto iter = mStates.begin(); iter != mStates.end(); ++iter)
+	{
+		if (iter->second == state)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool InputSystem::HasRange(uint32_t range) const
+{
+	for (auto iter = mRanges.begin(); iter != mRanges.end(); ++iter)
+	{
+		if (iter->second == range)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void InputSystem::Dispatch( float delata )
+{
+	DispatchActions(delata);
+	DispatchStates(delata);
+	DispatchRanges(delata);
+}
+
 }

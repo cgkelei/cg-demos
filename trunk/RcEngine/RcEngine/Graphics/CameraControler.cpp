@@ -57,10 +57,12 @@ FPSCameraControler::FPSCameraControler()
 		InputRange(MS_YDelta, TurnUpDown),
 	};
 
+	InputSystem* inputSystem = InputSystem::GetSingletonPtr();
 
-	//if (inputSystem)
+
+	if (inputSystem)
 	{
-	/*	inputSystem->AddState(states, states+ sizeof(states)/ sizeof(InputState));
+		inputSystem->AddState(states, states+ sizeof(states)/ sizeof(InputState));
 		inputSystem->AddStateHandler(Forward, fastdelegate::MakeDelegate(this, &FPSCameraControler::HandleMove));
 		inputSystem->AddStateHandler(Backward, fastdelegate::MakeDelegate(this, &FPSCameraControler::HandleMove));
 		inputSystem->AddStateHandler(MoveLeft, fastdelegate::MakeDelegate(this, &FPSCameraControler::HandleMove));
@@ -68,7 +70,7 @@ FPSCameraControler::FPSCameraControler()
 				
 		inputSystem->AddRange(ranges, ranges+ sizeof(ranges)/ sizeof(InputRange));
 		inputSystem->AddRangeHandler(TurnLeftRight, fastdelegate::MakeDelegate(this, &FPSCameraControler::HandleRoatate));
-		inputSystem->AddRangeHandler(TurnUpDown, fastdelegate::MakeDelegate(this, &FPSCameraControler::HandleRoatate));*/
+		inputSystem->AddRangeHandler(TurnUpDown, fastdelegate::MakeDelegate(this, &FPSCameraControler::HandleRoatate));
 	}
 			
 }
@@ -140,16 +142,20 @@ void FPSCameraControler::HandleMove( uint32_t action, bool value, float delta)
 
 void FPSCameraControler::HandleRoatate( uint32_t action, int32_t value, float dt)
 {
-	if (action == TurnLeftRight)
+	Window* mainWindow = Context::GetSingleton().GetApplication().GetMainWindow();
+	InputSystem& inputSys = InputSystem::GetSingleton();
+
+	if (inputSys.MouseButtonDown(MS_LeftButton) && !inputSys.MouseButtonPress(MS_LeftButton))
 	{
-		Rotate(value * 15 * dt, 0 , 0);
+		if (action == TurnLeftRight)
+		{
+			Rotate(value * 15 * dt, 0 , 0);
+		}
+		else if (action == TurnUpDown)
+		{
+			Rotate(0, value * 15 * dt, 0);
+		}	
 	}
-	else if (action == TurnUpDown)
-	{
-		Rotate(0, value * 15 * dt, 0);
-	}
-	
-	Context::GetSingleton().GetApplication().GetMainWindow()->ForceMouseToCenter();		
 }
 
 void FPSCameraControler::Rotate( float yaw, float pitch, float roll )
@@ -315,63 +321,63 @@ void ModelViewerCameraControler::AttachCamera( Camera* camera )
 
 void ModelViewerCameraControler::HadnleCameraView( uint32_t action, bool value, float delta )
 {
-	//assert(action == CameraView);
-	//// Get mouse device to fetch position
-	//Mouse* mouse =	Context::GetSingleton().GetInputSystem().GetMouse();
-	//if (value == true)
-	//{
-	//	if (mCameraArcBall.IsDragging() == false)
-	//	{
-	//		mCameraArcBall.OnBegin(mouse->X(), mouse->Y());
-	//	}
-	//	else
-	//	{
-	//		mCameraArcBall.OnMove(mouse->X(), mouse->Y());
+	assert(action == CameraView);
+	// Get mouse device to fetch position
 
-	//		// Now need to update camera view matrix
-	//		mCameraRot = QuaternionInverse(mCameraArcBall.GetRotation());
+	int2 mousePos = InputSystem::GetSingleton().GetMousePos();
 
-	//		// Transform vectors based on camera's rotation matrix
-	//		float3 vWorldUp, vWorldAhead;
-	//		float3 vLocalUp = float3( 0, 1, 0 );
-	//		float3 vLocalAhead = float3( 0, 0, 1 );
-	//		vWorldUp = Transform(vLocalUp, mCameraRot );
-	//		vWorldAhead = Transform( vLocalAhead, mCameraRot );
+	if (value == true)
+	{
+		if (mCameraArcBall.IsDragging() == false)
+		{
+			mCameraArcBall.OnBegin(mousePos.X(), mousePos.Y());
+		}
+		else
+		{
+			mCameraArcBall.OnMove(mousePos.X(), mousePos.Y());
 
-	//		//mAttachedCamera->SetViewParams(mAttachedCamera->GetPosition(), mAttachedCamera->GetPosition() + vWorldAhead, vWorldUp);
+			// Now need to update camera view matrix
+			mCameraRot = QuaternionInverse(mCameraArcBall.GetRotation());
 
+			// Transform vectors based on camera's rotation matrix
+			float3 vWorldUp, vWorldAhead;
+			float3 vLocalUp = float3( 0, 1, 0 );
+			float3 vLocalAhead = float3( 0, 0, 1 );
+			vWorldUp = Transform(vLocalUp, mCameraRot );
+			vWorldAhead = Transform( vLocalAhead, mCameraRot );
 
-	//	}
-	//}
-	//else
-	//{
-	//	mCameraArcBall.OnEnd();
-	//}
+			mAttachedCamera->SetViewParams(mAttachedCamera->GetPosition(), mAttachedCamera->GetPosition() + vWorldAhead, vWorldUp);
+		}
+	}
+	else
+	{
+		mCameraArcBall.OnEnd();
+	}
 }
 
 
 void ModelViewerCameraControler::HandleModelView( uint32_t action, bool value, float delta )
 {
 	//assert(action == ModelView);
-	//// Get mouse device to fetch position
-	//Mouse* mouse =	Context::GetSingleton().GetInputSystem().GetMouse();
-	//if (value == true)
-	//{
-	//	if (mModelArcBall.IsDragging() == false)
-	//	{
-	//		mModelArcBall.OnBegin(mouse->X(), mouse->Y());
-	//	}
-	//	else
-	//	{
-	//		mModelArcBall.OnMove(mouse->X(), mouse->Y());
-	//		mWorld = QuaternionToRotationMatrix( mModelArcBall.GetRotation() );
-	//	}
-	//}
-	//else
-	//{
-	//	if (mModelArcBall.IsDragging() == true)
-	//		mModelArcBall.OnEnd();
-	//}
+	// Get mouse device to fetch position
+	int2 mousePos = InputSystem::GetSingleton().GetMousePos();
+	if (value == true)
+	{
+		if (mModelArcBall.IsDragging() == false)
+		{
+			mModelArcBall.OnBegin(mousePos.X(), mousePos.Y());
+		}
+		else
+		{
+			mModelArcBall.OnMove(mousePos.X(), mousePos.Y());
+			mWorld = QuaternionToRotationMatrix( mModelArcBall.GetRotation() );
+		}
+	}
+	else
+	{
+		if (mModelArcBall.IsDragging() == true)
+			mModelArcBall.OnEnd();
+	}
 
 }
 

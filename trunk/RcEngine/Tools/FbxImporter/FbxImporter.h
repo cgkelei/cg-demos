@@ -176,6 +176,8 @@ public:
 	void CollectMaterials(FbxScene* fbxScene);
 	void CollectSkeletons(FbxScene* fbxScene);
 
+	void MergeScene();
+
 	void BuildAndSaveXML();
 	void BuildAndSaveBinary();	
 
@@ -185,6 +187,7 @@ private:
 	FbxManager* mFBXSdkManager;
 	FbxScene* mFBXScene;
 	bool mQuietMode;
+	bool mMergeScene;
 
 	unordered_map<String, shared_ptr<Skeleton>> mSkeletons;
 	unordered_map<String, AnimationData> mAnimations;

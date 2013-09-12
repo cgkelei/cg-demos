@@ -197,6 +197,8 @@ public:
 	// Call after Collect OS Events
 	void EndEvents();
 
+	void Dispatch(float deltaTime);
+
 	/**
 	 * Mouse
 	 */
@@ -219,6 +221,45 @@ public:
 	bool KeyPress(KeyCode key) const;
 	bool KeyRelease(KeyCode key) const;
 
+	void AddActionHandler(uint32_t action, InputActionHandler handler);
+	void AddStateHandler(uint32_t state, InputStateHandler handler);
+	void AddRangeHandler(uint32_t range, InputRangeHandler handler);
+
+	template<typename ForwardIterator>
+	void AddAction(ForwardIterator first, ForwardIterator last)
+	{
+		for (ForwardIterator iter = first; iter != last; ++iter)
+		{
+			mActions.insert(InputAction((*iter).first, (*iter).second));
+		}
+	}
+
+	template<typename ForwardIterator>
+	void AddState(ForwardIterator first, ForwardIterator last)
+	{
+		for (ForwardIterator iter = first; iter != last; ++iter)
+		{
+			mStates.insert(InputState((*iter).first, (*iter).second));
+		}
+	}
+
+	template<typename ForwardIterator>
+	void AddRange(ForwardIterator first, ForwardIterator last)
+	{
+		for (ForwardIterator iter = first; iter != last; ++iter)
+		{
+			mRanges.insert(InputRange((*iter).first, (*iter).second));
+		}
+	}
+
+	bool HasAction(uint32_t action) const;
+	bool HasState(uint32_t state) const;
+	bool HasRange(uint32_t range) const;
+
+private:
+	void DispatchActions(float delata) const;
+	void DispatchStates(float delata) const;
+	void DispatchRanges(float delata) const;
 
 private:
 	Vector<int32_t, 2>  mMousePos;
@@ -230,6 +271,18 @@ private:
 	std::vector<int32_t>  mjustReleased;
 	
 	std::queue<InputEvent> mEventQueue;
+
+	// Raw input to Action
+	std::unordered_map<uint32_t, uint32_t> mActions;
+	std::unordered_map<uint32_t, InputActionHandler> mActionHandlers;
+
+	// Raw input to State 
+	std::unordered_map<uint32_t, uint32_t> mStates;
+	std::unordered_map<uint32_t, InputStateHandler> mStateHandlers;
+
+	// Raw input to Range
+	std::unordered_map<uint32_t, uint32_t> mRanges;
+	std::unordered_map<uint32_t, InputRangeHandler> mRangeHandlers;
 };
 
 } // Namespace RcEngine
