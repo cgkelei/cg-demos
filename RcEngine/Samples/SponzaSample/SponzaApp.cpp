@@ -8,17 +8,20 @@
 #include <Graphics/RenderQueue.h>
 #include <Graphics/Effect.h>
 #include <Graphics/Camera.h>
+#include <Graphics/CameraControler.h>
 #include <Graphics/FrameBuffer.h>
 #include <Math/MathUtil.h>
 
 SponzaApp::SponzaApp( const String& config )
-	:Application(config)
+	:Application(config),
+	 mCameraControler(0)
 {
 }
 
 
 SponzaApp::~SponzaApp(void)
 {
+	SAFE_DELETE(mCameraControler);
 }
 
 void SponzaApp::Initialize()
@@ -28,6 +31,11 @@ void SponzaApp::Initialize()
 	float3 up(0, 1, 0);
 	camera->SetViewParams(float3(60, 10, 5), float3(0, 0, 0), up);
 	camera->SetProjectionParams(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 300.0f );
+
+	mCameraControler = new FPSCameraControler;
+	//mCameraControler = new ModelViewerCameraControler();
+	//mCameraControler->SetWindowSize(GetMainWindow()->GetWidth(), GetMainWindow()->GetHeight());
+	mCameraControler->AttachCamera(camera);
 }
 
 void SponzaApp::LoadContent()
@@ -36,9 +44,10 @@ void SponzaApp::LoadContent()
 	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
-	Entity* sponzaEntity = sceneMan.CreateEntity("Sponza", "Sponza/Sponza.mesh",  "Custom");
+	Entity* sponzaEntity = sceneMan.CreateEntity("Sponza", "Sponza/sponza_00.mesh",  "Custom");
 	SceneNode* sponzaNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Sponza");
 	sponzaNode->SetPosition(float3(0, 0, 0));
+	//sponzaNode->SetRotation(QuaternionFromRotationAxis(float3(1, 0, 0), Mathf::ToRadian(90)));
 	sponzaNode->SetScale(0.05f);
 	sponzaNode->AttachObject(sponzaEntity);
 }

@@ -2,6 +2,7 @@ from xml.dom.minidom import parse, parseString
 
 materials = parse("Sponza.materials.xml")
 template = parse("leaf1.material.xml")
+count = 0
 
 for material in materials.getElementsByTagName('material'):
     name = material.attributes['material'].value
@@ -12,8 +13,9 @@ for material in materials.getElementsByTagName('material'):
     
     texture = texture[0].attributes['name'].value
     texture = texture.split('\\')[-1]
-    print texture
-    
+
+    texture = texture.replace('tga','dds')
+
     outMat = template.getElementsByTagName('Material')[0]
     outMat.attributes['name'].value = name
 
@@ -21,11 +23,14 @@ for material in materials.getElementsByTagName('material'):
         if node.attributes['type'].value == 'texture2d' and node.attributes['semantic'].value == 'DiffuseMaterialMap':
                node.attributes['value'].value = texture
               
-
+    count = count + 1;
+    print count, texture
+    
     outName = name + ".material.xml"
     outXML = open(outName, "w")
     outXML.write(template.toxml())
     outXML.close()
+    
 
     
             

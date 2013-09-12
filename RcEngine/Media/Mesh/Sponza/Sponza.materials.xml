@@ -1,219 +1,219 @@
-<materials>
-	<material material="leaf">
+<materials count="26">
+	<material material="_sponzaleaf">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_thorn_diff.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_thorn_diff.dds"/>
-		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_thorn_ddn.dds"/>
-		<TransparentColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_thorn_mask.dds"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_thorn_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_thorn_diff.tga"/>
+		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\sponza_thorn_ddn.tga"/>
+		<TransparentColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_thorn_mask.tga"/>
 	</material>
-	<material material="Material__57">
+	<material material="_sponzaMaterial__57">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_plant.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_plant.dds"/>
-		<TransparentColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_plant_mask.dds"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_plant.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_plant.tga"/>
+		<TransparentColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_plant_mask.tga"/>
 	</material>
-	<material material="vase_round">
+	<material material="_sponzavase_round">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_round.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_round.dds"/>
-		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_round_ddn.dds"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_round.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_round.tga"/>
+		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\vase_round_ddn.tga"/>
 	</material>
-	<material material="Material__298">
+	<material material="_sponzaMaterial__298">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\background.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\background.dds"/>
-		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\background_ddn.dds"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\background.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\background.tga"/>
+		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\background_ddn.tga"/>
 	</material>
-	<material material="16___Default">
-		<ambient r="0.588" g="0.588" b="0.588"/>
-		<diffuse r="0.588" g="0.588" b="0.588"/>
-		<specular r="0" g="0" b="0" power="2"/>
-		<emissive r="0" g="0" b="0"/>
-	</material>
-	<material material="bricks">
-		<ambient r="0.588" g="0.588" b="0.588"/>
-		<diffuse r="0.588" g="0.588" b="0.588"/>
-		<specular r="0" g="0" b="0" power="2"/>
-		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\spnza_bricks_a_diff.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\spnza_bricks_a_diff.dds"/>
-		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\spnza_bricks_a_ddn.dds"/>
-	</material>
-	<material material="arch">
-		<ambient r="0.588" g="0.588" b="0.588"/>
-		<diffuse r="0.588" g="0.588" b="0.588"/>
-		<specular r="0" g="0" b="0" power="2"/>
-		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_arch_diff.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_arch_diff.dds"/>
-	</material>
-	<material material="ceiling">
-		<ambient r="0.588" g="0.588" b="0.588"/>
-		<diffuse r="0.588" g="0.588" b="0.588"/>
-		<specular r="0" g="0" b="0" power="2"/>
-		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_ceiling_a_diff.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_ceiling_a_diff.dds"/>
-	</material>
-	<material material="column_a">
-		<ambient r="0.588" g="0.588" b="0.588"/>
-		<diffuse r="0.588" g="0.588" b="0.588"/>
-		<specular r="0" g="0" b="0" power="2"/>
-		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_a_diff.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_a_diff.dds"/>
-		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_a_ddn.dds"/>
-	</material>
-	<material material="floor">
-		<ambient r="0.588" g="0.588" b="0.588"/>
-		<diffuse r="0.588" g="0.588" b="0.588"/>
-		<specular r="0" g="0" b="0" power="2"/>
-		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_floor_a_diff.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_floor_a_diff.dds"/>
-	</material>
-	<material material="column_c">
-		<ambient r="0.588" g="0.588" b="0.588"/>
-		<diffuse r="0.588" g="0.588" b="0.588"/>
-		<specular r="0" g="0" b="0" power="2"/>
-		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_c_diff.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_c_diff.dds"/>
-		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_c_ddn.dds"/>
-	</material>
-	<material material="details">
-		<ambient r="0.588" g="0.588" b="0.588"/>
-		<diffuse r="0.588" g="0.588" b="0.588"/>
-		<specular r="0" g="0" b="0" power="2"/>
-		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_details_diff.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_details_diff.dds"/>
-	</material>
-	<material material="column_b">
-		<ambient r="0.588" g="0.588" b="0.588"/>
-		<diffuse r="0.588" g="0.588" b="0.588"/>
-		<specular r="0" g="0" b="0" power="2"/>
-		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_b_diff.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_b_diff.dds"/>
-		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_column_b_ddn.dds"/>
-	</material>
-	<material material="Material__47">
+	<material material="_sponza16___Default">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
 	</material>
-	<material material="flagpole">
+	<material material="_sponzabricks">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_flagpole_diff.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_flagpole_diff.dds"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\spnza_bricks_a_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\spnza_bricks_a_diff.tga"/>
+		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\spnza_bricks_a_diff.tga"/>
 	</material>
-	<material material="fabric_e">
+	<material material="_sponzaarch">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_fabric_green_diff.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_fabric_green_diff.dds"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_arch_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_arch_diff.tga"/>
 	</material>
-	<material material="fabric_d">
+	<material material="_sponzaceiling">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_fabric_blue_diff.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_fabric_blue_diff.dds"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_ceiling_a_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_ceiling_a_diff.tga"/>
 	</material>
-	<material material="fabric_a">
+	<material material="_sponzacolumn_a">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_fabric_diff.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_fabric_diff.dds"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_a_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_a_diff.tga"/>
+		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_a_ddn.tga"/>
 	</material>
-	<material material="fabric_g">
+	<material material="_sponzafloor">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_curtain_blue_diff.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_curtain_blue_diff.dds"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_floor_a_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_floor_a_diff.tga"/>
 	</material>
-	<material material="fabric_c">
+	<material material="_sponzacolumn_c">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_curtain_diff.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_curtain_diff.dds"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_c_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_c_diff.tga"/>
+		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_c_ddn.tga"/>
 	</material>
-	<material material="fabric_f">
+	<material material="_sponzadetails">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_curtain_green_diff.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_curtain_green_diff.dds"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_details_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_details_diff.tga"/>
 	</material>
-	<material material="chain">
+	<material material="_sponzacolumn_b">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\chain_texture.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\chain_texture.dds"/>
-		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\chain_texture_ddn.dds"/>
-		<TransparentColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\chain_texture_mask.dds"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_b_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_b_diff.tga"/>
+		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_b_ddn.tga"/>
 	</material>
-	<material material="vase_hanging">
+	<material material="_sponzaMaterial__47">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_hanging.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_hanging.dds"/>
 	</material>
-	<material material="vase">
+	<material material="_sponzaflagpole">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_dif.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\vase_dif.dds"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_flagpole_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_flagpole_diff.tga"/>
 	</material>
-	<material material="Material__25">
+	<material material="_sponzafabric_e">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\lion.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\lion.dds"/>
-		<Bump name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\lion_ddn.dds"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_fabric_green_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_fabric_green_diff.tga"/>
 	</material>
-	<material material="roof">
+	<material material="_sponzafabric_d">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_roof_diff.dds"/>
-		<AmbientColor name="C:\Users\Eric\Downloads\OBJ\Sponza\dds\sponza_roof_diff.dds"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_fabric_blue_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_fabric_blue_diff.tga"/>
+	</material>
+	<material material="_sponzafabric_a">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_fabric_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_fabric_diff.tga"/>
+	</material>
+	<material material="_sponzafabric_g">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_curtain_blue_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_curtain_blue_diff.tga"/>
+	</material>
+	<material material="_sponzafabric_c">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_curtain_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_curtain_diff.tga"/>
+	</material>
+	<material material="_sponzafabric_f">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_curtain_green_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_curtain_green_diff.tga"/>
+	</material>
+	<material material="_sponzachain">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\chain_texture.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\chain_texture.tga"/>
+		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\chain_texture_ddn.tga"/>
+		<TransparentColor name="F:\RcEngine\Tools\FbxImporter\textures\chain_texture_mask.tga"/>
+	</material>
+	<material material="_sponzavase_hanging">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_hanging.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_hanging.tga"/>
+	</material>
+	<material material="_sponzavase">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_dif.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_dif.tga"/>
+	</material>
+	<material material="_sponzaMaterial__25">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\lion.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\lion.tga"/>
+		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\lion_ddn.tga"/>
+	</material>
+	<material material="_sponzaroof">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_roof_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_roof_diff.tga"/>
 	</material>
 </materials>
 

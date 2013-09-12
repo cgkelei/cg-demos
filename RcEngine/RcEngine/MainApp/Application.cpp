@@ -108,10 +108,12 @@ void Application::Tick()
 		mMainWindow->CollectOSEvents();
 	inputSystem.EndEvents();
 
+	float deltaTime = mTimer.GetDeltaTime();
+
 	// Process input events
 	ProcessEventQueue();
 
-	float deltaTime = mTimer.GetDeltaTime();
+	inputSystem.Dispatch(deltaTime);
 
 	// update
 	Update(deltaTime);

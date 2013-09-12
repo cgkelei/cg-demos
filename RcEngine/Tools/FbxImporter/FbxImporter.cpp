@@ -339,7 +339,7 @@ void FbxProcesser::BoneWeights::Normalize()
 
 
 FbxProcesser::FbxProcesser(void)
-	: mFBXScene(nullptr), mFBXSdkManager(nullptr), mQuietMode(false)
+	: mFBXScene(nullptr), mFBXSdkManager(nullptr), mQuietMode(false), mMergeScene(false)
 {
 }
 
@@ -1067,6 +1067,8 @@ void FbxProcesser::ExportMaterial()
 	XMLNodePtr rootNode = materialxml.AllocateNode(XML_Node_Element, "materials");
 	materialxml.RootNode(rootNode);
 
+	rootNode->AppendAttribute(materialxml.AllocateAttributeUInt("count", mMaterials.size()));
+
 	XMLNodePtr matNode, tmpNode;
 	XMLAttributePtr attrib;
 	for (size_t i = 0; i < mMaterials.size(); ++i)
@@ -1740,15 +1742,47 @@ void FbxProcesser::ProcessAnimation( FbxAnimStack* pStack, FbxNode* pNode, doubl
 	}
 }
 
+void FbxProcesser::MergeScene()
+{
+	if (mSceneMeshes.size() > 1)
+	{
+		// Make other mesh as a mesh part of first mesh
+		for (size_t mi = 1; mi < mSceneMeshes.size(); ++mi)
+		{
+			MeshData& mesh  = *(mSceneMeshes[mi]);
+
+			if (mesh.MeshSkeleton)
+			{
+				printf("Multiple animation mesh exits in scene, can't merge!\n");
+				exit(0);
+			}
+
+			mSceneMeshes[0]->Bound.Merge(mesh.Bound);
+			
+			for (auto& part : mesh.MeshParts)
+				mSceneMeshes[0]->MeshParts.push_back(part);
+		}
+
+		mSceneMeshes.resize(1);
+	}	
+}
+
 int main()
 {
 	FbxProcesser fbxProcesser;
 	fbxProcesser.Initialize();
 
-	if (fbxProcesser.LoadScene("Sponza.fbx"))
+	if (fbxProcesser.LoadScene("sponza.fbx"))
 	{
 		fbxProcesser.ProcessScene(0);
-		fbxProcesser.BuildAndSaveXML();
+
+		bool mergeScene = true;
+		if (mergeScene)
+		{
+			fbxProcesser.MergeScene();
+		}
+
+		//fbxProcesser.BuildAndSaveXML();
 		fbxProcesser.BuildAndSaveBinary();
 		fbxProcesser.ExportMaterial();
 	}
