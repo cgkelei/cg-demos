@@ -188,6 +188,7 @@ private:
 	FbxScene* mFBXScene;
 	bool mQuietMode;
 	bool mMergeScene;
+	String mSceneName;
 
 	unordered_map<String, shared_ptr<Skeleton>> mSkeletons;
 	unordered_map<String, AnimationData> mAnimations;
@@ -196,3 +197,22 @@ private:
 	vector<shared_ptr<MeshData> > mSceneMeshes;
 };
 
+
+class FBXTransformer
+{
+public:
+	FBXTransformer()
+		: mUnitScale( 1.0f )
+	{ }
+
+	void Initialize( FbxScene* pScene );
+
+	void TransformMatrix( float4x4* pDestMatrix, const float4x4* pSrcMatrix ) const;
+	void TransformPosition( float3* pDestPosition, const float3* pSrcPosition ) const;
+	void TransformDirection( float3* pDestDirection, const float3* pSrcDirection ) const;
+	float TransformLength( float inputLength ) const;
+
+protected:
+	float mUnitScale;
+	bool  m3dMaxConversion;
+};

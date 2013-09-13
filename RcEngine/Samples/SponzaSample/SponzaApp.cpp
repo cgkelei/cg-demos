@@ -10,6 +10,8 @@
 #include <Graphics/Camera.h>
 #include <Graphics/CameraControler.h>
 #include <Graphics/FrameBuffer.h>
+#include <Graphics/AnimationState.h>
+#include <Graphics/Animation.h>
 #include <Math/MathUtil.h>
 
 SponzaApp::SponzaApp( const String& config )
@@ -28,8 +30,8 @@ void SponzaApp::Initialize()
 {
 	Camera* camera = RcEngine::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
 
-	float3 up(0, 1, 0);
-	camera->SetViewParams(float3(60, 10, 5), float3(0, 0, 0), up);
+	//camera->SetViewParams(float3(0, 0, -20), float3(0, 0, 0));
+	camera->SetViewParams(float3(0, 50, 150), float3(0, 50, 0));
 	camera->SetProjectionParams(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 300.0f );
 
 	mCameraControler = new FPSCameraControler;
@@ -44,12 +46,27 @@ void SponzaApp::LoadContent()
 	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
-	Entity* sponzaEntity = sceneMan.CreateEntity("Sponza", "Sponza/sponza_00.mesh",  "Custom");
-	SceneNode* sponzaNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Sponza");
-	sponzaNode->SetPosition(float3(0, 0, 0));
-	//sponzaNode->SetRotation(QuaternionFromRotationAxis(float3(1, 0, 0), Mathf::ToRadian(90)));
-	sponzaNode->SetScale(0.05f);
-	sponzaNode->AttachObject(sponzaEntity);
+	//Entity* sponzaEntity = sceneMan.CreateEntity("Sponza", "Teapot001.mesh",  "General");
+	//SceneNode* sponzaNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Sponza");
+	//sponzaNode->SetPosition(float3(0, 0, 0));
+	////sponzaNode->SetRotation(QuaternionFromRotationAxis(float3(1, 0, 0), Mathf::ToRadian(90)));
+	//sponzaNode->SetScale(0.05f);
+	//sponzaNode->AttachObject(sponzaEntity);
+
+
+	// Entity
+	Entity* dudeEntity = sceneMan.CreateEntity("Dude", "him.mesh",  "Custom");
+	SceneNode* dudeNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Dwarf");
+	dudeNode->SetPosition(float3(0, 0, 0));
+	dudeNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(180.0f), 0.0f, 0.0f));
+	dudeNode->AttachObject(dudeEntity);
+
+	AnimationPlayer* animPlayer = dudeEntity->GetAnimationPlayer();
+	AnimationState* takeClip = animPlayer->GetClip("Take 001");
+	takeClip->WrapMode = AnimationState::Wrap_Loop;
+
+	animPlayer->PlayClip("Take 001");
+
 }
 
 void SponzaApp::UnloadContent()

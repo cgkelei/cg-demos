@@ -13,7 +13,7 @@
 // we not support non-uniform scale, so the normal matrix is 
 // simply the up 3x3 mat.
 #ifdef _Skinning
-	uniform mat4 WorldMatrices[64];
+	uniform mat4 SkinMatrices[64];
 #endif
 
 	uniform mat4 World;
@@ -30,7 +30,7 @@ in vec3 iPos;
 #endif
 
 in vec3 iNormal;
-in vec2 iTex0;
+in vec2 iTex;
 
 #ifdef _NormalMapping
 	in vec3 iTangent;
@@ -55,24 +55,22 @@ out vec2 oTex;
 void main()
 {
 #ifdef _Skinning
-	mat4 SkinningWorld = WorldMatrices[iBlendIndices[0]] * iBlendWeights[0] +
-							WorldMatrices[iBlendIndices[1]] * iBlendWeights[1] +
-							WorldMatrices[iBlendIndices[2]] * iBlendWeights[2] +
-							WorldMatrices[iBlendIndices[3]] * iBlendWeights[3];
-
-	mat3 SkinningNormal = mat3(SkinningWorld);
+	mat4 SkinMatrix = SkinMatrices[iBlendIndices[0]] * iBlendWeights[0] +
+					  SkinMatrices[iBlendIndices[1]] * iBlendWeights[1] +
+					  SkinMatrices[iBlendIndices[2]] * iBlendWeights[2] +
+					  SkinMatrices[iBlendIndices[3]] * iBlendWeights[3];
 #endif
-
+	
 	// calculate world normal.
 #ifdef _Skinning
-	vec3 normal = normalize(iNormal * SkinningWorld);
+	vec3 normal = normalize(iNormal * mat3(SkinMatrix * WorldNormal));
 #else
 	vec3 normal = normalize(iNormal * mat3(WorldNormal));
 #endif
 
 	// calculate position in world space:
 #ifdef _Skinning
-	oPosWS = vec4(iPos, 1.0)* SkinningWorld;
+	oPosWS = vec4(iPos, 1.0)* SkinMatrix * World;
 #else
 	oPosWS = vec4(iPos, 1.0) * World;
 #endif
@@ -100,8 +98,12 @@ void main()
 #else
 	oNormalWS = normal;
 #endif
+	
+	oTex = iTex;
+#ifndef Direct3D	
+	oTex.y = 1.0 - iTex.y;
+#endif
 
-	oTex = iTex0;
 	gl_Position = oPosWS * ViewProj;
 }
 	]]>
