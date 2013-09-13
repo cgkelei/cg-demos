@@ -24,6 +24,8 @@ public:
 	void AddInclude(const String& include);
 	void AddDefine(const String& name, const String& value);
 
+	void DumpSource(const char* filename);
+
 private:
 	Shader( const Shader& );
 	Shader& operator= ( const Shader& );

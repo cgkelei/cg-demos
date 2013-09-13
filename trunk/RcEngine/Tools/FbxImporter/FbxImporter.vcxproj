@@ -84,9 +84,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ExportLog.cpp" />
     <ClCompile Include="FbxImporter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ExportLog.h" />
     <ClInclude Include="FbxImporter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

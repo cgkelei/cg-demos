@@ -18,9 +18,15 @@
     <ClCompile Include="FbxImporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ExportLog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FbxImporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ExportLog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

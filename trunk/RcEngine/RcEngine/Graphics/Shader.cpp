@@ -24,6 +24,13 @@ void Shader::AddDefine( const String& name, const String& value )
 	mDefineValues.push_back(value);
 }
 
+void Shader::DumpSource( const char* filename )
+{
+	std::ofstream fs(filename);
+	fs << mShaderSource;
+	fs.close();
+}
+
 
 
 }
