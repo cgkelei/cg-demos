@@ -1,8 +1,8 @@
 <?xml version="1.0" ?><Material name="_sponzacolumn_b">
 	<Sampler name="LinearSampler">
 		<State name="Filter" value="Min_Mag_Mip_Linear"/>
-		<State name="AddressU" value="Clamp"/>
-		<State name="AddressV" value="Clamp"/>
+		<State name="AddressU" value="Wrap"/>
+		<State name="AddressV" value="Wrap"/>
 	</Sampler>
 	
 	<Parameter name="World" semantic="WorldMatrix" type="float4x4"/>

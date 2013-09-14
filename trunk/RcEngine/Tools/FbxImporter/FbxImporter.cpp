@@ -101,24 +101,22 @@ void CorrectName(String& matName)
 	std::replace(matName.begin(), matName.end(), ':', '_');
 }
 
-float4 FbxToVector4f(const FbxVector4& fbx)
+inline float4 float4FromFBX(const FbxVector4& fbx)
 {
 	return float4(float(fbx[0]), float(fbx[1]), float(fbx[2]), float(fbx[3]));
 }
 
-float3 FbxToVector3f(const FbxVector4& fbx)
+inline float3 float3FromFBX(const FbxVector4& fbx)
 {
 	return float3(float(fbx[0]), float(fbx[1]), float(fbx[2]));
 }
 
-float2 FbxToVector2f(const FbxVector2& fbx)
+inline float2 float2FromFBX(const FbxVector2& fbx)
 {
 	return float2(float(fbx[0]), float(fbx[1]));
 }
 
-
-
-float4x4 MatrixFromFbxAMatrix(const FbxAMatrix& fbxMatrix)
+float4x4 matrixFromFbxAMatrix(const FbxAMatrix& fbxMatrix)
 {
 	FbxVector4 translation = fbxMatrix.GetT();
 	FbxVector4 scale = fbxMatrix.GetS();
@@ -127,16 +125,6 @@ float4x4 MatrixFromFbxAMatrix(const FbxAMatrix& fbxMatrix)
 	return CreateTransformMatrix(float3((float)scale[0], (float)scale[1], (float)scale[2]), 
 		Quaternionf((float)rotation[3], (float)rotation[0], (float)rotation[1], (float)rotation[2]),
 		float3((float)translation[0], (float)translation[1], (float)translation[2]));
-
-	FbxVector4 r1 = fbxMatrix.GetRow(0);
-	FbxVector4 r2 = fbxMatrix.GetRow(1);
-	FbxVector4 r3 = fbxMatrix.GetRow(2);
-	FbxVector4 r4 = fbxMatrix.GetRow(3);
-
-	return float4x4((float)r1[0], (float)r1[1], (float)r1[2], (float)r1[3],
-					(float)r2[0], (float)r2[1], (float)r2[2], (float)r2[3],
-					(float)r3[0], (float)r3[1], (float)r3[2], (float)r3[3],
-					(float)r4[0], (float)r4[1], (float)r4[2], (float)r4[3]);
 }
 
 float3 ReadMaterialColor(FbxPropertyT<FbxDouble3> FBXColorProperty, FbxPropertyT<FbxDouble> FBXFactorProperty)
@@ -274,7 +262,6 @@ FbxAMatrix GetGlobalPosition(FbxNode* pNode, const FbxTime& pTime, FbxPose* pPos
 	return lGlobalPosition;
 }
 
-
 // Get the geometry offset to a node. It is never inherited by the children.
 FbxAMatrix GetGeometry(FbxNode* pNode)
 {
@@ -285,6 +272,137 @@ FbxAMatrix GetGeometry(FbxNode* pNode)
 	return FbxAMatrix(lT, lR, lS);
 }
 
+}
+
+void FBXTransformer::Initialize( FbxScene* pScene )
+{
+	ExportLog::LogMsg( 4, "Identifying scene's coordinate system." );
+
+	FbxAxisSystem SceneAxisSystem = pScene->GetGlobalSettings().GetAxisSystem();
+	FbxAxisSystem::MayaYUp.ConvertScene(pScene);
+
+	int iUpAxisSign;
+	FbxAxisSystem::EUpVector UpVector = SceneAxisSystem.GetUpVector( iUpAxisSign );
+
+	if( UpVector == FbxAxisSystem::eZAxis )
+	{
+		ExportLog::LogMsg( 4, "Converting from Z-up axis system to Y-up axis system." );
+		m3dMaxConversion = true;
+	}
+	else
+		m3dMaxConversion = false;
+}
+
+void FBXTransformer::TransformMatrix( float4x4* pDestMatrix, const float4x4* pSrcMatrix ) const
+{
+	float4x4 SrcMatrix;
+	if( pSrcMatrix == pDestMatrix )
+	{
+		memcpy( &SrcMatrix, pSrcMatrix, sizeof( float4x4 ) );
+		pSrcMatrix = &SrcMatrix;
+	}
+	memcpy( pDestMatrix, pSrcMatrix, sizeof( float4x4 ) );
+
+	// What we're doing here is premultiplying by a left hand -> right hand matrix,
+	// and then postmultiplying by a right hand -> left hand matrix.
+	// The end result of those multiplications is that the third row and the third
+	// column are negated (so element _33 is left alone).  So instead of actually
+	// carrying out the multiplication, we just negate the 6 matrix elements.
+
+	pDestMatrix->M13 = -pSrcMatrix->M13;
+	pDestMatrix->M23 = -pSrcMatrix->M23;
+	pDestMatrix->M43 = -pSrcMatrix->M43;
+
+	pDestMatrix->M31 = -pSrcMatrix->M31;
+	pDestMatrix->M32 = -pSrcMatrix->M32;
+	pDestMatrix->M34 = -pSrcMatrix->M34;
+
+	// Apply the global unit scale to the translation components of the matrix.
+	pDestMatrix->M41 *= mUnitScale;
+	pDestMatrix->M42 *= mUnitScale;
+	pDestMatrix->M43 *= mUnitScale;
+}
+
+void FBXTransformer::TransformPosition( float3* pDestPosition, const float3* pSrcPosition ) const
+{
+	float3 SrcVector;
+	if( pSrcPosition == pDestPosition )
+	{
+		SrcVector = *pSrcPosition;
+		pSrcPosition = &SrcVector;
+	}
+
+	if( m3dMaxConversion )
+	{
+		pDestPosition->X() = pSrcPosition->X() * mUnitScale;
+		pDestPosition->Y() = pSrcPosition->Z() * mUnitScale;
+		pDestPosition->Z() = pSrcPosition->Y() * mUnitScale;
+	}
+	else
+	{
+		pDestPosition->X()= pSrcPosition->X() * mUnitScale;
+		pDestPosition->Y() = pSrcPosition->Y() * mUnitScale;
+		pDestPosition->Z() = -pSrcPosition->Z() * mUnitScale;
+	}
+}
+
+void FBXTransformer::TransformDirection( float3* pDestDirection, const float3* pSrcDirection ) const
+{
+	float3 SrcVector;
+	if( pSrcDirection == pDestDirection )
+	{
+		SrcVector = *pSrcDirection;
+		pSrcDirection = &SrcVector;
+	}
+
+	if( m3dMaxConversion )
+	{
+		pDestDirection->X() = pSrcDirection->X();
+		pDestDirection->Y() = pSrcDirection->Z();
+		pDestDirection->Z() = pSrcDirection->Y();
+	}
+	else
+	{
+		pDestDirection->X() = pSrcDirection->X();
+		pDestDirection->Y() = pSrcDirection->Y();
+		pDestDirection->Z() = -pSrcDirection->Z();
+	}
+}
+
+//---------------------------------------------------------------------------------------------
+FbxProcesser::FbxProcesser(void)
+	: mFBXScene(nullptr), mFBXSdkManager(nullptr), mQuietMode(false), mMergeScene(false)
+{
+}
+
+FbxProcesser::~FbxProcesser(void)
+{
+}
+
+void FbxProcesser::Initialize()
+{
+	if (mFBXSdkManager)
+		mFBXSdkManager->Destroy();
+
+	mFBXSdkManager = FbxManager::Create();
+	if( !mFBXSdkManager )
+	{
+		ExportLog::LogError("Error: Unable to create FBX Manager!");
+		exit(1);
+	}
+	else
+		ExportLog::LogMsg(0, "Autodesk FBX SDK version %s", mFBXSdkManager->GetVersion());
+
+	//Create an IOSettings object. This object holds all import/export settings.
+	FbxIOSettings* ios = FbxIOSettings::Create(mFBXSdkManager, IOSROOT);
+	mFBXSdkManager->SetIOSettings(ios);
+
+	mFBXScene = FbxScene::Create(mFBXSdkManager , "");  
+	if( !mFBXScene )
+	{
+		ExportLog::LogError("Error: Unable to create FBX scene!");
+		exit(1);
+	}
 }
 
 void FbxProcesser::BoneWeights::AddBoneWeight( int nBoneIndex, float fBoneWeight )
@@ -342,154 +460,60 @@ void FbxProcesser::BoneWeights::Normalize()
 	});
 }
 
-
-FbxProcesser::FbxProcesser(void)
-	: mFBXScene(nullptr), mFBXSdkManager(nullptr), mQuietMode(false), mMergeScene(false)
-{
-}
-
-FbxProcesser::~FbxProcesser(void)
-{
-}
-
-bool FbxProcesser::Initialize()
-{
-	// Create the FBX SDK Manager, destroy the old manager at first  
-	if (mFBXSdkManager)
-	{
-		mFBXSdkManager->Destroy();
-		mFBXSdkManager = nullptr;
-	}
-
-	mFBXSdkManager = FbxManager::Create();
-	if( !mFBXSdkManager )
-	{
-		FBXSDK_printf("Error: Unable to create FBX Manager!\n");
-		exit(1);
-	}
-	else
-	{
-		FBXSDK_printf("Autodesk FBX SDK version %s\n", mFBXSdkManager->GetVersion());
-	}
-
-	//Create an IOSettings object. This object holds all import/export settings.
-	FbxIOSettings* ios = FbxIOSettings::Create(mFBXSdkManager, IOSROOT);
-	mFBXSdkManager->SetIOSettings(ios);
-
-	//Load plugins from the executable directory (optional)
-	//FbxString lPath = FbxGetApplicationDirectory();
-	//mFBXSdkManager->LoadPluginsDirectory(lPath.Buffer());
-
-	// Create the entity that hold the whole Scene  
-	mFBXScene = FbxScene::Create(mFBXSdkManager , "");  
-	if( !mFBXScene )
-	{
-		FBXSDK_printf("Error: Unable to create FBX scene!\n");
-		exit(1);
-	}
-
-	return true;
-}
-
 bool FbxProcesser::LoadScene( const char* filename )
 {
 	if (!mFBXSdkManager)
 	{
+		ExportLog::LogError("Create FBX Manager first!");
 		return false;
 	}
 
-	mSceneName = filename;
-	mSceneName.erase(mSceneName.find_last_of('.'));
-
 	int lFileMajor, lFileMinor, lFileRevision;
 	int lSDKMajor,  lSDKMinor,  lSDKRevision;
-
-	int i, lAnimStackCount;
-	bool lStatus;
-	char lPassword[1024];
+	bool bResult;
 
 	// Get the file version number generate by the FBX SDK.
 	FbxManager::GetFileFormatVersion(lSDKMajor, lSDKMinor, lSDKRevision);
+	ExportLog::LogMsg(1, "FBX file format version for this FBX SDK is %d.%d.%d", lSDKMajor, lSDKMinor, lSDKRevision);
 
 	// Create an importer.
 	FbxImporter* lImporter = FbxImporter::Create(mFBXSdkManager,"");
 
 	// Initialize the importer by providing a filename.
-	const bool lImportStatus = lImporter->Initialize(filename, -1, mFBXSdkManager->GetIOSettings());
-	lImporter->GetFileVersion(lFileMajor, lFileMinor, lFileRevision);
-
-	if( !lImportStatus )
+	bResult = lImporter->Initialize(filename, -1, mFBXSdkManager->GetIOSettings());
+	if( !bResult )
 	{
-		/*FBXSDK_printf("Call to FbxImporter::Initialize() failed.\n");
-		FBXSDK_printf("Error returned: %s\n\n", lImporter->GetLastErrorString());
-
-		if (lImporter->GetLastErrorID() == FbxIOBase::eFileVersionNotSupportedYet ||
-			lImporter->GetLastErrorID() == FbxIOBase::eFileVersionNotSupportedAnymore)
-		{
-			FBXSDK_printf("FBX file format version for this FBX SDK is %d.%d.%d\n", lSDKMajor, lSDKMinor, lSDKRevision);
-			FBXSDK_printf("FBX file format version for file '%s' is %d.%d.%d\n\n", filename, lFileMajor, lFileMinor, lFileRevision);
-		}
-		*/
+		ExportLog::LogError("Call to FbxExporter::Initialize() failed.");
+		//ExportLog::LogError("Error returned: %s\n\n", lImporter->GetLastErrorString());
 		return false;
 	}
 
-	FBXSDK_printf("FBX file format version for this FBX SDK is %d.%d.%d\n", lSDKMajor, lSDKMinor, lSDKRevision);
-
-	if (lImporter->IsFBX())
+	// Import the scene.
+	bResult = lImporter->Import(mFBXScene);
+	if( !bResult )
 	{
-		FBXSDK_printf("FBX file format version for file '%s' is %d.%d.%d\n\n", filename, lFileMajor, lFileMinor, lFileRevision);
-
-		// From this point, it is possible to access animation stack information without the expense of loading the entire file.
-		FBXSDK_printf("Animation Stack Information\n");
-
-		lAnimStackCount = lImporter->GetAnimStackCount();
-
-		FBXSDK_printf("    Number of Animation Stacks: %d\n", lAnimStackCount);
-		FBXSDK_printf("    Current Animation Stack: \"%s\"\n", lImporter->GetActiveAnimStackName().Buffer());
-		FBXSDK_printf("\n");
-
-		for(i = 0; i < lAnimStackCount; i++)
-		{
-			FbxTakeInfo* lTakeInfo = lImporter->GetTakeInfo(i);
-
-			FBXSDK_printf("    Animation Stack %d\n", i);
-			FBXSDK_printf("         Name: \"%s\"\n", lTakeInfo->mName.Buffer());
-			FBXSDK_printf("         Description: \"%s\"\n", lTakeInfo->mDescription.Buffer());
-
-			// Change the value of the import name if the animation stack should be imported under a different name.
-			FBXSDK_printf("         Import Name: \"%s\"\n", lTakeInfo->mImportName.Buffer());
-
-			// Set the value of the import state to false if the animation stack should be not be imported. 
-			FBXSDK_printf("         Import State: %s\n", lTakeInfo->mSelect ? "true" : "false");
-			FBXSDK_printf("\n");
-		}
-
-		// Set the import states. By default, the import states are always set to 
-		// true. The code below shows how to change these states.
-		IOS_REF.SetBoolProp(IMP_FBX_MATERIAL,        true);
-		IOS_REF.SetBoolProp(IMP_FBX_TEXTURE,         true);
-		IOS_REF.SetBoolProp(IMP_FBX_LINK,            true);
-		IOS_REF.SetBoolProp(IMP_FBX_SHAPE,           true);
-		IOS_REF.SetBoolProp(IMP_FBX_GOBO,            true);
-		IOS_REF.SetBoolProp(IMP_FBX_ANIMATION,       true);
-		IOS_REF.SetBoolProp(IMP_FBX_GLOBAL_SETTINGS, true);
+		ExportLog::LogError( "Could not load FBX file \"%s\".", filename );
+		return false;
 	}
 
-	// Import the scene.
-	lStatus = lImporter->Import(mFBXScene);
+	lImporter->GetFileVersion(lFileMajor, lFileMinor, lFileRevision);
+	ExportLog::LogMsg(1, "FBX file format version for file '%s' is %d.%d.%d", filename, lFileMajor, lFileMinor, lFileRevision);
+
+	// Axis Conversion
+	mFBXTransformer.Initialize(mFBXScene);
 
 	// Destroy the importer.
 	lImporter->Destroy();
 
-	return lStatus;
+	return bResult;
 }
 
-void FbxProcesser::ProcessScene( FbxScene* fbxScene )
+void FbxProcesser::ProcessScene( )
 {
-	CollectMaterials(mFBXScene);
-	CollectSkeletons(mFBXScene);
-	CollectMeshes(mFBXScene);
-	CollectAnimations(mFBXScene);
+	CollectMaterials();
+	CollectSkeletons();
+	CollectMeshes();
+	CollectAnimations();
 }
 
 void FbxProcesser::RunCommand( const vector<String>& arguments )
@@ -512,7 +536,11 @@ void FbxProcesser::ProcessNode( FbxNode* pNode, FbxNodeAttribute::EType attriTyp
 		case FbxNodeAttribute::eMesh:
 			ProcessMesh(pNode);
 			break;
-
+		case FbxNodeAttribute::eSubDiv:
+			ProcessSubDiv(pNode);
+			break;
+		case FbxNodeAttribute::eCamera:
+		case FbxNodeAttribute::eLight:
 		default:
 			break;
 		};
@@ -522,25 +550,29 @@ void FbxProcesser::ProcessNode( FbxNode* pNode, FbxNodeAttribute::EType attriTyp
 		ProcessNode(pNode->GetChild(i), attriType);
 }
 
+void FbxProcesser::ProcessSubDiv( FbxNode* pNode )
+{
+	FbxSubDiv* pSubDiv = pNode->GetSubdiv();
+
+	if (!pSubDiv) return;
+}
+
 void FbxProcesser::ProcessMesh( FbxNode* pNode )
 {
 	FbxMesh* pMesh = pNode->GetMesh();
 
 	if (!pMesh) return;
 
-	if (!mQuietMode)
-		FBXSDK_printf("Process mesh: %s\n", pNode->GetName());
+	ExportLog::LogMsg(3, "Process mesh: %s\n", pNode->GetName());
 
 	if (!pMesh->IsTriangleMesh())
 	{
-		// triangulation first
 		FbxGeometryConverter GeometryConverter(mFBXSdkManager);
 		if( !GeometryConverter.TriangulateInPlace( pNode ) )
 		{
-			std::cerr << "Triangulate mesh error!" << std::endl;
+			ExportLog::LogError("FbxMesh: %s triangulation failed!", pNode->GetName());
 			return;
 		}
-
 		pMesh = pNode->GetMesh();
 	}
 
@@ -556,7 +588,7 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 	// group the polygons by material
 	vector< vector<int> > polysByMaterial;
 	polysByMaterial.resize((std::max)(1,numMaterial));
-    const FbxLayerElementMaterial *materials = layer->GetMaterials();
+    const FbxLayerElementMaterial* materials = layer->GetMaterials();
 
 	bool useDefaultMat = false;
 	if (materials) 
@@ -568,7 +600,7 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 		if( !(mm == FbxLayerElement::eByPolygon || mm == FbxLayerElement::eAllSame) )
 		{
 			// only support eByPolygon and eAllSame
-			std::cerr << "Unsupported mapping mode: " << ((mm <= FbxLayerElement::eAllSame) ? mm_str[mm] : "unknown") << std::endl;
+			ExportLog::LogError("Unsupported mapping mode: %s", ((mm <= FbxLayerElement::eAllSame) ? mm_str[mm] : "unknown"));
 			return;
 		}
 			
@@ -604,7 +636,6 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 	vector<String> uvSets;
 	for (int i = 0; i < layer->GetUVSetCount(); ++i)
 		uvSets.push_back(layer->GetUVSets()[i]->GetName());
-
 	
 	// test if had skin
 	bool lHasSkin = false;
@@ -630,8 +661,10 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 	{
 		meshBoneWeights.resize(pMesh->GetControlPointsCount());
 		// Deform the vertex array with the skin deformer.
-		mesh->MeshSkeleton  = ProcessBoneWeights(pMesh, meshBoneWeights);
+		mesh->MeshSkeleton = ProcessBoneWeights(pMesh, meshBoneWeights);
 	}
+
+	float4x4 globalTransform = matrixFromFbxAMatrix( pNode->EvaluateGlobalTransform() );
 
 	for (size_t mi = 0; mi < polysByMaterial.size(); ++mi)
 	{
@@ -641,9 +674,7 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 		// mesh part name
 		meshPart->Name = pNode->GetName();
 		if (polysByMaterial.size() > 1)
-		{
-			meshPart->Name += LexicalCast<String>(mi);
-		}
+			meshPart->Name += std::to_string(mi);
 
 		// material name
 		meshPart->MaterialName = useDefaultMat ? "DefaultMaterial" : pNode->GetMaterial(mi)->GetName();
@@ -705,34 +736,37 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 				Vertex vertex;
 				
 				// get position
-				int ctrlPointIndex = pMesh->GetPolygonVertex(polyIndex , vi); 
-				vertex.Position = FbxToVector3f(pMesh->GetControlPointAt(ctrlPointIndex));
 				vertexFlag |= Vertex::ePosition;
+				int ctrlPointIndex = pMesh->GetPolygonVertex(polyIndex , vi); 
+				vertex.Position = float3FromFBX(pMesh->GetControlPointAt(ctrlPointIndex));
+
+				float4 baked = float4( vertex.Position.X(),  vertex.Position.Y(),  vertex.Position.Z(), 1.0f);
+				baked = baked * globalTransform;
+				vertex.Position = float3(baked.X(), baked.Y(), baked.Z());
+				 
+				//mFBXTransformer.TransformPosition(&vertex.Position, &vertex.Position);
 
 				boundingBox.Merge(vertex.Position);
-
 
 				if (vertexFlag & Vertex::eBlendWeight)
 				{
 					auto& boneWeights = meshBoneWeights[ctrlPointIndex];
 					boneWeights.Normalize();
 
-					auto& indicesAndWeights = boneWeights.GetBoneWeights();
-					
-					for (auto iter = indicesAndWeights.begin(); iter != indicesAndWeights.end(); ++iter)
+					for (auto& kv : boneWeights.GetBoneWeights())
 					{
-						vertex.BlendIndices.push_back(iter->first);
-						vertex.BlendWeights.push_back(iter->second);
+						vertex.BlendIndices.push_back(kv.first);
+						vertex.BlendWeights.push_back(kv.second);
 					}
 				}
-
 
 				// get normal
 				FbxVector4 fbxNormal;
 				if( pMesh->GetPolygonVertexNormal(polyIndex, vi, fbxNormal) )
 				{
-					vertex.Normal = FbxToVector3f(fbxNormal);
+					vertex.Normal = float3FromFBX(fbxNormal);
 					vertex.Normal.Normalize();
+					//mFBXTransformer.TransformDirection(&vertex.Normal, &vertex.Normal);
 					vertexFlag |= Vertex::eNormal;
 				}
 						
@@ -746,12 +780,12 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 
 						if (uv_idx == 0) 
 						{
-							vertex.Tex0 = FbxToVector2f(uv);
+							vertex.Tex0 = float2FromFBX(uv);
 							vertexFlag |= Vertex::eTexcoord0;
 						}
 						else if (uv_idx == 1) 
 						{
-							vertex.Tex1 = FbxToVector2f(uv);
+							vertex.Tex1 = float2FromFBX(uv);
 							vertexFlag |= Vertex::eTexcoord1;
 						} 
 						else 
@@ -766,9 +800,7 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 					FbxVector4 fbxTangent, fbxBinormal;
 
 					if (tangentRefMode == FbxLayerElement::eDirect) 
-					{
 						fbxTangent = layer->GetTangents()->GetDirectArray()[ctrlPointIndex + vi];
-					} 
 					else
 					{
 						int idx = layer->GetTangents()->GetIndexArray()[ctrlPointIndex + vi];
@@ -777,9 +809,7 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 					vertexFlag |= Vertex::eTangent;
 
 					if (binormalRefMode == FbxLayerElement::eDirect) 
-					{
 						fbxBinormal = layer->GetBinormals()->GetDirectArray()[ctrlPointIndex + vi];
-					} 
 					else 
 					{
 						int idx = layer->GetBinormals()->GetIndexArray()[ctrlPointIndex + vi];
@@ -792,11 +822,14 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 					fbxBinormal = mtxTransformNormal.MultT(fbxBinormal);
 					}*/
 
-					vertex.Tangent = FbxToVector3f(fbxTangent);
-					vertex.Binormal = FbxToVector3f(fbxBinormal);
+					vertex.Tangent = float3FromFBX(fbxTangent);
+					vertex.Binormal = float3FromFBX(fbxBinormal);
 
 					vertex.Tangent.Normalize();
 					vertex.Binormal.Normalize();
+
+					//mFBXTransformer.TransformDirection(&vertex.Tangent, &vertex.Tangent);
+					//mFBXTransformer.TransformDirection(&vertex.Binormal, &vertex.Binormal);
 				}
 
 				size_t index;
@@ -811,9 +844,7 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 					meshPart->Vertices.push_back(vertex);
 				}
 				else
-				{
 					index = exitingIter->Index;
-				}
 
 				meshPart->Indices.push_back(index);
 			}
@@ -884,7 +915,6 @@ shared_ptr<Skeleton>  FbxProcesser::ProcessBoneWeights( FbxMesh* pMesh, std::vec
 					continue;
 
 				// find which skeleton this mesh is skin to
-
 				if (!meshSkeleton)
 				{
 					FbxNode* skeletonRoot = GetBoneRoot(pLinkNode);
@@ -901,9 +931,7 @@ shared_ptr<Skeleton>  FbxProcesser::ProcessBoneWeights( FbxMesh* pMesh, std::vec
 				Bone* parentBone = (Bone*)skeletonBone->GetParent();
 
 				if (!skeletonBone)
-				{
 					continue;
-				}
 
 				FbxAMatrix matClusterTransformMatrix;
 				FbxAMatrix matClusterLinkTransformMatrix;
@@ -913,18 +941,18 @@ shared_ptr<Skeleton>  FbxProcesser::ProcessBoneWeights( FbxMesh* pMesh, std::vec
 				/*FbxAMatrix matInvBindPose = matClusterTransformMatrix * matClusterLinkTransformMatrix.Inverse();
 				float4x4 matBindPose = MatrixFromFbxAMatrix(matInvBindPose.Inverse());*/
 
-
-				float4x4 rcClusterTransformMatrix = MatrixFromFbxAMatrix(matClusterTransformMatrix);
-				float4x4 rcClusterLinkTransformMatrix = MatrixFromFbxAMatrix(matClusterLinkTransformMatrix);
+				float4x4 rcClusterTransformMatrix = matrixFromFbxAMatrix(matClusterTransformMatrix);
+				float4x4 rcClusterLinkTransformMatrix = matrixFromFbxAMatrix(matClusterLinkTransformMatrix);
 				float4x4 matBindPose = rcClusterLinkTransformMatrix * rcClusterTransformMatrix.Inverse();
 	
 				if (parentBone)
 				{
 					float4x4 paretTrans = parentBone->GetWorldTransform();
-
 					matBindPose = matBindPose * paretTrans.Inverse();
 				}
- 
+				
+				//mFBXTransformer.TransformMatrix(&matBindPose, &matBindPose);
+
 				float3 pos, scale;
 				Quaternionf rot;
 				MatrixDecompose(scale, rot, pos, matBindPose);
@@ -946,16 +974,13 @@ shared_ptr<Skeleton>  FbxProcesser::ProcessBoneWeights( FbxMesh* pMesh, std::vec
 	return meshSkeleton;
 }
 
-void FbxProcesser::CollectMaterials( FbxScene* pScene )
+void FbxProcesser::CollectMaterials( )
 { 
-	if (!mQuietMode)
-	{
-		FBXSDK_printf("Collect materials.\n");
-	}
+	ExportLog::LogMsg(2, "Collect Materials.");
 
-	for( int i = 0; i < pScene->GetMaterialCount(); ++i )
+	for( int i = 0; i < mFBXScene->GetMaterialCount(); ++i )
 	{
-		FbxSurfaceMaterial* pSurfaceMaterial = pScene->GetMaterial(i);
+		FbxSurfaceMaterial* pSurfaceMaterial = mFBXScene->GetMaterial(i);
 
 		MaterialData matData;
 		matData.Name = pSurfaceMaterial->GetName();
@@ -987,10 +1012,7 @@ void FbxProcesser::CollectMaterials( FbxScene* pScene )
 				matData.Power = static_cast<float>( FBXSpecularPowerProperty.Get() );
 		}
 
-		int textureLayerIndex;  
 		FbxProperty pProperty;  
-		int texID;  
-
 		for(int textureLayerIndex = 0 ; textureLayerIndex < FbxLayerElement::sTypeTextureCount ; ++textureLayerIndex)
 		{  
 			pProperty = pSurfaceMaterial->FindProperty(FbxLayerElement::sTextureChannelNames[textureLayerIndex]);  
@@ -1020,23 +1042,16 @@ void FbxProcesser::CollectMaterials( FbxScene* pScene )
 	}
 }
 
-void FbxProcesser::CollectSkeletons( FbxScene* fbxScene )
+void FbxProcesser::CollectSkeletons( )
 {
-	if (!mQuietMode)
-	{
-		FBXSDK_printf("Process skeletons.\n");
-	}
-	ProcessNode(fbxScene->GetRootNode(), FbxNodeAttribute::eSkeleton);
+	ExportLog::LogMsg(0, "Collect Skeletons.");
+	ProcessNode(mFBXScene->GetRootNode(), FbxNodeAttribute::eSkeleton);
 }
 
-void FbxProcesser::CollectMeshes( FbxScene* fbxScene )
+void FbxProcesser::CollectMeshes( )
 {
-	if (!mQuietMode)
-	{
-		FBXSDK_printf("Collect meshes.\n");
-	}
-
-	ProcessNode(fbxScene->GetRootNode(), FbxNodeAttribute::eMesh);
+	ExportLog::LogMsg(0, "Collect Meshes.");
+	ProcessNode(mFBXScene->GetRootNode(), FbxNodeAttribute::eMesh);
 }
 
 void FbxProcesser::ExportMaterial()
@@ -1607,26 +1622,26 @@ void FbxProcesser::BuildAndSaveBinary( )
 	}
 }
 
-void FbxProcesser::CollectAnimations( FbxScene* pScene )
+void FbxProcesser::CollectAnimations( )
 {
-	FbxNode* pRootNode = pScene->GetRootNode();
+	FbxNode* pRootNode = mFBXScene->GetRootNode();
 	
 	if (!pRootNode)
 		return;
 
-	double frameRate = FbxTime::GetFrameRate(pScene->GetGlobalSettings().GetTimeMode());
+	double frameRate = FbxTime::GetFrameRate(mFBXScene->GetGlobalSettings().GetTimeMode());
 
-	for (int i = 0; i < pScene->GetSrcObjectCount<FbxAnimStack>(); i++)
+	for (int i = 0; i < mFBXScene->GetSrcObjectCount<FbxAnimStack>(); i++)
 	{
-		FbxAnimStack* lAnimStack = pScene->GetSrcObject<FbxAnimStack>(i);
+		FbxAnimStack* lAnimStack = mFBXScene->GetSrcObject<FbxAnimStack>(i);
 		
 		FbxString takeName = lAnimStack->GetName();
 
 		if (takeName != FbxString("Default"))
 		{
-			FbxTakeInfo* lCurrentTakeInfo = pScene->GetTakeInfo(takeName);
+			FbxTakeInfo* lCurrentTakeInfo = mFBXScene->GetTakeInfo(takeName);
 
-			pScene->ActiveAnimStackName.Set(takeName);
+			mFBXScene->ActiveAnimStackName.Set(takeName);
 
 			FbxTime KStart;
 			FbxTime KStop;
@@ -1640,7 +1655,7 @@ void FbxProcesser::CollectAnimations( FbxScene* pScene )
 			{
 				// Take the time line value
 				FbxTimeSpan lTimeLineTimeSpan;
-				pScene->GetGlobalSettings().GetTimelineDefaultTimeSpan(lTimeLineTimeSpan);
+				mFBXScene->GetGlobalSettings().GetTimelineDefaultTimeSpan(lTimeLineTimeSpan);
 
 				KStart = lTimeLineTimeSpan.GetStart();
 				KStop  = lTimeLineTimeSpan.GetStop();
@@ -1693,14 +1708,17 @@ void FbxProcesser::ProcessAnimation( FbxAnimStack* pStack, FbxNode* pNode, doubl
 						FbxAMatrix matParentAbsoluteTransform = GetGlobalPosition(pNode->GetParent(), takeTime);
 						FbxAMatrix matLocalTrasform =  matParentAbsoluteTransform.Inverse() * matAbsoluteTransform;
 
-						FbxQuaternion quat = matLocalTrasform.GetQ();
-						FbxVector4 trans = matLocalTrasform.GetT();
-						FbxVector4 scale = matLocalTrasform.GetS();
-
+						//FbxQuaternion quat = matLocalTrasform.GetQ();
+						//FbxVector4 trans = matLocalTrasform.GetT();
+						//FbxVector4 scale = matLocalTrasform.GetS();
+				
 						AnimationClipData::KeyFrame keyframe;
-						keyframe.Rotation = Quaternionf((float)quat[3], (float)quat[0], (float)quat[1], (float)quat[2]);
-						keyframe.Scale = FbxToVector3f(scale);
-						keyframe.Translation = FbxToVector3f(trans);
+						MatrixDecompose(keyframe.Scale, keyframe.Rotation, keyframe.Translation,
+										matrixFromFbxAMatrix(matLocalTrasform));
+
+						//keyframe.Rotation = Quaternionf((float)quat[3], (float)quat[0], (float)quat[1], (float)quat[2]);
+						//keyframe.Scale = FbxToVector3f(scale);
+						//keyframe.Translation = FbxToVector3f(trans);
 						keyframe.Time = (float)fTime;
 
 						track.KeyFrames.push_back(keyframe);
@@ -1746,6 +1764,7 @@ void FbxProcesser::MergeScene()
 	}	
 }
 
+
 int main()
 {
 	ExportLog::AddListener( &g_ConsoleOutListener );
@@ -1759,15 +1778,12 @@ int main()
 	ExportLog::SetLogLevel( 1 );
 	ExportLog::EnableLogging( TRUE );
 
-	ExportLog::LogMsg( 0, "----------------------------------------------------------" );
-	ExportLog::LogWarning("----------------------------------------------------------" );
-
 	FbxProcesser fbxProcesser;
 	fbxProcesser.Initialize();
 
-	if (fbxProcesser.LoadScene("dude_gpu.fbx"))
+	if (fbxProcesser.LoadScene("sponza.FBX"))
 	{
-		fbxProcesser.ProcessScene(0);
+		fbxProcesser.ProcessScene();
 
 		bool mergeScene = true;
 		if (mergeScene)
@@ -1781,78 +1797,4 @@ int main()
 	}
 
 	return 0;
-}
-
-void FBXTransformer::Initialize( FbxScene* pScene )
-{
-	ExportLog::LogMsg( 4, "Identifying scene's coordinate system." );
-
-	FbxAxisSystem SceneAxisSystem = pScene->GetGlobalSettings().GetAxisSystem();
-	FbxAxisSystem::MayaYUp.ConvertScene(pScene);
-
-	int iUpAxisSign;
-	FbxAxisSystem::EUpVector UpVector = SceneAxisSystem.GetUpVector( iUpAxisSign );
-
-	if( UpVector == FbxAxisSystem::eZAxis )
-	{
-		ExportLog::LogMsg( 4, "Converting from Z-up axis system to Y-up axis system." );
-		m3dMaxConversion = true;
-	}
-	else
-	{
-		m3dMaxConversion = false;
-	}
-}
-
-void FBXTransformer::TransformMatrix( float4x4* pDestMatrix, const float4x4* pSrcMatrix ) const
-{
-	float4x4 SrcMatrix;
-	if( pSrcMatrix == pDestMatrix )
-	{
-		memcpy( &SrcMatrix, pSrcMatrix, sizeof( float4x4 ) );
-		pSrcMatrix = &SrcMatrix;
-	}
-	memcpy( pDestMatrix, pSrcMatrix, sizeof( float4x4 ) );
-
-	// What we're doing here is premultiplying by a left hand -> right hand matrix,
-	// and then postmultiplying by a right hand -> left hand matrix.
-	// The end result of those multiplications is that the third row and the third
-	// column are negated (so element _33 is left alone).  So instead of actually
-	// carrying out the multiplication, we just negate the 6 matrix elements.
-
-	pDestMatrix->M13 = -pSrcMatrix->M13;
-	pDestMatrix->M23 = -pSrcMatrix->M23;
-	pDestMatrix->M43 = -pSrcMatrix->M43;
-
-	pDestMatrix->M31 = -pSrcMatrix->M31;
-	pDestMatrix->M32 = -pSrcMatrix->M32;
-	pDestMatrix->M34 = -pSrcMatrix->M34;
-
-	// Apply the global unit scale to the translation components of the matrix.
-	pDestMatrix->M41 *= mUnitScale;
-	pDestMatrix->M42 *= mUnitScale;
-	pDestMatrix->M43 *= mUnitScale;
-}
-
-void FBXTransformer::TransformPosition( float3* pDestPosition, const float3* pSrcPosition ) const
-{
-	float3 SrcVector;
-	if( pSrcPosition == pDestPosition )
-	{
-		SrcVector = *pSrcPosition;
-		pSrcPosition = &SrcVector;
-	}
-
-	if( m3dMaxConversion )
-	{
-		pDestPosition->X() = pSrcPosition->X() * mUnitScale;
-		pDestPosition->Y() = pSrcPosition->Z() * mUnitScale;
-		pDestPosition->Z() = pSrcPosition->Y() * mUnitScale;
-	}
-	else
-	{
-		pDestPosition->X()= pSrcPosition->X() * mUnitScale;
-		pDestPosition->Y() = pSrcPosition->Y() * mUnitScale;
-		pDestPosition->Z() = -pSrcPosition->Z() * mUnitScale;
-	}
 }

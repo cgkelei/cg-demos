@@ -26,9 +26,11 @@ public:
 
 	ColorRGBA			   BorderColor;	
 
-	friend bool operator< (const SamplerStateDesc& lhs, const SamplerStateDesc& rhs);
+	friend bool operator< (const SamplerStateDesc& lhs, const SamplerStateDesc& rhs)
+	{
+		return std::memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
+	}
 };
-
 
 
 class _ApiExport SamplerState

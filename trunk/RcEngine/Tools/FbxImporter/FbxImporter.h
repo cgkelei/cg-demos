@@ -10,6 +10,28 @@
 
 using namespace RcEngine;
 
+class FBXTransformer
+{
+public:
+	FBXTransformer()
+		: mUnitScale( 1.0f )
+	{ }
+
+	void Initialize( FbxScene* pScene );
+
+	void TransformMatrix( float4x4* pDestMatrix, const float4x4* pSrcMatrix ) const;
+	void TransformPosition( float3* pDestPosition, const float3* pSrcPosition ) const;
+	void TransformDirection( float3* pDestDirection, const float3* pSrcDirection ) const;
+	float TransformLength( float inputLength ) const;
+
+	// Sets unit scale for exporting all geometry - works with characters too.
+	void SetUnitScale( const float fScale )	{ mUnitScale = fScale; }
+
+protected:
+	float mUnitScale;
+	bool  m3dMaxConversion;
+};
+
 class FbxProcesser
 {
 public:
@@ -160,21 +182,23 @@ public:
 	void RunCommand(const vector<String>& arguments);
 		
 public:
-	bool Initialize();
+	void Initialize();
 	bool LoadScene(const char* filename);
 
-	void ProcessScene(FbxScene* fbxScene);
-	void ProcessNode(FbxNode* pNode, FbxNodeAttribute::EType attributeType);
+	void ProcessNode(FbxNode* pNode, FbxNodeAttribute::EType attriType);
 	void ProcessSkeleton(FbxNode* pNode);
 	void ProcessMesh(FbxNode* pNode);
+	void ProcessSubDiv(FbxNode* pNode);
+
 	shared_ptr<Skeleton> ProcessBoneWeights(FbxMesh* pMesh, std::vector<BoneWeights>& meshBoneWeights);
 	
 	void ProcessAnimation(FbxAnimStack* pStack, FbxNode* pNode, double fFrameRate, double fStart, double fStop);
 
-	void CollectAnimations(FbxScene* fbxScene);
-	void CollectMeshes(FbxScene* fbxScene);
-	void CollectMaterials(FbxScene* fbxScene);
-	void CollectSkeletons(FbxScene* fbxScene);
+	void ProcessScene();
+	void CollectAnimations();
+	void CollectMeshes();
+	void CollectMaterials();
+	void CollectSkeletons();
 
 	void MergeScene();
 
@@ -195,24 +219,8 @@ private:
 
 	vector<MaterialData> mMaterials;
 	vector<shared_ptr<MeshData> > mSceneMeshes;
+
+	FBXTransformer mFBXTransformer;
 };
 
 
-class FBXTransformer
-{
-public:
-	FBXTransformer()
-		: mUnitScale( 1.0f )
-	{ }
-
-	void Initialize( FbxScene* pScene );
-
-	void TransformMatrix( float4x4* pDestMatrix, const float4x4* pSrcMatrix ) const;
-	void TransformPosition( float3* pDestPosition, const float3* pSrcPosition ) const;
-	void TransformDirection( float3* pDestDirection, const float3* pSrcDirection ) const;
-	float TransformLength( float inputLength ) const;
-
-protected:
-	float mUnitScale;
-	bool  m3dMaxConversion;
-};

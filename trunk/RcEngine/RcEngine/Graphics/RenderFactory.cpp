@@ -89,12 +89,16 @@ shared_ptr<SamplerState> RenderFactory::CreateSamplerState( const SamplerStateDe
 	if (found == mSamplerStatePool.end())
 	{
 		retVal = CreateSamplerStateImpl(desc);
+		printf("mSamplerStatePool.size1 = %d\n", mSamplerStatePool.size());
 		mSamplerStatePool.insert(std::make_pair(desc,retVal));
+		printf("mSamplerStatePool.size2 = %d\n", mSamplerStatePool.size());
 	}
 	else
 	{
 		retVal = found->second;
 	}
+
+	
 	return retVal;
 }
 

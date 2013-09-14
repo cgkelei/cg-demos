@@ -21,9 +21,16 @@ protected:
 	void Render();
 	void Update(float deltaTime);
 
+	void CalculateFrameRate();
+
+	void InitGUI();
+	void DrawUI();
+
 protected:
 	FPSCameraControler* mCameraControler;
 
+	Label* mFPSLabel;
+	int mFramePerSecond;
 };
 
 #endif // SponzaApp_h__
