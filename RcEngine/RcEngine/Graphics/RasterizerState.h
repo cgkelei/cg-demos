@@ -31,9 +31,7 @@ class _ApiExport RasterizerState
 public:
 	RasterizerState(const RasterizerStateDesc& desc)
 		: mDesc(desc)
-	{
-
-	}
+	{ }
 
 	const RasterizerStateDesc& GetDesc() const				{ return mDesc; }
 

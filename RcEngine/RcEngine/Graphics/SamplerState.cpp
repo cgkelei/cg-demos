@@ -12,9 +12,9 @@ SamplerStateDesc::SamplerStateDesc()
 
 }
 
-bool operator< (const SamplerStateDesc& lhs, const SamplerStateDesc& rhs)
-{
-	return std::memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
-}
+//bool operator< (const SamplerStateDesc& lhs, const SamplerStateDesc& rhs)
+//{
+//	return std::memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
+//}
 
 }
