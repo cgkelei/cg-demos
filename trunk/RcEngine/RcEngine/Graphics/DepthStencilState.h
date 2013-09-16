@@ -6,6 +6,7 @@
 
 namespace RcEngine {
 
+#pragma pack(push, 1)
 
 struct _ApiExport DepthStencilStateDesc
 {
@@ -32,6 +33,7 @@ struct _ApiExport DepthStencilStateDesc
     friend bool operator< (const DepthStencilStateDesc& lhs, const DepthStencilStateDesc& rhs);
 };
 
+#pragma pack(pop)
 
 class _ApiExport DepthStencilState
 {

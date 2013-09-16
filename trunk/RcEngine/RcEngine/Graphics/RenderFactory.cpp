@@ -83,23 +83,10 @@ shared_ptr<RasterizerState> RenderFactory::CreateRasterizerState( const Rasteriz
 
 shared_ptr<SamplerState> RenderFactory::CreateSamplerState( const SamplerStateDesc& desc )
 {
-	shared_ptr<SamplerState> retVal;
+	if (mSamplerStatePool.find(desc) == mSamplerStatePool.end())
+		mSamplerStatePool.insert(std::make_pair(desc, CreateSamplerStateImpl(desc)));
 
-	auto found = mSamplerStatePool.find(desc);
-	if (found == mSamplerStatePool.end())
-	{
-		retVal = CreateSamplerStateImpl(desc);
-		printf("mSamplerStatePool.size1 = %d\n", mSamplerStatePool.size());
-		mSamplerStatePool.insert(std::make_pair(desc,retVal));
-		printf("mSamplerStatePool.size2 = %d\n", mSamplerStatePool.size());
-	}
-	else
-	{
-		retVal = found->second;
-	}
-
-	
-	return retVal;
+	return mSamplerStatePool[desc];
 }
 
 } // Namespace RcEngine

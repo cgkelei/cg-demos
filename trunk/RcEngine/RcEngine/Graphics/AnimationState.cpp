@@ -38,7 +38,7 @@ void AnimationState::SetEnable( bool enabled )
 
 const String& AnimationState::GetName() const
 {
-	return mClip->GetName();
+	return mClip->GetResourceName();
 }
 
 float AnimationState::GetLength() const
@@ -51,15 +51,14 @@ void AnimationState::Apply()
 	if (!IsEnabled())
 		return;
 
-	for (auto iter = mClip->mAnimationTracks.begin(); iter != mClip->mAnimationTracks.end(); ++iter)
+
+	for (const AnimationClip::AnimationTrack& animTrack : mClip->mAnimationTracks)
 	{
-		const AnimationClip::AnimationTrack& animTrack = *iter;
-		
 		// if no key frames, pass
 		if (animTrack.KeyFrames.empty())
 			continue;
 
-		auto found = mAnimation.mAnimateTargets.find(animTrack.Name);
+		unordered_map<String, Bone*>::const_iterator found = mAnimation.mAnimateTargets.find(animTrack.Name);
 
 		assert( found != mAnimation.mAnimateTargets.end() );
 

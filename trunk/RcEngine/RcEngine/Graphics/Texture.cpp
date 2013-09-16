@@ -34,7 +34,7 @@ void TextureResource::LoadImpl()
 	FileSystem& fileSystem = FileSystem::GetSingleton();
 	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 
-	String fullPath = fileSystem.Locate(mName, mGroup);
+	String fullPath = fileSystem.Locate(mResourceName, mGroup);
 
 	mTexture = factory.CreateTextureFromFile(fullPath);
 }

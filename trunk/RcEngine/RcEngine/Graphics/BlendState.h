@@ -6,6 +6,8 @@
 
 namespace RcEngine {
 
+#pragma pack(push, 1)
+
 struct _ApiExport BlendStateDesc
 {
 public:
@@ -33,7 +35,7 @@ public:
 	friend bool operator< (const BlendStateDesc& lhs, const BlendStateDesc& rhs);
 };
 
-
+#pragma pack(pop)
 
 class _ApiExport BlendState
 {

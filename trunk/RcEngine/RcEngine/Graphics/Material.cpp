@@ -16,6 +16,7 @@
 #include <Core/XMLDom.h>
 #include <Core/Utility.h>
 #include <IO/FileSystem.h>
+#include <IO/PathUtil.h>
 #include <Resource/ResourceManager.h>
 
 
@@ -232,7 +233,7 @@ shared_ptr<Resource> Material::Clone()
 {
 	printf("Clone material: %s\n", mMaterialName.c_str());
 
-	shared_ptr<Material> retVal = std::make_shared<Material>(mCreator, mResourceHandle, mName, mGroup);
+	shared_ptr<Material> retVal = std::make_shared<Material>(mCreator, mResourceHandle, mResourceName, mGroup);
 
 	retVal->mMaterialName = mMaterialName;
 	
@@ -281,7 +282,7 @@ void Material::LoadImpl()
 	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
-	shared_ptr<Stream> matStream = fileSystem.OpenStream(mName, mGroup);
+	shared_ptr<Stream> matStream = fileSystem.OpenStream(mResourceName, mGroup);
 	Stream& source = *matStream;	
 
 	XMLDoc doc;
@@ -294,11 +295,18 @@ void Material::LoadImpl()
 	XMLNodePtr effectNode = root->FirstNode("Effect");
 	String effecFile =  effectNode->AttributeString("name", "");		// file name
 	
+	String parentDir = PathUtil::GetPath(mResourceName);
+
 	/* Effect name is unique resource ID, but with the effect shader macro, we can define different effect
 	 * with the same file. So the full effect name is the effect file string + shader macro. By this way, 
 	 * we can distinction effects.
 	 */
-	String effectName = effecFile;
+	String effectName = parentDir + effecFile;
+
+	String effectResGroup = "General";
+	// Test if a effect exits in the same group as material
+	if( fileSystem.Exits(effecFile, mGroup) )
+		effectResGroup = mGroup;
 
 	vector<String> effectFlags;
 	for (XMLNodePtr effectFlagNode = effectNode->FirstNode("Flag"); effectFlagNode; effectFlagNode = effectFlagNode->NextSibling("Flag"))
@@ -308,10 +316,7 @@ void Material::LoadImpl()
 		effectFlags.push_back(flag);
 	}
 
-	String effectResGroup = "General";
-	// Test if a effect exits in the same group as material
-	if( fileSystem.Exits(effecFile, mGroup) )
-		effectResGroup = mGroup;
+	
 	
 	// load effect
 	{
@@ -410,12 +415,9 @@ void Material::LoadImpl()
 		parameter->IsSemantic = semantic.length() > 0;
 
 		if (parameter->IsSemantic)
-		{
 			parameter->Usage = EffectParamsUsageDefs::GetInstance().GetUsageType(semantic);
-		}else
-		{
+		else
 			parameter->Usage = EPU_Unknown;
-		}	
 
 		// texture type
 		if (parameter->Type == EPT_Texture1D || parameter->Type == EPT_Texture2D ||
@@ -431,13 +433,17 @@ void Material::LoadImpl()
 
 			String samplerValue = paramNode->Attribute("sampler")->ValueString();
 			auto samplerIter = mSamplerStates.find(samplerValue) ;
+
 			if (samplerIter == mSamplerStates.end())
 				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Sampler: " + samplerValue + "doesn't exit", "Material::LoadFrom");
+
 			layer.Sampler = samplerIter->second;
 
 			String texFile = paramNode->AttributeString("value", "");
 			if (!texFile.empty())
 			{
+				texFile = parentDir + texFile;
+
 				shared_ptr<TextureResource> textureRes = std::static_pointer_cast<TextureResource>(
 					resMan.GetResourceByName(RT_Texture, texFile, mGroup));
 				textureRes->Load();
@@ -519,7 +525,7 @@ void Material::SetCurrentTechnique( const String& techName )
 	EffectTechnique* tech = mEffect->GetTechniqueByName(techName);
 
 	if (!tech)
-		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, techName + " deosn't exit in" + mEffect->GetName(), "Material::SetCurrentTechnique");
+		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, techName + " deosn't exit in" + mEffect->GetResourceName(), "Material::SetCurrentTechnique");
 
 	mCurrentTech = tech;
 }
@@ -530,7 +536,7 @@ void Material::SetCurrentTechnique( uint32_t index )
 
 	if (!tech)
 	{
-		String err = mEffect->GetName() + " doesn't have" + std::to_string(index) + " technique";
+		String err = mEffect->GetResourceName() + " doesn't have" + std::to_string(index) + " technique";
 		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, err, "Material::SetCurrentTechnique");
 	}
 

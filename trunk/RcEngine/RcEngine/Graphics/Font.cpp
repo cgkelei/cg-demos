@@ -228,12 +228,12 @@ void Font::LoadImpl()
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
 	// font texture
-	shared_ptr<TextureResource> fontTexture = std::static_pointer_cast<TextureResource>(resMan.GetResourceByName(RT_Texture, mName + ".sdff.png", mGroup));
+	shared_ptr<TextureResource> fontTexture = std::static_pointer_cast<TextureResource>(resMan.GetResourceByName(RT_Texture, mResourceName + ".sdff.png", mGroup));
 	fontTexture->Load();
 	mFontTexture = fontTexture->GetTexture();
 
 	// description file
-	String filePath = fileSystem.Locate(mName + ".sdff.txt", mGroup)  ;
+	String filePath = fileSystem.Locate(mResourceName + ".sdff.txt", mGroup)  ;
 
 	if (filePath.find(".txt") != std::string::npos)
 		LoadTXT(filePath);

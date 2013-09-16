@@ -50,7 +50,8 @@ ResourceHandle ResourceManager::AddResource( uint32_t type, const String& name, 
 {
 	ResourceHandle retVal = 0;
 
-	auto groupIter = mResourcesWithGroup.find(group);
+	unordered_map<String, ResourceGroup>::iterator groupIter;
+	groupIter = mResourcesWithGroup.find(group);
 
 	if (groupIter != mResourcesWithGroup.end())
 	{

@@ -73,7 +73,7 @@ void Pipeline::LoadImpl()
 	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
-	shared_ptr<Stream> matStream = fileSystem.OpenStream(mName, mGroup);
+	shared_ptr<Stream> matStream = fileSystem.OpenStream(mResourceName, mGroup);
 	Stream& source = *matStream;	
 
 	XMLDoc doc;

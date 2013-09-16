@@ -6,6 +6,7 @@
 
 namespace RcEngine {
 
+#pragma pack(push, 1)
 
 struct _ApiExport RasterizerStateDesc
 {
@@ -24,6 +25,7 @@ public:
 	friend bool operator< (const RasterizerStateDesc& lhs, const RasterizerStateDesc& rhs);
 };
 
+#pragma pack(pop)
 
 
 class _ApiExport RasterizerState

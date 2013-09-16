@@ -16,17 +16,15 @@
 #include <Graphics/SamplerState.h>
 #include <GUI/Label.h>
 #include <GUI/UIManager.h>
+#include <IO/FileSystem.h>
 #include <Math/MathUtil.h>
 
 SponzaApp::SponzaApp( const String& config )
 	:Application(config),
-	 mCameraControler(0)
+	 mCameraControler(0),
+	 mFramePerSecond(0)
 {
-	SamplerStateDesc sd1;
-	SamplerStateDesc sd2;
 
-	bool b1 = sd1 < sd2;
-	bool b2 = sd2 < sd1;
 }
 
 
@@ -57,19 +55,21 @@ void SponzaApp::LoadContent()
 	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
+	//FileSystem::GetSingleton().RegisterPath("../Media/Mesh/", "Custom");
+	
 	//Entity* sponzaEntity = sceneMan.CreateEntity("Sponza", "Teapot001.mesh",  "General");
 	//SceneNode* sponzaNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Sponza");
 	//sponzaNode->SetPosition(float3(0, 0, 0));
 	//sponzaNode->SetScale(0.05f);
 	//sponzaNode->AttachObject(sponzaEntity);
 
-	Entity* sponzaEntity = sceneMan.CreateEntity("Sponza", "Sponza.mesh",  "Custom");
-	SceneNode* sponzaNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Sponza");
-	sponzaNode->SetPosition(float3(0, 0, 0));
-	sponzaNode->SetScale(0.45f);
-	sponzaNode->AttachObject(sponzaEntity);
+	//Entity* sponzaEntity = sceneMan.CreateEntity("Sponza", "Sponza.mesh",  "Custom");
+	//SceneNode* sponzaNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Sponza");
+	//sponzaNode->SetPosition(float3(0, 0, 0));
+	//sponzaNode->SetScale(0.45f);
+	//sponzaNode->AttachObject(sponzaEntity);
 
-	Entity* dudeEntity = sceneMan.CreateEntity("Dude", "him.mesh",  "Custom");
+	/*Entity* dudeEntity = sceneMan.CreateEntity("Dude", "him.mesh",  "Custom");
 	SceneNode* dudeNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Dwarf");
 	dudeNode->SetPosition(float3(0, 0, 0));
 	dudeNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(90.0f), 0.0f, 0.0f));
@@ -78,8 +78,17 @@ void SponzaApp::LoadContent()
 	AnimationPlayer* animPlayer = dudeEntity->GetAnimationPlayer();
 	AnimationState* takeClip = animPlayer->GetClip("Take 001");
 	takeClip->WrapMode = AnimationState::Wrap_Loop;
+	animPlayer->PlayClip("Take 001");*/
 
-	animPlayer->PlayClip("Take 001");
+	Entity* arthasEntity = sceneMan.CreateEntity("Arthas", "Arthas/Mesh_ArthasLichKing.mesh",  "Custom");
+	SceneNode* arthasNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Arthas");
+	arthasNode->SetPosition(float3(0, 0, 0));
+	//dudeNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(90.0f), 0.0f, 0.0f));
+	arthasNode->AttachObject(arthasEntity);
+
+	AnimationPlayer* arthasAnimPlayer = arthasEntity->GetAnimationPlayer();
+	AnimationState* arthasTakeClip = arthasAnimPlayer->GetClip("Take 001");
+	arthasTakeClip->WrapMode = AnimationState::Wrap_Loop;	
 }
 
 void SponzaApp::UnloadContent()
@@ -117,24 +126,24 @@ void SponzaApp::Render()
 	//DrawUI();
 
 	// Move to engine level
-	scenenMan.UpdateRenderQueue(currentFrameBuffer->GetCamera(), RO_StateChange);
-	scenenMan.RenderScene();
+	/*scenenMan.UpdateRenderQueue(currentFrameBuffer->GetCamera(), RO_StateChange);
+	scenenMan.RenderScene();*/
 
-	/*RenderQueue* renderQueue = scenenMan.GetRenderQueue();
+	RenderQueue* renderQueue = scenenMan.GetRenderQueue();
 	std::vector<RenderQueueItem>&  renderBucket = renderQueue->GetRenderBucket(RenderQueue::BucketOpaque);
 
 	if (renderBucket.size())
 	{
-	std::sort(renderBucket.begin(), renderBucket.end(), [](const RenderQueueItem& lhs, const RenderQueueItem& rhs) {
-	return lhs.SortKey < rhs.SortKey; });
+		std::sort(renderBucket.begin(), renderBucket.end(), [](const RenderQueueItem& lhs, const RenderQueueItem& rhs) {
+			return lhs.SortKey < rhs.SortKey; });
 
-	for (const RenderQueueItem& renderItem : renderBucket)
-	{
+			for (const RenderQueueItem& renderItem : renderBucket)
+			{
 
-	renderItem.Renderable->Render();
+				renderItem.Renderable->Render();
+			}
 	}
-	}
-	*/
+
 	// Swap Buffer
 	currentFrameBuffer->SwapBuffers();
 }
@@ -142,6 +151,7 @@ void SponzaApp::Render()
 void SponzaApp::Update( float deltaTime )
 {
 	CalculateFrameRate();
+	mMainWindow->SetTitle("Graphics Demo FPS:" + std::to_string(mFramePerSecond));
 }
 
 void SponzaApp::InitGUI()
@@ -157,13 +167,8 @@ void SponzaApp::InitGUI()
 void SponzaApp::DrawUI()
 {
 	wchar_t buffer[100];
-	//int cx = swprintf ( buffer, 100, L"Graphics Demo FPS: %d", mFramePerSecond );
-
-	Camera* camera = RcEngine::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
-	int cx = swprintf ( buffer, 100, L"Camera Pos: %f %f %f", camera->GetPosition().X(), camera->GetPosition().Y(), camera->GetPosition().Z() );
+	int cx = swprintf ( buffer, 100, L"Graphics Demo FPS: %d", mFramePerSecond );
 	mFPSLabel->SetText(buffer);
-
-	//mMainWindow->SetTitle("Graphics Demo FPS:" + std::to_string(mFramePerSecond));
 
 	// Render UI
 	UIManager::GetSingleton().Render();

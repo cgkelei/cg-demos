@@ -16,6 +16,7 @@
 		</Group>
 		
 		<Group Name="Custom">
+			<Path Name="../Media/Mesh"/>
 			<Path Name="../Media/Mesh/Sponza"/>
 			<Path Name="../Media/Mesh/Dude"/>
 			<Path Name="../Media/Mesh/Dwarf"/>
