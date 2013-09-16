@@ -1737,23 +1737,26 @@ void FbxProcesser::MergeScene()
 	if (mSceneMeshes.size() > 1)
 	{
 		// Make other mesh as a mesh part of first mesh
-		for (size_t mi = 1; mi < mSceneMeshes.size(); ++mi)
-		{
-			MeshData& mesh  = *(mSceneMeshes[mi]);
+		//for (size_t mi = 1; mi < mSceneMeshes.size(); ++mi)
+		//{
+		//	MeshData& mesh  = *(mSceneMeshes[mi]);
 
-			if (mesh.MeshSkeleton)
-			{
-				printf("Multiple animation mesh exits in scene, can't merge!\n");
-				exit(0);
-			}
+		//	if (mesh.MeshSkeleton)
+		//	{
+		//		printf("Multiple animation mesh exits in scene, can't merge!\n");
+		//		/*exit(0);*/
+		//		continue;
+		//	}
 
-			mSceneMeshes[0]->Bound.Merge(mesh.Bound);
-			
-			for (auto& part : mesh.MeshParts)
-				mSceneMeshes[0]->MeshParts.push_back(part);
-		}
+		//	mSceneMeshes[0]->Bound.Merge(mesh.Bound);
+		//	
+		//	for (auto& part : mesh.MeshParts)
+		//		mSceneMeshes[0]->MeshParts.push_back(part);
+		//}
 
-		mSceneMeshes.resize(1);
+		//mSceneMeshes.resize(1);
+
+		mSceneMeshes.erase(mSceneMeshes.begin());
 	}	
 }
 
@@ -1773,7 +1776,7 @@ int main()
 	FbxProcesser fbxProcesser;
 	fbxProcesser.Initialize();
 
-	if (fbxProcesser.LoadScene("Arthas/Normal.fbx"))
+	if (fbxProcesser.LoadScene("Arthas_ShiFa.fbx"))
 	{
 		fbxProcesser.ProcessScene();
 
