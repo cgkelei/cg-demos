@@ -43,6 +43,7 @@ private:
 private:
 	unordered_set<String> mAllowedPaths;
 	unordered_map<String, vector<String> > mResouceGroups;
+	
 };
 
 } //Namespace RcEngine

@@ -296,17 +296,22 @@ void Material::LoadImpl()
 	String effecFile =  effectNode->AttributeString("name", "");		// file name
 	
 	String parentDir = PathUtil::GetPath(mResourceName);
+	String effectResGroup;
 
+	// Test if a effect exits in the same group as material
+	if( fileSystem.Exits(parentDir + effecFile, mGroup) )
+	{
+		effectResGroup = mGroup;
+		effecFile = parentDir + effecFile;  // Add material resource directory
+	}
+	else
+		effectResGroup = "General";
+	
 	/* Effect name is unique resource ID, but with the effect shader macro, we can define different effect
 	 * with the same file. So the full effect name is the effect file string + shader macro. By this way, 
 	 * we can distinction effects.
 	 */
-	String effectName = parentDir + effecFile;
-
-	String effectResGroup = "General";
-	// Test if a effect exits in the same group as material
-	if( fileSystem.Exits(effecFile, mGroup) )
-		effectResGroup = mGroup;
+	String effectName = effecFile;
 
 	vector<String> effectFlags;
 	for (XMLNodePtr effectFlagNode = effectNode->FirstNode("Flag"); effectFlagNode; effectFlagNode = effectFlagNode->NextSibling("Flag"))

@@ -89,6 +89,8 @@ void SponzaApp::LoadContent()
 	AnimationPlayer* arthasAnimPlayer = arthasEntity->GetAnimationPlayer();
 	AnimationState* arthasTakeClip = arthasAnimPlayer->GetClip("Take 001");
 	arthasTakeClip->WrapMode = AnimationState::Wrap_Loop;	
+
+	arthasAnimPlayer->PlayClip("Take 001");
 }
 
 void SponzaApp::UnloadContent()
@@ -129,7 +131,9 @@ void SponzaApp::Render()
 	/*scenenMan.UpdateRenderQueue(currentFrameBuffer->GetCamera(), RO_StateChange);
 	scenenMan.RenderScene();*/
 
-	RenderQueue* renderQueue = scenenMan.GetRenderQueue();
+	scenenMan.UpdateRenderQueue(currentFrameBuffer->GetCamera(), RO_StateChange);
+
+	RenderQueue* renderQueue = scenenMan.GetRenderQueue();	
 	std::vector<RenderQueueItem>&  renderBucket = renderQueue->GetRenderBucket(RenderQueue::BucketOpaque);
 
 	if (renderBucket.size())
