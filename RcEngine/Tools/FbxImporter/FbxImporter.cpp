@@ -116,6 +116,11 @@ inline float2 float2FromFBX(const FbxVector2& fbx)
 	return float2(float(fbx[0]), float(fbx[1]));
 }
 
+inline Quaternionf quatFromFBX(const FbxQuaternion& quat) 
+{
+	return Quaternionf((float)quat[3], (float)quat[0], (float)quat[1], (float)quat[2]);
+}
+
 float4x4 matrixFromFbxAMatrix(const FbxAMatrix& fbxMatrix)
 {
 	FbxVector4 translation = fbxMatrix.GetT();
@@ -877,6 +882,7 @@ void FbxProcesser::ProcessSkeleton( FbxNode* pNode )
 	if (pParentNode)
 		parentBone = skeleton->GetBone(pParentNode->GetName());
 
+	printf("Bone: %s\n", pNode->GetName());
 	skeleton->AddBone(pNode->GetName(), parentBone);
 }
 
@@ -1535,9 +1541,7 @@ void FbxProcesser::BuildAndSaveBinary( )
 
 				String parentName = "";
 				if (parentBone)
-				{
 					parentName = parentBone->GetName();
-				}
 
 				float3 pos = bone->GetPosition();
 				float3 scale = bone->GetScale();
@@ -1569,10 +1573,10 @@ void FbxProcesser::BuildAndSaveBinary( )
 				stream.WriteUInt(animationData.AnimationClips.size());
 
 				// animtion clip are write to each animation file
-				for (auto clipIter = animationData.AnimationClips.begin(); clipIter != animationData.AnimationClips.end(); ++clipIter)
+				for (const auto& kv : animationData.AnimationClips)
 				{
-					String clipName = clipIter->first + ".anim";
-					AnimationClipData& clip = clipIter->second;
+					String clipName = kv.first + ".anim";
+					const AnimationClipData& clip = kv.second;
 
 					// write clip file in mesh 
 					stream.WriteString(clipName);
@@ -1580,31 +1584,27 @@ void FbxProcesser::BuildAndSaveBinary( )
 					FileStream clipStream;
 					clipStream.Open(clipName, FILE_WRITE);
 
-					clipStream.WriteString(clipIter->first);
+					clipStream.WriteString(kv.first);
 					clipStream.WriteFloat(clip.Duration);
 					clipStream.WriteUInt(clip.mAnimationTracks.size());
 
-					
-					for (auto trackIter = clip.mAnimationTracks.begin(); trackIter != clip.mAnimationTracks.end(); ++trackIter)
+					for (const AnimationClipData::AnimationTrack& track : clip.mAnimationTracks)
 					{
-						AnimationClipData::AnimationTrack& track = *trackIter;
-
 						// write track name
 						clipStream.WriteString(track.Name);
 						// write track key frame count
 						clipStream.WriteUInt(track.KeyFrames.size());
 
-						for (auto keyIter = track.KeyFrames.begin(); keyIter != track.KeyFrames.end(); ++keyIter)
+						for (const AnimationClipData::KeyFrame& key : track.KeyFrames)
 						{
 							// write key time
-							clipStream.WriteFloat(keyIter->Time);
-
-							clipStream.Write(&keyIter->Translation, sizeof(float3));
-							clipStream.Write(&keyIter->Rotation, sizeof(Quaternionf));
-							clipStream.Write(&keyIter->Scale, sizeof(float3));
+							clipStream.WriteFloat(key.Time);
+							clipStream.Write(&key.Translation, sizeof(float3));
+							clipStream.Write(&key.Rotation, sizeof(Quaternionf));
+							clipStream.Write(&key.Scale, sizeof(float3));
 						}
 					}
-
+				
 					clipStream.Close();
 				}
 			}
@@ -1626,8 +1626,7 @@ void FbxProcesser::CollectAnimations( )
 {
 	FbxNode* pRootNode = mFBXScene->GetRootNode();
 	
-	if (!pRootNode)
-		return;
+	if (!pRootNode) return;
 
 	double frameRate = FbxTime::GetFrameRate(mFBXScene->GetGlobalSettings().GetTimeMode());
 
@@ -1643,9 +1642,8 @@ void FbxProcesser::CollectAnimations( )
 
 			mFBXScene->ActiveAnimStackName.Set(takeName);
 
-			FbxTime KStart;
-			FbxTime KStop;
-			
+			FbxTime KStart, KStop;
+
 			if (lCurrentTakeInfo)
 			{
 				KStart = lCurrentTakeInfo->mLocalTimeSpan.GetStart();
@@ -1667,9 +1665,7 @@ void FbxProcesser::CollectAnimations( )
 			//int num_frames = (int)(lTimeLineTimeSpan.GetDuration().GetMilliSeconds() * frameRate / 1000 + 0.5f);
 
 			if( fStart < fStop )
-			{
 				ProcessAnimation(lAnimStack, pRootNode, frameRate, fStart, fStop);
-			}
 		}
 	}
 }
@@ -1677,66 +1673,63 @@ void FbxProcesser::CollectAnimations( )
 void FbxProcesser::ProcessAnimation( FbxAnimStack* pStack, FbxNode* pNode, double fFrameRate, double fStart, double fStop )
 {
 	FbxNodeAttribute* pNodeAttribute = pNode->GetNodeAttribute();
-	if (pNodeAttribute)
+	if (pNodeAttribute && pNodeAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton)
 	{
-		if (pNodeAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton)
-		{
-			FbxNode* skeletonRoot = GetBoneRoot(pNode);
+		FbxNode* skeletonRoot = GetBoneRoot(pNode);
 			
-			AnimationClipData& clip = mAnimations[skeletonRoot->GetName()].AnimationClips[pStack->GetName()];
-			shared_ptr<Skeleton> skeleton = mSkeletons[skeletonRoot->GetName()];
+		AnimationClipData& clip = mAnimations[skeletonRoot->GetName()].AnimationClips[pStack->GetName()];
+		shared_ptr<Skeleton> skeleton = mSkeletons[skeletonRoot->GetName()];
 				
-			if( skeleton )
-			{
-				Bone* pBone = skeleton->GetBone(pNode->GetName());	
+		if( skeleton )
+		{
+			Bone* pBone = skeleton->GetBone(pNode->GetName());	
 				
-				if( pBone )
-				{	
-					AnimationClipData::AnimationTrack track;
-					track.Name = pNode->GetName();
+			if( pBone )
+			{	
+				AnimationClipData::AnimationTrack track;
+				track.Name = pNode->GetName();
 
-					double fTime = 0;
-					while( fTime <= fStop )
-					{
-						FbxTime takeTime;
-						takeTime.SetSecondDouble(fTime);
+				double fTime = 0;
+				while( fTime <= fStop )
+				{
+					FbxTime takeTime;
+					takeTime.SetSecondDouble(fTime);
 
-						FbxAMatrix offset = GetGeometry(pNode);
+					FbxAMatrix offset = GetGeometry(pNode);
 
-						FbxAMatrix matAbsoluteTransform = GetGlobalPosition(pNode, takeTime);
+					FbxAMatrix matAbsoluteTransform = GetGlobalPosition(pNode, takeTime);
+					FbxAMatrix matParentAbsoluteTransform = GetGlobalPosition(pNode->GetParent(), takeTime);
+					FbxAMatrix matLocalTrasform =  matParentAbsoluteTransform.Inverse() * matAbsoluteTransform;
 
-						FbxAMatrix matParentAbsoluteTransform = GetGlobalPosition(pNode->GetParent(), takeTime);
-						FbxAMatrix matLocalTrasform =  matParentAbsoluteTransform.Inverse() * matAbsoluteTransform;
+					FbxQuaternion quat = matLocalTrasform.GetQ();
+					FbxVector4 trans = matLocalTrasform.GetT();
+					FbxVector4 scale = matLocalTrasform.GetS();
+					
+					AnimationClipData::KeyFrame keyframe;
 
-						//FbxQuaternion quat = matLocalTrasform.GetQ();
-						//FbxVector4 trans = matLocalTrasform.GetT();
-						//FbxVector4 scale = matLocalTrasform.GetS();
-				
-						AnimationClipData::KeyFrame keyframe;
-						MatrixDecompose(keyframe.Scale, keyframe.Rotation, keyframe.Translation,
-										matrixFromFbxAMatrix(matLocalTrasform));
+					keyframe.Rotation = quatFromFBX(quat);
+					keyframe.Scale = float3FromFBX(scale);
+					keyframe.Translation = float3FromFBX(trans);
+		
+					//MatrixDecompose(keyframe.Scale, keyframe.Rotation, keyframe.Translation,
+					//				matrixFromFbxAMatrix(matLocalTrasform));
+		
+					keyframe.Time = (float)fTime;
+					track.KeyFrames.push_back(keyframe);
 
-						//keyframe.Rotation = Quaternionf((float)quat[3], (float)quat[0], (float)quat[1], (float)quat[2]);
-						//keyframe.Scale = FbxToVector3f(scale);
-						//keyframe.Translation = FbxToVector3f(trans);
-						keyframe.Time = (float)fTime;
+					fTime += 1.0f/fFrameRate;
+				}
 
-						track.KeyFrames.push_back(keyframe);
-
-						fTime += 1.0f/fFrameRate;
-					}
-
-					clip.Duration = (float)(fTime-1.0f/fFrameRate);
-					clip.mAnimationTracks.push_back(track);
-				}		
-			}
+				clip.Duration = (float)(fTime-1.0f/fFrameRate);
+				clip.mAnimationTracks.push_back(track);
+			}	
+			else 
+				ExportLog::LogWarning("Bone: %s not found", pNode->GetName());
 		}
 	}
 
 	for( int i = 0; i < pNode->GetChildCount(); ++i )
-	{
 		ProcessAnimation(pStack, pNode->GetChild(i), fFrameRate, fStart, fStop);
-	}
 }
 
 void FbxProcesser::MergeScene()
@@ -1764,7 +1757,6 @@ void FbxProcesser::MergeScene()
 	}	
 }
 
-
 int main()
 {
 	ExportLog::AddListener( &g_ConsoleOutListener );
@@ -1781,7 +1773,7 @@ int main()
 	FbxProcesser fbxProcesser;
 	fbxProcesser.Initialize();
 
-	if (fbxProcesser.LoadScene("sponza.FBX"))
+	if (fbxProcesser.LoadScene("Arthas/Normal.fbx"))
 	{
 		fbxProcesser.ProcessScene();
 

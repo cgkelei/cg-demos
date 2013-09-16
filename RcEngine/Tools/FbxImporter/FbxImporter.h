@@ -78,7 +78,7 @@ public:
 		std::vector<std::pair<int, float>> mBoneWeights;
 	};
 
-
+	#pragma pack(push, 1)
 	struct Vertex
 	{
 		enum Flags
@@ -122,6 +122,7 @@ public:
 		uint32_t Flag;
 		size_t Index;	// keep track index in vertices
 	};
+	#pragma pack(pop)
 
 	struct AnimationClipData
 	{

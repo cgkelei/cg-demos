@@ -15,6 +15,7 @@
 #include <Graphics/RenderQueue.h>
 #include <Core/Context.h>
 #include <Core/Exception.h>
+#include <IO/PathUtil.h>
 #include <Math/MathUtil.h>
 #include <Resource/ResourceManager.h>
 
@@ -44,12 +45,21 @@ Entity::~Entity()
 
 void Entity::Initialize()
 {
+	const String& meshGroup = mMesh->GetResourceGroup();
+	String meshDirectory = PathUtil::GetPath(mMesh->GetResourceName()); 
+
 	for (uint32_t i = 0; i < mMesh->GetNumMeshPart(); ++i)
 	{
 		shared_ptr<MeshPart> meshPart = mMesh->GetMeshPart(i);
 		
+		String matResName = meshDirectory + meshPart->GetMaterialName();
+
+		shared_ptr<Material> material = std::static_pointer_cast<Material>(
+			ResourceManager::GetSingleton().GetResourceByName(RT_Material, matResName, meshGroup));
+		material->Load();
+
 		SubEntity* subEnt = new SubEntity(this, meshPart);
-		subEnt->SetMaterial(meshPart->GetMaterialName(), mMesh->GetResourceGroup());
+		subEnt->SetMaterial(material);
 
 		mSubEntityList.push_back( subEnt );
 	}
@@ -65,16 +75,15 @@ void Entity::Initialize()
 	{
 		mAnimationPlayer = new SkinnedAnimationPlayer(mSkeleton);
 
-		const vector<String>& animations = mMesh->GetAnimations();
-		
-		for (size_t i = 0; i != animations.size(); ++i)
+		for (const String& animClipResName : mMesh->GetAnimations())
 		{
+			String clipName = meshDirectory + animClipResName;		 
 			shared_ptr<AnimationClip> clip = std::static_pointer_cast<AnimationClip>(
-				ResourceManager::GetSingleton().GetResourceByName(RT_Animation, animations[i], mMesh->GetResourceGroup()));
+				ResourceManager::GetSingleton().GetResourceByName(RT_Animation, clipName, meshGroup));
 			clip->Load();
 
 			mAnimationPlayer->AddClip(clip);
-		}		
+		}	
 	}
 
 	if (mParentNode)
@@ -247,11 +256,9 @@ void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, Camera* camera, Rende
 
 void Entity::UpdateAnimation()
 {
-	const unordered_map<String, AnimationState*>& clipStates = mAnimationPlayer->GetAllClip();
-	for (auto iter = clipStates.begin(); iter != clipStates.end(); ++iter)
+	for (auto& kv : mAnimationPlayer->GetAllClip())
 	{
-		AnimationState* animState = iter->second;
-
+		AnimationState* animState = kv.second;
 		animState->Apply();
 	}
 		

@@ -11,6 +11,7 @@
 #include <Graphics/Animation.h>
 #include <IO/Stream.h>
 #include <IO/FileSystem.h>
+#include <IO/PathUtil.h>
 #include <Math/MathUtil.h>
 #include <Resource/ResourceManager.h>
 
@@ -35,7 +36,9 @@ void Mesh::LoadImpl()
 	FileSystem& fileSystem = FileSystem::GetSingleton();
 	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 
-	shared_ptr<Stream> streamPtr = fileSystem.OpenStream(mName, mGroup);
+	String currMeshDirectory = PathUtil::GetParentPath(mResourceName);
+
+	shared_ptr<Stream> streamPtr = fileSystem.OpenStream(mResourceName, mGroup);
 	Stream& source = *streamPtr;
 
 	const uint32_t MeshId = ('M' << 24) | ('E' << 16) | ('S' << 8) | ('H');
@@ -53,18 +56,41 @@ void Mesh::LoadImpl()
 	mBoundingBox = BoundingBoxf(min, max);
 
 	// read mesh part
+	//uint32_t subMeshCount = source.ReadUInt();
+	//mMeshParts.resize(subMeshCount);
+	//for (uint32_t i = 0 ; i < subMeshCount; ++i)
+	//{
+	//	shared_ptr<MeshPart> subMesh = std::make_shared<MeshPart>(*this);
+	//	subMesh->Load(source);
+
+	//	// add mesh part material resource
+	//	ResourceManager::GetSingleton().AddResource(RT_Material, subMesh->mMaterialName, mGroup);
+
+	//	mMeshParts[i] = subMesh;
+	//}
+
 	uint32_t subMeshCount = source.ReadUInt();
-	mMeshParts.resize(subMeshCount);
 	for (uint32_t i = 0 ; i < subMeshCount; ++i)
 	{
 		shared_ptr<MeshPart> subMesh = std::make_shared<MeshPart>(*this);
 		subMesh->Load(source);
 
-		// add mesh part material resource
-		ResourceManager::GetSingleton().AddResource(RT_Material, subMesh->mMaterialName, mGroup);
+		String matPath;
 
-		mMeshParts[i] = subMesh;
+		if (currMeshDirectory.empty())
+			matPath = subMesh->mMaterialName;
+		else 
+			matPath = currMeshDirectory + "/" + subMesh->mMaterialName;
+
+		// Hack: if material doesn't exit, not add it
+		if (fileSystem.Exits(matPath, mGroup) == false)
+			continue;
+
+		// add mesh part material resource
+		ResourceManager::GetSingleton().AddResource(RT_Material, matPath, mGroup);
+		mMeshParts.push_back(subMesh);
 	}
+
 	
 	// read bones
 	mSkeleton = Skeleton::LoadFrom(source);
@@ -75,7 +101,7 @@ void Mesh::LoadImpl()
 	for (uint32_t i = 0; i < animClipCount; i++)
 	{
 		mAninationClips[i] = source.ReadString();
-		resMan.AddResource(RT_Animation, mAninationClips[i], mGroup);
+		//resMan.AddResource(RT_Animation, mAninationClips[i], mGroup);
 	}
 }
 

@@ -60,7 +60,7 @@ void AnimationClip::LoadImpl()
 {
 	FileSystem& fileSystem = FileSystem::GetSingleton();
 
-	shared_ptr<Stream> clipStream = fileSystem.OpenStream(mName, mGroup);
+	shared_ptr<Stream> clipStream = fileSystem.OpenStream(mResourceName, mGroup);
 	Stream& source = *clipStream;	
 
 	mClipName = source.ReadString(); 
@@ -86,7 +86,6 @@ void AnimationClip::LoadImpl()
 			AnimationClip::KeyFrame& animKey = animTrack.KeyFrames[key];
 
 			animKey.Time = source.ReadFloat();
-
 			source.Read(&animKey.Translation, sizeof(float3));
 			source.Read(&animKey.Rotation, sizeof(Quaternionf));
 			source.Read(&animKey.Scale, sizeof(float3));

@@ -27,7 +27,7 @@ public:
 	Material(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	virtual ~Material(void);
 
-	const String& GetName() const						{ return mName; }
+	const String& GetName() const						{ return mResourceName; }
 
 	const shared_ptr<Effect>& GetEffect() const			{ return mEffect; }
 	EffectTechnique* GetCurrentTechnique() const		{ return mCurrentTech; }

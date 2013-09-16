@@ -579,7 +579,7 @@ shared_ptr<Resource> Effect::Clone()
 {
 	printf("Clone effect: %s\n", mEffectName.c_str());
 
-	shared_ptr<Effect> retVal = std::make_shared<Effect>(mCreator, mResourceHandle, mName, mGroup);
+	shared_ptr<Effect> retVal = std::make_shared<Effect>(mCreator, mResourceHandle, mResourceName, mGroup);
 	
 	retVal->mEffectName = mEffectName;
 
@@ -609,7 +609,7 @@ void Effect::LoadImpl()
 	vector<String> effectFlags;
 	
 	//split the effect name to get effect file and flags
-	std::istringstream iss(mName); 
+	std::istringstream iss(mResourceName); 
 	do 
 	{ 
 		String sub; 

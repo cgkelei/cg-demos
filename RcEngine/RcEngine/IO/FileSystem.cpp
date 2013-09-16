@@ -144,18 +144,16 @@ String FileSystem::Locate( const String& file, const String& group )
 
 shared_ptr<Stream> FileSystem::OpenStream( const String& file, const String& group/*="General"*/ )
 {
-	auto groupIter = mResouceGroups.find(group);
-	if (groupIter == mResouceGroups.end())
+	if (mResouceGroups.find(group) == mResouceGroups.end())
 	{
 		std::cout << "Group: " << group << " doesn't exits" << std::endl;
 		ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, "Group: " + group + " doesn't exits", "FileSystem::OpenStream");
 	}
 
-	vector<String>& paths = groupIter->second;
-	for (auto iter = paths.begin(); iter != paths.end(); ++iter)
+	for (const String& groupPath : mResouceGroups[group])
 	{
-		String fileName = PathUtil::GetFileNameAndExtension(file);
-		String fullPath = *iter + "/" + fileName;
+		/*String fileName = PathUtil::GetFileNameAndExtension(file);*/
+		String fullPath = groupPath + "/" + file;
 
 		if (FileExits(fullPath))
 		{
@@ -177,8 +175,8 @@ bool FileSystem::Exits( const String& name, const String& group/*="General"*/ )
 	vector<String>& paths = mResouceGroups[group];
 	for (auto iter = paths.begin(); iter != paths.end(); ++iter)
 	{
-		String fileName = PathUtil::GetFileNameAndExtension(name);
-		String fullPath = *iter + "/" + fileName;
+		//String fileName = PathUtil::GetFileNameAndExtension(name);
+		String fullPath = *iter + "/" + name;
 
 		if (FileExits(fullPath))
 		{

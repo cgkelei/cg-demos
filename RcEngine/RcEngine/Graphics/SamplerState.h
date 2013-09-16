@@ -7,6 +7,8 @@
 
 namespace RcEngine {
 
+#pragma pack(push, 1)
+
 struct _ApiExport SamplerStateDesc
 {
 public:
@@ -24,7 +26,7 @@ public:
 	float                      MinLOD;
 	float                      MaxLOD;
 
-	ColorRGBA			   BorderColor;	
+	ColorRGBA			       BorderColor;	
 
 	friend bool operator< (const SamplerStateDesc& lhs, const SamplerStateDesc& rhs)
 	{
@@ -32,6 +34,7 @@ public:
 	}
 };
 
+#pragma pack(pop)
 
 class _ApiExport SamplerState
 {

@@ -39,12 +39,12 @@ public:
 
 	virtual shared_ptr<Resource> Clone();
 
-	const String& GetName() const				{ return mName; }
-	const String& GetResourceGroup() const		{ return mGroup; }
-	ResourceHandle GetResourceHandle() const    { return mResourceHandle; }
-	uint32_t GetSize() const					{ return mSize; }
-	uint32_t GetResourceType() const			{ return mResourceType; }
-	
+	const String&	GetResourceName() const				{ return mResourceName; }
+	const String&	GetResourceGroup() const			{ return mGroup; }
+	ResourceHandle	GetResourceHandle() const			{ return mResourceHandle; }
+	uint32_t		GetSize() const						{ return mSize; }
+	uint32_t		GetResourceType() const				{ return mResourceType; }
+
 	void Load(bool background = false);
 	void Unload();
 	void Reload();
@@ -53,8 +53,8 @@ public:
 	void SetLoadState(LoadState state);
 	LoadState GetLoadState();
 
-	bool IsLoaded() const						{ return mLoadState == Loaded; }
-	bool IsLoading() const						{ return mLoadState == Loading; }
+	bool IsLoaded() const								{ return mLoadState == Loaded; }
+	bool IsLoading() const								{ return mLoadState == Loading; }
 
 private:
 	void LoadSync();
@@ -68,7 +68,7 @@ protected:
 
 protected:
 	ResourceManager* mCreator;
-	String mName;
+	String mResourceName;
 	String mGroup;
 	bool mBackground;
 	LoadState mLoadState;

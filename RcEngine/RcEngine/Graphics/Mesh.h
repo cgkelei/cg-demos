@@ -28,7 +28,7 @@ public:
 	Mesh(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group );
 	virtual ~Mesh();
 
-	const String& GetName() const								{ return mName; }
+	const String& GetName() const								{ return mResourceName; }
 	const BoundingBoxf& GetBoundingBox() const			    { return mBoundingBox; }
 
 
