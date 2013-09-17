@@ -51,9 +51,44 @@ void Player::LoadContent()
 	mAnimationPlayer->AddClip(clip);
 	mAnimationPlayer->GetClip("Walk")->WrapMode = AnimationState::Wrap_Loop;
 
-	mAnimationPlayer->PlayClip("Take 001");
+	clipName = "Arthas/Run.anim";
+	clip = std::static_pointer_cast<AnimationClip>(
+		ResourceManager::GetSingleton().GetResourceByName(RT_Animation, clipName, "General"));
+	clip->Load();
+	clip->SetClipName("Run");
+	mAnimationPlayer->AddClip(clip);
+	mAnimationPlayer->GetClip("Run")->WrapMode = AnimationState::Wrap_Loop;
 
+	clipName = "Arthas/Fighting_Standby.anim";
+	clip = std::static_pointer_cast<AnimationClip>(
+		ResourceManager::GetSingleton().GetResourceByName(RT_Animation, clipName, "General"));
+	clip->Load();
+	clip->SetClipName("Fighting_Standby");
+	mAnimationPlayer->AddClip(clip);
+	mAnimationPlayer->GetClip("Fighting_Standby")->WrapMode = AnimationState::Wrap_Loop;
+
+	clipName = "Arthas/Standby.anim";
+	clip = std::static_pointer_cast<AnimationClip>(
+	ResourceManager::GetSingleton().GetResourceByName(RT_Animation, clipName, "General"));
+	clip->Load();
+	clip->SetClipName("Standby");
+	mAnimationPlayer->AddClip(clip);
+	mAnimationPlayer->GetClip("Standby")->WrapMode = AnimationState::Wrap_Loop;
+	
+	clipName = "Arthas/Casting.anim";
+	clip = std::static_pointer_cast<AnimationClip>(
+		ResourceManager::GetSingleton().GetResourceByName(RT_Animation, clipName, "General"));
+	clip->Load();
+	clip->SetClipName("Casting");
+	mAnimationPlayer->AddClip(clip);
+	mAnimationPlayer->GetClip("Casting")->WrapMode = AnimationState::Wrap_Loop;
+
+	mAnimationPlayer->PlayClip("Take 001");
 	//mAnimationPlayer->PlayClip("Walk");
+	//mAnimationPlayer->PlayClip("Run");
+	//mAnimationPlayer->PlayClip("Fighting_Standby");
+	//mAnimationPlayer->PlayClip("Standby");
+	//mAnimationPlayer->PlayClip("Casting");
 }
 
 void Player::Update( float dt )

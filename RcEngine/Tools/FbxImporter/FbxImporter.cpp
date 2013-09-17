@@ -1775,7 +1775,7 @@ int main()
 	//g_ExportSettings.ExportSkeleton = false;
     //g_ExportSettings.MergeScene = true;
 
-	if (fbxProcesser.LoadScene("Arthas/Arthas/Arthas_Casting.fbx"))
+	if (fbxProcesser.LoadScene("Arthas/Arthas_Casting.fbx"))
 	{
 		fbxProcesser.ProcessScene();
 		//fbxProcesser.BuildAndSaveXML();
