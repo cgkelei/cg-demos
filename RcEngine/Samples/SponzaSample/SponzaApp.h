@@ -4,6 +4,7 @@
 
 #include <MainApp/Application.h>
 #include <Graphics/CameraControler.h>
+#include "Player.h"
 
 using namespace RcEngine;
 
@@ -28,6 +29,8 @@ protected:
 
 protected:
 	FPSCameraControler* mCameraControler;
+
+	Player* mPlayer;
 
 	Label* mFPSLabel;
 	int mFramePerSecond;

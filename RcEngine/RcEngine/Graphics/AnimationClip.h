@@ -37,7 +37,8 @@ public:
 	AnimationClip(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group );
 	~AnimationClip();
 
-	const String& GetClipName() const { return mClipName; }
+	const String& GetClipName() const    { return mClipName; }
+	void SetClipName(const String& name) { mClipName = name; }
 
 	/**
 	 * Get AnimationClip's duration in seconds

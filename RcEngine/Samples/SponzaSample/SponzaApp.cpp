@@ -40,13 +40,17 @@ void SponzaApp::Initialize()
 	Camera* camera = RcEngine::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
 
 	//camera->SetViewParams(float3(0, 0, -20), float3(0, 0, 0));
-	camera->SetViewParams(float3(-296, 147, 11), float3(0, 50, 0));
+	//camera->SetViewParams(float3(-296, 147, 11), float3(0, 50, 0));
+	camera->SetViewParams(float3(0, 5, -40), float3(0, 5, 0));
 	camera->SetProjectionParams(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 3000.0f );
 
 	mCameraControler = new FPSCameraControler;
 	//mCameraControler = new ModelViewerCameraControler();
 	//mCameraControler->SetWindowSize(GetMainWindow()->GetWidth(), GetMainWindow()->GetHeight());
 	mCameraControler->AttachCamera(camera);
+
+
+	mPlayer = new Player;
 }
 
 void SponzaApp::LoadContent()
@@ -55,19 +59,15 @@ void SponzaApp::LoadContent()
 	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
+	Camera* camera = Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
+
 	//FileSystem::GetSingleton().RegisterPath("../Media/Mesh/", "Custom");
 	
-	//Entity* sponzaEntity = sceneMan.CreateEntity("Sponza", "Teapot001.mesh",  "General");
-	//SceneNode* sponzaNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Sponza");
-	//sponzaNode->SetPosition(float3(0, 0, 0));
-	//sponzaNode->SetScale(0.05f);
-	//sponzaNode->AttachObject(sponzaEntity);
-
-	//Entity* sponzaEntity = sceneMan.CreateEntity("Sponza", "Sponza.mesh",  "Custom");
-	//SceneNode* sponzaNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Sponza");
-	//sponzaNode->SetPosition(float3(0, 0, 0));
-	//sponzaNode->SetScale(0.45f);
-	//sponzaNode->AttachObject(sponzaEntity);
+	/*Entity* sponzaEntity = sceneMan.CreateEntity("Sponza", "Sponza.mesh",  "Custom");
+	SceneNode* sponzaNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Sponza");
+	sponzaNode->SetPosition(float3(0, 0, 0));
+	sponzaNode->SetScale(0.45f);
+	sponzaNode->AttachObject(sponzaEntity);*/
 
 	/*Entity* dudeEntity = sceneMan.CreateEntity("Dude", "him.mesh",  "Custom");
 	SceneNode* dudeNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Dwarf");
@@ -80,17 +80,20 @@ void SponzaApp::LoadContent()
 	takeClip->WrapMode = AnimationState::Wrap_Loop;
 	animPlayer->PlayClip("Take 001");*/
 
-	Entity* arthasEntity = sceneMan.CreateEntity("Arthas", "Arthas/Mesh_ArthasLichKing.mesh",  "Custom");
-	SceneNode* arthasNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Arthas");
-	arthasNode->SetPosition(float3(0, 0, 0));
-	//dudeNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(90.0f), 0.0f, 0.0f));
-	arthasNode->AttachObject(arthasEntity);
+	mPlayer->LoadContent();
 
-	AnimationPlayer* arthasAnimPlayer = arthasEntity->GetAnimationPlayer();
-	AnimationState* arthasTakeClip = arthasAnimPlayer->GetClip("Take 001");
-	arthasTakeClip->WrapMode = AnimationState::Wrap_Loop;	
+	//Entity* arthasEntity = sceneMan.CreateEntity("Arthas", "Arthas/Mesh_ArthasLichKing.mesh",  "Custom");
+	////Entity* arthasEntity = sceneMan.CreateEntity("Arthas", "Arthas/Mesh_Sword_2H_Frostmourne_D_01.mesh",  "Custom");
+	//SceneNode* arthasNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Arthas");
+	//arthasNode->SetPosition(float3(0, 0, 0));
+	////arthasNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(-90.0f), 0.0f, 0.0f));
+	//arthasNode->AttachObject(arthasEntity);
 
-	arthasAnimPlayer->PlayClip("Take 001");
+	//AnimationPlayer* arthasAnimPlayer = arthasEntity->GetAnimationPlayer();
+	//AnimationState* arthasTakeClip = arthasAnimPlayer->GetClip("Take 001");
+	//arthasTakeClip->WrapMode = AnimationState::Wrap_Loop;	
+
+	//arthasAnimPlayer->PlayClip("Take 001");
 }
 
 void SponzaApp::UnloadContent()

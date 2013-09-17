@@ -17,7 +17,9 @@ using namespace std;
 #endif
 
 ConsoleOutListener g_ConsoleOutListener;
-DebugSpewListener g_DebugSpewListener;
+DebugSpewListener  g_DebugSpewListener;
+ExportSettings     g_ExportSettings;
+
 
 #define MAXBONES_PER_VERTEX 4
 
@@ -519,6 +521,9 @@ void FbxProcesser::ProcessScene( )
 	CollectSkeletons();
 	CollectMeshes();
 	CollectAnimations();
+
+	if (g_ExportSettings.MergeScene)
+		MergeScene();
 }
 
 void FbxProcesser::RunCommand( const vector<String>& arguments )
@@ -568,7 +573,7 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 
 	if (!pMesh) return;
 
-	ExportLog::LogMsg(3, "Process mesh: %s\n", pNode->GetName());
+	ExportLog::LogMsg(0, "Process mesh: %s\n", pNode->GetName());
 
 	if (!pMesh->IsTriangleMesh())
 	{
@@ -644,16 +649,19 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 	
 	// test if had skin
 	bool lHasSkin = false;
-	const int lSkinCount = pMesh->GetDeformerCount(FbxDeformer::eSkin);
-	for (int iSkinIndex = 0; iSkinIndex < lSkinCount; ++iSkinIndex)
+	if (g_ExportSettings.ExportSkeleton)
 	{
-		if( ((FbxSkin*)pMesh->GetDeformer(iSkinIndex, FbxDeformer::eSkin))->GetClusterCount() > 0 )
+		const int lSkinCount = pMesh->GetDeformerCount(FbxDeformer::eSkin);
+		for (int iSkinIndex = 0; iSkinIndex < lSkinCount; ++iSkinIndex)
 		{
-			lHasSkin = true;
-			break;
+			if( ((FbxSkin*)pMesh->GetDeformer(iSkinIndex, FbxDeformer::eSkin))->GetClusterCount() > 0 )
+			{
+				lHasSkin = true;
+				break;
+			}
 		}
 	}
-
+	
 	// build mesh data
 	shared_ptr<MeshData> mesh = std::make_shared<MeshData>();
 
@@ -748,7 +756,8 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 				float4 baked = float4( vertex.Position.X(),  vertex.Position.Y(),  vertex.Position.Z(), 1.0f);
 				baked = baked * globalTransform;
 				vertex.Position = float3(baked.X(), baked.Y(), baked.Z());
-				 
+				
+				// Handness
 				//mFBXTransformer.TransformPosition(&vertex.Position, &vertex.Position);
 
 				boundingBox.Merge(vertex.Position);
@@ -956,8 +965,6 @@ shared_ptr<Skeleton>  FbxProcesser::ProcessBoneWeights( FbxMesh* pMesh, std::vec
 					float4x4 paretTrans = parentBone->GetWorldTransform();
 					matBindPose = matBindPose * paretTrans.Inverse();
 				}
-				
-				//mFBXTransformer.TransformMatrix(&matBindPose, &matBindPose);
 
 				float3 pos, scale;
 				Quaternionf rot;
@@ -1400,6 +1407,7 @@ void FbxProcesser::BuildAndSaveBinary( )
 
 		FileStream stream;
 		stream.Open(mesh.Name + ".mesh", FILE_WRITE);
+		ExportLog::LogMsg(0, "Build mesh: %s\n", mesh.Name.c_str());
 
 		// Write mesh id
 		stream.WriteUInt(MeshId);
@@ -1518,9 +1526,7 @@ void FbxProcesser::BuildAndSaveBinary( )
 			{
 				stream.WriteUInt(IBT_Bit16);
 				for (size_t i = 0; i < meshPart.Indices.size(); ++i)
-				{
 					stream.WriteUShort(meshPart.Indices[i]);
-				}
 			}
 			else
 			{
@@ -1529,11 +1535,12 @@ void FbxProcesser::BuildAndSaveBinary( )
 			}
 		}
 
-		// write bone count
-		if (mesh.MeshSkeleton && mesh.MeshSkeleton->GetBoneCount())
+		if (g_ExportSettings.ExportSkeleton && mesh.MeshSkeleton && mesh.MeshSkeleton->GetBoneCount())
 		{
+			// write bone count
 			auto& bones = mesh.MeshSkeleton->GetBones();
 			stream.WriteUInt(bones.size());
+			ExportLog::LogMsg(0, "mesh: %d\n has %d bones", mesh.Name.c_str(), bones.size());
 			for (size_t iBone = 0; iBone < bones.size(); ++iBone)
 			{
 				Bone* bone = bones[iBone];
@@ -1553,22 +1560,13 @@ void FbxProcesser::BuildAndSaveBinary( )
 				stream.Write(&pos, sizeof(float3));
 				stream.Write(&rot, sizeof(Quaternionf));
 				stream.Write(&scale, sizeof(float3));
-
 			}
-		}
-		else
-		{
-			stream.WriteUInt(0);
-		}
 
-		// write animation clips
-		if (mesh.MeshSkeleton)
-		{
-			auto animationIter = mAnimations.find(mesh.MeshSkeleton->GetRootBone()->GetName());
-
-			if (animationIter != mAnimations.end())
+			// write animation clips
+			const String& boneRootName = mesh.MeshSkeleton->GetRootBone()->GetName();
+			if (g_ExportSettings.ExportAnimation && mAnimations.count(boneRootName))
 			{
-				AnimationData& animationData = animationIter->second;
+				AnimationData& animationData = mAnimations[boneRootName];
 
 				stream.WriteUInt(animationData.AnimationClips.size());
 
@@ -1604,20 +1602,20 @@ void FbxProcesser::BuildAndSaveBinary( )
 							clipStream.Write(&key.Scale, sizeof(float3));
 						}
 					}
-				
+
 					clipStream.Close();
 				}
 			}
 			else
 			{
-				stream.WriteUInt(0);
+				stream.WriteUInt(0);  // No Animations
 			}
 		}
 		else
-		{
-			stream.WriteUInt(0);
+		{ 
+			stream.WriteUInt(0);	// No Skeleton
 		}
-		
+	
 		stream.Close();
 	}
 }
@@ -1701,19 +1699,20 @@ void FbxProcesser::ProcessAnimation( FbxAnimStack* pStack, FbxNode* pNode, doubl
 					FbxAMatrix matParentAbsoluteTransform = GetGlobalPosition(pNode->GetParent(), takeTime);
 					FbxAMatrix matLocalTrasform =  matParentAbsoluteTransform.Inverse() * matAbsoluteTransform;
 
+					AnimationClipData::KeyFrame keyframe;
+
 					FbxQuaternion quat = matLocalTrasform.GetQ();
 					FbxVector4 trans = matLocalTrasform.GetT();
 					FbxVector4 scale = matLocalTrasform.GetS();
-					
-					AnimationClipData::KeyFrame keyframe;
-
 					keyframe.Rotation = quatFromFBX(quat);
 					keyframe.Scale = float3FromFBX(scale);
 					keyframe.Translation = float3FromFBX(trans);
-		
-					//MatrixDecompose(keyframe.Scale, keyframe.Rotation, keyframe.Translation,
-					//				matrixFromFbxAMatrix(matLocalTrasform));
-		
+
+					// Handness
+					/*float4x4 transform = matrixFromFbxAMatrix(matLocalTrasform);
+					mFBXTransformer.TransformMatrix(&transform, &transform);
+					MatrixDecompose(keyframe.Scale, keyframe.Rotation, keyframe.Translation, transform);*/
+			
 					keyframe.Time = (float)fTime;
 					track.KeyFrames.push_back(keyframe);
 
@@ -1736,27 +1735,24 @@ void FbxProcesser::MergeScene()
 {
 	if (mSceneMeshes.size() > 1)
 	{
+		if (mSkeletons.size() && g_ExportSettings.ExportSkeleton)
+		{
+			ExportLog::LogWarning("Found mesh with skeleton, can't merge!");
+			return;
+		}
+
 		// Make other mesh as a mesh part of first mesh
-		//for (size_t mi = 1; mi < mSceneMeshes.size(); ++mi)
-		//{
-		//	MeshData& mesh  = *(mSceneMeshes[mi]);
+		for (size_t mi = 1; mi < mSceneMeshes.size(); ++mi)
+		{
+			MeshData& mesh  = *(mSceneMeshes[mi]);
 
-		//	if (mesh.MeshSkeleton)
-		//	{
-		//		printf("Multiple animation mesh exits in scene, can't merge!\n");
-		//		/*exit(0);*/
-		//		continue;
-		//	}
+			mSceneMeshes[0]->Bound.Merge(mesh.Bound);
 
-		//	mSceneMeshes[0]->Bound.Merge(mesh.Bound);
-		//	
-		//	for (auto& part : mesh.MeshParts)
-		//		mSceneMeshes[0]->MeshParts.push_back(part);
-		//}
+			for (auto& part : mesh.MeshParts)
+				mSceneMeshes[0]->MeshParts.push_back(part);
+		}
 
-		//mSceneMeshes.resize(1);
-
-		mSceneMeshes.erase(mSceneMeshes.begin());
+		mSceneMeshes.resize(1);		
 	}	
 }
 
@@ -1776,16 +1772,12 @@ int main()
 	FbxProcesser fbxProcesser;
 	fbxProcesser.Initialize();
 
-	if (fbxProcesser.LoadScene("Arthas_ShiFa.fbx"))
+	//g_ExportSettings.ExportSkeleton = false;
+    //g_ExportSettings.MergeScene = true;
+
+	if (fbxProcesser.LoadScene("Arthas/Arthas/Arthas_Casting.fbx"))
 	{
 		fbxProcesser.ProcessScene();
-
-		bool mergeScene = true;
-		if (mergeScene)
-		{
-			fbxProcesser.MergeScene();
-		}
-
 		//fbxProcesser.BuildAndSaveXML();
 		fbxProcesser.BuildAndSaveBinary();
 		fbxProcesser.ExportMaterial();
