@@ -13,7 +13,8 @@
 // we not support non-uniform scale, so the normal matrix is 
 // simply the up 3x3 mat.
 #ifdef _Skinning
-	uniform mat4 SkinMatrices[64];
+	#define MaxNumBone 92
+	uniform mat4 SkinMatrices[MaxNumBone];
 #endif
 
 	uniform mat4 World;
@@ -160,7 +161,7 @@ void main()
 	vec2 newTex = oTex ;
 #endif
 
-	vec4 diffuse = texture2D( DiffuseMap, newTex);
+	vec4 diffuse = texture2D(DiffuseMap, newTex);
 
 #ifdef AlphaTest
 	if( diffuse.a < 0.01 ) discard;
@@ -213,8 +214,8 @@ void main()
 #endif
 
 	//gl_FragColor = vec4(finalColor.rg, 1.0, 1.0);
-	//gl_FragColor = vec4(finalColor, diffuse.a);
-	gl_FragColor = vec4(diffuse.rgb, finalColor.r);
+	//gl_FragColor = vec4(newTex, 0, diffuse.a);
+	gl_FragColor = vec4(diffuse.rgb, finalColor.g);
 	
 }
 	]]>

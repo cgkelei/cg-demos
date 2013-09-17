@@ -10,6 +10,19 @@
 
 using namespace RcEngine;
 
+struct ExportSettings
+{
+	bool ExportSkeleton;
+	bool ExportAnimation; 
+	bool MergeScene;
+
+	ExportSettings()
+		: ExportSkeleton(true),
+		  ExportAnimation(true),
+		  MergeScene(false)
+	{}
+};
+
 class FBXTransformer
 {
 public:

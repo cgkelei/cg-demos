@@ -320,8 +320,6 @@ void Material::LoadImpl()
 		effectName += " " + flag;
 		effectFlags.push_back(flag);
 	}
-
-	
 	
 	// load effect
 	{

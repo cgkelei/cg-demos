@@ -94,14 +94,17 @@ void Mesh::LoadImpl()
 	
 	// read bones
 	mSkeleton = Skeleton::LoadFrom(source);
-	
-	// read animation clips
-	uint32_t animClipCount = source.ReadUInt();
-	mAninationClips.resize(animClipCount);
-	for (uint32_t i = 0; i < animClipCount; i++)
+
+	if (mSkeleton)
 	{
-		mAninationClips[i] = source.ReadString();
-		//resMan.AddResource(RT_Animation, mAninationClips[i], mGroup);
+		// read animation clips
+		uint32_t animClipCount = source.ReadUInt();
+		mAninationClips.resize(animClipCount);
+		for (uint32_t i = 0; i < animClipCount; i++)
+		{
+			mAninationClips[i] = source.ReadString();
+			//resMan.AddResource(RT_Animation, mAninationClips[i], mGroup);
+		}
 	}
 }
 

@@ -367,10 +367,10 @@ public:
 			Param->ClearDirty();
 		}
 		
-		glUniform1ui(Location, textureLayer.TexUnit);
-
 		glActiveTexture(GL_TEXTURE0+textureLayer.TexUnit);
 		glBindTexture(textureOGL->GetOpenGLTextureTarget(), textureOGL->GetOpenGLTexture());
+
+		glUniform1i(Location, textureLayer.TexUnit);		
 	}
 
 private:
