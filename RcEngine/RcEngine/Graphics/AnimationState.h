@@ -18,14 +18,15 @@ public:
 
 	enum AnimationStateBits
 	{
-		Clip_Is_Playing_Bit = 0x1,
-		Clip_Is_Started_Bit = 0x2,
-		Clip_Is_Pause_Bit = 0x4,
-		Clip_Is_End_Bit = 0x08,
+		Clip_Is_Playing_Bit			= 0x01,   // Bit representing whether AnimationClip is a running clip in AnimationController
+		Clip_Is_Started_Bit			= 0x02,   // Bit representing whether the AnimationClip has actually been started (ie: received first call to update())
+		Clip_Is_Pause_Bit			= 0x04,   // Bit representing if the clip is currently paused.
+		Clip_Is_End_Bit				= 0x08,   // Bit representing whether the clip has ended and should be removed from the AnimationController.
 		Clip_Is_FadeOut_Started_Bit = 0x10,
-		Clip_Is_FadeIn_Started_Bit = 0x20,
-		Clip_Is_Fading_Bit = 0x30,
-		Clip_All_Bit = 0xFF
+		Clip_Is_FadeIn_Started_Bit  = 0x20,
+		Clip_Is_Fading_Bit			= 0x40,
+		Clip_Is_Restarted_Bit		= 0x80,
+		Clip_All_Bit				= 0xFF
 	};
 
 public:
@@ -81,6 +82,13 @@ public:
 	void SetClipStateBit(uint8_t bits);
 	void ResetClipStateBit(uint8_t bits);
 	bool IsClipStateBitSet(uint8_t bits) const;
+
+	void Play();
+	void Pause();
+	void Resume();
+	void Stop();
+
+	bool IsPlaying() const;
 
 private:
 	void OnBegin();

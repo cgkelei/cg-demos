@@ -1,6 +1,7 @@
 #include <Graphics/AnimationState.h>
 #include <Graphics/AnimationClip.h>
 #include <Graphics/Animation.h>
+#include <Graphics/AnimationController.h>
 #include <Graphics/Skeleton.h>
 #include <Graphics/Mesh.h>
 #include <Input/InputSystem.h>
@@ -48,9 +49,8 @@ float AnimationState::GetLength() const
 
 void AnimationState::Apply()
 {
-	if (!IsEnabled())
+	if (!IsEnabled() || !IsClipStateBitSet(Clip_Is_Playing_Bit))
 		return;
-
 
 	for (const AnimationClip::AnimationTrack& animTrack : mClip->mAnimationTracks)
 	{
@@ -61,15 +61,14 @@ void AnimationState::Apply()
 		unordered_map<String, Bone*>::const_iterator found = mAnimation.mAnimateTargets.find(animTrack.Name);
 
 		assert( found != mAnimation.mAnimateTargets.end() );
-
 		Bone* bone = found->second;
 
-		size_t frame = animTrack.GetKeyFrameIndex(mTime);
-
-		size_t nextFrame = frame + 1;
+		int32_t frame = animTrack.GetKeyFrameIndex(mTime);
+		int32_t nextFrame = frame + 1;
+		//printf("nextFrame = %d\n", nextFrame);
 
 		bool interpolate = true;
-		if (nextFrame >= animTrack.KeyFrames.size())
+		if (nextFrame >= (int32_t)animTrack.KeyFrames.size())
 		{
 			if (WrapMode != Wrap_Loop)
 			{
@@ -91,10 +90,10 @@ void AnimationState::Apply()
 		}
 		else
 		{
+			
 			const AnimationClip::KeyFrame& nextKeyframe = animTrack.KeyFrames[nextFrame];
 
 			//std::cout << keyframe.Time << "-->" << nextKeyframe.Time << std::endl;
-
 			float timeInterval = nextKeyframe.Time - keyframe.Time;
 			if (timeInterval < 0.0f)
 				timeInterval += mClip->GetLength();
@@ -250,6 +249,65 @@ void AnimationState::OnBegin()
 void AnimationState::OnEnd()
 {
 
+}
+
+bool AnimationState::IsPlaying() const
+{
+	return IsClipStateBitSet(Clip_Is_Playing_Bit) && !IsClipStateBitSet(Clip_Is_Pause_Bit);
+}
+
+void AnimationState::Play()
+{
+	if (IsClipStateBitSet(Clip_Is_Playing_Bit))
+	{
+		// If paused, reset the bit and return.
+		if (IsClipStateBitSet(Clip_Is_Pause_Bit))
+		{
+			ResetClipStateBit(Clip_Is_Pause_Bit);
+			return;
+		}
+
+		// If the clip is set to be end, reset the flag.
+		if (IsClipStateBitSet(Clip_Is_End_Bit))
+			ResetClipStateBit(Clip_Is_End_Bit);
+
+		SetClipStateBit(Clip_Is_Restarted_Bit);
+	}
+	else
+	{
+		SetClipStateBit(Clip_Is_Playing_Bit);
+
+		// add to controller
+		mAnimation.mController->Schedule(this);
+	}
+}
+
+void AnimationState::Pause()
+{
+	if (IsClipStateBitSet(Clip_Is_Playing_Bit) && !IsClipStateBitSet(Clip_Is_End_Bit))
+		SetClipStateBit(Clip_Is_Pause_Bit);
+}
+
+void AnimationState::Resume()
+{
+	if (IsClipStateBitSet(Clip_Is_Playing_Bit) && IsClipStateBitSet(Clip_Is_Pause_Bit))
+		ResetClipStateBit(Clip_Is_Pause_Bit);
+}
+
+void AnimationState::Stop()
+{
+	if (IsClipStateBitSet(Clip_Is_Playing_Bit))
+	{
+		// Reset the restarted and paused bits. 
+		ResetClipStateBit(Clip_Is_Restarted_Bit);
+		ResetClipStateBit(Clip_Is_Pause_Bit);
+		ResetClipStateBit(Clip_Is_Playing_Bit);
+
+		mTime = 0;
+
+		// Mark the clip to removed from the AnimationController.
+		SetClipStateBit(Clip_Is_End_Bit);
+	}
 }
 
 

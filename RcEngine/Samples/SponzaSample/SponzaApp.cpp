@@ -40,8 +40,8 @@ void SponzaApp::Initialize()
 	Camera* camera = RcEngine::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
 
 	//camera->SetViewParams(float3(0, 0, -20), float3(0, 0, 0));
-	//camera->SetViewParams(float3(-296, 147, 11), float3(0, 50, 0));
-	camera->SetViewParams(float3(0, 5, -40), float3(0, 5, 0));
+	camera->SetViewParams(float3(-296, 147, 11), float3(0, 50, 0));
+	//camera->SetViewParams(float3(0, 5, -40), float3(0, 5, 0));
 	camera->SetProjectionParams(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 3000.0f );
 
 	mCameraControler = new FPSCameraControler;
@@ -63,11 +63,11 @@ void SponzaApp::LoadContent()
 
 	//FileSystem::GetSingleton().RegisterPath("../Media/Mesh/", "Custom");
 	
-	/*Entity* sponzaEntity = sceneMan.CreateEntity("Sponza", "Sponza.mesh",  "Custom");
+	Entity* sponzaEntity = sceneMan.CreateEntity("Sponza", "Sponza.mesh",  "Custom");
 	SceneNode* sponzaNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Sponza");
 	sponzaNode->SetPosition(float3(0, 0, 0));
 	sponzaNode->SetScale(0.45f);
-	sponzaNode->AttachObject(sponzaEntity);*/
+	sponzaNode->AttachObject(sponzaEntity);
 
 	/*Entity* dudeEntity = sceneMan.CreateEntity("Dude", "him.mesh",  "Custom");
 	SceneNode* dudeNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Dwarf");
@@ -159,6 +159,8 @@ void SponzaApp::Update( float deltaTime )
 {
 	CalculateFrameRate();
 	mMainWindow->SetTitle("Graphics Demo FPS:" + std::to_string(mFramePerSecond));
+
+	mPlayer->Update(deltaTime);
 }
 
 void SponzaApp::InitGUI()
