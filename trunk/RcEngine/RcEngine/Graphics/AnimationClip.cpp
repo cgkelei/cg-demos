@@ -10,38 +10,14 @@
 namespace RcEngine {
 
 
-size_t AnimationClip::AnimationTrack::GetKeyFrameIndex( float time ) const
+int32_t AnimationClip::AnimationTrack::GetKeyFrameIndex( float time ) const
 {
-	if (time < 0)
-		time = 0;
-
-	/*size_t index = 0;
-
-	while (index < KeyFrames.size() && time > KeyFrames[index].Time)
+	//if (time < 0) time = 0;
+	int32_t index = 0;
+	while (index < (int32_t)KeyFrames.size() && KeyFrames[index].Time < time)
 		index ++;
 
-	if (index >= KeyFrames.size())
-	{
-		index = KeyFrames.size() - 1;
-	}
-
-	
-	return index;*/
-
-	KeyFrame comparer;
-	comparer.Time = time;
-	auto iter = std::lower_bound(KeyFrames.begin(), KeyFrames.end(), comparer, [](const KeyFrame& key1, const KeyFrame& Key2)
-						{
-							return key1.Time < Key2.Time;
-						});
-
-	// Find last keyframe before or on current time
-	if (iter != KeyFrames.begin())
-	{
-		--iter;
-	}
-
-	return std::distance(KeyFrames.begin(), iter);	
+	return (std::max)(0, index-1);
 }
 
 

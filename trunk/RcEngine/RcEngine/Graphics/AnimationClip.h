@@ -30,7 +30,7 @@ public:
 		String Name;
 		vector<KeyFrame> KeyFrames;
 
-		size_t GetKeyFrameIndex( float time ) const;
+		int32_t GetKeyFrameIndex( float time ) const;
 	};
 
 public:

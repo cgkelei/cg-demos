@@ -9,6 +9,19 @@ using namespace RcEngine;
 class Player
 {
 public:
+	enum State
+	{
+		Standby = 0,
+		Walk,
+		Run,
+		Random,
+		Casting,
+		Fighting_Standby,
+		State_Count
+	};
+
+
+public:
 	Player();
 	~Player();
 
@@ -19,6 +32,8 @@ private:
 	SkinnedAnimationPlayer* mAnimationPlayer;
 	Entity* mActorEntity;
 	SceneNode* mActorNode;
+
+	AnimationState* mAnimationState[State_Count];
 };
 
 #endif // Player_h__

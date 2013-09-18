@@ -27,24 +27,22 @@ AnimationPlayer::~AnimationPlayer()
 
 AnimationState* AnimationPlayer::GetClip( const String& clipName ) const
 {
-	auto found = mAnimationStates.find(clipName);
-
+	unordered_map<String, AnimationState*>::const_iterator found;
+	
+	found = mAnimationStates.find(clipName);
 	if (found == mAnimationStates.end())
 		return nullptr;
 
 	return found->second;
 }
 
-
 AnimationState* AnimationPlayer::AddClip( const shared_ptr<AnimationClip>& clip )
 {
-	auto found = mAnimationStates.find(clip->GetClipName());
-
-	if (found != mAnimationStates.end())
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Same animation clip exits", "Animation::AddClip");
-
 	if (!clip->IsLoaded())
 		clip->Load();
+
+	if (mAnimationStates.find(clip->GetClipName()) != mAnimationStates.end())
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Same animation clip exits", "Animation::AddClip");
 
 	AnimationState* newClipState = new AnimationState(*this, clip);
 	mAnimationStates.insert( std::make_pair(clip->GetClipName(),  newClipState) );
@@ -54,99 +52,43 @@ AnimationState* AnimationPlayer::AddClip( const shared_ptr<AnimationClip>& clip 
 
 void AnimationPlayer::StopAll()
 {
-	for (auto iter = mAnimationStates.begin(); iter != mAnimationStates.end(); ++iter)
-	{
-		AnimationState* clipState = iter->second;
-
-		if (clipState->IsClipStateBitSet(AnimationState::Clip_Is_Playing_Bit))
-		{
-			// Mark the clip to removed from the AnimationController.
-			clipState->SetClipStateBit(AnimationState::Clip_Is_End_Bit);
-		}
-	}
-}
-
-void AnimationPlayer::PlayClip( const String& clipName )
-{
-	auto found = mAnimationStates.find(clipName);
-
-	if (found == mAnimationStates.end())
-		return;
-
-	AnimationState* clipState = found->second;
-
-	if (clipState->IsClipStateBitSet(AnimationState::Clip_Is_Playing_Bit))
-	{
-		if (clipState->IsClipStateBitSet(AnimationState::Clip_Is_Pause_Bit))
-		{
-			clipState->ResetClipStateBit(AnimationState::Clip_Is_Pause_Bit);
-		}
-	}
-	else
-	{
-		clipState->SetClipStateBit(AnimationState::Clip_Is_Playing_Bit);
-
-		// add to controller
-		mController->Schedule(clipState);
-	}
-}
-
-void AnimationPlayer::PauseClip( const String& clipName )
-{
-	auto found = mAnimationStates.find(clipName);
-
-	if (found == mAnimationStates.end())
-		return;
-
-	AnimationState* clipState = found->second;
-
-	if (clipState->IsClipStateBitSet(AnimationState::Clip_Is_Playing_Bit) &&
-		!clipState->IsClipStateBitSet(AnimationState::Clip_Is_End_Bit))
-	{
-		clipState->SetClipStateBit(AnimationState::Clip_Is_Pause_Bit);
-	}
-}
-
-void AnimationPlayer::ResumeClip( const String& clipName )
-{
-	auto found = mAnimationStates.find(clipName);
-
-	if (found == mAnimationStates.end())
-		return;
-
-	AnimationState* clipState = found->second;
-
-	if (clipState->IsClipStateBitSet(AnimationState::Clip_Is_Pause_Bit))
-	{
-		clipState->SetClipStateBit(AnimationState::Clip_Is_Playing_Bit);
-	}
+	for (auto& kv : mAnimationStates)
+		kv.second->Stop();
 }
 
 bool AnimationPlayer::IsPlaying( const String& clipName ) const
 {
-	auto found = mAnimationStates.find(clipName);
+	unordered_map<String, AnimationState*>::const_iterator iter;
+	iter = mAnimationStates.find(clipName);
 
-	if (found == mAnimationStates.end())
+	if ( iter == mAnimationStates.end())
 		return false;
 
-	AnimationState* clipState = found->second;
-	return clipState->IsClipStateBitSet(AnimationState::Clip_Is_Playing_Bit);
+	return iter->second->IsPlaying();
+}
+
+void AnimationPlayer::PlayClip( const String& clipName )
+{
+	if (mAnimationStates.find(clipName) != mAnimationStates.end())
+		mAnimationStates[clipName]->Play();
+}
+
+void AnimationPlayer::PauseClip( const String& clipName )
+{
+	if (mAnimationStates.find(clipName) != mAnimationStates.end())
+		mAnimationStates[clipName]->Pause();
+}
+
+void AnimationPlayer::ResumeClip( const String& clipName )
+{
+	if (mAnimationStates.find(clipName) != mAnimationStates.end())
+		mAnimationStates[clipName]->Resume();
 }
 
 void AnimationPlayer::StopClip( const String& clipName )
 {
-	auto found = mAnimationStates.find(clipName);
-
-	if (found == mAnimationStates.end())
-		return;
-
-	AnimationState* clipState = found->second;
-
-	if (clipState->IsClipStateBitSet(AnimationState::Clip_Is_Playing_Bit))
-	{
-		// Mark the clip to removed from the AnimationController.
-		clipState->SetClipStateBit(AnimationState::Clip_Is_End_Bit);
-	}
+	if (mAnimationStates.find(clipName) != mAnimationStates.end())
+		mAnimationStates[clipName]->Stop();
 }
 
 SkinnedAnimationPlayer::SkinnedAnimationPlayer( const shared_ptr<Skeleton>& skeleton )
@@ -160,7 +102,6 @@ SkinnedAnimationPlayer::SkinnedAnimationPlayer( const shared_ptr<Skeleton>& skel
 		mAnimateTargets.insert( std::make_pair(bone->GetName(), bone));
 	}
 }
-
 
 void SkinnedAnimationPlayer::CrossFade( const String& fadeClip, float fadeLength )
 {
