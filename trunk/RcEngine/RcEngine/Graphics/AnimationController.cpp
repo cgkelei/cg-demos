@@ -22,13 +22,17 @@ void AnimationController::Update( float elapsedTime )
 		return;
 
 	// Loop through running clips and call update() on them.
-	for (auto iter = mRunningClips.begin(); iter != mRunningClips.end(); ++iter)
+	std::list<AnimationState*>::iterator clipIter = mRunningClips.begin();
+	while (clipIter != mRunningClips.end())
 	{
-		AnimationState* clipState = *iter;
+		AnimationState* clipState = *clipIter;
+
 		if( !clipState->Update(elapsedTime) )
 		{
-			mRunningClips.erase(iter);
+			clipIter = mRunningClips.erase(clipIter);
 		}
+		else
+			++clipIter;
 	}
 
 	if (mRunningClips.empty())
@@ -46,13 +50,16 @@ void AnimationController::Schedule(AnimationState* clipState)
 
 void AnimationController::Unschedule(AnimationState* clipState)
 {
-	auto found = std::find(mRunningClips.begin(), mRunningClips.end(), clipState);
+	std::list<AnimationState*>::iterator found;
 
-	if (found != mRunningClips.end())
+	found = std::find(mRunningClips.begin(), mRunningClips.end(), clipState);
+	if ( found != mRunningClips.end() )
+	{
 		mRunningClips.erase(found);
 
-	if (mRunningClips.empty())
-		mState = Idle;
+		if (mRunningClips.empty())
+			mState = Idle;
+	}
 }
 
 }

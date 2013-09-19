@@ -70,7 +70,6 @@ void Entity::Initialize()
 		mSkinMatrices.resize(mNumSkinMatrices);
 	}
 
-
 	if (mMesh->HasAnimation())
 	{
 		mAnimationPlayer = new SkinnedAnimationPlayer(mSkeleton);
@@ -99,9 +98,8 @@ void Entity::OnAttach( Node* node )
 
 void Entity::OnDetach( Node* node )
 {
-
+	SceneObject::OnDetach(node);
 }
-
 
 const BoundingBoxf& Entity::GetWorldBoundingBox() const
 {
@@ -121,7 +119,6 @@ const BoundingBoxf& Entity::GetWorldBoundingBox() const
 
 	return mWorldBoundingBox;
 }
-
 
 const BoundingBoxf& Entity::GetLocalBoundingBox() const
 {
@@ -184,7 +181,7 @@ void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, Camera* camera, Rende
 			{
 				bucket = RenderQueue::BucketTransparent;
 				// Transparent object must render from furthest to nearest
-				sortKey =  -NearestDistToAABB( camera->GetPosition(), subWorldBoud.Min, subWorldBoud.Max);
+				sortKey = -NearestDistToAABB( camera->GetPosition(), subWorldBoud.Min, subWorldBoud.Max);
 			}
 
 			RenderQueueItem item;
@@ -206,8 +203,8 @@ void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, Camera* camera, Rende
 		{
 			SceneObject* child = kv.second;
 
-			bool visible = camera->Visible(child->GetWorldBoundingBox());
-
+			//bool visible = camera->Visible(child->GetWorldBoundingBox());
+			bool visible = true;
 			if (visible)
 			{
 				//Check if the bone exists in the current LOD
@@ -264,12 +261,6 @@ void Entity::UpdateAnimation()
 		
 	// Note: the model's world transform will be baked in the skin matrices
 	const vector<Bone*>& bones = mSkeleton->GetBones();
-		
-	if (mSkinMatrices.empty())
-	{
-		mSkinMatrices.resize(bones.size());
-	}
-
 	for (size_t i = 0; i < bones.size(); ++i)
 	{
 		Bone* bone = bones[i];
@@ -279,6 +270,12 @@ void Entity::UpdateAnimation()
 
 Bone* Entity::AttachObjectToBone( const String &boneName, SceneObject* sceneObj, const Quaternionf& offsetOrientation/*= Quaternionf::Identity()*/, const float3 & offsetPosition /*= float3::Zero()*/ )
 {
+	if (!HasSkeleton())
+	{
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "This entity's mesh has no skeleton to attach object to.",
+			"Entity::attachObjectToBone");
+	}
+
 	if (mChildAttachedObjects.find(sceneObj->GetName()) != mChildAttachedObjects.end())
 	{
 		ENGINE_EXCEPT(Exception::ERR_DUPLICATE_ITEM,
@@ -292,12 +289,6 @@ Bone* Entity::AttachObjectToBone( const String &boneName, SceneObject* sceneObj,
 			"Entity::attachObjectToBone");
 	}
 
-	if (!HasSkeleton())
-	{
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "This entity's mesh has no skeleton to attach object to.",
-			"Entity::attachObjectToBone");
-	}
-
 	Bone* bone = mSkeleton->GetBone(boneName);
 
 	if (!bone)
@@ -306,13 +297,13 @@ Bone* Entity::AttachObjectToBone( const String &boneName, SceneObject* sceneObj,
 			"Entity::attachObjectToBone");
 	}
 	
-	/*sceneObj->OnAttach(bone);
-	mChildAttachedObjects.insert( std::make_pair(sceneObj->GetName(), sceneObj));*/
+	sceneObj->OnAttach(bone);
+	mChildAttachedObjects.insert( std::make_pair(sceneObj->GetName(), sceneObj));
 
 	// Trigger update of bounding box if necessary
-	/*if (mParentNode)
+	if (mParentNode)
 		mParentNode->NeedUpdate();
-*/
+
 	return bone;
 }
 

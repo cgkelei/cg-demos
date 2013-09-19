@@ -43,8 +43,7 @@ public:
 	/**
 	 * Get AnimationClip's duration in seconds
 	 */
-	float GetLength() const { return mLength; }
-
+	float GetDuration() const { return mDuration; }
 
 protected:
 	void LoadImpl();
@@ -54,7 +53,7 @@ public:
 	static shared_ptr<Resource> FactoryFunc(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 
 private:	
-	float mLength;
+	float mDuration;
 	String mClipName;
 	vector<AnimationTrack> mAnimationTracks;
 };

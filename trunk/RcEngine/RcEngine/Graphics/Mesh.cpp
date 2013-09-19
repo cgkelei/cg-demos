@@ -90,12 +90,9 @@ void Mesh::LoadImpl()
 		ResourceManager::GetSingleton().AddResource(RT_Material, matPath, mGroup);
 		mMeshParts.push_back(subMesh);
 	}
-
 	
 	// read bones
-	mSkeleton = Skeleton::LoadFrom(source);
-
-	if (mSkeleton)
+	if (mSkeleton = Skeleton::LoadFrom(source))
 	{
 		// read animation clips
 		uint32_t animClipCount = source.ReadUInt();
