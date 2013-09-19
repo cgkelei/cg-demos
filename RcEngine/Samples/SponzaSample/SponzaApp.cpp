@@ -50,7 +50,7 @@ void SponzaApp::Initialize()
 	mCameraControler->AttachCamera(camera);
 
 
-	mPlayer = new Player;
+	mPlayer = new Character;
 }
 
 void SponzaApp::LoadContent()
@@ -69,31 +69,21 @@ void SponzaApp::LoadContent()
 	sponzaNode->SetScale(0.45f);
 	sponzaNode->AttachObject(sponzaEntity);
 
-	/*Entity* dudeEntity = sceneMan.CreateEntity("Dude", "him.mesh",  "Custom");
-	SceneNode* dudeNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Dwarf");
-	dudeNode->SetPosition(float3(0, 0, 0));
-	dudeNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(90.0f), 0.0f, 0.0f));
-	dudeNode->AttachObject(dudeEntity);
-
-	AnimationPlayer* animPlayer = dudeEntity->GetAnimationPlayer();
-	AnimationState* takeClip = animPlayer->GetClip("Take 001");
-	takeClip->WrapMode = AnimationState::Wrap_Loop;
-	animPlayer->PlayClip("Take 001");*/
-
 	mPlayer->LoadContent();
 
-	//Entity* arthasEntity = sceneMan.CreateEntity("Arthas", "Arthas/Mesh_ArthasLichKing.mesh",  "Custom");
-	////Entity* arthasEntity = sceneMan.CreateEntity("Arthas", "Arthas/Mesh_Sword_2H_Frostmourne_D_01.mesh",  "Custom");
-	//SceneNode* arthasNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Arthas");
+
+	//Entity* arthasEntity = sceneMan.CreateEntity("Sinbad", "Sinbad/sinbad_GEO.mesh",  "Custom");
+	//SceneNode* arthasNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Sinbad");
 	//arthasNode->SetPosition(float3(0, 0, 0));
+	////arthasNode->SetScale(float3(5, 5, 5));
 	////arthasNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(-90.0f), 0.0f, 0.0f));
 	//arthasNode->AttachObject(arthasEntity);
 
-	//AnimationPlayer* arthasAnimPlayer = arthasEntity->GetAnimationPlayer();
-	//AnimationState* arthasTakeClip = arthasAnimPlayer->GetClip("Take 001");
-	//arthasTakeClip->WrapMode = AnimationState::Wrap_Loop;	
+	////AnimationPlayer* arthasAnimPlayer = arthasEntity->GetAnimationPlayer();
+	////AnimationState* arthasTakeClip = arthasAnimPlayer->GetClip("Take 001");
+	////arthasTakeClip->WrapMode = AnimationState::Wrap_Loop;	
 
-	//arthasAnimPlayer->PlayClip("Take 001");
+	////arthasAnimPlayer->PlayClip("Take 001");
 }
 
 void SponzaApp::UnloadContent()
@@ -182,8 +172,6 @@ void SponzaApp::DrawUI()
 	// Render UI
 	UIManager::GetSingleton().Render();
 }
-
-
 
 int32_t main()
 {

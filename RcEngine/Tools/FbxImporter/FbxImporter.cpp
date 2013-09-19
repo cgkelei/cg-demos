@@ -279,6 +279,20 @@ FbxAMatrix GetGeometry(FbxNode* pNode)
 	return FbxAMatrix(lT, lR, lS);
 }
 
+bool HasSkin(FbxMesh* pMesh)
+{
+	const int lSkinCount = pMesh->GetDeformerCount(FbxDeformer::eSkin);
+	for (int iSkinIndex = 0; iSkinIndex < lSkinCount; ++iSkinIndex)
+	{
+		if( ((FbxSkin*)pMesh->GetDeformer(iSkinIndex, FbxDeformer::eSkin))->GetClusterCount() > 0 )
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 }
 
 void FBXTransformer::Initialize( FbxScene* pScene )
@@ -286,6 +300,7 @@ void FBXTransformer::Initialize( FbxScene* pScene )
 	ExportLog::LogMsg( 4, "Identifying scene's coordinate system." );
 
 	FbxAxisSystem SceneAxisSystem = pScene->GetGlobalSettings().GetAxisSystem();
+	FbxAxisSystem TargetAxisSystem = FbxAxisSystem::MayaYUp;
 	FbxAxisSystem::MayaYUp.ConvertScene(pScene);
 
 	int iUpAxisSign;
@@ -649,18 +664,8 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 	
 	// test if had skin
 	bool lHasSkin = false;
-	if (g_ExportSettings.ExportSkeleton)
-	{
-		const int lSkinCount = pMesh->GetDeformerCount(FbxDeformer::eSkin);
-		for (int iSkinIndex = 0; iSkinIndex < lSkinCount; ++iSkinIndex)
-		{
-			if( ((FbxSkin*)pMesh->GetDeformer(iSkinIndex, FbxDeformer::eSkin))->GetClusterCount() > 0 )
-			{
-				lHasSkin = true;
-				break;
-			}
-		}
-	}
+	if (g_ExportSettings.ExportSkeleton)  // Only process skin when ExportSkeleton is set
+		lHasSkin = HasSkin(pMesh);
 	
 	// build mesh data
 	shared_ptr<MeshData> mesh = std::make_shared<MeshData>();
@@ -1775,7 +1780,7 @@ int main()
 	//g_ExportSettings.ExportSkeleton = false;
     //g_ExportSettings.MergeScene = true;
 
-	if (fbxProcesser.LoadScene("Arthas/Arthas_Casting.fbx"))
+	if (fbxProcesser.LoadScene("Arthas/Sword.fbx"))
 	{
 		fbxProcesser.ProcessScene();
 		//fbxProcesser.BuildAndSaveXML();

@@ -47,7 +47,7 @@ public:
 
 	void OnUpdateRenderQueue(RenderQueue* renderQueue, Camera* cam, RenderOrder order);
 
-	Bone* AttachObjectToBone (const String &boneName, SceneObject* sceneObj, const Quaternionf& offsetOrientation= Quaternionf::Identity(), const float3 & offsetPosition = float3::Zero());
+	Bone* AttachObjectToBone(const String &boneName, SceneObject* sceneObj, const Quaternionf& offsetOrientation= Quaternionf::Identity(), const float3 & offsetPosition = float3::Zero());
 
 protected:
 	void Initialize();

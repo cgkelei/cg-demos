@@ -103,39 +103,6 @@ SkinnedAnimationPlayer::SkinnedAnimationPlayer( const shared_ptr<Skeleton>& skel
 	}
 }
 
-void SkinnedAnimationPlayer::CrossFade( const String& fadeClip, float fadeLength )
-{
-	//AnimationState* fadeClipState;
-
-	//auto found = mAnimationStates.find(fadeClip);
-	//assert(found != mAnimationStates.end());
-	//fadeClipState = found->second;
-
-
-	//if (!fadeClipState->IsClipStateBitSet(AnimationState::Clip_Is_Fading_Bit) &&
-	//	!mCurrentClipState->IsClipStateBitSet(AnimationState::Clip_Is_Fading_Bit))
-	//{
-	//	// if the given clip is not fading, do fading	
-	//	fadeClipState->BlendWeight = 0.0f;
-	//	fadeClipState->SetClipStateBit( AnimationState::Clip_Is_FadeIn_Started_Bit | AnimationState::Clip_Is_Fading_Bit );
-
-	//	mCurrentClipState->FadeLength = fadeLength;
-	//	mCurrentClipState->ResetCrossFadeTime();
-
-	//	mCurrentClipState->SetClipStateBit( AnimationState::Clip_Is_FadeOut_Started_Bit | AnimationState::Clip_Is_Fading_Bit );
-
-	//	// If this clip is currently not playing, we should start playing it.
-	//	if (!mCurrentClipState->IsClipStateBitSet(AnimationState::Clip_Is_Playing_Bit))
-	//	{
-	//		PlayClip(mCurrentClipState->GetName());
-	//	}
-
-	//	// Start playing the cross fade clip.
-	//	PlayClip(fadeClip);
-
-	//}
-}
-
 SkinnedAnimationPlayer::~SkinnedAnimationPlayer()
 {
 

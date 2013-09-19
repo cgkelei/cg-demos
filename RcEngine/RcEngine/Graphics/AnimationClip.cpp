@@ -40,7 +40,7 @@ void AnimationClip::LoadImpl()
 	Stream& source = *clipStream;	
 
 	mClipName = source.ReadString(); 
-	mLength = source.ReadFloat();
+	mDuration = source.ReadFloat();
 
 	// read track count
 	uint32_t numTracks = source.ReadUInt();

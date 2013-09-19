@@ -29,42 +29,44 @@ public:
 		Clip_All_Bit				= 0xFF
 	};
 
+	// Animation event callback at specified time pos between [0, length]. 
+	typedef fastdelegate::FastDelegate<void(AnimationState*, float)> AnimatonNotify;
+	typedef fastdelegate::FastDelegate<void(AnimationState*)> AnimatonBeginNotify;
+	typedef fastdelegate::FastDelegate<void(AnimationState*)> AnimatonEndNotify;
+
 public:
 	AnimationState(AnimationPlayer& animation, const shared_ptr<AnimationClip> clip);
 	~AnimationState();
 
+	const String& GetClipName() const; 
+
+	/**
+	 * Add animation event callback.
+	 */
+	void AddNotify(const AnimatonNotify& notify, float fireTime);
+	
+	/**
+	 * Update animation state, return false if finished, so will be removed
+	 * from running clips in animation controller.
+	 */
+	bool Update(float delta);
+
 	void SetAnimationWrapMode( AnimationWrapMode wrapMode );
-	AnimationWrapMode GetAnimationWrapMode() const  { return WrapMode; }
+	AnimationWrapMode GetAnimationWrapMode() const { return WrapMode; }
 
 	void SetEnable( bool enabled );
 	bool IsEnabled() const { return mEnable; } 
 
 	/**
-	 * Get the state clip name.
-	 */
-	const String& GetName() const; 
-
-	/**
-	 * Set time position.
+	 * Current animation time position.
 	 */
 	void SetTime( float time );
-	
-	/**
-	 * Get current animation time position.
-	 */
 	float GetTime() const { return mTime; }
 
-	bool Update(float delta);
-
 	/**
-	 * Advance the animation by delta time.
+	 * Get animation duration in seconds.
 	 */
-	void AdvanceTime( float delta );
-
-	/**
-	 * Get animation length in seconds.
-	 */
-	float GetLength() const;
+	float GetDuration() const;
 
 	float GetWeight() const { return BlendWeight; }
 
@@ -87,6 +89,7 @@ public:
 	void Pause();
 	void Resume();
 	void Stop();
+	void CrossFade(AnimationState* clipState, float fadeLength);
 
 	bool IsPlaying() const;
 
@@ -94,22 +97,36 @@ private:
 	void OnBegin();
 	void OnEnd();
 	
+	/**
+	 * Advance the animation by delta time.
+	 */
+	void AdvanceTime( float delta );
+
+	
 private:
 
 	AnimationPlayer& mAnimation;
 
+	// The clip that is being played by this animation state.
+	shared_ptr<AnimationClip> mClip;
+	
 	uint8_t mStateBits;
 
 	bool mEnable;
 
 	// The current time of the animation.
 	float mTime;
-
-	// The clip that is being played by this animation state.
-	shared_ptr<AnimationClip> mClip;
-
+	
+	// Cross fade time, and fade to clip state
 	float mCrossFadeOutElapsed;
-
+	AnimationState* mFadeToClipState;
+	
+	// Ordered collection of listeners on the clip.
+	std::list<std::pair<float, AnimatonNotify>> mAnimNotifies;
+	
+	// Iterator that points to the next listener event to be triggered.
+	std::list<std::pair<float, AnimatonNotify>>::iterator mAninNofityIter;
+		 
 public:
 
 	// The weight of animation
@@ -124,8 +141,10 @@ public:
 	// The layer of the animation. When calculating the final blend weights, animations in higher layers will get their weights
 	uint8_t mLayer;
 
-	float FadeLength;
-	
+	float CrossFadeLength;
+
+	AnimatonBeginNotify BeginNotify;
+	AnimatonEndNotify EndNotify;
 };
 
 }

@@ -17,7 +17,8 @@ AnimationState::AnimationState( AnimationPlayer& animation, const shared_ptr<Ani
 	  PlayBackSpeed(1.0f), 
 	  WrapMode(Wrap_Once),
 	  mStateBits(0x00),
-	  mEnable(true)
+	  mEnable(true),
+	  mFadeToClipState(nullptr)
 {
 
 }
@@ -37,14 +38,14 @@ void AnimationState::SetEnable( bool enabled )
 	mEnable = enabled;
 }
 
-const String& AnimationState::GetName() const
+const String& AnimationState::GetClipName() const
 {
-	return mClip->GetResourceName();
+	return mClip->GetClipName();
 }
 
-float AnimationState::GetLength() const
+float AnimationState::GetDuration() const
 {
-	return mClip->GetLength();
+	return mClip->GetDuration();
 }
 
 void AnimationState::Apply()
@@ -89,14 +90,13 @@ void AnimationState::Apply()
 			 bone->SetScale( Lerp(bone->GetScale(), keyframe.Scale, BlendWeight) );
 		}
 		else
-		{
-			
+		{		
 			const AnimationClip::KeyFrame& nextKeyframe = animTrack.KeyFrames[nextFrame];
 
 			//std::cout << keyframe.Time << "-->" << nextKeyframe.Time << std::endl;
 			float timeInterval = nextKeyframe.Time - keyframe.Time;
 			if (timeInterval < 0.0f)
-				timeInterval += mClip->GetLength();
+				timeInterval += mClip->GetDuration();
 			float t = timeInterval > 0.0f ? (mTime - keyframe.Time) / timeInterval : 1.0f;
 		
 			bone->SetPosition( Lerp(bone->GetPosition(),
@@ -113,13 +113,12 @@ void AnimationState::Apply()
 
 void AnimationState::AdvanceTime( float delta )
 {
-	float length = mClip->GetLength();
-
+	float length = mClip->GetDuration();
+	
 	if (delta == 0 || length == 0)
 		return;
 
 	float timePos = GetTime() + delta;
-
 	if (WrapMode == Wrap_Loop)
 	{
 		// wrap
@@ -127,19 +126,19 @@ void AnimationState::AdvanceTime( float delta )
 		if(timePos < 0)
 			timePos += length;    
 	}
+	else
+	{
+		if (timePos > length)
+			SetClipStateBit(Clip_Is_End_Bit);
+	}
 
 	SetTime(timePos);
 }
 
 void AnimationState::SetTime( float time )
 {
-	float length = mClip->GetLength();
-
 	// Clamp
-	if(time < 0)
-		time = 0;
-	else if (time > GetLength())
-		time = length;
+	time = Clamp(time, 0.0f, mClip->GetDuration());
 
 	if (mTime != time)
 	{
@@ -152,7 +151,7 @@ void AnimationState::SetTime( float time )
 
 void AnimationState::SetFadeLength( float fadeLength )
 {
-	FadeLength = fadeLength;
+	CrossFadeLength = fadeLength;
 }
 
 bool AnimationState::Update( float delta )
@@ -160,19 +159,20 @@ bool AnimationState::Update( float delta )
 	if (IsClipStateBitSet(Clip_Is_Pause_Bit))
 	{
 		// paused
-		return false;
-	}
-	else if (IsClipStateBitSet(Clip_Is_End_Bit))
-	{
-		// End
-		OnEnd();
 		return true;
 	}
-	else if (!IsClipStateBitSet(Clip_Is_Started_Bit))
+
+	if (IsClipStateBitSet(Clip_Is_End_Bit))
+	{
+		OnEnd();
+		// Return false so the AnimationClip is removed from the running clips on the AnimationController.
+		return false;
+	}
+	
+	if (!IsClipStateBitSet(Clip_Is_Started_Bit))
 	{
 		// first time update, begin
 		OnBegin();
-		SetClipStateBit(Clip_Is_Started_Bit);
 	}
 	else
 	{
@@ -180,28 +180,49 @@ bool AnimationState::Update( float delta )
 		AdvanceTime(delta * PlayBackSpeed);
 	}
 
-	float percentComplete = mTime / GetLength();
+	// Notify any listeners of Animation events.
+	if (!mAnimNotifies.empty())
+	{
+		if (PlayBackSpeed >= 0.0f)
+		{
+			while (mAninNofityIter != mAnimNotifies.end() && mTime >= mAninNofityIter->first)
+			{
+				(mAninNofityIter->second)(this, mTime);
+				++mAninNofityIter;
+			}
+		}
+		else
+		{
+			while (mAninNofityIter != mAnimNotifies.begin() && mTime <= mAninNofityIter->first)
+			{
+				(mAninNofityIter->second)(this, mTime);
+				--mAninNofityIter;
+			}
+		}
+	}
+
+	float percentComplete = mTime / GetDuration();
 
 	if (IsClipStateBitSet(Clip_Is_Fading_Bit))
 	{
-		assert(FadeLength > 0);
+		assert(CrossFadeLength > 0);
 
 		mCrossFadeOutElapsed += delta * PlayBackSpeed;
 
-		if (mCrossFadeOutElapsed < FadeLength)
+		if (mCrossFadeOutElapsed < CrossFadeLength)
         {
             // Calculate this clip's blend weight.
-            float tempBlendWeight = (FadeLength - mCrossFadeOutElapsed) / FadeLength;
+            float tempBlendWeight = (CrossFadeLength - mCrossFadeOutElapsed) / CrossFadeLength;
             
             // If this clip is fading in, adjust the crossfade clip's weight to be a percentage of your current blend weight
-            if (IsClipStateBitSet(Clip_Is_FadeIn_Started_Bit))
+            if (IsClipStateBitSet(Clip_Is_FadeOut_Started_Bit))
             {
-                BlendWeight = tempBlendWeight;
+                BlendWeight = (std::max)(tempBlendWeight, 0.0f);
             }
             else
             {
                 // Just set the blend weight.
-                BlendWeight = 1 - tempBlendWeight;
+                BlendWeight = (std::min)(1 - tempBlendWeight, 1.0f);
             }
         }
         else
@@ -217,8 +238,10 @@ bool AnimationState::Update( float delta )
 				BlendWeight = 0.0f;
 				ResetClipStateBit(Clip_Is_FadeOut_Started_Bit);
 				ResetClipStateBit(Clip_Is_Fading_Bit);
+
+				// Fading out 
+				SetClipStateBit(Clip_Is_End_Bit);
 			}
-			
         }
 	}
 
@@ -243,12 +266,21 @@ void AnimationState::ResetClipStateBit( uint8_t bits )
 
 void AnimationState::OnBegin()
 {
+	// Initialize animation to play.
+	SetClipStateBit(Clip_Is_Started_Bit);
 
+	if (!BeginNotify.empty())
+		BeginNotify(this);
 }
 
 void AnimationState::OnEnd()
 {
+	BlendWeight = 1.0f;
+	ResetClipStateBit(Clip_All_Bit);
 
+	// Notify end listeners if any.
+	if (!EndNotify.empty())
+		EndNotify(this);
 }
 
 bool AnimationState::IsPlaying() const
@@ -301,14 +333,69 @@ void AnimationState::Stop()
 		// Reset the restarted and paused bits. 
 		ResetClipStateBit(Clip_Is_Restarted_Bit);
 		ResetClipStateBit(Clip_Is_Pause_Bit);
-		ResetClipStateBit(Clip_Is_Playing_Bit);
-
-		mTime = 0;
 
 		// Mark the clip to removed from the AnimationController.
 		SetClipStateBit(Clip_Is_End_Bit);
 	}
 }
+
+void AnimationState::CrossFade( AnimationState* fadeClipState, float fadeLength )
+{
+	if (!fadeClipState->IsClipStateBitSet(AnimationState::Clip_Is_Fading_Bit) &&
+		!IsClipStateBitSet(AnimationState::Clip_Is_Fading_Bit))
+	{
+		// if the given clip is not fading, do fading	
+		fadeClipState->BlendWeight = 0.0f;
+		fadeClipState->SetClipStateBit( Clip_Is_FadeIn_Started_Bit | Clip_Is_Fading_Bit );
+		fadeClipState->CrossFadeLength = fadeLength;
+		fadeClipState->ResetCrossFadeTime();
+
+		// Set this clip fade out
+		SetClipStateBit( Clip_Is_FadeOut_Started_Bit | Clip_Is_Fading_Bit );
+		CrossFadeLength = fadeLength;
+		ResetCrossFadeTime();
+
+		// If this clip is currently not playing, we should start playing it.
+		if (!IsClipStateBitSet(AnimationState::Clip_Is_Playing_Bit))
+			Play();
+
+		// Start playing the cross fade clip.
+		fadeClipState->Play();
+	}
+}
+
+void AnimationState::AddNotify( const AnimatonNotify& notify, float fireTime )
+{
+	if (mAnimNotifies.empty())
+	{
+		mAnimNotifies.push_back(std::make_pair(fireTime, notify));
+
+		if (IsClipStateBitSet(Clip_Is_Playing_Bit))
+			mAninNofityIter = mAnimNotifies.begin();
+	}
+	else
+	{
+		for (auto iter = mAnimNotifies.begin(); iter != mAnimNotifies.end(); ++iter)
+		{
+			if (iter->first > fireTime)
+			{
+				iter = mAnimNotifies.insert(iter, std::make_pair(fireTime, notify));
+
+				//// If playing, update the iterator if we need to.
+				//// otherwise, it will just be set the next time the clip gets played.
+				//if (IsClipStateBitSet(Clip_Is_Playing_Bit))
+				//{
+				//	mAninNofityIter = mAnimNotifies.begin();
+				//}
+				break;
+			}
+		}
+	}
+
+}
+
+
+
 
 
 
