@@ -52,8 +52,8 @@ public:
 	void LoadAllFromDisk();
 
 protected:
-	ResourceHandle GetNextHandle();
-	ResourceHandle AddNonExitingResouce(uint32_t type, const String& name, const String& group);
+	ResourceHandle AddNonExitingResource(uint32_t type, const String& name, const String& group);
+	ResourceHandle GetNextHandle();  
 
 protected:	
 	uint32_t mNextHandle;

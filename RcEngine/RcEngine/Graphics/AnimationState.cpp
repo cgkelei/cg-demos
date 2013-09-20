@@ -308,6 +308,7 @@ void AnimationState::Play()
 	else
 	{
 		SetClipStateBit(Clip_Is_Playing_Bit);
+		mTime = 0;
 
 		// add to controller
 		mAnimation.mController->Schedule(this);
@@ -341,8 +342,11 @@ void AnimationState::Stop()
 
 void AnimationState::CrossFade( AnimationState* fadeClipState, float fadeLength )
 {
-	if (!fadeClipState->IsClipStateBitSet(AnimationState::Clip_Is_Fading_Bit) &&
-		!IsClipStateBitSet(AnimationState::Clip_Is_Fading_Bit))
+	if (fadeClipState == this)
+		return;
+
+	if (!fadeClipState->IsClipStateBitSet(Clip_Is_Fading_Bit) &&
+		!IsClipStateBitSet(Clip_Is_Fading_Bit))
 	{
 		// if the given clip is not fading, do fading	
 		fadeClipState->BlendWeight = 0.0f;

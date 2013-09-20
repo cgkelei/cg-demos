@@ -72,10 +72,10 @@ void SponzaApp::LoadContent()
 	mPlayer->LoadContent();
 
 
-	//Entity* arthasEntity = sceneMan.CreateEntity("Sinbad", "Sinbad/sinbad_GEO.mesh",  "Custom");
-	//SceneNode* arthasNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Sinbad");
+	//Entity* arthasEntity = sceneMan.CreateEntity("Sinbad", "Arthas/Mesh.mesh",  "Custom");
+	//SceneNode* arthasNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Arthas");
 	//arthasNode->SetPosition(float3(0, 0, 0));
-	////arthasNode->SetScale(float3(5, 5, 5));
+	//arthasNode->SetScale(float3(5, 5, 5));
 	////arthasNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(-90.0f), 0.0f, 0.0f));
 	//arthasNode->AttachObject(arthasEntity);
 

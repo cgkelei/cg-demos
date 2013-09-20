@@ -13,6 +13,7 @@
 #include <Graphics/AnimationState.h>
 #include <Graphics/Animation.h>
 #include <Graphics/SamplerState.h>
+#include <Graphics/Skeleton.h>
 #include <IO/FileSystem.h>
 #include <Core/Context.h>
 #include <Math/MathUtil.h>
@@ -44,11 +45,9 @@ void Character::LoadContent()
 	mActorNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(-90.0f), 0.0f, 0.0f));
 	mActorNode->AttachObject(mActorEntity);
 
-	//mSwordEntity = sceneMan.CreateEntity("Sword", "Arthas/Mesh_Sword_2H_Frostmourne_D_01.mesh",  "Custom");
-	////mActorEntity->AttachObjectToBone("wepson", mSwordEntity);
-	//mSwordNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Sword");
-	//mSwordNode->SetPosition(float3(0, 30, 0));
-	//mSwordNode->AttachObject(mSwordEntity);
+	mSwordEntity = sceneMan.CreateEntity("Sword", "Arthas/Mesh_Sword_2H_Frostmourne_D_01.mesh",  "Custom");
+	BoneFollower* swordNode = mActorEntity->AttachObjectToBone("wepson", mSwordEntity);
+	swordNode->SetPosition(float3(4.5, -7, 0));
 
 	mAnimationPlayer = (SkinnedAnimationPlayer*)mActorEntity->GetAnimationPlayer();
 	mAnimationState[Anim_Random] = mAnimationPlayer->GetClip("Take 001");
@@ -94,15 +93,47 @@ void Character::LoadContent()
 	clip->SetClipName("Casting");
 	mAnimationState[Anim_Casting] = mAnimationPlayer->AddClip(clip);
 	mAnimationState[Anim_Casting]->WrapMode = AnimationState::Wrap_Once;
+	mAnimationState[Anim_Casting]->EndNotify.bind(this, &Character::AnimationEnd);
 
-	for (size_t i = 0; i < Anim_Count; ++i)
-	{
-		mAnimationState[i]->PlayBackSpeed *= 0.5f;
-	}
+	//for (size_t i = 0; i < Anim_Count; ++i)
+	//{
+	//	mAnimationState[i]->PlayBackSpeed *= 0.5f;
+	//}
 
 	mAnimationState[Anim_Walk]->Play();
 	mCurrAnimID = Anim_Walk;
 }
+
+//void Character::LoadContent()
+//{
+//	RenderFactory* factory = Context::GetSingleton().GetRenderFactoryPtr();
+//	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
+//	ResourceManager& resMan = ResourceManager::GetSingleton();
+//	
+//	mActorEntity = sceneMan.CreateEntity("Arthas", "Arthas/Mesh_ArthasLichKing.mesh",  "Custom");
+//	mActorNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Dude");
+//	mActorNode->SetPosition(float3(0, 0, 0));
+//	mActorNode->SetScale(float3(3, 3, 3));
+//	//mActorNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(-90.0f), 0.0f, 0.0f));
+//	mActorNode->AttachObject(mActorEntity);
+//	
+//	mSwordEntity = sceneMan.CreateEntity("nurbsToPoly1", "Arthas/Mesh_Sword_2H_Frostmourne_D_01.mesh",  "Custom");
+//	BoneFollower* swordNode = mActorEntity->AttachObjectToBone("wepson", mSwordEntity);
+//	swordNode->SetPosition(float3(0, 0, 0));
+//	
+//	//mSwordNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Sword");
+//	//mSwordNode->SetPosition(float3(28, 31, 2));
+//	////mSwordNode->SetPosition(float3(-1.3f, 2.1f, 0.1f));
+//	//mSwordNode->AttachObject(mSwordEntity);
+//	
+//	mAnimationPlayer = (SkinnedAnimationPlayer*)mActorEntity->GetAnimationPlayer();
+//	mAnimationState[Anim_Random] = mAnimationPlayer->GetClip("Take 001");
+//	mAnimationState[Anim_Random]->WrapMode = AnimationState::Wrap_Loop;
+//	//mAnimationState[Anim_Random]->EndNotify.bind(this, &Character::AnimationEnd);
+//
+//	mCurrAnimID = Anim_Walk;
+//	mAnimationState[mCurrAnimID]->Play();
+//}
 
 void Character::Update( float dt )
 {
@@ -112,7 +143,6 @@ void Character::Update( float dt )
 	{	
 		mAnimationState[mCurrAnimID]->CrossFade(mAnimationState[Anim_Run], 0.5f);
 		mCurrAnimID = Anim_Run;
-
 	}
 	else if (inputSys.KeyPress(KC_RightShift))
 	{
@@ -126,19 +156,19 @@ void Character::Update( float dt )
 		mCurrAnimID = Anim_Random;
 		mAnimationState[Anim_Random]->Play();
 	}
+	else if (inputSys.KeyPress(KC_E))
+	{
+		mAnimationState[mCurrAnimID]->Stop();
+
+		mCurrAnimID = Anim_Casting;
+		mAnimationState[Anim_Casting]->Play();
+	}
 }
 
 void Character::AnimationEnd( AnimationState* state )
 {
-	if (state == mAnimationState[Anim_Random])
-	{
-		mAnimationState[Anim_Random]->Stop();
-		printf("%s stop\n", mAnimationState[Anim_Random]->GetClipName().c_str());
+	mAnimationState[mCurrAnimID]->Stop();
 
-		//mAnimationState[Anim_Random]->PlayBackSpeed *= -1;
-		//mAnimationState[Anim_Random]->Play();
-
-		//mCurrAnimID = Anim_Walk;
-		//mAnimationState[Anim_Walk]->Play();
-	}
+	mCurrAnimID = Anim_Walk;
+	mAnimationState[Anim_Walk]->Play();
 }
