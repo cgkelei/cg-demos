@@ -579,15 +579,15 @@ shared_ptr<Resource> Effect::Clone()
 {
 	printf("Clone effect: %s\n", mEffectName.c_str());
 
+	ResourceManager& resMan = ResourceManager::GetSingleton();
+
 	shared_ptr<Effect> retVal = std::make_shared<Effect>(mCreator, mResourceHandle, mResourceName, mGroup);
 	
 	retVal->mEffectName = mEffectName;
 
 	// clone paremeters
-	for (auto iter = mParameters.begin(); iter != mParameters.end(); ++iter)
-	{
-		retVal->mParameters[iter->first] = iter->second->Clone();
-	}	
+	for (auto& kv : mParameters)
+		retVal->mParameters[kv.first] = kv.second->Clone();
 
 	// clone technique
 	retVal->mTechniques.resize(mTechniques.size());

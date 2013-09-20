@@ -258,7 +258,7 @@ void Entity::UpdateAnimation()
 		AnimationState* animState = kv.second;
 		animState->Apply();
 	}
-		
+	
 	// Note: the model's world transform will be baked in the skin matrices
 	const vector<Bone*>& bones = mSkeleton->GetBones();
 	for (size_t i = 0; i < bones.size(); ++i)
@@ -268,7 +268,7 @@ void Entity::UpdateAnimation()
 	}
 }
 
-Bone* Entity::AttachObjectToBone( const String &boneName, SceneObject* sceneObj, const Quaternionf& offsetOrientation/*= Quaternionf::Identity()*/, const float3 & offsetPosition /*= float3::Zero()*/ )
+BoneFollower* Entity::AttachObjectToBone( const String &boneName, SceneObject* sceneObj, const Quaternionf& offsetOrientation/*= Quaternionf::Identity()*/, const float3 & offsetPosition /*= float3::Zero()*/ )
 {
 	if (!HasSkeleton())
 	{
@@ -296,15 +296,18 @@ Bone* Entity::AttachObjectToBone( const String &boneName, SceneObject* sceneObj,
 		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Cannot locate bone named " + boneName,
 			"Entity::attachObjectToBone");
 	}
+
+	BoneFollower* follower = mSkeleton->CreateFollowerOnBone(bone, offsetOrientation, offsetPosition);	
+	follower->SetParentEntity(this);
+	follower->SetFollower(sceneObj);
 	
-	sceneObj->OnAttach(bone);
-	mChildAttachedObjects.insert( std::make_pair(sceneObj->GetName(), sceneObj));
+	mChildAttachedObjects.insert( std::make_pair(sceneObj->GetName(), sceneObj) );
 
 	// Trigger update of bounding box if necessary
 	if (mParentNode)
 		mParentNode->NeedUpdate();
 
-	return bone;
+	return follower;
 }
 
 

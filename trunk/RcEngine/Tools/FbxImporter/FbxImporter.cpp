@@ -1777,7 +1777,7 @@ int main()
 	FbxProcesser fbxProcesser;
 	fbxProcesser.Initialize();
 
-	//g_ExportSettings.ExportSkeleton = false;
+	g_ExportSettings.ExportSkeleton = false;
     //g_ExportSettings.MergeScene = true;
 
 	if (fbxProcesser.LoadScene("Arthas/Sword.fbx"))

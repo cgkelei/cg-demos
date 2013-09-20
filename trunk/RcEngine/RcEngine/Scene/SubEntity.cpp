@@ -89,17 +89,6 @@ void SubEntity::GetWorldTransforms( float4x4* xform ) const
 std::uint32_t SubEntity::GetWorldTransformsCount() const
 {
 	return 1 + mParent->mNumSkinMatrices;
-
-	//if (!mParent->mNumBoneMatrices)
-	//{
-	//	// No Skin animation
-	//	return 1;
-	//}
-	//else
-	//{
-	//	// to do,add skin mesh support
-	//	return mParent->mNumBoneMatrices;
-	//}
 }
 
 const shared_ptr<RenderOperation>& SubEntity::GetRenderOperation() const

@@ -15,12 +15,11 @@ class MeshPart;
 
 /**
   MeshPart don't store a material reference, it only store a material name which is define 
-  in mesh file. MeshPart can load material by material resource manager if needed. We do that
-  because all the same mesh will load from disk only once, multiple Entity can shared same mesh,
-  so material reference stores in entity, and different entity with same mesh model can have different
-  material.
+  in mesh file. We do that because all the same mesh will load from disk only once, multiple
+  Entity can shared same mesh, so material reference stores in entity(SubEntity), and different
+  entity with same mesh model can have different material. But every different mesh copy may need
+  a different Skeleton copy, it's different for every single entity.
 */
-
 
 class _ApiExport Mesh : public Resource
 {
@@ -30,7 +29,6 @@ public:
 
 	const String& GetName() const								{ return mResourceName; }
 	const BoundingBoxf& GetBoundingBox() const			    { return mBoundingBox; }
-
 
 	uint32_t GetNumMeshPart() const								{ return mMeshParts.size(); }
 	const shared_ptr<MeshPart>& GetMeshPart(size_t i) const		{ return mMeshParts[i]; }
@@ -43,12 +41,15 @@ public:
 	uint32_t GetPrimitiveCount() const							{ return mPrimitiveCount; }
 	uint32_t GetVertexCount() const								{ return mVertexCount; }
 
+	virtual shared_ptr<Resource> Clone();
+
 protected:
 	void LoadImpl();
 	void UnloadImpl();
 
 public:
 	static shared_ptr<Resource> FactoryFunc(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
+
 
 private:
 			

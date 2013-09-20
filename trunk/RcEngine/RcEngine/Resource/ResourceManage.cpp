@@ -62,11 +62,11 @@ ResourceHandle ResourceManager::AddResource( uint32_t type, const String& name, 
 		if (resIter != resourceGroup.Resources.end())
 			retVal = resIter->second->GetResourceHandle();
 		else
-			retVal = AddNonExitingResouce(type, name, group);
+			retVal = AddNonExitingResource(type, name, group);
 	}
 	else
 	{
-		retVal = AddNonExitingResouce(type, name, group);
+		retVal = AddNonExitingResource(type, name, group);
 	}
 
 
@@ -74,7 +74,7 @@ ResourceHandle ResourceManager::AddResource( uint32_t type, const String& name, 
 }
 
 
-ResourceHandle ResourceManager::AddNonExitingResouce( uint32_t type, const String& name, const String& group )
+ResourceHandle ResourceManager::AddNonExitingResource( uint32_t type, const String& name, const String& group )
 {
 	ResourceHandle retVal;
 
@@ -121,7 +121,7 @@ shared_ptr<Resource> ResourceManager::GetResourceByName( uint32_t type, const St
 	}
 	else
 	{
-		ResourceHandle newResHandle = AddNonExitingResouce(type, name, group);
+		ResourceHandle newResHandle = AddNonExitingResource(type, name, group);
 		retVal = GetResourceByHandle(newResHandle);
 	}
 

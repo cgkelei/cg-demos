@@ -85,44 +85,6 @@ void TestApp::Initialize()
 	mCameraControler->AttachCamera(camera);
 }
 
-//void TestApp::LoadContent()
-//{
-//	RenderFactory* factory = RcEngine::Context::GetSingleton().GetRenderFactoryPtr();
-//	SceneManager* sceneManager = Context::GetSingleton().GetSceneManagerPtr();
-//	ResourceManager& resMan = ResourceManager::GetSingleton();
-//
-//	resMan.AddResource(RT_Material, "Sprite.material.xml", "General");
-//	resMan.AddResource(RT_Mesh, "him.mesh", "Custom");
-//
-//	resMan.LoadAllFromDisk();
-//
-//	spriteBatch  = new SpriteBatch();
-//	
-//	Entity* dudeEntity = sceneManager->CreateEntity("Dude", "him.mesh",  "Custom");
-//	SceneNode* dudeNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
-//	dudeNode->SetPosition(float3(0, 0, 0));
-//	dudeNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(180.0f), 0.0f, 0.0f));
-//	dudeNode->AttachObject(dudeEntity);
-//
-//
-//	AnimationPlayer* animPlayer = dudeEntity->GetAnimationPlayer();
-//	AnimationState* takeClip = animPlayer->GetClip("Take 001");
-//	takeClip->WrapMode = AnimationState::Wrap_Loop;
-//
-//	animPlayer->PlayClip("Take 001");
-//
-//	String skyTexPath = FileSystem::GetSingleton().Locate("MeadowTrail.dds");
-//
-//	//String skyTexPath = FileSystem::GetSingleton().Locate("front.dds");
-//	//mTexture = factory->CreateTextureFromFile(skyTexPath);
-//	//factory->SaveTexture2D("Test.dds", texture, 0, 0);
-//
-//	// Sky 
-//	//sceneManager->CreateSkyBox(texture, false);
-//	//sceneManager->CreateSkyBox(factory->CreateTextureFromFile(skyTexPath, 0));
-//	//sceneManager->CreateSkyBox(factory->CreateTextureFromFile("../Media/Textures/grassenvmap1024.dds", 0), 5000.0f); 
-//}
-
 void TestApp::LoadContent()
 {
 	RenderFactory* factory = RcEngine::Context::GetSingleton().GetRenderFactoryPtr();
@@ -136,21 +98,7 @@ void TestApp::LoadContent()
 
 	mSpriteBatch = std::make_shared<SpriteBatch>();
 
-	// Entity
-	Entity* dudeEntity = sceneManager->CreateEntity("Dude", "him.mesh",  "Custom");
-	SceneNode* dudeNode = sceneManager->GetRootSceneNode()->CreateChildSceneNode("Dwarf");
-	dudeNode->SetPosition(float3(0, 0, 0));
-	dudeNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(180.0f), 0.0f, 0.0f));
-	dudeNode->AttachObject(dudeEntity);
-	//dudeEntity->SetVisible(false);
-
-	AnimationPlayer* animPlayer = dudeEntity->GetAnimationPlayer();
-	AnimationState* takeClip = animPlayer->GetClip("Take 001");
-	takeClip->WrapMode = AnimationState::Wrap_Loop;
-
-	animPlayer->PlayClip("Take 001");
-
-	mTexture = factory->CreateTextureFromFile(FileSystem::GetSingleton().Locate("xWinForm.png"));
+	mTexture = factory->CreateTextureFromFile(FileSystem::GetSingleton().Locate("Sword_2H_Frostmourne_D_01_Glow.dds"));
 	
 	//String skyTexPath = ;
 	//mTexture = factory->CreateTextureFromFile(skyTexPath);
@@ -179,14 +127,10 @@ void TestApp::Render()
 	float clr = (float)169/255;
 	currentFrameBuffer->Clear(CF_Color | CF_Depth |CF_Stencil, RcEngine::ColorRGBA(clr, clr, clr, 1.0f), 1.0f, 0);
 	
-	//mSpriteBatch->Begin();
-
-	//Rectanglef dest(100, 100, 400, 400);
-	//IntRect src(94, 60, 1, 20);
-	//mSpriteBatch->Draw(mTexture, dest, &src, ColorRGBA::White);
-	////mSpriteBatch->Draw(mTexture, dest, nullptr, ColorRGBA::White);
-	//mSpriteBatch->End();
-	//mSpriteBatch->Flush();
+	mSpriteBatch->Begin();
+	mSpriteBatch->Draw(mTexture, float2(0, 0), nullptr, ColorRGBA::White);
+	mSpriteBatch->End();
+	mSpriteBatch->Flush();
 
 	// todo 
 	// Move to engine level
@@ -203,11 +147,6 @@ void TestApp::Render()
 
 void TestApp::Update( float deltaTime )
 {
-	/*static float degree = 0;
-	degree += deltaTime * 1.0f;*/
-
-	//SceneNode* dwarfNode = Context::GetSingleton().GetSceneManager().FindSceneNode("Dwarf");
-	//dwarfNode->SetRotation(QuaternionFromRotationMatrix(mCameraControler->GetWorldMatrix()));
 }
 
 void TestApp::InitGUI()

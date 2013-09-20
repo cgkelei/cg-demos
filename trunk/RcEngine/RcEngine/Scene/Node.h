@@ -55,8 +55,6 @@ public:
 	void Translate( const float3& d, TransformSpace relativeTo = TS_Parent );
 
 	void Rotate( const Quaternionf& rot, TransformSpace relativeTo = TS_Parent );
-
-
 	
 	/**
 	 * Set node local position relative to its parent.
@@ -204,23 +202,25 @@ protected:
 
 	virtual void OnChildNodeAdded( Node* node ) ;
 	virtual void OnChildNodeRemoved( Node* node );
-
-	void UpdateWorldTransform() const;
+	
+	virtual void UpdateWorldTransform() const;
 
 	void PropagateDirtyDown( uint32_t dirtyFlag );
 	void PropagateDirtyUp( uint32_t dirtyFlag );
 
 protected:
 
-	Node* mParent;
-
-	std::vector<Node*> mChildren;
-
 	String mName;
+	Node* mParent;
+	std::vector<Node*> mChildren;	
 
 	float3 mPosition;
-	Quaternionf mRotation;
 	float3 mScale;
+	Quaternionf mRotation;
+	
+	mutable float3 mDerivedPosition;
+	mutable float3 mDerivedScale;
+	mutable Quaternionf mDerivedRotation;
 
 	mutable float4x4 mWorldTransform;
 

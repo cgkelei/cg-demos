@@ -354,33 +354,23 @@ void Node::UpdateWorldTransform() const
 		mDirtyBits &= ~NODE_DIRTY_WORLD;
 
 		// force children to update their world transform.
-		for (auto iter = mChildren.begin(); iter != mChildren.end(); ++iter)
-		{
-			(*iter)->UpdateWorldTransform();
-		}
+		for (Node* child : mChildren)
+			child->UpdateWorldTransform();
 	}
 }
 
 void Node::Update( )
 {
 	if (! (mDirtyBits & NODE_DIRTY_WORLD) )
-	{
 		return;
-	}
 
 	OnPreUpdate();
 
 	// Calculate absolute matrix
-
 	if (mParent)
-	{
-		mParent->UpdateWorldTransform();
-		mWorldTransform = CreateTransformMatrix(mScale, mRotation, mPosition) * mParent->mWorldTransform;
-	}
+		mWorldTransform = CreateTransformMatrix(mScale, mRotation, mPosition) * mParent->GetWorldTransform();
 	else
-	{
 		mWorldTransform = CreateTransformMatrix(mScale, mRotation, mPosition);
-	}
 
 	OnPostUpdate();
 
@@ -389,9 +379,7 @@ void Node::Update( )
 	
 	// Visit children
 	for( size_t i = 0; i < mChildren.size(); ++i)
-	{
 		mChildren[i]->Update();
-	}	
 }
 
 void Node::PropagateDirtyDown( uint32_t dirtyFlag )

@@ -29,13 +29,9 @@ const BoundingBoxf& SceneObject::GetWorldBoundingBox() const
 const float4x4& SceneObject::GetWorldTransform() const
 {
 	if (mParentNode)
-	{
 		return mParentNode->GetWorldTransform();
-	}
 	else
-	{
 		return float4x4::Identity();
-	}
 }
 
 void SceneObject::OnAttach( Node* node )

@@ -116,6 +116,20 @@ shared_ptr<Resource> Mesh::FactoryFunc( ResourceManager* creator, ResourceHandle
 	return std::make_shared<Mesh>(creator, handle, name, group);
 }
 
+shared_ptr<Resource> Mesh::Clone()
+{
+	shared_ptr<Mesh> retVal(new Mesh(mCreator, mResourceHandle, mResourceName, mGroup));
+
+	retVal->mBoundingBox = mBoundingBox;
+	retVal->mPrimitiveCount = mPrimitiveCount;
+	retVal->mAninationClips = mAninationClips;
+	retVal->mBoundingBox = mBoundingBox;
+	retVal->mMeshParts = mMeshParts;
+	mSkeleton = mSkeleton->Clone();
+
+	return retVal;
+}
+
 
 
 
