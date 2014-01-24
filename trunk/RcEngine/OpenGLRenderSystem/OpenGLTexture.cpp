@@ -35,6 +35,7 @@ OpenGLTexture::OpenGLTexture( TextureType type, PixelFormat format, uint32_t arr
 
 OpenGLTexture::~OpenGLTexture(void)
 {
+	glDeleteTextures(1, &mTextureID);
 }
 
 uint32_t OpenGLTexture::GetWidth( uint32_t level )

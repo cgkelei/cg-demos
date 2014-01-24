@@ -15,7 +15,7 @@ class _OpenGLExport OpenGLRenderFactory : public RenderFactory
 public:
 	OpenGLRenderFactory(void);
 	~OpenGLRenderFactory(void);
-
+	
 	// Texture
 	//-------------------------------------------------------------------------------------------------------
 	virtual shared_ptr<Texture> CreateTexture1D(uint32_t width, PixelFormat format, uint32_t arrSize, 

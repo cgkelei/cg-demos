@@ -299,7 +299,9 @@ Window::~Window(void)
 
 LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 {
-	static int MouseButtonsMask = 0;
+	static int mouseButtonsMask = 0;
+	static bool mouseInsideClient = false;
+	static TRACKMOUSEEVENT trackMouse;
 
 	switch (uMsg)
 	{
@@ -397,8 +399,30 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 		}
 		break;
 
+	case WM_MOUSEWHEEL:
+		{
+			InputEvent e;
+			e.MouseWheel.type = InputEventType::MouseWheel;
+			e.MouseWheel.wheel = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
+			e.MouseWheel.x = GET_X_LPARAM(lParam); 
+			e.MouseWheel.y = GET_Y_LPARAM(lParam); 
+			mInputSystem->FireEvent(e);
+		}
+		break;
+
 	case WM_MOUSEMOVE:
 		{
+			// For mouse leave client track
+			if (!mouseInsideClient)
+			{
+				trackMouse.cbSize = sizeof(TRACKMOUSEEVENT);
+				trackMouse.dwFlags = TME_LEAVE | TME_HOVER;
+				trackMouse.dwHoverTime = 10;
+				trackMouse.hwndTrack = hWnd;
+				TrackMouseEvent(&trackMouse);
+				mouseInsideClient = true;
+			}
+
 			InputEvent e;
 			e.MouseMove.type = InputEventType::MouseMove;
 			e.MouseMove.x = LOWORD( lParam );
@@ -413,17 +437,19 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			mInputSystem->FireEvent(e);
 		}
 		break;
-	
-	case WM_MOUSEWHEEL:
+
+	case WM_MOUSELEAVE:
 		{
-			InputEvent e;
-			e.MouseWheel.type = InputEventType::MouseWheel;
-			e.MouseWheel.wheel = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
-			e.MouseWheel.x = GET_X_LPARAM(lParam); 
-			e.MouseWheel.y = GET_Y_LPARAM(lParam); 
-			mInputSystem->FireEvent(e);
+			mouseInsideClient = false;
+			mInputSystem->ClearStates();
 		}
 		break;
+	
+	case WM_MOUSEHOVER:
+		{
+			//printf("WM_MOUSEHOVER\n");
+		}
+		break;	
 
 	case WM_KEYDOWN:
 	case WM_SYSKEYDOWN:

@@ -1,5 +1,6 @@
 #include <Core/DynLib.h>
 #include <Core/Utility.h>
+#include <Core/Exception.h>
 
 namespace RcEngine {
 
@@ -9,13 +10,10 @@ DynLib::DynLib( const std::string& name )
 
 }
 
-
 DynLib::~DynLib()
 {
 
 }
-
-
 
 void DynLib::Load()
 {
@@ -28,8 +26,11 @@ void DynLib::Load()
 	m_hInst = (HINSTANCE)LoadLibraryEx(wname.c_str(), 0,  LOAD_WITH_ALTERED_SEARCH_PATH );
 	if (!m_hInst)
 	{
-		std::cout << DynLibError() << std::endl;
-		assert(false);
+		std::string error = DynLibError();
+		std::cout << error << std::endl;
+
+		error = "Load " + name + " failed!";
+		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, error, "DynLib::Load");
 	}
 }
 
@@ -40,7 +41,6 @@ void DynLib::Unload()
 		assert(false);
 	}
 }
-
 
 void* DynLib::GetSymbol( const std::string& strName ) const throw()
 {

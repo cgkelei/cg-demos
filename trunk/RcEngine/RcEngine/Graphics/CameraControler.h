@@ -20,8 +20,13 @@ protected:
 public:
 	virtual ~CameraControler();
 
+	//virtual void Update(float deltaTime);
+
+
 	virtual void AttachCamera(Camera* camera);
 	void DetachCamera();
+
+
 
 protected:
 	Camera* mAttachedCamera;
@@ -61,6 +66,10 @@ protected:
 	float mCameraYawAngle;
 	float mCameraPitchAngle;
 	float mCameraRollAngle;
+
+
+	float3 mMoveVelocity; 
+	float3 mRotVelocity;	
 };
 
 
@@ -113,8 +122,6 @@ private:
 
 	float3 mDownPt;			// starting point of rotation arc on sphere
 	float3 mCurrentPt;		// current point of rotation arc on sphere
-
-
 };
 
 class _ApiExport ModelViewerCameraControler : public CameraControler

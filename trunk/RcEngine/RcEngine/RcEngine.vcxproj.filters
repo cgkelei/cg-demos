@@ -339,6 +339,9 @@
     <ClInclude Include="GUI\RadioButton.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\CameraController1.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Context.cpp">
@@ -604,6 +607,9 @@
     </ClCompile>
     <ClCompile Include="GUI\RadioButton.cpp">
       <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\CameraController1.cpp">
+      <Filter>Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

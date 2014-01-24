@@ -60,14 +60,14 @@ Application::Application( const String& config )
 Application::~Application( void )
 {
 	// todo, move to dll unload
-	delete Context::GetSingleton().GetSceneManagerPtr();
+	//delete Context::GetSingleton().GetSceneManagerPtr();
 
-	ResourceManager::Finalize();
-	ModuleManager::Finalize();
-	FileSystem::Finalize();
-	InputSystem::Finalize();
-	UIManager::Finalize();
-	Context::Finalize();
+	//ResourceManager::Finalize();
+	//ModuleManager::Finalize();
+	//FileSystem::Finalize();
+	//InputSystem::Finalize();
+	//UIManager::Finalize();
+	//Context::Finalize();
 }
 
 void Application::RunGame()
@@ -78,10 +78,14 @@ void Application::RunGame()
 
 	mTimer.Reset();
 
+	int i = 0;
 	do 
 	{
 		Tick();
 
+		//i++;
+		//if (i==5)
+		//	mEndGame = true;
 	} while ( !mEndGame );
 
 	UnloadContent();
@@ -243,10 +247,17 @@ void Application::Create()
 
 void Application::Release()
 {
+	// Delete Scene Manager
+	SceneManager* pSceneMan = Context::GetSingleton().GetSceneManagerPtr();
+	delete pSceneMan;
+
 	UIManager::Finalize();
 	InputSystem::Finalize();
 	FileSystem::Finalize();
 	ResourceManager::Finalize();
+	
+	Context::Finalize();
+
 	//ModuleManager::Finalize();	
 }
 

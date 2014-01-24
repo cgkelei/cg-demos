@@ -159,11 +159,11 @@ QuaternionToAxisAngle(const Quaternion<Real>& quat, Vector<Real, 3>& axis, Real&
 
 template <typename Real>
 inline Quaternion<Real> 
-QuaternionFromRotationYawPitchRoll(Real yaw, Real pitch, Real roll);
+QuaternionFromYawPitchRoll(Real yaw, Real pitch, Real roll);
 
 template <typename Real>
 inline void 
-QuaternionToRotationYawPitchRoll(Real& yaw, Real& pitch, Real& roll, const Quaternion<Real>& quat);
+QuaternionToYawPitchRoll(Real& yaw, Real& pitch, Real& roll, const Quaternion<Real>& quat);
 
 
 /**

@@ -21,12 +21,12 @@ namespace RcEngine {
 Mesh::Mesh(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 	: Resource(RT_Mesh, creator, handle, name, group), mSkeleton(nullptr)
 {
-
+	printf("Create Mesh: %s\n", mResourceName.c_str());
 }
 
 Mesh::~Mesh()
 {
-
+	printf("Delete Mesh: %s\n", mResourceName.c_str());
 }
 
 void Mesh::LoadImpl()

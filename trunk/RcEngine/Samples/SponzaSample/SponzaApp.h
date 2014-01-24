@@ -4,6 +4,7 @@
 
 #include <MainApp/Application.h>
 #include <Graphics/CameraControler.h>
+#include <Graphics/CameraController1.h>
 #include "Character.h"
 
 using namespace RcEngine;
@@ -28,12 +29,15 @@ protected:
 	void DrawUI();
 
 protected:
-	FPSCameraControler* mCameraControler;
+	RcEngine::Test::FPSCameraControler* mCameraControler;
 
 	Character* mPlayer;
 
 	Label* mFPSLabel;
 	int mFramePerSecond;
+
+
+	shared_ptr<FrameBuffer> mGbuffer;
 };
 
 #endif // SponzaApp_h__

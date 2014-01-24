@@ -1,6 +1,7 @@
 #include "OpenGLFrameBuffer.h"
 #include "OpenGLRenderDevice.h"
 #include "OpenGLRenderView.h"
+#include <Core/Exception.h>
 #include <Core/Context.h>
 
 namespace RcEngine {
@@ -58,6 +59,16 @@ void OpenGLFrameBuffer::SwapBuffers()
 void OpenGLFrameBuffer::Resize( uint32_t width, uint32_t height )
 {
 
+}
+
+bool OpenGLFrameBuffer::CheckFramebufferStatus()
+{
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if(status == GL_FRAMEBUFFER_COMPLETE)
+		return true;
+
+	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "OpenGL FrameBuffer Error", "OpenGLFrameBuffer::CheckFramebufferStatus");
+	return false;
 }
 
 }
