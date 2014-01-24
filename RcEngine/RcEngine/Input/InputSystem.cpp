@@ -8,13 +8,22 @@ namespace RcEngine{
 SINGLETON_DECL(InputSystem)
 		
 InputSystem::InputSystem()
-	: mMouseMove(0, 0), mMousePos(0, 0)
+	: mMouseMove(0, 0), 
+	  mMousePos(0, 0),
+	  mKeyState(MS_Button7, false) // All for Key + Mouse + Joysticks
 {
-	mKeyState.resize(MS_Button7);  // All for Key + Mouse + Joysticks
 }
 
 InputSystem::~InputSystem()
 {
+}
+
+void InputSystem::ClearStates()
+{
+	mMouseMove = mLastMousePos = mMousePos = Vector<int32_t, 2>(0, 0);
+	std::fill(mKeyState.begin(), mKeyState.end(), false);
+	mJustPressed.clear();
+	mjustReleased.clear();
 }
 
 void InputSystem::FireEvent( const InputEvent& event )
@@ -168,7 +177,7 @@ void InputSystem::DispatchActions(float delata) const
 
 }
 
-void InputSystem::DispatchStates(float delata) const
+void InputSystem::DispatchStates(float deltaTime) const
 {
 	for (auto& kv : mStates)
 	{
@@ -176,11 +185,11 @@ void InputSystem::DispatchStates(float delata) const
 
 		auto foundHandler = mStateHandlers.find(kv.second);
 		if ( foundHandler != mStateHandlers.end() && !foundHandler->second.empty())
-			foundHandler->second(kv.second, value, delata);
+			foundHandler->second(kv.second, value, deltaTime);
 	}
 }
 
-void InputSystem::DispatchRanges(float delata) const
+void InputSystem::DispatchRanges(float deltaTime) const
 {
 	for (auto iter = mRanges.begin(); iter != mRanges.end(); ++iter)
 	{
@@ -206,10 +215,9 @@ void InputSystem::DispatchRanges(float delata) const
 
 		auto foundHandler = mRangeHandlers.find(iter->second);
 		if ( foundHandler != mRangeHandlers.end() && !foundHandler->second.empty())
-			foundHandler->second(iter->second, value, delata);
+			foundHandler->second(iter->second, value, deltaTime);
 	}
 }
-
 
 void InputSystem::AddActionHandler( uint32_t action, InputActionHandler handler )
 {
@@ -271,11 +279,18 @@ bool InputSystem::HasRange(uint32_t range) const
 	return false;
 }
 
-void InputSystem::Dispatch( float delata )
+void InputSystem::Dispatch( float deltaTime )
 {
-	DispatchActions(delata);
-	DispatchStates(delata);
-	DispatchRanges(delata);
+	DispatchActions(deltaTime);
+	DispatchStates(deltaTime);
+	DispatchRanges(deltaTime);
 }
+
+void InputSystem::ForceCursorToCenter()
+{
+	Window* mainWindow = Context::GetSingleton().GetApplication().GetMainWindow();
+	mainWindow->ForceMouseToCenter();
+}
+
 
 }

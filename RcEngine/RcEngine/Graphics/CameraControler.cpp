@@ -84,31 +84,12 @@ void FPSCameraControler::AttachCamera( Camera* camera )
 {
 	CameraControler::AttachCamera(camera);		
 
-	const float4x4& viewMatrix = camera->GetViewMatrix();
-			
-	/*float4x4 invViewMatrix = MatrixInverse(viewMatrix);	
-
-	float4 camPos = invViewMatrix.GetRow(3);
-	Quaternionf camRot = QuaternionFromRotationMatrix(invViewMatrix);
-
-	// The axis basis vectors and camera position are stored inside the 
-	// position matrix in the 4 rows of the camera's world matrix.
-	// To figure out the yaw/pitch of the camera, we just need the Z basis vector
-	float4 zBais = invViewMatrix.GetRow(2);
-
-	mCameraYawAngle = std::atan2(zBais.X(), zBais.Z());
-	float len = std::sqrt(zBais.X()* zBais.X() + zBais.Z()* zBais.Z());
-	mCameraPitchAngle = -std::atan2(zBais.Y(), len);
-
-	mCameraYawAngle = ToDegree(mCameraYawAngle);
-	mCameraPitchAngle = ToDegree(mCameraPitchAngle);*/
-	
 	Quaternionf quat;
 	float3 scale, pos;
-	MatrixDecompose(scale, quat, pos, viewMatrix);
+	MatrixDecompose(scale, quat, pos, camera->GetViewMatrix());
 
 	mCameraRot = QuaternionInverse(quat);
-	QuaternionToRotationYawPitchRoll(mCameraYawAngle, mCameraPitchAngle, mCameraRollAngle, mCameraRot);
+	QuaternionToYawPitchRoll(mCameraYawAngle, mCameraPitchAngle, mCameraRollAngle, mCameraRot);
 }
 
 void FPSCameraControler::Move( float x, float y, float z )
@@ -117,23 +98,23 @@ void FPSCameraControler::Move( float x, float y, float z )
 	mAttachedCamera->SetViewParams(newEyePos, newEyePos + mAttachedCamera->GetView(), mAttachedCamera->GetUp());
 }
 
-void FPSCameraControler::HandleMove( uint32_t action, bool value, float delta)
+void FPSCameraControler::HandleMove( uint32_t action, bool value, float dt)
 {
 	if (value)
 	{
 	switch(action)
 		{
 		case MoveLeft:
-			Move(-100 *delta, 0, 0);
+			Move(-100 *dt, 0, 0);
 			break;
 		case MoveRight:
-			Move(100 *delta, 0, 0);
+			Move(100 *dt, 0, 0);
 			break;
 		case Forward:
-			Move(0, 0, 100*delta);
+			Move(0, 0, 100*dt);
 			break;
 		case Backward:
-			Move(0, 0, -100 *delta);
+			Move(0, 0, -100 *dt);
 			break;
 		}
 	}
@@ -149,11 +130,11 @@ void FPSCameraControler::HandleRoatate( uint32_t action, int32_t value, float dt
 	{
 		if (action == TurnLeftRight)
 		{
-			Rotate(value * 15 * dt, 0 , 0);
+			Rotate(value * dt, 0 , 0);
 		}
 		else if (action == TurnUpDown)
 		{
-			Rotate(0, value * 15 * dt, 0);
+			Rotate(0, value * dt, 0);
 		}	
 	}
 }
@@ -163,10 +144,10 @@ void FPSCameraControler::Rotate( float yaw, float pitch, float roll )
 	mCameraYawAngle += yaw * 0.05f;
 	mCameraPitchAngle += pitch * 0.05f;
 
-	mCameraPitchAngle = (std::max)( -Mathf::PI / 2.0f, mCameraPitchAngle );
-	mCameraPitchAngle = (std::min)( +Mathf::PI / 2.0f, mCameraPitchAngle );
+	mCameraPitchAngle = (std::max)( -Mathf::HALF_PI, mCameraPitchAngle );
+	mCameraPitchAngle = (std::min)( +Mathf::HALF_PI, mCameraPitchAngle );
 
-	mCameraRot = QuaternionFromRotationYawPitchRoll(mCameraYawAngle, mCameraPitchAngle, 0.0f);
+	mCameraRot = QuaternionFromYawPitchRoll(mCameraYawAngle, mCameraPitchAngle, 0.0f);
 
 	// Transform vectors based on camera's rotation matrix
 	float3 vWorldUp, vWorldAhead;
@@ -210,7 +191,6 @@ void ArcBall::Reset()
 
 	mDrag = false;
 }
-
 
 float3 ArcBall::ScreenToSphere( float screenX, float screenY )
 {
@@ -354,7 +334,6 @@ void ModelViewerCameraControler::HadnleCameraView( uint32_t action, bool value, 
 		mCameraArcBall.OnEnd();
 	}
 }
-
 
 void ModelViewerCameraControler::HandleModelView( uint32_t action, bool value, float delta )
 {

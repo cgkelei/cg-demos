@@ -462,49 +462,49 @@ void OpenGLMapping::Mapping( GLenum& min, GLenum& mag, TextureFilter filter )
 	case TF_Min_Mag_Point_Mip_Linear:
 		{
 			min = GL_NEAREST_MIPMAP_LINEAR;
-			mag = GL_NEAREST_MIPMAP_LINEAR;
+			mag = GL_NEAREST;
 		}
 		break;
 	case TF_Min_Point_Mag_Linear_Mip_Point:
 		{
-			min = GL_NEAREST;
-			mag = GL_LINEAR_MIPMAP_NEAREST;
+			min = GL_NEAREST_MIPMAP_NEAREST;
+			mag = GL_LINEAR;
 		}
 		break;
 	case TF_Min_Point_Mag_Mip_Linear:
 		{
-			min = GL_NEAREST;
-			mag = GL_LINEAR_MIPMAP_LINEAR;
+			min = GL_NEAREST_MIPMAP_LINEAR;
+			mag = GL_LINEAR;
 		}
 		break;
 	case TF_Min_Linear_Mag_Mip_Point:
 		{
-			min = GL_LINEAR;
-			mag = GL_NEAREST_MIPMAP_NEAREST;
+			min = GL_LINEAR_MIPMAP_NEAREST;
+			mag = GL_NEAREST;
 		}
 		break;
 	case TF_Min_Linear_Mag_Point_Mip_Linear:
 		{
-			min = GL_LINEAR;
-			mag = GL_NEAREST_MIPMAP_LINEAR;
+			min = GL_LINEAR_MIPMAP_LINEAR;
+			mag = GL_NEAREST;
 		}
 		break;
 	case TF_Min_Mag_Linear_Mip_Point:
 		{
 			min = GL_LINEAR_MIPMAP_NEAREST;
-			mag = GL_LINEAR_MIPMAP_NEAREST;
+			mag = GL_LINEAR;
 		}
 		break;
 	case TF_Min_Mag_Mip_Linear:
 		{
 			min = GL_LINEAR_MIPMAP_LINEAR;
-			mag = GL_LINEAR_MIPMAP_LINEAR;
+			mag = GL_LINEAR;
 		}
 		break;
 	case TF_Anisotropic:
 		{
-			min = GL_NEAREST;
-			mag = GL_NEAREST;
+			min = GL_LINEAR_MIPMAP_LINEAR;
+			mag = GL_LINEAR;
 		}
 		break;
 	default:

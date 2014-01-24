@@ -188,6 +188,8 @@ public:
 	InputSystem();
 	~InputSystem();
 
+	void ClearStates();
+
 	void FireEvent(const InputEvent& event);
 	bool PollEvent(InputEvent* event);
 
@@ -221,6 +223,10 @@ public:
 	bool KeyPress(KeyCode key) const;
 	bool KeyRelease(KeyCode key) const;
 
+	// Force mouse cursor to window center
+	void ForceCursorToCenter();
+
+	//-----------------------------------------------------------------------------------
 	void AddActionHandler(uint32_t action, InputActionHandler handler);
 	void AddStateHandler(uint32_t state, InputStateHandler handler);
 	void AddRangeHandler(uint32_t range, InputRangeHandler handler);
@@ -257,9 +263,9 @@ public:
 	bool HasRange(uint32_t range) const;
 
 private:
-	void DispatchActions(float delata) const;
-	void DispatchStates(float delata) const;
-	void DispatchRanges(float delata) const;
+	void DispatchActions(float dt) const;
+	void DispatchStates(float dt) const;
+	void DispatchRanges(float dt) const;
 
 private:
 	Vector<int32_t, 2>  mMousePos;

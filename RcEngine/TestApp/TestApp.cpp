@@ -98,7 +98,7 @@ void TestApp::LoadContent()
 
 	mSpriteBatch = std::make_shared<SpriteBatch>();
 
-	mTexture = factory->CreateTextureFromFile(FileSystem::GetSingleton().Locate("Sword_2H_Frostmourne_D_01_Glow.dds"));
+	//mTexture = factory->CreateTextureFromFile(FileSystem::GetSingleton().Locate("Sword_2H_Frostmourne_D_01_Glow.dds"));
 	
 	//String skyTexPath = ;
 	//mTexture = factory->CreateTextureFromFile(skyTexPath);
@@ -126,11 +126,11 @@ void TestApp::Render()
 
 	float clr = (float)169/255;
 	currentFrameBuffer->Clear(CF_Color | CF_Depth |CF_Stencil, RcEngine::ColorRGBA(clr, clr, clr, 1.0f), 1.0f, 0);
-	
+	/*
 	mSpriteBatch->Begin();
 	mSpriteBatch->Draw(mTexture, float2(0, 0), nullptr, ColorRGBA::White);
 	mSpriteBatch->End();
-	mSpriteBatch->Flush();
+	mSpriteBatch->Flush();*/
 
 	// todo 
 	// Move to engine level

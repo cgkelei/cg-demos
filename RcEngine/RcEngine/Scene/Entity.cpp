@@ -29,14 +29,18 @@ Entity::Entity( const String& name, const shared_ptr<Mesh>& mesh )
 	mSkeleton( mesh->GetSkeleton() ? mesh->GetSkeleton()->Clone() : 0 )
 {
 	Initialize();
+
+	printf("Create Entity: %s\n", name.c_str());
 }
 
 Entity::~Entity()
 {
+	printf("Delete Entity: %s\n", mName.c_str());
+
 	for (SubEntity* subEntiry : mSubEntityList)
 		SAFE_DELETE(subEntiry);
-
 	mSubEntityList.clear();
+
 	mChildAttachedObjects.clear();
 
 	SAFE_DELETE(mAnimationPlayer);
@@ -289,17 +293,17 @@ BoneFollower* Entity::AttachObjectToBone( const String &boneName, SceneObject* s
 			"Entity::attachObjectToBone");
 	}
 
-	Bone* bone = mSkeleton->GetBone(boneName);
+	Bone* pBone = mSkeleton->GetBone(boneName);
 
-	if (!bone)
+	if (!pBone)
 	{
 		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Cannot locate bone named " + boneName,
 			"Entity::attachObjectToBone");
 	}
 
-	BoneFollower* follower = mSkeleton->CreateFollowerOnBone(bone, offsetOrientation, offsetPosition);	
-	follower->SetParentEntity(this);
-	follower->SetFollower(sceneObj);
+	BoneFollower* pBoneFollower = mSkeleton->CreateFollowerOnBone(pBone, offsetOrientation, offsetPosition);	
+	pBoneFollower->SetParentEntity(this);
+	pBoneFollower->SetFollower(sceneObj);
 	
 	mChildAttachedObjects.insert( std::make_pair(sceneObj->GetName(), sceneObj) );
 
@@ -307,7 +311,7 @@ BoneFollower* Entity::AttachObjectToBone( const String &boneName, SceneObject* s
 	if (mParentNode)
 		mParentNode->NeedUpdate();
 
-	return follower;
+	return pBoneFollower;
 }
 
 

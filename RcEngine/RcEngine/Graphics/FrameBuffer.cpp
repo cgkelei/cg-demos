@@ -174,5 +174,10 @@ void FrameBuffer::Clear( uint32_t flags, ColorRGBA& clr, float depth, uint32_t s
 	}
 }
 
+bool FrameBuffer::CheckFramebufferStatus()
+{
+	return true;
+}
+
 
 } // Namespace RcEngine

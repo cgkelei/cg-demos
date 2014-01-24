@@ -117,20 +117,14 @@ void OpenGLRenderView::DoClear( GLbitfield flags, const ColorRGBA& clr, float de
 	if (GLEW_EXT_draw_buffers2 && mFrameBufferID != 0)
 	{
 		if (clearFlagOGL & GL_COLOR_BUFFER_BIT)
-		{
 			glClearBufferfv(GL_COLOR, bufferIndex, clr());
-		}
 
 		if ((clearFlagOGL & GL_DEPTH_BUFFER_BIT) && (clearFlagOGL & GL_STENCIL_BUFFER_BIT))
-		{
 			glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
-		}
 		else
 		{
 			if (flags & GL_DEPTH_BUFFER_BIT)
-			{
 				glClearBufferfv(GL_DEPTH, 0, &depth);
-			}
 			else
 			{
 				if (flags & GL_STENCIL_BUFFER_BIT)
@@ -144,21 +138,16 @@ void OpenGLRenderView::DoClear( GLbitfield flags, const ColorRGBA& clr, float de
 	else
 	{
 		if (flags & GL_COLOR_BUFFER_BIT)
-		{
 			glClearColor(clr.R(), clr.G(), clr.B(), clr.A());
-		}
+
 		if (flags & GL_DEPTH_BUFFER_BIT)
-		{
 			glClearDepth(depth);
-		}
+
 		if (flags & GL_STENCIL_BUFFER_BIT)
-		{
 			glClearStencil(stencil);
-		}
+
 		if (flags != 0)
-		{
 			glClear(flags);
-		}
 	}
 
 	// set mask back

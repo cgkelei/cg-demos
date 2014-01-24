@@ -13,8 +13,8 @@ OpenGLSamplerState::OpenGLSamplerState( const SamplerStateDesc& desc )
 	
 	GLenum min, mag;
 	OpenGLMapping::Mapping( min, mag, desc.Filter);
-	glSamplerParameteri(mOGLSampler, GL_TEXTURE_MAG_FILTER, min);
-	glSamplerParameteri(mOGLSampler, GL_TEXTURE_MIN_FILTER, mag);
+	glSamplerParameteri(mOGLSampler, GL_TEXTURE_MAG_FILTER, mag);
+	glSamplerParameteri(mOGLSampler, GL_TEXTURE_MIN_FILTER, min);
 
 	glSamplerParameterf(mOGLSampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, desc.MaxAnisotropy);
 

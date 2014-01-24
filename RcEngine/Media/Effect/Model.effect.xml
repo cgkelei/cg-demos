@@ -169,9 +169,9 @@ void main()
 
 #ifdef _NormalMapping
 	vec3 normal = texture2D( NormalMap, newTex ).rgb * 2.0 - 1.0;
-	normal = normal * oTangentToWorld;
+	normal = normalize(normal * oTangentToWorld);
 #else
-	vec3 normal = oNormalWS;
+	vec3 normal = normalize(oNormalWS);
 #endif	
 
 #ifdef SPOTLIGHT

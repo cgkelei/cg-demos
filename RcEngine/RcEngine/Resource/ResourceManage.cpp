@@ -14,7 +14,7 @@ ResourceManager::ResourceManager()
 
 ResourceManager::~ResourceManager()
 {
-
+	mResourcesByHandle.clear();
 }
 
 
@@ -157,5 +157,19 @@ void ResourceManager::LoadAllFromDisk()
 	}
 }
 
+void ResourceManager::ReleaseResource( ResourceHandle handle )
+{
+	auto it = mResourcesByHandle.find(handle);
+	if (it != mResourcesByHandle.end())
+	{
+		//mResourcesByHandle[handle] = NULL;
+		mResourcesByHandle.erase(it);
+	}
+}
+
+void ResourceManager::UnLoadAll()
+{
+	mResourcesByHandle.clear();
+}
 
 }

@@ -18,6 +18,7 @@ public:
 
 	virtual void Resize(uint32_t width, uint32_t height);
 	virtual void SwapBuffers();
+	virtual bool CheckFramebufferStatus();
 
 	GLuint GetFrameBufferObject() const { return mFrameBufferObject; }
 

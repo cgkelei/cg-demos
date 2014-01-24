@@ -29,7 +29,6 @@ Character::Character()
 
 Character::~Character()
 {
-
 }
 
 void Character::LoadContent()
@@ -42,7 +41,7 @@ void Character::LoadContent()
 	mActorNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Arthas");
 	mActorNode->SetPosition(float3(0, 0, 0));
 	mActorNode->SetScale(float3(3, 3, 3));
-	mActorNode->SetRotation(QuaternionFromRotationYawPitchRoll(Mathf::ToRadian(-90.0f), 0.0f, 0.0f));
+	mActorNode->SetRotation(QuaternionFromYawPitchRoll(Mathf::ToRadian(-90.0f), 0.0f, 0.0f));
 	mActorNode->AttachObject(mActorEntity);
 
 	mSwordEntity = sceneMan.CreateEntity("Sword", "Arthas/Mesh_Sword_2H_Frostmourne_D_01.mesh",  "Custom");

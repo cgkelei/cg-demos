@@ -12,10 +12,10 @@ public:
 	Camera(void);
 	~Camera(void);
 
-	float3 GetPosition() const		{ return mPosition; }
+	float3 GetPosition() const			{ return mPosition; }
 	float3 GetLookAt() const			{ return mLookAt; }
 	float3 GetUp() const				{ return mUpVec; }
-	float3 GetView() const			{ return mViewVec; }
+	float3 GetView() const				{ return mViewVec; }
 	float    GetFov() const				{ return mFieldOfView; }
 	float    GetAspect() const			{ return mAspect; }
 	float    GetNearPlane() const		{ return mNearPlane; }

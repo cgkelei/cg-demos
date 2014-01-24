@@ -82,9 +82,7 @@ OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
 	}
 
 	if (WGLEW_EXT_swap_control)
-	{
 		wglSwapIntervalEXT(settings.SyncInterval);
-	}
 
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

@@ -51,6 +51,9 @@ public:
 
 	void LoadAllFromDisk();
 
+	void ReleaseResource(ResourceHandle handle);
+	void UnLoadAll();
+
 protected:
 	ResourceHandle AddNonExitingResource(uint32_t type, const String& name, const String& group);
 	ResourceHandle GetNextHandle();  
@@ -62,6 +65,8 @@ protected:
 	unordered_map<String, ResourceGroup> mResourcesWithGroup;
 	
 };
+
+
 
 
 

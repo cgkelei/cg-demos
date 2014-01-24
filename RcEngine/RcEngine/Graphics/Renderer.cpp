@@ -37,18 +37,14 @@ void Renderer::DrawRenderable( Camera* camera, const String& tech, const  String
 
 void Renderer::RenderScene( const shared_ptr<Pipeline>& pipeline )
 {
-	
 	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
 
-	for (size_t iStage = 0; iStage < pipeline->mPipelineStages.size(); ++iStage)
+	for (Pipeline::PipelineStage& stage : pipeline->mPipelineStages)
 	{
-		Pipeline::PipelineStage& stage = pipeline->mPipelineStages[iStage];
 		if( !stage.Enabled ) continue;
 
-		for( size_t iCommand = 0; iCommand < stage.Commands.size(); ++iCommand )
+		for( Pipeline::PipelineCommand& command : stage.Commands)
 		{
-			Pipeline::PipelineCommand& command = stage.Commands[iCommand];
-			
 			switch(command.Command)
 			{
 			case Pipeline::BindFrameBuffer:
@@ -57,9 +53,7 @@ void Renderer::RenderScene( const shared_ptr<Pipeline>& pipeline )
 					shared_ptr<FrameBuffer> frameBuffer = pipeline->GetFrameBuffer(fbName);
 
 					if (!frameBuffer)
-					{
 						frameBuffer = device.GetScreenFrameBuffer();
-					}
 
 					device.BindFrameBuffer(frameBuffer);
 					mCurrentFrameBuffer = frameBuffer;

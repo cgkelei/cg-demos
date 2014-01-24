@@ -46,12 +46,12 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 	GLenum gltype;
 	OpenGLMapping::Mapping(glinternalFormat, glformat, gltype, mFormat);
 
-	if (GLEW_ARB_pixel_buffer_object)
+	/*if (GLEW_ARB_pixel_buffer_object)
 	{
 		mPixelBuffers.resize(mTextureArraySize*mMipMaps);
 		glGenBuffers(static_cast<GLsizei>(mPixelBuffers.size()), &mPixelBuffers[0]);
 	}
-	else
+	else*/
 	{
 		mTextureData.resize(mTextureArraySize * mMipMaps);
 	}
@@ -156,7 +156,7 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 
 OpenGLTexture2D::~OpenGLTexture2D()
 {
-
+	
 }
 
 uint32_t OpenGLTexture2D::GetWidth( uint32_t level )
@@ -251,14 +251,9 @@ void OpenGLTexture2D::Map2D( uint32_t arrayIndex, uint32_t level, TextureMapAcce
 	}
 
 	if (PixelFormatUtils::IsCompressed(mFormat))
-	{
 		data = p + (yOffset / 4) * rowPitch + (xOffset / 4 * blockSize);
-	}
 	else
-	{
 		data = p + (yOffset * mWidths[level] + xOffset) * texelSize;
-	}
-
 }
 
 void OpenGLTexture2D::Unmap2D( uint32_t arrayIndex, uint32_t level )
