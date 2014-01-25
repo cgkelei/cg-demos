@@ -43,23 +43,23 @@ void SponzaApp::Initialize()
 	const uint32_t GBufferWidth = mMainWindow->GetWidth();
 	const uint32_t GBufferHeight = mMainWindow->GetHeight();
 
-	//// Create GBuffer
-	//mGbuffer = factory.CreateFrameBuffer(GBufferWidth, GBufferHeight);
-	//device.BindFrameBuffer(mGbuffer);
+	// Create GBuffer
+	mGbuffer = factory.CreateFrameBuffer(GBufferWidth, GBufferHeight);
+	device.BindFrameBuffer(mGbuffer);
 
-	//// Attach DepthStencilView
-	//shared_ptr<Texture> depthTexture = factory.CreateTexture2D(GBufferWidth, GBufferHeight, PF_Depth32, 1, 1, 1, 1, 0, nullptr);
-	//mGbuffer->Attach(ATT_DepthStencil, factory.CreateDepthStencilView(depthTexture, 0, 0));
+	// Attach DepthStencilView
+	shared_ptr<Texture> depthTexture = factory.CreateTexture2D(GBufferWidth, GBufferHeight, PF_Depth32, 1, 1, 1, 1, 0, nullptr);
+	mGbuffer->Attach(ATT_DepthStencil, factory.CreateDepthStencilView(depthTexture, 0, 0));
 
-	//shared_ptr<Texture> albedoTexture = factory.CreateTexture2D(GBufferWidth, GBufferHeight, PF_R8G8B8A8, 1, 1, 1, 1, 0, nullptr);
-	//shared_ptr<Texture> normalTexture = factory.CreateTexture2D(GBufferWidth, GBufferHeight, PF_R8G8B8A8, 1, 1, 1, 1, 0, nullptr);
-	//mGbuffer->Attach(ATT_Color0, factory.CreateRenderTargetView2D(albedoTexture, 0, 0));
-	//mGbuffer->Attach(ATT_Color1, factory.CreateRenderTargetView2D(normalTexture, 0, 0));
+	shared_ptr<Texture> albedoTexture = factory.CreateTexture2D(GBufferWidth, GBufferHeight, PF_R8G8B8A8, 1, 1, 1, 1, 0, nullptr);
+	shared_ptr<Texture> normalTexture = factory.CreateTexture2D(GBufferWidth, GBufferHeight, PF_R8G8B8A8, 1, 1, 1, 1, 0, nullptr);
+	mGbuffer->Attach(ATT_Color0, factory.CreateRenderTargetView2D(albedoTexture, 0, 0));
+	mGbuffer->Attach(ATT_Color1, factory.CreateRenderTargetView2D(normalTexture, 0, 0));
 
-	//mGbuffer->CheckFramebufferStatus();
+	mGbuffer->CheckFramebufferStatus();
 
 	// Bind Default ScreenBuffer
-	//device.BindFrameBuffer(device.GetScreenFrameBuffer());
+	device.BindFrameBuffer(device.GetScreenFrameBuffer());
 }
 
 void SponzaApp::LoadContent()
@@ -125,9 +125,12 @@ void SponzaApp::Render()
 	shared_ptr<FrameBuffer> defaultFrameBuffer = renderDevice.GetScreenFrameBuffer();
 
 	float clr = (float)169/255;
-	defaultFrameBuffer->Clear(CF_Color | CF_Depth | CF_Stencil, ColorRGBA(clr, clr, clr, 1.0f), 1.0f, 0);
+	//defaultFrameBuffer->Clear(CF_Color | CF_Depth | CF_Stencil, ColorRGBA(clr, clr, clr, 1.0f), 1.0f, 0);
 
-	renderDevice.BindFrameBuffer(defaultFrameBuffer);	
+	//renderDevice.BindFrameBuffer(defaultFrameBuffer);	
+
+	renderDevice.BindFrameBuffer(mGbuffer);
+	mGbuffer->Clear(CF_Color | CF_Depth , ColorRGBA(clr, clr, clr, 1.0f), 1.0f, 0);
 
 	//DrawUI();
 
@@ -152,7 +155,10 @@ void SponzaApp::Render()
 			}
 	}
 
-	//renderDevice.BindFrameBuffer(currentFrameBuffer);
+	//mGbuffer->GetAttachedView(ATT_Color0);
+
+	renderDevice.BindFrameBuffer(defaultFrameBuffer);
+	defaultFrameBuffer->Clear(CF_Color | CF_Depth | CF_Stencil, ColorRGBA(clr, clr, clr, 1.0f), 1.0f, 0);
 
 	// Swap Buffer
 	defaultFrameBuffer->SwapBuffers();	

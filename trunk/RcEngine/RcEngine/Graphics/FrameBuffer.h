@@ -42,7 +42,7 @@ public:
 	 * note that before do clear, you need to bind the frame buffer as current device 
 	 * frame buffer first, it is user's responsibity.
 	 */
-	void Clear(uint32_t flags, ColorRGBA& clr, float depth, uint32_t stencil);
+	void Clear(uint32_t flags, const ColorRGBA& clr, float depth, uint32_t stencil);
 
 	virtual void SwapBuffers() = 0;
 	virtual void Resize(uint32_t width, uint32_t height) = 0;
