@@ -152,12 +152,12 @@ void FrameBuffer::DetachAll()
 		Detach(ATT_DepthStencil);
 }
 
-void FrameBuffer::Clear( uint32_t flags, ColorRGBA& clr, float depth, uint32_t stencil )
+void FrameBuffer::Clear( uint32_t flags, const ColorRGBA& clr, float depth, uint32_t stencil )
 {
 	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
 
 	// frame buffer must binded before clear
-	shared_ptr<FrameBuffer> currentFrameBuffer = Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer();
+	shared_ptr<FrameBuffer> currentFrameBuffer = device.GetCurrentFrameBuffer();
 	assert( this == currentFrameBuffer.get());
 
 	for (size_t i = 0; i < mColorViews.size(); ++i)

@@ -9,7 +9,6 @@ namespace RcEngine {
 OpenGLFrameBuffer::OpenGLFrameBuffer( uint32_t width, uint32_t height, bool offscreen /*= true*/ )
 	: FrameBuffer(width, height, offscreen)
 {
-
 	if (mOffscreen)
 	{
 		glGenFramebuffersEXT(1, &mFrameBufferObject);
