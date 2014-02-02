@@ -7,11 +7,20 @@ namespace RcEngine {
 
 Light::Light( const String& name )
 	: SceneObject(name, SOT_Light, false), 
-	  mLightType(LT_Point), mLightPosition(float3::Zero()),
-	  mLightDirection(float3(0, 0, 1)), mLightColor(ColorRGBA::White),
-	  mSpotOuter(Mathf::ToRadian(40.0f)), mSpotInner(Mathf::ToRadian(30.0f)), mSpotFalloff(1.0f), mRange(100000), mAttenuationConst(1.0f),
-	  mAttenuationLinear(0.0f), mAttenuationQuad(0.0f), mDerivedPosition(float3::Zero()), 
-	  mDerivedDirection(float3(0, 0, 1)), mDerivedTransformDirty(false)
+	  mLightType(LT_Point), 
+	  mLightPosition(float3::Zero()),
+	  mLightDirection(float3(0, 0, 1)),
+	  mLightColor(float3::Zero()),
+	  mSpotOuter(Mathf::ToRadian(40.0f)), 
+	  mSpotInner(Mathf::ToRadian(30.0f)), 
+	  mSpotFalloff(1.0f),
+	  mRange(100000),
+	  mAttenuationConst(1.0f),
+	  mAttenuationLinear(0.0f), 
+	  mAttenuationQuad(0.0f), 
+	  mDerivedPosition(float3::Zero()), 
+	  mDerivedDirection(float3(0, 0, 1)),
+	  mDerivedTransformDirty(false)
 {
 
 }
@@ -28,11 +37,10 @@ void Light::SetPosition( const float3& pos )
 	mDerivedTransformDirty = true;
 }
 
-void Light::SetLightColor( const ColorRGBA& color )
+void Light::SetLightColor( const float3& color )
 {
 	mLightColor = color;
 }
-
 
 void Light::SetDirection( const float3& vec )
 {

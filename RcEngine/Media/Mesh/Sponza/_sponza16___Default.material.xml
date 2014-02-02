@@ -2,8 +2,8 @@
 
 <Material name="16___Default">
 
-	<Parameter name="World" semantic="WorldMatrix" type="float4x4"/>
-	<Parameter name="ViewProj" semantic="ViewProjectionMatrix" type="float4x4"/>
+	<Parameter name="WorldView" semantic="WorldViewMatrix" type="float4x4"/>
+	<Parameter name="Proj" semantic="ProjectionMatrix" type="float4x4"/>
 	<Parameter name="DiffuseColor" semantic="DiffuseMaterialColor" type="float3" value="0.588 0.588 0.588"/>
 	<Parameter name="AmbientColor" semantic="AmbientMaterialColor" type="float3" value="0.588 0.588 0.588"/>
 			

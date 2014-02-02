@@ -23,51 +23,47 @@ public:
 		shared_ptr<VertexDeclaration> VertexDecl;
 		uint32_t Frequency;
 		StreamType Type;
-
 	};
-
-	typedef std::vector<StreamUnit> StreamSlots;
 
 public:
 	RenderOperation(void);
 	~RenderOperation();
 
-	PrimitiveType GetPrimitiveType() const							{ return PrimitiveType; }
-	void SetPrimitiveType(PrimitiveType type)						{ PrimitiveType = type; }
-
-	uint32_t GetVertexCount() const;
-
-	uint32_t GetStartVertexLocation() const;
-	void SetStartVertexLocation(uint32_t loc);
-	uint32_t GetBaseVertexLocation() const;
-	void SetBaseVertexLocation(uint32_t loc);
-	uint32_t GetStartIndexLocation() const;
-	void SetStartIndexLocation(uint32_t loc);
-
-	uint32_t GetStreamCount() const;
-	const StreamUnit& GetStreamUnit(uint32_t index) const;
-
+	uint32_t GetStreamCount() const							{ return VertexStreams.size(); }
+	const StreamUnit& GetStreamUnit(uint32_t index) const	{ return VertexStreams[index]; }
+	
 	void BindVertexStream(const shared_ptr<GraphicsBuffer>& buffer, const shared_ptr<VertexDeclaration>& vd,
 		StreamType type = ST_Geometry, uint32_t freq = 1);
+
+	/**
+	 * Set indices buffer and calculate indices count.
+	 */
 	void BindIndexStream(const shared_ptr<GraphicsBuffer>& buffer, IndexBufferType type);
 
-	bool UseIndices() const;
-	uint32_t GetIndicesCount() const;
-
-	IndexBufferType GetIndexType() const									{ return IndexType; }
-	const shared_ptr<GraphicsBuffer>& GetIndexStream() const				{ return IndexBuffer; }			
+	/**
+	 * Set index range in IndexBuffer.
+	 */
+	void SetIndexRange(uint32_t indexStart, uint32_t indexCount);
+	
+	/**
+	 * No index buffer, set vertex range. Set VertexStart directly if need in VertexBuffer
+	 */
+	void SetVertexRange(uint32_t vertexStart, uint32_t vertexCount);
 
 public:
 	PrimitiveType PrimitiveType;
-	StreamSlots VertexStreams;
+
+	std::vector<StreamUnit> VertexStreams;
+
 	bool UseIndex;
 	shared_ptr<GraphicsBuffer> IndexBuffer;
 	IndexBufferType IndexType;
 
-	uint32_t StartVertexLocation;
-	uint32_t StartIndexLocation;
-	int32_t  BaseVertexLocation;
-	uint32_t StartInstanceLocation;
+	uint32_t VertexStart;
+	uint32_t VertexCount;
+
+	uint32_t IndexStart;
+	uint32_t IndexCount;
 };
 
 

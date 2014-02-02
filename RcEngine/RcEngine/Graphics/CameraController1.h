@@ -19,7 +19,7 @@ public:
 
 	virtual void Update(float deltaTime) = 0;
 
-	virtual void AttachCamera(Camera* camera);
+	virtual void AttachCamera(Camera& camera);
 	virtual void DetachCamera();
 
 protected:
@@ -33,7 +33,7 @@ public:
 	virtual ~FPSCameraControler();
 
 	virtual void Update(float deltaTime);
-	virtual void AttachCamera(Camera* camera);
+	virtual void AttachCamera(Camera& camera);
 
 	inline void  SetMoveSpeed(float speed)							{ mMoveSpeed = speed; }
 	inline float GetMoveSpeed() const								{ return mMoveSpeed; }

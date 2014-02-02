@@ -473,8 +473,11 @@ shared_ptr<Shader> CompileShader(const ShaderStage& shaderStage, const vector<St
 	{
 		std::cout << "shader:" + shaderStage.Name << std::endl;
 		std::cout << retVal->GetCompileInfo() << std::endl;
+
+		retVal->DumpSource(String("E:/" + shaderStage.Name).c_str());
+
 		ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "shader:" + shaderStage.Name  + " compile error!",
-			"Effect::LoadForm");
+			"Effect::LoadForm");		
 	}
 
 
@@ -507,7 +510,7 @@ void CollectShaderMacro(const XMLNodePtr& node, vector<String>& defines, vector<
 namespace RcEngine {
 
 Effect::Effect( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
-	: Resource(RT_Effect, creator, handle, name, group)
+	: Resource(RT_Effect, creator, handle, name, group), mCurrTechnique(nullptr)
 {
 
 }
@@ -558,7 +561,7 @@ EffectParameter* Effect::GetParameterByName( const String& paraName ) const
 	return nullptr;
 }
 
-EffectParameter* Effect::AddOrGetShaderParameter(const String& name, EffectParameterType type, bool array)
+EffectParameter* Effect::FetchShaderParameter(const String& name, EffectParameterType type, bool array)
 {
 	EffectParameter* effectParam;
 	auto found = mParameters.find(name);
@@ -579,12 +582,10 @@ shared_ptr<Resource> Effect::Clone()
 {
 	printf("Clone effect: %s\n", mEffectName.c_str());
 
-	ResourceManager& resMan = ResourceManager::GetSingleton();
-
 	shared_ptr<Effect> retVal = std::make_shared<Effect>(mCreator, mResourceHandle, mResourceName, mGroup);
 	
 	retVal->mEffectName = mEffectName;
-
+	
 	// clone paremeters
 	for (auto& kv : mParameters)
 		retVal->mParameters[kv.first] = kv.second->Clone();
@@ -594,6 +595,9 @@ shared_ptr<Resource> Effect::Clone()
 	for (size_t i = 0; i < mTechniques.size(); ++i)
 	{
 		retVal->mTechniques[i] = mTechniques[i]->Clone(*retVal);
+		
+		if (mTechniques[i] == mCurrTechnique)
+			retVal->mCurrTechnique = retVal->mTechniques[i];
 	}
 
 	retVal->SetLoadState(Resource::Loaded);
@@ -749,6 +753,8 @@ void Effect::LoadImpl()
 
 		mTechniques.push_back(technique);
 	}
+
+	mCurrTechnique = mTechniques.front();
 }
 
 void Effect::UnloadImpl()
@@ -759,6 +765,43 @@ void Effect::UnloadImpl()
 shared_ptr<Resource> Effect::FactoryFunc( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
 {
 	return std::make_shared<Effect>(creator,handle, name, group);
+}
+
+void Effect::SetCurrentTechnique( const String& techName )
+{
+	std::vector<EffectTechnique*>::const_iterator it;
+	
+	it = std::find_if(mTechniques.begin(), mTechniques.end(), [&](EffectTechnique* tech) {
+		return tech->GetTechniqueName() == techName; });
+	
+	if (it != mTechniques.end())
+	{
+		mCurrTechnique = *it;
+
+		// make all effect parameter dirty
+		for (auto& kv : mParameters)
+			kv.second->MakeDirty();
+	}
+	else
+	{
+		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, techName + " deosn't exit in" + mEffectName, "Effect::SetCurrentTechnique");
+	}	
+}
+
+void Effect::SetCurrentTechnique( uint32_t index )
+{
+	if (index < mTechniques.size())
+	{
+		mCurrTechnique = mTechniques[index];
+
+		// make all effect parameter dirty
+		for (auto& kv : mParameters)
+			kv.second->MakeDirty();
+	}
+	else
+	{
+		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Technique index out of range, " + mEffectName, "Effect::SetCurrentTechnique");
+	}	
 }
 
 

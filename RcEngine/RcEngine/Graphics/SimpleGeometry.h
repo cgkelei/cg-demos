@@ -57,6 +57,18 @@ protected:
 	shared_ptr<VertexDeclaration> mVertexDecl;
 };
 
+class _ApiExport Sphere : public RenderableHelper
+{
+public:
+	Sphere(const String& name, float radius, int32_t slices, int32_t stacks);
+	~Sphere() {}
+
+
+protected:
+	float mRadius;
+	int mNumSlices, mNumStacks;
+};
+
 } // Namespace RcEngine
 
 #endif // SimpleGeometry_h__

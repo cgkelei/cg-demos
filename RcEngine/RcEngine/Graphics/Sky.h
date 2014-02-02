@@ -7,7 +7,7 @@
 
 namespace RcEngine {
 
-class _ApiExport Sky : public SceneObject, public Renderable
+class _ApiExport Sky : public Renderable
 {
 public:
 	enum SkyBoxPlane
@@ -25,16 +25,12 @@ public:
 	Sky( float size,  bool cube = false );
 	~Sky();
 
-	SceneObejctType GetSceneObjectType() const  { return SOT_Sky; }
-
-	bool Renderable() const	{ return true; }
-
 	const shared_ptr<Material>& GetMaterial() const	{ return mMaterial; }
 
 	const shared_ptr<RenderOperation>& GetRenderOperation() const	{ return mRenderOperation; }
 
-	uint32_t GetWorldTransformsCount() const;
-	void GetWorldTransforms(float4x4* xform) const;
+	uint32_t GetWorldTransformsCount() const { return 0; }
+	void GetWorldTransforms(float4x4* xform) const { }
 	
 	void SetMaterial( const shared_ptr<Material>& mat );
 

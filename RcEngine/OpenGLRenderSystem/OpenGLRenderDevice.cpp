@@ -368,15 +368,12 @@ void OpenGLRenderDevice::SetDepthStencilState( const shared_ptr<DepthStencilStat
 	mCurrentBackStencilRef = backStencilRef;
 }
 
-void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
+void OpenGLRenderDevice::DoRender( const EffectTechnique& tech, const RenderOperation& op )
 {
-	RenderOperation::StreamSlots& streams = op.VertexStreams;
 
 	// bind vertex streams
-	for (size_t i = 0; i < streams.size(); ++i)
+	for (const RenderOperation::StreamUnit& streamUnit : op.VertexStreams)
 	{
-		RenderOperation::StreamUnit streamUnit = streams[i];
-
 		// bind vertex buffer
 		BindVertexBufferOGL(streamUnit.Stream);
 
@@ -390,7 +387,7 @@ void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
 			uint16_t count = VertexElement::GetTypeCount(ve.Type);
 			GLenum type = OpenGLMapping::Mapping(ve.Type);
 			bool isNormalized = VertexElement::IsNormalized(ve.Type);
-			uint32_t offset = ve.Offset + op.StartVertexLocation * vertexSize;
+			uint32_t offset = ve.Offset + op.VertexStart * vertexSize;
 
 			glEnableVertexAttribArray(att);
 
@@ -414,32 +411,27 @@ void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
 		if(op.IndexType == IBT_Bit16)
 		{
 			indexType = GL_UNSIGNED_SHORT;
-			indexOffset += op.StartIndexLocation * 2;
+			indexOffset += op.IndexStart * 2;
 
 		}
 		else
 		{
 			indexType = GL_UNSIGNED_INT;
-			indexOffset += op.StartIndexLocation * 4;
+			indexOffset += op.IndexStart * 4;
 		}
 
 		BindIndexBufferOGL(op.IndexBuffer);
 	}
 
 	// get pass
-	for(auto iter = tech.GetPasses().begin(); iter != tech.GetPasses().end(); ++iter)
+	for(EffectPass* pass : tech.GetPasses())
 	{
-		EffectPass* pass = *iter;
 		pass->BeginPass();
 	
 		if (op.UseIndex)
-		{
-			glDrawElements(OpenGLMapping::Mapping(op.PrimitiveType), op.GetIndicesCount(), indexType, indexOffset);	
-		}
+			glDrawElements(OpenGLMapping::Mapping(op.PrimitiveType), op.IndexCount, indexType, indexOffset);	
 		else
-		{
-			glDrawArrays(OpenGLMapping::Mapping(op.PrimitiveType), op.StartVertexLocation, static_cast<GLsizei>(op.GetVertexCount()));
-		}
+			glDrawArrays(OpenGLMapping::Mapping(op.PrimitiveType), op.VertexStart, static_cast<GLsizei>(op.VertexCount));
 
 		pass->EndPass();
 	}

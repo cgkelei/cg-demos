@@ -67,7 +67,6 @@
     <ClInclude Include="Graphics\Texture.h" />
     <ClInclude Include="Graphics\VertexDeclaration.h" />
     <ClInclude Include="Graphics\VertexElement.h" />
-    <ClInclude Include="Graphics\Viewport.h" />
     <ClInclude Include="GUI\Button.h" />
     <ClInclude Include="GUI\CheckBox.h" />
     <ClInclude Include="GUI\ComboBox.h" />
@@ -168,7 +167,6 @@
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Graphics\VertexDeclaration.cpp" />
     <ClCompile Include="Graphics\VertexElement.cpp" />
-    <ClCompile Include="Graphics\Viewport.cpp" />
     <ClCompile Include="GUI\Button.cpp" />
     <ClCompile Include="GUI\CheckBox.cpp" />
     <ClCompile Include="GUI\ComboBox.cpp" />
@@ -219,6 +217,18 @@
     <None Include="Math\Quaternion.inl" />
     <None Include="Math\Rectangle.inl" />
     <None Include="Math\Vector.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\Media\Effect\DeferredLighting.effect.xml" />
+    <Xml Include="..\Media\Effect\DeferredReadUtill.include.xml" />
+    <Xml Include="..\Media\Effect\Font.effect.xml" />
+    <Xml Include="..\Media\Effect\LightingUtil.include.xml" />
+    <Xml Include="..\Media\Effect\Model.effect.xml" />
+    <Xml Include="..\Media\Effect\SimpleModel.effect.xml" />
+    <Xml Include="..\Media\Effect\Sky.effect.xml" />
+    <Xml Include="..\Media\Effect\Sprite.effect.xml" />
+    <Xml Include="..\Media\Pipiline\DeferredLighting.pipeline.xml" />
+    <Xml Include="..\Media\Pipiline\ForwardLighting.pipeline.xml" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8C5FC295-3DCE-4113-83C6-884D4F46DEF2}</ProjectGuid>

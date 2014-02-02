@@ -6,6 +6,7 @@
 namespace RcEngine {
 
 
+// Left is high bit, right is low bit
 enum PixelFormat
 {
 	/// <summary>

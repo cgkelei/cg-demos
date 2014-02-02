@@ -205,14 +205,17 @@ void Application::Window_Paint()
 
 void Application::Window_UserResized()
 {
-	mMainWindow->UpdateWindowSize();
 	uint32_t width = mMainWindow->GetWidth();
 	uint32_t height = mMainWindow->GetHeight();
 
+	if (mSettings.Width != width || mSettings.Height != height)
+	{
+		Context::GetSingleton().GetRenderDevice().Resize(width, height);	
+		UIManager::GetSingleton().OnWindowResize(width, height);
+		//Context::GetSingleton().GetInputSystem().Resize(width, height);
 
-	//Context::GetSingleton().GetInputSystem().Resize(width, height);
-	Context::GetSingleton().GetRenderDevice().Resize(width, height);	
-	UIManager::GetSingleton().OnWindowResize(width, height);
+		WindowResize(width, height);
+	}	
 }
 
 void Application::Window_Close()
@@ -224,13 +227,13 @@ void Application::Create()
 {
 	// Create main window
 	mMainWindow = new Window(mAppTitle, mSettings);
-	mMainWindow->UserResizedEvent.bind(this, &Application::Window_UserResized);
 	mMainWindow->PaintEvent.bind(this, &Application::Window_Paint);
 	mMainWindow->SuspendEvent.bind(this, &Application::Window_Suspend);
 	mMainWindow->ResumeEvent.bind(this, &Application::Window_Resume);
 	mMainWindow->ApplicationActivatedEvent.bind(this, &Application::Window_ApplicationActivated);
 	mMainWindow->ApplicationDeactivatedEvent.bind(this, &Application::Window_ApplicationDeactivated);
 	mMainWindow->WindowClose.bind(this, &Application::Window_Close);
+	mMainWindow->UserResizedEvent.bind(this, &Application::Window_UserResized);
 
 	// load all modules
 	LoadAllModules();
@@ -311,7 +314,6 @@ void Application::ReadConfiguration()
 		}
 	}
 }
-
 
 
 } // Namespace RcEngine

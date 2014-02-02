@@ -8,22 +8,18 @@ RenderQueue::RenderQueue()
 	// set up default bucket
 	mRenderBuckets.insert(std::make_pair(BucketOpaque, new RenderBucket()));
 	mRenderBuckets.insert(std::make_pair(BucketTransparent, new RenderBucket()));
-	mRenderBuckets.insert(std::make_pair(BucketSky, new RenderBucket()));
+	mRenderBuckets.insert(std::make_pair(BucketBackground, new RenderBucket()));
 	mRenderBuckets.insert(std::make_pair(BucketTranslucent, new RenderBucket()));
-	mRenderBuckets.insert(std::make_pair(BucketGui, new RenderBucket()));
+	mRenderBuckets.insert(std::make_pair(BucketOverlay, new RenderBucket()));
 }
 
 RenderQueue::~RenderQueue()
 {
-	for (auto iter = mRenderBuckets.begin(); iter != mRenderBuckets.end(); ++iter)
-	{
-		iter->second->clear();
-		delete iter->second;
-	}
-	mRenderBuckets.clear();
+	for (auto& kv : mRenderBuckets)
+		delete kv.second;
 }
 
-std::vector<RenderQueueItem>& RenderQueue::GetRenderBucket( uint32_t bucket )
+RenderBucket& RenderQueue::GetRenderBucket( Bucket bucket )
 {
 	if (mRenderBuckets.find(bucket) == mRenderBuckets.end())
 	{
@@ -33,7 +29,7 @@ std::vector<RenderQueueItem>& RenderQueue::GetRenderBucket( uint32_t bucket )
 	return (*mRenderBuckets[bucket]);
 }
 
-void RenderQueue::AddToQueue( RenderQueueItem item, uint32_t bucket )
+void RenderQueue::AddToQueue( RenderQueueItem item, Bucket bucket )
 {
 	if (mRenderBuckets.find(bucket) == mRenderBuckets.end())
 	{
@@ -43,7 +39,7 @@ void RenderQueue::AddToQueue( RenderQueueItem item, uint32_t bucket )
 	mRenderBuckets[bucket]->push_back(item);
 }
 
-void RenderQueue::AddRenderBucket( uint32_t bucket )
+void RenderQueue::AddRenderBucket( Bucket bucket )
 {
 	if (mRenderBuckets.find(bucket) != mRenderBuckets.end())
 	{
@@ -59,6 +55,11 @@ void RenderQueue::ClearAllQueue()
 	{
 		iter->second->clear();
 	}
+}
+
+void RenderQueue::ClearQueue( Bucket bucket )
+{
+	mRenderBuckets[bucket]->clear();
 }
 
 

@@ -1,26 +1,18 @@
 <Effect name="ModelEffect">
 
-<Shader name="ModelVS" stage="Vertex" entry="main">
+<Shader name="ShaodowMapVS" stage="Vertex" entry="main">
 	<ShaderSource>
 	<![CDATA[
-#version 330
-
-#ifdef _ParallaxMapping
-	#define _NormalMapping
-#endif
-
-// skin model will bake the world matrix into skin matrices
-// we not support non-uniform scale, so the normal matrix is 
-// simply the up 3x3 mat.
+	
+#version 330	
+	
+// shader uniform 	
 #ifdef _Skinning
 	#define MaxNumBone 92
 	uniform mat4 SkinMatrices[MaxNumBone];
-#endif
-
-	uniform mat4 World;
-	uniform mat4 WorldNormal;
-	uniform mat4 ViewProj;
-	uniform vec3 ViewerPos;
+#endif	
+	
+uniform mat4 WorldViewProj;
 
 // shader input
 in vec3 iPos;
@@ -38,19 +30,67 @@ in vec2 iTex;
 	in vec3 iBinormal;
 #endif
 
+void main()
+{
+	#ifdef _Skinning
+	mat4 SkinMatrix = SkinMatrices[iBlendIndices[0]] * iBlendWeights[0] +
+					  SkinMatrices[iBlendIndices[1]] * iBlendWeights[1] +
+					  SkinMatrices[iBlendIndices[2]] * iBlendWeights[2] +
+					  SkinMatrices[iBlendIndices[3]] * iBlendWeights[3];
+#endif
+	
+	// calculate position in world space:
+#ifdef _Skinning
+	gl_Position = vec4(iPos, 1.0)* SkinMatrix * WorldViewProj;
+#else
+	gl_Position = vec4(iPos, 1.0) * WorldViewProj;
+#endif
+}	
+	]]>
+	</ShaderSource>
+</Shader>
+
+
+<Shader name="GeneralVS" stage="Vertex" entry="main">
+	<ShaderSource>
+	<![CDATA[
+#version 330
+
+// skin model will bake the world matrix into skin matrices
+// we not support non-uniform scale, so the normal matrix is 
+// simply the up 3x3 mat.
+#ifdef _Skinning
+	#define MaxNumBone 92
+	uniform mat4 SkinMatrices[MaxNumBone];
+#endif
+
+uniform mat4 WorldView;
+uniform mat4 Proj;
+
+// shader input
+in vec3 iPos;
+
+#ifdef _Skinning
+	in vec4 iBlendWeights;
+	in uvec4 iBlendIndices;
+#endif
+
+in vec3 iNormal;
+in vec2 iTex;
+
+#ifdef _NormalMapping
+	in vec3 iTangent;
+	in vec3 iBinormal;
+#endif
 
 // shader out put
-out vec4 oPosWS;
+out vec4 oPosVS;
 out vec2 oTex;
 
 #ifdef _NormalMapping
-	out mat3 oTangentToWorld;
+	out mat3 oTangentToView;
 #else
-	out vec3 oNormalWS;
-#endif
-
-#ifdef _ParallaxMapping
-	out vec3 oViewTS; 
+	out vec3 oNormalVS;
 #endif
 
 void main()
@@ -62,62 +102,137 @@ void main()
 					  SkinMatrices[iBlendIndices[3]] * iBlendWeights[3];
 #endif
 	
-	// calculate world normal.
+	// calculate position in view space:
 #ifdef _Skinning
-	vec3 normal = normalize(iNormal * mat3(SkinMatrix * WorldNormal));
+	mat4 SkinWorldView = SkinMatrix * WorldView;
+	oPosVS = vec4(iPos, 1.0)* SkinWorldView;
 #else
-	vec3 normal = normalize(iNormal * mat3(WorldNormal));
+	oPosVS = vec4(iPos, 1.0) * WorldView;
 #endif
 
-	// calculate position in world space:
+	// calculate view space normal.
 #ifdef _Skinning
-	oPosWS = vec4(iPos, 1.0)* SkinMatrix * World;
+	vec3 normal = normalize(iNormal * mat3(SkinWorldView));
 #else
-	oPosWS = vec4(iPos, 1.0) * World;
+	vec3 normal = normalize(iNormal * mat3(WorldView));
 #endif
 
 	// calculate tangent and binormal.
 #ifdef _NormalMapping
 	#ifdef _Skinning
-		vec3 tangent = normalize(iTangent * SkinningNormal);
-		vec3 binormal = normalize(iBinormal * SkinningNormal);
+		vec3 tangent = normalize(iTangent * mat3(SkinWorldView));
+		vec3 binormal = normalize(iBinormal * mat3(SkinWorldView));
 	#else
-		vec3 tangent = normalize(iTangent * mat3(WorldNormal));
-		vec3 binormal = normalize(iBinormal * mat3(WorldNormal));
+		vec3 tangent = normalize(iTangent * mat3(WorldView));
+		vec3 binormal = normalize(iBinormal * mat3(WorldView));
 	#endif
 
 	// actualy this is a world to tangent matrix, because we always use V * Mat.
-	oTangentToWorld = mat3( tangent, binormal, normal);
-
-	#ifdef _ParallaxMapping
-		oViewTS = (ViewerPos - oPosWS) * oTangentToWorld;
-	#endif
+	oTangentToView = mat3( tangent, binormal, normal);
 
 	// transpose to get tangent to world matrix
-	oTangentToWorld = transpose(oTangentToWorld);
-
+	oTangentToView = transpose(oTangentToView);
 #else
-	oNormalWS = normal;
+	oNormalVS = normal;
 #endif
 	
+	// texcoord
 	oTex = iTex;
 #ifndef Direct3D	
 	oTex.y = 1.0 - iTex.y;
 #endif
 
-	gl_Position = oPosWS * ViewProj;
+	gl_Position = oPosVS * Proj;
+}
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Shader name="GBufferPS" stage="Pixel" entry="main">
+	<ShaderSource>
+	<![CDATA[
+
+#version 330
+	
+uniform sampler2D DiffuseMap;
+uniform sampler2D BestNormalFitMap;
+
+#ifdef _NormalMapping
+	uniform sampler2D NormalMap;
+#endif
+
+// shader input
+in vec4 oPosVS;
+in vec2 oTex;
+
+#ifdef _NormalMapping
+	in mat3 oTangentToView;
+#else
+	in vec3 oNormalVS;
+#endif
+
+// shader output
+out vec4 FragColor0; // Normal + shininess
+out vec4 FragColor1; // Diffuse + Specular
+	
+#define Shininess 20.0
+#define Specular 0.2
+
+void CompressUnsignedNormalToNormalsBuffer(inout vec3 vNormal)
+{
+  // renormalize (needed if any blending or interpolation happened before)
+  vNormal.rgb = normalize(vNormal.rgb);
+  // get unsigned normal for cubemap lookup (note the full float precision is required)
+  vec3 vNormalUns = abs(vNormal.rgb);
+  // get the main axis for cubemap lookup
+  float maxNAbs = max(vNormalUns.z, max(vNormalUns.x, vNormalUns.y));
+  // get texture coordinates in a collapsed cubemap
+  vec2 vTexCoord = vNormalUns.z<maxNAbs?(vNormalUns.y<maxNAbs?vNormalUns.yz:vNormalUns.xz):vNormalUns.xy;
+  vTexCoord = vTexCoord.x < vTexCoord.y ? vTexCoord.yx : vTexCoord.xy;
+  vTexCoord.y /= vTexCoord.x;
+  
+#ifndef Direct3D	
+	vTexCoord.y = 1.0 - vTexCoord.y;
+#endif
+  
+  // fit normal into the edge of unit cube
+  vNormal.rgb /= maxNAbs;
+  // look-up fitting length and scale the normal to get the best fit
+  float fFittingScale = texture2D(BestNormalFitMap, vTexCoord).a;
+  // scale the normal to get the best fit
+  vNormal.rgb *= fFittingScale;
+  // squeeze back to unsigned
+  vNormal.rgb = vNormal.rgb * .5 + .5;
+}
+
+void main() 
+{	
+	vec4 albedo =  texture2D(DiffuseMap, oTex);
+    
+#ifdef _NormalMapping
+	vec3 normal = texture2D( NormalMap, oTex ).rgb * 2.0 - 1.0;
+	normal = normalize(normal * oTangentToView);
+#else
+	vec3 normal = normalize(oNormalVS);
+#endif	
+
+	CompressUnsignedNormalToNormalsBuffer(normal);
+	
+	//normal = normal * .5f + .5f;
+	
+	FragColor0 = vec4(normal.xyz, Shininess / 255.0);
+    FragColor1 = vec4(albedo.rgb, Specular);	
 }
 	]]>
 	</ShaderSource>
 </Shader>
 	
-<Shader name="ModelPS" stage="Pixel" entry="main">
+<Shader name="ForwardPS" stage="Pixel" entry="main">
 	<Include name="LightingUtil.include.xml"/>
 	<ShaderSource>
 	<![CDATA[
-uniform vec3 ViewerPos;
-uniform vec4 LightPos;		// w dimension is spot light inner cone cos angle
-uniform vec4 LightDir;		// w dimension is spot light outer cone cos angle
+uniform vec4 LightPosVS;		// w dimension is spot light inner cone cos angle
+uniform vec4 LightDirVS;		// w dimension is spot light outer cone cos angle
 uniform vec3 LightColor;
 uniform vec3 LightFalloff; 
 
@@ -127,55 +242,34 @@ uniform sampler2D DiffuseMap;
 	uniform sampler2D NormalMap;
 #endif
 
-in vec4 oPosWS;
+// shader input
+in vec4 oPosVS;
 in vec2 oTex;
 
 #ifdef _NormalMapping
-	in mat3 oTangentToWorld;
+	in mat3 oTangentToView;
 #else
-	in vec3 oNormalWS;
+	in vec3 oNormalVS;
 #endif
 
-#ifdef _ParallaxMapping
-	in vec3 oViewTS; 
-#endif
 
 void main()
 {
-#ifdef _ParallaxMapping
-	const float heightScale = 0.03;
-	const float heightBias = 0.01;
-
-	// get height field form map
-	float currentHeight = texture2D( NormalMap, oTex).a;
-
-	// Scale and bias this height map value:
-    float height = currentHeight * heightScale + heightBias;
-
-	// Perform offset limiting if desired:
-    height /= oViewTS.z;
-
-	// Compute the offset vector for approximating parallax:
-    vec2 newTex = oTex + oViewTS.xy * height;
-#else
-	vec2 newTex = oTex ;
-#endif
-
-	vec4 diffuse = texture2D(DiffuseMap, newTex);
+	vec4 diffuse = texture2D(DiffuseMap, oTex);
 
 #ifdef AlphaTest
 	if( diffuse.a < 0.01 ) discard;
 #endif
 
 #ifdef _NormalMapping
-	vec3 normal = texture2D( NormalMap, newTex ).rgb * 2.0 - 1.0;
-	normal = normalize(normal * oTangentToWorld);
+	vec3 normal = texture2D( NormalMap, oTex ).rgb * 2.0 - 1.0;
+	normal = normalize(normal * oTangentToView);
 #else
-	vec3 normal = normalize(oNormalWS);
+	vec3 normal = normalize(oNormalVS);
 #endif	
 
 #ifdef SPOTLIGHT
-	float spot = SpotLighting(LightPos.xyz, LightDir.xyz, vec2(LightPos.w, LightDir.w), oPosWS.xyz);
+	float spot = SpotLighting(LightPosVS.xyz, LightDirVS.xyz, vec2(LightPosVS.w, LightDirVS.w), oPosVS.xyz);
 #endif
 
 	vec3 finalColor = vec3(0.0);
@@ -187,21 +281,24 @@ void main()
 		
 		// calculate  light vector
 	#ifdef DIRLIGHT
-		vec3 lightVec = normalize(-LightDir.xyz);
+		vec3 lightVec = normalize(-LightDirVS.xyz);
 	#else
-		vec3 lightVec = normalize(LightPos.xyz - oPosWS.xyz);
+		vec3 lightVec = normalize(LightPosVS.xyz - oPosVS.xyz);
 	#endif
 
-		vec3 viewVec = normalize(ViewerPos- oPosWS.xyz);
-		vec3 halfVec = normalize((viewVec + lightVec) / 2.0);
+		vec3 viewVec = normalize(-oPosVS.xyz);
+		vec3 halfVec = normalize(viewVec + lightVec);
 		
 		// calculate attenuation
 		float atten = 1.0;
-	#ifdef SPOTLIGHT 
-		atten = spot * CalcAttenuation(LightPos.xyz, oPosWS.xyz, LightFalloff);
-	#elseif POINTLIGHT
-		atten = CalcAttenuation(LightPos.xyz, oPosWS.xyz, LightFalloff);
-	#endif
+
+#ifdef POINTLIGHT
+		atten = CalcAttenuation(LightPosVS.xyz, oPosVS.xyz, LightFalloff);
+#endif
+
+#ifdef SPOTLIGHT 
+		atten = spot * CalcAttenuation(LightPosVS.xyz, oPosVS.xyz, LightFalloff);
+#endif
 
 		float NdotL = dot(lightVec, normal);
 		if (NdotL > 0.0)
@@ -222,10 +319,27 @@ void main()
 	</ShaderSource>
 </Shader>
 
+<!--
+<Technique name="ShadowMap">
+	<Pass name="p0">
+		<VertexShader name="ShaodowMapVS"/>
+		<state name="ColorWriteMask" index="0" r="false" g="false" b="false" a="false"/>
+		<state name="SlopeScaledDepthBias" value="1.0"/>
+	</Pass>
+</Technique>
+-->
+
+<Technique name="GBuffer">
+	<Pass name="p0">
+		<VertexShader name="GeneralVS"/>
+		<PixelShader name="GBufferPS"/>
+	</Pass>
+</Technique>
+
 <Technique name="PointLighting">
 	<Pass name="p0">
-		<VertexShader name="ModelVS"/>
-		<PixelShader name="ModelPS">
+		<VertexShader name="GeneralVS"/>
+		<PixelShader name="ForwardPS">
 			<Macro name="POINTLIGHT"/>
 		</PixelShader>
 	</Pass>
@@ -233,8 +347,8 @@ void main()
 
 <Technique name="DirectionalLighting">
 	<Pass name="p0">
-		<VertexShader name="ModelVS"/>
-		<PixelShader name="ModelPS">
+		<VertexShader name="GeneralVS"/>
+		<PixelShader name="ForwardPS">
 			<Macro name="DIRLIGHT"/>
 		</PixelShader>
 	</Pass>
@@ -242,9 +356,9 @@ void main()
 
 <Technique name="SpotLighting">
 	<Pass name="p0">
-		<VertexShader name="ModelVS"/>
-		<PixelShader name="ModelPS"/>
-			<Macro name="SPOTLIGHT">
+		<VertexShader name="GeneralVS"/>
+		<PixelShader name="ForwardPS">
+			<Macro name="SPOTLIGHT"/>
 		</PixelShader>
 	</Pass>
 </Technique>

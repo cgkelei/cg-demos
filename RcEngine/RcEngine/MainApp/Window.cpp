@@ -9,6 +9,8 @@ Window* Window::msWindow = 0;
 
 void Window::OnUserResized()
 {
+	UpdateWindowSize();
+
 	if(!UserResizedEvent.empty())
 		UserResizedEvent();
 }

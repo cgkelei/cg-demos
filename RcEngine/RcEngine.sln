@@ -19,7 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{3B4A
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SponzaSample", "Samples\SponzaSample\SponzaSample.vcxproj", "{47DE133A-E5FF-4A9D-B93E-09215AE72D14}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FrameBuffer", "Samples\FrameBuffer\FrameBuffer.vcxproj", "{170C7B46-A633-4370-B4E8-38FFD890DD69}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DeferredRendering", "Samples\DeferredRendering\DeferredRendering.vcxproj", "{170C7B46-A633-4370-B4E8-38FFD890DD69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

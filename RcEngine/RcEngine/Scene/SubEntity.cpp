@@ -68,12 +68,10 @@ void SubEntity::GetWorldTransforms( float4x4* xform ) const
 		// hardware skin
 		if (mParent->HasSkeletonAnimation())
 		{
-			assert(mParent->mNumSkinMatrices);
-			size_t i;
+			assert(mParent->mNumSkinMatrices != 0);
+			size_t i = 0;
 			for (i = 0; i < mParent->mNumSkinMatrices; ++i)
-			{
 				xform[i] = mParent->mSkinMatrices[i];
-			}
 
 			// last matrix is scene node world matrix
 			xform[i] = mParent->GetWorldTransform();
@@ -86,7 +84,7 @@ void SubEntity::GetWorldTransforms( float4x4* xform ) const
 	}
 }
 
-std::uint32_t SubEntity::GetWorldTransformsCount() const
+uint32_t SubEntity::GetWorldTransformsCount() const
 {
 	return 1 + mParent->mNumSkinMatrices;
 }

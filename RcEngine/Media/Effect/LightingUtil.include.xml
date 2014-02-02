@@ -2,6 +2,8 @@
 <ShaderSource>
 	<![CDATA[
 
+#define saturate(x) clamp(x, 0.0, 1.0)	
+	
 float DirectionalLighting(const vec3 lightDir, const vec3 normal)
 {
 	return dot(-lightDir, normal);
@@ -33,6 +35,43 @@ float CalcAttenuation(const vec3 lightPos, const vec3 point, const vec3 atten)
 vec3 CalcPhongSpotLight(const vec3 diffuse, const vec3 specular, float shinness,  const vec3 l, const vec3 h, const vec3 n)
 {
 	return max((diffuse + specular * CalcShininess(h, n, shinness))* dot(n, l), 0.0);
+}
+
+/**
+ * @brief Computes the specular contribution of a light
+ */
+float CalculateSpecular(vec3 N, vec3 H, float specPower)
+{
+    return pow(saturate(dot(N, H)), specPower);
+}
+
+/**
+ * @brief Calculate luminance of color
+ */
+ float Luminance(vec3 color)
+ {
+	return dot(color, vec3(0.2126, 0.7152, 0.0722));
+ }
+
+ /**
+ * @brief Calculate the Fresnel factor using Schlick's approximation
+ */
+vec3 CalculateFresnel(vec3 specAlbedo, vec3 L, vec3 H) 
+{
+    vec3 fresnel = specAlbedo;
+    fresnel += (1.0f - specAlbedo) * pow((1.0f - saturate(dot(L, H))), 5.0f);
+    return saturate(fresnel);
+}
+
+/**
+ * @brief Calculate an approximate Fresnel factor using N dot V instead of L dot H
+ *        Which is used for environment map fresnel.
+ */
+vec3 CalculateAmbiemtFresnel(in vec3 specAlbedo, in vec3 N, in vec3 V) 
+{
+	vec3 fresnel = specAlbedo;
+    fresnel += (1.0f - specAlbedo) * pow((1.0f - saturate(dot(N, V))), 5.0f);
+    return saturate(fresnel);
 }
 
 	]]>

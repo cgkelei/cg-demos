@@ -61,11 +61,11 @@ private:
 public:
 	EventHandler PaintEvent;
 	EventHandler ResumeEvent;
-	EventHandler UserResizedEvent;
 	EventHandler SuspendEvent;
 	EventHandler ApplicationActivatedEvent;
 	EventHandler ApplicationDeactivatedEvent;
 	EventHandler WindowClose;
+	EventHandler UserResizedEvent;
 
 protected:
 

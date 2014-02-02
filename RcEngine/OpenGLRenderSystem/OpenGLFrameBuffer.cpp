@@ -57,7 +57,14 @@ void OpenGLFrameBuffer::SwapBuffers()
 
 void OpenGLFrameBuffer::Resize( uint32_t width, uint32_t height )
 {
-
+	if ((width != mWidth) || (height != mHeight))
+	{
+		mViewport.Width = width;
+		mViewport.Height = height;
+		mWidth = width;
+		mHeight = height;
+		mDirty = true;
+	}
 }
 
 bool OpenGLFrameBuffer::CheckFramebufferStatus()

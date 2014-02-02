@@ -52,7 +52,7 @@ public:
 	/**
 	 * Called when scene manager render queue update.
 	 */
-	void OnUpdateRenderQueues(Camera* camera,  RenderOrder order);
+	void OnUpdateRenderQueues(const Camera& cam,  RenderOrder order);
 	
 protected:
 	virtual Node* CreateChildImpl( const String& name );

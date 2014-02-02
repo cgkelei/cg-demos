@@ -31,7 +31,7 @@ public:
 	virtual void CreateRenderWindow(const RenderSettings& settings) = 0;	
 	virtual void AdjustProjectionMatrix(float4x4& pOut) = 0;
 
-	void Render( EffectTechnique& tech, RenderOperation& op);
+	void Render( const EffectTechnique& tech, const RenderOperation& op);
 	void Resize(uint32_t width, uint32_t height);
 
 	void BindFrameBuffer(const shared_ptr<FrameBuffer>& fb);
@@ -52,7 +52,7 @@ public:
 
 protected:
 	virtual void DoBindFrameBuffer(const shared_ptr<FrameBuffer>& fb) = 0;
-	virtual void DoRender( EffectTechnique& tech, RenderOperation& op) = 0;
+	virtual void DoRender( const EffectTechnique& tech, const RenderOperation& op) = 0;
 
 protected:
 	RenderDeviceType mRenderDeviceType;

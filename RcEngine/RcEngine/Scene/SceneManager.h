@@ -11,7 +11,7 @@ namespace RcEngine {
 
 class Sky;
 class SceneObject;
-class SpriteEntity;
+class Sprite;
 
 class _ApiExport SceneManager
 {
@@ -56,9 +56,8 @@ public:
 	SceneNode* FindSceneNode( const String& name ) const;
 
 	Entity* CreateEntity( const String& entityName, const String& meshName, const String& groupName );
-
+	
 	Light* CreateLight( const String& name);
-
 	const std::vector<Light*>& GetSceneLights() const  { return mAllSceneLights; }
 
 	void CreateSkyBox( const shared_ptr<Texture>& texture, bool cubemap = true, float distance = 100.0f );
@@ -71,16 +70,18 @@ public:
 	/**
 	 * Update render queue, and remove scene node outside of the camera frustum.
 	 */
-	void UpdateRenderQueue(Camera* cam, RenderOrder order);
+	void UpdateRenderQueue(const Camera& cam, RenderOrder order);
+	void UpdateOverlayQueue();
 
-	RenderQueue* GetRenderQueue() { return mRenderQueue; }
+	RenderQueue* GetRenderQueue() const { return mRenderQueue; }
 
 	void RenderScene();
 
 	AnimationController* GetAnimationController() const;
 
 public_internal:
-	SpriteEntity* CreateSpriteEntity( const shared_ptr<Texture>& tex, const shared_ptr<Material>& mat);
+	Sprite* CreateSprite( const shared_ptr<Texture>& tex, const shared_ptr<Material>& mat);
+	void DestroySprite(Sprite* sprite);
 
 protected:
 	void ClearScene();
@@ -100,9 +101,9 @@ protected:
 	std::vector<Light*> mAllSceneLights;
 
 	// For sky box
-	SceneNode* mSkyBoxNode;	
 	Sky* mSkyBox;
-	
+	std::list<Sprite*> mSprites;
+
 	AnimationController* mAnimationController;
 
 	RenderQueue* mRenderQueue;

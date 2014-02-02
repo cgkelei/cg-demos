@@ -23,8 +23,8 @@ public:
 	uint32_t GetVertexCount() const				{ return mVertexCount; }
 	uint32_t GetPrimitiveCount() const			{ return mPrimitiveCount; }
 	uint32_t GetIndexCount() const				{ return mIndexCount; }
-	uint32_t GetStartIndex() const				{ return mStartIndex; }
-	uint32_t GetStartVertex() const			    { return mStartVertex;}
+	uint32_t GetStartIndex() const				{ return mIndexStart; }
+	uint32_t GetStartVertex() const			    { return mVertexStart;}
 
 	const String& GetMaterialName() const		{ return mMaterialName; }
 
@@ -55,10 +55,10 @@ private:
 
 	uint32_t mPrimitiveCount; // Only support triangle
 
-	uint32_t mStartIndex;
+	uint32_t mIndexStart;
 	uint32_t mIndexCount;
 
-	uint32_t mStartVertex;
+	uint32_t mVertexStart;
 	uint32_t mVertexCount;
 };
 

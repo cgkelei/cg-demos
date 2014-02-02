@@ -155,7 +155,7 @@ AnimationPlayer* Entity::GetAnimationPlayer() const
 	return mAnimationPlayer;
 }
 
-void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, Camera* camera, RenderOrder order)
+void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, const Camera& camera, RenderOrder order)
 {
 	// Add each visible SubEntity to the queue
 	for (SubEntity* subEntity : mSubEntityList)
@@ -166,7 +166,7 @@ void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, Camera* camera, Rende
 		/*if(cam->Visible(subWorldBoud))
 		{*/
 			float sortKey = 0;
-			RenderQueue::Bucket bucket =  RenderQueue::BucketOpaque;
+			RenderQueue::Bucket bucket = (RenderQueue::Bucket)subEntity->GetMaterial()->GetQueueBucket();
 
 			switch( order )
 			{
@@ -174,27 +174,20 @@ void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, Camera* camera, Rende
 				sortKey = (float)subEntity->GetMaterial()->GetEffect()->GetResourceHandle();
 				break;
 			case RO_FrontToBack:
-				sortKey = NearestDistToAABB( camera->GetPosition(), subWorldBoud.Min, subWorldBoud.Max);
+				sortKey = NearestDistToAABB( camera.GetPosition(), subWorldBoud.Min, subWorldBoud.Max);
 				break;
 			case RO_BackToFront:
-				sortKey = -NearestDistToAABB( camera->GetPosition(), subWorldBoud.Min, subWorldBoud.Max);
+				sortKey = -NearestDistToAABB( camera.GetPosition(), subWorldBoud.Min, subWorldBoud.Max);
 				break;
 			}
 			
-			if (subEntity->GetMaterial()->Transparent())
+			if (bucket == RenderQueue::BucketTransparent)
 			{
-				bucket = RenderQueue::BucketTransparent;
 				// Transparent object must render from furthest to nearest
-				sortKey = -NearestDistToAABB( camera->GetPosition(), subWorldBoud.Min, subWorldBoud.Max);
+				sortKey = -NearestDistToAABB( camera.GetPosition(), subWorldBoud.Min, subWorldBoud.Max);
 			}
 
-			RenderQueueItem item;
-			item.Renderable = subEntity;
-			item.Type = SOT_Entity;
-			item.SortKey = sortKey;
-
-			renderQueue->AddToQueue(item, bucket);
-			
+			renderQueue->AddToQueue(RenderQueueItem(subEntity, sortKey), bucket);			
 		//}
 	}
 

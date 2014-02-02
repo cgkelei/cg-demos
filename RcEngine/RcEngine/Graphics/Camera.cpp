@@ -25,6 +25,7 @@ void Camera::SetViewParams( const float3& eyePos, const float3& lookat, const fl
 
 	mViewVec = Normalize(mLookAt - mPosition);
 	mViewMatrix = CreateLookAtMatrixLH(mPosition, mLookAt, mUpVec);
+	mInvViewMatrix = mViewMatrix.Inverse();
 
 	mFrustumDirty = true;
 }
@@ -36,28 +37,20 @@ void Camera::SetProjectionParams( float fov, float aspect, float nearPlane, floa
 	mNearPlane = nearPlane;
 	mFarPlane = farPlane;
 
-	mProjectionMatrix = CreatePerspectiveFovLH(mFieldOfView, mAspect, mNearPlane, mFarPlane);
+	mProjMatrix = CreatePerspectiveFovLH(mFieldOfView, mAspect, mNearPlane, mFarPlane);
+	mInvProjMatrix = mProjMatrix.Inverse();
+
 	//修改投影矩阵，使OpenGL适应左右坐标系
-	Context::GetSingletonPtr()->GetRenderDevicePtr()->AdjustProjectionMatrix(mProjectionMatrix);
+	Context::GetSingletonPtr()->GetRenderDevicePtr()->AdjustProjectionMatrix(mProjMatrix);
 
 	mFrustumDirty = true;
-}
-
-const float4x4& Camera::GetViewMatrix() const
-{
-	return mViewMatrix;
-}
-
-const float4x4& Camera::GetProjectionMatrix() const
-{
-	return mProjectionMatrix;
 }
 
 const Frustumf& Camera::GetFrustum() const
 {
 	if (mFrustumDirty)
 	{
-		mFrustum.Update(mViewMatrix * mProjectionMatrix);
+		mFrustum.Update(mViewMatrix * mProjMatrix);
 		mFrustumDirty = false;
 	}
 	return mFrustum;
@@ -67,7 +60,7 @@ bool Camera::Visible( const BoundingSpheref& sphere )
 {
 	if (mFrustumDirty)
 	{
-		mFrustum.Update(mViewMatrix * mProjectionMatrix);
+		mFrustum.Update(mViewMatrix * mProjMatrix);
 		mFrustumDirty = false;
 	}
 
@@ -81,7 +74,7 @@ bool Camera::Visible( const BoundingBoxf& box )
 {
 	if (mFrustumDirty)
 	{
-		mFrustum.Update(mViewMatrix * mProjectionMatrix);
+		mFrustum.Update(mViewMatrix * mProjMatrix);
 		mFrustumDirty = false;
 	}
 

@@ -13,9 +13,9 @@ CameraController::CameraController()
 
 }
 
-void CameraController::AttachCamera( Camera* camera )
+void CameraController::AttachCamera( Camera& camera )
 {
-	mAttachedCamera = camera;
+	mAttachedCamera = &camera;
 }
 
 void CameraController::DetachCamera()
@@ -78,7 +78,6 @@ void FPSCameraControler::UpdateInput( bool keyboardInput, bool mouseInput, bool 
 	float fPercentOfOld = 1.0f - fPercentOfNew;
 	mMouseDelta = mMouseDelta * fPercentOfOld + curMouseDelta * fPercentOfNew;
 }
-
 
 void FPSCameraControler::Update( float deltaTime )
 {
@@ -166,13 +165,13 @@ void FPSCameraControler::Update( float deltaTime )
 	mAttachedCamera->SetViewParams(newCameraPos, newCameraPos + vWorldAhead, vWorldUp);
 }
 
-void FPSCameraControler::AttachCamera( Camera* camera )
+void FPSCameraControler::AttachCamera( Camera& camera )
 {
 	CameraController::AttachCamera(camera);		
 
 	Quaternionf quat;
 	float3 scale, pos;
-	MatrixDecompose(scale, quat, pos, camera->GetViewMatrix());
+	MatrixDecompose(scale, quat, pos, camera.GetViewMatrix());
 
 	mCameraRot = QuaternionInverse(quat);
 	QuaternionToYawPitchRoll(mCameraYawAngle, mCameraPitchAngle, mCameraRollAngle, mCameraRot);

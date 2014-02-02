@@ -18,9 +18,10 @@ OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
 	PixelFormatUtils::GetNumDepthStencilBits(settings.DepthStencilFormat, mDepthBits, mStencilBits);
 
 #ifdef RcWindows
-	mHwnd = Context::GetSingleton().GetApplication().GetMainWindow()->GetHwnd();
+	Window* mainWindow = Context::GetSingleton().GetApplication().GetMainWindow();
+	mHwnd = mainWindow->GetHwnd();
 	mHdc = GetDC(mHwnd);
-
+	
 	if (mFullscreen)												
 	{
 		mLeft = 0;
@@ -135,21 +136,6 @@ void OpenGLRenderWindow::SwapBuffers()
 #ifdef RcWindows
 	::SwapBuffers(mHdc);
 #endif
-}
-
-void OpenGLRenderWindow::Resize( uint32_t width, uint32_t height )
-{
-	if (mActice)
-	{
-		if ((width != mWidth) || (height != mHeight))
-		{
-			mViewport.Width = width;
-			mViewport.Height = height;
-			mWidth = width;
-			mHeight = height;
-		}
-		mDirty = true;
-	}
 }
 
 }

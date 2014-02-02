@@ -16,7 +16,7 @@ namespace RcEngine {
 
 MeshPart::MeshPart(Mesh& mesh)
 	: mParentMesh(mesh), mVertexBuffer(nullptr), mIndexBuffer(nullptr), 
-	  mIndexCount(0), mPrimitiveCount(0), mStartIndex(0), mStartVertex(0)
+	  mIndexCount(0), mPrimitiveCount(0), mIndexStart(0), mVertexStart(0)
 {
 
 }
@@ -90,7 +90,7 @@ void MeshPart::Load(  Stream& source )
 	source.Read(data, vertexBufferSize);
 	mVertexBuffer->UnMap();
 
-	mStartVertex = 0;
+	mVertexStart = 0;
 	mVertexCount = vertexCount;
 
 	uint32_t indexCount = source.ReadUInt();
@@ -116,7 +116,7 @@ void MeshPart::Load(  Stream& source )
 
 	mPrimitiveCount = indexCount / 3;
 	mIndexFormat = indexFormat;
-	mStartIndex = 0;
+	mIndexStart = 0;
 	mIndexCount = indexCount;
 }
 
@@ -134,19 +134,20 @@ MeshPart::~MeshPart()
 
 void MeshPart::GetRenderOperation( RenderOperation& op, uint32_t lodIndex )
 {
-	op.UseIndex = (mIndexCount != 0);
-
-	if (op.UseIndex)
-	{
-		op.IndexBuffer = mIndexBuffer;
-		op.IndexType = mIndexFormat;
-		op.StartIndexLocation = 0;
-	}
-
-	op.StartVertexLocation = 0;
-	op.BaseVertexLocation = 0;
-	op.BindVertexStream(mVertexBuffer, mVertexDecl);
 	op.PrimitiveType = PT_Triangle_List;
+	op.BindVertexStream(mVertexBuffer, mVertexDecl);
+
+	if (mIndexCount > 0)
+	{
+		// use indices buffer
+		op.BindIndexStream(mIndexBuffer, mIndexFormat);
+		op.SetIndexRange(mIndexStart, mIndexCount);
+		op.VertexStart = mVertexStart;
+	}
+	else
+	{
+		op.SetVertexRange(mVertexStart, mVertexCount);
+	}	
 }
 
 }

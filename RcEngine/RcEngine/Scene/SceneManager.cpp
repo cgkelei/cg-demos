@@ -18,19 +18,18 @@
 #include <Resource/ResourceManager.h>
 #include <Scene/SubEntity.h>
 #include <Scene/Light.h>
+#include <Graphics/Effect.h>
 
 namespace RcEngine {
 
 SceneManager::SceneManager()
-	: mSkyBox(nullptr), 
-	  mSkyBoxNode(nullptr)
+	: mSkyBox(nullptr) 
 {
 	Context::GetSingleton().SetSceneManager(this);
 
 	// Register all known scene object types
 	RegisterType(SOT_Entity, "Entity Type", nullptr, nullptr, Entity::FactoryFunc);
 	RegisterType(SOT_Light, "Light Type", nullptr, nullptr, Light::FactoryFunc);
-	RegisterType(SOT_Sprite, "Sprite Type", nullptr, nullptr, SpriteEntity::FactoryFunc);
 
 	mAnimationController = new AnimationController;
 	mRenderQueue = new RenderQueue;
@@ -142,65 +141,71 @@ SceneNode* SceneManager::FindSceneNode( const String& name ) const
 	return nullptr;
 }
 
-SpriteEntity* SceneManager::CreateSpriteEntity( const shared_ptr<Texture>& tex, const shared_ptr<Material>& mat )
+Sprite* SceneManager::CreateSprite( const shared_ptr<Texture>& tex, const shared_ptr<Material>& mat )
 {
-	auto factoryIter = mRegistry.find(SOT_Sprite);
-	if (factoryIter == mRegistry.end())
-		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Entity type haven't Registed", "SceneManager::CreateSpriteEntity");
+	Sprite* sprite = new Sprite();
+	sprite->SetSpriteContent(tex, mat);
+	mSprites.push_back(sprite);
 
-	SpriteEntity* entity = static_cast<SpriteEntity*>((factoryIter->second.factoryFunc)(mat->GetName(), NULL));
-	entity->SetSpriteContent(tex, mat);
+	return sprite;
+}
 
-	// all sprite is attached in scene root node
-	GetRootSceneNode()->AttachObject(entity);
+void SceneManager::DestroySprite( Sprite* sprite )
+{
+	if (sprite)
+	{
+		std::list<Sprite*>::iterator it = std::find(mSprites.begin(), mSprites.end(), sprite);
+		if (it != mSprites.end())
+			mSprites.erase(it);
 
-	mSceneObjectCollections[SOT_Sprite].push_back(entity);
-
-	return entity;
+		delete sprite;
+	}
 }
 
 
 void SceneManager::CreateSkyBox( const shared_ptr<Texture>& texture, bool cubemap /*= true*/, float distance /*= 100.0f */ )
 {
-	if (mSkyBox)
-	{
-		SAFE_DELETE(mSkyBox);
-	}
-
-	if (!mSkyBoxNode)
-	{
-		mSkyBoxNode = static_cast<SceneNode*>(GetRootSceneNode()->CreateChildSceneNode("SkyBox"));
-	}
-
-
+	SAFE_DELETE(mSkyBox);
 	mSkyBox = new Sky(distance, cubemap);
 
 	if (cubemap)
-	{
 		mSkyBox->GetMaterial()->SetTexture("SkyCubeMap", texture);
-	}
 	else
-	{
 		mSkyBox->GetMaterial()->SetTexture("SkyPlaneMaps", texture);
-	}
-	
-
-	mSkyBoxNode->AttachObject(mSkyBox);
 }
 
-void SceneManager::UpdateRenderQueue(Camera* cam, RenderOrder order)
+void SceneManager::UpdateRenderQueue(const Camera& cam, RenderOrder order)
 {
 	mRenderQueue->ClearAllQueue();
 
 	GetRootSceneNode()->OnUpdateRenderQueues(cam, order);
 
-	// Update skynode same with camera positon, add sky box to render queue
-	if (mSkyBoxNode)
+	//// Update skynode same with camera positon, add sky box to render queue
+	//if (mSkyBoxNode)
+	//{
+	//	mSkyBoxNode->SetPosition( cam.GetPosition() );
+	//	mRenderQueue->AddToQueue(  RenderQueueItem(SOT_Sky, mSkyBox, 0) ,RenderQueue::BucketBackground);
+	//}
+}
+
+void SceneManager::UpdateOverlayQueue()
+{
+	mRenderQueue->ClearQueue(RenderQueue::BucketOverlay);
+
+	for (Sprite* sprite : mSprites)
 	{
-		mSkyBoxNode->SetPosition( cam->GetPosition() );
-		mRenderQueue->AddToQueue(  RenderQueueItem(SOT_Sky, mSkyBox, 0) ,RenderQueue::BucketSky);
+		if (sprite->Empty() == false)
+		{
+			RenderQueueItem item;
+			item.Renderable = sprite;
+
+			// ignore render order, only handle state change order
+			item.SortKey = (float)sprite->GetMaterial()->GetEffect()->GetResourceHandle();
+			mRenderQueue->AddToQueue(item, RenderQueue::BucketOverlay);
+		}
 	}
 }
+
 
 void SceneManager::UpdateSceneGraph( float delta )
 {
@@ -260,5 +265,6 @@ void SceneManager::RegisterType( uint32_t type, const String& typeString, ResTyp
 	// Initialize resource type
 	if( inf != 0 ) (*inf)();
 }
+
 
 }

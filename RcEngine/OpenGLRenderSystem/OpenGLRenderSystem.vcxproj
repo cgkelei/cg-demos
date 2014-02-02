@@ -105,6 +105,7 @@
     <ClCompile Include="OpenGLTexture2D.cpp" />
     <ClCompile Include="OpenGLTexture3D.cpp" />
     <ClCompile Include="OpenGLTextureCube.cpp" />
+    <ClCompile Include="pfm.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OpenGLFrameBuffer.h" />
@@ -120,6 +121,7 @@
     <ClInclude Include="OpenGLShader.h" />
     <ClInclude Include="OpenGLShaderProgram.h" />
     <ClInclude Include="OpenGLTexture.h" />
+    <ClInclude Include="pfm.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

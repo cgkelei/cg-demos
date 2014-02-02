@@ -1,0 +1,276 @@
+<Effect name="DeferredLightingEffect">
+
+<Shader name="DeferredLightingVS" stage="Vertex" entry="main">
+	<ShaderSource>
+	<![CDATA[
+	
+#version 330
+
+// uniform
+uniform mat4 WorldView;
+uniform mat4 Projection;
+uniform mat4 InvProj;
+
+#if defined(DIRLIGHT)
+in vec2 iPos;
+out vec2 oTex;
+#elif defined(POINTLIGHT) || defined(SPOTLIGHT)  
+in vec3 iPos;
+out vec3 oTex; // divide by w is wrong, w may negative, So pass the clip space coord to pixel shader
+#endif
+
+out vec3 oViewRay;
+
+void main()
+{
+#if defined(DIRLIGHT)
+
+	gl_Position = vec4(iPos, 0.0, 1.0);
+	
+	oTex = iPos * 0.5f + 0.5f;
+
+	vec4 posVS = gl_Position * InvProj;
+	oViewRay = vec3(posVS.xy / posVS.z, 1.0);       // Proj to Z=1 plane
+	
+#elif defined(POINTLIGHT) || defined(SPOTLIGHT)   
+	
+	vec4 viewPos = vec4(iPos, 1.0) * WorldView;
+	oViewRay = viewPos.xyz;
+	
+	gl_Position = viewPos * Projection;
+	oTex = vec3(gl_Position.xy, gl_Position.w);
+#endif
+
+}	
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Shader name="DeferredLightingPS" stage="Pixel" entry="main">
+	<Include name="DeferredReadUtill.include.xml"/>
+	<Include name="LightingUtil.include.xml"/>
+	<ShaderSource>
+	<![CDATA[
+	
+#version 330
+	
+uniform vec2 CameraNearFar;
+
+uniform vec4 LightPosVS;		// w dimension is spot light inner cone cos angle
+uniform vec4 LightDirVS;		// w dimension is spot light outer cone cos angle
+uniform vec3 LightColor;
+uniform vec3 LightFalloff; 
+	
+uniform sampler2D GBuffer0;	
+uniform sampler2D DepthBuffer;	
+	
+#if defined(DIRLIGHT)       
+in vec2 oTex;
+#elif defined(POINTLIGHT) || defined(SPOTLIGHT)   
+in vec3 oTex;
+#endif
+
+in vec3 oViewRay;
+
+out vec4 oFragColor;
+	
+void main()
+{
+	vec4 final = vec4(0.0);
+
+#if defined(DIRLIGHT)
+	vec2 tex = oTex;
+#elif defined(POINTLIGHT) || defined(SPOTLIGHT)
+	vec2 tex = oTex.xy / oTex.z;
+	tex = tex * 0.5 + 0.5;
+#endif
+
+	// Convert non-linear depth to view space linear depth
+	float linearDepth = LinearizeDepth( texture2D(DepthBuffer, tex).x, CameraNearFar.x, CameraNearFar.y );
+	// View space lit position
+	vec3 positionVS = PositionVSFromDepth(oViewRay, linearDepth);
+
+#ifdef SPOTLIGHT
+	float spot = SpotLighting(LightPosVS.xyz, LightDirVS.xyz, vec2(LightPosVS.w, LightDirVS.w), positionVS);
+	if(spot > 0.0)
+	{
+#endif
+		
+	// calculate  light vector
+#ifdef DIRLIGHT
+	vec3 L = normalize(-LightDirVS.xyz);
+#else
+	vec3 L = normalize(LightPosVS.xyz - positionVS);
+#endif
+
+	// Fetch GBuffer
+	vec4 tap0 = texture2D(GBuffer0, tex);
+
+	// Decode view space normal
+	vec3 N = normalize(tap0.xyz * 2.0 - 1.0); 
+	float shininess = tap0.a * 255.0;
+
+	float nDotl = dot(L, N);
+	if (nDotl > 0.0)
+	{
+		vec3 V = normalize(-positionVS);
+		vec3 H = normalize(V + L);
+		
+		// calculate attenuation
+		float attenuation = 1.0;
+
+#ifdef POINTLIGHT
+		attenuation = CalcAttenuation(LightPosVS.xyz, positionVS, LightFalloff);
+#endif
+
+#ifdef SPOTLIGHT 
+		attenuation = spot * CalcAttenuation(LightPosVS.xyz, positionVS, LightFalloff);	
+#endif
+		
+		vec3 diffuse = LightColor * nDotl * attenuation;
+		// Frensel in moved to calculate in shading pass
+		vec3 specular = CalculateSpecular(N, H, shininess) * LightColor * nDotl * attenuation;
+		
+		
+		//final.rgb = oViewRay;
+		//final.a = Luminance(diffuse) +  Luminance(specular);
+		//final = vec4(diffuse.rg, nDotl, dot(N, H));
+		final = vec4(diffuse, Luminance(specular));
+	}
+#ifdef SPOTLIGHT
+	}
+#endif
+		
+	oFragColor = final; 
+}	
+	
+	]]>
+	</ShaderSource>
+</Shader>	
+
+
+<Shader name="DeferredShadingPS" stage="Pixel" entry="main">
+	<Include name="DeferredReadUtill.include.xml"/>
+	<Include name="LightingUtil.include.xml"/>
+	<ShaderSource>
+	<![CDATA[
+	
+#version 330	
+	
+uniform sampler2D GBuffer0;           // Normal + Shininess
+uniform sampler2D GBuffer1 ;
+uniform sampler2D LightAccumulateBuffer;
+
+in vec2 oTex;
+in vec3 oViewRay;
+
+out vec4 oFragColor;
+
+// Deferred shading pass
+void main()
+{
+	vec3 final = vec3(0, 0, 0);
+
+	// Fetch GBuffer
+	vec4 tap0 = texture2D( GBuffer0, oTex );
+	vec4 tap1 = texture2D( GBuffer1, oTex );
+	
+	// Decode view space normal
+	vec3 N = normalize(tap0.rgb * 2.0 - 1.0); 
+	vec3 V = normalize(-oViewRay);
+
+	// Get Diffuse Albedo and Specular
+	vec3 diffuseAlbedo = tap1.rgb;
+	vec3 specularAlbedo = tap1.aaa;
+	float specularPower = tap0.a * 256.0;
+
+	vec4 lightColor = texture2D(LightAccumulateBuffer, oTex);
+	                    
+	vec3 diffueLight = lightColor.rgb;
+	vec3 specularLight = lightColor.a / (Luminance(diffueLight) + 1e-6) * diffueLight;
+
+	// Approximate fresnel by N and V
+	vec3 fresnelTerm = CalculateAmbiemtFresnel(specularAlbedo, N, V);
+	
+	final =  diffueLight * diffuseAlbedo + ((specularPower + 2.0) / 8.0) * fresnelTerm * specularLight;
+	final = final + vec3(0.2, 0.2, 0.2) * diffuseAlbedo;
+
+	oFragColor = vec4(final, 1.0);
+}
+	
+		]]>
+	</ShaderSource>
+</Shader>	
+
+<Technique name="DirectionalLighting">
+	<Pass name="p0">
+		<VertexShader name="DeferredLightingVS">
+			<Macro name="DIRLIGHT"/>
+		</VertexShader>
+		<PixelShader name="DeferredLightingPS">
+			<Macro name="DIRLIGHT"/>
+		</PixelShader>
+		<State name="DepthEnable" value="false"/>
+		<State name="DepthWriteMask" value="false"/>
+    <State name="BlendEnable" value="true"/>
+    <State name="SrcBlend" value="One"/>
+    <State name="DestBlend" value="One"/>
+    <State name="BlendOp" value="Add"/>
+    <State name="SrcBlendAlpha" value="One"/>
+    <State name="DestBlendAlpha" value="One"/>
+    <State name="BlendOpAlpha" value="Add"/>
+  </Pass>
+</Technique>
+
+<Technique name="PointLighting">
+	<Pass name="p0">
+		<VertexShader name="DeferredLightingVS">
+			<Macro name="POINTLIGHT"/>
+		</VertexShader>
+		<PixelShader name="DeferredLightingPS">
+			<Macro name="POINTLIGHT"/>
+		</PixelShader>
+    <State name="DepthEnable" value="false"/>
+    <State name="BlendEnable" value="true"/>
+    <State name="SrcBlend" value="One"/>
+    <State name="DestBlend" value="One"/>
+    <State name="BlendOp" value="Add"/>
+    <State name="SrcBlendAlpha" value="One"/>
+    <State name="DestBlendAlpha" value="One"/>
+    <State name="BlendOpAlpha" value="Add"/>  
+  </Pass>
+</Technique>
+
+<Technique name="SpotLighting">
+	<Pass name="p0">
+		<VertexShader name="DeferredLightingVS">
+			<Macro name="SPOTLIGHT"/>
+		</VertexShader>
+		<PixelShader name="DeferredLightingPS">
+			<Macro name="SPOTLIGHT"/>
+		</PixelShader>
+    <State name="BlendEnable" value="true"/>
+    <State name="SrcBlend" value="One"/>
+    <State name="DestBlend" value="One"/>
+    <State name="BlendOp" value="Add"/>
+    <State name="SrcBlendAlpha" value="One"/>
+    <State name="DestBlendAlpha" value="One"/>
+    <State name="BlendOpAlpha" value="Add"/>
+	</Pass>
+</Technique>
+
+<Technique name="Shading">
+	<Pass name="p0">
+		<VertexShader name="DeferredLightingVS">
+			<Macro name="DIRLIGHT"/>
+		</VertexShader>
+		<PixelShader name="DeferredShadingPS">
+			<Macro name="DIRLIGHT"/>
+		</PixelShader>
+		<State name="DepthEnable" value="false"/>
+		<State name="DepthWriteMask" value="false"/>	
+	</Pass>
+</Technique>
+
+</Effect>
+	

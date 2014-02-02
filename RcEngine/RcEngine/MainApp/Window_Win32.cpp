@@ -294,6 +294,13 @@ Window::Window( const std::string& title, const RenderSettings& settings )
 
 Window::~Window(void)
 {
+	PaintEvent.clear();
+	ResumeEvent.clear();
+	SuspendEvent.clear();
+	ApplicationActivatedEvent.clear();
+	ApplicationDeactivatedEvent.clear();
+	WindowClose.clear();
+	UserResizedEvent.clear();
 }
 
 
