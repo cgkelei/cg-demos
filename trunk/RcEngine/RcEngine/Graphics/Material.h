@@ -3,10 +3,12 @@
 
 #include <Core/Prerequisites.h>
 #include <Math/ColorRGBA.h>
+#include <Math/Matrix.h>
 #include <Graphics/GraphicsCommon.h>
-#include <Graphics/EffectAnnotation.h>
-#include <Graphics/EffectParameter.h>
 #include <Resource/Resource.h>
+#include <Graphics/EffectParameter.h>
+#include <Graphics/RenderQueue.h>
+
 
 namespace RcEngine {
 	
@@ -14,10 +16,10 @@ static const int32_t MaxMaterialTextures = 16;
 
 struct _ApiExport MaterialParameter
 {
+	String Name;
+	bool IsSemantic;
 	EffectParameterType Type;
 	EffectParameterUsage Usage;
-	bool IsSemantic;
-	String Name;
 	EffectParameter* EffectParam;
 };
 
@@ -28,10 +30,11 @@ public:
 	virtual ~Material(void);
 
 	const String& GetName() const						{ return mResourceName; }
+	uint32_t GetQueueBucket() const						{ return mQueueBucket; }
 
 	const shared_ptr<Effect>& GetEffect() const			{ return mEffect; }
-	EffectTechnique* GetCurrentTechnique() const		{ return mCurrentTech; }
-
+	
+	EffectTechnique* GetCurrentTechnique() const;
 	void SetCurrentTechnique(const String& techName);
 	void SetCurrentTechnique(uint32_t index);
 			
@@ -42,11 +45,10 @@ public:
 	void SetDiffuseColor(const ColorRGBA& diffuse)		{ mDiffuse = diffuse; }
 	void SetSpecularColor(const ColorRGBA& specular)	{ mSpecular = specular; }
 
-	void SetTexture(const String& texUint, const shared_ptr<Texture>& texture);
+	void SetTexture(const String& name, const shared_ptr<Texture>& texture);
 
-	bool Transparent() const { return mTransparent; }
-			
-	void ApplyMaterial();
+	// Apply shader parameter before rendering, called by renderable
+	void ApplyMaterial(const float4x4& world = float4x4::Identity());
 
 	shared_ptr<Resource> Clone();
 
@@ -61,13 +63,10 @@ public:
 protected:	
 	
 	String mMaterialName;
-
 	shared_ptr<Effect> mEffect;
-	EffectTechnique* mCurrentTech;
-
-	vector<MaterialParameter*> mCachedEffectParams;
-
 	unordered_map<String, shared_ptr<SamplerState> > mSamplerStates;
+	unordered_map<String, TextureLayer> mTextures;			
+	vector<MaterialParameter*> mCachedEffectParams;
 
 	ColorRGBA mAmbient;
 	ColorRGBA mDiffuse;
@@ -75,10 +74,7 @@ protected:
 	ColorRGBA mEmissive;
 	float mPower;
 
-	bool mTransparent;
-
-	unordered_map<String, TextureLayer > mTextures;
-			
+	uint32_t mQueueBucket;
 };
 
 

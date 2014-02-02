@@ -22,10 +22,11 @@ public:
 
 	EffectTechnique* Clone(Effect& effect);
 
-	vector<EffectPass*>& GetPasses()	{ return mPasses; }
+	vector<EffectPass*>& GetPasses()					{ return mPasses; }
+	const vector<EffectPass*>& GetPasses() const		{ return mPasses; }
 
-	EffectPass* GetPassByName(const String& name);
-	EffectPass* GetPassByIndex(uint32_t index);
+	EffectPass* GetPassByName(const String& name) const;
+	EffectPass* GetPassByIndex(uint32_t index) const;
 
 protected:
 	String mName;

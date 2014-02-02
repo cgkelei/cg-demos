@@ -4,11 +4,25 @@
 #include <Core/Prerequisites.h>
 #include <Graphics/PixelFormat.h>
 #include <Graphics/GraphicsCommon.h>
-#include <Graphics/Viewport.h>
 #include <Math/ColorRGBA.h>
 
 namespace RcEngine {
 
+struct _ApiExport Viewport
+{
+public:
+	Viewport();
+	Viewport(uint32_t left, uint32_t top, uint32_t width, uint32_t height)
+		: Left(left), Top(top), Width(width), Height(height) {} 
+	
+	bool operator==( const Viewport& rhs ) const
+	{
+		return (Left == rhs.Left && Top == rhs.Top &&
+			   Width == rhs.Width && Height == rhs.Height);
+	}
+
+	uint32_t Left, Top, Width, Height;
+};
 
 class _ApiExport FrameBuffer
 {
@@ -32,7 +46,8 @@ public:
 	bool IsDepthBuffered() const			{ return mIsDepthBuffered; }
 	bool IsDirty() const					{ return mDirty; }
 
-	Camera* GetCamera() const				{ return mViewport.AttachCamera; }
+	const shared_ptr<Camera>& GetCamera() const		{ return mCamera; }
+	void SetCamera(const shared_ptr<Camera>& cam)	{ mCamera = cam; }
 
 	shared_ptr<RenderView> GetAttachedView(Attachment att);
 
@@ -74,6 +89,7 @@ protected:
 	shared_ptr<RenderView> mDepthStencilView;
 
 	Viewport mViewport;
+	shared_ptr<Camera> mCamera;
 
 	bool mOffscreen;
 	bool mDirty;

@@ -46,7 +46,7 @@ void SceneObject::OnDetach( Node* node )
 }
 
 
-void SceneObject::OnUpdateRenderQueue( RenderQueue* renderQueue, Camera* cam, RenderOrder order )
+void SceneObject::OnUpdateRenderQueue( RenderQueue* renderQueue, const Camera& cam, RenderOrder order )
 {
 
 }

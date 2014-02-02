@@ -1,5 +1,4 @@
 <Material name="Test">
-
 	<Sampler name="LinearSampler">
 		<State name="Filter" value="Min_Mag_Mip_Linear"/>
 		<State name="AddressU" value="Clamp"/>
@@ -10,7 +9,7 @@
 	<Parameter type="float4x4" name="ViewProj" semantic="ViewProjectionMatrix" />
 	<Parameter type="texture2d" name="DiffuseMap" semantic="DiffuseMaterialMap" stage="PixelShader" sampler="LinearSampler" texUnit="0" value="../Media/Mesh/Dwarf/Body.dds"/>
 	
-	<Effect name="Model.effect.xml">
-	</Effect>
+	<Effect name="Model.effect.xml"/>
+	<Queue name="Opaque"/>
 </Material>
 	

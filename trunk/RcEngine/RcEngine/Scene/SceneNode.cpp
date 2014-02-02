@@ -132,7 +132,7 @@ uint32_t SceneNode::GetNumAttachedObjects() const
 	return mAttachedObjects.size();
 }
 
-void SceneNode::OnUpdateRenderQueues(Camera* camera,  RenderOrder order)
+void SceneNode::OnUpdateRenderQueues(const Camera& camera,  RenderOrder order)
 {
 	const BoundingBoxf& worldBound = GetWorldBoundingBox();
 	

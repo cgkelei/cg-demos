@@ -6,11 +6,11 @@
 #include <Graphics/Texture.h>
 #include <Graphics/Effect.h>
 #include <Graphics/EffectTechnique.h>
-#include <Graphics/EffectParameter.h>
 #include <Graphics/DepthStencilState.h>
 #include <Graphics/SamplerState.h>
 #include <Graphics/BlendState.h>
 #include <Graphics/RasterizerState.h>
+#include <Graphics/RenderQueue.h>
 #include <Core/Context.h>
 #include <Core/Exception.h>
 #include <Core/XMLDom.h>
@@ -18,7 +18,6 @@
 #include <IO/FileSystem.h>
 #include <IO/PathUtil.h>
 #include <Resource/ResourceManager.h>
-
 
 namespace {
 
@@ -47,11 +46,10 @@ public:
 		mDefs.insert(std::make_pair("DiffuseMaterialMap", EPU_Material_Diffuse_Texture));
 		mDefs.insert(std::make_pair("SpecularMaterialMap", EPU_Material_Specular_Texture));
 		mDefs.insert(std::make_pair("NormalMaterialMap", EPU_Material_Normal_Texture));
-		mDefs.insert(std::make_pair("AmbientLight", EPU_Light_Ambient));
-		mDefs.insert(std::make_pair("DiffuseLight", EPU_Light_Diffuse));
-		mDefs.insert(std::make_pair("SpecularLight", EPU_Light_Specular));
-		mDefs.insert(std::make_pair("DirLight", EPU_Light_Dir));
-		mDefs.insert(std::make_pair("PositionLight", EPU_Light_Position));
+		mDefs.insert(std::make_pair("LightColor", EPU_Light_Color));
+		mDefs.insert(std::make_pair("LightFalloff", EPU_Light_Falloff));
+		mDefs.insert(std::make_pair("LightDirection", EPU_Light_Dir));
+		mDefs.insert(std::make_pair("LightPosition", EPU_Light_Position));
 	}
 
 	static EffectParamsUsageDefs& GetInstance()
@@ -64,9 +62,7 @@ public:
 	{
 		unordered_map<String, EffectParameterUsage>::iterator iter = mDefs.find(str);
 		if (iter != mDefs.end())
-		{
 			return iter->second;
-		}
 
 		return EPU_Unknown;
 	}
@@ -88,9 +84,7 @@ public:
 	{
 		auto iter = mDefs.find(name);
 		if (iter != mDefs.end())
-		{
 			return iter->second;
-		}
 
 		return TF_Min_Mag_Mip_Point;
 	}
@@ -131,12 +125,30 @@ private:
 	unordered_map<String, uint32_t> mDefs;
 };
 
+uint32_t GetRenderQueueBucket(const String& str) 
+{
+	if (str == "Overlay")
+		return RenderQueue::BucketOverlay;
+	else if (str == "Background")
+		return RenderQueue::BucketBackground;
+	else if (str == "Opaque")
+		return RenderQueue::BucketOpaque;
+	else if (str == "Transparent")
+		return RenderQueue::BucketTransparent;
+	else if (str == "Translucent")
+		return RenderQueue::BucketTranslucent;
+	else if (str == "Opaque")
+		return RenderQueue::BucketTransparent;
+	else 
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Undefined Queue Bucket", "GetQueueBucket");
+}
+
 }
 
 namespace RcEngine {
 
 Material::Material( ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
-	: Resource(RT_Material, creator, handle, name, group), mTransparent(false), mCurrentTech(nullptr)
+	: Resource(RT_Material, creator, handle, name, group)
 {
 }
 
@@ -147,64 +159,6 @@ Material::~Material(void)
 		delete param;
 
 	mCachedEffectParams.clear();
-}
-
-void Material::ApplyMaterial()
-{
-	RenderDevice* renderDevice = Context::GetSingleton().GetRenderDevicePtr();
-	Camera* camera = renderDevice->GetCurrentFrameBuffer()->GetCamera();
-
-	for(size_t i = 0; i < mCachedEffectParams.size(); ++i)
-	{
-		MaterialParameter* param = mCachedEffectParams[i];
-		switch (param->Usage)
-		{
-		case EPU_ViewMatrix:
-			{
-				param->EffectParam->SetValue(camera->GetViewMatrix());
-			}
-			break;
-		case EPU_ViewProjectionMatrix:
-			{
-				param->EffectParam->SetValue(camera->GetViewMatrix() * camera->GetProjectionMatrix());
-			}
-			break;
-		case EPU_Material_Ambient_Color:
-			{
-				float3 color(mAmbient.R(), mAmbient.G(), mAmbient.B());
-				param->EffectParam->SetValue(color);
-			}
-			break;
-		case EPU_Material_Diffuse_Color:
-			{
-				float3 color(mDiffuse.R(), mDiffuse.G(), mDiffuse.B());
-				param->EffectParam->SetValue(color);
-			}
-			break;
-		case EPU_Material_Specular_Color:
-			{
-				float4 color(mSpecular.R(), mSpecular.G(), mSpecular.B(), mSpecular.A());
-				param->EffectParam->SetValue(color);
-			}
-			break;
-		case EPU_Material_Power:
-			{
-				param->EffectParam->SetValue(mPower);
-			}
-			break;
-
-		case EPU_Material_Diffuse_Texture:
-			{
-				param->EffectParam->SetValue(mTextures[param->Name]);
-			}
-			break;
-
-		default:
-			{
-
-			}
-		}
-	}
 }
 
 EffectParameter* Material::GetCustomParameter( EffectParameterUsage usage ) const
@@ -244,7 +198,6 @@ shared_ptr<Resource> Material::Clone()
 	retVal->mPower = mPower;
 
 	retVal->mEffect = std::static_pointer_cast<Effect>(mEffect->Clone());
-	retVal->mCurrentTech = retVal->mEffect->GetTechniqueByName(mCurrentTech->GetTechniqueName());
 	retVal->mTextures = mTextures;
 
 	for (MaterialParameter* param : mCachedEffectParams)
@@ -263,16 +216,17 @@ shared_ptr<Resource> Material::Clone()
 	return retVal;
 }
 
-void Material::SetTexture( const String& texUint, const shared_ptr<Texture>& texture )
+void Material::SetTexture( const String& name, const shared_ptr<Texture>& texture )
 {
-	auto found = mTextures.find(texUint);
-	if (found != mTextures.end())
+	if (mTextures.find(name) != mTextures.end())
 	{
-		found->second.Texture = texture;
+		mTextures[name].Texture = texture;
+		mEffect->GetParameterByName(name)->SetValue(mTextures[name]);
 	}
 	else
 	{
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Texture Unit: "+texUint +"doesn't exit!", "Material::SetTexture");
+		String errMsg = "Texture " + name + " not exit in Effect" + mEffect->GetResourceName();
+		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, errMsg, "Material::SetTexture");
 	}
 }
 
@@ -327,10 +281,9 @@ void Material::LoadImpl()
 		effectProtype->Load();
 
 		// if use material animation, use effect clone
-		mEffect = std::static_pointer_cast<Effect>(effectProtype->Clone());
-		mCurrentTech = mEffect->GetTechniqueByIndex(0);  
-	}
-	
+		//mEffect = std::static_pointer_cast<Effect>(effectProtype->Clone());
+		mEffect = std::static_pointer_cast<Effect>(effectProtype);
+	}	
 
 	for (XMLNodePtr samplerNode = root->FirstNode("Sampler"); samplerNode; samplerNode = samplerNode->NextSibling("Sampler"))
 	{
@@ -423,10 +376,7 @@ void Material::LoadImpl()
 			parameter->Usage = EPU_Unknown;
 
 		// texture type
-		if (parameter->Type == EPT_Texture1D || parameter->Type == EPT_Texture2D ||
-			parameter->Type == EPT_TextureCUBE || parameter->Type == EPT_Texture3D ||
-			parameter->Type == EPT_Texture1DArray || parameter->Type == EPT_Texture2DArray ||
-			parameter->Type == EPT_Texture3DArray || parameter->Type == EPT_TextureCUBEArray)
+		if (EPT_Texture1D <= parameter->Type && parameter->Type <= EPT_TextureCUBEArray)
 		{	
 			TextureLayer layer;
 
@@ -435,26 +385,40 @@ void Material::LoadImpl()
 			layer.TexUnit = paramNode->Attribute("texUnit")->ValueUInt();
 
 			String samplerValue = paramNode->Attribute("sampler")->ValueString();
-			auto samplerIter = mSamplerStates.find(samplerValue) ;
-
-			if (samplerIter == mSamplerStates.end())
+			if (mSamplerStates.find(samplerValue) == mSamplerStates.end())
 				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Sampler: " + samplerValue + "doesn't exit", "Material::LoadFrom");
 
-			layer.Sampler = samplerIter->second;
+			layer.Sampler = mSamplerStates[samplerValue];
 
 			String texFile = paramNode->AttributeString("value", "");
 			if (!texFile.empty())
 			{
-				texFile = parentDir + texFile;
+				String texturePath = parentDir + texFile;
+				
+				shared_ptr<TextureResource> textureRes;
+				if (fileSystem.Exits(texturePath, mGroup))
+				{
+					textureRes = std::static_pointer_cast<TextureResource>(
+						resMan.GetResourceByName(RT_Texture, texturePath, mGroup));
+				}
+				else 
+				{
+					textureRes = std::static_pointer_cast<TextureResource>(
+						resMan.GetResourceByName(RT_Texture, texFile, "General"));
 
-				shared_ptr<TextureResource> textureRes = std::static_pointer_cast<TextureResource>(
-					resMan.GetResourceByName(RT_Texture, texFile, mGroup));
-				textureRes->Load();
+					textureRes->Load();
+					layer.Texture = textureRes->GetTexture();
+				}		
 
-				layer.Texture = textureRes->GetTexture();
+				if (textureRes)
+				{
+					textureRes->Load();
+					layer.Texture = textureRes->GetTexture();				
+				}			
 			}
 
 			mTextures[parameter->Name] = layer;
+			SetTexture(paramName, layer.Texture);
 		}
 
 		// Material Color
@@ -511,6 +475,13 @@ void Material::LoadImpl()
 			
 		mCachedEffectParams.push_back(parameter);
 	}
+
+	// Parse render queue bucket
+	if (root->FirstNode("Queue"))
+	{
+		String bucket = root->FirstNode("Queue")->AttributeString("name", "");
+		mQueueBucket = GetRenderQueueBucket(bucket);
+	}
 }
 
 void Material::UnloadImpl()
@@ -523,32 +494,116 @@ shared_ptr<Resource> Material::FactoryFunc( ResourceManager* creator, ResourceHa
 	return std::make_shared<Material>(creator, handle, name, group);
 }
 
+EffectTechnique* Material::GetCurrentTechnique() const
+{
+	return mEffect->GetCurrentTechnique();
+}
+
 void Material::SetCurrentTechnique( const String& techName )
 {
-	EffectTechnique* tech = mEffect->GetTechniqueByName(techName);
-
-	if (!tech)
-		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, techName + " deosn't exit in" + mEffect->GetResourceName(), "Material::SetCurrentTechnique");
-
-	mCurrentTech = tech;
+	mEffect->SetCurrentTechnique(techName);
 }
 
 void Material::SetCurrentTechnique( uint32_t index )
 {
-	EffectTechnique* tech = mEffect->GetTechniqueByIndex(index);
-
-	if (!tech)
-	{
-		String err = mEffect->GetResourceName() + " doesn't have" + std::to_string(index) + " technique";
-		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, err, "Material::SetCurrentTechnique");
-	}
-
-	mCurrentTech = tech;
+	mEffect->SetCurrentTechnique(index);
 }
 
+void Material::ApplyMaterial( const float4x4& world )
+{
+	RenderDevice* renderDevice = Context::GetSingleton().GetRenderDevicePtr();
+	const shared_ptr<Camera>& camera = renderDevice->GetCurrentFrameBuffer()->GetCamera();
 
+	for(size_t i = 0; i < mCachedEffectParams.size(); ++i)
+	{
+		MaterialParameter* param = mCachedEffectParams[i];
+		switch (param->Usage)
+		{
+		case EPU_WorldMatrix:
+			{
+				param->EffectParam->SetValue(world);
+			}		
+			break;
+		case EPU_ViewMatrix:
+			{
+				param->EffectParam->SetValue(camera->GetViewMatrix());
+			}			
+			break;
+		case EPU_ProjectionMatrix:
+			{
+				param->EffectParam->SetValue(camera->GetProjectionMatrix());
+			}	
+			break;
+		case EPU_WorldViewMatrix:
+			{
+				param->EffectParam->SetValue(world * camera->GetViewMatrix());
+			}		
+			break;
+		case EPU_ViewProjectionMatrix:
+			{
+				param->EffectParam->SetValue(camera->GetViewMatrix() * camera->GetProjectionMatrix());
+			}			
+			break;	
+		case EPU_WorldViewProjection:
+			{
+				param->EffectParam->SetValue(world * camera->GetViewMatrix() * camera->GetProjectionMatrix());
+			}			
+			break;
+		case EPU_WorldInverseTranspose:
+			{
+				param->EffectParam->SetValue(world.Inverse().Transpose());
+			}
+			break;
+		case EPU_WorldMatrixInverse:
+			{
+				param->EffectParam->SetValue(world.Inverse());
+			}
+			break;
+		case EPU_ViewMatrixInverse:
+			{
+				param->EffectParam->SetValue(camera->GetInvViewMatrix());
+			}
+			break;
+		case EPU_ProjectionMatrixInverse:
+			{
+				param->EffectParam->SetValue(camera->GetInvProjectionMatrix());
+			}
+			break;
+		case EPU_Material_Ambient_Color:
+			{
+				float3 color(mAmbient.R(), mAmbient.G(), mAmbient.B());
+				param->EffectParam->SetValue(color);
+			}
+			break;
+		case EPU_Material_Diffuse_Color:
+			{
+				float3 color(mDiffuse.R(), mDiffuse.G(), mDiffuse.B());
+				param->EffectParam->SetValue(color);
+			}
+			break;
+		case EPU_Material_Specular_Color:
+			{
+				float4 color(mSpecular.R(), mSpecular.G(), mSpecular.B(), mSpecular.A());
+				param->EffectParam->SetValue(color);
+			}
+			break;
+		case EPU_Material_Power:
+			{
+				param->EffectParam->SetValue(mPower);
+			}
+			break;
+		case EPU_Material_Diffuse_Texture:
+			{
+				param->EffectParam->SetValue(mTextures[param->Name]);
+			}
+			break;
 
+		default:
+			{
 
-
+			}
+		}
+	}
+}
 
 } // Namespace RcEngine

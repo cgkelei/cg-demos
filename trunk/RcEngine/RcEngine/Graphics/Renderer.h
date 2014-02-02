@@ -3,12 +3,10 @@
 
 #include <Core/Prerequisites.h>
 #include <Graphics/GraphicsCommon.h>
+#include <Graphics/Pipeline.h>
 #include <Math/Matrix.h>
 
-
 namespace RcEngine {
-
-class FrameBuffer;
 
 class _ApiExport Renderer
 {
@@ -16,16 +14,26 @@ public:
 	Renderer();
 	~Renderer();
 
-	void RenderScene(const shared_ptr<Pipeline>& pipeline);
-	void UpdateShadowMap();
+	void Init();
+
+	void SetRenderPipeline(const shared_ptr<Pipeline>& pipeline);
+	void RenderScene();
+
 
 private:
-	void DrawFSQuad(const shared_ptr<Material>& mat, const String& tech);
+	void UpdateShadowMap();
+
+
+	void DrawFSQuad(const String& tech);
 
 	/**
 	 * Draw geometry with light, it can used to generate shadow map
 	 */
-	void DrawGeometry(const String& tech, const String& matClass);
+	void DrawGeometry(const String& tech, const String& matClass, RenderOrder order);
+
+	void DrawLightShape(const String& tech);
+
+	void DrawOverlays();
 
 	void DrawLightGeometry(Light* light, const String& matClass);
 
@@ -36,18 +44,24 @@ private:
 private:
 	void DrawEntity();
 
-	void ApplyMaterial(const shared_ptr<Material>& material);
+	void UpdateMaterialParameters(Pipeline::PipelineCommand* cmd);
+
+	void CreatePrimitives();
+
+	void DrawPointLightShape(const float3& worldPos, float radius, const String& tech);
 
 private:
-	shared_ptr<FrameBuffer> mCurrentFrameBuffer;
-	
-	shared_ptr<Material> mCurrentMat;
+
+	shared_ptr<FrameBuffer> mShadowMap;
+	shared_ptr<Pipeline> mCurrPipeline;
+	shared_ptr<Material> mCurrMaterial;
 	
 	EffectTechnique* mCurrentTechnique;
-
-	float4x4 mViewMat, mViewMatInv, mProjMat, mViewProjMat;
-
 	Light* mCurrentLight;
+
+
+	shared_ptr<RenderOperation> mPointLightShape;
+	shared_ptr<RenderOperation> mFSQuadShape;
 };
 
 

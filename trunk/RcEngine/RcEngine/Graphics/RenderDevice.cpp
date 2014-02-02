@@ -33,9 +33,6 @@ RenderDevice::~RenderDevice(void)
 void RenderDevice::Resize( uint32_t width, uint32_t height )
 {
 	mScreenFrameBuffer->Resize(width, height);
-
-	Camera* cam = GetCurrentFrameBuffer()->GetCamera();
-	cam->SetProjectionParams(cam->GetFov(), (float)width/(float)height, cam->GetNearPlane(), cam->GetFarPlane());
 }
 
 
@@ -57,7 +54,7 @@ void RenderDevice::BindFrameBuffer( const shared_ptr<FrameBuffer>& fb )
 	}
 }
 
-void RenderDevice::Render( EffectTechnique& tech, RenderOperation& op )
+void RenderDevice::Render( const EffectTechnique& tech, const RenderOperation& op )
 {
 	DoRender(tech, op);
 }

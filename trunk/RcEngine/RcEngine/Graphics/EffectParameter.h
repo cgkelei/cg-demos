@@ -66,6 +66,7 @@ public:
 	virtual void SetValue(const TextureLayer& value);
 
 	void ClearDirty() { mDirty = false; }
+	void MakeDirty()  { mDirty = true; }
 	bool Dirty() const { return mDirty; }
 
 protected:

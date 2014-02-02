@@ -20,12 +20,12 @@ public:
 	 * This method will create reader device with render settings and then 
 	 * load all modules, create render window
 	 */
-	virtual void Create(); 
+	void Create(); 
 
 	/**
 	 * This method will release all modules.
 	 */
-	virtual void Release();
+	void Release();
 
 	/// <summary>
 	// Call this method to initialize the game, begin running the game loop
@@ -36,7 +36,7 @@ public:
 	Window* GetMainWindow() { return mMainWindow; }
 
 	bool Active() const { return mActice; }
-
+	
 protected:
 
 	//Called after the Game and GraphicsDevice are created, but before LoadContent.
@@ -71,8 +71,8 @@ private:
 	void Tick();
 	void LoadAllModules();
 	void UnloadAllModules();
-
 	void ReadConfiguration();
+	void ProcessEventQueue();
 
 	void Window_UserResized();
 	void Window_ApplicationActivated();
@@ -81,8 +81,9 @@ private:
 	void Window_Resume();
 	void Window_Paint();
 	void Window_Close();
-
-	void ProcessEventQueue();
+	
+protected:
+	virtual void WindowResize(uint32_t width, uint32_t height) { }
 
 protected:
 

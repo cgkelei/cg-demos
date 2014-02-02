@@ -1,5 +1,5 @@
 <Application Title = "OpenGL Demo">
-	<Graphics Left="200" Top="200" Width="800" Height="600" ColorForamt="R8G8B8A8" DepthStencilFormat="Depth24Stencil8" FullScreen="0">
+	<Graphics Left="200" Top="200" Width="1024" Height="768" ColorForamt="R8G8B8A8" DepthStencilFormat="Depth24Stencil8" FullScreen="0">
 		<Sample Count="0" Quality="0"/>
 		<SyncInterval Interval="0"/>
 	</Graphics>

@@ -9,32 +9,26 @@ EffectTechnique::EffectTechnique()
 
 EffectTechnique::~EffectTechnique()
 {
-	for (auto iter = mPasses.begin(); iter != mPasses.end(); ++iter)
-	{
-		delete *iter;
-	}
-	mPasses.clear();
+	for (EffectPass* pass : mPasses)
+		delete pass;
 }
 
-EffectPass* EffectTechnique::GetPassByName( const String& name )
+EffectPass* EffectTechnique::GetPassByName( const String& name ) const
 {
-	auto found = std::find_if(mPasses.begin(), mPasses.end(), 
-		[&name](EffectPass* pass){ return pass->GetPassName() == name;} );
-
-	if (found != mPasses.end())
+	for (EffectPass* pass : mPasses)
 	{
-		return *found;
+		if (pass->GetPassName() == name)
+			return pass;
 	}
 
 	return nullptr;
 }
 
-EffectPass* EffectTechnique::GetPassByIndex( uint32_t index )
+EffectPass* EffectTechnique::GetPassByIndex( uint32_t index ) const
 {
 	if (index >= 0 && index < mPasses.size())
-	{
 		return mPasses[index];
-	}
+
 	return nullptr;
 }
 

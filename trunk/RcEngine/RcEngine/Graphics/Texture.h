@@ -15,10 +15,12 @@ public:
 	Texture(TextureType type, PixelFormat format, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint);
 	virtual ~Texture();
 
-	uint32_t GetSampleCount() const			{ return mSampleCount; }
-	uint32_t GetSampleQuality() const		{ return mSampleQuality; }
+	uint32_t GetSampleCount() const				{ return mSampleCount; }
+	uint32_t GetSampleQuality() const			{ return mSampleQuality; }
 	PixelFormat GetTextureFormat() const		{ return mFormat; }
 	TextureType GetTextureType() const          { return mType; }
+	uint32_t GetTextureArraySize() const		{ return mTextureArraySize; }
+	uint32_t GetNumMipmaps() const				{ return mMipMaps; }
 
 	virtual uint32_t GetWidth(uint32_t level) = 0;
 	virtual uint32_t GetHeight(uint32_t level) = 0;

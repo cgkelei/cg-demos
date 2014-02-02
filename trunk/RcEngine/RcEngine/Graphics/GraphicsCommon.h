@@ -437,20 +437,10 @@ enum EffectParameterUsage
 	EPU_Material_Emissive_Color, 
 
 	/**
-	 * The ambient component of light, ColorRGBA format 
+	 * Light Color, ColorRGBA format 
 	 */
-	EPU_Light_Ambient, 
+	EPU_Light_Color, 
 	
-	/**
-	 * The diffuse component of light, ColorRGBA format 
-	 */
-	EPU_Light_Diffuse, 
-
-	/**
-	 * The specular component of light, ColorRGBA format 
-	 */
-	EPU_Light_Specular, 
-
 	/**
 	 * Direction of light, only for directional light
 	 */
@@ -462,9 +452,19 @@ enum EffectParameterUsage
 	EPU_Light_Position,
 
 	/**
+	 * The ambient component of light, ColorRGBA format 
+	 */
+	EPU_Light_Falloff, 
+
+	/**
 	 * Position of camera.
 	 */
-	EPU_Camera_Position
+	EPU_Camera_Position,
+
+	/**
+	 * Camera info(focal len, near, far)
+	 */
+	EPU_Camera_Info
 };
 
 

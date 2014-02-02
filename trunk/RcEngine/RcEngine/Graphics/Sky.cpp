@@ -140,8 +140,8 @@ namespace RcEngine {
 
 //---------------------------------------------------------------------------
 Sky::Sky( float size  , bool cube /*= false*/ )
-	: SceneObject("Sky Box", SOT_Sky, true), 
-	mCubeMapSky(cube), mRenderOperation(new RenderOperation)
+	: mCubeMapSky(cube), 
+	  mRenderOperation(new RenderOperation)
 {
 	if (!cube)
 	{
@@ -153,11 +153,9 @@ Sky::Sky( float size  , bool cube /*= false*/ )
 	}
 
 	// init render operation
-	mRenderOperation->BindVertexStream(mVertexBuffer, mVertexDecl);
-	mRenderOperation->StartVertexLocation = 0;
-	mRenderOperation->BindIndexStream(mIndexBuffer, IBT_Bit32);
-	mRenderOperation->StartIndexLocation = 0;
 	mRenderOperation->PrimitiveType = PT_Triangle_List;
+	mRenderOperation->BindVertexStream(mVertexBuffer, mVertexDecl);
+	mRenderOperation->BindIndexStream(mIndexBuffer, IBT_Bit32);
 }
 
 Sky::~Sky()
@@ -168,16 +166,6 @@ Sky::~Sky()
 void Sky::SetMaterial( const shared_ptr<Material>& mat )
 {
 	mMaterial = mat;
-}
-
-uint32_t Sky::GetWorldTransformsCount() const
-{
-	return 1;
-}
-
-void Sky::GetWorldTransforms( float4x4* xform ) const
-{
-	xform[0] = GetWorldTransform();
 }
 
 void Sky::InitializeSkyBox(float size)

@@ -19,18 +19,24 @@ public:
 	Effect(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	~Effect();
 
-	vector<EffectTechnique*>& GetTechniques()	{ return mTechniques; }
+	EffectTechnique* GetCurrentTechnique() const						{ return mCurrTechnique; }
+	void SetCurrentTechnique(const String& techName);					
+	void SetCurrentTechnique(uint32_t index);
+
+	const vector<EffectTechnique*>& GetTechniques()	const				{ return mTechniques; }
 	EffectTechnique* GetTechniqueByName(const String& techName);
 	EffectTechnique* GetTechniqueByIndex(uint32_t index);
 
+	const EffectParameterMap& GetAllParameters() const					{ return mParameters; }
 	EffectParameter* GetParameterByName(const String& paraName) const;
-
+	
 	shared_ptr<Resource> Clone();
 
+public_internal:
 	/**
 	 * Only used by sub render system shader parameter set internal.
 	 */
-	EffectParameter* AddOrGetShaderParameter(const String& name, EffectParameterType type, bool array);
+	EffectParameter* FetchShaderParameter(const String& name, EffectParameterType type, bool array);
 
 protected:
 	void LoadImpl();
@@ -43,6 +49,7 @@ protected:
 	String mEffectName;
 	EffectParameterMap mParameters;
 	vector<EffectTechnique*> mTechniques;
+	EffectTechnique* mCurrTechnique;
 };
 
 

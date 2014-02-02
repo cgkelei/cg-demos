@@ -20,7 +20,8 @@ for material in materials.getElementsByTagName('material'):
     outMat.attributes['name'].value = name
 
     for node in template.getElementsByTagName('Parameter'):
-        if node.attributes['type'].value == 'texture2d' and node.attributes['semantic'].value == 'DiffuseMaterialMap':
+        if node.attributes['type'].value == 'texture2d':
+            if node.attributes.has_key('semantic') and node.attributes['semantic'].value == 'DiffuseMaterialMap':
                node.attributes['value'].value = texture
               
     count = count + 1;

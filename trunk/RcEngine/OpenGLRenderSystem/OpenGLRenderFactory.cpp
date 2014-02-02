@@ -10,6 +10,7 @@
 #include <Graphics/BlendState.h>
 #include <Graphics/DepthStencilState.h>
 #include <Graphics/RasterizerState.h>
+#include "pfm.h"
 
 namespace {
 
@@ -488,7 +489,31 @@ void OpenGLRenderFactory::SaveTexture2D( const String& texFile, const shared_ptr
 				imageData[j*w+i].a = a;
 			}
 
-		WriteTGA(texFile.c_str(), &imageData[0], w, h);
+			WriteTGA(texFile.c_str(), &imageData[0], w, h);
+	}
+	else if (texture->GetTextureFormat() == PF_A8B8G8R8)
+	{
+		void* pData;
+		uint32_t rowPitch;
+		texture->Map2D(arrayIndex, level, TMA_Read_Only, 0, 0, 0, 0, pData, rowPitch);
+
+		uint8_t* pixel = (uint8_t*)pData;
+		vector<Pixel32> imageData(w*h);
+		for (uint32_t j = 0; j < h; j++)
+			for(uint32_t i = 0; i < w; i ++)
+			{
+				uint8_t r = pixel[((h-j -1) * w + i)*4 + 0];
+				uint8_t g = pixel[((h-j-1) * w + i)*4 +1];
+				uint8_t b = pixel[((h-j-1) * w + i)*4 +2];
+				uint8_t a = pixel[((h-j-1) * w + i)*4 +3];
+
+				imageData[j*w+i].r = r;
+				imageData[j*w+i].g = g;
+				imageData[j*w+i].b = b;
+				imageData[j*w+i].a = a;
+			}
+
+			WriteTGA(texFile.c_str(), &imageData[0], w, h);
 	}
 	else if (texture->GetTextureFormat() == PF_R8G8B8)
 	{
@@ -537,6 +562,51 @@ void OpenGLRenderFactory::SaveTexture2D( const String& texFile, const shared_ptr
 
 			WriteTGA(texFile.c_str(), &imageData[0], w, h);
 	}
+	else if (texture->GetTextureFormat() == PF_A32B32G32R32F)
+	{
+		void* pData;
+		uint32_t rowPitch;
+		texture->Map2D(arrayIndex, level, TMA_Read_Only, 0, 0, 0, 0, pData, rowPitch);
+
+		float* pixel = (float*)pData;
+		/*vector<Pixel32> imageData(w*h);
+		for (uint32_t j = 0; j < h; j++)
+		for(uint32_t i = 0; i < w; i ++)
+		{
+		float r = pixel[((h-j -1) * w + i)*4 + 0];
+		float g = pixel[((h-j-1) * w + i)*4 +1];
+		float b = pixel[((h-j-1) * w + i)*4 +2];
+		float a = pixel[((h-j-1) * w + i)*4 +3];
+
+		imageData[j*w+i].r = r*255;
+		imageData[j*w+i].g = g*255;
+		imageData[j*w+i].b = b*255;
+		imageData[j*w+i].a = a*255;
+		}*/
+
+		//WriteTGA(texFile.c_str(), &imageData[0], w, h);
+
+		vector<float> temp;
+		temp.resize(w * h * 3);
+		float* imageData = &temp[0];
+		for (uint32_t j = 0; j < h; j++)
+		for(uint32_t i = 0; i < w; i ++)
+		{
+			float r = pixel[(j * w + i)*4 + 0];
+			float g = pixel[(j * w + i)*4 +1];
+			float b = pixel[(j * w + i)*4 +2];
+			float a = pixel[(j * w + i)*4 +3];
+
+			*imageData++ = r;
+			*imageData++ = g;
+			*imageData++ = b;
+		}
+
+		WritePfm(texFile.c_str(), w, h, 3, &temp[0]);
+		
+	}
 }
 
 }
+
+

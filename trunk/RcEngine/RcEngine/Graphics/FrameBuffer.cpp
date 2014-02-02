@@ -1,22 +1,27 @@
 #include <Graphics/FrameBuffer.h>
 #include <Graphics/RenderView.h>
 #include <Graphics/RenderDevice.h>
+#include <Graphics/Camera.h>
 #include <Core/Context.h>
 
 namespace RcEngine {
 
 FrameBuffer::FrameBuffer(uint32_t width, uint32_t height,  bool offscreen /*= true*/ )
-	: mWidth(width), mHeight(height), mDepthStencilView(0), mDirty(true), mOffscreen(offscreen),
-	mViewport(0, 0, width, height)
+	: mWidth(width), 
+	  mHeight(height), 
+	  mDepthStencilView(0),
+	  mDirty(true), 
+	  mIsDepthBuffered(false),
+	  mOffscreen(offscreen),
+	  mViewport(0, 0, width, height)
 {
-			
+	mCamera = std::make_shared<Camera>();
 }
 
 FrameBuffer::~FrameBuffer(void)
 {
 	
 }
-
 
 shared_ptr<RenderView> FrameBuffer::GetAttachedView( Attachment att )
 {
@@ -127,7 +132,6 @@ void FrameBuffer::OnBind()
 {
 	// Do Render API specify set
 	DoBind();
-
 	mDirty = false;
 }
 
@@ -135,6 +139,7 @@ void FrameBuffer::OnUnbind()
 {
 	// Do Render API specify set
 	DoUnbind();
+	mDirty =  true;
 }
 
 void FrameBuffer::DetachAll()

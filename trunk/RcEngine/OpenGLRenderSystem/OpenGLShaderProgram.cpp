@@ -587,6 +587,46 @@ OpenGLShaderProgram::ParameterBind OpenGLShaderProgram::GetShaderParamBindFunc(G
 	return paramBind;
 }
 
+String GetGLSLTypeString(GLenum type)
+{
+	switch (type)
+	{
+	case GL_FLOAT:
+		return "float";
+	case GL_FLOAT_VEC2:
+		return "vec2";
+	case GL_FLOAT_VEC3:
+		return "vec3";
+	case GL_FLOAT_VEC4:
+		return "vec4";
+	case GL_INT:
+		return "int";
+	case GL_INT_VEC2:
+		return "int2";
+	case GL_INT_VEC3:
+		return "int3";
+	case GL_INT_VEC4:
+		return "int4";
+	case GL_UNSIGNED_INT:
+		return "uint";
+	case GL_UNSIGNED_INT_VEC2:
+		return "uint2";
+	case GL_UNSIGNED_INT_VEC3:
+		return "uint3";
+	case GL_UNSIGNED_INT_VEC4:
+		return "uint4";
+	case GL_FLOAT_MAT2:
+		return "mat2";
+	case GL_FLOAT_MAT3:
+		return "mat3";
+	case GL_FLOAT_MAT4:
+		return "mat4";
+	default:
+		break;
+	}
+	return "unknow";
+}
+
 void OpenGLShaderProgram::CaptureAllParameter()
 {
 	GLint activeAttribs;
@@ -606,14 +646,14 @@ void OpenGLShaderProgram::CaptureAllParameter()
 		{
 			glGetActiveAttrib(mOGLProgramObject, i, maxLength, &length, &attibSize, &attibType, &maxName[0]);
 			String actualName(&maxName[0], length);
-			//std::cout << actualName << std::endl;
+			//std::cout << actualName << " size=" << attibSize << " type=" << GetGLSLTypeString(attibType) << std::endl;
 		}
 
 		auto iPos = glGetAttribLocation(mOGLProgramObject, "iPos");
 		auto iBlendWeights = glGetAttribLocation(mOGLProgramObject, "iBlendWeights");
 		auto iBlendIndices = glGetAttribLocation(mOGLProgramObject, "iBlendIndices");
 		auto iNormal = glGetAttribLocation(mOGLProgramObject, "iNormal");
-		auto iTex0 = glGetAttribLocation(mOGLProgramObject, "iTex0");
+		auto iTex = glGetAttribLocation(mOGLProgramObject, "iTex");
 		auto iTangent = glGetAttribLocation(mOGLProgramObject, "iTangent");
 		auto iBinormal = glGetAttribLocation(mOGLProgramObject, "iBinormal");
 	}
@@ -651,13 +691,13 @@ void OpenGLShaderProgram::CaptureAllParameter()
 			String actualName(&maxName[0], length);
 			GLint location = glGetUniformLocation(mOGLProgramObject, actualName.c_str());
 
-			
-
 			EffectParameterType effectParamType;
 			OpenGLMapping::UnMapping(effectParamType, uniformType);
 
-			
-			EffectParameter* effectParam = mEffect.AddOrGetShaderParameter(actualName, effectParamType, isArray);
+			//printf("\t%s\n", actualName.c_str());
+			//std::cout << actualName << " size=" << uniformSize << " type=" << GetGLSLTypeString(uniformType) << std::endl;
+
+			EffectParameter* effectParam = mEffect.FetchShaderParameter(actualName, effectParamType, isArray);
 
 			mParameterBinds[i] = GetShaderParamBindFunc(location, effectParam, isArray);
 

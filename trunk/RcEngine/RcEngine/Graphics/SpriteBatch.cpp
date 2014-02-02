@@ -77,15 +77,18 @@ SpriteBatch::~SpriteBatch()
 
 void SpriteBatch::Begin( )
 {
-	for (auto iter = mBatches.begin(); iter != mBatches.end(); ++iter)
+	std::map<shared_ptr<Texture>, Sprite*>::iterator it;
+	for (it = mBatches.begin(); it != mBatches.end(); ++it)
 	{
-		iter->second->ClearAll();
+		Sprite* entity = it->second;
+		entity->ClearAll();
 	}
 }
 
 void SpriteBatch::End()
 {
-
+	// Todo:
+	// Remove empty SpriteEntity
 }
 
 void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& dest, const IntRect* src, const ColorRGBA& color, float rotAngle /*= 0*/, const float2& origin /*= float2::Zero()*/, float layerDepth /*= 0.0f*/ )
@@ -98,16 +101,16 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& de
 
 	IntRect srcRect = src ? (*src) : IntRect(0, 0, texWidth, texHeight);
 
-	SpriteEntity* spriteEntity = nullptr;
+	Sprite* spriteEntity = nullptr;
 	if (mBatches.find(texture) == mBatches.end())
 	{
-		spriteEntity = Context::GetSingleton().GetSceneManager().CreateSpriteEntity(texture, 
+		spriteEntity = Context::GetSingleton().GetSceneManager().CreateSprite(texture, 
 			std::static_pointer_cast<Material>(mSpriteMaterial->Clone()));
 		mBatches[texture] = spriteEntity;
 	}
 	else
 	{
-		spriteEntity = static_cast<SpriteEntity* >(mBatches[texture]);
+		spriteEntity = static_cast<Sprite* >(mBatches[texture]);
 	}
 	assert(spriteEntity);
 
@@ -229,39 +232,22 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const float2& positi
 
 void SpriteBatch::Flush()
 {
-	//SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
-	//SceneNode* sceneNode = sceneMan.GetRootSceneNode();
-
-	// update parameter
-	//Window* mainWindow =  Context::GetSingleton().GetApplication().GetMainWindow();
-	//mProjectionMatrix = CreateOrthographicLH(float(mainWindow->GetWidth()), float(mainWindow->GetHeight()), float(-1), float(1));
-	//Context::GetSingleton().GetRenderDevice().AdjustProjectionMatrix(mProjectionMatrix);
-
-	for (auto iter = mBatches.begin(); iter != mBatches.end(); ++iter)
+	std::map<shared_ptr<Texture>, Sprite*>::iterator it;
+	for (it = mBatches.begin(); it != mBatches.end(); ++it)
 	{
-		if (!iter->second->Empty())
-		{
-			//iter->second->SetProjectionMatrix(mProjectionMatrix);
-			iter->second->SetVisible(true);
-		}	
-		else
-		{
-			iter->second->SetVisible(false);
-		}
+		Sprite* entity = it->second;
+		
+		bool visile = (entity->Empty() == false);		
+		if (visile)
+			entity->UpdateGeometryBuffers();			
 	}
 }
 
 //-----------------------------------------------------------------------------------------------------------------
-SpriteEntity::SpriteEntity( const String& name )
-: SceneObject(name, SOT_Sprite, true), mDirty(true)
+Sprite::Sprite()
+	: mDirty(true)
 {
 	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
-
-	mRenderOperation = std::make_shared<RenderOperation>();
-	mRenderOperation->BaseVertexLocation = 0;
-	mRenderOperation->StartIndexLocation = 0;
-	mRenderOperation->StartVertexLocation = 0;
-	mRenderOperation->PrimitiveType = PT_Triangle_List;
 
 	// create index buffer 
 	mIndexBuffer = factory.CreateIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
@@ -277,16 +263,18 @@ SpriteEntity::SpriteEntity( const String& name )
 		VertexElement(sizeof(float3) + sizeof(float2), VEF_Float4, VEU_Color, 0)
 	};
 
+	mRenderOperation = std::make_shared<RenderOperation>();
+	mRenderOperation->PrimitiveType = PT_Triangle_List;
 	mRenderOperation->BindVertexStream(mVertexBuffer, factory.CreateVertexDeclaration(elements, 3));
 	mRenderOperation->BindIndexStream(mIndexBuffer, IBT_Bit16);
 }
 
-SpriteEntity::~SpriteEntity()
+Sprite::~Sprite()
 {
 	
 }
 
-void SpriteEntity::OnRenderBegin()
+void Sprite::OnRenderBegin()
 {
 	Renderable::OnRenderBegin();
 
@@ -296,26 +284,26 @@ void SpriteEntity::OnRenderBegin()
 	mWindowSizeParam->SetValue(float2(float(frameBuffer->GetWidth()), float(frameBuffer->GetHeight())));
 }
 
-void SpriteEntity::OnUpdateRenderQueue( RenderQueue* renderQueue, Camera* cam, RenderOrder order )
-{
-	UpdateGeometryBuffers();
+//void Sprite::OnUpdateRenderQueue( RenderQueue* renderQueue, const Camera& cam, RenderOrder order )
+//{
+//	UpdateGeometryBuffers();
+//
+//	RenderQueueItem item;
+//	item.Renderable = this;
+//	item.Type = SOT_Sprite;
+//
+//	// ignore render order, only handle state change order
+//	item.SortKey = (float)mSpriteMaterial->GetEffect()->GetResourceHandle();
+//
+//	renderQueue->AddToQueue(item, RenderQueue::BucketOverlay);
+//}
 
-	RenderQueueItem item;
-	item.Renderable = this;
-	item.Type = SOT_Sprite;
-
-	// ignore render order, only handle state change order
-	item.SortKey = (float)mSpriteMaterial->GetEffect()->GetResourceHandle();
-
-	renderQueue->AddToQueue(item, RenderQueue::BucketGui);
-}
-
-void SpriteEntity::SetProjectionMatrix( const float4x4& mat )
+void Sprite::SetProjectionMatrix( const float4x4& mat )
 {
 	mSpriteMaterial->GetCustomParameter("ProjMat")->SetValue(mat);
 }
 
-void SpriteEntity::UpdateGeometryBuffers()
+void Sprite::UpdateGeometryBuffers()
 {
 	if (mDirty)
 	{
@@ -334,52 +322,45 @@ void SpriteEntity::UpdateGeometryBuffers()
 			uint8_t* ibData = (uint8_t*)mIndexBuffer->Map(0, ibSize, BA_Read_Write);
 			memcpy(ibData, (uint8_t*)&mInidces[0], ibSize);
 			mIndexBuffer->UnMap();
+
+			mRenderOperation->BindIndexStream(mIndexBuffer, IBT_Bit16);
 		}
 
 		mDirty = false;
 	}
 }
 
-bool SpriteEntity::Empty() const
+bool Sprite::Empty() const
 {
 	return mInidces.empty();
 }
 
-void SpriteEntity::ClearAll()
+void Sprite::ClearAll()
 {
 	mVertices.resize(0);
 	mInidces.resize(0);
 }
 
-vector<SpriteVertex>& SpriteEntity::GetVertices()
+vector<SpriteVertex>& Sprite::GetVertices()
 {
 	mDirty = true;
 	return mVertices;
 }
 
-vector<uint16_t>& SpriteEntity::GetIndices()
+vector<uint16_t>& Sprite::GetIndices()
 {
 	mDirty = true;
 	return mInidces;
 }
 
-EffectTechnique* SpriteEntity::GetTechnique() const
-{
-	return mSpriteMaterial->GetCurrentTechnique();
-}
 
-void SpriteEntity::SetSpriteContent( const shared_ptr<Texture>& tex, const shared_ptr<Material>& mat )
+void Sprite::SetSpriteContent( const shared_ptr<Texture>& tex, const shared_ptr<Material>& mat )
 {
 	mSpriteTexture = tex;
 	mSpriteMaterial = mat;
 
 	mSpriteMaterial->SetTexture("SpriteTexture", mSpriteTexture);
 	mWindowSizeParam = mSpriteMaterial->GetCustomParameter("WindowSize");
-}
-
-SceneObject* SpriteEntity::FactoryFunc( const String& name, const NameValuePairList* params )
-{
-	return new SpriteEntity(name);
 }
 
 }

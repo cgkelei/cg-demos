@@ -43,22 +43,18 @@ void Renderable::OnRenderBegin()
 	shared_ptr<Material> material = GetMaterial();
 
 	// Get world transforms
+	float4x4 worldMatrix;
 	uint32_t matCounts = GetWorldTransformsCount();
 
-	if (matCounts)
+	if (matCounts > 0)
 	{
 		vector<float4x4> matWorlds(matCounts);
 		GetWorldTransforms(&matWorlds[0]);
 
-		/**
-		 * Last matrix is world mat, before is skin matrices.
-		 */
-		EffectParameter* worldParam = material->GetCustomParameter(EPU_WorldMatrix);
-		if (worldParam)
-		{
-			worldParam->SetValue(matWorlds.back());
-		}
+		//Last matrix is world transform matrix, previous is skin matrices.
+		worldMatrix = matWorlds.back();
 
+		// Skin matrix
 		if (matCounts > 1)
 		{	
 			EffectParameter* skinMatricesParam = material->GetCustomParameter("SkinMatrices");
@@ -72,7 +68,7 @@ void Renderable::OnRenderBegin()
 	}
 			
 	// Setup other material parameter
-	material->ApplyMaterial();
+	material->ApplyMaterial(worldMatrix);
 }
 
 void Renderable::OnRenderEnd()

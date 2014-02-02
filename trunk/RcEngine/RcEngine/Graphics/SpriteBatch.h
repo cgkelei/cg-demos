@@ -11,7 +11,7 @@
 namespace RcEngine {
 
 // Forward declaration
-class SpriteEntity;
+class Sprite;
 
 struct SpriteVertex
 {
@@ -79,21 +79,19 @@ private:
 	shared_ptr<Material> mSpriteMaterial;
 
 	// SpriteEntity is keep track by SceneManager, So SceneManager will delete it when destroy
-	std::map<shared_ptr<Texture>, SpriteEntity*> mBatches;
+	std::map<shared_ptr<Texture>, Sprite*> mBatches;
 };
 
 
 /**
  */
-class SpriteEntity : public Renderable, public SceneObject
+class Sprite : public Renderable
 {
 public:
-	SpriteEntity(const String& name);
-	~SpriteEntity();
+	Sprite();
+	~Sprite();
 
 	const shared_ptr<Material>& GetMaterial() const { return mSpriteMaterial; }
-
-	EffectTechnique* GetTechnique() const;
 
 	// no world transform
 	uint32_t GetWorldTransformsCount() const { return 0; }
@@ -114,13 +112,9 @@ public:
 
 	void OnRenderBegin();
 
-	void OnUpdateRenderQueue( RenderQueue* renderQueue, Camera* cam, RenderOrder order );	
-
 	void UpdateGeometryBuffers();
 
 public_internal:
-	static SceneObject* FactoryFunc(const String& name, const NameValuePairList* params);
-
 	void SetSpriteContent(const shared_ptr<Texture>& tex, const shared_ptr<Material>& mat);
 
 private:

@@ -6,66 +6,17 @@ namespace RcEngine {
 
 
 RenderOperation::RenderOperation( void )
-	: UseIndex(true), PrimitiveType(PT_Triangle_List),
-	StartIndexLocation(0), StartVertexLocation(0), BaseVertexLocation(0)
+	: PrimitiveType(PT_Triangle_List),
+	  UseIndex(false), 
+	  VertexStart(0), 
+	  IndexStart(0), 
+	  IndexCount(0)
 {
 
 }
-
 
 RenderOperation::~RenderOperation()
 {
-}
-
-uint32_t RenderOperation::GetVertexCount() const
-{
-	return 0;
-}
-
-uint32_t RenderOperation::GetStreamCount() const
-{
-	return VertexStreams.size();
-}
-
-bool RenderOperation::UseIndices() const
-{
-	return UseIndex;
-}
-
-uint32_t RenderOperation::GetIndicesCount() const
-{
-	static uint32_t sIndexSize[2] = { 2, 4 };
-	return IndexBuffer->GetBufferSize() / sIndexSize[IndexType];
-}
-
-uint32_t RenderOperation::GetStartVertexLocation() const
-{
-	return StartVertexLocation;
-}
-
-void RenderOperation::SetStartVertexLocation( uint32_t loc )
-{
-	StartVertexLocation = loc;
-}
-
-uint32_t RenderOperation::GetBaseVertexLocation() const
-{
-	return BaseVertexLocation;
-}
-
-void RenderOperation::SetBaseVertexLocation( uint32_t loc )
-{
-	BaseVertexLocation = loc;
-}
-
-uint32_t RenderOperation::GetStartIndexLocation() const
-{
-	return StartIndexLocation;
-}
-
-void RenderOperation::SetStartIndexLocation( uint32_t loc )
-{
-	StartIndexLocation = loc;
 }
 
 void RenderOperation::BindVertexStream( const shared_ptr<GraphicsBuffer>& buffer, const shared_ptr<VertexDeclaration>& vd, StreamType type /*= ST_Geometry*/, uint32_t freq /*= 1*/ )
@@ -93,15 +44,29 @@ void RenderOperation::BindVertexStream( const shared_ptr<GraphicsBuffer>& buffer
 
 void RenderOperation::BindIndexStream( const shared_ptr<GraphicsBuffer>& buffer, IndexBufferType type )
 {
+	static uint32_t sIndexSize[2] = { 2, 4 };
+
 	IndexType = type;
 	IndexBuffer = buffer;
 	UseIndex = true;
+
+	IndexCount = IndexBuffer->GetBufferSize() / sIndexSize[IndexType];
 }
 
-const RenderOperation::StreamUnit& RenderOperation::GetStreamUnit( uint32_t index ) const
+void RenderOperation::SetIndexRange( uint32_t indexStart, uint32_t indexCount )
 {
-	return VertexStreams[index];
+	IndexStart = indexStart; 
+	indexCount = IndexCount;
 }
+
+void RenderOperation::SetVertexRange( uint32_t vertexStart, uint32_t vertexCount )
+{
+	VertexStart = vertexStart; 
+	VertexCount = vertexCount;
+	UseIndex = false;
+}
+
+
 
 
 } // Namespace RcEngine

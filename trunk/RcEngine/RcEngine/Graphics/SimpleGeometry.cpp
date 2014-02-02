@@ -79,15 +79,9 @@ SimpleBox::SimpleBox(const String& name)
 	iInitData.slicePitch = 0;
 	mIndexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
 
-
-	mRenderOperation->BaseVertexLocation = 0;
-	mRenderOperation->UseIndex = true;
-	mRenderOperation->IndexBuffer = mIndexBuffer;
-	mRenderOperation->BindVertexStream(mVertexBuffer, mVertexDecl);
 	mRenderOperation->PrimitiveType = PT_Triangle_List;
-	mRenderOperation->IndexType = IBT_Bit16;
-	mRenderOperation->StartIndexLocation = 0;
-	mRenderOperation->StartVertexLocation = 0;
+	mRenderOperation->BindVertexStream(mVertexBuffer, mVertexDecl);
+	mRenderOperation->BindIndexStream(mIndexBuffer, IBT_Bit16);
 }
 
 SimpleBox::~SimpleBox()
@@ -143,15 +137,9 @@ SimpleTexturedQuad::SimpleTexturedQuad(const String& name)
 	iInitData.slicePitch = 0;
 	mIndexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
 
-
-	mRenderOperation->BaseVertexLocation = 0;
-	mRenderOperation->UseIndex = true;
-	mRenderOperation->IndexBuffer = mIndexBuffer;
-	mRenderOperation->BindVertexStream(mVertexBuffer, mVertexDecl);
 	mRenderOperation->PrimitiveType = PT_Triangle_List;
-	mRenderOperation->IndexType = IBT_Bit16;
-	mRenderOperation->StartIndexLocation = 0;
-	mRenderOperation->StartVertexLocation = 0;
+	mRenderOperation->BindVertexStream(mVertexBuffer, mVertexDecl);
+	mRenderOperation->BindIndexStream(mIndexBuffer, IBT_Bit16);
 }
 
 void SimpleTexturedQuad::SetDiffuseTexture( const shared_ptr<Texture>& diffuseMap )
@@ -162,6 +150,16 @@ void SimpleTexturedQuad::SetDiffuseTexture( const shared_ptr<Texture>& diffuseMa
 SimpleTexturedQuad::~SimpleTexturedQuad()
 {
 
+}
+
+//----------------------------------------------------------------------------------------
+Sphere::Sphere( const String& name, float radius, int32_t slices, int32_t stacks )
+	: RenderableHelper(name), 
+	  mRadius(radius), 
+	  mNumSlices(slices), 
+	  mNumStacks(stacks)
+{
+	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 }
 
 } // Namespace RcEngine

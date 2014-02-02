@@ -32,7 +32,7 @@ public:
 	void AdjustProjectionMatrix(float4x4& pOut);
 
 	//void Draw(RenderTechnique& tech, RenderOperation& operation);
-	void DoRender( EffectTechnique& tech, RenderOperation& op);
+	void DoRender( const EffectTechnique& tech, const RenderOperation& op );
 
 protected:
 	void DoBindFrameBuffer( const shared_ptr<FrameBuffer>& fb );

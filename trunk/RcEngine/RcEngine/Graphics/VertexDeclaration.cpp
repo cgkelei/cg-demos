@@ -23,29 +23,22 @@ VertexDeclaration::~VertexDeclaration()
 
 }
 
-const VertexElement* VertexDeclaration::FindElementBySemantic( VertexElementUsage sem, uint16_t index /*= 0*/ )
+const VertexElement* VertexDeclaration::FindElementBySemantic( VertexElementUsage usage, uint16_t index /*= 0*/ )
 {
-	VertexElementList::const_iterator ei, eiend;
-	eiend = mElementList.end();
-	for (ei = mElementList.begin(); ei != eiend; ++ei)
+	for (const VertexElement& element : mElementList)
 	{
-		if (ei->Usage == sem && ei->UsageIndex == index)
-		{
-			return &(*ei);
-		}
+		if (element.Usage == usage && element.UsageIndex == index)
+			return &element;
 	}
-	return NULL;
+
+	return nullptr;
 }
 
 uint32_t VertexDeclaration::GetVertexSize() const
 {
 	uint32_t size = 0;
-	VertexElementList::const_iterator ei, eiend;
-	eiend = mElementList.end();
-	for (ei = mElementList.begin(); ei != eiend; ++ei)
-	{
-		size += ei->GetSize();
-	}
+	for (const VertexElement& element : mElementList)
+		size += element.GetSize();
 
 	return size;
 }

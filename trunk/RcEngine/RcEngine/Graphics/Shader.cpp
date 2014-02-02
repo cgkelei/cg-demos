@@ -27,7 +27,9 @@ void Shader::AddDefine( const String& name, const String& value )
 void Shader::DumpSource( const char* filename )
 {
 	std::ofstream fs(filename);
-	fs << mShaderSource;
+
+	mShaderSource.erase(std::remove(mShaderSource.begin(), mShaderSource.end(), '\r'), mShaderSource.end());
+	fs << mShaderSource << std::endl;
 	fs.close();
 }
 

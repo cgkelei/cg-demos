@@ -7,12 +7,11 @@ namespace RcEngine {
 
 struct _ApiExport RenderQueueItem
 {
-	uint32_t Type;
 	Renderable* Renderable;
 	float SortKey;
 
 	RenderQueueItem() {}
-	RenderQueueItem( uint32_t type, class Renderable* rd, float key ) : Type(type), Renderable(rd), SortKey(key) { }
+	RenderQueueItem(class Renderable* rd, float key) : Renderable(rd), SortKey(key) { }
 };
 typedef std::vector<RenderQueueItem> RenderBucket;
 
@@ -21,6 +20,15 @@ class _ApiExport RenderQueue
 public:
 	enum Bucket
 	{
+		/**
+         * A special mode used for rendering really far away, flat objects - 
+         * e.g. skies. In this mode, the depth is set to infinity so 
+         * spatials in this bucket will appear behind everything, the downside
+         * to this bucket is that 3D objects will not be rendered correctly
+         * due to lack of depth testing.
+         */
+        BucketBackground,
+
 		 /**
          * The renderer will try to find the optimal order for rendering all 
          * objects using this mode.
@@ -39,15 +47,7 @@ public:
          */
         BucketTransparent,
         
-        /**
-         * A special mode used for rendering really far away, flat objects - 
-         * e.g. skies. In this mode, the depth is set to infinity so 
-         * spatials in this bucket will appear behind everything, the downside
-         * to this bucket is that 3D objects will not be rendered correctly
-         * due to lack of depth testing.
-         */
-        BucketSky,
-        
+            
         /**
          * A special mode used for rendering transparent objects that
          * should not be effected by {@link SceneProcessor}. 
@@ -65,24 +65,24 @@ public:
          * the resolution of the screen rendered to. Any spatials
          * outside of that range are culled.
          */
-        BucketGui, 
+        BucketOverlay, 
 	};
 
 public:
 	RenderQueue();
 	~RenderQueue();
 
-	void AddRenderBucket(uint32_t bucket);
+	void AddRenderBucket(Bucket bucket);
 
-	std::vector<RenderQueueItem>& GetRenderBucket(uint32_t bucket);
-	std::map<uint32_t, RenderBucket*>& GetAllRenderBuckets() { return mRenderBuckets; }
+	RenderBucket& GetRenderBucket(Bucket bucket);
+	std::map<Bucket, RenderBucket*>& GetAllRenderBuckets() { return mRenderBuckets; }
 
-	void AddToQueue(RenderQueueItem item, uint32_t bucket);
+	void AddToQueue(RenderQueueItem item, Bucket bucket);
 	void ClearAllQueue();
-
+	void ClearQueue(Bucket bucket);
 
 public:
-	std::map<uint32_t, RenderBucket*> mRenderBuckets;
+	std::map<Bucket, RenderBucket*> mRenderBuckets;
 };
 
 

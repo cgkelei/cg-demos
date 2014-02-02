@@ -46,7 +46,7 @@ public:
 	void OnAttach( Node* node );
 	void OnDetach( Node* node );
 
-	void OnUpdateRenderQueue(RenderQueue* renderQueue, Camera* cam, RenderOrder order);
+	void OnUpdateRenderQueue(RenderQueue* renderQueue, const Camera& cam, RenderOrder order);
 
 	BoneFollower* AttachObjectToBone(const String &boneName, SceneObject* sceneObj, const Quaternionf& offsetOrientation= Quaternionf::Identity(), const float3 & offsetPosition = float3::Zero());
 

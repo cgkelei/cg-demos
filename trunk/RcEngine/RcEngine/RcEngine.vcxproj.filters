@@ -28,6 +28,15 @@
     <Filter Include="Scene">
       <UniqueIdentifier>{f10722c4-add3-4b4a-87e0-af6db7f55c37}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Asset">
+      <UniqueIdentifier>{8f0baa9b-faf5-48a6-9c89-3b53c24d9209}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Asset\Effect">
+      <UniqueIdentifier>{7fb6c7de-5c99-499f-84db-706fd343c14c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Asset\Pipeline">
+      <UniqueIdentifier>{301a2abe-beb2-4659-b24b-20fe6bb5d83c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\CompileConfig.h">
@@ -187,9 +196,6 @@
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\VertexElement.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\Viewport.h">
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="GUI\Button.h">
@@ -488,9 +494,6 @@
     <ClCompile Include="Graphics\VertexElement.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\Viewport.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="GUI\Button.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
@@ -646,5 +649,37 @@
     <None Include="Math\Vector.inl">
       <Filter>Math</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\Media\Effect\DeferredLighting.effect.xml">
+      <Filter>Asset\Effect</Filter>
+    </Xml>
+    <Xml Include="..\Media\Effect\DeferredReadUtill.include.xml">
+      <Filter>Asset\Effect</Filter>
+    </Xml>
+    <Xml Include="..\Media\Effect\Font.effect.xml">
+      <Filter>Asset\Effect</Filter>
+    </Xml>
+    <Xml Include="..\Media\Effect\LightingUtil.include.xml">
+      <Filter>Asset\Effect</Filter>
+    </Xml>
+    <Xml Include="..\Media\Effect\Model.effect.xml">
+      <Filter>Asset\Effect</Filter>
+    </Xml>
+    <Xml Include="..\Media\Effect\SimpleModel.effect.xml">
+      <Filter>Asset\Effect</Filter>
+    </Xml>
+    <Xml Include="..\Media\Effect\Sky.effect.xml">
+      <Filter>Asset\Effect</Filter>
+    </Xml>
+    <Xml Include="..\Media\Effect\Sprite.effect.xml">
+      <Filter>Asset\Effect</Filter>
+    </Xml>
+    <Xml Include="..\Media\Pipiline\DeferredLighting.pipeline.xml">
+      <Filter>Asset\Pipeline</Filter>
+    </Xml>
+    <Xml Include="..\Media\Pipiline\ForwardLighting.pipeline.xml">
+      <Filter>Asset\Pipeline</Filter>
+    </Xml>
   </ItemGroup>
 </Project>
