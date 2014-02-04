@@ -74,13 +74,13 @@ void OpenGLMapping::Mapping( GLint& outInternalformat, GLenum& outFormat, GLenum
 	{
 	case PF_Luminance8:
 		outInternalformat = GL_LUMINANCE8;
-		outFormat = GL_LUMINANCE8;
+		outFormat = GL_LUMINANCE;
 		outType = GL_UNSIGNED_BYTE;
 		break;
 
 	case PF_Luminance16:
 		outInternalformat = GL_LUMINANCE16;
-		outFormat = GL_LUMINANCE16;
+		outFormat = GL_LUMINANCE;
 		outType = GL_UNSIGNED_SHORT;
 		break;
 
