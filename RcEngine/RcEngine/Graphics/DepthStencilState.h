@@ -6,6 +6,9 @@
 
 namespace RcEngine {
 
+#define	DEFAULT_STENCIL_READ_MASK	( 0xff )
+#define	DEFAULT_STENCIL_WRITE_MASK	( 0xff )
+
 #pragma pack(push, 1)
 
 struct _ApiExport DepthStencilStateDesc

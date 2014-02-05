@@ -34,5 +34,9 @@ protected:
 
 	Label* mLabel;
 	UIWindow* mWindow;
+
+	shared_ptr<RenderOperation> mSphere;
+	shared_ptr<RenderOperation> mCone;
+	shared_ptr<Material> mMaterial;
 };
 

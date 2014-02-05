@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SponzaSample", "Samples\Spo
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DeferredRendering", "Samples\DeferredRendering\DeferredRendering.vcxproj", "{170C7B46-A633-4370-B4E8-38FFD890DD69}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StencilTest", "Samples\StencilTest\StencilTest.vcxproj", "{1352EF31-F8DE-4AB2-9195-54972D2FCB47}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -59,6 +61,10 @@ Global
 		{170C7B46-A633-4370-B4E8-38FFD890DD69}.Debug|Win32.Build.0 = Debug|Win32
 		{170C7B46-A633-4370-B4E8-38FFD890DD69}.Release|Win32.ActiveCfg = Release|Win32
 		{170C7B46-A633-4370-B4E8-38FFD890DD69}.Release|Win32.Build.0 = Release|Win32
+		{1352EF31-F8DE-4AB2-9195-54972D2FCB47}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1352EF31-F8DE-4AB2-9195-54972D2FCB47}.Debug|Win32.Build.0 = Debug|Win32
+		{1352EF31-F8DE-4AB2-9195-54972D2FCB47}.Release|Win32.ActiveCfg = Release|Win32
+		{1352EF31-F8DE-4AB2-9195-54972D2FCB47}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -69,5 +75,6 @@ Global
 		{8F51C30A-0889-49FC-928B-060917477106} = {8A1135A4-739E-4894-9089-D82A77F59F4F}
 		{47DE133A-E5FF-4A9D-B93E-09215AE72D14} = {3B4A1896-1B80-4E14-B14D-03138B4E4C13}
 		{170C7B46-A633-4370-B4E8-38FFD890DD69} = {3B4A1896-1B80-4E14-B14D-03138B4E4C13}
+		{1352EF31-F8DE-4AB2-9195-54972D2FCB47} = {3B4A1896-1B80-4E14-B14D-03138B4E4C13}
 	EndGlobalSection
 EndGlobal

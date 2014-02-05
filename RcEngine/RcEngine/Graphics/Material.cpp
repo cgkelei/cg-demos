@@ -47,7 +47,7 @@ public:
 		mDefs.insert(std::make_pair("SpecularMaterialMap", EPU_Material_Specular_Texture));
 		mDefs.insert(std::make_pair("NormalMaterialMap", EPU_Material_Normal_Texture));
 		mDefs.insert(std::make_pair("LightColor", EPU_Light_Color));
-		mDefs.insert(std::make_pair("LightFalloff", EPU_Light_Falloff));
+		mDefs.insert(std::make_pair("LightFalloff", EPU_Light_Attenuation));
 		mDefs.insert(std::make_pair("LightDirection", EPU_Light_Dir));
 		mDefs.insert(std::make_pair("LightPosition", EPU_Light_Position));
 	}

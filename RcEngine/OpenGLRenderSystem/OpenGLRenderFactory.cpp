@@ -605,6 +605,35 @@ void OpenGLRenderFactory::SaveTexture2D( const String& texFile, const shared_ptr
 		WritePfm(texFile.c_str(), w, h, 3, &temp[0]);
 		
 	}
+	else if (texture->GetTextureFormat() == PF_Depth32)
+	{
+		void* pData;
+		uint32_t rowPitch;
+		texture->Map2D(arrayIndex, level, TMA_Read_Only, 0, 0, 0, 0, pData, rowPitch);
+
+		float* pixel = (float*)pData;
+
+		vector<float> temp;
+		temp.resize(w * h);
+		float* imageData = &temp[0];
+		for (uint32_t j = 0; j < h; j++)
+		for(uint32_t i = 0; i < w; i ++)
+		{
+			float r = pixel[(j * w + i)];
+			*imageData++ = r;
+		}
+
+		WritePfm(texFile.c_str(), w, h, 1, &temp[0]);
+	}
+	else if (texture->GetTextureFormat() == PF_Depth24Stencil8)
+	{		
+		shared_ptr<OpenGLTexture> oglTexture = std::static_pointer_cast<OpenGLTexture>(texture);
+
+		std::vector<uint8_t> data(w*h);
+		glBindTexture(oglTexture->GetOpenGLTextureTarget(), oglTexture->GetOpenGLTexture());
+		glGetTexImage(oglTexture->GetOpenGLTextureTarget(), 0, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, &data[0]);
+		GLenum err = glGetError();
+	}
 }
 
 }

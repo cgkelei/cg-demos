@@ -7,17 +7,15 @@ namespace RcEngine {
 
 Light::Light( const String& name )
 	: SceneObject(name, SOT_Light, false), 
-	  mLightType(LT_Point), 
+	  mLightType(LT_PointLight), 
 	  mLightPosition(float3::Zero()),
-	  mLightDirection(float3(0, 0, 1)),
-	  mLightColor(float3::Zero()),
-	  mSpotOuter(Mathf::ToRadian(40.0f)), 
-	  mSpotInner(Mathf::ToRadian(30.0f)), 
+	  mLightDirection(float3(0, 1, 0)),
+	  mLightColor(1, 1, 1),
+	  mAttenuation(1.0f, 25.0f, 0.0f),
+	  mSpotInnerAngle(Mathf::ToRadian(30.0f)), 
+	  mSpotOuterAngle(Mathf::ToRadian(60.0f)), 
 	  mSpotFalloff(1.0f),
 	  mRange(100000),
-	  mAttenuationConst(1.0f),
-	  mAttenuationLinear(0.0f), 
-	  mAttenuationQuad(0.0f), 
 	  mDerivedPosition(float3::Zero()), 
 	  mDerivedDirection(float3(0, 0, 1)),
 	  mDerivedTransformDirty(false)
@@ -29,7 +27,6 @@ Light::~Light()
 {
 
 }
-
 
 void Light::SetPosition( const float3& pos )
 {
@@ -45,48 +42,67 @@ void Light::SetLightColor( const float3& color )
 void Light::SetDirection( const float3& vec )
 {
 	mLightDirection = vec;
+	mLightDirection = Normalize(mLightDirection);
 	mDerivedTransformDirty = true;
 }
 
-void Light::SetAttenuation( float range, float constant, float linear, float quadratic )
+void Light::SetAttenuation( float constant, float linear, float quadratic )
 {
-	mRange = range;
-	mAttenuationConst = constant;
-	mAttenuationLinear = linear;
-	mAttenuationQuad = quadratic;
+	mAttenuation = float3(constant, linear, quadratic);
 }
 
-void Light::SetSpotlightRange( float innerAngleRadian, float outerAngleRadian, float falloff /*= 1.0*/ )
+void Light::SetRange( float range )
+{
+	mRange = range;
+}
+
+void Light::SetSpotAngle( float innerAngleRadian, float outerAngleRadian, float falloff /*= 1.0*/ )
 {
 	if (mLightType != LT_SpotLight)
 	{
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "setSpotlightRange is only valid for spotlights.", "Light::SetSpotlightRange");
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "SetSpotInnerAngle is only valid for spotlights.", "Light::SetSpotInnerAngle");
 	}
 
-	mSpotInner = innerAngleRadian;
-	mSpotOuter = outerAngleRadian;
+	mSpotInnerAngle = innerAngleRadian;
+	mSpotOuterAngle = outerAngleRadian;
 	mSpotFalloff = falloff;
 }
 
-void Light::SetSpotlightInnerAngle( float innerAngleRadian )
+void Light::SetSpotInnerAngle( float innerAngleRadian )
 {
-	mSpotInner = innerAngleRadian;
+	if (mLightType != LT_SpotLight)
+	{
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "SetSpotInnerAngle is only valid for spotlights.", "Light::SetSpotInnerAngle");
+	}
+
+	mSpotInnerAngle = innerAngleRadian;
 }
 
-void Light::SetSpotlightOuterAngle( float outerAngleRadian )
+void Light::SetSpotOuterAngle( float outerAngleRadian )
 {
-	mSpotOuter = outerAngleRadian;
+	if (mLightType != LT_SpotLight)
+	{
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "SetSpotOuterAngle is only valid for spotlights.", "Light::SetSpotOuterAngle");
+	}
+
+	mSpotOuterAngle = outerAngleRadian;
 }
 
-void Light::SetSpotlightFalloff( float val )
+void Light::SetSpotFalloff( float exponent )
 {
-	mSpotFalloff = val;
+	if (mLightType != LT_SpotLight)
+	{
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "SetSpotFalloff is only valid for spotlights.", "Light::SetSpotFalloff");
+	}
+
+	mSpotFalloff = exponent;
 }
 
-void Light::SetSpotlightNearClipDistance( float nearClip )
-{ 
-	mSpotNearClip = nearClip;
-}
+
+//void Light::SetSpotlightNearClipDistance( float nearClip )
+//{ 
+//	mSpotNearClip = nearClip;
+//}
 
 void Light::SetLightType( LightType type )
 {
@@ -122,7 +138,8 @@ void Light::UpdateTransform() const
 			mDerivedPosition = mLightPosition;
 			mDerivedDirection = mLightDirection;
 		}
-
+		
+		mDerivedDirection = Normalize(mDerivedDirection);
 		mDerivedTransformDirty = false;
 	}
 }
@@ -131,6 +148,7 @@ SceneObject* Light::FactoryFunc( const String& name, const NameValuePairList* pa
 {
 	return new Light(name);
 }
+
 
 
 

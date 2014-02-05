@@ -15,10 +15,11 @@ class _ApiExport EffectTechnique
 	friend class Effect;
 
 public:
-	EffectTechnique();
+	EffectTechnique(Effect& effect);
 	~EffectTechnique();
 
 	const String& GetTechniqueName() const				{ return mName; }
+	Effect& GetEffect()									{ return mEffect; }
 
 	EffectTechnique* Clone(Effect& effect);
 
@@ -29,6 +30,8 @@ public:
 	EffectPass* GetPassByIndex(uint32_t index) const;
 
 protected:
+	Effect& mEffect;
+
 	String mName;
 	bool mValid;
 	vector<EffectPass*> mPasses;

@@ -278,7 +278,7 @@ public:
 	static bool IsCompressed(PixelFormat format);
 
 	/** Shortcut method to determine if the format is a depth format. */
-	static bool IsDepthStencil(PixelFormat format);
+	static bool IsDepth(PixelFormat format);
 
 	static bool IsStencil(PixelFormat format);
 

@@ -136,7 +136,6 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 					}
 					else
 					{
-
 						glTexImage2D(mTargetType, level, glinternalFormat, levelWidth, levelHeight, 0, glformat, gltype,
 							(NULL == initData) ? NULL : initData[arrIndex * mMipMaps + level].pData);
 					}

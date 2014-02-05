@@ -44,7 +44,7 @@ OpenGLDepthStencilView::OpenGLDepthStencilView( Texture& texture, uint32_t arrIn
 			"OpenGLDepthStencilView::OpenGLDepthStencilView");
 	}
 
-	if(!PixelFormatUtils::IsDepthStencil(texture.GetTextureFormat()))
+	if(!PixelFormatUtils::IsDepth(texture.GetTextureFormat()))
 	{
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Texture Type Error, Only Depth Texture Needed",
 			"OpenGLDepthStencilView::OpenGLDepthStencilView");
@@ -88,26 +88,17 @@ void OpenGLDepthStencilView::OnAttach(FrameBuffer& fb, Attachment attr)
 		// has mip map, use textue object
 		if(mTextureTarget == GL_TEXTURE_2D)
 		{
-			if (PixelFormatUtils::IsDepthStencil(mFormat))
-			{
-				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, mTextureTarget, mTextureID, mLevel);
-			}
-			if (PixelFormatUtils::IsStencil(mFormat))
-			{
-				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, mTextureTarget, mTextureID, mLevel);
-			}
+			if (mFormat == PF_Depth24Stencil8)
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, mTextureTarget, mTextureID, mLevel);
+			else if (mFormat == PF_Depth16 || mFormat == PF_Depth32)
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, mTextureTarget, mTextureID, mLevel);
 		}
 		else
 		{
-			// Texture Array
-			if (PixelFormatUtils::IsDepthStencil(mFormat))
-			{
+			if (mFormat == PF_Depth24Stencil8)
+				glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, mTextureID, mArrIndex, mLevel);
+			else if (mFormat == PF_Depth16 || mFormat == PF_Depth32)
 				glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, mTextureID, mArrIndex, mLevel);
-			}
-			if (PixelFormatUtils::IsStencil(mFormat))
-			{
-				glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, mTextureID, mArrIndex, mLevel);
-			}
 		}
 	}
 }
@@ -128,29 +119,19 @@ void OpenGLDepthStencilView::OnDetach(FrameBuffer& fb, Attachment attr)
 	}
 	else
 	{
-		// has mip map, use textue object
 		if(mTextureTarget == GL_TEXTURE_2D)
 		{
-			if (PixelFormatUtils::IsDepthStencil(mFormat))
-			{
-				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, mTextureTarget, 0, 0);
-			}
-			if (PixelFormatUtils::IsStencil(mFormat))
-			{
-				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, mTextureTarget, 0, 0);
-			}
+			if (mFormat == PF_Depth24Stencil8)
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, mTextureTarget, 0, 0);
+			else if (mFormat == PF_Depth16 || mFormat == PF_Depth32)
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, mTextureTarget, 0, 0);
 		}
 		else
 		{
-			// Texture Array
-			if (PixelFormatUtils::IsDepthStencil(mFormat))
-			{
+			if (mFormat == PF_Depth24Stencil8)
+				glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, 0, 0, 0);
+			else if (mFormat == PF_Depth16 || mFormat == PF_Depth32)
 				glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, 0, 0, 0);
-			}
-			if (PixelFormatUtils::IsStencil(mFormat))
-			{
-				glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, 0, 0, 0);
-			}
 		}
 	}
 }

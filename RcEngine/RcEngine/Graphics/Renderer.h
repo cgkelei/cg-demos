@@ -49,6 +49,7 @@ private:
 	void CreatePrimitives();
 
 	void DrawPointLightShape(const float3& worldPos, float radius, const String& tech);
+	void DrawSpotLightShape(const float3& worldPos, const float radius, const String& tech);
 
 private:
 
@@ -59,7 +60,7 @@ private:
 	EffectTechnique* mCurrentTechnique;
 	Light* mCurrentLight;
 
-
+	shared_ptr<RenderOperation> mSpotLightShape;
 	shared_ptr<RenderOperation> mPointLightShape;
 	shared_ptr<RenderOperation> mFSQuadShape;
 };

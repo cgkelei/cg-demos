@@ -165,17 +165,25 @@ void FrameBuffer::Clear( uint32_t flags, const ColorRGBA& clr, float depth, uint
 	shared_ptr<FrameBuffer> currentFrameBuffer = device.GetCurrentFrameBuffer();
 	assert( this == currentFrameBuffer.get());
 
-	for (size_t i = 0; i < mColorViews.size(); ++i)
+	if (flags & CF_Color)
 	{
-		if (mColorViews[i])
+		for (size_t i = 0; i < mColorViews.size(); ++i)
 		{
-			mColorViews[i]->ClearColor(clr);
-		}		
+			if (mColorViews[i])
+			{
+				mColorViews[i]->ClearColor(clr);
+			}		
+		}
 	}
-
-	if (mDepthStencilView)
+	
+	if ( mDepthStencilView )
 	{
-		mDepthStencilView->ClearDepthStencil(depth, stencil);
+		if ( (flags & CF_Stencil) && (flags & CF_Depth) )
+			mDepthStencilView->ClearDepthStencil(depth, stencil);
+		else if (flags & CF_Depth)
+			mDepthStencilView->ClearDepth(depth);
+		else if (flags & CF_Stencil)
+			mDepthStencilView->ClearDepthStencil(depth, stencil);  // Clear stencil only
 	}
 }
 

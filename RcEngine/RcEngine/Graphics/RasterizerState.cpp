@@ -3,9 +3,14 @@
 namespace RcEngine {
 
 RasterizerStateDesc::RasterizerStateDesc()
-	: PolygonFillMode(FM_Solid), PolygonCullMode(CM_Back), FrontCounterClockwise(false),
-		DepthBias(0.0f), SlopeScaledDepthBias(0.0f),
-		DepthClipEnable(true), ScissorEnable(false), MultisampleEnable(false)
+	: PolygonFillMode(FM_Solid), 
+	  PolygonCullMode(CM_Back), 
+	  FrontCounterClockwise(false),
+	  DepthBias(0.0f), 
+	  SlopeScaledDepthBias(0.0f),
+	  DepthClipEnable(true), 
+	  ScissorEnable(false), 
+	  MultisampleEnable(false)
 {
 
 }

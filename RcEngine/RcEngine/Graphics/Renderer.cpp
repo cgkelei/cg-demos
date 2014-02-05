@@ -26,7 +26,7 @@ shared_ptr<RenderOperation> BuildFSQuadShape()
 
 	// Fullscreen polygon
 	float vertices[6] = {  // x, y, z
-		-1.0f, 1.0f, -1.0f, -3.0f, 3.0f, 1.0f   // Front Face CCW, todo unify OpenGL and D3D back face culling
+		-1.0f, 1.0f, 3.0f, 1.0f, -1.0f, -3.0f, 
 	};
 
 	ElementInitData vInitData;
@@ -53,8 +53,8 @@ shared_ptr<RenderOperation> BuildPointLightShape()
 {
 	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 
-	const int nRings = 200;
-	const int nSegments = 200;
+	const int nRings = 30;
+	const int nSegments = 30;
 	const float r = 1.0f;
 
 	VertexElement vdsc[] = {
@@ -107,7 +107,7 @@ shared_ptr<RenderOperation> BuildPointLightShape()
 				*pIndices++ = wVerticeIndex + nSegments + 1;
 				*pIndices++ = wVerticeIndex + 1;
 				*pIndices++ = wVerticeIndex;
-				wVerticeIndex ++;
+				wVerticeIndex ++;				
 			}
 		}; // end for seg
 	} // end for ring
@@ -123,101 +123,84 @@ shared_ptr<RenderOperation> BuildPointLightShape()
 	return mRenderOperation;
 }
 
-		//shared_ptr<RenderOperation> BuildSpotLightShape() 
-		//{
-		//	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
+shared_ptr<RenderOperation> BuildSpotLightShape() 
+{
+	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 
+	VertexElement vdsc[] = {
+		VertexElement(0, VEF_Float3,  VEU_Position, 0),
+	};
+	shared_ptr<VertexDeclaration> vertexDecl = factory.CreateVertexDeclaration(vdsc, 1);
 
-		//	VertexElement vdsc[] = {
-		//		VertexElement(0, VEF_Float3,  VEU_Position, 0),
-		//	};
+	float mRadius = 1.f;
+	float mHeight = 1.f;
+	uint16_t nCapSegments = 20;
 
+	uint16_t vertexCount = nCapSegments+1;
+	uint16_t indicesCount = (nCapSegments+nCapSegments-2)*3;
 
-		//	float mRadius = 1.f;
-		//	float mHeight = 1.f;
-		//	unsigned int mNumSegBase = 16;
-		//	unsigned int mNumSegHeight = 1;
+	ElementInitData vInitData;
+	vInitData.pData = nullptr;
+	vInitData.rowPitch = 3 * vertexCount * sizeof(float);
+	vInitData.slicePitch = 0;
+	shared_ptr<GraphicsBuffer> vertexBuffer= factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
 
-		//	uint32_t vertexCount = (mNumSegHeight+1)*(mNumSegBase+1)+mNumSegBase+2;
-		//	uint32_t indicesCount = mNumSegHeight*mNumSegBase*6+3*mNumSegBase;
+	ElementInitData iInitData;
+	iInitData.pData = nullptr;
+	iInitData.rowPitch = indicesCount * sizeof(uint16_t);
+	iInitData.slicePitch = 0;
+	shared_ptr<GraphicsBuffer> indexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
 
-		//	ElementInitData vInitData;
-		//	vInitData.pData = nullptr;
-		//	vInitData.rowPitch = 3 * vertexCount * sizeof(float);
-		//	vInitData.slicePitch = 0;
-		//	shared_ptr<GraphicsBuffer> vertexBuffer= factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
+	float* pVertex = static_cast<float*>(vertexBuffer->Map(0, -1, BA_Write_Only));
+	uint16_t* pIndices = static_cast<uint16_t*>(indexBuffer->Map(0, -1, BA_Write_Only));
 
-		//	ElementInitData iInitData;
-		//	iInitData.pData = nullptr;
-		//	iInitData.rowPitch = indicesCount * sizeof(uint16_t);
-		//	iInitData.slicePitch = 0;
-		//	shared_ptr<GraphicsBuffer> indexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
+	std::vector<float3> Vertices;
+	std::vector<int> Indices;
 
-		//	float* pVertex = static_cast<float*>(vertexBuffer->Map(0, -1, BA_Write_Only));
-		//	uint16_t* pIndices = static_cast<uint16_t*>(indexBuffer->Map(0, -1, BA_Write_Only));
+	uint16_t topPointOffset = 0;
+	*pVertex++ = 0.0f;
+	*pVertex++ = 0.0f;
+	*pVertex++ = 0.0f;
 
-		//	float deltaAngle = (Mathf::TWO_PI / mNumSegBase);
-		//	float deltaHeight = mHeight/(float)mNumSegHeight;
-		//	int offset = 0;
+	int ringStartOffset = 1;
+	float deltaAngle = (Mathf::TWO_PI / nCapSegments);
+	for (uint16_t i = 0; i < nCapSegments; i++)
+	{
+		float x0 = mRadius* cosf(i*deltaAngle);
+		float z0 = mRadius * sinf(i*deltaAngle);
 
-		//	for (uint32_t i = 0; i <=mNumSegHeight; i++)
-		//	{
-		//		float r0 = mRadius * i / (float)mNumSegHeight;
-		//		for (uint32_t j = 0; j<=mNumSegBase; j++)
-		//		{
-		//			float x0 = r0* cosf(j*deltaAngle);
-		//			float y0 = r0 * sinf(j*deltaAngle);
+		*pVertex++ = x0;
+		*pVertex++ = mHeight;
+		*pVertex++ = z0;
+	}
 
-		//			// Add one vertex to the strip which makes up the sphere
-		//			*pVertex++ = x0;
-		//			*pVertex++ = y0;
-		//			*pVertex++ = i*deltaHeight;
-		//	
-		//			if (i != mNumSegHeight&& j != mNumSegBase)
-		//			{
-		//				*pIndices++ = offset + mNumSegBase + 2;
-		//				*pIndices++ = offset;
-		//				*pIndices++ = offset + mNumSegBase+1;
+	for (uint16_t i = 0; i < nCapSegments; ++i)
+	{
+		*pIndices++ = topPointOffset;
+		*pIndices++ = ringStartOffset+i;
+		*pIndices++ = ringStartOffset+ (i+1)%nCapSegments;
+	}
 
-		//				*pIndices++ = offset + mNumSegBase + 2;
-		//				*pIndices++ = offset + mNumSegBase+1;
-		//				*pIndices++ = offset;
-		//			}
+	// Caps
+	for (uint16_t i = 0; i < nCapSegments - 2; ++i)
+	{
+		*pIndices++ = ringStartOffset;
+		*pIndices++ = ringStartOffset+i+1+1;
+		*pIndices++ = ringStartOffset+i+1;
+	}
 
-		//			offset ++;
-		//		}
-		//	}
+	vertexBuffer->UnMap();
+	indexBuffer->UnMap();
 
-		//	//low cap
-		//	int centerIndex = offset;
+	shared_ptr<RenderOperation> mRenderOperation(new RenderOperation);
+	mRenderOperation->PrimitiveType = PT_Triangle_List;
+	mRenderOperation->BindVertexStream(vertexBuffer, vertexDecl);
+	mRenderOperation->BindIndexStream(indexBuffer, IBT_Bit16);
 
-		//	*pVertex++ = 0.0f;
-		//	*pVertex++ = 0.0f;
-		//	*pVertex++ = mHeight;
-
-		//	offset++;
-		//	for (uint32_t j=0; j<=mNumSegBase; j++)
-		//	{
-		//		float x0 = mRadius * cosf(j*deltaAngle);
-		//		float y0 = mRadius * sinf(j*deltaAngle);
-
-		//		*pVertex++ = x0;
-		//		*pVertex++ = y0;
-		//		*pVertex++ = mHeight;
-
-		//		if (j!=mNumSegBase)
-		//		{
-		//			*pIndices++ = centerIndex;
-		//			*pIndices++ = offset;
-		//			*pIndices++ = offset+1;
-		//		}
-		//		offset++;
-		//	}
-		//}
-
+	return mRenderOperation;
 }
 
-
+}
 
 namespace RcEngine {
 
@@ -242,15 +225,13 @@ void Renderer::Init()
 
 	mPointLightShape = BuildPointLightShape();
 	mFSQuadShape = BuildFSQuadShape();
+	mSpotLightShape = BuildSpotLightShape();
 }
-
 
 void Renderer::CreatePrimitives()
 {
 
 }
-
-
 
 void Renderer::SetRenderPipeline( const shared_ptr<Pipeline>& pipeline )
 {
@@ -261,7 +242,6 @@ void Renderer::DrawRenderable( Camera* camera, const String& tech, const  String
 {
 
 }
-
 
 void Renderer::RenderScene()
 {
@@ -311,6 +291,7 @@ void Renderer::RenderScene()
 						const ColorRGBA& clearColor = command->Params[1].GetColor();
 						device.GetCurrentFrameBuffer()->GetAttachedView(att)->ClearColor(clearColor);
 					}
+					
 				}
 				break;
 
@@ -371,7 +352,7 @@ void Renderer::RenderScene()
 		}
 	}
 
-	device.GetScreenFrameBuffer()->SwapBuffers();
+	//device.GetScreenFrameBuffer()->SwapBuffers();
 }
 
 void Renderer::UpdateMaterialParameters( Pipeline::PipelineCommand* cmd )
@@ -424,6 +405,9 @@ void Renderer::DrawGeometry( const String& tech, const  String& matClass, Render
 
 	}
 
+	//const shared_ptr<Texture>& rt0 = mCurrPipeline->GetRenderTarget(0, 0);
+	//device.GetRenderFactory()->SaveTexture2D("E:/Depth.pfm", rt0, 0, 0);
+
 	//const shared_ptr<Texture>& rt0 = mCurrPipeline->GetRenderTarget(0, 1);
 	//const shared_ptr<Texture>& rt1 = mCurrPipeline->GetRenderTarget(0, 2);
 	//device.GetRenderFactory()->SaveTexture2D("E:/GBuffer0.tga", rt0, 0, 0);
@@ -444,6 +428,9 @@ void Renderer::DrawLightShape( const String& tech )
 		const float3& lightColor = light->GetLightColor();
 		mCurrMaterial->GetCustomParameter(EPU_Light_Color)->SetValue(lightColor);
 
+		float2 camNearFar(currCamera.GetNearPlane(), currCamera.GetFarPlane());
+		mCurrMaterial->GetEffect()->GetParameterByName("CameraNearFar")->SetValue(camNearFar);
+
 		if (light->GetLightType() == LT_Directional)
 		{
 			const float3& worldDirection = light->GetDerivedDirection();
@@ -452,55 +439,69 @@ void Renderer::DrawLightShape( const String& tech )
 
 			mCurrMaterial->GetCustomParameter(EPU_Light_Dir)->SetValue(lightDir);
 			
-			float2 camNearFar(currCamera.GetNearPlane(), currCamera.GetFarPlane());
-			mCurrMaterial->GetEffect()->GetParameterByName("CameraNearFar")->SetValue(camNearFar);
-
 			String techName = "Directional" + tech;
 			DrawFSQuad(techName);
 		}
-		else if (light->GetLightType() == LT_Point)
+		else if (light->GetLightType() == LT_PointLight)
 		{
-			float attenuationRange = light->GetAttenuationRange();
+			float lightRadius = light->GetRange();
 
-			const float3& worldPosition = light->GetDerivedPosition();
-			float4 lightPos(worldPosition[0], worldPosition[1], worldPosition[2], 1.0f);
+			const float3& worldPos = light->GetDerivedPosition();
+			float4 lightPos(worldPos[0], worldPos[1], worldPos[2], 1.0f);
 			lightPos = lightPos * currCamera.GetViewMatrix();
 			mCurrMaterial->GetCustomParameter(EPU_Light_Position)->SetValue(lightPos);
 
-			float3 lightFalloff(light->GetAttenuationConstant(), light->GetAttenuationLinear(), light->GetAttenuationQuadric());
-			mCurrMaterial->GetCustomParameter(EPU_Light_Falloff)->SetValue(lightFalloff);
-			
-			String techName = "Point" + tech;
-			DrawPointLightShape(worldPosition, attenuationRange, techName);
+			mCurrMaterial->GetCustomParameter(EPU_Light_Attenuation)->SetValue(light->GetAttenuation());
+						
+			float4x4 worldMatrix(lightRadius,  0.0f,		  0.0f,		    0.0f,
+								 0.0f,         lightRadius,   0.0f,		    0.0f,
+								 0.0f,         0.0f,          lightRadius,  0.0f,
+								 worldPos.X(), worldPos.Y(),  worldPos.Z(), 1.0f);
+
+			mCurrMaterial->ApplyMaterial(worldMatrix);
+			mCurrMaterial->SetCurrentTechnique("Point" + tech);
+			device.Render(*mCurrMaterial->GetCurrentTechnique(), *mPointLightShape);
 		}
 		else if (light->GetLightType() == LT_SpotLight)
 		{
-			float attenuationRange = light->GetAttenuationRange();
-
-			const float3& worldPosition = light->GetDerivedDirection();
-			float4 lightPos(worldPosition[0], worldPosition[1], worldPosition[2], 1.0f);
+			const float3& worldPos = light->GetDerivedPosition();
+			float4 lightPos(worldPos[0], worldPos[1], worldPos[2], 1.0f);
 			lightPos = lightPos * currCamera.GetViewMatrix();
 			
 			const float3& worldDirection = light->GetDerivedDirection();
 			float4 lightDir(worldDirection[0], worldDirection[1], worldDirection[2], 0.0f);
 			lightDir = lightDir * currCamera.GetViewMatrix();
 
-			lightPos[4] = cosf(light->GetSpotlightInnerAngle());
-			lightDir[4] = cosf(light->GetSpotlightOuterAngle());
+			float spotInnerAngle = light->GetSpotInnerAngle();
+			float spotOuterAngle = light->GetSpotOuterAngle();
+			lightPos[3] = cosf(spotInnerAngle);
+			lightDir[3] = cosf(spotOuterAngle);
 			mCurrMaterial->GetCustomParameter(EPU_Light_Dir)->SetValue(lightDir);
 			mCurrMaterial->GetCustomParameter(EPU_Light_Position)->SetValue(lightPos);
 
-			float3 lightFalloff(light->GetAttenuationConstant(), light->GetAttenuationLinear(), light->GetAttenuationQuadric());
-			mCurrMaterial->GetCustomParameter(EPU_Light_Falloff)->SetValue(lightFalloff);
+			mCurrMaterial->GetCustomParameter(EPU_Light_Attenuation)->SetValue(light->GetAttenuation());
+
+			float scaleHeight = light->GetRange();
+			float scaleBase = scaleHeight * tanf(spotOuterAngle * 0.5f);
+			
+			float3 rotAxis = Cross(float3(0, 1, 0), worldDirection);
+			//float rotAngle = acosf(Dot(float3(0, 1, 0), worldDirection));
+			float4x4 rotation = CreateRotationAxis(rotAxis, acosf(worldDirection.Y()));
+			
+			float4x4 worldMatrix = CreateScaling(scaleBase, scaleHeight, scaleBase) * rotation *
+				                   CreateTranslation(worldPos);
 
 			String techName = "Spot" + tech;
-			//DrawCone()
+			mCurrMaterial->ApplyMaterial(worldMatrix);
+			mCurrMaterial->SetCurrentTechnique("Spot" + tech);
+			device.Render(*mCurrMaterial->GetCurrentTechnique(), *mSpotLightShape);
 		}
-	}
 
-	{
-		const shared_ptr<Texture>& rt = mCurrPipeline->GetRenderTarget(1, 0);
-		device.GetRenderFactory()->SaveTexture2D("E:/DeferredLight.pfm", rt, 0, 0);
+		//const shared_ptr<Texture>& rt = mCurrPipeline->GetRenderTarget(1, 0);
+		//device.GetRenderFactory()->SaveTexture2D("E:/Stencil.pfm", rt, 0, 0);
+
+		//const shared_ptr<Texture>& rt = mCurrPipeline->GetRenderTarget(1, 1);
+		//device.GetRenderFactory()->SaveTexture2D("E:/Lit.pfm", rt, 0, 0);
 	}
 }
 

@@ -3,10 +3,20 @@
 namespace RcEngine {
 
 DepthStencilStateDesc::DepthStencilStateDesc()
-	: DepthEnable(true), DepthWriteMask(true), DepthFunc(CF_Less),
-	StencilEnable(true),StencilReadMask(0xFFFF), StencilWriteMask(0xFFFF), 
-	FrontStencilFailOp(SOP_Keep), FrontStencilDepthFailOp(SOP_Keep), FrontStencilPassOp(SOP_Keep), FrontStencilFunc(CF_AlwaysPass),
-	BackStencilFailOp(SOP_Keep), BackStencilDepthFailOp(SOP_Keep), BackStencilPassOp(SOP_Keep), BackStencilFunc(CF_AlwaysPass)
+	: DepthEnable(true), 
+	  DepthWriteMask(true), 
+	  DepthFunc(CF_Less),
+	  StencilEnable(false),
+	  StencilReadMask(DEFAULT_STENCIL_READ_MASK), 
+	  StencilWriteMask(DEFAULT_STENCIL_WRITE_MASK), 
+	  FrontStencilFunc(CF_AlwaysPass),
+	  FrontStencilFailOp(SOP_Keep), 
+	  FrontStencilDepthFailOp(SOP_Keep), 
+	  FrontStencilPassOp(SOP_Keep), 
+	  BackStencilFunc(CF_AlwaysPass),
+	  BackStencilFailOp(SOP_Keep), 
+	  BackStencilDepthFailOp(SOP_Keep), 
+	  BackStencilPassOp(SOP_Keep)
 {
 
 }

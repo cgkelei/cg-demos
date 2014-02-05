@@ -641,7 +641,7 @@ bool PixelFormatUtils::IsCompressed( PixelFormat format )
 	return ( GetFlags(format) & PFF_Compressed) > 0;
 }
 
-bool PixelFormatUtils::IsDepthStencil( PixelFormat format )
+bool PixelFormatUtils::IsDepth( PixelFormat format )
 {
 	return ( GetFlags(format) & PFF_Depth) > 0;
 }
