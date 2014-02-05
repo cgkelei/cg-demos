@@ -317,16 +317,45 @@ void main()
 		<VertexShader name="DeferredLightingVS">
 			<Macro name="SPOTLIGHT"/>
 		</VertexShader>
+		<State name="ColorWriteMask" index="0" r="false" g="false" b="false" a="false"/> 
+		<State name="DepthEnable" value="true"/>
+		<State name="DepthWriteMask" value="false"/>
+		<State name="DepthFunc" value="LessEqual"/>
+		<State name="StencilEnable" value="true"/>
+		<State name="FrontStencilFunc" value="AlwaysPass"/>
+		<State name="FrontStencilFailOp" value="Keep"/>
+		<State name="FrontStencilDepthFailOp" value="DecrWrap"/>
+		<State name="FrontStencilPassOp" value="Keep"/>
+		<State name="BackStencilFunc" value="AlwaysPass"/>
+		<State name="BackStencilFailOp" value="Keep"/>
+		<State name="BackStencilDepthFailOp" value="IncrWrap"/>	
+		<State name="BackStencilPassOp" value="Keep"/>
+		<State name="CullMode" value="None"/> 	
+	</Pass>
+	<Pass name="p1">
+		<VertexShader name="DeferredLightingVS">
+			<Macro name="SPOTLIGHT"/>
+		</VertexShader>
 		<PixelShader name="DeferredLightingPS">
 			<Macro name="SPOTLIGHT"/>
 		</PixelShader>
-    <State name="BlendEnable" value="true"/>
-    <State name="SrcBlend" value="One"/>
-    <State name="DestBlend" value="One"/>
-    <State name="BlendOp" value="Add"/>
-    <State name="SrcBlendAlpha" value="One"/>
-    <State name="DestBlendAlpha" value="One"/>
-    <State name="BlendOpAlpha" value="Add"/>
+		<State name="DepthEnable" value="false"/>
+		<State name="DepthWriteMask" value="false"/>
+		<State name="DepthFunc" value="LessEqual"/>
+		<State name="StencilEnable" value="true"/>
+		<State name="BackStencilFunc" value="NotEqual"/>
+		<State name="BackStencilFailOp" value="Keep"/>
+		<State name="BackStencilDepthFailOp" value="Keep"/>	
+		<State name="BackStencilPassOp" value="Zero"/>
+		<State name="BackStencilRef" value="0"/>	
+		<State name="CullMode" value="Front"/> 	
+		<State name="BlendEnable" value="true"/>
+		<State name="SrcBlend" value="One"/>
+		<State name="DestBlend" value="One"/>
+		<State name="BlendOp" value="Add"/>
+		<State name="SrcBlendAlpha" value="One"/>
+		<State name="DestBlendAlpha" value="One"/>
+		<State name="BlendOpAlpha" value="Add"/> 
 	</Pass>
 </Technique>
 
@@ -339,7 +368,7 @@ void main()
 			<Macro name="DIRLIGHT"/>
 		</PixelShader>
 		<State name="DepthEnable" value="false"/>
-		<State name="DepthWriteMask" value="true"/>	
+		<State name="DepthWriteMask" value="false"/>	
 	</Pass>
 </Technique>
 
