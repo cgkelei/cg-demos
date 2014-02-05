@@ -316,7 +316,8 @@ void App::LoadContent()
 	
 	// Set up camera
 	mCamera = device.GetScreenFrameBuffer()->GetCamera();
-	mCamera->SetViewParams(float3(85, 68, -21), float3(86, 68, -21));
+	/*mCamera->SetViewParams(float3(85, 68, -21), float3(86, 68, -21));*/
+	mCamera->SetViewParams(float3(-211, 57, -12), float3(-212, 57, -12));
 	mCamera->SetProjectionParams(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 3000.0f );
 
 	mCameraControler = new RcEngine::Test::FPSCameraControler;
@@ -332,11 +333,11 @@ void App::SetupLights()
 {
 	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
 
-	//Light* sunLight = sceneMan.CreateLight("Sun");
-	//sunLight->SetLightType(LT_Directional);
-	//sunLight->SetDirection(float3(-1, -1, -1));
-	//sunLight->SetLightColor(float3(1, 1, 1));
-	//sceneMan.GetRootSceneNode()->AttachObject(sunLight);
+	Light* sunLight = sceneMan.CreateLight("Sun");
+	sunLight->SetLightType(LT_Directional);
+	sunLight->SetDirection(float3(-1, -1, -1));
+	sunLight->SetLightColor(float3(1, 1, 1));
+	sceneMan.GetRootSceneNode()->AttachObject(sunLight);
 
 	Light* pointLight = sceneMan.CreateLight("Point");
 	pointLight->SetLightType(LT_PointLight);
@@ -346,15 +347,15 @@ void App::SetupLights()
 	pointLight->SetPosition(float3(550, 81, -18));
 	sceneMan.GetRootSceneNode()->AttachObject(pointLight);
 
-	//Light* spotLight = sceneMan.CreateLight("Spot");
-	//spotLight->SetLightType(LT_SpotLight);
-	//spotLight->SetLightColor(float3(0, 1, 0));
-	//spotLight->SetRange(250.0f);
-	//spotLight->SetPosition(float3(-442, 70, -16));
-	//spotLight->SetDirection(float3(-1, 0, 0));
-	//spotLight->SetAttenuation(1.0f, 1.0f);
-	//spotLight->SetSpotAngle(Mathf::ToRadian(30), Mathf::ToRadian(40));
-	//sceneMan.GetRootSceneNode()->AttachObject(spotLight);
+	Light* spotLight = sceneMan.CreateLight("Spot");
+	spotLight->SetLightType(LT_SpotLight);
+	spotLight->SetLightColor(float3(0, 1, 0));
+	spotLight->SetRange(250.0f);
+	spotLight->SetPosition(float3(-442, 70, -16));
+	spotLight->SetDirection(float3(-1, 0, 0));
+	spotLight->SetAttenuation(1.0f, 0.0f);
+	spotLight->SetSpotAngle(Mathf::ToRadian(30), Mathf::ToRadian(40));
+	sceneMan.GetRootSceneNode()->AttachObject(spotLight);
 }
 
 void App::UnloadContent()
