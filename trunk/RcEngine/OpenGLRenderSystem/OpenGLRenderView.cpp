@@ -60,7 +60,7 @@ void OpenGLRenderView::OnDetach(FrameBuffer& fb, Attachment attr)
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferID);
 }
 
-void OpenGLRenderView::DoClear( GLbitfield flags, const ColorRGBA& clr, float depth, uint32_t stencil )
+void OpenGLRenderView::DoClear( GLbitfield clearFlagOGL, const ColorRGBA& clr, float depth, uint32_t stencil )
 {
 	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
 
@@ -71,63 +71,53 @@ void OpenGLRenderView::DoClear( GLbitfield flags, const ColorRGBA& clr, float de
 	const DepthStencilStateDesc& currDepthStencilDesc = device.GetCurrentDepthStencilState()->GetDesc();
 	const BlendStateDesc& currBlendDesc = device.GetCurrentBlendState()->GetDesc();
 
-	GLbitfield clearFlagOGL = 0;
-
 	// mark all clear channel write mask true ,so we can clear it
-	if (flags & GL_COLOR_BUFFER_BIT)
+	if (clearFlagOGL & GL_COLOR_BUFFER_BIT)
 	{
-		if (GLEW_EXT_draw_buffers2)
+		if (GLEW_EXT_draw_buffers2 && mFrameBufferID != 0)
 		{
 			// separate render target blend enables and color write masks supported
-			for (size_t i = 0; i < 8; ++i)
-			{
-				if (currBlendDesc.RenderTarget[i].ColorWriteMask != CWM_All)
-				{
-					glColorMaskIndexedEXT(i, true, true, true, true);
-				}
-			}
+			int32_t bufferIdx = mAttachment - ATT_Color0;
+			if (currBlendDesc.RenderTarget[bufferIdx].ColorWriteMask != CWM_All)
+				glColorMaskIndexedEXT(bufferIdx, GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 		}
 		else
 		{
 			if (currBlendDesc.RenderTarget[0].ColorWriteMask != CWM_All)
-			{
-				glColorMask(true, true, true, true);
-			}
+				glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 		}
 	}
 
-	if (flags & GL_DEPTH_BUFFER_BIT)
+	if (clearFlagOGL & GL_DEPTH_BUFFER_BIT)
 	{
 		if (!currDepthStencilDesc.DepthWriteMask)
-		{
 			glDepthMask(GL_TRUE);
-		}
 	}
 
-	if (flags & GL_STENCIL_BUFFER_BIT)
+	if (clearFlagOGL & GL_STENCIL_BUFFER_BIT)
 	{
 		if (!currDepthStencilDesc.StencilWriteMask)
-		{
 			glStencilMask(GL_TRUE);
-		}
 	}
 
 	// do the clear
-	uint32_t bufferIndex = mAttachment - ATT_DepthStencil;
 	if (GLEW_EXT_draw_buffers2 && mFrameBufferID != 0)
 	{
 		if (clearFlagOGL & GL_COLOR_BUFFER_BIT)
+		{
+			GLint  bufferIndex = mAttachment - ATT_Color0;
 			glClearBufferfv(GL_COLOR, bufferIndex, clr());
+		}
 
 		if ((clearFlagOGL & GL_DEPTH_BUFFER_BIT) && (clearFlagOGL & GL_STENCIL_BUFFER_BIT))
 			glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
 		else
 		{
-			if (flags & GL_DEPTH_BUFFER_BIT)
+			if (clearFlagOGL & GL_DEPTH_BUFFER_BIT)
 				glClearBufferfv(GL_DEPTH, 0, &depth);
 			else
 			{
-				if (flags & GL_STENCIL_BUFFER_BIT)
+				if (clearFlagOGL & GL_STENCIL_BUFFER_BIT)
 				{
 					GLint s = stencil;
 					glClearBufferiv(GL_STENCIL, 0, &s);
@@ -137,31 +127,29 @@ void OpenGLRenderView::DoClear( GLbitfield flags, const ColorRGBA& clr, float de
 	}
 	else
 	{
-		if (flags & GL_COLOR_BUFFER_BIT)
+		if (clearFlagOGL & GL_COLOR_BUFFER_BIT)
 			glClearColor(clr.R(), clr.G(), clr.B(), clr.A());
 
-		if (flags & GL_DEPTH_BUFFER_BIT)
+		if (clearFlagOGL & GL_DEPTH_BUFFER_BIT)
 			glClearDepth(depth);
 
-		if (flags & GL_STENCIL_BUFFER_BIT)
+		if (clearFlagOGL & GL_STENCIL_BUFFER_BIT)
 			glClearStencil(stencil);
 
-		if (flags != 0)
-			glClear(flags);
+		if (clearFlagOGL != 0)
+			glClear(clearFlagOGL);
 	}
 
 	// set mask back
-	if (flags & GL_COLOR_BUFFER_BIT)
+	if (clearFlagOGL & GL_COLOR_BUFFER_BIT)
 	{
-		if (GLEW_EXT_draw_buffers2)
+		if (GLEW_EXT_draw_buffers2 && mFrameBufferID != 0)
 		{
 			// separate render target blend enables and color write masks supported
-			for (size_t i = 0; i < 8; ++i)
-			{
-				uint32_t writeMask = currBlendDesc.RenderTarget[i].ColorWriteMask;
-				glColorMaskIndexedEXT(i, (writeMask & CWM_Red) != 0, (writeMask & CWM_Green) != 0, 
-					(writeMask & CWM_Blue) != 0, (writeMask & CWM_Alpha) != 0);
-			}
+			int32_t bufferIdx = mAttachment - ATT_Color0;
+			uint32_t writeMask = currBlendDesc.RenderTarget[bufferIdx].ColorWriteMask;
+			glColorMaskIndexedEXT(bufferIdx, (writeMask & CWM_Red) != 0, (writeMask & CWM_Green) != 0, 
+				(writeMask & CWM_Blue) != 0, (writeMask & CWM_Alpha) != 0);
 		}
 		else
 		{
@@ -171,17 +159,14 @@ void OpenGLRenderView::DoClear( GLbitfield flags, const ColorRGBA& clr, float de
 		}
 	}
 
-	if (flags & GL_DEPTH_BUFFER_BIT)
+	if (clearFlagOGL & GL_DEPTH_BUFFER_BIT)
 	{
 		if(!currDepthStencilDesc.DepthWriteMask)
 			glDepthMask(GL_FALSE);
 	}
 
-	if (flags & GL_STENCIL_BUFFER_BIT)
-	{
-		if (currDepthStencilDesc.StencilWriteMask)
-			glStencilMask(GL_FALSE);
-	}
+	if (clearFlagOGL & GL_STENCIL_BUFFER_BIT)
+		glStencilMask(currDepthStencilDesc.StencilWriteMask);
 }
 	
 

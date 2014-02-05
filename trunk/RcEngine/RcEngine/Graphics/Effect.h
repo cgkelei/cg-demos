@@ -38,6 +38,8 @@ public_internal:
 	 */
 	EffectParameter* FetchShaderParameter(const String& name, EffectParameterType type, bool array);
 
+	void MakeEffectParameterDirty();
+
 protected:
 	void LoadImpl();
 	void UnloadImpl();

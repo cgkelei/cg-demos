@@ -54,7 +54,7 @@ void RenderDevice::BindFrameBuffer( const shared_ptr<FrameBuffer>& fb )
 	}
 }
 
-void RenderDevice::Render( const EffectTechnique& tech, const RenderOperation& op )
+void RenderDevice::Render( EffectTechnique& tech, RenderOperation& op )
 {
 	DoRender(tech, op);
 }

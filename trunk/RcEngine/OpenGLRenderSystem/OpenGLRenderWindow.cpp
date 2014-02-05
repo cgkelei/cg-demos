@@ -14,7 +14,7 @@ OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
 	mColorFormat = settings.ColorFormat;
 	mColorDepth = PixelFormatUtils::GetNumElemBits(settings.ColorFormat);
 	mFullscreen = settings.Fullscreen;
-	mIsDepthBuffered = PixelFormatUtils::IsDepthStencil(settings.DepthStencilFormat);
+	mIsDepthBuffered = PixelFormatUtils::IsDepth(settings.DepthStencilFormat);
 	PixelFormatUtils::GetNumDepthStencilBits(settings.DepthStencilFormat, mDepthBits, mStencilBits);
 
 #ifdef RcWindows
@@ -76,19 +76,18 @@ OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, errMsg, "OpenGLRenderDevice::InitGlew");
 	}
 
+	if (WGLEW_EXT_swap_control)
+		wglSwapIntervalEXT(settings.SyncInterval);
+#endif
+
 	uint32_t sampleCount = settings.SampleCount;
 	if(sampleCount > 1)
 	{
 
 	}
 
-	if (WGLEW_EXT_swap_control)
-		wglSwapIntervalEXT(settings.SyncInterval);
-
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-#endif
 
 	std::ostringstream oss;
 	oss << reinterpret_cast<char const *>(glGetString(GL_VENDOR)) << " "

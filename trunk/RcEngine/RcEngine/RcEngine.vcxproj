@@ -219,7 +219,9 @@
     <None Include="Math\Vector.inl" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="..\Media\Effect\DeferredLighting.effect.xml" />
+    <Xml Include="..\Media\Effect\DeferredLighting.effect.xml">
+      <SubType>Designer</SubType>
+    </Xml>
     <Xml Include="..\Media\Effect\DeferredReadUtill.include.xml" />
     <Xml Include="..\Media\Effect\Font.effect.xml" />
     <Xml Include="..\Media\Effect\LightingUtil.include.xml" />

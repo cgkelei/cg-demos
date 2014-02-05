@@ -677,7 +677,7 @@ void Effect::LoadImpl()
 	XMLNodePtr technqueNode;
 	for (technqueNode = root->FirstNode("Technique");  technqueNode; technqueNode = technqueNode->NextSibling("Technique"))
 	{
-		EffectTechnique* technique = new EffectTechnique;
+		EffectTechnique* technique = new EffectTechnique(*this);
 
 		technique->mName = technqueNode->AttributeString("name", "");
 
@@ -721,24 +721,27 @@ void Effect::LoadImpl()
 			}
 
 			XMLNodePtr pixelNode = passNode->FirstNode("PixelShader");
-			String pixelName = pixelNode->AttributeString("name", "");
-			if (shaderStages.find(pixelName) != shaderStages.end())
+			if (pixelNode)
 			{
-				vector<String> defines, values;
-				CollectShaderMacro(pixelNode, defines, values);
-				for (size_t i = 1; i < effectFlags.size(); ++i)
+				String pixelName = pixelNode->AttributeString("name", "");
+				if (shaderStages.find(pixelName) != shaderStages.end())
 				{
-					defines.push_back(effectFlags[i]);
-					values.push_back(String(""));
+					vector<String> defines, values;
+					CollectShaderMacro(pixelNode, defines, values);
+					for (size_t i = 1; i < effectFlags.size(); ++i)
+					{
+						defines.push_back(effectFlags[i]);
+						values.push_back(String(""));
+					}
+					program->AttachShader(CompileShader(shaderStages[pixelName], defines, values));
 				}
-				program->AttachShader(CompileShader(shaderStages[pixelName], defines, values));
+				else
+				{
+					String err = "PS( " + pixelName + " ) not found!";
+					ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, err, "Effect::Load");
+				}
 			}
-			else
-			{
-				String err = "PS( " + pixelName + " ) not found!";
-				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, err, "Effect::Load");
-			}
-
+			
 			if (!program->LinkProgram())
 			{
 				std::cout << program->GetLinkInfo() << std::endl;
@@ -802,6 +805,12 @@ void Effect::SetCurrentTechnique( uint32_t index )
 	{
 		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Technique index out of range, " + mEffectName, "Effect::SetCurrentTechnique");
 	}	
+}
+
+void Effect::MakeEffectParameterDirty()
+{
+	for (auto& kv : mParameters)
+		kv.second->MakeDirty();
 }
 
 

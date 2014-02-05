@@ -61,6 +61,7 @@ void main()
 		<State name="SrcBlend" value="SrcAlpha"/>
 		<State name="DestBlend" value="InvSrcAlpha"/>
 		<State name="DepthFunc" value="LessEqual"/>
+		<State name="CullMode" value="None"/> 	
 		
 		<VertexShader name="SpriteVS"/>
 		<PixelShader name="SpritePS"/>

@@ -9,6 +9,7 @@
 #include "OpenGLGraphicCommon.h"
 #include <Graphics/Material.h>
 #include <Graphics/EffectTechnique.h>
+#include <Graphics/Effect.h>
 #include <Graphics/EffectPass.h>
 #include <Graphics/Viewport.h>
 #include <Graphics/BlendState.h>
@@ -65,18 +66,34 @@ void OpenGLRenderDevice::CreateRenderWindow( const RenderSettings& settings )
 	}
 
 	//Create default render state
-	// Set default render state
 	mCurrentDepthStencilState = mRenderFactory->CreateDepthStencilState(DepthStencilStateDesc());
+	mCurrentBlendState = mRenderFactory->CreateBlendState(BlendStateDesc());
+	mCurrentRasterizerState = mRenderFactory->CreateRasterizerState(RasterizerStateDesc());
 
-	BlendStateDesc blendDesc;
-	mCurrentBlendState = mRenderFactory->CreateBlendState(blendDesc);
+	// enable default render state
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_STENCIL_TEST);  // Disable
+	glEnable(GL_STENCIL_TEST_TWO_SIDE_EXT);
 
-	RasterizerStateDesc rasterDesc;
-	mCurrentRasterizerState = mRenderFactory->CreateRasterizerState(rasterDesc);
+	/* glStencil*Separete does't work for back face on my PC.
+	glStencilFuncSeparate(GL_FRONT, GL_ALWAYS, 0, DEFAULT_STENCIL_READ_MASK);
+	glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_KEEP);
+	glStencilFuncSeparate(GL_BACK, GL_ALWAYS, 0, DEFAULT_STENCIL_READ_MASK);
+	glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_KEEP);*/
+
+	glActiveStencilFaceEXT(GL_FRONT);
+	glStencilFunc(GL_ALWAYS, 0, DEFAULT_STENCIL_READ_MASK);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+	glActiveStencilFaceEXT(GL_BACK);
+	glStencilFunc(GL_ALWAYS, 0, DEFAULT_STENCIL_READ_MASK);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CW);
 
 	// do little hard code
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_STENCIL_TEST);
 	glEnable(GL_TEXTURE_1D);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_TEXTURE_3D);
@@ -157,11 +174,27 @@ void OpenGLRenderDevice::SetBlendState( const shared_ptr<BlendState>& state, con
 				if (currDesc.RenderTarget[i].ColorWriteMask != stateDesc.RenderTarget[i].ColorWriteMask)
 				{
 					glColorMaskIndexedEXT(i, (stateDesc.RenderTarget[i].ColorWriteMask & CWM_Red) != 0,
-						(stateDesc.RenderTarget[i].ColorWriteMask & CWM_Green) != 0,
-						(stateDesc.RenderTarget[i].ColorWriteMask & CWM_Blue) != 0,
-						(stateDesc.RenderTarget[i].ColorWriteMask & CWM_Alpha) != 0 );
+											 (stateDesc.RenderTarget[i].ColorWriteMask & CWM_Green) != 0,
+										     (stateDesc.RenderTarget[i].ColorWriteMask & CWM_Blue) != 0,
+											 (stateDesc.RenderTarget[i].ColorWriteMask & CWM_Alpha) != 0 );
 				}
 
+				if (currDesc.RenderTarget[i].BlendOp != stateDesc.RenderTarget[i].BlendOp)
+				{
+					glBlendEquationSeparatei(i, OpenGLMapping::Mapping(stateDesc.RenderTarget[i].BlendOp),
+											    OpenGLMapping::Mapping(stateDesc.RenderTarget[i].BlendOpAlpha));
+				}
+
+				if ( (currDesc.RenderTarget[i].SrcBlend != stateDesc.RenderTarget[i].SrcBlend) || 
+					 (currDesc.RenderTarget[i].DestBlend != stateDesc.RenderTarget[i].DestBlend)|| 
+					 (currDesc.RenderTarget[i].SrcBlendAlpha != stateDesc.RenderTarget[i].SrcBlendAlpha) || 
+					 (currDesc.RenderTarget[i].DestBlendAlpha != stateDesc.RenderTarget[i].DestBlendAlpha) )
+				{
+					glBlendFuncSeparatei(i, OpenGLMapping::Mapping(stateDesc.RenderTarget[i].SrcBlend), 
+									        OpenGLMapping::Mapping(stateDesc.RenderTarget[i].DestBlend),
+									        OpenGLMapping::Mapping(stateDesc.RenderTarget[i].SrcBlendAlpha), 
+										    OpenGLMapping::Mapping(stateDesc.RenderTarget[i].DestBlendAlpha));
+				}
 			}
 		}
 		else
@@ -177,33 +210,34 @@ void OpenGLRenderDevice::SetBlendState( const shared_ptr<BlendState>& state, con
 			if (currDesc.RenderTarget[0].ColorWriteMask != stateDesc.RenderTarget[0].ColorWriteMask)
 			{
 				glColorMask( (stateDesc.RenderTarget[0].ColorWriteMask & CWM_Red) != 0,
-					(stateDesc.RenderTarget[0].ColorWriteMask & CWM_Green) != 0,
-					(stateDesc.RenderTarget[0].ColorWriteMask & CWM_Blue) != 0,
-					(stateDesc.RenderTarget[0].ColorWriteMask & CWM_Alpha) != 0 );
+							 (stateDesc.RenderTarget[0].ColorWriteMask & CWM_Green) != 0,
+							 (stateDesc.RenderTarget[0].ColorWriteMask & CWM_Blue) != 0,
+							 (stateDesc.RenderTarget[0].ColorWriteMask & CWM_Alpha) != 0 );
 			}
-		}				
 
-		if (currDesc.RenderTarget[0].BlendOp != stateDesc.RenderTarget[0].BlendOp)
-		{
-			glBlendEquationSeparate(OpenGLMapping::Mapping(stateDesc.RenderTarget[0].BlendOp),
-				OpenGLMapping::Mapping(stateDesc.RenderTarget[0].BlendOpAlpha));
-		}
+			if (currDesc.RenderTarget[0].BlendOp != stateDesc.RenderTarget[0].BlendOp)
+			{
+				glBlendEquationSeparate(OpenGLMapping::Mapping(stateDesc.RenderTarget[0].BlendOp),
+					OpenGLMapping::Mapping(stateDesc.RenderTarget[0].BlendOpAlpha));
+			}
 
-		if ( (currDesc.RenderTarget[0].SrcBlend != stateDesc.RenderTarget[0].SrcBlend)
-			|| (currDesc.RenderTarget[0].DestBlend != stateDesc.RenderTarget[0].DestBlend)
-			|| (currDesc.RenderTarget[0].SrcBlendAlpha != stateDesc.RenderTarget[0].SrcBlendAlpha)
-			|| (currDesc.RenderTarget[0].DestBlendAlpha != stateDesc.RenderTarget[0].DestBlendAlpha) )
-		{
-			//auto src1 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlend);
-			//auto dst1 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlend);
-			//auto src11 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlendAlpha);
-			//auto dst11 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlendAlpha);
+			if ( (currDesc.RenderTarget[0].SrcBlend != stateDesc.RenderTarget[0].SrcBlend) || 
+				 (currDesc.RenderTarget[0].DestBlend != stateDesc.RenderTarget[0].DestBlend) || 
+				 (currDesc.RenderTarget[0].SrcBlendAlpha != stateDesc.RenderTarget[0].SrcBlendAlpha) || 
+				 (currDesc.RenderTarget[0].DestBlendAlpha != stateDesc.RenderTarget[0].DestBlendAlpha) )
+			{
+				//auto src1 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlend);
+				//auto dst1 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlend);
+				//auto src11 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlendAlpha);
+				//auto dst11 = OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlendAlpha);
 
-			glBlendFuncSeparate(OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlend), 
-				                OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlend),
-								OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlendAlpha), 
-								OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlendAlpha));
-		}
+				glBlendFuncSeparate(OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlend), 
+								    OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlend),
+									OpenGLMapping::Mapping(stateDesc.RenderTarget[0].SrcBlendAlpha), 
+									OpenGLMapping::Mapping(stateDesc.RenderTarget[0].DestBlendAlpha));
+			}
+
+		}	
 
 		// Set Current
 		mCurrentBlendState = state;	
@@ -332,34 +366,36 @@ void OpenGLRenderDevice::SetDepthStencilState( const shared_ptr<DepthStencilStat
 			|| (mCurrentFrontStencilRef != frontStencilRef)
 			|| (currDesc.StencilReadMask != stateDesc.StencilReadMask))
 		{
-			glStencilFuncSeparate(GL_FRONT, OpenGLMapping::Mapping(stateDesc.FrontStencilFunc),
-				frontStencilRef, stateDesc.StencilReadMask);
-		}
-
-		if ((currDesc.BackStencilFunc != stateDesc.BackStencilFunc)
-			|| (mCurrentBackStencilRef != backStencilRef)
-			|| (currDesc.StencilReadMask != stateDesc.StencilReadMask))
-		{
-			glStencilFuncSeparate(GL_BACK, OpenGLMapping::Mapping(stateDesc.BackStencilFunc),
-				backStencilRef, stateDesc.StencilReadMask);
+			glActiveStencilFaceEXT(GL_FRONT);
+			glStencilFunc(OpenGLMapping::Mapping(stateDesc.FrontStencilFunc), frontStencilRef, stateDesc.StencilReadMask);
 		}
 
 		if ((currDesc.FrontStencilFailOp != stateDesc.FrontStencilFailOp)
 			|| (currDesc.FrontStencilDepthFailOp != stateDesc.FrontStencilDepthFailOp)
 			|| (currDesc.FrontStencilPassOp != stateDesc.FrontStencilPassOp))
 		{
-			glStencilOpSeparate(GL_FRONT, OpenGLMapping::Mapping(stateDesc.FrontStencilFailOp),
-				OpenGLMapping::Mapping(stateDesc.FrontStencilDepthFailOp),
-				OpenGLMapping::Mapping(stateDesc.FrontStencilPassOp) );
+			glActiveStencilFaceEXT(GL_FRONT);
+			glStencilOp(OpenGLMapping::Mapping(stateDesc.FrontStencilFailOp),
+					    OpenGLMapping::Mapping(stateDesc.FrontStencilDepthFailOp),
+						OpenGLMapping::Mapping(stateDesc.FrontStencilPassOp));
+		}
+
+		if ((currDesc.BackStencilFunc != stateDesc.BackStencilFunc)
+			|| (mCurrentBackStencilRef != backStencilRef)
+			|| (currDesc.StencilReadMask != stateDesc.StencilReadMask))
+		{
+			glActiveStencilFaceEXT(GL_BACK);
+			glStencilFunc(OpenGLMapping::Mapping(stateDesc.BackStencilFunc), backStencilRef, stateDesc.StencilReadMask);
 		}
 
 		if ((currDesc.BackStencilFailOp != stateDesc.BackStencilFailOp)
 			|| (currDesc.BackStencilDepthFailOp != stateDesc.BackStencilDepthFailOp)
 			|| (currDesc.BackStencilPassOp != stateDesc.BackStencilPassOp))
 		{
-			glStencilOpSeparate(GL_BACK, OpenGLMapping::Mapping(stateDesc.BackStencilFailOp),
-				OpenGLMapping::Mapping(stateDesc.BackStencilDepthFailOp),
-				OpenGLMapping::Mapping(stateDesc.BackStencilPassOp) );
+			glActiveStencilFaceEXT(GL_BACK);
+			glStencilOp(OpenGLMapping::Mapping(stateDesc.BackStencilFailOp),
+				        OpenGLMapping::Mapping(stateDesc.BackStencilDepthFailOp),
+						OpenGLMapping::Mapping(stateDesc.BackStencilPassOp));
 		}
 	}
 
@@ -368,9 +404,8 @@ void OpenGLRenderDevice::SetDepthStencilState( const shared_ptr<DepthStencilStat
 	mCurrentBackStencilRef = backStencilRef;
 }
 
-void OpenGLRenderDevice::DoRender( const EffectTechnique& tech, const RenderOperation& op )
+void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
 {
-
 	// bind vertex streams
 	for (const RenderOperation::StreamUnit& streamUnit : op.VertexStreams)
 	{
@@ -427,13 +462,17 @@ void OpenGLRenderDevice::DoRender( const EffectTechnique& tech, const RenderOper
 	for(EffectPass* pass : tech.GetPasses())
 	{
 		pass->BeginPass();
-	
+
 		if (op.UseIndex)
 			glDrawElements(OpenGLMapping::Mapping(op.PrimitiveType), op.IndexCount, indexType, indexOffset);	
 		else
 			glDrawArrays(OpenGLMapping::Mapping(op.PrimitiveType), op.VertexStart, static_cast<GLsizei>(op.VertexCount));
 
 		pass->EndPass();
+
+		// Todo: Design a more elegant effect system
+		if (tech.GetPasses().size() > 1)
+			tech.GetEffect().MakeEffectParameterDirty();
 	}
 }
 

@@ -2,7 +2,9 @@
 
 namespace RcEngine {
 
-EffectTechnique::EffectTechnique()
+EffectTechnique::EffectTechnique(Effect& effect)
+	: mEffect(effect),
+	  mValid(true)
 {
 
 }
@@ -34,7 +36,7 @@ EffectPass* EffectTechnique::GetPassByIndex( uint32_t index ) const
 
 EffectTechnique* EffectTechnique::Clone(Effect& effect)
 {
-	EffectTechnique* retVal = new EffectTechnique();
+	EffectTechnique* retVal = new EffectTechnique(effect);
 
 	retVal->mName = mName;
 	retVal->mValid = mValid;

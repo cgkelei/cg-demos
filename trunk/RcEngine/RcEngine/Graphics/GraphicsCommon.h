@@ -454,7 +454,7 @@ enum EffectParameterUsage
 	/**
 	 * The ambient component of light, ColorRGBA format 
 	 */
-	EPU_Light_Falloff, 
+	EPU_Light_Attenuation, 
 
 	/**
 	 * Position of camera.

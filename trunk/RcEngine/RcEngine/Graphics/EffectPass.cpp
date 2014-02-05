@@ -5,7 +5,12 @@
 
 namespace RcEngine {
 
-EffectPass::EffectPass()
+EffectPass::EffectPass( )
+	: mValid(false),
+	  mFrontStencilRef(0),
+	  mBackStencilRef(0),
+	  mBlendColor(0, 0, 0, 0),
+	  mSampleMask(0)
 {
 
 }
@@ -32,7 +37,7 @@ void EffectPass::EndPass()
 
 EffectPass* EffectPass::Clone(Effect& effect)
 {
-	EffectPass* retVal = new EffectPass;
+	EffectPass* retVal = new EffectPass();
 
 
 	retVal->mName =  mName;

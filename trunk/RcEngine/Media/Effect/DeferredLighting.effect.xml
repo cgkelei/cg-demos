@@ -128,13 +128,10 @@ void main()
 #endif
 		
 		vec3 diffuse = LightColor * nDotl * attenuation;
+		
 		// Frensel in moved to calculate in shading pass
 		vec3 specular = CalculateSpecular(N, H, shininess) * LightColor * nDotl * attenuation;
 		
-		
-		//final.rgb = oViewRay;
-		//final.a = Luminance(diffuse) +  Luminance(specular);
-		//final = vec4(diffuse.rg, nDotl, dot(N, H));
 		final = vec4(diffuse, Luminance(specular));
 	}
 #ifdef SPOTLIGHT
@@ -193,7 +190,7 @@ void main()
 	vec3 fresnelTerm = CalculateAmbiemtFresnel(specularAlbedo, N, V);
 	
 	final =  diffueLight * diffuseAlbedo + ((specularPower + 2.0) / 8.0) * fresnelTerm * specularLight;
-	final = final + vec3(0.2, 0.2, 0.2) * diffuseAlbedo;
+	final = final + vec3(0.1, 0.1, 0.1) * diffuseAlbedo;
 
 	oFragColor = vec4(final, 1.0);
 }
@@ -201,6 +198,52 @@ void main()
 		]]>
 	</ShaderSource>
 </Shader>	
+
+<Shader name="FSQuadVS" stage="Vertex" entry="main">
+	<ShaderSource>
+	<![CDATA[
+	
+attribute vec2 iPos;
+varying vec2 oTex;
+
+void main()
+{
+	oTex = iPos * 0.5 + 0.5;
+	gl_Position = vec4(iPos, 0.0, 1.0);	
+	
+}	
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Shader name="CopyDepthPS" stage="Pixel" entry="main">
+	<Include name="DeferredReadUtill.include.xml"/>
+	<ShaderSource>
+	<![CDATA[
+
+uniform sampler2D DepthBuffer;	
+varying vec2 oTex;
+
+void main() 
+{
+	gl_FragDepth = texture2D( DepthBuffer, oTex ).r;
+}
+	]]>
+	</ShaderSource>
+</Shader>
+
+<!-- Techniques -->
+
+<Technique name="CopyDepth">
+	<Pass name="p0">
+		<VertexShader name="FSQuadVS"/>
+		<PixelShader name="CopyDepthPS"/>
+		<State name="DepthEnable" value="true"/>
+		<State name="DepthFunc" value="AlwaysPass"/>
+		<State name="DepthWriteMask" value="true"/>
+		<State name="ColorWriteMask" index="0" r="false" g="false" b="false" a="false"/> 
+	</Pass>
+</Technique>
 
 <Technique name="DirectionalLighting">
 	<Pass name="p0">
@@ -212,13 +255,13 @@ void main()
 		</PixelShader>
 		<State name="DepthEnable" value="false"/>
 		<State name="DepthWriteMask" value="false"/>
-    <State name="BlendEnable" value="true"/>
-    <State name="SrcBlend" value="One"/>
-    <State name="DestBlend" value="One"/>
-    <State name="BlendOp" value="Add"/>
-    <State name="SrcBlendAlpha" value="One"/>
-    <State name="DestBlendAlpha" value="One"/>
-    <State name="BlendOpAlpha" value="Add"/>
+		<State name="BlendEnable" value="true"/>
+		<State name="SrcBlend" value="One"/>
+		<State name="DestBlend" value="One"/>
+		<State name="BlendOp" value="Add"/>
+		<State name="SrcBlendAlpha" value="One"/>
+		<State name="DestBlendAlpha" value="One"/>
+		<State name="BlendOpAlpha" value="Add"/>
   </Pass>
 </Technique>
 
@@ -227,18 +270,46 @@ void main()
 		<VertexShader name="DeferredLightingVS">
 			<Macro name="POINTLIGHT"/>
 		</VertexShader>
+		<State name="ColorWriteMask" index="0" r="false" g="false" b="false" a="false"/> 
+		<State name="DepthEnable" value="true"/>
+		<State name="DepthWriteMask" value="false"/>
+		<State name="DepthFunc" value="LessEqual"/>
+		<State name="StencilEnable" value="true"/>
+		<State name="FrontStencilFunc" value="AlwaysPass"/>
+		<State name="FrontStencilFailOp" value="Keep"/>
+		<State name="FrontStencilDepthFailOp" value="DecrWrap"/>
+		<State name="FrontStencilPassOp" value="Keep"/>
+		<State name="BackStencilFunc" value="AlwaysPass"/>
+		<State name="BackStencilFailOp" value="Keep"/>
+		<State name="BackStencilDepthFailOp" value="IncrWrap"/>	
+		<State name="BackStencilPassOp" value="Keep"/>
+		<State name="CullMode" value="None"/> 	
+	</Pass>
+	<Pass name="p1">
+		<VertexShader name="DeferredLightingVS">
+			<Macro name="POINTLIGHT"/>
+		</VertexShader>
 		<PixelShader name="DeferredLightingPS">
 			<Macro name="POINTLIGHT"/>
 		</PixelShader>
-    <State name="DepthEnable" value="false"/>
-    <State name="BlendEnable" value="true"/>
-    <State name="SrcBlend" value="One"/>
-    <State name="DestBlend" value="One"/>
-    <State name="BlendOp" value="Add"/>
-    <State name="SrcBlendAlpha" value="One"/>
-    <State name="DestBlendAlpha" value="One"/>
-    <State name="BlendOpAlpha" value="Add"/>  
-  </Pass>
+		<State name="DepthEnable" value="false"/>
+		<State name="DepthWriteMask" value="false"/>
+		<State name="DepthFunc" value="LessEqual"/>
+		<State name="StencilEnable" value="true"/>
+		<State name="BackStencilFunc" value="NotEqual"/>
+		<State name="BackStencilFailOp" value="Keep"/>
+		<State name="BackStencilDepthFailOp" value="Keep"/>	
+		<State name="BackStencilPassOp" value="Zero"/>
+		<State name="BackStencilRef" value="0"/>	
+		<State name="CullMode" value="Front"/> 	
+		<State name="BlendEnable" value="true"/>
+		<State name="SrcBlend" value="One"/>
+		<State name="DestBlend" value="One"/>
+		<State name="BlendOp" value="Add"/>
+		<State name="SrcBlendAlpha" value="One"/>
+		<State name="DestBlendAlpha" value="One"/>
+		<State name="BlendOpAlpha" value="Add"/> 
+	</Pass>
 </Technique>
 
 <Technique name="SpotLighting">
@@ -268,7 +339,7 @@ void main()
 			<Macro name="DIRLIGHT"/>
 		</PixelShader>
 		<State name="DepthEnable" value="false"/>
-		<State name="DepthWriteMask" value="false"/>	
+		<State name="DepthWriteMask" value="true"/>	
 	</Pass>
 </Technique>
 

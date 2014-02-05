@@ -20,6 +20,7 @@ public:
 
 	virtual void ClearColor(const ColorRGBA& clr) = 0;
 	virtual void ClearDepth(float depth) = 0;
+	virtual void ClearStencil(uint32_t stencil) = 0;
 	virtual void ClearDepthStencil(float depth, uint32_t stencil) = 0;
 
 	/**
