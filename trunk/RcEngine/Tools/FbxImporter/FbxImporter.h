@@ -10,40 +10,48 @@
 
 using namespace RcEngine;
 
+enum AxisSystem 
+{
+	Axis_OpenGL,
+	Axis_DirectX,
+};
+
 struct ExportSettings
 {
 	bool ExportSkeleton;
 	bool ExportAnimation; 
 	bool MergeScene;
+	AxisSystem AxisSystem;
 
 	ExportSettings()
 		: ExportSkeleton(true),
 		  ExportAnimation(true),
-		  MergeScene(false)
+		  MergeScene(false),
+		  AxisSystem(Axis_DirectX)
 	{}
 };
 
-class FBXTransformer
-{
-public:
-	FBXTransformer()
-		: mUnitScale( 1.0f )
-	{ }
-
-	void Initialize( FbxScene* pScene );
-
-	void TransformMatrix( float4x4* pDestMatrix, const float4x4* pSrcMatrix ) const;
-	void TransformPosition( float3* pDestPosition, const float3* pSrcPosition ) const;
-	void TransformDirection( float3* pDestDirection, const float3* pSrcDirection ) const;
-	float TransformLength( float inputLength ) const;
-
-	// Sets unit scale for exporting all geometry - works with characters too.
-	void SetUnitScale( const float fScale )	{ mUnitScale = fScale; }
-
-protected:
-	float mUnitScale;
-	bool  m3dMaxConversion;
-};
+//class FBXTransformer
+//{
+//public:
+//	FBXTransformer()
+//		: mUnitScale( 1.0f )
+//	{ }
+//
+//	void Initialize( FbxScene* pScene );
+//
+//	void TransformMatrix( float4x4* pDestMatrix, const float4x4* pSrcMatrix ) const;
+//	void TransformPosition( float3* pDestPosition, const float3* pSrcPosition ) const;
+//	void TransformDirection( float3* pDestDirection, const float3* pSrcDirection ) const;
+//	float TransformLength( float inputLength ) const;
+//
+//	// Sets unit scale for exporting all geometry - works with characters too.
+//	void SetUnitScale( const float fScale )	{ mUnitScale = fScale; }
+//
+//protected:
+//	float mUnitScale;
+//	bool  m3dMaxConversion;
+//};
 
 class FbxProcesser
 {
@@ -197,7 +205,7 @@ public:
 		
 public:
 	void Initialize();
-	bool LoadScene(const char* filename);
+	bool LoadScene(const String& filename);
 
 	void ProcessNode(FbxNode* pNode, FbxNodeAttribute::EType attriType);
 	void ProcessSkeleton(FbxNode* pNode);
@@ -227,6 +235,7 @@ private:
 	bool mQuietMode;
 	bool mMergeScene;
 	String mSceneName;
+	String mOutputPath;
 
 	unordered_map<String, shared_ptr<Skeleton>> mSkeletons;
 	unordered_map<String, AnimationData> mAnimations;
@@ -234,7 +243,7 @@ private:
 	vector<MaterialData> mMaterials;
 	vector<shared_ptr<MeshData> > mSceneMeshes;
 
-	FBXTransformer mFBXTransformer;
+	//FBXTransformer mFBXTransformer;
 };
 
 

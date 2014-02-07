@@ -1,3 +1,6 @@
+#ifndef Pipeline_h__
+#define Pipeline_h__
+
 #include <Core/Prerequisites.h>
 #include <Graphics/PixelFormat.h>
 #include <Graphics/GraphicsCommon.h>
@@ -170,7 +173,7 @@ private:
 	std::vector<shared_ptr<Material>> mMaterials; 
 };
 
-
-
-
 }
+
+
+#endif // Pipeline_h__

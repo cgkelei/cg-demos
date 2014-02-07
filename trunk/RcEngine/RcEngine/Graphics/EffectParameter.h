@@ -24,7 +24,7 @@ class _ApiExport EffectParameter
 {
 public:
 	EffectParameter(const String& name, EffectParameterType type)
-		: mDirty(true), mType(type), mName(name) { }
+		: mDirty(true), mType(type), mName(name), mArray(false) { }
 
 	virtual ~EffectParameter(void) { }
 

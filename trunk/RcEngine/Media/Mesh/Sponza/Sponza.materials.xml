@@ -1,219 +1,214 @@
-<materials count="26">
-	<material material="_sponzaleaf">
+<materials count="25">
+	<material material="leaf">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_thorn_diff.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_thorn_diff.tga"/>
-		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\sponza_thorn_ddn.tga"/>
-		<TransparentColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_thorn_mask.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_thorn_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_thorn_diff.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\sponza_thorn_bump.png"/>
+		<TransparentColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_thorn_mask.tga"/>
 	</material>
-	<material material="_sponzaMaterial__57">
+	<material material="Material__57">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_plant.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_plant.tga"/>
-		<TransparentColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_plant_mask.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_plant.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_plant.tga"/>
+		<TransparentColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_plant_mask.tga"/>
 	</material>
-	<material material="_sponzavase_round">
+	<material material="vase_round">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_round.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_round.tga"/>
-		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\vase_round_ddn.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_round.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_round.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\vase_round_bump.png"/>
 	</material>
-	<material material="_sponzaMaterial__298">
+	<material material="Material__298">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\background.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\background.tga"/>
-		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\background_ddn.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\background.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\background.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\background_bump.png"/>
 	</material>
-	<material material="_sponza16___Default">
+	<material material="bricks">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\spnza_bricks_a_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\spnza_bricks_a_diff.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\spnza_bricks_a_diff.tga"/>
 	</material>
-	<material material="_sponzabricks">
+	<material material="arch">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\spnza_bricks_a_diff.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\spnza_bricks_a_diff.tga"/>
-		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\spnza_bricks_a_diff.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_arch_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_arch_diff.tga"/>
 	</material>
-	<material material="_sponzaarch">
+	<material material="ceiling">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_arch_diff.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_arch_diff.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_ceiling_a_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_ceiling_a_diff.tga"/>
 	</material>
-	<material material="_sponzaceiling">
+	<material material="column_a">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_ceiling_a_diff.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_ceiling_a_diff.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_a_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_a_diff.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_a_bump.png"/>
 	</material>
-	<material material="_sponzacolumn_a">
+	<material material="floor">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_a_diff.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_a_diff.tga"/>
-		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_a_ddn.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_floor_a_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_floor_a_diff.tga"/>
 	</material>
-	<material material="_sponzafloor">
+	<material material="column_c">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_floor_a_diff.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_floor_a_diff.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_c_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_c_diff.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_c_bump.png"/>
 	</material>
-	<material material="_sponzacolumn_c">
+	<material material="details">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_c_diff.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_c_diff.tga"/>
-		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_c_ddn.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_details_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_details_diff.tga"/>
 	</material>
-	<material material="_sponzadetails">
+	<material material="column_b">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_details_diff.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_details_diff.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_b_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_b_diff.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_b_bump.png"/>
 	</material>
-	<material material="_sponzacolumn_b">
-		<ambient r="0.588" g="0.588" b="0.588"/>
-		<diffuse r="0.588" g="0.588" b="0.588"/>
-		<specular r="0" g="0" b="0" power="2"/>
-		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_b_diff.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_b_diff.tga"/>
-		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\sponza_column_b_ddn.tga"/>
-	</material>
-	<material material="_sponzaMaterial__47">
+	<material material="Material__47">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
 	</material>
-	<material material="_sponzaflagpole">
+	<material material="flagpole">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_flagpole_diff.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_flagpole_diff.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_flagpole_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_flagpole_diff.tga"/>
 	</material>
-	<material material="_sponzafabric_e">
+	<material material="fabric_e">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_fabric_green_diff.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_fabric_green_diff.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_fabric_green_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_fabric_green_diff.tga"/>
 	</material>
-	<material material="_sponzafabric_d">
+	<material material="fabric_d">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_fabric_blue_diff.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_fabric_blue_diff.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_fabric_blue_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_fabric_blue_diff.tga"/>
 	</material>
-	<material material="_sponzafabric_a">
+	<material material="fabric_a">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_fabric_diff.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_fabric_diff.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_fabric_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_fabric_diff.tga"/>
 	</material>
-	<material material="_sponzafabric_g">
+	<material material="fabric_g">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_curtain_blue_diff.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_curtain_blue_diff.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_curtain_blue_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_curtain_blue_diff.tga"/>
 	</material>
-	<material material="_sponzafabric_c">
+	<material material="fabric_c">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_curtain_diff.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_curtain_diff.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_curtain_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_curtain_diff.tga"/>
 	</material>
-	<material material="_sponzafabric_f">
+	<material material="fabric_f">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_curtain_green_diff.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_curtain_green_diff.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_curtain_green_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_curtain_green_diff.tga"/>
 	</material>
-	<material material="_sponzachain">
+	<material material="chain">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\chain_texture.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\chain_texture.tga"/>
-		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\chain_texture_ddn.tga"/>
-		<TransparentColor name="F:\RcEngine\Tools\FbxImporter\textures\chain_texture_mask.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\chain_texture.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\chain_texture.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\chain_texture_bump.png"/>
+		<TransparentColor name="F:\RcEngine\Media\crytek-sponza\textures\chain_texture_mask.tga"/>
 	</material>
-	<material material="_sponzavase_hanging">
+	<material material="vase_hanging">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_hanging.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_hanging.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_hanging.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_hanging.tga"/>
 	</material>
-	<material material="_sponzavase">
+	<material material="vase">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_dif.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\vase_dif.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_dif.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_dif.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\vase_bump.png"/>
 	</material>
-	<material material="_sponzaMaterial__25">
+	<material material="Material__25">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\lion.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\lion.tga"/>
-		<Bump name="F:\RcEngine\Tools\FbxImporter\textures\lion_ddn.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\lion.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\lion.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\lion_bump.png"/>
 	</material>
-	<material material="_sponzaroof">
+	<material material="roof">
 		<ambient r="0.588" g="0.588" b="0.588"/>
 		<diffuse r="0.588" g="0.588" b="0.588"/>
 		<specular r="0" g="0" b="0" power="2"/>
 		<emissive r="0" g="0" b="0"/>
-		<DiffuseColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_roof_diff.tga"/>
-		<AmbientColor name="F:\RcEngine\Tools\FbxImporter\textures\sponza_roof_diff.tga"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_roof_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_roof_diff.tga"/>
 	</material>
 </materials>
 

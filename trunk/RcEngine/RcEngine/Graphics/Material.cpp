@@ -577,8 +577,7 @@ void Material::ApplyMaterial( const float4x4& world )
 			break;
 		case EPU_Material_Diffuse_Color:
 			{
-				float3 color(mDiffuse.R(), mDiffuse.G(), mDiffuse.B());
-				param->EffectParam->SetValue(color);
+				param->EffectParam->SetValue(float4(mDiffuse.R(), mDiffuse.G(), mDiffuse.B(), mDiffuse.A()));
 			}
 			break;
 		case EPU_Material_Specular_Color:
@@ -593,11 +592,13 @@ void Material::ApplyMaterial( const float4x4& world )
 			}
 			break;
 		case EPU_Material_Diffuse_Texture:
+		case EPU_Material_Specular_Texture:
+		case EPU_Material_Normal_Texture:
 			{
 				param->EffectParam->SetValue(mTextures[param->Name]);
 			}
 			break;
-
+	
 		default:
 			{
 

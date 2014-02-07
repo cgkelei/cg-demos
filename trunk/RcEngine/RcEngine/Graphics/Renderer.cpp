@@ -134,7 +134,7 @@ shared_ptr<RenderOperation> BuildSpotLightShape()
 
 	float mRadius = 1.f;
 	float mHeight = 1.f;
-	uint16_t nCapSegments = 20;
+	uint16_t nCapSegments = 30;
 
 	uint16_t vertexCount = nCapSegments+1;
 	uint16_t indicesCount = (nCapSegments+nCapSegments-2)*3;
@@ -223,9 +223,14 @@ void Renderer::Init()
 		return;
 	}
 
+	// Build light shape
 	mPointLightShape = BuildPointLightShape();
 	mFSQuadShape = BuildFSQuadShape();
 	mSpotLightShape = BuildSpotLightShape();
+
+	// Build shadow map
+
+
 }
 
 void Renderer::CreatePrimitives()
@@ -405,12 +410,9 @@ void Renderer::DrawGeometry( const String& tech, const  String& matClass, Render
 
 	}
 
-	//const shared_ptr<Texture>& rt0 = mCurrPipeline->GetRenderTarget(0, 0);
-	//device.GetRenderFactory()->SaveTexture2D("E:/Depth.pfm", rt0, 0, 0);
-
 	//const shared_ptr<Texture>& rt0 = mCurrPipeline->GetRenderTarget(0, 1);
 	//const shared_ptr<Texture>& rt1 = mCurrPipeline->GetRenderTarget(0, 2);
-	//device.GetRenderFactory()->SaveTexture2D("E:/GBuffer0.tga", rt0, 0, 0);
+	//device.GetRenderFactory()->SaveTexture2D("E:/Normal.pfm", rt0, 0, 0);
 	//device.GetRenderFactory()->SaveTexture2D("E:/GBuffer1.tga", rt1, 0, 0);
 }
 
