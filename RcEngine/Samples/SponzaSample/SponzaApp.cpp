@@ -38,28 +38,6 @@ void SponzaApp::Initialize()
 {
 	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
 	RenderFactory& factory =  Context::GetSingleton().GetRenderFactory();
-
-	// Create GBuffer
-	const uint32_t GBufferWidth = mMainWindow->GetWidth();
-	const uint32_t GBufferHeight = mMainWindow->GetHeight();
-
-	// Create GBuffer
-	mGbuffer = factory.CreateFrameBuffer(GBufferWidth, GBufferHeight);
-	device.BindFrameBuffer(mGbuffer);
-
-	// Attach DepthStencilView
-	shared_ptr<Texture> depthTexture = factory.CreateTexture2D(GBufferWidth, GBufferHeight, PF_Depth32, 1, 1, 1, 1, 0, nullptr);
-	mGbuffer->Attach(ATT_DepthStencil, factory.CreateDepthStencilView(depthTexture, 0, 0));
-
-	shared_ptr<Texture> albedoTexture = factory.CreateTexture2D(GBufferWidth, GBufferHeight, PF_R8G8B8A8, 1, 1, 1, 1, 0, nullptr);
-	shared_ptr<Texture> normalTexture = factory.CreateTexture2D(GBufferWidth, GBufferHeight, PF_R8G8B8A8, 1, 1, 1, 1, 0, nullptr);
-	mGbuffer->Attach(ATT_Color0, factory.CreateRenderTargetView2D(albedoTexture, 0, 0));
-	mGbuffer->Attach(ATT_Color1, factory.CreateRenderTargetView2D(normalTexture, 0, 0));
-
-	mGbuffer->CheckFramebufferStatus();
-
-	// Bind Default ScreenBuffer
-	device.BindFrameBuffer(device.GetScreenFrameBuffer());
 }
 
 void SponzaApp::LoadContent()
@@ -87,12 +65,8 @@ void SponzaApp::LoadContent()
 	sponzaNode->SetScale(0.45f);
 	sponzaNode->AttachObject(sponzaEntity);
 
-	mPlayer = new Character;
-	mPlayer->LoadContent();
-
 	mCameraControler->SetMoveSpeed(50.0f);
 	mCameraControler->SetMoveInertia(true);
-
 
 	InitGUI();
 }
@@ -146,7 +120,7 @@ void SponzaApp::Render()
 
 			for (const RenderQueueItem& renderItem : renderBucket)
 			{
-
+				renderItem.Renderable->GetMaterial()->SetCurrentTechnique("PointLighting");
 				renderItem.Renderable->Render();
 			}
 	}
@@ -161,8 +135,6 @@ void SponzaApp::Update( float deltaTime )
 
 	CalculateFrameRate();
 	mMainWindow->SetTitle("Graphics Demo FPS:" + std::to_string(mFramePerSecond));
-
-	mPlayer->Update(deltaTime);
 }
 
 void SponzaApp::InitGUI()

@@ -109,7 +109,7 @@ void main()
 	// Decode view space normal
 	vec3 N = normalize(tap0.xyz * 2.0 - 1.0); 
 	float shininess = tap0.a * 255.0;
-
+	
 	float nDotl = dot(L, N);
 	if (nDotl > 0.0)
 	{

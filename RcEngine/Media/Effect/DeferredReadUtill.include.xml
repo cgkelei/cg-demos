@@ -7,11 +7,10 @@ float LinearizeDepth(in float nonLinearDepth, in float nearPlane, in float farPl
 	return nearPlane * farPlane / (farPlane - (farPlane - nearPlane) * nonLinearDepth);
 }
 	
-vec3 PositionVSFromDepth(in vec3 lPosView, in float linearDepth)
+vec3 PositionVSFromDepth(in vec3 viewRay, in float linearDepth)
 {
     // Clamp the view space position to the plane at Z = 1
-	vec3 viewRay = vec3(lPosView.xy / lPosView.z, 1.0);
-	return viewRay * linearDepth;
+	return viewRay * (linearDepth / viewRay.z);
 }
 
 	]]>

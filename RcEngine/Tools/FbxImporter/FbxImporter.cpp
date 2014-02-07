@@ -5,6 +5,7 @@
 #include <Core/Exception.h>
 #include <Core/Utility.h>
 #include <IO/FileStream.h>
+#include <IO/PathUtil.h>
 #include <set>
 
 #include "ExportLog.h"
@@ -293,103 +294,115 @@ bool HasSkin(FbxMesh* pMesh)
 	return false;
 }
 
-}
-
-void FBXTransformer::Initialize( FbxScene* pScene )
+float3 BakePosition(const float3& pos, const float4x4& globalTransform)
 {
-	ExportLog::LogMsg( 4, "Identifying scene's coordinate system." );
-
-	FbxAxisSystem SceneAxisSystem = pScene->GetGlobalSettings().GetAxisSystem();
-	FbxAxisSystem TargetAxisSystem = FbxAxisSystem::MayaYUp;
-	FbxAxisSystem::MayaYUp.ConvertScene(pScene);
-
-	int iUpAxisSign;
-	FbxAxisSystem::EUpVector UpVector = SceneAxisSystem.GetUpVector( iUpAxisSign );
-
-	if( UpVector == FbxAxisSystem::eZAxis )
-	{
-		ExportLog::LogMsg( 4, "Converting from Z-up axis system to Y-up axis system." );
-		m3dMaxConversion = true;
-	}
-	else
-		m3dMaxConversion = false;
+	float4 baked = float4(pos[0], pos[1], pos[2], 1.0f) * globalTransform;
+	return float3(baked[0], baked[1], baked[2]);
 }
 
-void FBXTransformer::TransformMatrix( float4x4* pDestMatrix, const float4x4* pSrcMatrix ) const
+float3 BakeDirection(const float3& dir, const float4x4& globalTransform)
 {
-	float4x4 SrcMatrix;
-	if( pSrcMatrix == pDestMatrix )
-	{
-		memcpy( &SrcMatrix, pSrcMatrix, sizeof( float4x4 ) );
-		pSrcMatrix = &SrcMatrix;
-	}
-	memcpy( pDestMatrix, pSrcMatrix, sizeof( float4x4 ) );
-
-	// What we're doing here is premultiplying by a left hand -> right hand matrix,
-	// and then postmultiplying by a right hand -> left hand matrix.
-	// The end result of those multiplications is that the third row and the third
-	// column are negated (so element _33 is left alone).  So instead of actually
-	// carrying out the multiplication, we just negate the 6 matrix elements.
-
-	pDestMatrix->M13 = -pSrcMatrix->M13;
-	pDestMatrix->M23 = -pSrcMatrix->M23;
-	pDestMatrix->M43 = -pSrcMatrix->M43;
-
-	pDestMatrix->M31 = -pSrcMatrix->M31;
-	pDestMatrix->M32 = -pSrcMatrix->M32;
-	pDestMatrix->M34 = -pSrcMatrix->M34;
-
-	// Apply the global unit scale to the translation components of the matrix.
-	pDestMatrix->M41 *= mUnitScale;
-	pDestMatrix->M42 *= mUnitScale;
-	pDestMatrix->M43 *= mUnitScale;
+	float4 baked = float4(dir[0], dir[1], dir[2], 0.0f) * globalTransform;
+	return float3(baked[0], baked[1], baked[2]);
 }
 
-void FBXTransformer::TransformPosition( float3* pDestPosition, const float3* pSrcPosition ) const
-{
-	float3 SrcVector;
-	if( pSrcPosition == pDestPosition )
-	{
-		SrcVector = *pSrcPosition;
-		pSrcPosition = &SrcVector;
-	}
-
-	if( m3dMaxConversion )
-	{
-		pDestPosition->X() = pSrcPosition->X() * mUnitScale;
-		pDestPosition->Y() = pSrcPosition->Z() * mUnitScale;
-		pDestPosition->Z() = pSrcPosition->Y() * mUnitScale;
-	}
-	else
-	{
-		pDestPosition->X()= pSrcPosition->X() * mUnitScale;
-		pDestPosition->Y() = pSrcPosition->Y() * mUnitScale;
-		pDestPosition->Z() = -pSrcPosition->Z() * mUnitScale;
-	}
 }
 
-void FBXTransformer::TransformDirection( float3* pDestDirection, const float3* pSrcDirection ) const
-{
-	float3 SrcVector;
-	if( pSrcDirection == pDestDirection )
-	{
-		SrcVector = *pSrcDirection;
-		pSrcDirection = &SrcVector;
-	}
-
-	if( m3dMaxConversion )
-	{
-		pDestDirection->X() = pSrcDirection->X();
-		pDestDirection->Y() = pSrcDirection->Z();
-		pDestDirection->Z() = pSrcDirection->Y();
-	}
-	else
-	{
-		pDestDirection->X() = pSrcDirection->X();
-		pDestDirection->Y() = pSrcDirection->Y();
-		pDestDirection->Z() = -pSrcDirection->Z();
-	}
-}
+//void FBXTransformer::Initialize( FbxScene* pScene )
+//{
+//	ExportLog::LogMsg( 4, "Identifying scene's coordinate system." );
+//
+//	FbxAxisSystem SceneAxisSystem = pScene->GetGlobalSettings().GetAxisSystem();
+//	FbxAxisSystem TargetAxisSystem = FbxAxisSystem::MayaYUp;
+//	FbxAxisSystem::MayaYUp.ConvertScene(pScene);
+//
+//	int iUpAxisSign;
+//	FbxAxisSystem::EUpVector UpVector = SceneAxisSystem.GetUpVector( iUpAxisSign );
+//
+//	if( UpVector == FbxAxisSystem::eZAxis )
+//	{
+//		ExportLog::LogMsg( 4, "Converting from Z-up axis system to Y-up axis system." );
+//		m3dMaxConversion = true;
+//	}
+//	else
+//		m3dMaxConversion = false;
+//}
+//
+//void FBXTransformer::TransformMatrix( float4x4* pDestMatrix, const float4x4* pSrcMatrix ) const
+//{
+//	float4x4 SrcMatrix;
+//	if( pSrcMatrix == pDestMatrix )
+//	{
+//		memcpy( &SrcMatrix, pSrcMatrix, sizeof( float4x4 ) );
+//		pSrcMatrix = &SrcMatrix;
+//	}
+//	memcpy( pDestMatrix, pSrcMatrix, sizeof( float4x4 ) );
+//
+//	// What we're doing here is premultiplying by a left hand -> right hand matrix,
+//	// and then postmultiplying by a right hand -> left hand matrix.
+//	// The end result of those multiplications is that the third row and the third
+//	// column are negated (so element _33 is left alone).  So instead of actually
+//	// carrying out the multiplication, we just negate the 6 matrix elements.
+//
+//	pDestMatrix->M13 = -pSrcMatrix->M13;
+//	pDestMatrix->M23 = -pSrcMatrix->M23;
+//	pDestMatrix->M43 = -pSrcMatrix->M43;
+//
+//	pDestMatrix->M31 = -pSrcMatrix->M31;
+//	pDestMatrix->M32 = -pSrcMatrix->M32;
+//	pDestMatrix->M34 = -pSrcMatrix->M34;
+//
+//	// Apply the global unit scale to the translation components of the matrix.
+//	pDestMatrix->M41 *= mUnitScale;
+//	pDestMatrix->M42 *= mUnitScale;
+//	pDestMatrix->M43 *= mUnitScale;
+//}
+//
+//void FBXTransformer::TransformPosition( float3* pDestPosition, const float3* pSrcPosition ) const
+//{
+//	float3 SrcVector;
+//	if( pSrcPosition == pDestPosition )
+//	{
+//		SrcVector = *pSrcPosition;
+//		pSrcPosition = &SrcVector;
+//	}
+//
+//	if( m3dMaxConversion )
+//	{
+//		pDestPosition->X() = pSrcPosition->X() * mUnitScale;
+//		pDestPosition->Y() = pSrcPosition->Z() * mUnitScale;
+//		pDestPosition->Z() = pSrcPosition->Y() * mUnitScale;
+//	}
+//	else
+//	{
+//		pDestPosition->X()= pSrcPosition->X() * mUnitScale;
+//		pDestPosition->Y() = pSrcPosition->Y() * mUnitScale;
+//		pDestPosition->Z() = -pSrcPosition->Z() * mUnitScale;
+//	}
+//}
+//
+//void FBXTransformer::TransformDirection( float3* pDestDirection, const float3* pSrcDirection ) const
+//{
+//	float3 SrcVector;
+//	if( pSrcDirection == pDestDirection )
+//	{
+//		SrcVector = *pSrcDirection;
+//		pSrcDirection = &SrcVector;
+//	}
+//
+//	if( m3dMaxConversion )
+//	{
+//		pDestDirection->X() = pSrcDirection->X();
+//		pDestDirection->Y() = pSrcDirection->Z();
+//		pDestDirection->Z() = pSrcDirection->Y();
+//	}
+//	else
+//	{
+//		pDestDirection->X() = pSrcDirection->X();
+//		pDestDirection->Y() = pSrcDirection->Y();
+//		pDestDirection->Z() = -pSrcDirection->Z();
+//	}
+//}
 
 //---------------------------------------------------------------------------------------------
 FbxProcesser::FbxProcesser(void)
@@ -482,7 +495,7 @@ void FbxProcesser::BoneWeights::Normalize()
 	});
 }
 
-bool FbxProcesser::LoadScene( const char* filename )
+bool FbxProcesser::LoadScene( const String& filename )
 {
 	if (!mFBXSdkManager)
 	{
@@ -502,7 +515,7 @@ bool FbxProcesser::LoadScene( const char* filename )
 	FbxImporter* lImporter = FbxImporter::Create(mFBXSdkManager,"");
 
 	// Initialize the importer by providing a filename.
-	bResult = lImporter->Initialize(filename, -1, mFBXSdkManager->GetIOSettings());
+	bResult = lImporter->Initialize(filename.c_str(), -1, mFBXSdkManager->GetIOSettings());
 	if( !bResult )
 	{
 		ExportLog::LogError("Call to FbxExporter::Initialize() failed.");
@@ -514,18 +527,31 @@ bool FbxProcesser::LoadScene( const char* filename )
 	bResult = lImporter->Import(mFBXScene);
 	if( !bResult )
 	{
-		ExportLog::LogError( "Could not load FBX file \"%s\".", filename );
+		ExportLog::LogError( "Could not load FBX file \"%s\".", filename.c_str() );
 		return false;
 	}
 
 	lImporter->GetFileVersion(lFileMajor, lFileMinor, lFileRevision);
-	ExportLog::LogMsg(1, "FBX file format version for file '%s' is %d.%d.%d", filename, lFileMajor, lFileMinor, lFileRevision);
+	ExportLog::LogMsg(1, "FBX file format version for file '%s' is %d.%d.%d", filename.c_str(), lFileMajor, lFileMinor, lFileRevision);
 
 	// Axis Conversion
-	mFBXTransformer.Initialize(mFBXScene);
+	//mFBXTransformer.Initialize(mFBXScene);
+
+	FbxAxisSystem engineAxisSystem = FbxAxisSystem::DirectX;
+	if (g_ExportSettings.AxisSystem == Axis_OpenGL)
+		engineAxisSystem = FbxAxisSystem::OpenGL;
+
+	FbxAxisSystem sceneAxisSystem = mFBXScene->GetGlobalSettings().GetAxisSystem();
+	if (sceneAxisSystem != engineAxisSystem)
+	{
+		engineAxisSystem.ConvertScene(mFBXScene);
+	}
 
 	// Destroy the importer.
 	lImporter->Destroy();
+
+	mOutputPath = PathUtil::GetPath(filename);
+	mSceneName = PathUtil::GetFileName(filename);
 
 	return bResult;
 }
@@ -682,7 +708,7 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 		mesh->MeshSkeleton = ProcessBoneWeights(pMesh, meshBoneWeights);
 	}
 
-	float4x4 globalTransform = matrixFromFbxAMatrix( pNode->EvaluateGlobalTransform() );
+	float4x4 nodeGlobalTransform = matrixFromFbxAMatrix( pNode->EvaluateGlobalTransform() );
 
 	for (size_t mi = 0; mi < polysByMaterial.size(); ++mi)
 	{
@@ -757,14 +783,8 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 				vertexFlag |= Vertex::ePosition;
 				int ctrlPointIndex = pMesh->GetPolygonVertex(polyIndex , vi); 
 				vertex.Position = float3FromFBX(pMesh->GetControlPointAt(ctrlPointIndex));
-
-				float4 baked = float4( vertex.Position.X(),  vertex.Position.Y(),  vertex.Position.Z(), 1.0f);
-				baked = baked * globalTransform;
-				vertex.Position = float3(baked.X(), baked.Y(), baked.Z());
+				vertex.Position = BakePosition(vertex.Position, nodeGlobalTransform);
 				
-				// Handness
-				//mFBXTransformer.TransformPosition(&vertex.Position, &vertex.Position);
-
 				boundingBox.Merge(vertex.Position);
 
 				if (vertexFlag & Vertex::eBlendWeight)
@@ -783,9 +803,9 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 				FbxVector4 fbxNormal;
 				if( pMesh->GetPolygonVertexNormal(polyIndex, vi, fbxNormal) )
 				{
-					vertex.Normal = float3FromFBX(fbxNormal);
+					vertex.Normal = float3FromFBX(fbxNormal);	
+					vertex.Normal = BakeDirection(vertex.Normal, nodeGlobalTransform);
 					vertex.Normal.Normalize();
-					//mFBXTransformer.TransformDirection(&vertex.Normal, &vertex.Normal);
 					vertexFlag |= Vertex::eNormal;
 				}
 						
@@ -844,11 +864,11 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 					vertex.Tangent = float3FromFBX(fbxTangent);
 					vertex.Binormal = float3FromFBX(fbxBinormal);
 
+					vertex.Tangent = BakeDirection(vertex.Tangent, nodeGlobalTransform);
 					vertex.Tangent.Normalize();
-					vertex.Binormal.Normalize();
 
-					//mFBXTransformer.TransformDirection(&vertex.Tangent, &vertex.Tangent);
-					//mFBXTransformer.TransformDirection(&vertex.Binormal, &vertex.Binormal);
+					vertex.Binormal = BakeDirection(vertex.Binormal, nodeGlobalTransform);
+					vertex.Binormal.Normalize();	
 				}
 
 				size_t index;
@@ -1123,7 +1143,7 @@ void FbxProcesser::ExportMaterial()
 		rootNode->AppendNode(matNode);
 	}
 
-	std::ofstream xmlFile(mSceneName + ".materials.xml");
+	std::ofstream xmlFile(mOutputPath + mSceneName + ".materials.xml");
 	materialxml.Print(xmlFile);
 	xmlFile.close();
 }
@@ -1411,7 +1431,7 @@ void FbxProcesser::BuildAndSaveBinary( )
 		MeshData& mesh  = *(mSceneMeshes[mi]);
 
 		FileStream stream;
-		stream.Open(mesh.Name + ".mesh", FILE_WRITE);
+		stream.Open(mOutputPath + mSceneName + ".mesh", FILE_WRITE);
 		ExportLog::LogMsg(0, "Build mesh: %s\n", mesh.Name.c_str());
 
 		// Write mesh id
@@ -1766,9 +1786,7 @@ int main()
 	ExportLog::AddListener( &g_ConsoleOutListener );
 #if _MSC_VER >= 1500
 	if( IsDebuggerPresent() )
-	{
 		ExportLog::AddListener( &g_DebugSpewListener );
-	}
 #endif
 
 	ExportLog::SetLogLevel( 1 );
@@ -1778,9 +1796,10 @@ int main()
 	fbxProcesser.Initialize();
 
 	g_ExportSettings.ExportSkeleton = false;
-    //g_ExportSettings.MergeScene = true;
+    g_ExportSettings.MergeScene = true;
+	g_ExportSettings.AxisSystem = Axis_OpenGL;
 
-	if (fbxProcesser.LoadScene("Arthas/Arthas/Arthas_Run.fbx"))
+	if (fbxProcesser.LoadScene("Sponza/Sponza.FBX"))
 	{
 		fbxProcesser.ProcessScene();
 		//fbxProcesser.BuildAndSaveXML();

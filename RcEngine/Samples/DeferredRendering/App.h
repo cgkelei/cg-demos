@@ -24,6 +24,8 @@ protected:
 
 	void WindowResize(uint32_t width, uint32_t height);
 
+	void MouseButtonPress();
+
 
 protected:
 	Renderer* mSceneRender;
@@ -38,5 +40,11 @@ protected:
 	shared_ptr<RenderOperation> mSphere;
 	shared_ptr<RenderOperation> mCone;
 	shared_ptr<Material> mMaterial;
+
+	Light* mDirLight;
+	Light* mPointLight;
+	Light* mSpotLight;
+
+	std::vector<Light*> mSpotLights;
 };
 

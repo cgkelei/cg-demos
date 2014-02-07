@@ -20,7 +20,7 @@ public:
 	void RenderScene();
 
 
-private:
+//private:
 	void UpdateShadowMap();
 
 
@@ -53,7 +53,9 @@ private:
 
 private:
 
-	shared_ptr<FrameBuffer> mShadowMap;
+	std::vector<shared_ptr<Texture>> mShadowMaps; 
+	shared_ptr<FrameBuffer> mShadowFB;
+
 	shared_ptr<Pipeline> mCurrPipeline;
 	shared_ptr<Material> mCurrMaterial;
 	
