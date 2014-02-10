@@ -28,7 +28,7 @@ public:
 	virtual ~Mesh();
 
 	const String& GetName() const								{ return mResourceName; }
-	const BoundingBoxf& GetBoundingBox() const			    { return mBoundingBox; }
+	const BoundingBoxf& GetBoundingBox() const					{ return mBoundingBox; }
 
 	uint32_t GetNumMeshPart() const								{ return mMeshParts.size(); }
 	const shared_ptr<MeshPart>& GetMeshPart(size_t i) const		{ return mMeshParts[i]; }
