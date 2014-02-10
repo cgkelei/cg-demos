@@ -1,0 +1,23 @@
+<Material name="DeferredPipeline">
+
+	<Sampler name="PointSampler">
+		<State name="Filter" value="Min_Mag_Mip_Point"/>
+		<State name="AddressU" value="Clamp"/>
+		<State name="AddressV" value="Clamp"/>
+	</Sampler>
+	
+	
+	<Parameter type="float4x4" name="WorldView" semantic="WorldViewMatrix"/>
+	<Parameter type="float4x4" name="Projection" semantic="ProjectionMatrix"/>
+	<Parameter type="float4x4" name="InvProj" semantic="ProjectionMatrixInverse"/>
+	<Parameter type="float4" name="LightPosVS" semantic="LightPosition"/>
+	<Parameter type="float4" name="LightDirVS" semantic="LightDirection"/>
+	<Parameter type="float3" name="LightColor" semantic="LightColor"/>
+	<Parameter type="float3" name="LightFalloff" semantic="LightFalloff"/>
+	<Parameter type="texture2d" name="DepthBuffer" stage="PixelShader" sampler="PointSampler" texUnit="0"/>
+	<Parameter type="texture2d" name="GBuffer0" stage="PixelShader" sampler="PointSampler" texUnit="1"/>
+	<Parameter type="texture2d" name="GBuffer1" stage="PixelShader" sampler="PointSampler" texUnit="2"/>
+	<Parameter type="texture2d" name="LightAccumulateBuffer" stage="PixelShader" sampler="PointSampler" texUnit="3"/>
+	
+	<Effect name="DeferredLighting.effect.xml"/>
+</Material>

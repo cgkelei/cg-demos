@@ -1,0 +1,214 @@
+<materials count="25">
+	<material material="leaf">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_thorn_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_thorn_diff.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\sponza_thorn_bump.png"/>
+		<TransparentColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_thorn_mask.tga"/>
+	</material>
+	<material material="Material__57">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_plant.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_plant.tga"/>
+		<TransparentColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_plant_mask.tga"/>
+	</material>
+	<material material="vase_round">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_round.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_round.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\vase_round_bump.png"/>
+	</material>
+	<material material="Material__298">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\background.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\background.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\background_bump.png"/>
+	</material>
+	<material material="bricks">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\spnza_bricks_a_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\spnza_bricks_a_diff.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\spnza_bricks_a_diff.tga"/>
+	</material>
+	<material material="arch">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_arch_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_arch_diff.tga"/>
+	</material>
+	<material material="ceiling">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_ceiling_a_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_ceiling_a_diff.tga"/>
+	</material>
+	<material material="column_a">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_a_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_a_diff.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_a_bump.png"/>
+	</material>
+	<material material="floor">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_floor_a_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_floor_a_diff.tga"/>
+	</material>
+	<material material="column_c">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_c_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_c_diff.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_c_bump.png"/>
+	</material>
+	<material material="details">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_details_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_details_diff.tga"/>
+	</material>
+	<material material="column_b">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_b_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_b_diff.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\sponza_column_b_bump.png"/>
+	</material>
+	<material material="Material__47">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+	</material>
+	<material material="flagpole">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_flagpole_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_flagpole_diff.tga"/>
+	</material>
+	<material material="fabric_e">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_fabric_green_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_fabric_green_diff.tga"/>
+	</material>
+	<material material="fabric_d">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_fabric_blue_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_fabric_blue_diff.tga"/>
+	</material>
+	<material material="fabric_a">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_fabric_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_fabric_diff.tga"/>
+	</material>
+	<material material="fabric_g">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_curtain_blue_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_curtain_blue_diff.tga"/>
+	</material>
+	<material material="fabric_c">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_curtain_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_curtain_diff.tga"/>
+	</material>
+	<material material="fabric_f">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_curtain_green_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_curtain_green_diff.tga"/>
+	</material>
+	<material material="chain">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\chain_texture.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\chain_texture.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\chain_texture_bump.png"/>
+		<TransparentColor name="F:\RcEngine\Media\crytek-sponza\textures\chain_texture_mask.tga"/>
+	</material>
+	<material material="vase_hanging">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_hanging.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_hanging.tga"/>
+	</material>
+	<material material="vase">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_dif.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\vase_dif.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\vase_bump.png"/>
+	</material>
+	<material material="Material__25">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\lion.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\lion.tga"/>
+		<Bump name="F:\RcEngine\Media\crytek-sponza\textures\lion_bump.png"/>
+	</material>
+	<material material="roof">
+		<ambient r="0.588" g="0.588" b="0.588"/>
+		<diffuse r="0.588" g="0.588" b="0.588"/>
+		<specular r="0" g="0" b="0" power="2"/>
+		<emissive r="0" g="0" b="0"/>
+		<DiffuseColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_roof_diff.tga"/>
+		<AmbientColor name="F:\RcEngine\Media\crytek-sponza\textures\sponza_roof_diff.tga"/>
+	</material>
+</materials>
+
