@@ -8,9 +8,9 @@ CreateLookAtMatrixLH(const Vector<Real,3>& vEye, const Vector<Real,3>& vAt, cons
 	Vector<Real, 3> yAxis = Cross(zAxis, xAxis);
 
 	return Matrix4<Real>(xAxis.X(), yAxis.X(), zAxis.X(), (Real)0, 
-		xAxis.Y(), yAxis.Y(), zAxis.Y(), (Real)0, 
-		xAxis.Z(), yAxis.Z(), zAxis.Z(), (Real)0,
-		- Dot(xAxis, vEye), - Dot(yAxis, vEye), - Dot(zAxis, vEye), (Real)1);
+						 xAxis.Y(), yAxis.Y(), zAxis.Y(), (Real)0, 
+						 xAxis.Z(), yAxis.Z(), zAxis.Z(), (Real)0,
+					   - Dot(xAxis, vEye), - Dot(yAxis, vEye), - Dot(zAxis, vEye), (Real)1);
 }
 
 
@@ -43,9 +43,27 @@ CreateOrthographicLH(Real width, Real height, Real zNear,  Real zFar)
  */
 
 	return Matrix4<Real>((Real)2 / width, (Real)0, (Real)0, (Real)0, 
-		(Real)0, (Real)2 / height, (Real)0, (Real)0, 
-		(Real)0, (Real)0, (Real)1 / (zFar - zNear), (Real)0,
-		(Real)0, (Real)0, zNear / (zNear - zFar), (Real)1);
+						 (Real)0, (Real)2 / height, (Real)0, (Real)0, 
+						 (Real)0, (Real)0, (Real)1 / (zFar - zNear), (Real)0,
+						 (Real)0, (Real)0, zNear / (zNear - zFar), (Real)1);
+
+}
+
+//----------------------------------------------------------------------------
+template<typename Real>
+inline Matrix4<Real> 
+CreateOrthoOffCenterLH(Real l, Real r, Real b, Real t, Real zn, Real zf)
+{
+/**
+	2/(r-l)      0            0           0
+	0            2/(t-b)      0           0
+	0            0            1/(zf-zn)   0
+	(l+r)/(l-r)  (t+b)/(b-t)  zn/(zn-zf)  1
+*/
+	return Matrix4<Real>(Real(2)/(r-l),  Real(0),       Real(0),       Real(0), 
+						 Real(0),	   Real(2)/(t-b),   Real(0),       Real(0), 
+						 Real(0),        Real(0),     Real(1)/(zf-zn), Real(0), 
+						 (l+r)/(l-r),  (t+b)/(b-t),   zn/(zn-zf),	   Real(0));
 
 }
 

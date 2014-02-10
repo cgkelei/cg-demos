@@ -16,6 +16,9 @@ enum PlaneSide
 	Both_Side
 };
 
+/**
+ * Plane: N*P+D = 0
+ */
 template< typename Real >
 class Plane
 {
