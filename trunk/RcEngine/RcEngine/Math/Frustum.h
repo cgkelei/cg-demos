@@ -11,11 +11,23 @@ namespace RcEngine {
 enum FrustumPlaneSide
 {
 	FPS_Left = 0,
-	FPS_Right = 1,
-	FPS_Top = 2,
-	FPS_Bottom = 3,
-	FPS_Near = 4,
-	FPS_Far = 5,
+	FPS_Right,
+	FPS_Top,
+	FPS_Bottom,
+	FPS_Near,
+	FPS_Far,
+};
+
+enum FrustumCorner
+{
+	FC_Near_Top_Left = 0,
+	FC_Near_Top_Right,
+	FC_Near_Bottom_Left,
+	FC_Near_Bottom_Right,
+	FC_Far_Top_Left,
+	FC_Far_Top_Right,
+	FC_Far_Bottom_Left,
+	FC_Far_Bottom_Right,
 };
 
 template<typename Real>
@@ -35,14 +47,13 @@ public:
 	/**
 	 * Determines whether the frustum contain specify sphere.
 	 */
-	ContainmentType Contain( const BoundingSphere<Real>& sphere ); 
+	ContainmentType Contain( const BoundingSphere<Real>& sphere ) const; 
 
-	ContainmentType Contain( const BoundingBox<Real>& box ); 
+	ContainmentType Contain( const BoundingBox<Real>& box ) const; 
 
 public:
 	Plane<Real> Planes[6];
-	Vector<Real,3>  mOrigin;
-	Vector<Real,3>  mCorner[8];  // Corner points
+	Vector<Real,3> Corner[8];  // Corner points
 };
 
 typedef Frustum<float> Frustumf;

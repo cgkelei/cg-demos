@@ -46,6 +46,10 @@ CreateOrthographicLH(Real width, Real height, Real zNear,  Real zFar);
 
 template<typename Real>
 inline Matrix4<Real> 
+CreateOrthoOffCenterLH(Real l, Real r, Real b, Real t, Real zn, Real zf);
+
+template<typename Real>
+inline Matrix4<Real> 
 CreateRotationX(Real angle);
 		
 template<typename Real>
