@@ -63,6 +63,8 @@ void OpenGLFrameBuffer::Resize( uint32_t width, uint32_t height )
 		mViewport.Height = height;
 		mWidth = width;
 		mHeight = height;
+		mViewport.Top = 0;
+		mViewport.Left = 0;
 		mDirty = true;
 	}
 }
