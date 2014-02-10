@@ -32,6 +32,7 @@
     <ClInclude Include="Graphics\Camera.h" />
     <ClInclude Include="Graphics\CameraControler.h" />
     <ClInclude Include="Graphics\CameraController1.h" />
+    <ClInclude Include="Graphics\CascadedShadowMap.h" />
     <ClInclude Include="Graphics\DepthStencilState.h" />
     <ClInclude Include="Graphics\Effect.h" />
     <ClInclude Include="Graphics\EffectAnnotation.h" />
@@ -134,6 +135,7 @@
     <ClCompile Include="Graphics\Camera.cpp" />
     <ClCompile Include="Graphics\CameraControler.cpp" />
     <ClCompile Include="Graphics\CameraController1.cpp" />
+    <ClCompile Include="Graphics\CascadedShadowMap.cpp" />
     <ClCompile Include="Graphics\DepthStencilState.cpp" />
     <ClCompile Include="Graphics\Effect.cpp" />
     <ClCompile Include="Graphics\EffectAnnotation.cpp" />

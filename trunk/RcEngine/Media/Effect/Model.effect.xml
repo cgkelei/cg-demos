@@ -1,6 +1,6 @@
 <Effect name="ModelEffect">
 
-<Shader name="ShaodowMapVS" stage="Vertex" entry="main">
+<Shader name="ShadowMapVS" stage="Vertex" entry="main">
 	<ShaderSource>
 	<![CDATA[
 	
@@ -12,7 +12,8 @@
 	uniform mat4 SkinMatrices[MaxNumBone];
 #endif	
 	
-uniform mat4 WorldViewProj;
+uniform mat4 WorldView;
+uniform mat4 Proj;
 
 // shader input
 in vec3 iPos;
@@ -22,13 +23,6 @@ in vec3 iPos;
 	in uvec4 iBlendIndices;
 #endif
 
-in vec3 iNormal;
-in vec2 iTex;
-
-#ifdef _NormalMapping
-	in vec3 iTangent;
-	in vec3 iBinormal;
-#endif
 
 void main()
 {
@@ -41,9 +35,9 @@ void main()
 	
 	// calculate position in world space:
 #ifdef _Skinning
-	gl_Position = vec4(iPos, 1.0)* SkinMatrix * WorldViewProj;
+	gl_Position = vec4(iPos, 1.0)* SkinMatrix * WorldView * Proj;
 #else
-	gl_Position = vec4(iPos, 1.0) * WorldViewProj;
+	gl_Position = vec4(iPos, 1.0) * WorldView * Proj;
 #endif
 }	
 	]]>
@@ -320,15 +314,13 @@ void main()
 	</ShaderSource>
 </Shader>
 
-<!--
 <Technique name="ShadowMap">
 	<Pass name="p0">
-		<VertexShader name="ShaodowMapVS"/>
+		<VertexShader name="ShadowMapVS"/>
 		<state name="ColorWriteMask" index="0" r="false" g="false" b="false" a="false"/>
-		<state name="SlopeScaledDepthBias" value="1.0"/>
+		<!--<state name="SlopeScaledDepthBias" value="1.0"/>-->
 	</Pass>
 </Technique>
--->
 
 <Technique name="GBuffer">
 	<Pass name="p0">

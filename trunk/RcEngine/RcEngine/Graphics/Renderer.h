@@ -8,6 +8,8 @@
 
 namespace RcEngine {
 
+class CascadedShadowMap;
+
 class _ApiExport Renderer
 {
 public:
@@ -21,8 +23,6 @@ public:
 
 
 //private:
-	void UpdateShadowMap();
-
 
 	void DrawFSQuad(const String& tech);
 
@@ -48,13 +48,24 @@ private:
 
 	void CreatePrimitives();
 
-	void DrawPointLightShape(const float3& worldPos, float radius, const String& tech);
-	void DrawSpotLightShape(const float3& worldPos, const float radius, const String& tech);
+	void DrawDirectionalLightShape(Light* light, const String& tech);
+	void DrawPointLightShape(Light* light, const String& tech);
+	void DrawSpotLightShape(Light* light, const String& tech);
+
+	void UpdateCascadeShadowMap(Light* light);
+	void CalcCropMatrix();
 
 private:
+	RenderDevice* mDevice;
+	SceneManager* mSceneMan;
 
-	std::vector<shared_ptr<Texture>> mShadowMaps; 
+	
+	bool mShadowEnable;
+
+	enum { MAX_CASCADES = 4 };
+
 	shared_ptr<FrameBuffer> mShadowFB;
+	CascadedShadowMap* mCascadedShadowMap;
 
 	shared_ptr<Pipeline> mCurrPipeline;
 	shared_ptr<Material> mCurrMaterial;

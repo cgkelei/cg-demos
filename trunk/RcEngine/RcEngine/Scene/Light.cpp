@@ -18,7 +18,10 @@ Light::Light( const String& name )
 	  mRange(100000),
 	  mDerivedPosition(float3::Zero()), 
 	  mDerivedDirection(float3(0, 0, 1)),
-	  mDerivedTransformDirty(false)
+	  mDerivedTransformDirty(false),
+	  mCastShadow(false),
+	  mSplitLambda(0.75f),
+	  mShadowCascades(3)
 {
 
 }

@@ -44,8 +44,8 @@ public:
 	//void SetSpotlightNearClipDistance(float nearClip);
 	
 	LightType GetLightType() const					{ return mLightType; }
-	const float3& GetPosition() const				{ return mLightDirection; }
-	const float3& GetDirection() const				{ return mLightPosition; }
+	const float3& GetPosition() const				{ return mLightPosition; }
+	const float3& GetDirection() const				{ return mLightDirection; }
 	const float3& GetLightColor() const			    { return mLightColor; }
 	const float3& GetAttenuation() const			{ return mAttenuation; }
 	float GetRange () const						    { return mRange; }
@@ -55,8 +55,13 @@ public:
 	//float GetSpotlightNearClipDistance() const		{ return mSpotNearClip; }
 
 	// Cascade shadow map cout
+	bool GetCastShadow() const						{ return mCastShadow; }
+	void SetCastShadow(bool enable)					{ mCastShadow = enable; }
+	
 	uint32_t GetShadowCascades() const				{ return mShadowCascades; }
 	void SetShadowCascades(uint32_t count)			{ mShadowCascades = count; }
+	float GetSplitLambda() const					{ return mSplitLambda; }
+	void SetSplitLambda(float lambda) 				{ mSplitLambda = lambda; }
 
 	const float3& GetDerivedPosition() const;
 	const float3& GetDerivedDirection() const;
@@ -88,8 +93,10 @@ protected:
 	mutable bool mDerivedTransformDirty;
 
 	// for shadow map
+	bool mCastShadow;
 	uint32_t mShadowCascades;
 	float mShadowMapBais;
+	float mSplitLambda;
 };
 
 }

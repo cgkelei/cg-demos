@@ -531,7 +531,7 @@ void Material::ApplyMaterial( const float4x4& world )
 			break;
 		case EPU_ProjectionMatrix:
 			{
-				param->EffectParam->SetValue(camera->GetProjectionMatrix());
+				param->EffectParam->SetValue(camera->GetEngineProjMatrix());
 			}	
 			break;
 		case EPU_WorldViewMatrix:
@@ -541,12 +541,12 @@ void Material::ApplyMaterial( const float4x4& world )
 			break;
 		case EPU_ViewProjectionMatrix:
 			{
-				param->EffectParam->SetValue(camera->GetViewMatrix() * camera->GetProjectionMatrix());
+				param->EffectParam->SetValue(camera->GetViewMatrix() * camera->GetEngineProjMatrix());
 			}			
 			break;	
 		case EPU_WorldViewProjection:
 			{
-				param->EffectParam->SetValue(world * camera->GetViewMatrix() * camera->GetProjectionMatrix());
+				param->EffectParam->SetValue(world * camera->GetViewMatrix() * camera->GetEngineProjMatrix());
 			}			
 			break;
 		case EPU_WorldInverseTranspose:
@@ -566,7 +566,7 @@ void Material::ApplyMaterial( const float4x4& world )
 			break;
 		case EPU_ProjectionMatrixInverse:
 			{
-				param->EffectParam->SetValue(camera->GetInvProjectionMatrix());
+				param->EffectParam->SetValue(camera->GetInvProjMatrix());
 			}
 			break;
 		case EPU_Material_Ambient_Color:

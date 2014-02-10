@@ -23,6 +23,14 @@ FrameBuffer::~FrameBuffer(void)
 	
 }
 
+void FrameBuffer::SetViewport( const Viewport& vp )
+{
+	if (mViewport != vp)
+	{
+		mViewport = vp;
+	}
+}
+
 shared_ptr<RenderView> FrameBuffer::GetAttachedView( Attachment att )
 {
 	switch(att)

@@ -95,7 +95,7 @@ void FPSCameraControler::AttachCamera( Camera* camera )
 void FPSCameraControler::Move( float x, float y, float z )
 {
 	float3 newEyePos = mAttachedCamera->GetPosition() + Transform(float3(x,y,z), mCameraRot);
-	mAttachedCamera->SetViewParams(newEyePos, newEyePos + mAttachedCamera->GetView(), mAttachedCamera->GetUp());
+	mAttachedCamera->CreateLookAt(newEyePos, newEyePos + mAttachedCamera->GetView(), mAttachedCamera->GetUp());
 }
 
 void FPSCameraControler::HandleMove( uint32_t action, bool value, float dt)
@@ -156,7 +156,7 @@ void FPSCameraControler::Rotate( float yaw, float pitch, float roll )
 	vWorldUp = Transform(vLocalUp, mCameraRot );
 	vWorldAhead = Transform( vLocalAhead, mCameraRot );
 
-	mAttachedCamera->SetViewParams(mAttachedCamera->GetPosition(), mAttachedCamera->GetPosition() + vWorldAhead, vWorldUp);
+	mAttachedCamera->CreateLookAt(mAttachedCamera->GetPosition(), mAttachedCamera->GetPosition() + vWorldAhead, vWorldUp);
 }
 
 /************************************************************************/
@@ -326,7 +326,7 @@ void ModelViewerCameraControler::HadnleCameraView( uint32_t action, bool value, 
 			vWorldUp = Transform(vLocalUp, mCameraRot );
 			vWorldAhead = Transform( vLocalAhead, mCameraRot );
 
-			mAttachedCamera->SetViewParams(mAttachedCamera->GetPosition(), mAttachedCamera->GetPosition() + vWorldAhead, vWorldUp);
+			mAttachedCamera->CreateLookAt(mAttachedCamera->GetPosition(), mAttachedCamera->GetPosition() + vWorldAhead, vWorldUp);
 		}
 	}
 	else
