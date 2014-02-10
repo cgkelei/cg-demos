@@ -49,9 +49,9 @@ void SponzaApp::LoadContent()
 
 	Camera& camera = *device.GetCurrentFrameBuffer()->GetCamera();
 	//camera->SetViewParams(float3(0, 0, -20), float3(0, 0, 0));
-	camera.SetViewParams(float3(-296, 147, 11), float3(0, 50, 0));
+	camera.CreateLookAt(float3(-296, 147, 11), float3(0, 50, 0));
 	//camera->SetViewParams(float3(0, 5, -40), float3(0, 5, 0));
-	camera.SetProjectionParams(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 3000.0f );
+	camera.CreatePerspectiveFov(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 3000.0f );
 
 	mCameraControler = new RcEngine::Test::FPSCameraControler;
 	//mCameraControler = new ModelViewerCameraControler();

@@ -9,12 +9,14 @@
 #include <Graphics/RenderFactory.h>
 #include <Graphics/RenderOperation.h>
 #include <Scene/SceneManager.h>
+#include <Scene/SceneNode.h>
 #include <Graphics/GraphicBuffer.h>
 #include <GUI/UIManager.h>
 #include <Core/Exception.h>
 #include <Scene/Light.h>
 #include <Core/Context.h>
 #include <Math/MathUtil.h>
+#include <Graphics/CascadedShadowMap.h>
 
 namespace {
 
@@ -216,10 +218,11 @@ Renderer::~Renderer()
 
 void Renderer::Init()
 {
-	RenderDevice* device = Context::GetSingleton().GetRenderDevicePtr();
-	if (!device)
+	mDevice = Context::GetSingleton().GetRenderDevicePtr();
+	mSceneMan = Context::GetSingleton().GetSceneManagerPtr();
+	if (mDevice == NULL || mSceneMan == NULL)
 	{
-		ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Create device first!", "Renderer::Init");
+		ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Create device and SceneManager first!", "Renderer::Init");
 		return;
 	}
 
@@ -229,7 +232,7 @@ void Renderer::Init()
 	mSpotLightShape = BuildSpotLightShape();
 
 	// Build shadow map
-
+	mCascadedShadowMap = new CascadedShadowMap;
 
 }
 
@@ -377,11 +380,6 @@ void Renderer::UpdateMaterialParameters( Pipeline::PipelineCommand* cmd )
 	}
 }
 
-void Renderer::UpdateShadowMap()
-{
-
-}
-
 void Renderer::DrawGeometry( const String& tech, const  String& matClass, RenderOrder order)
 {
 	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
@@ -418,87 +416,25 @@ void Renderer::DrawGeometry( const String& tech, const  String& matClass, Render
 
 void Renderer::DrawLightShape( const String& tech )
 {
-	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
-	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
-	const Camera& currCamera = *(device.GetCurrentFrameBuffer()->GetCamera());
-
 	// Fetch all lights affect current view frustum
-	const std::vector<Light*>& lights = sceneMan.GetSceneLights();
 
-	for (Light* light : lights)
+	for (Light* light : mSceneMan->GetSceneLights())
 	{
-		const float3& lightColor = light->GetLightColor();
-		mCurrMaterial->GetCustomParameter(EPU_Light_Color)->SetValue(lightColor);
-
-		float2 camNearFar(currCamera.GetNearPlane(), currCamera.GetFarPlane());
-		mCurrMaterial->GetEffect()->GetParameterByName("CameraNearFar")->SetValue(camNearFar);
-
-		if (light->GetLightType() == LT_Directional)
+		switch (light->GetLightType())
 		{
-			const float3& worldDirection = light->GetDerivedDirection();
-			float4 lightDir(worldDirection[0], worldDirection[1], worldDirection[2], 0.0f);
-			lightDir = lightDir * currCamera.GetViewMatrix();
-
-			mCurrMaterial->GetCustomParameter(EPU_Light_Dir)->SetValue(lightDir);
-			
-			String techName = "Directional" + tech;
-			DrawFSQuad(techName);
+		case LT_Directional:
+			DrawDirectionalLightShape(light, tech);
+			break;
+		case LT_PointLight:
+			DrawPointLightShape(light, tech);
+			break;
+		case LT_SpotLight:
+			DrawSpotLightShape(light, tech);
+			break;
+		default:
+			break;
 		}
-		else if (light->GetLightType() == LT_PointLight)
-		{
-			float lightRadius = light->GetRange();
-
-			const float3& worldPos = light->GetDerivedPosition();
-			float4 lightPos(worldPos[0], worldPos[1], worldPos[2], 1.0f);
-			lightPos = lightPos * currCamera.GetViewMatrix();
-			mCurrMaterial->GetCustomParameter(EPU_Light_Position)->SetValue(lightPos);
-
-			mCurrMaterial->GetCustomParameter(EPU_Light_Attenuation)->SetValue(light->GetAttenuation());
-						
-			float4x4 worldMatrix(lightRadius,  0.0f,		  0.0f,		    0.0f,
-								 0.0f,         lightRadius,   0.0f,		    0.0f,
-								 0.0f,         0.0f,          lightRadius,  0.0f,
-								 worldPos.X(), worldPos.Y(),  worldPos.Z(), 1.0f);
-
-			mCurrMaterial->ApplyMaterial(worldMatrix);
-			mCurrMaterial->SetCurrentTechnique("Point" + tech);
-			device.Render(*mCurrMaterial->GetCurrentTechnique(), *mPointLightShape);
-		}
-		else if (light->GetLightType() == LT_SpotLight)
-		{
-			const float3& worldPos = light->GetDerivedPosition();
-			float4 lightPos(worldPos[0], worldPos[1], worldPos[2], 1.0f);
-			lightPos = lightPos * currCamera.GetViewMatrix();
-			
-			const float3& worldDirection = light->GetDerivedDirection();
-			float4 lightDir(worldDirection[0], worldDirection[1], worldDirection[2], 0.0f);
-			lightDir = lightDir * currCamera.GetViewMatrix();
-
-			float spotInnerAngle = light->GetSpotInnerAngle();
-			float spotOuterAngle = light->GetSpotOuterAngle();
-			lightPos[3] = cosf(spotInnerAngle);
-			lightDir[3] = cosf(spotOuterAngle);
-			mCurrMaterial->GetCustomParameter(EPU_Light_Dir)->SetValue(lightDir);
-			mCurrMaterial->GetCustomParameter(EPU_Light_Position)->SetValue(lightPos);
-
-			mCurrMaterial->GetCustomParameter(EPU_Light_Attenuation)->SetValue(light->GetAttenuation());
-
-			float scaleHeight = light->GetRange();
-			float scaleBase = scaleHeight * tanf(spotOuterAngle * 0.5f);
-			
-			float3 rotAxis = Cross(float3(0, 1, 0), worldDirection);
-			//float rotAngle = acosf(Dot(float3(0, 1, 0), worldDirection));
-			float4x4 rotation = CreateRotationAxis(rotAxis, acosf(worldDirection.Y()));
-			
-			float4x4 worldMatrix = CreateScaling(scaleBase, scaleHeight, scaleBase) * rotation *
-				                   CreateTranslation(worldPos);
-
-			String techName = "Spot" + tech;
-			mCurrMaterial->ApplyMaterial(worldMatrix);
-			mCurrMaterial->SetCurrentTechnique("Spot" + tech);
-			device.Render(*mCurrMaterial->GetCurrentTechnique(), *mSpotLightShape);
-		}
-
+		
 		//const shared_ptr<Texture>& rt = mCurrPipeline->GetRenderTarget(1, 0);
 		//device.GetRenderFactory()->SaveTexture2D("E:/Stencil.pfm", rt, 0, 0);
 
@@ -507,15 +443,128 @@ void Renderer::DrawLightShape( const String& tech )
 	}
 }
 
-void Renderer::DrawPointLightShape( const float3& worldPos, float radius, const String& tech )
+void Renderer::DrawDirectionalLightShape( Light* light, const String& tech )
 {
-	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
+	const Camera& currCamera = *(mDevice->GetCurrentFrameBuffer()->GetCamera());
+	
+	bool bCastShadow = light->GetCastShadow();
+	
+	if (bCastShadow)
+	{
+		// Update shadow map matrix
+		mCascadedShadowMap->UpdateShadowMatrix(currCamera, *light);
 
-	float4x4 worldMatrix = CreateScaling(radius, radius, radius) * CreateTranslation(worldPos);
+		shared_ptr<FrameBuffer> currFrameBuffer = mDevice->GetCurrentFrameBuffer();
+
+		// Draw all shadow map
+		for (uint32_t i = 0; i < light->GetShadowCascades(); ++i)
+		{
+			shared_ptr<FrameBuffer>& shadowFB = mCascadedShadowMap->mShadowFrameBuffer;
+			shadowFB->SetViewport(mCascadedShadowMap->mShadowVP[i]);
+			shadowFB->SetCamera(mCascadedShadowMap->mLightCamera[i]);
+			mDevice->BindFrameBuffer(shadowFB);	
+			DrawGeometry("ShadowMap", "", RO_None);
+		}
+
+		mDevice->BindFrameBuffer(currFrameBuffer);	
+	}
+
+	const float3& lightColor = light->GetLightColor();
+	mCurrMaterial->GetCustomParameter(EPU_Light_Color)->SetValue(lightColor);
+
+	float2 camNearFar(currCamera.GetNearPlane(), currCamera.GetFarPlane());
+	mCurrMaterial->GetEffect()->GetParameterByName("CameraNearFar")->SetValue(camNearFar);
+
+	const float3& worldDirection = light->GetDerivedDirection();
+	float4 lightDir(worldDirection[0], worldDirection[1], worldDirection[2], 0.0f);
+	lightDir = lightDir * currCamera.GetViewMatrix();
+
+	mCurrMaterial->GetCustomParameter(EPU_Light_Dir)->SetValue(lightDir);
+
+	//if (bCastShadow)
+	//{
+	//	const float4x4& shadowMatrix = mCascadedShadowMap->GetShadowMatrix()
+
+	//	String techName = "Directional" + tech;
+	//	DrawFSQuad(techName);
+	//}
+	//else
+	{
+		String techName = "Directional" + tech;
+		DrawFSQuad(techName);
+	}
+}
+
+void Renderer::DrawPointLightShape( Light* light, const String& tech )
+{
+	const Camera& currCamera = *(mDevice->GetCurrentFrameBuffer()->GetCamera());
+
+	float lightRadius = light->GetRange();
+
+	const float3& lightColor = light->GetLightColor();
+	mCurrMaterial->GetCustomParameter(EPU_Light_Color)->SetValue(lightColor);
+
+	float2 camNearFar(currCamera.GetNearPlane(), currCamera.GetFarPlane());
+	mCurrMaterial->GetEffect()->GetParameterByName("CameraNearFar")->SetValue(camNearFar);
+
+	const float3& worldPos = light->GetDerivedPosition();
+	float4 lightPos(worldPos[0], worldPos[1], worldPos[2], 1.0f);
+	lightPos = lightPos * currCamera.GetViewMatrix();
+	mCurrMaterial->GetCustomParameter(EPU_Light_Position)->SetValue(lightPos);
+
+	mCurrMaterial->GetCustomParameter(EPU_Light_Attenuation)->SetValue(light->GetAttenuation());
+
+	float4x4 worldMatrix(lightRadius,  0.0f,		  0.0f,		    0.0f,
+						 0.0f,         lightRadius,   0.0f,		    0.0f,
+						 0.0f,         0.0f,          lightRadius,  0.0f,
+						 worldPos.X(), worldPos.Y(),  worldPos.Z(), 1.0f);
 
 	mCurrMaterial->ApplyMaterial(worldMatrix);
-	mCurrMaterial->SetCurrentTechnique(tech);
-	device.Render(*mCurrMaterial->GetCurrentTechnique(), *mPointLightShape);
+	mCurrMaterial->SetCurrentTechnique("Point" + tech);
+	mDevice->Render(*mCurrMaterial->GetCurrentTechnique(), *mPointLightShape);
+}
+
+void Renderer::DrawSpotLightShape( Light* light, const String& tech )
+{
+	const Camera& currCamera = *(mDevice->GetCurrentFrameBuffer()->GetCamera());
+
+	const float3& lightColor = light->GetLightColor();
+	mCurrMaterial->GetCustomParameter(EPU_Light_Color)->SetValue(lightColor);
+
+	float2 camNearFar(currCamera.GetNearPlane(), currCamera.GetFarPlane());
+	mCurrMaterial->GetEffect()->GetParameterByName("CameraNearFar")->SetValue(camNearFar);
+
+	const float3& worldPos = light->GetDerivedPosition();
+	float4 lightPos(worldPos[0], worldPos[1], worldPos[2], 1.0f);
+	lightPos = lightPos * currCamera.GetViewMatrix();
+
+	const float3& worldDirection = light->GetDerivedDirection();
+	float4 lightDir(worldDirection[0], worldDirection[1], worldDirection[2], 0.0f);
+	lightDir = lightDir * currCamera.GetViewMatrix();
+
+	float spotInnerAngle = light->GetSpotInnerAngle();
+	float spotOuterAngle = light->GetSpotOuterAngle();
+	lightPos[3] = cosf(spotInnerAngle);
+	lightDir[3] = cosf(spotOuterAngle);
+	mCurrMaterial->GetCustomParameter(EPU_Light_Dir)->SetValue(lightDir);
+	mCurrMaterial->GetCustomParameter(EPU_Light_Position)->SetValue(lightPos);
+
+	mCurrMaterial->GetCustomParameter(EPU_Light_Attenuation)->SetValue(light->GetAttenuation());
+
+	float scaleHeight = light->GetRange();
+	float scaleBase = scaleHeight * tanf(spotOuterAngle * 0.5f);
+
+	float3 rotAxis = Cross(float3(0, 1, 0), worldDirection);
+	//float rotAngle = acosf(Dot(float3(0, 1, 0), worldDirection));
+	float4x4 rotation = CreateRotationAxis(rotAxis, acosf(worldDirection.Y()));
+
+	float4x4 worldMatrix = CreateScaling(scaleBase, scaleHeight, scaleBase) * rotation *
+		CreateTranslation(worldPos);
+
+	String techName = "Spot" + tech;
+	mCurrMaterial->ApplyMaterial(worldMatrix);
+	mCurrMaterial->SetCurrentTechnique("Spot" + tech);
+	mDevice->Render(*mCurrMaterial->GetCurrentTechnique(), *mSpotLightShape);
 }
 
 void Renderer::DrawFSQuad( const String& tech )
@@ -546,6 +595,13 @@ void Renderer::DrawOverlays()
 				renderItem.Renderable->Render();
 	}
 }
+
+void Renderer::UpdateCascadeShadowMap( Light* light )
+{
+
+}
+
+
 
 
 

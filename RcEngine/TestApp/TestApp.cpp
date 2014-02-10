@@ -76,8 +76,8 @@ void TestApp::Initialize()
 	Camera* camera = RcEngine::Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->GetCamera();
 	
 	float3 up(0, 1, 0);
-	camera->SetViewParams(float3(0, 50, 150), float3(0, 50, 0), up);
-	camera->SetProjectionParams(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 10000.0f );
+	camera->CreateLookAt(float3(0, 50, 150), float3(0, 50, 0), up);
+	camera->CreatePerspectiveFov(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 10000.0f );
 
 	mCameraControler = new FPSCameraControler;
 	//mCameraControler = new ModelViewerCameraControler();

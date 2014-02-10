@@ -317,8 +317,10 @@ void App::LoadContent()
 	mCamera = device.GetScreenFrameBuffer()->GetCamera();
 	/*mCamera->SetViewParams(float3(85, 68, -21), float3(86, 68, -21));*/
 	/*mCamera->SetViewParams(float3(-211, 57, -12), float3(-212, 57, -12));*/
-	mCamera->SetViewParams(float3(-104, 39, -9.8), float3(-54,34.9,-10.8));
-	mCamera->SetProjectionParams(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 3000.0f );
+	mCamera->CreateLookAt(float3(-104, 39, -9.8), float3(-54,34.9,-10.8));
+	mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 3000.0f );
+
+	mCamera->GetFrustum();
 
 	mCameraControler = new RcEngine::Test::FPSCameraControler;
 	mCameraControler->AttachCamera(*mCamera);
@@ -337,6 +339,7 @@ void App::SetupLights()
 	mDirLight->SetLightType(LT_Directional);
 	mDirLight->SetDirection(float3(0, -1, -1));
 	mDirLight->SetLightColor(float3(1, 1, 1));
+	mDirLight->SetCastShadow(false);
 	sceneMan.GetRootSceneNode()->AttachObject(mDirLight);
 
 	//mPointLight = sceneMan.CreateLight("Point");
@@ -380,7 +383,7 @@ void App::SetupLights()
 			Light* spotLight = sceneMan.CreateLight("Spot");
 			spotLight->SetLightType(LT_SpotLight);
 			spotLight->SetLightColor(float3(0, 1, 1));
-			spotLight->SetRange(300);
+			spotLight->SetRange(150);
 			spotLight->SetPosition(float3(-278.2f + i * 166.5f, 398.1f, -35.7f));
 			spotLight->SetDirection(direction);
 			spotLight->SetAttenuation(1.0f, 0.0f);
@@ -513,6 +516,7 @@ void App::Update( float deltaTime )
 {
 	mCameraControler->Update(deltaTime);
 	CalculateFrameRate();
+	mMainWindow->SetTitle("Graphics Demo FPS:" + std::to_string(mFramePerSecond));
 
 	float3 target = mCamera->GetPosition() + mCamera->GetView() * 50.0f;
 
@@ -528,7 +532,7 @@ void App::Update( float deltaTime )
 		float x = mouse.X() / float(w) * 2.0f - 1.0f;
 		float y = (1.0f - mouse.Y() / float(h)) * 2.0f - 1.0f;
 
-		float4 worldPosH = float4(x, y,z, 1.0) * mCamera->GetInvProjectionMatrix() * mCamera->GetInvViewMatrix();
+		float4 worldPosH = float4(x, y,z, 1.0) * mCamera->GetInvProjMatrix() * mCamera->GetInvViewMatrix();
 
 		PickPos = float3(worldPosH.X() / worldPosH.W(), worldPosH.Y() / worldPosH.W(), worldPosH.Z() / worldPosH.W()); 
 	}
@@ -581,7 +585,7 @@ void App::WindowResize(uint32_t width, uint32_t height)
 {
 	// resize pipeline buffer
 	Camera& camera = *(Context::GetSingleton().GetRenderDevice().GetScreenFrameBuffer()->GetCamera());
-	camera.SetProjectionParams(camera.GetFov(), (float)width/(float)height, camera.GetNearPlane(), camera.GetFarPlane());
+	camera.CreatePerspectiveFov(camera.GetFov(), (float)width/(float)height, camera.GetNearPlane(), camera.GetFarPlane());
 
 	mDeferredPipeline->Resize(width, height);
 }

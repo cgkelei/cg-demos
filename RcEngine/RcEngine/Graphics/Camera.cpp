@@ -8,8 +8,8 @@ namespace RcEngine {
 Camera::Camera(void)
 	: mFrustumDirty(true)
 {
-	SetViewParams(float3(0, 0, 0), float3(0, 0, 1), float3(0, 1, 0));
-	SetProjectionParams(Mathf::PI / 4.0f, 1.0f, 1.0f, 1000.0f);
+	CreateLookAt(float3(0, 0, 0), float3(0, 0, 1), float3(0, 1, 0));
+	CreatePerspectiveFov(Mathf::PI / 4.0f, 1.0f, 1.0f, 1000.0f);
 }
 
 
@@ -17,7 +17,7 @@ Camera::~Camera(void)
 {
 }
 
-void Camera::SetViewParams( const float3& eyePos, const float3& lookat, const float3& upVec /*= float3(0, 1, 0)*/ )
+void Camera::CreateLookAt( const float3& eyePos, const float3& lookat, const float3& upVec /*= float3(0, 1, 0)*/ )
 {
 	mPosition = eyePos;
 	mLookAt	= lookat;
@@ -30,7 +30,7 @@ void Camera::SetViewParams( const float3& eyePos, const float3& lookat, const fl
 	mFrustumDirty = true;
 }
 
-void Camera::SetProjectionParams( float fov, float aspect, float nearPlane, float farPlane )
+void Camera::CreatePerspectiveFov( float fov, float aspect, float nearPlane, float farPlane )
 {
 	mFieldOfView = fov;
 	mAspect = aspect;
@@ -40,9 +40,19 @@ void Camera::SetProjectionParams( float fov, float aspect, float nearPlane, floa
 	mProjMatrix = CreatePerspectiveFovLH(mFieldOfView, mAspect, mNearPlane, mFarPlane);
 	mInvProjMatrix = mProjMatrix.Inverse();
 
-	//修改投影矩阵，使OpenGL适应左右坐标系
-	Context::GetSingletonPtr()->GetRenderDevicePtr()->AdjustProjectionMatrix(mProjMatrix);
+	mEngineProjMatrix = mProjMatrix;
+	Context::GetSingleton().GetRenderDevice().AdjustProjectionMatrix(mEngineProjMatrix);
 
+	mFrustumDirty = true;
+}
+
+void Camera::CreateOrthoOffCenter( float left, float right, float bottom, float top, float nearPlane, float farPlane )
+{
+	mProjMatrix = CreateOrthoOffCenterLH(left, right, bottom, top, nearPlane, farPlane);
+	
+	mEngineProjMatrix = mProjMatrix;
+	Context::GetSingleton().GetRenderDevice().AdjustProjectionMatrix(mEngineProjMatrix);
+	
 	mFrustumDirty = true;
 }
 
@@ -83,5 +93,7 @@ bool Camera::Visible( const BoundingBoxf& box )
 
 	return true;
 }
+
+
 
 } // Namespace RcEngine

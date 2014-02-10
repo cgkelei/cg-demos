@@ -50,8 +50,9 @@ void RenderDevice::BindFrameBuffer( const shared_ptr<FrameBuffer>& fb )
 	if(mCurrentFrameBuffer->IsDirty())
 	{
 		mCurrentFrameBuffer->OnBind();
-		DoBindFrameBuffer(mCurrentFrameBuffer);
 	}
+
+	DoBindFrameBuffer(mCurrentFrameBuffer);
 }
 
 void RenderDevice::Render( EffectTechnique& tech, RenderOperation& op )

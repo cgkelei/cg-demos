@@ -162,7 +162,7 @@ void FPSCameraControler::Update( float deltaTime )
 	float3 newCameraPos = mAttachedCamera->GetPosition() + Transform(deltaMove, mCameraRot);
 	
 	// Update View Matrix
-	mAttachedCamera->SetViewParams(newCameraPos, newCameraPos + vWorldAhead, vWorldUp);
+	mAttachedCamera->CreateLookAt(newCameraPos, newCameraPos + vWorldAhead, vWorldUp);
 }
 
 void FPSCameraControler::AttachCamera( Camera& camera )
