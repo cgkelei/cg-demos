@@ -6,6 +6,9 @@
 
 namespace RcEngine {
 
+template<typename Real>
+class BoundingSphere;
+
 template <typename Real>
 class BoundingBox
 {
@@ -13,65 +16,38 @@ public:
 	typedef Real value_type;
 
 public:
-	BoundingBox() : Defined(false) { }
+
+	BoundingBox() : Min(FLT_MAX, FLT_MAX, FLT_MAX), Max(-FLT_MAX, -FLT_MAX, -FLT_MAX) { }
 
 	BoundingBox(const Vector<Real,3>& min, const Vector<Real,3>& max)
-		: Min(min), Max(max), Defined(true) { }
+		: Min(min), Max(max) { }
 
 	BoundingBox(const BoundingBox<Real>& rhs)
-		: Min(rhs.Min), Max(rhs.Max), Defined(rhs.Defined) { }
-
-	BoundingBox& operator = (const BoundingBox<Real>& rhs)
-	{
-		if (this != &rhs)
-		{
-			Max = rhs.Max;
-			Min = rhs.Min;
-			Defined = rhs.Defined;
-		}
-		return *this;
-	}
-
-	bool operator == ( const BoundingBox<Real>& rhs)
-	{
-		return (Min == rhs.Min) && (Max == rhs.Max);
-	}
+		: Min(rhs.Min), Max(rhs.Max) { }
 
 	/**
 	 * Reset the bounding box to undefined.
 	 */
-	void SetNull()	{ Defined = false; }
+	inline void SetNull()	
+	{ 
+		Min = Vector<Real,3>(FLT_MAX, FLT_MAX, FLT_MAX); 
+		Max = Vector<Real,3>(-FLT_MAX, -FLT_MAX, -FLT_MAX);  
+	}
 
-	/**
-	 * Return center of box.
-	 */
-	Vector<Real,3> Center() const { return (Min + Max) * Real(0.5); }
+	inline bool IsValid() const {  return Max.X()>=Min.X() && Max.Y()>=Min.Y() && Max.Z()>=Min.Z(); }
 
-	/**
-	 * Merge a point
-	 */
-	void Merge( const Vector<Real,3>& point );
-	
-	/**
-	 * Merge another box
-	 */
-	void Merge( const BoundingBox<Real>& box );
+	inline Vector<Real,3> Center() const { return (Min + Max) * Real(0.5); }
 
-	/**
-	 * Determines whether contains the specified box.
-	 */
-	ContainmentType Contains( const BoundingBox<Real>& box );
+	void Merge(const Vector<Real,3>& point);
+	void Merge(const BoundingBox<Real>& box);
+	void Merge(const BoundingSphere<Real>& sphere);
 
-	/**
-	 * Determines whether contains the specified point.
-	 */
-	ContainmentType Contains( const Vector<Real,3>& point );
+	ContainmentType Contains( const BoundingBox<Real>& box ) const;
+	ContainmentType Contains( const BoundingSphere<Real>& sphere ) const;
+	ContainmentType Contains( const Vector<Real,3>& point ) const;
 
-	/**
-	 * Determines whether a sphere intersects the specified object.
-	 */
-	bool Intersects( const BoundingBox<Real>& box );
-
+	bool Intersects(const BoundingSphere<Real>& sphere) const;
+	bool Intersects(const BoundingBox<Real>& box) const;
 
 public:
 	Vector<Real,3> Max;
@@ -85,8 +61,8 @@ typedef BoundingBox<double> BoundingBoxd;
 /**
  * Return a new bounding box merged  from two given bounding box 
  */
-template<typename Real>
-BoundingBox<Real> Merge( const BoundingBox<Real>& box1, const BoundingBox<Real>& box2 );
+//template<typename Real>
+//BoundingBox<Real> Merge( const BoundingBox<Real>& box1, const BoundingBox<Real>& box2 );
 
 #include "Math/BoundingBox.inl"
 

@@ -24,7 +24,6 @@ Vector<Real,3> IntersectionOfPlanes(const Plane<Real>& a, const Plane<Real>& b, 
 	//return Vector<Real,3>(x * invDenom, y * invDenom, z * invDenom);
 }
 
-
 }
 
 
@@ -127,43 +126,42 @@ template<typename Real>
 ContainmentType Frustum<Real>::Contain( const BoundingSphere<Real>& sphere ) const
 {
 	bool allInside = true;
-	for (int32_t i=0; i < 6; ++i)
+	int num = 0;
+	for (const Plane<Real>& plane : Planes)
 	{
-		Real d = Planes[i].DistanceTo(sphere.Center);
-		if (d <= -sphere.Radius)
-		{
+		Real dot = Dot(plane.Normal, sphere.Center) + plane.Distance;
+		if (dot < -sphere.Radius)
 			return CT_Disjoint;
-		}
-		else if (d < sphere.Radius)
-		{
-			allInside = false;
-			break;;
-		}
+		
+		if( dot > sphere.Radius )
+			num++;		
 	}
 
-	return allInside ? CT_Contains : CT_Intersects;
+	return (num == 6) ? CT_Contains : CT_Intersects;	
 }
 
 template<typename Real>
-ContainmentType Frustum<Real>::Contain( const BoundingBox<Real>& box ) const
+ContainmentType Frustum<Real>::Contain( const BoundingBox<Real>& aabb ) const
 {
-	Vector<Real,3> center = box.Center();
-	Vector<Real,3> half = center - box.Min;
 	bool allInside = true;
-
-	for (unsigned i = 0; i < 6; ++i)
+	for (const Plane<Real>& plane : Planes)
 	{
-		Vector<Real,3> absNormal = Vector<Real,3>( fabs(Planes[i].Normal.X()), 
-			fabs(Planes[i].Normal.Y()), fabs(Planes[i].Normal.Z()) );
-
-		Real singedDist = Planes[i].DistanceTo(center);
-		Real extent = Dot(absNormal, half);
-
-		if (singedDist < -extent)
+		switch (plane.Intersects(aabb))
+		{
+		case PIT_Back:
 			return CT_Disjoint;
-		else if (singedDist < extent)
+		case PIT_Intersecting:
 			allInside = false;
+			break;
+		}
 	}
+
 	return allInside ? CT_Contains : CT_Intersects;
 }
+
+//template<typename Real>
+//ContainmentType Frustum<Real>::Contain( const Frustum<Real>& frustum ) const
+//{
+//
+//}
 

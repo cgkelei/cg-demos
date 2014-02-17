@@ -44,17 +44,16 @@ public:
 	 */
 	void Update(const Matrix4<Real>& viewProjection);
 
-	/**
-	 * Determines whether the frustum contain specify sphere.
-	 */
-	ContainmentType Contain( const BoundingSphere<Real>& sphere ) const; 
-
-	ContainmentType Contain( const BoundingBox<Real>& box ) const; 
+	ContainmentType Contain(const BoundingSphere<Real>& sphere) const; 
+	ContainmentType Contain(const BoundingBox<Real>& box) const; 
+	/*ContainmentType Contain(const Frustum<Real>& frustum) const; */
 
 public:
 	Plane<Real> Planes[6];
 	Vector<Real,3> Corner[8];  // Corner points
 };
+
+
 
 typedef Frustum<float> Frustumf;
 

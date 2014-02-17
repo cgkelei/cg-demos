@@ -42,49 +42,67 @@ Plane<Real>::Plane(const Vector<Real, 3>& rkPoint1, const Vector<Real, 3>& rkPoi
 
 //----------------------------------------------------------------------------
 template< typename Real >
-Plane<Real>& Plane<Real>::operator=( const Plane<Real>& rkPlane )
+Real Plane<Real>::DotNormal( const Vector<Real, 3>& value ) const
 {
-	Normal = rkPlane.Normal;
-	Distance = rkPlane.Distance;
-	return *this;
+	return Dot(Normal, value)
 }
 
 //----------------------------------------------------------------------------
 template< typename Real >
-PlaneSide Plane<Real>::WhichSide (const Vector<Real, 3>& rkPoint) const
+Real Plane<Real>::DotCoordinate( const Vector<Real, 3>& value ) const
 {
-	Real fDistance = DistanceTo(rkPoint);
-
-	if (fDistance < (Real)0.0)
-	{
-		return Negative_Side;
-	}
-
-	if (fDistance > (Real)0.0)
-	{
-		return Positive_Side;
-	}
-
-	return No_Side;
+	return Dot(Normal, value) + Distance;
 }
 
 //----------------------------------------------------------------------------
 template< typename Real >
-Real Plane<Real>::DistanceTo(const Vector<Real, 3>& rkQ) const
+void Plane<Real>::Normalize( )
 {
-	return Dot(Normal, rkQ) + Distance;
-}
+	Real length2 = Dot(Normal, Normal);
 
-template< typename Real >
-void Plane<Real>::Normalize( Real epsilon /*= Math<Real>::ZERO_TOLERANCE*/ )
-{
-	Real length = Normal.Length();
-
-	if (length > epsilon)
+	if ( fabs(length2 - 1) > Math<Real>::EPSILON)
 	{
-		Real invLength = Real(1) / length;
+		Real invLength = Real(1) / sqrt(length2);
 		Normal *= invLength;
 		Distance *= invLength;
 	}
+}
+
+//----------------------------------------------------------------------------
+template< typename Real >
+PlaneIntersectionType Plane<Real>::Intersects( const BoundingBox<Real>& box ) const
+{
+	Vector<Real, 3> min, max;
+	max.X() = (Normal.X() >= Real(0)) ? box.Min.X() : box.Max.X();
+	max.Y() = (Normal.Y() >= Real(0)) ? box.Min.Y() : box.Max.Y();
+	max.Z() = (Normal.Z() >= Real(0)) ? box.Min.Z() : box.Max.Z();
+	min.X() = (Normal.X() >= Real(0)) ? box.Max.X() : box.Min.X();
+	min.Y() = (Normal.Y() >= Real(0)) ? box.Max.Y() : box.Min.Y();
+	min.Z() = (Normal.Z() >= Real(0)) ? box.Max.Z() : box.Min.Z();
+
+	Real dot = Dot(Normal, max); 
+	if( dot + Distance > Real(0) )
+		return PIT_Front;
+
+	dot = Dot(Normal, min); 
+	if ( dot + Distance < Real(0))
+		return PIT_Back;
+
+	return PIT_Intersecting;
+}
+
+//----------------------------------------------------------------------------
+template< typename Real >
+PlaneIntersectionType Plane<Real>::Intersects( const BoundingSphere<Real>& sphere ) const
+{
+	Real dot = Dot(sphere.Center,  Normal) + Distance;
+
+	if( dot > sphere.Radius )
+		return PIT_Front;
+
+	if( dot < -sphere.Radius )
+		return PIT_Back
+
+	return PIT_Intersecting;
 }
 

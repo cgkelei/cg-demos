@@ -8,13 +8,18 @@
 
 namespace RcEngine{
 
-enum PlaneSide
+enum PlaneIntersectionType
 {
-	No_Side,
-	Positive_Side,
-	Negative_Side,
-	Both_Side
+	PIT_Front,
+	PIT_Back,
+	PIT_Intersecting
 };
+
+template<typename Real>
+class BoundingSphere;
+
+template <typename Real>
+class BoundingBox;
 
 /**
  * Plane: N*P+D = 0
@@ -32,19 +37,20 @@ public:
 	Plane(const Vector<Real, 3>& point1, const Vector<Real, 3>& point2, const Vector<Real, 3>& point3);
 	Plane(const Plane& rhs);
 
-	// assignment
-	Plane& operator= (const Plane& rhs);
+	inline void Flip() { Normal = -Normal; Distance = -Distance; }
+	void Normalize();
+	Real DotCoordinate(const Vector<Real, 3>& value) const;
+	Real DotNormal(const Vector<Real, 3>& value) const;
 
-	PlaneSide WhichSide (const Vector<Real, 3>& point) const;
+	PlaneIntersectionType Intersects(const BoundingSphere<Real>& sphere) const;
+	PlaneIntersectionType Intersects(const BoundingBox<Real>& box) const;
 
-	Real DistanceTo(const Vector<Real, 3>& point) const;
-
-	void Normalize(Real epsilon = Math<Real>::ZERO_TOLERANCE);
-		
 public:
 	Vector<Real, 3> Normal;
 	Real Distance;
 };
+
+
 
 #include <Math/Plane.inl>
 
