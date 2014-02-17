@@ -100,8 +100,12 @@ inline Vector<Real, Size> Normalize(const Vector<Real, Size>& vec);
 template< typename Real, int32_t Size >
 inline Vector<Real, Size> Lerp(const Vector<Real, Size>& vec1, const Vector<Real, Size>& vec2, float s);
 
+template< typename Real, int32_t Size >
+inline Vector<Real, Size> Clamp( const Vector<Real, Size>& value, const Vector<Real, Size>& min,  const Vector<Real, Size>& max );
+
 template<typename Real>
 inline Vector<Real, 3> Cross( const Vector<Real, 3>& vec1, const Vector<Real, 3>& vec2 );
+
 
 #include <Math/Vector.inl>
 

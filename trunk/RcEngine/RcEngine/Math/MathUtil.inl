@@ -63,7 +63,7 @@ CreateOrthoOffCenterLH(Real l, Real r, Real b, Real t, Real zn, Real zf)
 	return Matrix4<Real>(Real(2)/(r-l),  Real(0),       Real(0),       Real(0), 
 						 Real(0),	   Real(2)/(t-b),   Real(0),       Real(0), 
 						 Real(0),        Real(0),     Real(1)/(zf-zn), Real(0), 
-						 (l+r)/(l-r),  (t+b)/(b-t),   zn/(zn-zf),	   Real(0));
+						 (l+r)/(l-r),  (t+b)/(b-t),   zn/(zn-zf),	   Real(1));
 
 }
 
@@ -719,10 +719,8 @@ template<typename Real>
 BoundingBox<Real>
 Transform( const BoundingBox<Real>& box, const Matrix4<Real>& matrix )
 {
-	if (!box.Defined)
-	{
+	if (!box.IsValid())
 		return box;
-	}
 
 	BoundingBox<Real> result;
 
@@ -770,10 +768,8 @@ template<typename Real>
 BoundingBox<Real>
 TransformAffine( const BoundingBox<Real>& box, const Matrix4<Real>& matrix )
 {
-	if (!box.Defined)
-	{
+	if (!box.IsValid())
 		return box;
-	}
 
 	BoundingBox<Real> result;
 
@@ -794,10 +790,8 @@ template<typename Real>
 BoundingSphere<Real>
 Transform( const BoundingSphere<Real>& sphere, const Matrix4<Real>& matrix )
 {
-	if (!sphere.Defined)
-	{
+	if (!sphere.IsValid())
 		return sphere;
-	}
 
 	Vector<Real,3> scale = ScaleFromMatrix(matrix);
 	Vector<Real,3> newCenter = Transform(sphere.Center, matrix);
