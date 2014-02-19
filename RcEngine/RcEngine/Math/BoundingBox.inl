@@ -121,6 +121,28 @@ bool BoundingBox<Real>::Intersects( const BoundingSphere<Real>& sphere ) const
 	return distanceSquared <= sphere.Radius*sphere.Radius;
 }
 
+template <typename Real>
+Vector<Real, 3> BoundingBox<Real>::GetCorner( uint8_t pos ) const
+{
+	return Vector<Real, 3>(pos&1?Max.X():Min.X(), pos&2?Max.Y():Min.Y(), pos&4?Max.Z():Min.Z());
+}
+
+
+template <typename Real>
+void BoundingBox<Real>::GetCorners( Vector<Real, 3> corners[8] ) const
+{
+	corners[0] = Vector<Real, 3>(Min.X(), Min.Y(), Min.Z());
+	corners[1] = Vector<Real, 3>(Max.X(), Min.Y(), Min.Z());
+	corners[2] = Vector<Real, 3>(Min.X(), Max.Y(), Min.Z());
+	corners[3] = Vector<Real, 3>(Max.X(), Max.Y(), Min.Z());
+
+	corners[4] = Vector<Real, 3>(Min.X(), Min.Y(), Max.Z());
+	corners[5] = Vector<Real, 3>(Max.X(), Min.Y(), Max.Z());
+	corners[6] = Vector<Real, 3>(Min.X(), Max.Y(), Max.Z());
+	corners[7] = Vector<Real, 3>(Max.X(), Max.Y(), Max.Z());
+}
+
+
 //template<typename Real>
 //BoundingBox<Real> Merge( const BoundingBox<Real>& box1, const BoundingBox<Real>& box2 )
 //{

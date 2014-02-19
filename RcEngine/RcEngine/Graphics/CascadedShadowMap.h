@@ -10,10 +10,12 @@ namespace RcEngine {
 #define MAX_CASCADES 4
 #define SHADOW_MAP_SIZE 1024
 
+#define SHADOW_MAP_VSM
+
 class _ApiExport CascadedShadowMap
 {
 public:
-	CascadedShadowMap();;
+	CascadedShadowMap();
 	virtual ~CascadedShadowMap() {}
 
 	void UpdateShadowMatrix(const Camera& camera, const Light& directionLight);

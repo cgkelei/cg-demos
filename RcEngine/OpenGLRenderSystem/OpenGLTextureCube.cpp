@@ -125,14 +125,14 @@ OpenGLTextureCube::~OpenGLTextureCube()
 }
 
 
-uint32_t OpenGLTextureCube::GetWidth( uint32_t level )
+uint32_t OpenGLTextureCube::GetWidth( uint32_t level ) const
 {
 	assert(level < mMipMaps);
 	return mSizes[level];
 }
 
 
-uint32_t OpenGLTextureCube::GetHeight( uint32_t level )
+uint32_t OpenGLTextureCube::GetHeight( uint32_t level ) const
 {
 	assert(level < mMipMaps);
 	return mSizes[level];

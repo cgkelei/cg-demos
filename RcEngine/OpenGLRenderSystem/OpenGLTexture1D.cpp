@@ -92,7 +92,7 @@ OpenGLTexture1D::~OpenGLTexture1D()
 }
 
 
-uint32_t OpenGLTexture1D::GetWidth( uint32_t level )
+uint32_t OpenGLTexture1D::GetWidth( uint32_t level ) const
 {
 	assert(level < mMipMaps);
 	return mWidths[level];

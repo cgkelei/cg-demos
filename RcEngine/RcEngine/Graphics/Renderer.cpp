@@ -8,15 +8,17 @@
 #include <Graphics/RenderQueue.h>
 #include <Graphics/RenderFactory.h>
 #include <Graphics/RenderOperation.h>
+#include <Graphics/GraphicBuffer.h>
+#include <Graphics/Texture.h>
+#include <Graphics/CascadedShadowMap.h>
 #include <Scene/SceneManager.h>
 #include <Scene/SceneNode.h>
-#include <Graphics/GraphicBuffer.h>
-#include <GUI/UIManager.h>
-#include <Core/Exception.h>
 #include <Scene/Light.h>
 #include <Core/Context.h>
+#include <Core/Exception.h>
 #include <Math/MathUtil.h>
-#include <Graphics/CascadedShadowMap.h>
+#include <GUI/UIManager.h>
+
 
 namespace {
 
@@ -451,22 +453,26 @@ void Renderer::DrawDirectionalLightShape( Light* light, const String& tech )
 	
 	if (bCastShadow)
 	{
-		// Update shadow map matrix
-		mCascadedShadowMap->UpdateShadowMatrix(currCamera, *light);
+		const shared_ptr<FrameBuffer>& currFrameBuffer = mDevice->GetCurrentFrameBuffer();
 
-		shared_ptr<FrameBuffer> currFrameBuffer = mDevice->GetCurrentFrameBuffer();
+		// Update shadow map matrix
+		mCascadedShadowMap->UpdateShadowMatrix(currCamera, *light);	
+		shared_ptr<FrameBuffer>& shadowFrameBuffer = mCascadedShadowMap->mShadowFrameBuffer;
 
 		// Draw all shadow map
 		for (uint32_t i = 0; i < light->GetShadowCascades(); ++i)
-		{
-			shared_ptr<FrameBuffer>& shadowFB = mCascadedShadowMap->mShadowFrameBuffer;
-			shadowFB->SetViewport(mCascadedShadowMap->mShadowVP[i]);
-			shadowFB->SetCamera(mCascadedShadowMap->mLightCamera[i]);
-			mDevice->BindFrameBuffer(shadowFB);	
-			DrawGeometry("ShadowMap", "", RO_None);
+		{		
+			shadowFrameBuffer->SetViewport(mCascadedShadowMap->mShadowVP[i]);
+			shadowFrameBuffer->SetCamera(mCascadedShadowMap->mLightCamera[i]);
+			mDevice->BindFrameBuffer(shadowFrameBuffer);	
+
+			bool b = shadowFrameBuffer->CheckFramebufferStatus();
+			DrawGeometry("VSM", "", RO_None);
 		}
 
 		mDevice->BindFrameBuffer(currFrameBuffer);	
+		mCascadedShadowMap->mShadowTexture->BuildMipMap();
+		//mDevice->GetRenderFactory()->SaveTexture2D("E:/Depth", mCascadedShadowMap->mShadowTexture, 0, 0);
 	}
 
 	const float3& lightColor = light->GetLightColor();
@@ -481,18 +487,21 @@ void Renderer::DrawDirectionalLightShape( Light* light, const String& tech )
 
 	mCurrMaterial->GetCustomParameter(EPU_Light_Dir)->SetValue(lightDir);
 
-	//if (bCastShadow)
-	//{
-	//	const float4x4& shadowMatrix = mCascadedShadowMap->GetShadowMatrix()
-
-	//	String techName = "Directional" + tech;
-	//	DrawFSQuad(techName);
-	//}
-	//else
+	shared_ptr<Effect> effect = mCurrMaterial->GetEffect();
+	effect->GetParameterByName("ShadowEnabled")->SetValue(bCastShadow);
+	if (bCastShadow)
 	{
-		String techName = "Directional" + tech;
-		DrawFSQuad(techName);
+		
+		effect->GetParameterByName("ShadowMatrix")->SetValue(mCascadedShadowMap->mLightViewProj);
+		effect->GetParameterByName("NumCascades")->SetValue((int)light->GetShadowCascades());
+		effect->GetParameterByName("ShadowMatrix")->SetValue(mCascadedShadowMap->mLightViewProj);
+		effect->GetParameterByName("BorderPaddingMaxMin")->SetValue(float2(0, 1));
+		//effect->GetParameterByName("Bias")->SetValue(0.005f);
+		mCurrMaterial->SetTexture("ShadowTex", mCascadedShadowMap->mShadowTexture);
 	}
+
+	String techName = "Directional" + tech;
+	DrawFSQuad(techName);
 }
 
 void Renderer::DrawPointLightShape( Light* light, const String& tech )

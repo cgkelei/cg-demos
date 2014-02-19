@@ -13,9 +13,11 @@ public:
 	OpenGLTexture(TextureType type, PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint );
 	virtual ~OpenGLTexture(void);
 
-	virtual uint32_t GetWidth(uint32_t level);
-	virtual uint32_t GetHeight(uint32_t level);
-	virtual uint32_t GetDepth(uint32_t level); 
+	virtual uint32_t GetWidth(uint32_t level) const;
+	virtual uint32_t GetHeight(uint32_t level) const;
+	virtual uint32_t GetDepth(uint32_t level) const; 
+
+	virtual void BuildMipMap();
 
 	virtual void Map1D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
 		uint32_t xOffset, uint32_t width, void*& data);
@@ -59,7 +61,7 @@ public:
 
 	~OpenGLTexture1D();
 
-	virtual uint32_t GetWidth(uint32_t level);
+	virtual uint32_t GetWidth(uint32_t level) const;
 
 	virtual void Map1D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
 		uint32_t xOffset, uint32_t width, void*& data);
@@ -80,8 +82,8 @@ public:
 
 	~OpenGLTexture2D();
 
-	virtual uint32_t GetWidth(uint32_t level);
-	virtual uint32_t GetHeight(uint32_t level);
+	virtual uint32_t GetWidth(uint32_t level) const;
+	virtual uint32_t GetHeight(uint32_t level) const;
 
 	virtual void Map2D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
@@ -103,9 +105,9 @@ public:
 		uint32_t height, uint32_t depth, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData);
 	~OpenGLTexture3D();
 
-	virtual uint32_t GetWidth(uint32_t level);
-	virtual uint32_t GetHeight(uint32_t level);
-	virtual uint32_t GetDepth(uint32_t level);
+	virtual uint32_t GetWidth(uint32_t level) const;
+	virtual uint32_t GetHeight(uint32_t level) const;
+	virtual uint32_t GetDepth(uint32_t level) const;
 
 	virtual void Map3D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t zOffset,
@@ -131,8 +133,8 @@ public:
 
 	~OpenGLTextureCube();
 
-	virtual uint32_t GetWidth(uint32_t level);
-	virtual uint32_t GetHeight(uint32_t level);
+	virtual uint32_t GetWidth(uint32_t level) const;
+	virtual uint32_t GetHeight(uint32_t level) const;
 
 	virtual void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, TextureMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,

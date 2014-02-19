@@ -34,8 +34,8 @@ public:
 	void CreatePerspectiveFov(float fov, float aspect, float nearPlane, float farPlane);
 	void CreateOrthoOffCenter(float left, float right, float bottom, float top, float nearPlane, float farPlane);
 
-	bool Visible( const BoundingSpheref& sphere );
-	bool Visible( const BoundingBoxf& box );
+	bool Visible( const BoundingSpheref& sphere ) const;
+	bool Visible( const BoundingBoxf& box ) const;
 
 public_internal:
 	const float4x4& GetEngineProjMatrix() const			{ return mEngineProjMatrix; }

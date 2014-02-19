@@ -55,6 +55,31 @@ vec3 CalculateAmbiemtFresnel(in vec3 specAlbedo, in vec3 N, in vec3 V)
     return saturate(fresnel);
 }
 
+
+float ChebyshevUpperBound(vec2 moments, float depth, float minVariance)
+{
+	float mean = moments.x;
+	float measSquared = moments.y;
+	
+	float p = float(depth <= mean);
+	
+	float variance = max(minVariance, measSquared - mean*mean);
+	float d = depth - mean;
+	float pmax = variance / (variance + d * d);
+	
+	 // To combat light-bleeding, experiment with raising p_max to some power
+     // (Try values from 0.1 to 100.0, if you like.)	
+	return pow( max(p, pmax), 4.0 );
+	//return max(p, pmax);
+}
+
+float CalculateVarianceShadow(vec3 shadowTexCoord, sampler2D shadowMap)
+{
+	vec2 moments = texture2D(shadowMap, shadowTexCoord.xy).rg;
+	return ChebyshevUpperBound(moments, shadowTexCoord.z, 0.0001);
+}
+
+
 	]]>
 </ShaderSource>
 

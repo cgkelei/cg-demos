@@ -3,11 +3,17 @@
 namespace RcEngine {
 
 SamplerStateDesc::SamplerStateDesc()
-	: AddressU(TAM_Wrap), AddressV(TAM_Wrap), AddressW(TAM_Wrap), 
-	Filter(TF_Min_Mag_Mip_Point), BorderColor(0, 0, 0, 0),
-	MipMapLODBias(0),MinLOD(FLT_MIN), MaxLOD( FLT_MAX),
-	MaxAnisotropy(16), ComparisonFunc(CF_AlwaysFail), BindStage(ST_Pixel)
-
+	: AddressU(TAM_Clamp), 
+	  AddressV(TAM_Clamp), 
+	  AddressW(TAM_Clamp), 
+	  Filter(TF_Min_Mag_Mip_Linear),
+	  BorderColor(0, 0, 0, 0),
+	  MipMapLODBias(0),
+	  MinLOD(-FLT_MAX),
+	  MaxLOD(FLT_MAX),
+	  MaxAnisotropy(1),
+	  ComparisonFunc(CF_AlwaysFail),
+	  BindStage(ST_Pixel)
 {
 
 }

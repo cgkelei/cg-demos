@@ -32,7 +32,7 @@ public:
 	const String& GetName() const						{ return mResourceName; }
 	uint32_t GetQueueBucket() const						{ return mQueueBucket; }
 
-	const shared_ptr<Effect>& GetEffect() const			{ return mEffect; }
+	shared_ptr<Effect> GetEffect() const				{ return mEffect; }
 	
 	EffectTechnique* GetCurrentTechnique() const;
 	void SetCurrentTechnique(const String& techName);

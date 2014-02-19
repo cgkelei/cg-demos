@@ -37,6 +37,17 @@ public:
 	inline bool IsValid() const {  return Max.X()>=Min.X() && Max.Y()>=Min.Y() && Max.Z()>=Min.Z(); }
 
 	inline Vector<Real,3> Center() const { return (Min + Max) * Real(0.5); }
+	
+
+	/** 
+	 * Returns a specific corner of the bounding box.
+     * pos specifies the corner as a number between 0 and 7.
+     * Each bit selects an axis, X, Y, or Z from least- to
+     * most-significant. Unset bits select the minimum value
+     * for that axis, and set bits select the maximum.
+	 */
+	Vector<Real, 3> GetCorner(uint8_t pos) const;
+	void GetCorners(Vector<Real, 3> corners[8]) const; 
 
 	void Merge(const Vector<Real,3>& point);
 	void Merge(const BoundingBox<Real>& box);
@@ -49,10 +60,11 @@ public:
 	bool Intersects(const BoundingSphere<Real>& sphere) const;
 	bool Intersects(const BoundingBox<Real>& box) const;
 
+
+
 public:
 	Vector<Real,3> Max;
 	Vector<Real,3> Min;
-	bool Defined;
 };
 
 typedef BoundingBox<float> BoundingBoxf;
