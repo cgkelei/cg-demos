@@ -6,28 +6,29 @@ namespace RcEngine {
 OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width, uint32_t height, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData )
 	: OpenGLTexture(TT_Texture2D, format, arraySize, numMipMaps, sampleCount, sampleQuality, accessHint)
 {
+	// numMipMap == 0, will generate mipmap levels automatically
 	if( numMipMaps == 0 )
 	{
-		// calculate mip map levels
+		// Calculate full mipmap levels
 		mMipMaps = 1;
-		/*uint32_t w = width;
+		uint32_t w = width;
 		uint32_t h = height;
-		while( w!= 1 || h != 1)
+		while( w != 1 || h != 1)
 		{
 			++mMipMaps;
 			w = std::max<uint32_t>(1U, w / 2);
-			h = std::max<uint32_t>(1U, h / 2);
-		}*/
+			h = std::max<uint32_t>(1U, h / 2);	
+		}
 	}
 	else
 	{
 		mMipMaps = numMipMaps;
 	}
 
+	// keep every level width and height
 	mWidths.resize(mMipMaps);
 	mHeights.resize(mMipMaps);
-	{
-		// store every level width and height
+	{		
 		uint32_t w = width;
 		uint32_t h = height;
 		for(uint32_t level = 0; level < mMipMaps; level++)
@@ -38,22 +39,25 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 			h = std::max<uint32_t>(1U, h / 2);
 		}
 	} 
-
+	
+	GLint glinternalFormat;
+	GLenum glformat, gltype;
+	OpenGLMapping::Mapping(glinternalFormat, glformat, gltype, mFormat);
 	uint32_t texelSize = PixelFormatUtils::GetNumElemBytes(mFormat);
 
-	GLint glinternalFormat;
-	GLenum glformat;
-	GLenum gltype;
-	OpenGLMapping::Mapping(glinternalFormat, glformat, gltype, mFormat);
-
-	/*if (GLEW_ARB_pixel_buffer_object)
+	// Only CPU side access can use Map
+	bool cpuSideAccess = (accessHint & (EAH_CPU_Read | EAH_CPU_Write)) != 0;
+	if ( cpuSideAccess )
 	{
-		mPixelBuffers.resize(mTextureArraySize*mMipMaps);
-		glGenBuffers(static_cast<GLsizei>(mPixelBuffers.size()), &mPixelBuffers[0]);
-	}
-	else*/
-	{
-		mTextureData.resize(mTextureArraySize * mMipMaps);
+		if (GLEW_ARB_pixel_buffer_object)
+		{
+			mPixelBuffers.resize(mTextureArraySize*mMipMaps);
+			glGenBuffers(static_cast<GLsizei>(mPixelBuffers.size()), &mPixelBuffers[0]);
+		}
+		else
+		{
+			mTextureData.resize(mTextureArraySize * mMipMaps);
+		}
 	}
 	
 	if(mSampleCount <= 1)
@@ -61,6 +65,8 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 		// not multiple sample 
 		glGenTextures(1, &mTextureID);
 		glBindTexture(mTargetType, mTextureID);
+		glTexParameteri(mTargetType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(mTargetType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(mTargetType, GL_TEXTURE_MAX_LEVEL, mMipMaps - 1);
 
 		for (uint32_t  arrIndex = 0; arrIndex < mTextureArraySize; ++ arrIndex)
@@ -71,12 +77,11 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 				uint32_t levelHeight = mHeights[level];
 
 				if (!mPixelBuffers.empty())
-				{
 					glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, mPixelBuffers[arrIndex * mMipMaps + level]);
-				}
 
 				if (PixelFormatUtils::IsCompressed(mFormat))
 				{
+					// Need check
 					int blockSize = (glinternalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16; 
 					uint32_t imageSize = ((levelWidth+3)/4)*((levelHeight+3)/4)*blockSize; 
 					
@@ -85,9 +90,9 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 						glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, imageSize, NULL, GL_STREAM_DRAW);
 						glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
 					}
-					else
+					else if (cpuSideAccess)
 					{
-						// resize texture data for copy
+						// resize texture data for Map
 						mTextureData[arrIndex * mMipMaps + level].resize(imageSize);
 					}
 
@@ -117,9 +122,9 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 						glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, imageSize, NULL, GL_STREAM_DRAW);
 						glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
 					}
-					else
+					else if (cpuSideAccess)
 					{
-						// resize texture data for copy
+						// resize texture data for Map
 						mTextureData[arrIndex * mMipMaps + level].resize(imageSize);
 					}				
 
@@ -158,13 +163,13 @@ OpenGLTexture2D::~OpenGLTexture2D()
 	
 }
 
-uint32_t OpenGLTexture2D::GetWidth( uint32_t level )
+uint32_t OpenGLTexture2D::GetWidth( uint32_t level ) const
 {
 	assert(level < mMipMaps);
 	return mWidths[level];
 }
 
-uint32_t OpenGLTexture2D::GetHeight( uint32_t level )
+uint32_t OpenGLTexture2D::GetHeight( uint32_t level ) const
 {
 	assert(level < mMipMaps);
 	return mHeights[level];
@@ -172,6 +177,9 @@ uint32_t OpenGLTexture2D::GetHeight( uint32_t level )
 
 void OpenGLTexture2D::Map2D( uint32_t arrayIndex, uint32_t level, TextureMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height, void*& data, uint32_t& rowPitch )
 {
+	if ( (mAccessHint & (EAH_CPU_Read | EAH_CPU_Write)) == 0 )
+		ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Map only work with CPU side access!", "OpenGLTexture2D::Map2D");
+
 	// store 
 	mTextureMapAccess = tma;
 
@@ -257,6 +265,9 @@ void OpenGLTexture2D::Map2D( uint32_t arrayIndex, uint32_t level, TextureMapAcce
 
 void OpenGLTexture2D::Unmap2D( uint32_t arrayIndex, uint32_t level )
 {
+	if ( (mAccessHint & (EAH_CPU_Read | EAH_CPU_Write)) == 0 )
+		ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Map only work with CPU side access!", "OpenGLTexture2D::Unmap2D");
+
 	switch(mTextureMapAccess)
 	{
 	case TMA_Read_Only:

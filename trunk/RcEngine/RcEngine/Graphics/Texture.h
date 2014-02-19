@@ -22,9 +22,11 @@ public:
 	uint32_t GetTextureArraySize() const		{ return mTextureArraySize; }
 	uint32_t GetNumMipmaps() const				{ return mMipMaps; }
 
-	virtual uint32_t GetWidth(uint32_t level) = 0;
-	virtual uint32_t GetHeight(uint32_t level) = 0;
-	virtual uint32_t GetDepth(uint32_t level) = 0;
+	virtual uint32_t GetWidth(uint32_t level) const = 0;
+	virtual uint32_t GetHeight(uint32_t level) const = 0;
+	virtual uint32_t GetDepth(uint32_t level) const = 0;
+
+	virtual void BuildMipMap() = 0;
 
 	virtual void Map1D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
 		uint32_t xOffset, uint32_t width, void*& data) = 0;

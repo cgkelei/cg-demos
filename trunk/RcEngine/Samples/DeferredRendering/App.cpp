@@ -24,6 +24,7 @@
 #include <Graphics/RenderOperation.h>
 #include <Graphics/GraphicBuffer.h>
 #include <Graphics/Texture.h>
+#include <Graphics/CascadedShadowMap.h>
 
 #include <GL/GL.h>
 #pragma comment(lib, "OpenGL32")
@@ -31,84 +32,6 @@
 
 std::vector<float> gSceneDepth;
 float3 PickPos;
-
-//shared_ptr<RenderOperation> BuildPointLightShape()
-//{
-//	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
-//
-//	const int nRings = 30;
-//	const int nSegments = 30;
-//	const float r = 1.0f;
-//
-//	VertexElement vdsc[] = {
-//		VertexElement(0, VEF_Float3,  VEU_Position, 0),
-//		VertexElement(0, VEF_Float2,  VEU_TextureCoordinate, 0),
-//	};
-//	shared_ptr<VertexDeclaration> vertexDecl = factory.CreateVertexDeclaration(vdsc, 2);
-//
-//	int32_t vertexCount = (nRings + 1) * (nSegments+1);
-//	int32_t indicesCount =  6 * nRings * (nSegments + 1);
-//
-//	ElementInitData vInitData;
-//	vInitData.pData = nullptr;
-//	vInitData.rowPitch = 5 * vertexCount * sizeof(float);
-//	vInitData.slicePitch = 0;
-//	shared_ptr<GraphicsBuffer> vertexBuffer= factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
-//
-//	ElementInitData iInitData;
-//	iInitData.pData = nullptr;
-//	iInitData.rowPitch = indicesCount * sizeof(unsigned short);
-//	iInitData.slicePitch = 0;
-//	shared_ptr<GraphicsBuffer> indexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
-//
-//	float* pVertex = static_cast<float*>(vertexBuffer->Map(0, -1, BA_Write_Only));
-//	unsigned short* pIndices = static_cast<unsigned short*>(indexBuffer->Map(0, -1, BA_Write_Only));
-//
-//	float fDeltaRingAngle = Mathf::PI / nRings;
-//	float fDeltaSegAngle = Mathf::TWO_PI / nSegments;
-//	unsigned short wVerticeIndex = 0 ;
-//
-//	// Generate the group of rings for the sphere
-//	for( int ring = 0; ring <= nRings; ring++ ) {
-//		float r0 = r * sinf (ring * fDeltaRingAngle);
-//		float y0 = r * cosf (ring * fDeltaRingAngle);
-//
-//		// Generate the group of segments for the current ring
-//		for(int seg = 0; seg <= nSegments; seg++) {
-//			float x0 = r0 * sinf(seg * fDeltaSegAngle);
-//			float z0 = r0 * cosf(seg * fDeltaSegAngle);
-//
-//			// Add one vertex to the strip which makes up the sphere
-//			*pVertex++ = x0;
-//			*pVertex++ = y0;
-//			*pVertex++ = z0;
-//
-//			*pVertex++ = seg / (float)nSegments;
-//			*pVertex++ = ring / (float)nRings; 
-//
-//			if (ring != nRings) {
-//				// each vertex (except the last) has six indices pointing to it
-//				*pIndices++ = wVerticeIndex + nSegments + 1;
-//				*pIndices++ = wVerticeIndex;               
-//				*pIndices++ = wVerticeIndex + nSegments;
-//				*pIndices++ = wVerticeIndex + nSegments + 1;
-//				*pIndices++ = wVerticeIndex + 1;
-//				*pIndices++ = wVerticeIndex;
-//				wVerticeIndex ++;				
-//			}
-//		}; // end for seg
-//	} // end for ring
-//
-//	vertexBuffer->UnMap();
-//	indexBuffer->UnMap();
-//
-//	shared_ptr<RenderOperation> mRenderOperation(new RenderOperation);
-//	mRenderOperation->PrimitiveType = PT_Triangle_List;
-//	mRenderOperation->BindVertexStream(vertexBuffer, vertexDecl);
-//	mRenderOperation->BindIndexStream(indexBuffer, IBT_Bit16);
-//
-//	return mRenderOperation;
-//}
 
 shared_ptr<RenderOperation> BuildPointLightShape()
 {
@@ -337,9 +260,9 @@ void App::SetupLights()
 
 	mDirLight = sceneMan.CreateLight("Sun");
 	mDirLight->SetLightType(LT_Directional);
-	mDirLight->SetDirection(float3(0, -1, -1));
+	mDirLight->SetDirection(float3(0, -8, -1));
 	mDirLight->SetLightColor(float3(1, 1, 1));
-	mDirLight->SetCastShadow(false);
+	mDirLight->SetCastShadow(true);
 	sceneMan.GetRootSceneNode()->AttachObject(mDirLight);
 
 	//mPointLight = sceneMan.CreateLight("Point");

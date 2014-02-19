@@ -163,8 +163,8 @@ void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, const Camera& camera,
 		BoundingBoxf subWorldBoud = Transform(subEntity->GetBoundingBox(), mParentNode->GetWorldTransform());
 
 		// tode  mesh part world bounding has some bugs.
-		/*if(cam->Visible(subWorldBoud))
-		{*/
+		if(camera.Visible(subWorldBoud))
+		{
 			float sortKey = 0;
 			RenderQueue::Bucket bucket = (RenderQueue::Bucket)subEntity->GetMaterial()->GetQueueBucket();
 
@@ -188,7 +188,7 @@ void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, const Camera& camera,
 			}
 
 			renderQueue->AddToQueue(RenderQueueItem(subEntity, sortKey), bucket);			
-		//}
+		}
 	}
 
 	// Update animation 
@@ -200,12 +200,13 @@ void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, const Camera& camera,
 		{
 			SceneObject* child = kv.second;
 
-			//bool visible = camera->Visible(child->GetWorldBoundingBox());
-			bool visible = true;
+			bool renderable = child->Renderable();
+			bool visible = camera.Visible(child->GetWorldBoundingBox());
+			
+			/*bool visible = true;*/
 			if (visible)
 			{
 				//Check if the bone exists in the current LOD
-
 				//The child is connected to a joint
 				Bone* bone = static_cast<Bone*>(child->GetParentNode());
 
@@ -217,7 +218,7 @@ void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, const Camera& camera,
 				}
 			}
 
-			if (visible)
+			if (visible && renderable)
 			{
 				child->OnUpdateRenderQueue(renderQueue, camera, order);
 			}   

@@ -9,7 +9,7 @@ Camera::Camera(void)
 	: mFrustumDirty(true)
 {
 	CreateLookAt(float3(0, 0, 0), float3(0, 0, 1), float3(0, 1, 0));
-	CreatePerspectiveFov(Mathf::PI / 4.0f, 1.0f, 1.0f, 1000.0f);
+	CreatePerspectiveFov(Mathf::HALF_PI, 1.0f, 1.0f, 1000.0f);
 }
 
 
@@ -21,12 +21,13 @@ void Camera::CreateLookAt( const float3& eyePos, const float3& lookat, const flo
 {
 	mPosition = eyePos;
 	mLookAt	= lookat;
-	mUpVec	= upVec;
+	mUpVec = upVec;
 
 	mViewVec = Normalize(mLookAt - mPosition);
 	mViewMatrix = CreateLookAtMatrixLH(mPosition, mLookAt, mUpVec);
 	mInvViewMatrix = mViewMatrix.Inverse();
 
+	mUpVec = float3(mViewMatrix.M12, mViewMatrix.M22, mViewMatrix.M32);
 	mFrustumDirty = true;
 }
 
@@ -48,8 +49,12 @@ void Camera::CreatePerspectiveFov( float fov, float aspect, float nearPlane, flo
 
 void Camera::CreateOrthoOffCenter( float left, float right, float bottom, float top, float nearPlane, float farPlane )
 {
+	mNearPlane = nearPlane;
+	mFarPlane = farPlane;
+
 	mProjMatrix = CreateOrthoOffCenterLH(left, right, bottom, top, nearPlane, farPlane);
-	
+	mInvProjMatrix = mProjMatrix.Inverse();
+
 	mEngineProjMatrix = mProjMatrix;
 	Context::GetSingleton().GetRenderDevice().AdjustProjectionMatrix(mEngineProjMatrix);
 	
@@ -66,7 +71,7 @@ const Frustumf& Camera::GetFrustum() const
 	return mFrustum;
 }
 
-bool Camera::Visible( const BoundingSpheref& sphere )
+bool Camera::Visible( const BoundingSpheref& sphere ) const
 {
 	if (mFrustumDirty)
 	{
@@ -80,7 +85,7 @@ bool Camera::Visible( const BoundingSpheref& sphere )
 	return true;
 }
 
-bool Camera::Visible( const BoundingBoxf& box )
+bool Camera::Visible( const BoundingBoxf& box ) const
 {
 	if (mFrustumDirty)
 	{

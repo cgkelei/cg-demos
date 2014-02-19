@@ -23,6 +23,21 @@ in vec3 iPos;
 	in uvec4 iBlendIndices;
 #endif
 
+in vec3 iNormal;
+in vec2 iTex;
+
+#ifdef _NormalMapping
+	in vec3 iTangent;
+	in vec3 iBinormal;
+#endif
+
+#ifdef _AlphaTest
+out vec3 oNormal;  // not used, just to make iTex attribute at corrent position
+out vec2 oTex;
+#endif
+
+out float oDepth;
+
 
 void main()
 {
@@ -39,7 +54,84 @@ void main()
 #else
 	gl_Position = vec4(iPos, 1.0) * WorldView * Proj;
 #endif
+	
+#ifdef _AlphaTest	
+	oNormal = iNormal;
+	oTex = vec2(iTex.x, 1.0-iTex.y);
+#endif
+	
+	oDepth = gl_Position.z * 0.5 + 0.5;
 }	
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Shader name="ShadowMapPS" stage="Pixel" entry="main">
+	<ShaderSource>
+	<![CDATA[
+	
+#version 330	
+
+#ifdef _AlphaTest
+	uniform sampler2D AlphaMap;
+	in vec3 oNormal;
+	in vec2 oTex;
+#endif 
+
+in float oDepth;
+
+// Standard Shadow Maps
+#if defined(SSM)
+out float oFragDepth;
+#endif
+
+// Variance Shadow Maps
+#ifdef VSM
+out vec2 oFragDepth;
+#endif 
+
+// Exponential Variance Shadow Maps
+#ifdef EVSM
+uniform vec2 EVSMConst;
+out vec4 oFragDepth;
+#endif 
+
+// Exponential Shadow Maps
+#ifdef ESM
+uniform vec2 ESMConst;
+out float oFragDepth;
+#endif 
+
+void main()
+{
+#ifdef _AlphaTest
+	float alpha =  texture2D(AlphaMap, oTex).a;
+	if( alpha < 0.01 ) discard;
+#endif	
+
+#if defined(SSM)
+	oFragDepth.x = oDepth;
+#endif
+
+#ifdef VSM
+	oFragDepth.x = oDepth;
+	oFragDepth.y = oDepth * oDepth;
+	
+	//vec2 dxdy = vec2(dFdx(oDepth), dFdy(oDepth));
+	//oFragDepth.y = oDepth * oDepth + 0.25 * dot(dxdy, dxdy);
+#endif 
+
+#ifdef EVSM
+	float posDepth = exp(EVSMConst.x * oDepth);
+	float negDepth = -exp(-EVSMConst.y * oDepth);
+
+	oFragDepth = vec4(posDepth, posDepth * posDepth, negDepth, negDepth * negDepth);
+#endif 
+
+#ifdef ESM
+	oFragDepth =  exp(ESMConst.x * oDepth);
+#endif 
+}
 	]]>
 	</ShaderSource>
 </Shader>
@@ -314,11 +406,39 @@ void main()
 	</ShaderSource>
 </Shader>
 
+<!--
 <Technique name="ShadowMap">
 	<Pass name="p0">
 		<VertexShader name="ShadowMapVS"/>
 		<state name="ColorWriteMask" index="0" r="false" g="false" b="false" a="false"/>
-		<!--<state name="SlopeScaledDepthBias" value="1.0"/>-->
+	</Pass>
+</Technique>
+-->
+
+<Technique name="VSM">
+	<Pass name="p0">
+		<VertexShader name="ShadowMapVS"/>
+		<PixelShader name="ShadowMapPS">
+			<Macro name="VSM"/>
+		</PixelShader>
+	</Pass>
+</Technique>
+
+<Technique name="EVSM">
+	<Pass name="p0">
+		<VertexShader name="ShadowMapVS"/>
+		<PixelShader name="ShadowMapPS">
+			<Macro name="EVSM"/>
+		</PixelShader>
+	</Pass>
+</Technique>
+
+<Technique name="ESM">
+	<Pass name="p0">
+		<VertexShader name="ShadowMapVS"/>
+		<PixelShader name="ShadowMapPS">
+			<Macro name="ESM"/>
+		</PixelShader>
 	</Pass>
 </Technique>
 
@@ -329,6 +449,8 @@ void main()
 	</Pass>
 </Technique>
 
+
+<!-- for forward lighting, simple version -->
 <Technique name="PointLighting">
 	<Pass name="p0">
 		<VertexShader name="GeneralVS"/>

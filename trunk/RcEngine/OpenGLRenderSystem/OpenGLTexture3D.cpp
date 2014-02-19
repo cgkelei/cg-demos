@@ -89,19 +89,19 @@ OpenGLTexture3D::~OpenGLTexture3D()
 
 };
 
-uint32_t OpenGLTexture3D::GetWidth( uint32_t level )
+uint32_t OpenGLTexture3D::GetWidth( uint32_t level ) const
 {
 	assert(level < mMipMaps);
 	return mWidths[level];
 }
 
-uint32_t OpenGLTexture3D::GetHeight( uint32_t level )
+uint32_t OpenGLTexture3D::GetHeight( uint32_t level ) const
 {
 	assert(level < mMipMaps);
 	return mHeights[level];
 }
 
-uint32_t OpenGLTexture3D::GetDepth( uint32_t level )
+uint32_t OpenGLTexture3D::GetDepth( uint32_t level ) const
 {
 	assert(level < mMipMaps);
 	return mDepths[level];
