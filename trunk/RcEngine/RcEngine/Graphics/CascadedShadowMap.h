@@ -20,19 +20,18 @@ public:
 
 	void UpdateShadowMatrix(const Camera& camera, const Light& directionLight);
 
-	const Viewport& GetShadowVP(int iCascade) const     { return mShadowVP[iCascade]; }
-
 private:
 	void UpdateShadowMapSize(const Light& light);
 
 public:	
 	float mSplitPlanes[MAX_CASCADES+1];
-	Viewport mShadowVP[MAX_CASCADES]; 
-	
+
 	std::vector<float4x4> mLightViewProj;
 	
 	// Used in frame buffer camera
 	std::vector<shared_ptr<Camera>> mLightCamera;
+
+	std::vector<shared_ptr<RenderView>> mShadowSplitsRTV;
 	
 	shared_ptr<FrameBuffer> mShadowFrameBuffer;
 	shared_ptr<Texture> mShadowTexture;

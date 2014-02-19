@@ -37,20 +37,20 @@ void OpenGLRenderTargetView2D::OnAttach(FrameBuffer& fb, Attachment attr)
 		if(mTextureOGL.GetSampleCount() <= 1)
 		{
 			
-			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+			glFramebufferTexture2D(GL_FRAMEBUFFER,
 				GL_COLOR_ATTACHMENT0_EXT + index, GL_TEXTURE_2D, mTextureOGL.GetOpenGLTexture(), mLevel);
 		}
 		else
 		{
-			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
-				GL_COLOR_ATTACHMENT0_EXT + index, GL_RENDERBUFFER_EXT, mTextureOGL.GetOpenGLTexture());
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER,
+				GL_COLOR_ATTACHMENT0 + index, GL_RENDERBUFFER, mTextureOGL.GetOpenGLTexture());
 		}
 	}
 	else
 	{
 		// 2D Texture Array
 		glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index,
-			mTextureOGL.GetOpenGLTexture(), mArrIndex, mLevel);
+			mTextureOGL.GetOpenGLTexture(), mLevel, mArrIndex);
 	}
 }
 
@@ -64,11 +64,11 @@ void OpenGLRenderTargetView2D::OnDetach(FrameBuffer& fb, Attachment attr)
 	{		
 		if(mTextureOGL.GetSampleCount() <= 1)
 		{
-			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT + index, GL_TEXTURE_2D, 0, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT + index, GL_TEXTURE_2D, 0, 0);
 		}
 		else
 		{
-			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT + index, GL_RENDERBUFFER_EXT, 0);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT + index, GL_RENDERBUFFER_EXT, 0);
 		}
 	}
 	else

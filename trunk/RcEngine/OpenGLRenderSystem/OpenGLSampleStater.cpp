@@ -20,7 +20,7 @@ OpenGLSamplerState::OpenGLSamplerState( const SamplerStateDesc& desc )
 
 	glSamplerParameterf(mOGLSampler, GL_TEXTURE_MIN_LOD, desc.MinLOD);
 	glSamplerParameterf(mOGLSampler, GL_TEXTURE_MAX_LOD, desc.MaxLOD);
-	glSamplerParameterf(mOGLSampler, GL_TEXTURE_LOD_BIAS , desc.MipMapLODBias);
+	glSamplerParameterf(mOGLSampler, GL_TEXTURE_LOD_BIAS , desc.MipLODBias);
 	
 	glSamplerParameterfv(mOGLSampler, GL_TEXTURE_BORDER_COLOR, desc.BorderColor());
 }

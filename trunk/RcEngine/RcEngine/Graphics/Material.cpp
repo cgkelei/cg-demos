@@ -197,7 +197,7 @@ shared_ptr<Resource> Material::Clone()
 	retVal->mEmissive = mEmissive;
 	retVal->mPower = mPower;
 
-	retVal->mEffect = std::static_pointer_cast<Effect>(mEffect->Clone());
+	retVal->mEffect = std::static_pointer_cast<Effect>(mEffect/*->Clone()*/);
 	retVal->mTextures = mTextures;
 
 	for (MaterialParameter* param : mCachedEffectParams)
@@ -319,15 +319,20 @@ void Material::LoadImpl()
 				uint32_t value = stateNode->Attribute("value")->ValueUInt();
 				desc.MaxAnisotropy = value;
 			}
-			else if (stateName == "MinLod")
+			else if (stateName == "MinLOD")
 			{
 				float value = stateNode->Attribute("value")->ValueFloat();
 				desc.MinLOD = value;
 			}
-			else if (stateName == "MaxLod")
+			else if (stateName == "MaxLOD")
 			{
 				float value = stateNode->Attribute("value")->ValueFloat();
 				desc.MaxLOD = value;
+			}
+			else if (stateName == "MipLODBias")
+			{
+				float value = stateNode->Attribute("value")->ValueFloat();
+				desc.MipLODBias = value;
 			}
 			else if (stateName == "ComparisonFunc")
 			{

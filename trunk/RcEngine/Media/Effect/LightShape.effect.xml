@@ -1,0 +1,43 @@
+<Effect name="LightShape">
+
+<Shader name="ViewSphereVS" stage="Vertex" entry="main">
+	<ShaderSource>
+	<![CDATA[
+	
+attribute vec3 iPos;
+
+uniform mat4 World;
+uniform mat4 ViewProj;
+
+void main()
+{
+	gl_Position = vec4(iPos, 1.0) * World * ViewProj;	
+}	
+	]]>
+	</ShaderSource>
+</Shader>
+
+
+<Shader name="ViewSpherePS" stage="Pixel" entry="main">
+	<ShaderSource>
+	<![CDATA[
+
+uniform vec4 Color;
+	
+void main()
+{
+	gl_FragColor  = vec4(Color.rgb, 1.0);
+}	
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Technique name="LightShape">
+	<Pass name="p0">
+		<VertexShader name="ViewSphereVS"/>
+		<PixelShader name="ViewSpherePS"/>
+		<State name="FillMode" value="WireFrame"/> 	
+	</Pass>
+</Technique>
+
+</Effect>

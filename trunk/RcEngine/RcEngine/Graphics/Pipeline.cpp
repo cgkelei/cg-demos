@@ -137,7 +137,6 @@ void Pipeline::CreateFrameBuffers()
 		
 		// bind as current, so we can add render target
 		device.BindFrameBuffer(fbDesc.FrameBuffer);
-
 		for (size_t j = 0; j < fbDesc.RenderTargets.size(); ++j)
 		{
 			RenderTarget& rtDesc = fbDesc.RenderTargets[j];

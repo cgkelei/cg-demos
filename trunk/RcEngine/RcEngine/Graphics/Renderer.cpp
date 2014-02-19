@@ -316,6 +316,7 @@ void Renderer::RenderScene()
 						order = RenderOrder(command->Params[2].GetInt());
 
 					DrawGeometry(techName, matClass, order);
+
 				}
 				break;
 
@@ -331,6 +332,7 @@ void Renderer::RenderScene()
 						UpdateMaterialParameters(cmd);
 
 					DrawLightShape(techName);
+
 				}
 				break;
 
@@ -346,6 +348,7 @@ void Renderer::RenderScene()
 						UpdateMaterialParameters(cmd);
 
 					DrawFSQuad(techName);
+
 
 					//const shared_ptr<Texture>& rt = mCurrPipeline->GetRenderTarget(2, 0);
 					//device.GetRenderFactory()->SaveTexture2D("E:/DeferredShading.pfm", rt, 0, 0);
@@ -462,9 +465,11 @@ void Renderer::DrawDirectionalLightShape( Light* light, const String& tech )
 		// Draw all shadow map
 		for (uint32_t i = 0; i < light->GetShadowCascades(); ++i)
 		{		
-			shadowFrameBuffer->SetViewport(mCascadedShadowMap->mShadowVP[i]);
 			shadowFrameBuffer->SetCamera(mCascadedShadowMap->mLightCamera[i]);
+			
 			mDevice->BindFrameBuffer(shadowFrameBuffer);	
+			shadowFrameBuffer->Attach(ATT_Color0, mCascadedShadowMap->mShadowSplitsRTV[i]);
+			shadowFrameBuffer->Clear(CF_Depth | CF_Color, ColorRGBA(1, 1, 1, 1), 1.0f, 0);
 
 			bool b = shadowFrameBuffer->CheckFramebufferStatus();
 			DrawGeometry("VSM", "", RO_None);
@@ -603,6 +608,7 @@ void Renderer::DrawOverlays()
 			for (const RenderQueueItem& renderItem : guiBucket) 
 				renderItem.Renderable->Render();
 	}
+
 }
 
 void Renderer::UpdateCascadeShadowMap( Light* light )

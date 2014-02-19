@@ -10,6 +10,11 @@
 		<State name="Filter" value="Min_Mag_Mip_Linear"/>
 		<State name="AddressU" value="Clamp"/>
 		<State name="AddressV" value="Clamp"/>
+		<State name="AddressW" value="Border"/>
+		<State name="MaxAnisotropy" value="0"/>
+		<State name="MaxLOD" value="0"/>
+		<State name="MinLOD" value="0"/>
+		<State name="MipLODBias" value="0"/>
 	</Sampler>
 	
 	
