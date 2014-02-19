@@ -6,7 +6,7 @@ namespace RcEngine {
 OpenGLTexture::OpenGLTexture( TextureType type, PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint )
 	: Texture(type, format, numMipMaps, sampleCount, sampleQuality, accessHint)
 {
-	mTextureArraySize = arraySize;
+	mTextureArraySize = (std::max)(arraySize, 1U);
 
 	if ( (mTextureArraySize > 1) && !GLEW_EXT_texture_array)
 	{

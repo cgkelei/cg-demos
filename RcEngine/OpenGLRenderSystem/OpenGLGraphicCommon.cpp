@@ -144,7 +144,7 @@ void OpenGLMapping::Mapping( GLint& outInternalformat, GLenum& outFormat, GLenum
 		outType = GL_UNSIGNED_BYTE;
 		break;
 
-	case PF_A8B8G8R8:
+	case PF_A8B8G8R8: //
 		outInternalformat = GL_RGBA8;
 		outFormat = GL_RGBA;
 		outType = GL_UNSIGNED_BYTE;
@@ -220,38 +220,38 @@ void OpenGLMapping::Mapping( GLint& outInternalformat, GLenum& outFormat, GLenum
 		break;
 
 	case PF_R16F:
-		outInternalformat = GL_LUMINANCE16F_ARB;
-		outFormat = GL_LUMINANCE;
+		outInternalformat = GL_R16F;
+		outFormat = GL_RED;
 		outType = GL_HALF_FLOAT;
 		break;
 
 	case PF_R32F:
-		outInternalformat = GL_LUMINANCE32F_ARB;
-		outFormat = GL_LUMINANCE;
+		outInternalformat = GL_R32F;
+		outFormat = GL_RED;
 		outType = GL_FLOAT;
 		break;
 
 	case PF_G16R16:
-		outInternalformat = GL_LUMINANCE16_ALPHA16;
-		outFormat = GL_LUMINANCE_ALPHA;
+		outInternalformat = GL_RG16;
+		outFormat = GL_RG;
 		outType = GL_UNSIGNED_SHORT;
 		break;
 
 	case PF_G16R16F:
-		outInternalformat = GL_LUMINANCE_ALPHA16F_ARB;
-		outFormat = GL_LUMINANCE_ALPHA;
-		outType = GL_HALF_FLOAT_ARB;
+		outInternalformat = GL_RG16F;
+		outFormat = GL_RG;
+		outType = GL_HALF_FLOAT;
 		break;
 
-	case PF_G32R32F:
-		outInternalformat = GL_LUMINANCE_ALPHA32F_ARB;
-		outFormat = GL_LUMINANCE_ALPHA;
+	case PF_G32R32F://
+		outInternalformat = GL_RG32F;
+		outFormat = GL_RG;
 		outType = GL_FLOAT;
 		break;
 
 	case PF_B16G16R16:
 		outInternalformat = GL_RGB16;
-		outFormat = GL_RGB_INTEGER;
+		outFormat = GL_RGB;
 		outType = GL_UNSIGNED_SHORT;
 		break;
 
@@ -286,7 +286,7 @@ void OpenGLMapping::Mapping( GLint& outInternalformat, GLenum& outFormat, GLenum
 		}
 		break;
 
-	case PF_Depth32:
+	case PF_Depth32://
 		outInternalformat = GL_DEPTH_COMPONENT32F;
 		outFormat = GL_DEPTH_COMPONENT;
 		outType = GL_FLOAT;

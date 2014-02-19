@@ -147,9 +147,9 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 	else
 	{
 		// Multisample, For render target
-		glGenRenderbuffersEXT(1, &mTextureID);
-		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, mTextureID);
-		glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, mSampleCount, glinternalFormat, width, height);
+		glGenRenderbuffers(1, &mTextureID);
+		glBindRenderbuffer(GL_RENDERBUFFER, mTextureID);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, mSampleCount, glinternalFormat, width, height);
 	}
 }
 
