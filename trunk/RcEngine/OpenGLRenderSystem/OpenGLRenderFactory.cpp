@@ -569,22 +569,6 @@ void OpenGLRenderFactory::SaveTexture2D( const String& texFile, const shared_ptr
 		texture->Map2D(arrayIndex, level, TMA_Read_Only, 0, 0, 0, 0, pData, rowPitch);
 
 		float* pixel = (float*)pData;
-		/*vector<Pixel32> imageData(w*h);
-		for (uint32_t j = 0; j < h; j++)
-		for(uint32_t i = 0; i < w; i ++)
-		{
-		float r = pixel[((h-j -1) * w + i)*4 + 0];
-		float g = pixel[((h-j-1) * w + i)*4 +1];
-		float b = pixel[((h-j-1) * w + i)*4 +2];
-		float a = pixel[((h-j-1) * w + i)*4 +3];
-
-		imageData[j*w+i].r = r*255;
-		imageData[j*w+i].g = g*255;
-		imageData[j*w+i].b = b*255;
-		imageData[j*w+i].a = a*255;
-		}*/
-
-		//WriteTGA(texFile.c_str(), &imageData[0], w, h);
 
 		vector<float> temp;
 		temp.resize(w * h * 3);
@@ -605,7 +589,7 @@ void OpenGLRenderFactory::SaveTexture2D( const String& texFile, const shared_ptr
 		WritePfm(texFile.c_str(), w, h, 3, &temp[0]);
 		
 	}
-	else if (texture->GetTextureFormat() == PF_Depth32)
+	else if (texture->GetTextureFormat() == PF_Depth32 || texture->GetTextureFormat() == PF_R32F)
 	{
 		void* pData;
 		uint32_t rowPitch;
@@ -625,14 +609,35 @@ void OpenGLRenderFactory::SaveTexture2D( const String& texFile, const shared_ptr
 
 		WritePfm(texFile.c_str(), w, h, 1, &temp[0]);
 	}
-	else if (texture->GetTextureFormat() == PF_Depth24Stencil8)
-	{		
-		shared_ptr<OpenGLTexture> oglTexture = std::static_pointer_cast<OpenGLTexture>(texture);
+	else if (texture->GetTextureFormat() == PF_G32R32F)
+	{
+		void* pData;
+		uint32_t rowPitch;
+		texture->Map2D(arrayIndex, level, TMA_Read_Only, 0, 0, 0, 0, pData, rowPitch);
 
-		std::vector<uint8_t> data(w*h);
-		glBindTexture(oglTexture->GetOpenGLTextureTarget(), oglTexture->GetOpenGLTexture());
-		glGetTexImage(oglTexture->GetOpenGLTextureTarget(), 0, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, &data[0]);
-		GLenum err = glGetError();
+		float* pixel = (float*)pData;
+
+		vector<float> temp;
+		temp.resize(w * h / 3);
+		float* imageData = &temp[0];
+
+		String depthImage;
+		for (int m = 0; m < 3; ++m)
+		{
+			for (uint32_t j = 0; j < h; j++)
+				for(uint32_t i = 0; i < w/3; i ++)
+				{
+					float r = pixel[(j * w + i + w/3*m)*2+0];
+					float g = pixel[(j * w + i + w/3*m)*2+1];
+
+					*imageData++ = r;
+				}
+			
+			depthImage = texFile + std::to_string(m) + ".pfm";
+			WritePfm(depthImage.c_str(), w/3, h, 1, &temp[0]);
+
+			imageData = &temp[0];
+		}	
 	}
 }
 

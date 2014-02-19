@@ -426,6 +426,11 @@ void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
 
 			glEnableVertexAttribArray(att);
 
+			/**
+			 * Make sure VertexElement semantic same with OpenGL vertex attribute index
+			 * May need to use layout in vertex shader.
+			 */
+
 			if (OpenGLMapping::IsIntegerType(type))
 			{
 				glVertexAttribIPointer(att, count, type, vertexSize, BUFFER_OFFSET(offset));	

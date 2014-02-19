@@ -19,16 +19,16 @@ struct ShaderParameterSetHelper<bool>
 {
 public:
 	ShaderParameterSetHelper(GLint location, EffectParameter* param)
-		: Location(Location), Param(param) {}
+		: Location(location), Param(param) {}
 
 	void operator() ()
 	{
 		if (Param->Dirty())
 		{
 			bool value; Param->GetValue(value);
-			glUniform1i(Location, value);
+			glUniform1ui(Location, value);
 			Param->ClearDirty();
-		}
+		} 
 	}
 
 private:
@@ -359,18 +359,21 @@ public:
 		TextureLayer textureLayer; Param->GetValue(textureLayer);
 		shared_ptr<OpenGLTexture> textureOGL = std::static_pointer_cast<OpenGLTexture>(textureLayer.Texture);
 
-		if (Param->Dirty())
-		{	
-			RenderDevice& device = Context::GetSingleton().GetRenderDevice();
-			device.SetSamplerState(textureLayer.Stage, textureLayer.TexUnit, textureLayer.Sampler);
-		
-			Param->ClearDirty();
-		}
-		
-		glActiveTexture(GL_TEXTURE0+textureLayer.TexUnit);
-		glBindTexture(textureOGL->GetOpenGLTextureTarget(), textureOGL->GetOpenGLTexture());
+		if (textureOGL)
+		{
+			if (Param->Dirty())
+			{	
+				RenderDevice& device = Context::GetSingleton().GetRenderDevice();
+				device.SetSamplerState(textureLayer.Stage, textureLayer.TexUnit, textureLayer.Sampler);
 
-		glUniform1i(Location, textureLayer.TexUnit);		
+				Param->ClearDirty();
+			}
+
+			glActiveTexture(GL_TEXTURE0+textureLayer.TexUnit);
+			glBindTexture(textureOGL->GetOpenGLTextureTarget(), textureOGL->GetOpenGLTexture());
+
+			glUniform1i(Location, textureLayer.TexUnit);		
+		}	
 	}
 
 private:
@@ -642,20 +645,23 @@ void OpenGLShaderProgram::CaptureAllParameter()
 		GLenum attibType;
 		unsigned int samplerIndex = 0;	
 
-		for (GLint i = 0; i < activeAttribs; ++i)
+		/*	for (GLint i = 0; i < activeAttribs; ++i)
 		{
-			glGetActiveAttrib(mOGLProgramObject, i, maxLength, &length, &attibSize, &attibType, &maxName[0]);
-			String actualName(&maxName[0], length);
-			//std::cout << actualName << " size=" << attibSize << " type=" << GetGLSLTypeString(attibType) << std::endl;
-		}
+		glGetActiveAttrib(mOGLProgramObject, i, maxLength, &length, &attibSize, &attibType, &maxName[0]);
+		String actualName(&maxName[0], length);
+		auto attrPos = glGetAttribLocation(mOGLProgramObject, actualName.c_str());
 
-		auto iPos = glGetAttribLocation(mOGLProgramObject, "iPos");
+			std::cout << actualName << " attr=" << attrPos << " size=" << attibSize << " type=" << GetGLSLTypeString(attibType) << std::endl;
+		}
+		std::cout << std::endl;*/
+
+		/*	auto iPos = glGetAttribLocation(mOGLProgramObject, "iPos");
 		auto iBlendWeights = glGetAttribLocation(mOGLProgramObject, "iBlendWeights");
 		auto iBlendIndices = glGetAttribLocation(mOGLProgramObject, "iBlendIndices");
 		auto iNormal = glGetAttribLocation(mOGLProgramObject, "iNormal");
 		auto iTex = glGetAttribLocation(mOGLProgramObject, "iTex");
 		auto iTangent = glGetAttribLocation(mOGLProgramObject, "iTangent");
-		auto iBinormal = glGetAttribLocation(mOGLProgramObject, "iBinormal");
+		auto iBinormal = glGetAttribLocation(mOGLProgramObject, "iBinormal");*/
 	}
 
 	// Query and store uniforms from the program.
