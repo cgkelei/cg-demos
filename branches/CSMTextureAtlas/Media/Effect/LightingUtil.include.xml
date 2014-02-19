@@ -1,0 +1,87 @@
+<Effect name="LightingUtil">
+<ShaderSource>
+	<![CDATA[
+
+#define saturate(x) clamp(x, 0.0, 1.0)	
+	
+float SpotLighting(const vec3 lightPos, const vec3 lightDir, const vec2 cosCone, const vec3 litPoint)
+{
+	// calc the cos angle between lightdir and litpoint dir
+	float cosAlpha =  dot(normalize(litPoint - lightPos), lightDir);
+	return saturate( (cosAlpha - cosCone.y) / (cosCone.x - cosCone.y) );
+}
+
+float CalcAttenuation(const vec3 lightPos, const vec3 point, const vec3 atten)
+{
+	float d = distance(lightPos, point);
+	return 1.0 / (atten.x + d * atten.y + d * d * atten.z);
+}
+
+
+/**
+ * @brief Computes the specular contribution of a light
+ */
+float CalculateSpecular(vec3 N, vec3 H, float specPower)
+{
+    return pow(saturate(dot(N, H)), specPower);
+}
+
+/**
+ * @brief Calculate luminance of color
+ */
+ float Luminance(vec3 color)
+ {
+	return dot(color, vec3(0.2126, 0.7152, 0.0722));
+ }
+
+ /**
+ * @brief Calculate the Fresnel factor using Schlick's approximation
+ */
+vec3 CalculateFresnel(vec3 specAlbedo, vec3 L, vec3 H) 
+{
+    vec3 fresnel = specAlbedo;
+    fresnel += (1.0f - specAlbedo) * pow((1.0f - saturate(dot(L, H))), 5.0f);
+    return saturate(fresnel);
+}
+
+/**
+ * @brief Calculate an approximate Fresnel factor using N dot V instead of L dot H
+ *        Which is used for environment map fresnel.
+ */
+vec3 CalculateAmbiemtFresnel(in vec3 specAlbedo, in vec3 N, in vec3 V) 
+{
+	vec3 fresnel = specAlbedo;
+    fresnel += (1.0f - specAlbedo) * pow((1.0f - saturate(dot(N, V))), 5.0f);
+    return saturate(fresnel);
+}
+
+
+float ChebyshevUpperBound(vec2 moments, float depth, float minVariance)
+{
+	float mean = moments.x;
+	float measSquared = moments.y;
+	
+	float p = float(depth <= mean);
+	
+	float variance = max(minVariance, measSquared - mean*mean);
+	float d = depth - mean;
+	float pmax = variance / (variance + d * d);
+	
+	 // To combat light-bleeding, experiment with raising p_max to some power
+     // (Try values from 0.1 to 100.0, if you like.)	
+	return pow( max(p, pmax), 4.0 );
+	//return max(p, pmax);
+}
+
+float CalculateVarianceShadow(vec3 shadowTexCoord, sampler2D shadowMap)
+{
+	vec2 moments = texture2D(shadowMap, shadowTexCoord.xy).rg;
+	return ChebyshevUpperBound(moments, shadowTexCoord.z, 0.0001);
+}
+
+
+	]]>
+</ShaderSource>
+
+</Effect>
+	
