@@ -39,6 +39,7 @@ void UIManager::OnGraphicsInitialize()
 		mMainWindow = Context::GetSingleton().GetApplication().GetMainWindow();
 
 		mRootElement = new UIElement();
+		mRootElement->SetName("UIRoot");
 		mRootElement->SetSize(int2(mMainWindow->GetWidth(), mMainWindow->GetHeight()));
 
 		ResourceManager& resMan = ResourceManager::GetSingleton();

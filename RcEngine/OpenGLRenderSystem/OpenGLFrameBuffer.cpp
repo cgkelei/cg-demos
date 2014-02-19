@@ -75,6 +75,35 @@ bool OpenGLFrameBuffer::CheckFramebufferStatus()
 	if(status == GL_FRAMEBUFFER_COMPLETE)
 		return true;
 
+	String errStr;
+	switch (status)
+	{
+	case GL_FRAMEBUFFER_UNDEFINED:
+		errStr = "The default framebuffer does not exist";
+		break;
+	case GL_FRAMEBUFFER_UNSUPPORTED:
+		errStr = "Combination of internal formats of the attached images violates an implementation-dependent set of restrictions";
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+		errStr = "Any of the framebuffer attachment points are framebuffer incomplete";
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+		errStr = "The framebuffer does not have at least one image attached to it";
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+		break;
+	case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS :
+		errStr = "Any framebuffer attachment is layered, and any populated attachment is not layered, or if all populated color attachments are not from textures of the same target";
+		break;
+	default:
+		break;
+	}
+
+	std::cout << errStr << std::endl;
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "OpenGL FrameBuffer Error", "OpenGLFrameBuffer::CheckFramebufferStatus");
 	return false;
 }

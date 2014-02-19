@@ -144,6 +144,7 @@ SceneNode* SceneManager::FindSceneNode( const String& name ) const
 Sprite* SceneManager::CreateSprite( const shared_ptr<Texture>& tex, const shared_ptr<Material>& mat )
 {
 	Sprite* sprite = new Sprite();
+	printf("SetSpriteContent\n");
 	sprite->SetSpriteContent(tex, mat);
 	mSprites.push_back(sprite);
 
@@ -240,6 +241,11 @@ void SceneManager::ClearScene()
 		delete node;
 
 	mAllSceneNodes.clear();
+
+	// clear all sprite
+	for (Sprite* sprite : mSprites)
+		delete sprite;
+	mSprites.clear();
 
 	// clear all scene object
 	for (auto& kv : mSceneObjectCollections)

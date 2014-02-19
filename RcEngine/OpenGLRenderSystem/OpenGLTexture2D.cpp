@@ -69,85 +69,92 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 		glTexParameteri(mTargetType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(mTargetType, GL_TEXTURE_MAX_LEVEL, mMipMaps - 1);
 
-		for (uint32_t  arrIndex = 0; arrIndex < mTextureArraySize; ++ arrIndex)
+		if (initData == NULL && GLEW_ARB_texture_storage && mTextureArraySize > 1)
 		{
-			for (uint32_t level = 0; level < mMipMaps; ++ level)
+			glTexStorage3D(mTargetType, mMipMaps, glinternalFormat, mWidths[0], mHeights[0], mTextureArraySize);
+		}
+		else
+		{
+			for (uint32_t  arrIndex = 0; arrIndex < mTextureArraySize; ++ arrIndex)
 			{
-				uint32_t levelWidth = mWidths[level];
-				uint32_t levelHeight = mHeights[level];
-
-				if (!mPixelBuffers.empty())
-					glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, mPixelBuffers[arrIndex * mMipMaps + level]);
-
-				if (PixelFormatUtils::IsCompressed(mFormat))
+				for (uint32_t level = 0; level < mMipMaps; ++ level)
 				{
-					// Need check
-					int blockSize = (glinternalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16; 
-					uint32_t imageSize = ((levelWidth+3)/4)*((levelHeight+3)/4)*blockSize; 
-					
-					if (!mPixelBuffers.empty())
-					{
-						glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, imageSize, NULL, GL_STREAM_DRAW);
-						glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
-					}
-					else if (cpuSideAccess)
-					{
-						// resize texture data for Map
-						mTextureData[arrIndex * mMipMaps + level].resize(imageSize);
-					}
+					uint32_t levelWidth = mWidths[level];
+					uint32_t levelHeight = mHeights[level];
 
-					if (mTextureArraySize > 1)
-					{	
-						if (0 == arrIndex)
+					if (!mPixelBuffers.empty())
+						glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, mPixelBuffers[arrIndex * mMipMaps + level]);
+
+					if (PixelFormatUtils::IsCompressed(mFormat))
+					{
+						// Need check
+						int blockSize = (glinternalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16; 
+						uint32_t imageSize = ((levelWidth+3)/4)*((levelHeight+3)/4)*blockSize; 
+
+						if (!mPixelBuffers.empty())
 						{
-							glCompressedTexImage3D(mTargetType, level, glinternalFormat, levelWidth, levelHeight, mTextureArraySize,
-								0, imageSize, NULL);
+							glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, imageSize, NULL, GL_STREAM_DRAW);
+							glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
 						}
-						glCompressedTexSubImage3D(mTargetType, level, 0, 0, arrIndex, levelWidth, levelHeight, 1, glinternalFormat, 
-							imageSize, (NULL == initData) ? NULL : initData[arrIndex * mMipMaps + level].pData);
-								
+						else if (cpuSideAccess)
+						{
+							// resize texture data for Map
+							mTextureData[arrIndex * mMipMaps + level].resize(imageSize);
+						}
+
+						if (mTextureArraySize > 1)
+						{	
+							if (0 == arrIndex)
+							{
+								glCompressedTexImage3D(mTargetType, level, glinternalFormat, levelWidth, levelHeight, mTextureArraySize,
+									0, imageSize, NULL);
+							}
+							glCompressedTexSubImage3D(mTargetType, level, 0, 0, arrIndex, levelWidth, levelHeight, 1, glinternalFormat, 
+								imageSize, (NULL == initData) ? NULL : initData[arrIndex * mMipMaps + level].pData);
+
+						}
+						else
+						{
+							glCompressedTexImage2D(GL_TEXTURE_2D, level, glinternalFormat, levelWidth, levelHeight, 0,
+								imageSize, (NULL == initData) ? NULL : initData[arrIndex * mMipMaps + level].pData);
+						}
 					}
 					else
 					{
-						glCompressedTexImage2D(GL_TEXTURE_2D, level, glinternalFormat, levelWidth, levelHeight, 0,
-							imageSize, (NULL == initData) ? NULL : initData[arrIndex * mMipMaps + level].pData);
-					}
-				}
-				else
-				{
-					uint32_t imageSize = levelWidth * levelHeight * texelSize;
+						uint32_t imageSize = levelWidth * levelHeight * texelSize;
 
-					if (!mPixelBuffers.empty())
-					{
-						glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, imageSize, NULL, GL_STREAM_DRAW);
-						glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
-					}
-					else if (cpuSideAccess)
-					{
-						// resize texture data for Map
-						mTextureData[arrIndex * mMipMaps + level].resize(imageSize);
-					}				
-
-					if (mTextureArraySize > 1)
-					{
-						if (0 == arrIndex)
+						if (!mPixelBuffers.empty())
 						{
-							glTexImage3D(mTargetType, level, glinternalFormat, levelWidth, 
-								levelHeight, mTextureArraySize, 0, glformat, gltype, NULL);
+							glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, imageSize, NULL, GL_STREAM_DRAW);
+							glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+						}
+						else if (cpuSideAccess)
+						{
+							// resize texture data for Map
+							mTextureData[arrIndex * mMipMaps + level].resize(imageSize);
+						}				
+
+						if (mTextureArraySize > 1)
+						{
+							if (0 == arrIndex)
+							{
+								glTexImage3D(mTargetType, level, glinternalFormat, levelWidth, 
+									levelHeight, mTextureArraySize, 0, glformat, gltype, NULL);
+							}
+
+							glTexSubImage3D(mTargetType, level, 0, 0, arrIndex, levelWidth, levelHeight, 1,
+								glformat, gltype, (NULL == initData) ? NULL : initData[arrIndex * mMipMaps + level].pData);
+						}
+						else
+						{
+							glTexImage2D(mTargetType, level, glinternalFormat, levelWidth, levelHeight, 0, glformat, gltype,
+								(NULL == initData) ? NULL : initData[arrIndex * mMipMaps + level].pData);
 						}
 
-						glTexSubImage3D(mTargetType, level, 0, 0, arrIndex, levelWidth, levelHeight, 1,
-							glformat, gltype, (NULL == initData) ? NULL : initData[arrIndex * mMipMaps + level].pData);
 					}
-					else
-					{
-						glTexImage2D(mTargetType, level, glinternalFormat, levelWidth, levelHeight, 0, glformat, gltype,
-							(NULL == initData) ? NULL : initData[arrIndex * mMipMaps + level].pData);
-					}
-
 				}
 			}
-		}
+		}	
 	}
 	else
 	{

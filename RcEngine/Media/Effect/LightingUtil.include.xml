@@ -73,9 +73,9 @@ float ChebyshevUpperBound(vec2 moments, float depth, float minVariance)
 	//return max(p, pmax);
 }
 
-float CalculateVarianceShadow(vec3 shadowTexCoord, sampler2D shadowMap)
+float CalculateVarianceShadow(vec3 shadowTexCoord, float splitIdx, sampler2DArray shadowMap)
 {
-	vec2 moments = texture2D(shadowMap, shadowTexCoord.xy).rg;
+	vec2 moments = texture(shadowMap, vec3(shadowTexCoord.xy, splitIdx)).rg;
 	return ChebyshevUpperBound(moments, shadowTexCoord.z, 0.0001);
 }
 

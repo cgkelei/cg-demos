@@ -105,7 +105,7 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& de
 	if (mBatches.find(texture) == mBatches.end())
 	{
 		spriteEntity = Context::GetSingleton().GetSceneManager().CreateSprite(texture, 
-			std::static_pointer_cast<Material>(mSpriteMaterial->Clone()));
+			std::static_pointer_cast<Material>(mSpriteMaterial->Clone()));	
 		mBatches[texture] = spriteEntity;
 	}
 	else
@@ -113,7 +113,7 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& de
 		spriteEntity = static_cast<Sprite* >(mBatches[texture]);
 	}
 	assert(spriteEntity);
-
+	
 	float2 topLeft = float2(dest.Left(), dest.Top());
 	float2 topRight = float2(dest.Right(), dest.Top());
 	float2 bottomLeft = float2(dest.Left(), dest.Bottom());

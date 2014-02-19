@@ -15,6 +15,7 @@ OpenGLGraphicsBuffer::OpenGLGraphicsBuffer(BufferUsage usage, uint32_t accessHin
 		glBufferData(mTarget, static_cast<GLsizeiptr>(mSizeInBytes),
 			initData->pData, (BU_Static == mBufferUsage) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
 	}
+
 	glBindBuffer(mTarget, 0);
 }
 

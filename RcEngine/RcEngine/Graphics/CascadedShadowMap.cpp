@@ -149,8 +149,11 @@ void CalculateLightNearFar( BoundingBoxf& lightFrustumBound, const float3 sceneA
 						float ratio01 = hitRatio / (triangleList[iTri].pt[1][component] - triangleList[iTri].pt[0][component]);
 						float ratio02 = hitRatio / (triangleList[iTri].pt[2][component] - triangleList[iTri].pt[0][component]);
 
-						triangleList[iTri].pt[1] = Lerp(triangleList[iTri].pt[0], triangleList[iTri].pt[1], ratio01);
-						triangleList[iTri].pt[2] = Lerp(triangleList[iTri].pt[0], triangleList[iTri].pt[2], ratio02);
+						float3 v1 = Lerp(triangleList[iTri].pt[0], triangleList[iTri].pt[1], ratio01);
+						float3 v2 = Lerp(triangleList[iTri].pt[0], triangleList[iTri].pt[2], ratio02);
+
+						triangleList[iTri].pt[1] = v2;
+						triangleList[iTri].pt[2] = v1;
 					}
 					else if( insideVertCount == 2 ) 
 					{ // 2 in  // tesselate into 2 triangles
@@ -167,8 +170,8 @@ void CalculateLightNearFar( BoundingBoxf& lightFrustumBound, const float3 sceneA
 						float ratio20 = fitRatio / (triangleList[iTri].pt[0][component] - triangleList[iTri].pt[2][component]);
 						float ratio21 = fitRatio / (triangleList[iTri].pt[1][component] - triangleList[iTri].pt[2][component]);
 
-						float3 v1 = Lerp(triangleList[iTri].pt[2], triangleList[iTri].pt[0], ratio20);
-						float3 v2 = Lerp(triangleList[iTri].pt[2], triangleList[iTri].pt[1], ratio21);
+						float3 v2 = Lerp(triangleList[iTri].pt[2], triangleList[iTri].pt[0], ratio20);
+						float3 v1 = Lerp(triangleList[iTri].pt[2], triangleList[iTri].pt[1], ratio21);
 
 						// Add new triangles.
 						triangleList[iTri+1].pt[0] = triangleList[iTri].pt[0];
@@ -229,8 +232,6 @@ void CascadedShadowMap::UpdateShadowMapSize( const Light& light )
 	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
 
 	uint32_t numCascade = light.GetShadowCascades();
-	uint32_t shadowTexWidth = SHADOW_MAP_SIZE * numCascade;
-	uint32_t shadowTexHeight = SHADOW_MAP_SIZE;
 
 	PixelFormat shadowTexFmt = PF_R32F;
 
@@ -242,38 +243,30 @@ void CascadedShadowMap::UpdateShadowMapSize( const Light& light )
 	shadowTexFmt = PF_R32F;
 #endif
 
-
-	if (!mShadowTexture)
+	if (!mShadowFrameBuffer)
 	{
-		mShadowFrameBuffer = factory.CreateFrameBuffer(shadowTexWidth, shadowTexHeight);
-		mShadowDepth = factory.CreateTexture2D(shadowTexWidth, shadowTexHeight, PF_Depth32, 1, 1, 1, 0, EAH_GPU_Write, NULL);
-		mShadowTexture = factory.CreateTexture2D(shadowTexWidth, shadowTexHeight, shadowTexFmt, 1, 0, 1, 0, EAH_GPU_Write | EAH_GPU_Read, NULL);
-
+		mShadowFrameBuffer = factory.CreateFrameBuffer(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 		device.BindFrameBuffer(mShadowFrameBuffer);
-		mShadowFrameBuffer->Attach(ATT_DepthStencil, factory.CreateDepthStencilView(mShadowDepth, 0, 0));
-		mShadowFrameBuffer->Attach(ATT_Color0, factory.CreateRenderTargetView2D(mShadowTexture, 0, 0));
-		mShadowFrameBuffer->Clear(CF_Depth | CF_Color, ColorRGBA(1, 1, 1, 1), 1.0f, 0);
-	}
-	else if (mShadowTexture->GetWidth(0) != shadowTexWidth || mShadowTexture->GetHeight(0) != shadowTexHeight)
-	{
-		mShadowFrameBuffer->Resize(shadowTexWidth, shadowTexHeight);
-		mShadowDepth = factory.CreateTexture2D(shadowTexWidth, shadowTexHeight, PF_Depth32, 1, 1, 1, 0, EAH_GPU_Write, NULL);
-		mShadowTexture = factory.CreateTexture2D(shadowTexWidth, shadowTexHeight, shadowTexFmt, 1, 0, 1, 0, EAH_GPU_Write | EAH_GPU_Read, NULL);
 
-		device.BindFrameBuffer(mShadowFrameBuffer);
-		mShadowFrameBuffer->Attach(ATT_DepthStencil, factory.CreateDepthStencilView(mShadowDepth, 0, 0));
-		mShadowFrameBuffer->Attach(ATT_Color0, factory.CreateRenderTargetView2D(mShadowTexture, 0, 0));
-		mShadowFrameBuffer->Clear(CF_Depth | CF_Color, ColorRGBA(1, 1, 1, 1), 1.0f, 0);
+		mShadowDepth = factory.CreateTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, PF_Depth32, 1, 1, 1, 0, EAH_GPU_Write, NULL);
+		mShadowFrameBuffer->Attach(ATT_DepthStencil, factory.CreateDepthStencilView(mShadowDepth, 0, 0));	
+
+		mShadowTexture = factory.CreateTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, shadowTexFmt, numCascade, 0, 1, 0, EAH_GPU_Write | EAH_GPU_Read, NULL);
+		bool b = mShadowFrameBuffer->CheckFramebufferStatus();
+
+		for (uint32_t i = 0; i < numCascade; ++i)
+			mShadowSplitsRTV.push_back(factory.CreateRenderTargetView2D(mShadowTexture, i, 0));	
 	}
-	else
+	else if (mShadowTexture->GetTextureArraySize() != numCascade)
 	{
-		mShadowFrameBuffer->SetViewport(Viewport(0, 0, shadowTexWidth, shadowTexHeight));
-		device.BindFrameBuffer(mShadowFrameBuffer);	
-		mShadowFrameBuffer->Clear(CF_Depth | CF_Color, ColorRGBA(1, 1, 1, 1), 1.0f, 0);
+		mShadowTexture = factory.CreateTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, shadowTexFmt, numCascade, 0, 1, 0, EAH_GPU_Write | EAH_GPU_Read, NULL);
+		
+		mShadowSplitsRTV.clear();
+		for (uint32_t i = 0; i < numCascade; ++i)
+			mShadowSplitsRTV.push_back(factory.CreateRenderTargetView2D(mShadowTexture, i, 0));
 	}
 
-	for (uint32_t i = 0; i < numCascade; ++i)
-		mShadowVP[i] = Viewport(SHADOW_MAP_SIZE*i, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+
 }
 
 void CascadedShadowMap::UpdateShadowMatrix( const Camera& camera, const Light& light )
@@ -354,8 +347,52 @@ void CascadedShadowMap::UpdateShadowMatrix( const Camera& camera, const Light& l
 			boundSplit.Merge(Corners[nearSplitIdx][i]);
 			boundSplit.Merge(Corners[farSplitIdx][i]);
 		}
+
+		//float3 vWorldUnitsPerTexel = 0.0f;
+		//{
+		//	// We calculate a looser bound based on the size of the PCF blur.  This ensures us that we're 
+		//	// sampling within the correct map.
+		//	float fScaleDuetoBlureAMT = ( (float)( 3 * 2 + 1 ) /(float)1024 );
+		//	float fNormalizeByBufferSize = ( 1.0f / (float)1024 );
+
+		//	// We calculate the offsets as a percentage of the bound.
+		//	float3 vBoarderOffset = boundSplit.Max - boundSplit.Min;
+		//	vBoarderOffset *= 0.5;
+		//	vBoarderOffset *= fScaleDuetoBlureAMT;
+		//	boundSplit.Max += vBoarderOffset;
+		//	boundSplit.Min -= vBoarderOffset;
+
+		//	// The world units per texel are used to snap  the orthographic projection
+		//	// to texel sized increments.  
+		//	// Because we're fitting tighly to the cascades, the shimmering shadow edges will still be present when the 
+		//	// camera rotates.  However, when zooming in or strafing the shadow edge will not shimmer.
+		//	vWorldUnitsPerTexel = boundSplit.Max - boundSplit.Min;
+		//	vWorldUnitsPerTexel *= fNormalizeByBufferSize;
+		//}
+
+
+		//if( 1 ) 
+		//{
+
+		//	// We snape the camera to 1 pixel increments so that moving the camera does not cause the shadows to jitter.
+		//	// This is a matter of integer dividing by the world space size of a texel
+		//	boundSplit.Min.X() /= vWorldUnitsPerTexel.X();
+		//	boundSplit.Min.X() = floorf( boundSplit.Min.X()  );
+		//	boundSplit.Min.X() *= vWorldUnitsPerTexel.X();
+		//	boundSplit.Min.Y() /= vWorldUnitsPerTexel.Y();
+		//	boundSplit.Min.Y() = floorf( boundSplit.Min.Y()  );
+		//	boundSplit.Min.Y() *= vWorldUnitsPerTexel.Y();
+
+		//	boundSplit.Max.X() /= vWorldUnitsPerTexel.X();
+		//	boundSplit.Max.X() = floorf( boundSplit.Max.X()  );
+		//	boundSplit.Max.X() *= vWorldUnitsPerTexel.X();
+		//	boundSplit.Max.Y() /= vWorldUnitsPerTexel.Y();
+		//	boundSplit.Max.Y() = floorf( boundSplit.Max.Y()  );
+		//	boundSplit.Max.Y() *= vWorldUnitsPerTexel.Y();
+		//}
+
 		
-		// Calculate SceneAABB (min, max) depth in light space
+		 //Calculate SceneAABB (min, max) depth in light space
 		//float minZLightSpace = FLT_MAX;
 		//float maxZLightSpace = -FLT_MAX;
 		//for (int i = 0; i < 8; ++i)

@@ -20,7 +20,7 @@ public:
 	TextureAddressMode		   AddressU;
 	TextureAddressMode		   AddressV;
 	TextureAddressMode		   AddressW;
-	float                      MipMapLODBias;
+	float                      MipLODBias;
 	uint8_t                    MaxAnisotropy;
 	CompareFunction            ComparisonFunc;
 	float                      MinLOD;
