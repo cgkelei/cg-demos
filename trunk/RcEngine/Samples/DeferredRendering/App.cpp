@@ -262,7 +262,7 @@ void App::SetupLights()
 	mDirLight->SetLightType(LT_Directional);
 	mDirLight->SetDirection(float3(0, -8, -1));
 	mDirLight->SetLightColor(float3(1, 1, 1));
-	mDirLight->SetCastShadow(true);
+	mDirLight->SetCastShadow(false);
 	sceneMan.GetRootSceneNode()->AttachObject(mDirLight);
 
 	//mPointLight = sceneMan.CreateLight("Point");

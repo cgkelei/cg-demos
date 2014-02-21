@@ -21,12 +21,14 @@ struct ExportSettings
 	bool ExportSkeleton;
 	bool ExportAnimation; 
 	bool MergeScene;
+	bool MergeWithSameMaterial; // Merge sub mesh with same material
 	AxisSystem AxisSystem;
 
 	ExportSettings()
 		: ExportSkeleton(true),
 		  ExportAnimation(true),
 		  MergeScene(false),
+		  MergeWithSameMaterial(true),
 		  AxisSystem(Axis_DirectX)
 	{}
 };
@@ -223,6 +225,7 @@ public:
 	void CollectSkeletons();
 
 	void MergeScene();
+	void MergeSubMeshWithSameMaterial();
 
 	void BuildAndSaveXML();
 	void BuildAndSaveBinary();	
