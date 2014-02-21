@@ -565,6 +565,9 @@ void FbxProcesser::ProcessScene( )
 
 	if (g_ExportSettings.MergeScene)
 		MergeScene();
+
+	if (g_ExportSettings.MergeWithSameMaterial)
+		MergeSubMeshWithSameMaterial();
 }
 
 void FbxProcesser::RunCommand( const vector<String>& arguments )
@@ -870,6 +873,16 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 					vertex.Binormal = BakeDirection(vertex.Binormal, nodeGlobalTransform);
 					vertex.Binormal.Normalize();	
 				}
+
+				// test tangent
+				if (vertexFlag & Vertex::eTangent)
+				{
+					float dot1 = Dot(vertex.Tangent, vertex.Binormal);
+					float dot2 = Dot(vertex.Tangent, vertex.Normal);
+					float dot3 = Dot(vertex.Binormal, vertex.Normal);
+					printf("dot1=%f, dot2=%f, dot3=%f\n", dot1, dot2, dot3);
+				}
+
 
 				size_t index;
 
@@ -1777,8 +1790,84 @@ void FbxProcesser::MergeScene()
 				mSceneMeshes[0]->MeshParts.push_back(part);
 		}
 
-		mSceneMeshes.resize(1);		
+		mSceneMeshes.resize(1);	
 	}	
+}
+
+void FbxProcesser::MergeSubMeshWithSameMaterial()
+{
+	for (size_t mi = 0; mi < mSceneMeshes.size(); ++mi)
+	{
+		MeshData& mesh  = *(mSceneMeshes[mi]);
+
+		std::vector<shared_ptr<MeshPartData>> mergedList;
+
+		shared_ptr<MeshPartData> subMesh;
+
+		bool merging = false;
+		if (mesh.MeshParts.size())
+		{
+			subMesh = mesh.MeshParts.back();
+			mesh.MeshParts.pop_back();
+			merging = true;
+		}
+
+		while (merging)
+		{
+			auto it = mesh.MeshParts.begin();
+			while (it != mesh.MeshParts.end())
+			{
+				shared_ptr<MeshPartData> testMesh = *it;
+
+				bool canMerge = false;
+				
+				// Must have same material
+				canMerge = (subMesh->MaterialName == testMesh->MaterialName); 
+				canMerge &= (subMesh->Indices.size() + testMesh->Indices.size() < UINT_MAX);
+				canMerge &= (subMesh->VertexDecl == testMesh->VertexDecl);
+
+				if (canMerge)
+				{
+					size_t baseIndex = subMesh->Vertices.size();
+
+					subMesh->Vertices.reserve(subMesh->Vertices.size() + testMesh->Vertices.size());
+					subMesh->Indices.reserve(testMesh->Indices.size() + testMesh->Indices.size());
+					for (Vertex& vertex : testMesh->Vertices)
+					{
+						vertex.Index += baseIndex;
+						subMesh->Vertices.push_back(vertex);
+					}
+
+					for (const uint32_t& index : testMesh->Indices)
+					{
+						subMesh->Indices.push_back(baseIndex + index);
+					}
+
+					subMesh->Bound.Merge(testMesh->Bound);
+
+					it = mesh.MeshParts.erase(it);
+				}
+				else 
+					++it;
+			}
+
+			mergedList.push_back(subMesh);
+
+			if (mesh.MeshParts.size())
+			{
+				subMesh = mesh.MeshParts.back();
+				mesh.MeshParts.pop_back();
+			}
+			else
+			{
+				// finished
+				merging = false;
+			}
+		}
+
+		mesh.MeshParts.swap(mergedList);
+	}
+
 }
 
 int main()
@@ -1799,7 +1888,7 @@ int main()
     g_ExportSettings.MergeScene = true;
 	g_ExportSettings.AxisSystem = Axis_OpenGL;
 
-	if (fbxProcesser.LoadScene("Tree/Tree.FBX"))
+	if (fbxProcesser.LoadScene("Sponza/Sponza.FBX"))
 	{
 		fbxProcesser.ProcessScene();
 		//fbxProcesser.BuildAndSaveXML();
