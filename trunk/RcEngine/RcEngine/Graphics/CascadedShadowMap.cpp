@@ -6,12 +6,45 @@
 #include <Graphics/RenderDevice.h>
 #include <Graphics/RenderFactory.h>
 #include <Graphics/Texture.h>
+#include <Graphics/Effect.h>
 #include <Graphics/Camera.h>
+#include <Graphics/Material.h>
+#include <Graphics/RenderOperation.h>
+#include <Resource/ResourceManager.h>
 #include <Math/MathUtil.h>
 
 namespace {
 
 using namespace RcEngine;
+
+shared_ptr<RenderOperation> BuildFSQuadShape()
+{
+	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
+
+	// Fullscreen polygon
+	float vertices[6] = {  // x, y, z
+		-1.0f, 1.0f, 3.0f, 1.0f, -1.0f, -3.0f, 
+	};
+
+	ElementInitData vInitData;
+	vInitData.pData = vertices;
+	vInitData.rowPitch = 6 * sizeof(float);
+	vInitData.slicePitch = 0;
+	shared_ptr<GraphicsBuffer> vertexBuffer= factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
+
+	VertexElement vdsc[] = {
+		VertexElement(0, VEF_Float2,  VEU_Position, 0),
+	};
+	shared_ptr<VertexDeclaration> vertexDecl = factory.CreateVertexDeclaration(vdsc, 1);
+
+	shared_ptr<RenderOperation> mRenderOperation(new RenderOperation);
+
+	mRenderOperation->PrimitiveType = PT_Triangle_List;
+	mRenderOperation->BindVertexStream(vertexBuffer, vertexDecl);
+	mRenderOperation->SetVertexRange(0, 3);
+
+	return mRenderOperation;
+}
 
 void FrustumPlaneExtraction(const Camera& camera, float camZ, float3 corner[4])
 {
@@ -219,17 +252,24 @@ void CalculateLightNearFar( BoundingBoxf& lightFrustumBound, const float3 sceneA
 
 namespace RcEngine {
 
-CascadedShadowMap::CascadedShadowMap()
+CascadedShadowMap::CascadedShadowMap(RenderDevice* device)
+	: mDevice(device)
 {
 	mLightViewProj.resize(MAX_CASCADES);
 	for (int i = 0; i < MAX_CASCADES; ++i)
 		mLightCamera.push_back(std::make_shared<Camera>());
+
+	// Load shade map blur effect
+	ResourceManager& resMan = ResourceManager::GetSingleton();
+	mBlurMaterial = std::static_pointer_cast<Material>(resMan.GetResourceByName(RT_Material, "ShadowMapBlur.material.xml", "General"));
+	mBlurMaterial->Load();
+
+	mFSQuadShape = BuildFSQuadShape();
 }
 
 void CascadedShadowMap::UpdateShadowMapSize( const Light& light )
 {
-	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
-	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
+	RenderFactory* factory = mDevice->GetRenderFactory();
 
 	uint32_t numCascade = light.GetShadowCascades();
 
@@ -245,37 +285,106 @@ void CascadedShadowMap::UpdateShadowMapSize( const Light& light )
 
 	if (!mShadowFrameBuffer)
 	{
-		mShadowFrameBuffer = factory.CreateFrameBuffer(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
-		device.BindFrameBuffer(mShadowFrameBuffer);
+		mShadowFrameBuffer = factory->CreateFrameBuffer(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+		mDevice->BindFrameBuffer(mShadowFrameBuffer);
 
-		mShadowDepth = factory.CreateTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, PF_Depth32, 1, 1, 1, 0, EAH_GPU_Write, NULL);
-		mShadowFrameBuffer->Attach(ATT_DepthStencil, factory.CreateDepthStencilView(mShadowDepth, 0, 0));	
+		mShadowDepth = factory->CreateTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, PF_Depth32, 1, 1, 1, 0, EAH_GPU_Write, NULL);
+		mShadowFrameBuffer->Attach(ATT_DepthStencil, factory->CreateDepthStencilView(mShadowDepth, 0, 0));	
 
-		mShadowTexture = factory.CreateTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, shadowTexFmt, numCascade, 0, 1, 0, EAH_GPU_Write | EAH_GPU_Read, NULL);
-		bool b = mShadowFrameBuffer->CheckFramebufferStatus();
-
+		mShadowTexture = factory->CreateTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, shadowTexFmt, numCascade, 0, 1, 0, EAH_GPU_Write | EAH_GPU_Read, NULL);
+		
 		for (uint32_t i = 0; i < numCascade; ++i)
-			mShadowSplitsRTV.push_back(factory.CreateRenderTargetView2D(mShadowTexture, i, 0));	
+			mShadowSplitsRTV.push_back(factory->CreateRenderTargetView2D(mShadowTexture, i, 0));	
+		
+		mShadowMapTempBlur = factory->CreateTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, shadowTexFmt, 1, 1, 1, 0, EAH_GPU_Write | EAH_GPU_Read | EAH_CPU_Read, NULL);
+		mShadowMapTempBlurRTV = factory->CreateRenderTargetView2D(mShadowMapTempBlur, 0, 0);
 	}
 	else if (mShadowTexture->GetTextureArraySize() != numCascade)
 	{
-		mShadowTexture = factory.CreateTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, shadowTexFmt, numCascade, 0, 1, 0, EAH_GPU_Write | EAH_GPU_Read, NULL);
+		mShadowTexture = factory->CreateTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, shadowTexFmt, numCascade, 0, 1, 0, EAH_GPU_Write | EAH_GPU_Read, NULL);
 		
 		mShadowSplitsRTV.clear();
 		for (uint32_t i = 0; i < numCascade; ++i)
-			mShadowSplitsRTV.push_back(factory.CreateRenderTargetView2D(mShadowTexture, i, 0));
+			mShadowSplitsRTV.push_back(factory->CreateRenderTargetView2D(mShadowTexture, i, 0));
+	}
+}
+
+void CascadedShadowMap::MakeCascadedShadowMap(const Light& light)
+{
+	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
+	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
+
+	const shared_ptr<FrameBuffer>& currFrameBuffer = device.GetCurrentFrameBuffer();
+	const Camera& viewCamera = *currFrameBuffer->GetCamera();
+
+	 // Create shadow texture if not. or resize it if shadow map size change.
+	UpdateShadowMapSize(light);
+
+	// Update shadow map matrix
+	UpdateShadowMatrix(viewCamera, light);	
+
+	const String shadowMapTech = "VSM";
+
+	// Draw all shadow map
+	for (uint32_t i = 0; i < light.GetShadowCascades(); ++i)
+	{		
+		mShadowFrameBuffer->SetCamera(mLightCamera[i]);
+
+		mDevice->BindFrameBuffer(mShadowFrameBuffer);	
+		mShadowFrameBuffer->Attach(ATT_Color0, mShadowSplitsRTV[i]);
+		mShadowFrameBuffer->Clear(CF_Depth | CF_Color, ColorRGBA(1, 1, 1, 1), 1.0f, 0);
+		bool b = mShadowFrameBuffer->CheckFramebufferStatus();
+
+		// Update light render queue 
+		sceneMan.UpdateRenderQueue(*mLightCamera[i], RO_None);
+
+		RenderQueue* renderQueue = sceneMan.GetRenderQueue();	
+		RenderBucket& opaqueBucket = renderQueue->GetRenderBucket(RenderQueue::BucketOpaque);
+		if (opaqueBucket.size())
+		{
+			std::sort(opaqueBucket.begin(), opaqueBucket.end(), [](const RenderQueueItem& lhs, const RenderQueueItem& rhs) {
+				return lhs.SortKey < rhs.SortKey; });
+
+				for (const RenderQueueItem& renderItem : opaqueBucket) 
+				{
+					renderItem.Renderable->GetMaterial()->SetCurrentTechnique(shadowMapTech);
+					renderItem.Renderable->Render();
+				}
+		}
 	}
 
+	// Blur shadow map
+	for (uint32_t i = 0; i < light.GetShadowCascades(); ++i)
+	{
+		mDevice->BindFrameBuffer(mShadowFrameBuffer);	
+		mShadowFrameBuffer->Attach(ATT_Color0, mShadowMapTempBlurRTV);
+		//bool b = mShadowFrameBuffer->CheckFramebufferStatus();
 
+		mBlurMaterial->SetCurrentTechnique("ShadowMapBlurX");
+		mBlurMaterial->SetTexture("InputTex", mShadowTexture);
+		mBlurMaterial->GetEffect()->GetParameterByName("ArraySlice")->SetValue(float(i));
+		mDevice->Render(*mBlurMaterial->GetCurrentTechnique(), *mFSQuadShape);
+
+		//String texFile = "E:/BlurX" + std::to_string(i) + ".pfm";
+		//mDevice->GetRenderFactory()->SaveTexture2D(texFile, mShadowMapTempBlur, 0, 0);
+
+		mShadowFrameBuffer->Attach(ATT_Color0, mShadowSplitsRTV[i]);
+		mBlurMaterial->SetTexture("InputTex", mShadowMapTempBlur);
+		mBlurMaterial->SetCurrentTechnique("ShadowMapBlurY");
+		mDevice->Render(*mBlurMaterial->GetCurrentTechnique(), *mFSQuadShape);
+	}
+	
+	
+	mShadowTexture->BuildMipMap();
+
+
+
+	mDevice->BindFrameBuffer(currFrameBuffer);	
+	//mDevice->GetRenderFactory()->SaveTexture2D("E:/Depth", mCascadedShadowMap->mShadowTexture, 0, 0);
 }
 
 void CascadedShadowMap::UpdateShadowMatrix( const Camera& camera, const Light& light )
 {
-	/**
-	 * Create shadow texture if not. or resize it if shadow map size change.
-	 */
-	UpdateShadowMapSize(light);
-
 	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
 	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
 

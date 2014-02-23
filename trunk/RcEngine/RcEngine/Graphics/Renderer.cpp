@@ -234,7 +234,7 @@ void Renderer::Init()
 	mSpotLightShape = BuildSpotLightShape();
 
 	// Build shadow map
-	mCascadedShadowMap = new CascadedShadowMap;
+	mCascadedShadowMap = new CascadedShadowMap(mDevice);
 
 }
 
@@ -415,7 +415,7 @@ void Renderer::DrawGeometry( const String& tech, const  String& matClass, Render
 
 	//const shared_ptr<Texture>& rt0 = mCurrPipeline->GetRenderTarget(0, 1);
 	//const shared_ptr<Texture>& rt1 = mCurrPipeline->GetRenderTarget(0, 2);
-	//device.GetRenderFactory()->SaveTexture2D("E:/Normal.pfm", rt0, 0, 0);
+	//device.GetRenderFactory()->SaveTexture2D("E:/Normal.tga", rt0, 0, 0);
 	//device.GetRenderFactory()->SaveTexture2D("E:/GBuffer1.tga", rt1, 0, 0);
 }
 
@@ -439,12 +439,6 @@ void Renderer::DrawLightShape( const String& tech )
 		default:
 			break;
 		}
-		
-		//const shared_ptr<Texture>& rt = mCurrPipeline->GetRenderTarget(1, 0);
-		//device.GetRenderFactory()->SaveTexture2D("E:/Stencil.pfm", rt, 0, 0);
-
-		//const shared_ptr<Texture>& rt = mCurrPipeline->GetRenderTarget(1, 1);
-		//device.GetRenderFactory()->SaveTexture2D("E:/Lit.pfm", rt, 0, 0);
 	}
 }
 
@@ -456,28 +450,8 @@ void Renderer::DrawDirectionalLightShape( Light* light, const String& tech )
 	
 	if (bCastShadow)
 	{
-		const shared_ptr<FrameBuffer>& currFrameBuffer = mDevice->GetCurrentFrameBuffer();
-
-		// Update shadow map matrix
-		mCascadedShadowMap->UpdateShadowMatrix(currCamera, *light);	
-		shared_ptr<FrameBuffer>& shadowFrameBuffer = mCascadedShadowMap->mShadowFrameBuffer;
-
-		// Draw all shadow map
-		for (uint32_t i = 0; i < light->GetShadowCascades(); ++i)
-		{		
-			shadowFrameBuffer->SetCamera(mCascadedShadowMap->mLightCamera[i]);
-			
-			mDevice->BindFrameBuffer(shadowFrameBuffer);	
-			shadowFrameBuffer->Attach(ATT_Color0, mCascadedShadowMap->mShadowSplitsRTV[i]);
-			shadowFrameBuffer->Clear(CF_Depth | CF_Color, ColorRGBA(1, 1, 1, 1), 1.0f, 0);
-
-			bool b = shadowFrameBuffer->CheckFramebufferStatus();
-			DrawGeometry("VSM", "", RO_None);
-		}
-
-		mDevice->BindFrameBuffer(currFrameBuffer);	
-		mCascadedShadowMap->mShadowTexture->BuildMipMap();
-		//mDevice->GetRenderFactory()->SaveTexture2D("E:/Depth", mCascadedShadowMap->mShadowTexture, 0, 0);
+		// Generate shadow map
+		mCascadedShadowMap->MakeCascadedShadowMap(*light);
 	}
 
 	const float3& lightColor = light->GetLightColor();
@@ -495,11 +469,9 @@ void Renderer::DrawDirectionalLightShape( Light* light, const String& tech )
 	shared_ptr<Effect> effect = mCurrMaterial->GetEffect();
 	effect->GetParameterByName("ShadowEnabled")->SetValue(bCastShadow);
 	if (bCastShadow)
-	{
-		
+	{	
 		effect->GetParameterByName("ShadowMatrix")->SetValue(mCascadedShadowMap->mLightViewProj);
 		effect->GetParameterByName("NumCascades")->SetValue((int)light->GetShadowCascades());
-		effect->GetParameterByName("ShadowMatrix")->SetValue(mCascadedShadowMap->mLightViewProj);
 		effect->GetParameterByName("BorderPaddingMaxMin")->SetValue(float2(0, 1));
 		//effect->GetParameterByName("Bias")->SetValue(0.005f);
 		mCurrMaterial->SetTexture("ShadowTex", mCascadedShadowMap->mShadowTexture);

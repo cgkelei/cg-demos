@@ -669,8 +669,6 @@ void OpenGLShaderProgram::CaptureAllParameter()
 	glGetProgramiv(mOGLProgramObject, GL_ACTIVE_UNIFORMS, &activeUniforms);
 	if (activeUniforms > 0)
 	{
-		mParameterBinds.resize(activeUniforms);
-
 		GLint maxLength;
 		glGetProgramiv(mOGLProgramObject, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxLength);
 		vector<char> maxName(maxLength);
@@ -695,6 +693,15 @@ void OpenGLShaderProgram::CaptureAllParameter()
 			}
 
 			String actualName(&maxName[0], length);
+
+			/**
+			 * Hack:
+			 * OpenGL seems to treat const variable as active uniform with a modified name.
+			 * Don't retrieve it.
+			 */
+			if (!isalpha(actualName[0]))
+				continue;
+
 			GLint location = glGetUniformLocation(mOGLProgramObject, actualName.c_str());
 
 			EffectParameterType effectParamType;
@@ -705,7 +712,7 @@ void OpenGLShaderProgram::CaptureAllParameter()
 
 			EffectParameter* effectParam = mEffect.FetchShaderParameter(actualName, effectParamType, isArray);
 
-			mParameterBinds[i] = GetShaderParamBindFunc(location, effectParam, isArray);
+			mParameterBinds.push_back( GetShaderParamBindFunc(location, effectParam, isArray) );
 
 
 		/*	switch(effectParamType)
