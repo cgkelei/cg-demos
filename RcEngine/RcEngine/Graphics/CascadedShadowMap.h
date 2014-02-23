@@ -15,27 +15,37 @@ namespace RcEngine {
 class _ApiExport CascadedShadowMap
 {
 public:
-	CascadedShadowMap();
+	CascadedShadowMap(RenderDevice* device);
 	virtual ~CascadedShadowMap() {}
 
 	void UpdateShadowMatrix(const Camera& camera, const Light& directionLight);
+	void MakeCascadedShadowMap(const Light& light);
 
 private:
 	void UpdateShadowMapSize(const Light& light);
 
-public:	
+private:	
+	RenderDevice* mDevice;
+
 	float mSplitPlanes[MAX_CASCADES+1];
 
-	std::vector<float4x4> mLightViewProj;
-	
 	// Used in frame buffer camera
 	std::vector<shared_ptr<Camera>> mLightCamera;
-
 	std::vector<shared_ptr<RenderView>> mShadowSplitsRTV;
-	
+
 	shared_ptr<FrameBuffer> mShadowFrameBuffer;
-	shared_ptr<Texture> mShadowTexture;
 	shared_ptr<Texture> mShadowDepth;
+	shared_ptr<Texture> mShadowMapTempBlur;
+	shared_ptr<RenderView> mShadowMapTempBlurRTV;
+
+	shared_ptr<Material> mBlurMaterial;
+
+	// FSQuad
+	shared_ptr<RenderOperation> mFSQuadShape;
+
+public:
+	std::vector<float4x4> mLightViewProj;
+	shared_ptr<Texture> mShadowTexture;
 };
 
 

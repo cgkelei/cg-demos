@@ -815,7 +815,8 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 				for (size_t uv_idx = 0; uv_idx  < uvSets.size(); ++uv_idx)
 				{
 					FbxVector2 uv;
-					if( pMesh->GetPolygonVertexUV(polyIndex, vi, uvSets[uv_idx].c_str(), uv) )
+					bool hadUV;
+					if( pMesh->GetPolygonVertexUV(polyIndex, vi, uvSets[uv_idx].c_str(), uv, hadUV) )
 					{
 						// flip the y-coordinate to match DirectX
 						uv[1] = 1 - uv[1];
@@ -875,13 +876,13 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 				}
 
 				// test tangent
-				if (vertexFlag & Vertex::eTangent)
+				/*if (vertexFlag & Vertex::eTangent)
 				{
 					float dot1 = Dot(vertex.Tangent, vertex.Binormal);
 					float dot2 = Dot(vertex.Tangent, vertex.Normal);
 					float dot3 = Dot(vertex.Binormal, vertex.Normal);
 					printf("dot1=%f, dot2=%f, dot3=%f\n", dot1, dot2, dot3);
-				}
+				}*/
 
 
 				size_t index;

@@ -490,6 +490,7 @@ void OpenGLRenderFactory::SaveTexture2D( const String& texFile, const shared_ptr
 			}
 
 			WriteTGA(texFile.c_str(), &imageData[0], w, h);
+			texture->Unmap2D(arrayIndex, level);
 	}
 	else if (texture->GetTextureFormat() == PF_A8B8G8R8)
 	{
@@ -514,6 +515,7 @@ void OpenGLRenderFactory::SaveTexture2D( const String& texFile, const shared_ptr
 			}
 
 			WriteTGA(texFile.c_str(), &imageData[0], w, h);
+			texture->Unmap2D(arrayIndex, level);
 	}
 	else if (texture->GetTextureFormat() == PF_R8G8B8)
 	{
@@ -537,6 +539,7 @@ void OpenGLRenderFactory::SaveTexture2D( const String& texFile, const shared_ptr
 			}
 
 			WriteTGA(texFile.c_str(), &imageData[0], w, h);
+			texture->Unmap2D(arrayIndex, level);
 	}
 	else if (texture->GetTextureFormat() == PF_Alpha8)
 	{
@@ -561,6 +564,7 @@ void OpenGLRenderFactory::SaveTexture2D( const String& texFile, const shared_ptr
 			}
 
 			WriteTGA(texFile.c_str(), &imageData[0], w, h);
+			texture->Unmap2D(arrayIndex, level);
 	}
 	else if (texture->GetTextureFormat() == PF_A32B32G32R32F)
 	{
@@ -587,6 +591,7 @@ void OpenGLRenderFactory::SaveTexture2D( const String& texFile, const shared_ptr
 		}
 
 		WritePfm(texFile.c_str(), w, h, 3, &temp[0]);
+		texture->Unmap2D(arrayIndex, level);
 		
 	}
 	else if (texture->GetTextureFormat() == PF_Depth32 || texture->GetTextureFormat() == PF_R32F)
@@ -608,6 +613,7 @@ void OpenGLRenderFactory::SaveTexture2D( const String& texFile, const shared_ptr
 		}
 
 		WritePfm(texFile.c_str(), w, h, 1, &temp[0]);
+		texture->Unmap2D(arrayIndex, level);
 	}
 	else if (texture->GetTextureFormat() == PF_G32R32F)
 	{
@@ -618,26 +624,20 @@ void OpenGLRenderFactory::SaveTexture2D( const String& texFile, const shared_ptr
 		float* pixel = (float*)pData;
 
 		vector<float> temp;
-		temp.resize(w * h / 3);
+		temp.resize(w * h);
 		float* imageData = &temp[0];
 
-		String depthImage;
-		for (int m = 0; m < 3; ++m)
-		{
-			for (uint32_t j = 0; j < h; j++)
-				for(uint32_t i = 0; i < w/3; i ++)
-				{
-					float r = pixel[(j * w + i + w/3*m)*2+0];
-					float g = pixel[(j * w + i + w/3*m)*2+1];
+		for (uint32_t j = 0; j < h; j++)
+			for(uint32_t i = 0; i < w; i ++)
+			{
+				float r = pixel[(j * w + i)*2+0];
+				float g = pixel[(j * w + i)*2+1];
 
-					*imageData++ = r;
-				}
+				*imageData++ = r;
+			}
 			
-			depthImage = texFile + std::to_string(m) + ".pfm";
-			WritePfm(depthImage.c_str(), w/3, h, 1, &temp[0]);
-
-			imageData = &temp[0];
-		}	
+		WritePfm(texFile.c_str(), w, h, 1, &temp[0]);
+		texture->Unmap2D(arrayIndex, level);
 	}
 }
 

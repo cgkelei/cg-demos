@@ -1,0 +1,86 @@
+<Effect name="GaussianBlur">
+
+<Shader name="GaussianBlurVS" stage="Vertex" entry="main">
+	<ShaderSource>
+	<![CDATA[
+#version 330
+	
+in vec2 iPos;
+out vec2 oTex;
+
+void main()
+{
+	// Map [-1, -1] to [0, 1]
+	oTex = iPos * 0.5 + 0.5;
+	gl_Position = vec4(iPos, 0.0, 1.0);
+}		
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Shader name="ShadowBlurXPS" stage="Pixel" entry="main">
+	<ShaderSource>
+	<![CDATA[
+#version 330
+	
+uniform sampler2DArray InputTex;	
+uniform float ArraySlice;
+
+const float Weights[3] = float[3](0.402619947, 0.244201342, 0.054488685);  
+
+in vec2 oTex;
+
+void main()
+{
+	vec4 sum = vec4(0.0);
+	for (int i = -2; i <= 2; ++i)
+		sum += textureOffset(InputTex, vec3(oTex, ArraySlice), ivec2(i, 0)) * Weights[i];
+		
+	gl_FragColor = sum;
+}		
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Shader name="ShadowBlurYPS" stage="Pixel" entry="main">
+	<ShaderSource>
+	<![CDATA[
+#version 330
+
+uniform sampler2D InputTex;	
+
+const float Weights[3] = float[3](0.402619947, 0.244201342, 0.054488685);  
+
+in vec2 oTex;
+
+void main()
+{
+	vec4 sum = vec4(0.0);
+	for (int i = -2; i <= 2; ++i)
+		sum += textureOffset(InputTex, oTex, ivec2(0, i)) * Weights[i];
+		
+	gl_FragColor = sum;
+}		
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Technique name="ShadowMapBlurX">
+	<Pass name="p0">
+		<VertexShader name="GaussianBlurVS"/>
+		<PixelShader name="ShadowBlurXPS"/>
+		<State name="DepthEnable" value="false"/>
+		<State name="DepthWriteMask" value="false"/>	
+	</Pass>
+</Technique>
+
+<Technique name="ShadowMapBlurY">
+	<Pass name="p0">
+		<VertexShader name="GaussianBlurVS"/>
+		<PixelShader name="ShadowBlurYPS"/>
+		<State name="DepthEnable" value="false"/>
+		<State name="DepthWriteMask" value="false"/>	
+	</Pass>
+</Technique>
+
+</Effect>

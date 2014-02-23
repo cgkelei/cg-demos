@@ -69,9 +69,13 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 		glTexParameteri(mTargetType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(mTargetType, GL_TEXTURE_MAX_LEVEL, mMipMaps - 1);
 
-		if (initData == NULL && GLEW_ARB_texture_storage && mTextureArraySize > 1)
+		// Use texture storage to init, faster
+		if (initData == NULL && GLEW_ARB_texture_storage)
 		{
-			glTexStorage3D(mTargetType, mMipMaps, glinternalFormat, mWidths[0], mHeights[0], mTextureArraySize);
+			if (mTextureArraySize > 1)
+				glTexStorage3D(mTargetType, mMipMaps, glinternalFormat, mWidths[0], mHeights[0], mTextureArraySize);
+			else
+				glTexStorage2D(mTargetType, mMipMaps, glinternalFormat, mWidths[0], mHeights[0]);
 		}
 		else
 		{

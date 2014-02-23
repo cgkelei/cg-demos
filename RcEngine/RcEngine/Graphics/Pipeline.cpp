@@ -143,14 +143,16 @@ void Pipeline::CreateFrameBuffers()
 
 			shared_ptr<RenderView> view;
 
+			uint32_t accessHint = EAH_CPU_Read | EAH_CPU_Write | EAH_GPU_Read;
+
 			if (rtDesc.Attach == ATT_DepthStencil)
 			{
-				rtDesc.RenderTexture = factory.CreateTexture2D(fbDesc.Width, fbDesc.Height, rtDesc.Format, 1, 1, rtDesc.SampleCount, rtDesc.SampleQuality, 0, nullptr);
+				rtDesc.RenderTexture = factory.CreateTexture2D(fbDesc.Width, fbDesc.Height, rtDesc.Format, 1, 1, rtDesc.SampleCount, rtDesc.SampleQuality, accessHint, nullptr);
 				view = factory.CreateDepthStencilView(rtDesc.RenderTexture, 0, 0);
 			}
 			else
 			{
-				rtDesc.RenderTexture = factory.CreateTexture2D(fbDesc.Width, fbDesc.Height, rtDesc.Format, 1, 1, rtDesc.SampleCount, rtDesc.SampleQuality, 0, nullptr);
+				rtDesc.RenderTexture = factory.CreateTexture2D(fbDesc.Width, fbDesc.Height, rtDesc.Format, 1, 1, rtDesc.SampleCount, rtDesc.SampleQuality, accessHint, nullptr);
 				view = factory.CreateRenderTargetView2D(rtDesc.RenderTexture, 0, 0);
 			}
 
