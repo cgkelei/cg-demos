@@ -49,9 +49,11 @@ void RenderDevice::BindFrameBuffer( const shared_ptr<FrameBuffer>& fb )
 
 	if(mCurrentFrameBuffer->IsDirty())
 	{
+		// update FBO info
 		mCurrentFrameBuffer->OnBind();
 	}
 
+	// this will update viewport info
 	DoBindFrameBuffer(mCurrentFrameBuffer);
 }
 

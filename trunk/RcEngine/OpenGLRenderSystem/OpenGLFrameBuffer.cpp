@@ -29,6 +29,8 @@ RcEngine::OpenGLFrameBuffer::~OpenGLFrameBuffer()
 
 void OpenGLFrameBuffer::DoBind()
 {
+	OGL_ERROR_CHECK();
+
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferObject);
 	
 	if (mFrameBufferObject != 0 && mColorViews.size())
@@ -42,11 +44,13 @@ void OpenGLFrameBuffer::DoBind()
 		}
 		glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
 	}
+
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLFrameBuffer::DoUnbind()
 {
-
+	OGL_ERROR_CHECK();
 }
 
 
@@ -71,6 +75,8 @@ void OpenGLFrameBuffer::Resize( uint32_t width, uint32_t height )
 
 bool OpenGLFrameBuffer::CheckFramebufferStatus()
 {
+	OGL_ERROR_CHECK();
+
 	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if(status == GL_FRAMEBUFFER_COMPLETE)
 		return true;
@@ -102,6 +108,8 @@ bool OpenGLFrameBuffer::CheckFramebufferStatus()
 	default:
 		break;
 	}
+
+	OGL_ERROR_CHECK();
 
 	std::cout << errStr << std::endl;
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "OpenGL FrameBuffer Error", "OpenGLFrameBuffer::CheckFramebufferStatus");

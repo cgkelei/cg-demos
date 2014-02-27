@@ -11,4 +11,6 @@
 	<Effect name="Model.effect.xml">
 		<Flag name="_Skinning"/>
 	</Effect>
+	<Queue name="Opaque"/>
+
 </Material>

@@ -88,7 +88,6 @@ void OpenGLRenderDevice::CreateRenderWindow( const RenderSettings& settings )
 	glStencilFunc(GL_ALWAYS, 0, DEFAULT_STENCIL_READ_MASK);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CW);
@@ -98,6 +97,8 @@ void OpenGLRenderDevice::CreateRenderWindow( const RenderSettings& settings )
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_TEXTURE_3D);
 	glEnable(GL_TEXTURE_CUBE_MAP);
+
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLRenderDevice::AdjustProjectionMatrix( float4x4& pOut )
@@ -110,18 +111,26 @@ void OpenGLRenderDevice::AdjustProjectionMatrix( float4x4& pOut )
 
 void OpenGLRenderDevice::BindVertexBufferOGL( const shared_ptr<GraphicsBuffer>& buffer )
 {
+	OGL_ERROR_CHECK();
+
 	shared_ptr<OpenGLGraphicsBuffer> pBuffer = std::static_pointer_cast<OpenGLGraphicsBuffer>(buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, pBuffer->GetBufferID());
+
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLRenderDevice::BindIndexBufferOGL( const shared_ptr<GraphicsBuffer>& indexBuffer )
 {
 	shared_ptr<OpenGLGraphicsBuffer> pBuffer = std::static_pointer_cast<OpenGLGraphicsBuffer>(indexBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pBuffer->GetBufferID());
+
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLRenderDevice::DoBindFrameBuffer( const shared_ptr<FrameBuffer>& fb )
 {	
+	OGL_ERROR_CHECK();
+
 	const Viewport& vp = fb->GetViewport();
 
 	if (vp.Left != mViewportLeft || vp.Top != mViewportTop || vp.Height !=mViewportHeight || vp.Width != mViewportWidth)
@@ -132,6 +141,8 @@ void OpenGLRenderDevice::DoBindFrameBuffer( const shared_ptr<FrameBuffer>& fb )
 		mViewportHeight = vp.Height;
 		mViewportWidth = vp.Width;
 	}
+
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLRenderDevice::ToggleFullscreen( bool fs )
@@ -146,6 +157,8 @@ bool OpenGLRenderDevice::Fullscreen() const
 
 void OpenGLRenderDevice::SetBlendState( const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask )
 {
+	OGL_ERROR_CHECK();
+
 	if( mCurrentBlendState != state )
 	{
 		const BlendStateDesc& currDesc = mCurrentBlendState->GetDesc();
@@ -256,10 +269,13 @@ void OpenGLRenderDevice::SetBlendState( const shared_ptr<BlendState>& state, con
 		mCurrentSampleMask = sampleMask;
 	}
 
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLRenderDevice::SetRasterizerState( const shared_ptr<RasterizerState>& state )
 {
+	OGL_ERROR_CHECK();
+
 	if(mCurrentRasterizerState != state)
 	{
 		const RasterizerStateDesc& currDesc = mCurrentRasterizerState->GetDesc();
@@ -321,10 +337,14 @@ void OpenGLRenderDevice::SetRasterizerState( const shared_ptr<RasterizerState>& 
 		//Set Current
 		mCurrentRasterizerState = state;
 	}
+
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLRenderDevice::SetDepthStencilState( const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef, uint16_t backStencilRef )
 {
+	OGL_ERROR_CHECK();
+
 	if ( (mCurrentDepthStencilState != state) || (mCurrentFrontStencilRef != frontStencilRef) 
 		|| (mCurrentBackStencilRef != backStencilRef) )
 	{
@@ -402,44 +422,49 @@ void OpenGLRenderDevice::SetDepthStencilState( const shared_ptr<DepthStencilStat
 	mCurrentDepthStencilState = state;
 	mCurrentFrontStencilRef = frontStencilRef;
 	mCurrentBackStencilRef = backStencilRef;
+
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
 {
+	OGL_ERROR_CHECK();
+
 	// bind vertex streams
 	for (const RenderOperation::StreamUnit& streamUnit : op.VertexStreams)
 	{
-		// bind vertex buffer
-		BindVertexBufferOGL(streamUnit.Stream);
-
-		// set vertex attributes
-		const VertexElementList& vertexAttrs = streamUnit.VertexDecl->GetElements(); 
-		uint32_t vertexSize = streamUnit.VertexDecl->GetVertexSize();
-
-		for(size_t att = 0; att < vertexAttrs.size(); att++)
+		// bind vertex buffer if exits
+		if (streamUnit.Stream)
 		{
-			const VertexElement& ve = vertexAttrs[att]; 
-			uint16_t count = VertexElement::GetTypeCount(ve.Type);
-			GLenum type = OpenGLMapping::Mapping(ve.Type);
-			bool isNormalized = VertexElement::IsNormalized(ve.Type);
-			uint32_t offset = ve.Offset + op.VertexStart * vertexSize;
+			BindVertexBufferOGL(streamUnit.Stream);
 
-			glEnableVertexAttribArray(att);
+			// set vertex attributes
+			const VertexElementList& vertexAttrs = streamUnit.VertexDecl->GetElements(); 
+			uint32_t vertexSize = streamUnit.VertexDecl->GetVertexSize();
 
-			/**
-			 * Make sure VertexElement semantic same with OpenGL vertex attribute index
-			 * May need to use layout in vertex shader.
-			 */
-
-			if (OpenGLMapping::IsIntegerType(type))
+			for(size_t att = 0; att < vertexAttrs.size(); att++)
 			{
-				glVertexAttribIPointer(att, count, type, vertexSize, BUFFER_OFFSET(offset));	
-			}
-			else
-			{
-				glVertexAttribPointer(att, count, type, isNormalized, vertexSize, BUFFER_OFFSET(offset));	
+				const VertexElement& ve = vertexAttrs[att]; 
+				uint16_t count = VertexElement::GetTypeCount(ve.Type);
+				GLenum type = OpenGLMapping::Mapping(ve.Type);
+				bool isNormalized = VertexElement::IsNormalized(ve.Type);
+				uint32_t offset = ve.Offset + op.VertexStart * vertexSize;
+
+				glEnableVertexAttribArray(att);
+
+				/**
+				 * Make sure VertexElement semantic same with OpenGL vertex attribute index
+				 * May need to use layout in vertex shader.
+				 */
+
+				if (OpenGLMapping::IsIntegerType(type))
+					glVertexAttribIPointer(att, count, type, vertexSize, BUFFER_OFFSET(offset));	
+				else
+					glVertexAttribPointer(att, count, type, isNormalized, vertexSize, BUFFER_OFFSET(offset));	
 			}
 		}
+	
+		OGL_ERROR_CHECK();
 	}
 
 	// bind index buffer
@@ -452,7 +477,6 @@ void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
 		{
 			indexType = GL_UNSIGNED_SHORT;
 			indexOffset += op.IndexStart * 2;
-
 		}
 		else
 		{
@@ -468,10 +492,14 @@ void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
 	{
 		pass->BeginPass();
 
+		OGL_ERROR_CHECK();
+
 		if (op.UseIndex)
 			glDrawElements(OpenGLMapping::Mapping(op.PrimitiveType), op.IndexCount, indexType, indexOffset);	
 		else
 			glDrawArrays(OpenGLMapping::Mapping(op.PrimitiveType), op.VertexStart, static_cast<GLsizei>(op.VertexCount));
+
+		OGL_ERROR_CHECK();
 
 		pass->EndPass();
 
@@ -483,6 +511,8 @@ void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
 
 void OpenGLRenderDevice::SetSamplerState( ShaderType stage, uint32_t unit, const shared_ptr<SamplerState>& state )
 {
+	OGL_ERROR_CHECK();
+
 	if (mCurrentSamplerStates[unit] != state)
 	{
 		mCurrentSamplerStates[unit] = state;
@@ -490,6 +520,8 @@ void OpenGLRenderDevice::SetSamplerState( ShaderType stage, uint32_t unit, const
 		shared_ptr<OpenGLSamplerState> sampler = std::static_pointer_cast<OpenGLSamplerState>(state);
 		glBindSampler(unit, sampler->GetSamplerObject());
 	}
+
+	OGL_ERROR_CHECK();
 }
 
 }

@@ -58,6 +58,8 @@ void OpenGLRenderView::OnDetach(FrameBuffer& fb, Attachment attr)
 	mAttachment = attr;
 
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferID);
+
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLRenderView::DoClear( GLbitfield clearFlagOGL, const ColorRGBA& clr, float depth, uint32_t stencil )
@@ -167,6 +169,8 @@ void OpenGLRenderView::DoClear( GLbitfield clearFlagOGL, const ColorRGBA& clr, f
 
 	if (clearFlagOGL & GL_STENCIL_BUFFER_BIT)
 		glStencilMask(currDepthStencilDesc.StencilWriteMask);
+
+	OGL_ERROR_CHECK();
 }
 	
 

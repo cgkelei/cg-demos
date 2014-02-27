@@ -26,17 +26,35 @@ void main()
 uniform sampler2DArray InputTex;	
 uniform float ArraySlice;
 
-const float Weights[3] = float[3](0.402619947, 0.244201342, 0.054488685);  
-
 in vec2 oTex;
 
 void main()
 {
-	vec4 sum = vec4(0.0);
-	for (int i = -2; i <= 2; ++i)
-		sum += textureOffset(InputTex, vec3(oTex, ArraySlice), ivec2(i, 0)) * Weights[i];
-		
-	gl_FragColor = sum;
+	vec2 filtered  = vec2(0.0);
+	
+	// box filter
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(-2, 0)).rg;
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(-1, 0)).rg;
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(0,  0)).rg;
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(1,  0)).rg;
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(2,  0)).rg;
+	gl_FragColor = vec4(filtered  * 0.2, 0.0, 1.0);
+	
+	
+	//filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(-3, 0)).rg;
+	//filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(3, 0)).rg;
+	//gl_FragColor = vec4(filtered * (1.0 / 7.0), 0.0, 1.0);
+	
+	
+	/*
+	// 5 tap gaussian filter
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(-2, 0)).rg * 0.0097576614950975;
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(-1, 0)).rg * 0.20584891912478;
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(0,  0)).rg * 0.56878683876025;
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(1,  0)).rg * 0.20584891912478;
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(2,  0)).rg * 0.012439754406416;
+	
+	gl_FragColor = sum;*/
 }		
 	]]>
 	</ShaderSource>
@@ -49,17 +67,34 @@ void main()
 
 uniform sampler2D InputTex;	
 
-const float Weights[3] = float[3](0.402619947, 0.244201342, 0.054488685);  
-
 in vec2 oTex;
 
 void main()
 {
-	vec4 sum = vec4(0.0);
-	for (int i = -2; i <= 2; ++i)
-		sum += textureOffset(InputTex, oTex, ivec2(0, i)) * Weights[i];
-		
-	gl_FragColor = sum;
+	vec2 filtered = vec2(0.0);
+	
+	// box filter
+	filtered += textureLodOffset(InputTex, oTex, 0, ivec2(-2, 0)).rg;
+	filtered += textureLodOffset(InputTex, oTex, 0, ivec2(-1, 0)).rg;
+	filtered += textureLodOffset(InputTex, oTex, 0, ivec2(0,  0)).rg;
+	filtered += textureLodOffset(InputTex, oTex, 0, ivec2(1,  0)).rg;
+	filtered += textureLodOffset(InputTex, oTex, 0, ivec2(2,  0)).rg;
+
+	gl_FragColor = vec4(filtered * 0.2, 0.0, 1.0);
+	
+	//filtered  += textureLodOffset(InputTex, oTex, 0, ivec2(-3,  0)).rg;
+	//filtered  += textureLodOffset(InputTex, oTex, 0, ivec2(3,  0)).rg;
+	//gl_FragColor = vec4(filtered * (1.0 / 7.0), 0.0, 1.0);
+	
+	/*
+	// 5 tap gaussian filter
+	filtered += textureOffset(InputTex, oTex, ivec2(0, -2)).rg * 0.0097576614950975;
+	filtered += textureOffset(InputTex, oTex, ivec2(0, -1)).rg * 0.20584891912478;
+	filtered += textureOffset(InputTex, oTex, ivec2(0,  0)).rg * 0.56878683876025;
+	filtered += textureOffset(InputTex, oTex, ivec2(0,  1)).rg * 0.20584891912478;
+	filtered += textureOffset(InputTex, oTex, ivec2(0,  2)).rg * 0.012439754406416;
+	
+	gl_FragColor = filtered;*/
 }		
 	]]>
 	</ShaderSource>

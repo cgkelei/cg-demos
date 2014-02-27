@@ -9,6 +9,7 @@ namespace RcEngine {
 
 #define MAX_CASCADES 4
 #define SHADOW_MAP_SIZE 1024
+#define SHADOW_MAP_BLUR_KERNEL_SIZE 5
 
 #define SHADOW_MAP_VSM
 
@@ -20,6 +21,7 @@ public:
 
 	void UpdateShadowMatrix(const Camera& camera, const Light& directionLight);
 	void MakeCascadedShadowMap(const Light& light);
+	void MakeSpotShadowMap(const Light& light);
 
 private:
 	void UpdateShadowMapSize(const Light& light);
@@ -38,14 +40,31 @@ private:
 	shared_ptr<Texture> mShadowMapTempBlur;
 	shared_ptr<RenderView> mShadowMapTempBlurRTV;
 
+	shared_ptr<Texture> mShadowMapTempBlur1;
+	shared_ptr<RenderView> mShadowMapTempBlurRTV1;
+
 	shared_ptr<Material> mBlurMaterial;
 
 	// FSQuad
 	shared_ptr<RenderOperation> mFSQuadShape;
 
 public:
-	std::vector<float4x4> mLightViewProj;
 	shared_ptr<Texture> mShadowTexture;
+	
+	// Light view matrix
+	float4x4 mShadowView; 
+	
+	// Light ortho projection scale and offset 
+	std::vector<float4> mShadowCascadeScale;
+	std::vector<float4> mShadowCascadeOffset;
+
+	// For Map based selection scheme, this keeps the pixels inside of the the valid range.
+	// When there is no boarder, these values are 0 and 1 respectivley.
+	float2 mBorderPaddingMinMax;
+
+	bool mMoveLightTexelSize;
+
+	float mCascadeBlendArea;
 };
 
 

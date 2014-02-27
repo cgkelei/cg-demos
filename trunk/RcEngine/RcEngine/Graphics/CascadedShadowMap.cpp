@@ -253,9 +253,11 @@ void CalculateLightNearFar( BoundingBoxf& lightFrustumBound, const float3 sceneA
 namespace RcEngine {
 
 CascadedShadowMap::CascadedShadowMap(RenderDevice* device)
-	: mDevice(device)
+	: mDevice(device),
+	  mMoveLightTexelSize(true)
 {
-	mLightViewProj.resize(MAX_CASCADES);
+	mShadowCascadeScale.resize(MAX_CASCADES);
+	mShadowCascadeOffset.resize(MAX_CASCADES);
 	for (int i = 0; i < MAX_CASCADES; ++i)
 		mLightCamera.push_back(std::make_shared<Camera>());
 
@@ -265,6 +267,10 @@ CascadedShadowMap::CascadedShadowMap(RenderDevice* device)
 	mBlurMaterial->Load();
 
 	mFSQuadShape = BuildFSQuadShape();
+
+	//mBorderPaddingMinMax = float2(0.0, 1.0);
+	mBorderPaddingMinMax = float2(float(1)/float(SHADOW_MAP_SIZE), float(SHADOW_MAP_SIZE-1)/float(SHADOW_MAP_SIZE));
+	mCascadeBlendArea = mBorderPaddingMinMax[1];
 }
 
 void CascadedShadowMap::UpdateShadowMapSize( const Light& light )
@@ -290,14 +296,16 @@ void CascadedShadowMap::UpdateShadowMapSize( const Light& light )
 
 		mShadowDepth = factory->CreateTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, PF_Depth32, 1, 1, 1, 0, EAH_GPU_Write, NULL);
 		mShadowFrameBuffer->Attach(ATT_DepthStencil, factory->CreateDepthStencilView(mShadowDepth, 0, 0));	
-
-		mShadowTexture = factory->CreateTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, shadowTexFmt, numCascade, 0, 1, 0, EAH_GPU_Write | EAH_GPU_Read, NULL);
-		
+			
+		mShadowTexture = factory->CreateTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, shadowTexFmt, numCascade, 0, 1, 0, EAH_GPU_Write | EAH_GPU_Read | EAH_CPU_Read, NULL);
 		for (uint32_t i = 0; i < numCascade; ++i)
 			mShadowSplitsRTV.push_back(factory->CreateRenderTargetView2D(mShadowTexture, i, 0));	
-		
+
 		mShadowMapTempBlur = factory->CreateTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, shadowTexFmt, 1, 1, 1, 0, EAH_GPU_Write | EAH_GPU_Read | EAH_CPU_Read, NULL);
 		mShadowMapTempBlurRTV = factory->CreateRenderTargetView2D(mShadowMapTempBlur, 0, 0);
+
+		mShadowMapTempBlur1 = factory->CreateTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, shadowTexFmt, 1, 1, 1, 0, EAH_GPU_Write | EAH_GPU_Read | EAH_CPU_Read, NULL);
+		mShadowMapTempBlurRTV1 = factory->CreateRenderTargetView2D(mShadowMapTempBlur1, 0, 0);
 	}
 	else if (mShadowTexture->GetTextureArraySize() != numCascade)
 	{
@@ -354,33 +362,35 @@ void CascadedShadowMap::MakeCascadedShadowMap(const Light& light)
 	}
 
 	// Blur shadow map
-	for (uint32_t i = 0; i < light.GetShadowCascades(); ++i)
-	{
-		mDevice->BindFrameBuffer(mShadowFrameBuffer);	
-		mShadowFrameBuffer->Attach(ATT_Color0, mShadowMapTempBlurRTV);
-		//bool b = mShadowFrameBuffer->CheckFramebufferStatus();
+	//for (uint32_t i = 0; i < light.GetShadowCascades(); ++i)
+	//{
+	//	mDevice->BindFrameBuffer(mShadowFrameBuffer);	
+	//	mShadowFrameBuffer->Attach(ATT_Color0, mShadowMapTempBlurRTV);
+	//	//bool b = mShadowFrameBuffer->CheckFramebufferStatus();	
 
-		mBlurMaterial->SetCurrentTechnique("ShadowMapBlurX");
-		mBlurMaterial->SetTexture("InputTex", mShadowTexture);
-		mBlurMaterial->GetEffect()->GetParameterByName("ArraySlice")->SetValue(float(i));
-		mDevice->Render(*mBlurMaterial->GetCurrentTechnique(), *mFSQuadShape);
+	//	mBlurMaterial->SetCurrentTechnique("ShadowMapBlurX");
+	//	mBlurMaterial->SetTexture("InputTex", mShadowTexture);
+	//	mBlurMaterial->GetEffect()->GetParameterByName("ArraySlice")->SetValue(float(i));
+	//	mDevice->Render(*mBlurMaterial->GetCurrentTechnique(), *mFSQuadShape);
 
-		//String texFile = "E:/BlurX" + std::to_string(i) + ".pfm";
-		//mDevice->GetRenderFactory()->SaveTexture2D(texFile, mShadowMapTempBlur, 0, 0);
+	//	//String texFile = "E:/BlurX" + std::to_string(i) + ".pfm";
+	//	//mDevice->GetRenderFactory()->SaveTexture2D(texFile, mShadowMapTempBlur, 0, 0);
 
-		mShadowFrameBuffer->Attach(ATT_Color0, mShadowSplitsRTV[i]);
-		mBlurMaterial->SetTexture("InputTex", mShadowMapTempBlur);
-		mBlurMaterial->SetCurrentTechnique("ShadowMapBlurY");
-		mDevice->Render(*mBlurMaterial->GetCurrentTechnique(), *mFSQuadShape);
-	}
-	
+	//	//mShadowFrameBuffer->Attach(ATT_Color0, mShadowMapTempBlurRTV1);
+
+	//	mShadowFrameBuffer->Attach(ATT_Color0, mShadowSplitsRTV[i]);
+	//	//b = mShadowFrameBuffer->CheckFramebufferStatus();
+	//	mBlurMaterial->SetTexture("InputTex", mShadowMapTempBlur);
+	//	mBlurMaterial->SetCurrentTechnique("ShadowMapBlurY");
+	//	mDevice->Render(*mBlurMaterial->GetCurrentTechnique(), *mFSQuadShape);
+
+	//	//texFile = "E:/BlurY" + std::to_string(i) + ".pfm";
+	//	//mDevice->GetRenderFactory()->SaveTexture2D(texFile, mShadowMapTempBlur1, 0, 0);
+	//}
 	
 	mShadowTexture->BuildMipMap();
 
-
-
 	mDevice->BindFrameBuffer(currFrameBuffer);	
-	//mDevice->GetRenderFactory()->SaveTexture2D("E:/Depth", mCascadedShadowMap->mShadowTexture, 0, 0);
 }
 
 void CascadedShadowMap::UpdateShadowMatrix( const Camera& camera, const Light& light )
@@ -405,7 +415,7 @@ void CascadedShadowMap::UpdateShadowMatrix( const Camera& camera, const Light& l
 		mLightCamera[i]->CreateLookAt(float3(0, 0, 0), lightDirection, lightUp);
 
 	// Keep a copy
-	const float4x4& lightView = mLightCamera[0]->GetViewMatrix();
+	mShadowView = mLightCamera[0]->GetViewMatrix();
 
 	// 0. Find scene AABB and transform to light view space
 	float3 sceneAABBPointsLightSpace[8];
@@ -415,7 +425,7 @@ void CascadedShadowMap::UpdateShadowMatrix( const Camera& camera, const Light& l
 
 		// Transform the scene AABB to Light space.
 		for (int i = 0; i < 8; ++i)
-			sceneAABBPointsLightSpace[i] = Transform(sceneAABBPointsLightSpace[i], lightView);
+			sceneAABBPointsLightSpace[i] = Transform(sceneAABBPointsLightSpace[i], mShadowView);
 	}
 	
 	// 1. Split view frustum into sub frustum
@@ -440,7 +450,7 @@ void CascadedShadowMap::UpdateShadowMatrix( const Camera& camera, const Light& l
 
 	// Transform world space sub-frustum corners to light view space
 	for (int i = 0; i < 4; ++i) 
-		Corners[nearSplitIdx][i] = Transform(Corners[nearSplitIdx][i], lightView);
+		Corners[nearSplitIdx][i] = Transform(Corners[nearSplitIdx][i], mShadowView);
 
 	for (iSplit = 0; iSplit < numSplits; ++iSplit)
 	{
@@ -448,7 +458,7 @@ void CascadedShadowMap::UpdateShadowMatrix( const Camera& camera, const Light& l
 		FrustumPlaneExtraction(camera, mSplitPlanes[iSplit+1], Corners[farSplitIdx]);
 
 		for (int i = 0; i < 4; ++i)
-			Corners[farSplitIdx][i] = Transform(Corners[farSplitIdx][i], lightView);
+			Corners[farSplitIdx][i] = Transform(Corners[farSplitIdx][i], mShadowView);
 
 		BoundingBoxf boundSplit;
 		for (int i = 0; i < 4; ++i)
@@ -457,49 +467,44 @@ void CascadedShadowMap::UpdateShadowMatrix( const Camera& camera, const Light& l
 			boundSplit.Merge(Corners[farSplitIdx][i]);
 		}
 
-		//float3 vWorldUnitsPerTexel = 0.0f;
-		//{
-		//	// We calculate a looser bound based on the size of the PCF blur.  This ensures us that we're 
-		//	// sampling within the correct map.
-		//	float fScaleDuetoBlureAMT = ( (float)( 3 * 2 + 1 ) /(float)1024 );
-		//	float fNormalizeByBufferSize = ( 1.0f / (float)1024 );
+		float3 worldUnitsPerTexel = 0.0f;
+		{
+			// We calculate a looser bound based on the size of the blur kernel.  This ensures us that we're 
+			// sampling within the correct map.
+			float scaleDuetoBlureAMT = float(SHADOW_MAP_BLUR_KERNEL_SIZE) / float(SHADOW_MAP_SIZE);
+			//float scaleDuetoBlureAMT = float(SHADOW_MAP_BLUR_KERNEL_SIZE/2) / float(SHADOW_MAP_SIZE);
+		
+			// We calculate the offsets as a percentage of the bound.
+			float3 vBoarderOffset = (boundSplit.Max - boundSplit.Min) * 0.5 * scaleDuetoBlureAMT;
 
-		//	// We calculate the offsets as a percentage of the bound.
-		//	float3 vBoarderOffset = boundSplit.Max - boundSplit.Min;
-		//	vBoarderOffset *= 0.5;
-		//	vBoarderOffset *= fScaleDuetoBlureAMT;
-		//	boundSplit.Max += vBoarderOffset;
-		//	boundSplit.Min -= vBoarderOffset;
+			boundSplit.Max += vBoarderOffset;
+			boundSplit.Min -= vBoarderOffset;
 
-		//	// The world units per texel are used to snap  the orthographic projection
-		//	// to texel sized increments.  
-		//	// Because we're fitting tighly to the cascades, the shimmering shadow edges will still be present when the 
-		//	// camera rotates.  However, when zooming in or strafing the shadow edge will not shimmer.
-		//	vWorldUnitsPerTexel = boundSplit.Max - boundSplit.Min;
-		//	vWorldUnitsPerTexel *= fNormalizeByBufferSize;
-		//}
+			// The world units per texel are used to snap the orthographic projection to texel sized increments.  
+			// Because we're fitting tighly to the cascades, the shimmering shadow edges will still be present when the 
+			// camera rotates.  However, when zooming in or strafing the shadow edge will not shimmer.
+			worldUnitsPerTexel = (boundSplit.Max - boundSplit.Min) / float(SHADOW_MAP_SIZE);
+		}
 
 
-		//if( 1 ) 
-		//{
+		if( mMoveLightTexelSize ) 
+		{
+			// We snape the camera to 1 pixel increments so that moving the camera does not cause the shadows to jitter.
+			// This is a matter of integer dividing by the world space size of a texel
+			boundSplit.Min.X() /= worldUnitsPerTexel.X();
+			boundSplit.Min.X() = floorf( boundSplit.Min.X()  );
+			boundSplit.Min.X() *= worldUnitsPerTexel.X();
+			boundSplit.Min.Y() /= worldUnitsPerTexel.Y();
+			boundSplit.Min.Y() = floorf( boundSplit.Min.Y()  );
+			boundSplit.Min.Y() *= worldUnitsPerTexel.Y();
 
-		//	// We snape the camera to 1 pixel increments so that moving the camera does not cause the shadows to jitter.
-		//	// This is a matter of integer dividing by the world space size of a texel
-		//	boundSplit.Min.X() /= vWorldUnitsPerTexel.X();
-		//	boundSplit.Min.X() = floorf( boundSplit.Min.X()  );
-		//	boundSplit.Min.X() *= vWorldUnitsPerTexel.X();
-		//	boundSplit.Min.Y() /= vWorldUnitsPerTexel.Y();
-		//	boundSplit.Min.Y() = floorf( boundSplit.Min.Y()  );
-		//	boundSplit.Min.Y() *= vWorldUnitsPerTexel.Y();
-
-		//	boundSplit.Max.X() /= vWorldUnitsPerTexel.X();
-		//	boundSplit.Max.X() = floorf( boundSplit.Max.X()  );
-		//	boundSplit.Max.X() *= vWorldUnitsPerTexel.X();
-		//	boundSplit.Max.Y() /= vWorldUnitsPerTexel.Y();
-		//	boundSplit.Max.Y() = floorf( boundSplit.Max.Y()  );
-		//	boundSplit.Max.Y() *= vWorldUnitsPerTexel.Y();
-		//}
-
+			boundSplit.Max.X() /= worldUnitsPerTexel.X();
+			boundSplit.Max.X() = floorf( boundSplit.Max.X()  );
+			boundSplit.Max.X() *= worldUnitsPerTexel.X();
+			boundSplit.Max.Y() /= worldUnitsPerTexel.Y();
+			boundSplit.Max.Y() = floorf( boundSplit.Max.Y()  );
+			boundSplit.Max.Y() *= worldUnitsPerTexel.Y();
+		}
 		
 		 //Calculate SceneAABB (min, max) depth in light space
 		//float minZLightSpace = FLT_MAX;
@@ -520,11 +525,54 @@ void CascadedShadowMap::UpdateShadowMatrix( const Camera& camera, const Light& l
 												   boundSplit.Min.Y(), boundSplit.Max.Y(),
 												   boundSplit.Min.Z(), boundSplit.Max.Z());
 
-		mLightViewProj[iSplit] = lightView * mLightCamera[iSplit]->GetProjMatrix();
+		const float4x4& orthoProjection = mLightCamera[iSplit]->GetProjMatrix();
+		mShadowCascadeScale[iSplit] = float4(orthoProjection.M11, orthoProjection.M22, orthoProjection.M33, 1.0f);
+		mShadowCascadeOffset[iSplit] = float4(orthoProjection.M41, orthoProjection.M42, orthoProjection.M43, 0.0f);
 
 		// Ping-Pang swap
 		std::swap(nearSplitIdx, farSplitIdx);
 	}
+}
+
+void CascadedShadowMap::MakeSpotShadowMap( const Light& light )
+{
+	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
+
+	const shared_ptr<FrameBuffer>& currFrameBuffer = mDevice->GetCurrentFrameBuffer();
+	const Camera& viewCamera = *currFrameBuffer->GetCamera();
+
+	float fov = light.GetSpotOuterAngle();
+	float zFar = light.GetRange();
+
+	const float3& lightPosition = light.GetDerivedPosition();
+	const float3& lightDirection = light.GetDerivedDirection();
+
+	// Build light coordinate system, view matrix.
+	float3 lightUp = viewCamera.GetRight();
+	if(fabs(Dot(lightUp,lightDirection))>0.9f) lightUp = viewCamera.GetUp();
+
+	mLightCamera[0]->CreateLookAt(light.GetDerivedPosition(), lightPosition + light.GetDerivedDirection(), lightUp);
+	mLightCamera[0]->CreatePerspectiveFov(fov, 1.0, 0.1f, zFar);
+
+	// Update light render queue 
+	sceneMan.UpdateRenderQueue(*mLightCamera[0], RO_None);
+	
+	//RenderQueue* renderQueue = sceneMan.GetRenderQueue();	
+	//RenderBucket& opaqueBucket = renderQueue->GetRenderBucket(RenderQueue::BucketOpaque);
+	//if (opaqueBucket.size())
+	//{
+	//	std::sort(opaqueBucket.begin(), opaqueBucket.end(), [](const RenderQueueItem& lhs, const RenderQueueItem& rhs) {
+	//		return lhs.SortKey < rhs.SortKey; });
+
+
+
+	//		for (const RenderQueueItem& renderItem : opaqueBucket) 
+	//		{
+	//			renderItem.Renderable->GetMaterial()->SetCurrentTechnique(shadowMapTech);
+	//			renderItem.Renderable->Render();
+	//		}
+	//}
+
 }
 
 }

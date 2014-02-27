@@ -283,7 +283,7 @@ public:
 			vector<float4> value; Param->GetValue(value);
 			if (!value.empty())
 			{
-				glUniform3fv(Location, value.size(), 
+				glUniform4fv(Location, value.size(), 
 					reinterpret_cast<float*>(&value[0][0]));
 			}
 			Param->ClearDirty();
@@ -371,9 +371,8 @@ public:
 
 			glActiveTexture(GL_TEXTURE0+textureLayer.TexUnit);
 			glBindTexture(textureOGL->GetOpenGLTextureTarget(), textureOGL->GetOpenGLTexture());
-
 			glUniform1i(Location, textureLayer.TexUnit);		
-		}	
+		}
 	}
 
 private:
@@ -397,7 +396,10 @@ void OpenGLShaderProgram::Bind()
 	glUseProgram(mOGLProgramObject);
 
 	for (ParameterBind& paramBind : mParameterBinds)
+	{
 		paramBind.ShaderParamSetFunc();
+		OGL_ERROR_CHECK();
+	}
 }
 
 void OpenGLShaderProgram::Unbind()
@@ -447,6 +449,8 @@ bool OpenGLShaderProgram::LinkProgram()
 		return false;
 
 	CaptureAllParameter();
+
+	OGL_ERROR_CHECK();
 
 	return mValidate;
 }
@@ -828,6 +832,8 @@ void OpenGLShaderProgram::CaptureAllParameter()
 		}
 			//mParameterBinds[i].TextureSamplerIndex =  GL_SAMPLER_2D ? (samplerIndex++) : 0;
 	}
+
+	OGL_ERROR_CHECK();
 }
 
 shared_ptr<ShaderProgram> OpenGLShaderProgram::Clone( Effect& effect )

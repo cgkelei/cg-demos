@@ -15,10 +15,8 @@ OpenGLDepthStencilView::OpenGLDepthStencilView( uint32_t width, uint32_t height,
 	mHeight = height;
 	mFormat = format;
 
-	GLint internalFormat;
-	GLenum glformat;
-	GLenum gltype;
-	OpenGLMapping::Mapping(internalFormat, glformat, gltype, mFormat);
+	GLenum internalFormat, externFormat, formatType;
+	OpenGLMapping::Mapping(internalFormat, externFormat, formatType, mFormat);
 
 	glGenRenderbuffersEXT(1, &mRenderBufferID);
 	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, mRenderBufferID);
@@ -32,12 +30,15 @@ OpenGLDepthStencilView::OpenGLDepthStencilView( uint32_t width, uint32_t height,
 		glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, sampleCount,
 			internalFormat, mWidth, mHeight);
 	}
+
+	OGL_ERROR_CHECK();
 }
 
 
 OpenGLDepthStencilView::OpenGLDepthStencilView( Texture& texture, uint32_t arrIndex, uint32_t level )
 	: mArrIndex(arrIndex), mLevel(level)
 {
+
 	if(texture.GetTextureType() != TT_Texture2D)
 	{
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Texture Type Error, Only 2D Texture Needed",
@@ -71,6 +72,8 @@ OpenGLDepthStencilView::~OpenGLDepthStencilView()
 
 void OpenGLDepthStencilView::OnAttach(FrameBuffer& fb, Attachment attr)
 {
+	OGL_ERROR_CHECK();
+
 	assert(attr == ATT_DepthStencil);
 	OpenGLRenderView::OnAttach(fb, attr);
 
@@ -134,6 +137,8 @@ void OpenGLDepthStencilView::OnDetach(FrameBuffer& fb, Attachment attr)
 				glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, 0, 0, 0);
 		}
 	}
+
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLDepthStencilView::ClearDepth(float depth)

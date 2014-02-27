@@ -1,0 +1,391 @@
+<Effect name="ModelEffect">
+
+<Shader name="ShadowMapVS" stage="Vertex" entry="main">
+	<ShaderSource>
+	<![CDATA[	
+#version 330
+	
+uniform mat4 WorldView;
+uniform mat4 Proj;
+
+// shader input
+layout (location = 0) in vec3 iPos;
+layout (location = 2) in vec2 iTex;    // Need to varying texcoord, if normal attribute not used, it will ignore by compiler, make vertex shader input wrong
+
+#ifdef _NormalMapping
+	in vec3 iTangent;
+	in vec3 iBinormal;
+#endif
+
+out vec2 oTex;
+out float oDepth;
+
+void main()
+{
+	gl_Position = vec4(iPos, 1.0) * WorldView * Proj;
+	oTex = vec2(iTex.x, 1.0-iTex.y);
+	oDepth = gl_Position.z * 0.5 + 0.5;
+}	
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Shader name="ShadowMapPS" stage="Pixel" entry="main">
+	<ShaderSource>
+	<![CDATA[
+#version 330	
+
+uniform sampler2D DiffuseMap;
+
+in vec2 oTex;
+in float oDepth;
+
+// Standard Shadow Maps
+#if defined(SSM)
+out float oFragDepth;
+#endif
+
+// Variance Shadow Maps
+#ifdef VSM
+out vec2 oFragDepth;
+#endif 
+
+// Exponential Variance Shadow Maps
+#ifdef EVSM
+uniform vec2 EVSMConst;
+out vec4 oFragDepth;
+#endif 
+
+// Exponential Shadow Maps
+#ifdef ESM
+uniform vec2 ESMConst;
+out float oFragDepth;
+#endif 
+
+void main()
+{
+	float alpha =  texture2D(DiffuseMap, oTex).a;
+	if( alpha < 0.01 ) discard;
+
+#if defined(SSM)
+	oFragDepth.x = oDepth;
+#endif
+
+#ifdef VSM
+	oFragDepth.x = oDepth;
+	oFragDepth.y = oDepth * oDepth;
+	
+	//vec2 dxdy = vec2(dFdx(oDepth), dFdy(oDepth));
+	//oFragDepth.y = oDepth * oDepth + 0.25 * dot(dxdy, dxdy);
+#endif 
+
+#ifdef EVSM
+	float posDepth = exp(EVSMConst.x * oDepth);
+	float negDepth = -exp(-EVSMConst.y * oDepth);
+
+	oFragDepth = vec4(posDepth, posDepth * posDepth, negDepth, negDepth * negDepth);
+#endif 
+
+#ifdef ESM
+	oFragDepth =  exp(ESMConst.x * oDepth);
+#endif 
+}
+	]]>
+	</ShaderSource>
+</Shader>
+
+
+<Shader name="GeneralVS" stage="Vertex" entry="main">
+	<ShaderSource>
+	<![CDATA[
+#version 330
+
+uniform mat4 WorldView;
+uniform mat4 Proj;
+
+// shader input
+in vec3 iPos;
+in vec3 iNormal;
+in vec2 iTex;
+
+#ifdef _NormalMapping
+	in vec3 iTangent;
+	in vec3 iBinormal;
+#endif
+
+// shader out put
+out vec4 oPosVS;
+out vec2 oTex;
+
+#ifdef _NormalMapping
+	out mat3 oTangentToView;
+#else
+	out vec3 oNormalVS;
+#endif
+
+void main()
+{
+	oPosVS = vec4(iPos, 1.0) * WorldView;
+	vec3 normal = normalize(iNormal * mat3(WorldView));
+	
+	// calculate tangent and binormal.
+#ifdef _NormalMapping
+	vec3 tangent = normalize(iTangent * mat3(WorldView));
+	vec3 binormal = normalize(iBinormal * mat3(WorldView));
+
+	// actualy this is a world to tangent matrix, because we always use V * Mat.
+	oTangentToView = mat3( tangent, binormal, normal);
+
+	// transpose to get tangent to world matrix
+	oTangentToView = transpose(oTangentToView);
+#else
+	oNormalVS = normal;
+#endif
+	
+	oTex = vec2(iTex.x, 1.0 - iTex.y);
+
+	gl_Position = oPosVS * Proj;
+}
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Shader name="GBufferPS" stage="Pixel" entry="main">
+	<ShaderSource>
+	<![CDATA[
+
+#version 330
+	
+uniform sampler2D DiffuseMap;
+uniform sampler2D BestNormalFitMap;
+
+#ifdef _NormalMapping
+	uniform sampler2D NormalMap;
+#endif
+
+// shader input
+in vec4 oPosVS;
+in vec2 oTex;
+
+#ifdef _NormalMapping
+	in mat3 oTangentToView;
+#else
+	in vec3 oNormalVS;
+#endif
+
+// shader output
+out vec4 FragColor0; // Normal + shininess
+out vec4 FragColor1; // Diffuse + Specular
+	
+#define Shininess 20.0
+#define Specular 0.2
+
+void CompressUnsignedNormalToNormalsBuffer(inout vec3 vNormal)
+{
+  // renormalize (needed if any blending or interpolation happened before)
+  vNormal.rgb = normalize(vNormal.rgb);
+  // get unsigned normal for cubemap lookup (note the full float precision is required)
+  vec3 vNormalUns = abs(vNormal.rgb);
+  // get the main axis for cubemap lookup
+  float maxNAbs = max(vNormalUns.z, max(vNormalUns.x, vNormalUns.y));
+  // get texture coordinates in a collapsed cubemap
+  vec2 vTexCoord = vNormalUns.z<maxNAbs?(vNormalUns.y<maxNAbs?vNormalUns.yz:vNormalUns.xz):vNormalUns.xy;
+  vTexCoord = vTexCoord.x < vTexCoord.y ? vTexCoord.yx : vTexCoord.xy;
+  vTexCoord.y /= vTexCoord.x;
+  
+#ifndef Direct3D	
+	vTexCoord.y = 1.0 - vTexCoord.y;
+#endif
+  
+  // fit normal into the edge of unit cube
+  vNormal.rgb /= maxNAbs;
+  // look-up fitting length and scale the normal to get the best fit
+  float fFittingScale = texture2D(BestNormalFitMap, vTexCoord).a;
+  // scale the normal to get the best fit
+  vNormal.rgb *= fFittingScale;
+  // squeeze back to unsigned
+  vNormal.rgb = vNormal.rgb * .5 + .5;
+}
+
+void main() 
+{	
+	vec4 albedo =  texture2D(DiffuseMap, oTex);
+	if( albedo.a < 0.01 ) discard;
+    
+#ifdef _NormalMapping
+	vec3 normal = texture2D( NormalMap, oTex ).rgb * 2.0 - 1.0;
+	normal = normalize(normal * oTangentToView);
+#else
+	vec3 normal = normalize(oNormalVS);
+#endif	
+	
+	//normal = normal * 0.5 + 0.5;
+	CompressUnsignedNormalToNormalsBuffer(normal);	
+	
+	FragColor0 = vec4(normal.xyz, Shininess / 255.0);
+    FragColor1 = vec4(albedo.rgb, Specular);	
+}
+	]]>
+	</ShaderSource>
+</Shader>
+	
+<Shader name="ForwardPS" stage="Pixel" entry="main">
+	<Include name="LightingUtil.include.xml"/>
+	<ShaderSource>
+	<![CDATA[
+uniform vec4 LightPosVS;		// w dimension is spot light inner cone cos angle
+uniform vec4 LightDirVS;		// w dimension is spot light outer cone cos angle
+uniform vec3 LightColor;
+uniform vec3 LightFalloff; 
+
+uniform sampler2D DiffuseMap;
+
+#ifdef _NormalMapping
+	uniform sampler2D NormalMap;
+#endif
+
+// shader input
+in vec4 oPosVS;
+in vec2 oTex;
+
+#ifdef _NormalMapping
+	in mat3 oTangentToView;
+#else
+	in vec3 oNormalVS;
+#endif
+
+
+void main()
+{
+	vec4 diffuse = texture2D(DiffuseMap, oTex);
+	if( diffuse.a < 0.01 ) discard;
+
+#ifdef _NormalMapping
+	vec3 normal = texture2D( NormalMap, oTex ).rgb * 2.0 - 1.0;
+	normal = normalize(normal * oTangentToView);
+#else
+	vec3 normal = normalize(oNormalVS);
+#endif	
+
+#ifdef SPOTLIGHT
+	float spot = SpotLighting(LightPosVS.xyz, LightDirVS.xyz, vec2(LightPosVS.w, LightDirVS.w), oPosVS.xyz);
+#endif
+
+	vec3 finalColor = vec3(0.0);
+
+#ifdef SPOTLIGHT
+	if(spot > 0.0)
+	{
+#endif
+		
+		// calculate  light vector
+	#ifdef DIRLIGHT
+		vec3 lightVec = normalize(-LightDirVS.xyz);
+	#else
+		vec3 lightVec = normalize(LightPosVS.xyz - oPosVS.xyz);
+	#endif
+
+		vec3 viewVec = normalize(-oPosVS.xyz);
+		vec3 halfVec = normalize(viewVec + lightVec);
+		
+		// calculate attenuation
+		float atten = 1.0;
+
+#ifdef POINTLIGHT
+		atten = CalcAttenuation(LightPosVS.xyz, oPosVS.xyz, LightFalloff);
+#endif
+
+#ifdef SPOTLIGHT 
+		atten = spot * CalcAttenuation(LightPosVS.xyz, oPosVS.xyz, LightFalloff);
+#endif
+
+		float NdotL = dot(lightVec, normal);
+		if (NdotL > 0.0)
+		{
+			finalColor += atten * diffuse.rgb * LightColor;
+		}
+
+#ifdef SPOTLIGHT
+	}
+#endif
+
+	gl_FragColor = vec4(diffuse.rgb, finalColor.g);
+	
+}
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Technique name="VSM">
+	<Pass name="p0">
+		<VertexShader name="ShadowMapVS"/>
+		<PixelShader name="ShadowMapPS">
+			<Macro name="VSM"/>
+		</PixelShader>
+		<state name="CullMode" value="None"/>
+	</Pass>
+</Technique>
+
+<Technique name="EVSM">
+	<Pass name="p0">
+		<VertexShader name="ShadowMapVS"/>
+		<PixelShader name="ShadowMapPS">
+			<Macro name="EVSM"/>
+		</PixelShader>
+		<state name="CullMode" value="None"/>
+	</Pass>
+</Technique>
+
+<Technique name="ESM">
+	<Pass name="p0">
+		<VertexShader name="ShadowMapVS"/>
+		<PixelShader name="ShadowMapPS">
+			<Macro name="ESM"/>
+		</PixelShader>
+		<state name="CullMode" value="None"/>
+	</Pass>
+</Technique>
+
+<Technique name="GBuffer">
+	<Pass name="p0">
+		<VertexShader name="GeneralVS"/>
+		<PixelShader name="GBufferPS"/>
+		<state name="CullMode" value="None"/>
+	</Pass>
+</Technique>
+
+
+<!-- for forward lighting, simple version -->
+<Technique name="PointLighting">
+	<Pass name="p0">
+		<VertexShader name="GeneralVS"/>
+		<PixelShader name="ForwardPS">
+			<Macro name="POINTLIGHT"/>
+		</PixelShader>
+		<state name="CullMode" value="None"/>
+	</Pass>
+</Technique>
+
+<Technique name="DirectionalLighting">
+	<Pass name="p0">
+		<VertexShader name="GeneralVS"/>
+		<PixelShader name="ForwardPS">
+			<Macro name="DIRLIGHT"/>
+		</PixelShader>
+		<state name="CullMode" value="None"/>
+	</Pass>
+</Technique>
+
+<Technique name="SpotLighting">
+	<Pass name="p0">
+		<VertexShader name="GeneralVS"/>
+		<PixelShader name="ForwardPS">
+			<Macro name="SPOTLIGHT"/>
+		</PixelShader>
+		<state name="CullMode" value="None"/>
+	</Pass>
+</Technique>
+
+</Effect>
+	
+	

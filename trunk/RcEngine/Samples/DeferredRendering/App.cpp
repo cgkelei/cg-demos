@@ -240,7 +240,9 @@ void App::LoadContent()
 	mCamera = device.GetScreenFrameBuffer()->GetCamera();
 	/*mCamera->SetViewParams(float3(85, 68, -21), float3(86, 68, -21));*/
 	/*mCamera->SetViewParams(float3(-211, 57, -12), float3(-212, 57, -12));*/
-	mCamera->CreateLookAt(float3(-104, 39, -9.8), float3(-54,34.9,-10.8));
+	/*mCamera->CreateLookAt(float3(-104, 39, -9.8), float3(-54,34.9,-10.8));*/
+
+	mCamera->CreateLookAt(float3(213.4, 405.5, -30.5),  float3(214.3, 405.1, -30.6), float3(0.4, 0.9, -0.0));
 	mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 3000.0f );
 
 	mCamera->GetFrustum();
@@ -329,7 +331,7 @@ void App::Render()
 	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
 
 	device.BindFrameBuffer(device.GetScreenFrameBuffer());
-	//device.GetScreenFrameBuffer()->Clear(CF_Depth, ColorRGBA::Black, 1.0f, 0);
+	device.GetScreenFrameBuffer()->Clear(CF_Depth, ColorRGBA::Black, 1.0f, 0);
 	
 	//{
 	//	float radius = mPointLight->GetRange();
@@ -441,29 +443,34 @@ void App::Update( float deltaTime )
 	CalculateFrameRate();
 	mMainWindow->SetTitle("Graphics Demo FPS:" + std::to_string(mFramePerSecond));
 
-	float3 target = mCamera->GetPosition() + mCamera->GetView() * 50.0f;
+	/*float3 target = mCamera->GetPosition() + mCamera->GetView() * 50.0f;*/
 
-	InputSystem& inputSys = InputSystem::GetSingleton();
-	if (inputSys.MouseButtonPress(MS_RightButton))
-	{
-		uint32_t w = mMainWindow->GetWidth(); 
-		uint32_t h = mMainWindow->GetHeight();
-		int2 mouse = inputSys.GetMousePos();
+	//InputSystem& inputSys = InputSystem::GetSingleton();
+	//if (inputSys.MouseButtonPress(MS_RightButton))
+	//{
+	//	uint32_t w = mMainWindow->GetWidth(); 
+	//	uint32_t h = mMainWindow->GetHeight();
+	//	int2 mouse = inputSys.GetMousePos();
 
-		float z = gSceneDepth[(h - mouse.Y() - 1) * w + mouse.X()];
+	//	float z = gSceneDepth[(h - mouse.Y() - 1) * w + mouse.X()];
 
-		float x = mouse.X() / float(w) * 2.0f - 1.0f;
-		float y = (1.0f - mouse.Y() / float(h)) * 2.0f - 1.0f;
+	//	float x = mouse.X() / float(w) * 2.0f - 1.0f;
+	//	float y = (1.0f - mouse.Y() / float(h)) * 2.0f - 1.0f;
 
-		float4 worldPosH = float4(x, y,z, 1.0) * mCamera->GetInvProjMatrix() * mCamera->GetInvViewMatrix();
+	//	float4 worldPosH = float4(x, y,z, 1.0) * mCamera->GetInvProjMatrix() * mCamera->GetInvViewMatrix();
 
-		PickPos = float3(worldPosH.X() / worldPosH.W(), worldPosH.Y() / worldPosH.W(), worldPosH.Z() / worldPosH.W()); 
-	}
+	//	PickPos = float3(worldPosH.X() / worldPosH.W(), worldPosH.Y() / worldPosH.W(), worldPosH.Z() / worldPosH.W()); 
+	//}
+
+	float3 camPos = mCamera->GetPosition();
+	float3 lookat = mCamera->GetLookAt();
+	float3 up = mCamera->GetUp();
 
 	wchar_t buffer[255];
-	int cx = swprintf (buffer, 255, L"FPS: %d, Target Pos (%.1f, %.1f, %.1f), Pick (%.1f, %.1f, %.1f)", mFramePerSecond,
-		target.X(), target.Y(), target.Z(),
-		PickPos.X(), PickPos.Y(), PickPos.Z());
+	int cx = swprintf (buffer, 255, L"FPS: %d, Target Pos (%.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f)", mFramePerSecond,
+		camPos.X(), camPos.Y(), camPos.Z(),
+		lookat.X(), lookat.Y(), lookat.Z(),
+		up.X(), up.Y(), up.Z());
 	mLabel->SetText(buffer);
 }
 
