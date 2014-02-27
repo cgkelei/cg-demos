@@ -11,7 +11,7 @@
 		<State name="AddressU" value="Clamp"/>
 		<State name="AddressV" value="Clamp"/>
 		<State name="AddressW" value="Border"/>
-		<State name="MaxAnisotropy" value="0"/>
+		<State name="MaxAnisotropy" value="1"/>
 		<State name="MaxLOD" value="0"/>
 		<State name="MinLOD" value="0"/>
 		<State name="MipLODBias" value="0"/>
@@ -26,8 +26,9 @@
 	<Parameter type="float4" name="LightDirVS" semantic="LightDirection"/>
 	<Parameter type="float3" name="LightColor" semantic="LightColor"/>
 	<Parameter type="float3" name="LightFalloff" semantic="LightFalloff"/>
-	<Parameter type="texture2d" name="DepthBuffer" stage="PixelShader" sampler="PointSampler" texUnit="0"/>
-	<Parameter type="texture2d" name="GBuffer0" stage="PixelShader" sampler="PointSampler" texUnit="1"/>
+	
+	<Parameter type="texture2d" name="GBuffer0" stage="PixelShader" sampler="PointSampler" texUnit="0"/>
+	<Parameter type="texture2d" name="DepthBuffer" stage="PixelShader" sampler="PointSampler" texUnit="1"/>
 	<Parameter type="texture2d" name="GBuffer1" stage="PixelShader" sampler="PointSampler" texUnit="2"/>
 	<Parameter type="texture2d" name="LightAccumulateBuffer" stage="PixelShader" sampler="PointSampler" texUnit="3"/>
 	<Parameter type="texture2d" name="ShadowTex" stage="PixelShader" sampler="ShadowSampler" texUnit="4"/>

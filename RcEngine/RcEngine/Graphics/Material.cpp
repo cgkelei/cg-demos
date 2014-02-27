@@ -15,6 +15,7 @@
 #include <Core/Exception.h>
 #include <Core/XMLDom.h>
 #include <Core/Utility.h>
+#include <Core/Exception.h>
 #include <IO/FileSystem.h>
 #include <IO/PathUtil.h>
 #include <Resource/ResourceManager.h>
@@ -317,6 +318,8 @@ void Material::LoadImpl()
 			else if (stateName == "MaxAnisotropy")
 			{
 				uint32_t value = stateNode->Attribute("value")->ValueUInt();
+				if (value < 1 || value > 16)
+					ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "MaxAnisotropy range invalid, only[1, 16] supported!",  "Material::LoadImpl");
 				desc.MaxAnisotropy = value;
 			}
 			else if (stateName == "MinLOD")

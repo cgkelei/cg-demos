@@ -49,12 +49,8 @@ OpenGLTexture3D::OpenGLTexture3D( PixelFormat format, uint32_t arraySize, uint32
 
 	uint32_t texelSize = PixelFormatUtils::GetNumElemBytes(mFormat);
 
-	GLint glinternalFormat;
-	GLenum glformat;
-	GLenum gltype;
-	OpenGLMapping::Mapping(glinternalFormat, glformat, gltype, mFormat);
-
-	mTextureData.resize(mMipMaps);
+	GLenum internalFormat, externFormat, formatType;
+	OpenGLMapping::Mapping(internalFormat, externFormat, formatType, mFormat);
 
 	glGenTextures(1, &mTextureID);
 	glBindTexture(mTargetType, mTextureID);
@@ -75,10 +71,8 @@ OpenGLTexture3D::OpenGLTexture3D( PixelFormat format, uint32_t arraySize, uint32
 		}
 		else
 		{
-			uint32_t imageSize = levelWidth * levelHeight * levelDepth * texelSize;
-			mTextureData[level].resize(imageSize);
-			glTexImage3D(mTargetType, level, glinternalFormat, levelWidth, levelHeight, levelDepth, 0,
-				glformat, gltype, (NULL == initData) ? NULL : initData[level].pData);
+			glTexImage3D(mTargetType, level, internalFormat, levelWidth, levelHeight, levelDepth, 0,
+				externFormat, formatType, (NULL == initData) ? NULL : initData[level].pData);
 
 		}
 	}

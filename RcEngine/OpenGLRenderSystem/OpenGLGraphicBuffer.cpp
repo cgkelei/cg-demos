@@ -17,6 +17,8 @@ OpenGLGraphicsBuffer::OpenGLGraphicsBuffer(BufferUsage usage, uint32_t accessHin
 	}
 
 	glBindBuffer(mTarget, 0);
+
+	OGL_ERROR_CHECK();
 }
 
 
@@ -56,6 +58,9 @@ void* OpenGLGraphicsBuffer::Map( uint32_t offset, uint32_t length, BufferAccess 
 	glBindBuffer(mTarget, mBufferID);
 	pMapBuffer = glMapBuffer(mTarget, mapFlag);
 	glBindBuffer(mTarget, 0);
+
+	OGL_ERROR_CHECK();
+
 	return pMapBuffer;
 }
 
@@ -64,6 +69,8 @@ void OpenGLGraphicsBuffer::UnMap()
 	glBindBuffer(mTarget, mBufferID);
 	glUnmapBuffer(mTarget);
 	glBindBuffer(mTarget, 0);
+
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLGraphicsBuffer::ResizeBuffer( uint32_t sizeInByte )
@@ -75,6 +82,8 @@ void OpenGLGraphicsBuffer::ResizeBuffer( uint32_t sizeInByte )
 			(BU_Static == mBufferUsage) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
 
 		mSizeInBytes = sizeInByte;
+
+		OGL_ERROR_CHECK();
 	}
 }
 

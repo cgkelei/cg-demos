@@ -1,0 +1,120 @@
+<Effect name="ShadowUtil">
+<ShaderSource>
+	<![CDATA[
+	
+#define MAX_CASCADE_COUNT 4
+	
+uniform sampler2DArray ShadowTex;	
+uniform int NumCascades;
+uniform mat4 ShadowView;
+uniform vec4 CascadeScale[MAX_CASCADE_COUNT];   // Shadow projection info
+uniform vec4 CascadeOffset[MAX_CASCADE_COUNT];	
+uniform vec2 BorderPaddingMinMax;				// For map based selection, this keep pixels in valid range.
+uniform float CascadeBlendArea;  				// Amount to overlap when blending between cascades.
+
+/**
+ * Calculate blend weight for cascade boundary pixels.
+ * @param blendArea, blend width.
+ * @param blendBandLocation, current pixel's location in blend band.
+ * @param cascadeBlendWeight, calculated blend weight, [1, 0] -> [width, 0].
+ */ 
+void CalculateBlendAmountForMap(in vec2 shadowTexCoord, in float blendArea, inout float blendBandLocation, out float cascadeBlendWeight)
+{
+	vec2 distanceToOne = vec2(1.0 - shadowTexCoord.x, 1.0 - shadowTexCoord.y);
+    blendBandLocation = min(shadowTexCoord.x, shadowTexCoord.y);
+    blendBandLocation = min( blendBandLocation, min(distanceToOne.x, distanceToOne.y) );
+    cascadeBlendWeight = blendBandLocation / blendArea;
+}
+
+float ChebyshevUpperBound(vec2 moments, float depth, float minVariance)
+{
+	float mean = moments.x;
+	float measSquared = moments.y;
+	
+	float p = float(depth <= mean);
+	
+	float variance = max(minVariance, measSquared - mean*mean);
+	float d = depth - mean;
+	float pmax = variance / (variance + d * d);
+	
+	 // To combat light-bleeding, experiment with raising p_max to some power
+     // (Try values from 0.1 to 100.0, if you like.)	
+	return pow( max(p, pmax), 5.0 );
+}
+
+float CalculateVarianceShadow(in vec4 shadowTexCoord, in vec4 posShadowViewSpace, in int iCascade)
+{
+	vec4 shadowTexCoordDDX = dFdx(posShadowViewSpace) * CascadeScale[iCascade];
+	vec4 shadowTexCoordDDY = dFdy(posShadowViewSpace) * CascadeScale[iCascade];
+	
+	vec2 moments = textureGrad(ShadowTex, shadowTexCoord.xyz, shadowTexCoordDDX.xy, shadowTexCoordDDY.xy).rg;
+	
+	return ChebyshevUpperBound(moments, shadowTexCoord.w, 0.0001);
+}
+
+float CalculateVarianceShadowWrong(in vec4 shadowTexCoord, in vec4 posShadowViewSpace, in int iCascade)
+{
+	vec2 moments = texture(ShadowTex, shadowTexCoord.xyz).rg;
+	return ChebyshevUpperBound(moments, shadowTexCoord.w, 0.0001);
+}
+
+float EvalCascadeShadow(in vec4 posWorldSpace, out int selectCascade)
+{
+	float percentLit = 0.0;
+
+	vec4 shadowTexCoord = vec4(0.0);
+	vec4 shadowTexCoordBlend = vec4(0.0);
+	
+	// Compute view space position of shadow
+	vec4 posShadowVS = posWorldSpace * ShadowView;
+		
+	int iCascadeSelected = 0;
+	int cascadeFound = 0;
+	for( int iCascade = 0; iCascade < NumCascades && cascadeFound == 0; ++iCascade ) 
+	{
+		shadowTexCoord = posShadowVS * CascadeScale[iCascade] + CascadeOffset[iCascade];		
+		shadowTexCoord.xy = shadowTexCoord.xy * 0.5 + 0.5; // Map [-1, 1]x[-1, 1] -> [0, 1]x[0, 1]
+			
+		if ( min( shadowTexCoord.x, shadowTexCoord.y ) > BorderPaddingMinMax.x && 
+             max( shadowTexCoord.x, shadowTexCoord.y ) < BorderPaddingMinMax.y )
+        { 
+            iCascadeSelected = iCascade;   
+            cascadeFound = 1; 
+        }		
+	}
+		
+	// Store selected cascade index in z
+	shadowTexCoord.w = shadowTexCoord.z;
+	shadowTexCoord.z = float(iCascadeSelected);
+	
+	percentLit = CalculateVarianceShadow(shadowTexCoord,  posShadowVS, iCascadeSelected);	
+	
+	/*
+	// Blend between cascades
+	int iNextCascadeIndex = min ( NumCascades - 1, iCascadeSelected + 1 ); 
+	shadowTexCoordBlend = posShadowVS * CascadeScale[iNextCascadeIndex] + CascadeOffset[iNextCascadeIndex];
+	shadowTexCoordBlend.xy = shadowTexCoordBlend.xy * 0.5 + 0.5; // Map [-1, 1]x[-1, 1] -> [0, 1]x[0, 1]
+	shadowTexCoordBlend.w = shadowTexCoordBlend.z;
+	shadowTexCoordBlend.z = float(iNextCascadeIndex);
+		
+	// Calculate cascade blend
+	float cascadeBlendWeight = 1.0f;
+	float blendBandLocation = 1.0f;
+		
+	CalculateBlendAmountForMap(shadowTexCoord.xy, CascadeBlendArea, blendBandLocation, cascadeBlendWeight);
+	if (blendBandLocation < CascadeBlendArea)
+	{
+		float percentLitBlend = CalculateVarianceShadow(shadowTexCoordBlend, posShadowVS, iNextCascadeIndex);
+			
+		// Blend the two calculated shadows by the blend amount.
+        percentLit = mix(percentLitBlend, percentLit, cascadeBlendWeight); 
+	}	
+	*/
+	
+	selectCascade = iCascadeSelected;
+	return percentLit;
+}
+	]]>
+</ShaderSource>
+
+</Effect>

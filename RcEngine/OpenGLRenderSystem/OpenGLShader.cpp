@@ -51,8 +51,9 @@ bool OpenGLShader::Compile( const String& source, const String& entryPoint /*= "
 		return false;
 	}
 
-	String version, defines;
+	String version, extensions, defines;
 
+	// make version and extensions appears before other language
 	size_t versionStart = mShaderSource.find("#version");
 	if (versionStart != String::npos)
 	{
@@ -64,10 +65,24 @@ bool OpenGLShader::Compile( const String& source, const String& entryPoint /*= "
 		}
 	}
 
+	size_t extensionStart = mShaderSource.find("#extension");
+	if (extensionStart != String::npos)
+	{
+		size_t extensionEnd = mShaderSource.find('\n', extensionStart);
+		if (extensionEnd != String::npos)
+		{
+			extensions += mShaderSource.substr(extensionStart, extensionEnd - extensionStart+1);
+			mShaderSource = mShaderSource.substr(extensionEnd);
+			extensionStart = mShaderSource.find("#extension ");
+		}
+		else 
+			extensionStart = String::npos;
+	}
+
 	for (unsigned i = 0; i < mDefines.size(); ++i)
 		defines += "#define " + mDefines[i] + " " + mDefineValues[i] + "\n";
 
-	mShaderSource = version + defines + mShaderIncludes + mShaderSource;
+	mShaderSource = version + extensions + defines + mShaderIncludes + mShaderSource;
 
 	const char* glslSrc = mShaderSource.c_str();
 	glShaderSource(mOGLShaderObject, 1, &glslSrc, NULL);
@@ -89,6 +104,7 @@ bool OpenGLShader::Compile( const String& source, const String& entryPoint /*= "
 		mCompileOutput.clear();
 	}
 
+	OGL_ERROR_CHECK();
 	return mValidate;
 }
 

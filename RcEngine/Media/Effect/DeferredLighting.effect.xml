@@ -47,38 +47,31 @@ void main()
 </Shader>
 
 <Shader name="DeferredDirectionalLightingPS" stage="Pixel" entry="main">
+	<Include name="ShadowUtil.include.xml"/>
 	<Include name="DeferredReadUtill.include.xml"/>
-	<Include name="LightingUtil.include.xml"/>
+	<Include name="LightingUtil.include.xml"/>	
 	<ShaderSource>
 	<![CDATA[	
 #version 330
-#extension GL_EXT_gpu_shader4 : enable 
+#extension GL_EXT_texture_array : enable
 	
 uniform vec2 CameraNearFar;
 
 uniform vec4 LightDirVS;	
 uniform vec3 LightColor;
 
-uniform bool ShadowEnabled;
-uniform int NumCascades; 
 uniform mat4 InvView;			// Inv view matrix of current camera
-uniform mat4 ShadowMatrix[4];   // Shadow matrix for each cascades, ShadowMatrix = LightView * LightProj;
-uniform sampler2DArray ShadowTex;
 
-// For Map based selection scheme, this keeps the pixels inside of the the valid range.
-// When there is no boarder, these values are 0 and 1 respectivley.
-uniform vec2 BorderPaddingMaxMin;
+uniform bool ShadowEnabled;
+uniform bool VisiualizeCascades;
 
 uniform sampler2D GBuffer0;	
 uniform sampler2D DepthBuffer;	
-
-uniform bool VisiualizeCascades;
 
 in vec2 oTex;
 in vec3 oViewRay;
 
 out vec4 oFragColor;
-
 
 const vec4 vCascadeColorsMultiplier[4] = vec4[4]
 (
@@ -87,14 +80,6 @@ const vec4 vCascadeColorsMultiplier[4] = vec4[4]
     vec4 ( 0.0, 0.0, 1.5, 1.0 ),
     vec4 ( 1.5, 1.5, 0.0, 1.0 )
 );
-
-
-
-float ShadowTest(vec3 shadowTexCoord, float splitIdx, float bias)
-{
-	float currDepth = shadowTexCoord.z - bias;
-	return float(texture(ShadowTex, vec3(shadowTexCoord.xy, splitIdx)).r > currDepth);
-}
 	
 void main()
 {
@@ -106,36 +91,18 @@ void main()
 	vec3 positionVS = PositionVSFromDepth(oViewRay, linearDepth);
 	
 	vec4 visibility = vec4(1.0);
+	
+	
 	if (ShadowEnabled)
 	{
-		vec4 shadowTexCoord = vec4(0.0);
-		
 		vec4 posWS = vec4(positionVS, 1.0) * InvView;
 		
 		int iCascadeSelected = 0;
-		int cascadeFound = 0;
-		for( int iCascade = 0; iCascade < NumCascades && cascadeFound == 0; ++iCascade ) 
-		{
-			shadowTexCoord = posWS * ShadowMatrix[iCascade];
-			shadowTexCoord.xy = shadowTexCoord.xy * 0.5 + 0.5; // Map [-1, 1]x[-1, 1] -> [0, 1]x[0, 1]
-			
-			if ( min( shadowTexCoord.x, shadowTexCoord.y ) > BorderPaddingMaxMin.x && 
-                 max( shadowTexCoord.x, shadowTexCoord.y ) < BorderPaddingMaxMin.y )
-            { 
-                iCascadeSelected = iCascade;   
-                cascadeFound = 1; 
-            }		
-		}
+		float percentLit = EvalCascadeShadow(posWS, iCascadeSelected);
 		
-		//VSM 
-		//float v = CalculateVarianceShadow(shadowTexCoord.xyz, float(iCascadeSelected), ShadowTex);
-		
-		// SSM
-		float v = ShadowTest(shadowTexCoord.xyz, float(iCascadeSelected), 0.005);
-		visibility = visibility * v;
-		
+		visibility = vec4(percentLit, percentLit, percentLit, percentLit);
 		if (VisiualizeCascades)
-			visibility = v * vCascadeColorsMultiplier[iCascadeSelected];
+			visibility *= vCascadeColorsMultiplier[iCascadeSelected];
 	}
 	
 	vec3 L = normalize(-LightDirVS.xyz);
@@ -162,6 +129,7 @@ void main()
 	}
 		
 	oFragColor = final * visibility; 
+	//oFragColor.r = 1.0;
 }	
 	
 	]]>

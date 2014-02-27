@@ -23,6 +23,8 @@ OpenGLSamplerState::OpenGLSamplerState( const SamplerStateDesc& desc )
 	glSamplerParameterf(mOGLSampler, GL_TEXTURE_LOD_BIAS , desc.MipLODBias);
 	
 	glSamplerParameterfv(mOGLSampler, GL_TEXTURE_BORDER_COLOR, desc.BorderColor());
+
+	OGL_ERROR_CHECK();
 }
 
 OpenGLSamplerState::~OpenGLSamplerState()

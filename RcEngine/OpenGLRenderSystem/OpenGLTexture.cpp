@@ -4,7 +4,9 @@
 namespace RcEngine {
 
 OpenGLTexture::OpenGLTexture( TextureType type, PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint )
-	: Texture(type, format, numMipMaps, sampleCount, sampleQuality, accessHint)
+	: Texture(type, format, numMipMaps, sampleCount, sampleQuality, accessHint), 
+	  mPixelBuffer(0),
+	  mTextureID(0)
 {
 	mTextureArraySize = (std::max)(arraySize, 1U);
 
@@ -36,6 +38,8 @@ OpenGLTexture::OpenGLTexture( TextureType type, PixelFormat format, uint32_t arr
 OpenGLTexture::~OpenGLTexture(void)
 {
 	glDeleteTextures(1, &mTextureID);
+	if (mPixelBuffer)
+		glDeleteBuffers(1, &mPixelBuffer);
 }
 
 uint32_t OpenGLTexture::GetWidth( uint32_t level ) const

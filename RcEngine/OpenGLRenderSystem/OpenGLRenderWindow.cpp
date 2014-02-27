@@ -120,14 +120,18 @@ bool OpenGLRenderWindow::Fullscreen() const
 
 void OpenGLRenderWindow::DoBind()
 {
+	OGL_ERROR_CHECK();
+
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	GLenum targets[] = { GL_BACK };
 	glDrawBuffers(1, &targets[0]);
+
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLRenderWindow::DoUnbind()
 {
-
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLRenderWindow::SwapBuffers()

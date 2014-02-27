@@ -9,7 +9,8 @@ namespace RcEngine {
 
 OpenGLRenderTargetView2D::OpenGLRenderTargetView2D(Texture& texture, uint32_t arrIndex, uint32_t level)
 	: mTextureOGL(*(static_cast_checked<OpenGLTexture2D*>(&texture))),
-	  mArrIndex(arrIndex), mLevel(level)
+	  mArrIndex(arrIndex),
+	  mLevel(level)
 {
 	mWidth = mTextureOGL.GetWidth(level);
 	mHeight = mTextureOGL.GetHeight(level);
@@ -23,11 +24,17 @@ OpenGLRenderTargetView2D::~OpenGLRenderTargetView2D()
 
 void OpenGLRenderTargetView2D::ClearColor( const ColorRGBA& clr )
 {
+	OGL_ERROR_CHECK();
+
 	DoClear(GL_COLOR_BUFFER_BIT, clr, 0, 0);
+
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLRenderTargetView2D::OnAttach(FrameBuffer& fb, Attachment attr)
 {
+	OGL_ERROR_CHECK();
+
 	OpenGLRenderView::OnAttach(fb, attr);
 
 	uint32_t index = attr - ATT_Color0;
@@ -52,10 +59,14 @@ void OpenGLRenderTargetView2D::OnAttach(FrameBuffer& fb, Attachment attr)
 		glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index,
 			mTextureOGL.GetOpenGLTexture(), mLevel, mArrIndex);
 	}
+
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLRenderTargetView2D::OnDetach(FrameBuffer& fb, Attachment attr)
 {
+	OGL_ERROR_CHECK();
+
 	OpenGLRenderView::OnDetach(fb, attr);
 
 	uint32_t index = attr - ATT_Color0;
@@ -76,6 +87,8 @@ void OpenGLRenderTargetView2D::OnDetach(FrameBuffer& fb, Attachment attr)
 		// 2D Texture Array
 		glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, 0, 0, 0);
 	}
+
+	OGL_ERROR_CHECK();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -93,6 +106,8 @@ OpenGLScreenRenderTargetView2D::~OpenGLScreenRenderTargetView2D()
 
 void OpenGLScreenRenderTargetView2D::OnAttach(FrameBuffer& fb, Attachment attr)
 {
+	OGL_ERROR_CHECK();
+
 	assert(attr == ATT_Color0);
 	OpenGLRenderView::OnAttach(fb, attr);
 
@@ -103,10 +118,14 @@ void OpenGLScreenRenderTargetView2D::OnAttach(FrameBuffer& fb, Attachment attr)
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "ScreenDepthStencilView Can Only Attach To Screen Frame Buffer",
 			"OpenGLScreenRenderTargetView2D::OnAttach");
 	}
+
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLScreenRenderTargetView2D::OnDetach(FrameBuffer& fb, Attachment attr)
 {
+	OGL_ERROR_CHECK();
+
 	assert(attr == ATT_Color0);
 	OpenGLRenderView::OnDetach(fb, attr);
 
@@ -116,6 +135,8 @@ void OpenGLScreenRenderTargetView2D::OnDetach(FrameBuffer& fb, Attachment attr)
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "OpenGLScreenRenderTarget2DView Can Only Attach To Screen Frame Buffer",
 			"OpenGLScreenRenderTargetView2D::OnDetach");
 	}
+
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLScreenRenderTargetView2D::ClearColor( const ColorRGBA& clr )

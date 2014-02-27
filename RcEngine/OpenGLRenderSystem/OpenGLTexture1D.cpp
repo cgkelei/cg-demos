@@ -34,11 +34,8 @@ OpenGLTexture1D::OpenGLTexture1D( PixelFormat format, uint32_t arraySize, uint32
 
 	uint32_t texelSize = PixelFormatUtils::GetNumElemBytes(mFormat);
 
-	GLint glinternalFormat;
-	GLenum glformat;
-	GLenum gltype;
-	OpenGLMapping::Mapping(glinternalFormat, glformat, gltype, mFormat);
-	mTextureData.resize(mTextureArraySize * mMipMaps);
+	GLenum internalFormat, externFormat, formatType;
+	OpenGLMapping::Mapping(internalFormat, externFormat, formatType, mFormat);
 
 	if(mSampleCount <= 1)
 	{
@@ -61,22 +58,19 @@ OpenGLTexture1D::OpenGLTexture1D( PixelFormat format, uint32_t arraySize, uint32
 				}
 				else
 				{
-					GLsizei imageSize = level * texelSize;
-					mTextureData[arrIndex * mMipMaps + level].resize(imageSize);
-
 					if (mTextureArraySize > 1)
 					{
 						if (0 == arrIndex)
 						{
-							glTexImage2D(mTargetType, level, glinternalFormat, levelWidth, mTextureArraySize, 0, glformat, gltype, NULL);
+							glTexImage2D(mTargetType, level, internalFormat, levelWidth, mTextureArraySize, 0, externFormat, formatType, NULL);
 						}
 
 						glTexSubImage2D(mTargetType, level, 0, arrIndex, levelWidth, 1,
-							glformat, gltype, (NULL == initData) ? NULL : initData[arrIndex * mMipMaps + level].pData);
+							externFormat, formatType, (NULL == initData) ? NULL : initData[arrIndex * mMipMaps + level].pData);
 					}
 					else
 					{
-						glTexImage1D(mTargetType, level, glinternalFormat, levelWidth, 0, glformat, gltype,
+						glTexImage1D(mTargetType, level, internalFormat, levelWidth, 0, externFormat, formatType,
 							(NULL == initData) ? NULL : initData[arrIndex * mMipMaps + level].pData);
 					}
 

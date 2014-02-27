@@ -68,7 +68,7 @@ GLenum OpenGLMapping::Mapping( PrimitiveType type )
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported PrimitiveType", "OpenGLGraphicCommon::Mapping");
 }
 
-void OpenGLMapping::Mapping( GLint& outInternalformat, GLenum& outFormat, GLenum& outType, PixelFormat inPixelFormat )
+void OpenGLMapping::Mapping( GLenum& outInternalformat, GLenum& outFormat, GLenum& outType, PixelFormat inPixelFormat )
 {
 	switch(inPixelFormat)
 	{
@@ -257,14 +257,20 @@ void OpenGLMapping::Mapping( GLint& outInternalformat, GLenum& outFormat, GLenum
 
 	case PF_DXT1:
 		outInternalformat =  GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+		outFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+		outType = GL_UNSIGNED_BYTE;
 		break;
 
 	case PF_DXT3:
 		outInternalformat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+		outFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+		outType = GL_UNSIGNED_BYTE;
 		break;
 
 	case PF_DXT5:
 		outInternalformat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+		outFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+		outType = GL_UNSIGNED_BYTE;
 		break;
 
 	case PF_Depth16:
@@ -513,7 +519,7 @@ void OpenGLMapping::Mapping( GLenum& min, GLenum& mag, TextureFilter filter )
 	}
 }
 
-PixelFormat OpenGLMapping::UnMapping( GLint internalformat, GLenum format, GLenum type )
+PixelFormat OpenGLMapping::UnMapping( GLenum internalformat, GLenum format, GLenum type )
 {
 	switch(internalformat)
 	{

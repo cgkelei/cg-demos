@@ -46,9 +46,10 @@ public:
 protected:
 	GLuint mTextureID;
 	GLenum mTargetType;
-	std::vector<GLuint> mPixelBuffers;
-	std::vector< std::vector<unsigned char> > mTextureData;
 	TextureMapAccess mTextureMapAccess;
+
+	GLuint mPixelBuffer;
+	std::vector<unsigned char> mTextureData;
 };
 
 
@@ -90,6 +91,11 @@ public:
 		void*& data, uint32_t& rowPitch);
 
 	virtual void Unmap2D(uint32_t arrayIndex, uint32_t level);
+
+private:
+	// use texture storage if supported
+	void CreateWithImmutableStorage(ElementInitData* initData);
+	void CreateWithMutableStorage(ElementInitData* initData);
 
 private:
 	std::vector<uint32_t> mWidths;

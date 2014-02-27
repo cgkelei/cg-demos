@@ -25,8 +25,8 @@ public:
 	static void Mapping(GLenum& min, GLenum& mag, TextureFilter filter);
 
 	// Reference glTexImage* function
-	static void Mapping(GLint& outInternalformat, GLenum& outFormat, GLenum& outType, PixelFormat inPixelFormat);
-	static PixelFormat UnMapping( GLint inInternalformat, GLenum inFormat, GLenum inType);
+	static void Mapping(GLenum& outInternalformat, GLenum& outFormat, GLenum& outType, PixelFormat inPixelFormat);
+	static PixelFormat UnMapping( GLenum inInternalformat, GLenum inFormat, GLenum inType);
 	static void UnMapping(EffectParameterType& outType, GLenum glType);
 
 	/**

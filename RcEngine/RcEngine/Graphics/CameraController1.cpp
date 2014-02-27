@@ -83,7 +83,8 @@ void FPSCameraControler::Update( float deltaTime )
 {
 	InputSystem& inputSys = InputSystem::GetSingleton();
 
-	bool updateRotate = inputSys.MouseButtonDown(MS_LeftButton);
+	//bool updateRotate = inputSys.MouseButtonDown(MS_LeftButton);
+	bool updateRotate = inputSys.MouseButtonDown(MS_RightButton);
 
 	UpdateInput(true, updateRotate, false);
 	

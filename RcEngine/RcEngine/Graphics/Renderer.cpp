@@ -19,7 +19,6 @@
 #include <Math/MathUtil.h>
 #include <GUI/UIManager.h>
 
-
 namespace {
 
 using namespace RcEngine;
@@ -470,11 +469,13 @@ void Renderer::DrawDirectionalLightShape( Light* light, const String& tech )
 	effect->GetParameterByName("ShadowEnabled")->SetValue(bCastShadow);
 	if (bCastShadow)
 	{	
-		effect->GetParameterByName("ShadowMatrix")->SetValue(mCascadedShadowMap->mLightViewProj);
-		effect->GetParameterByName("NumCascades")->SetValue((int)light->GetShadowCascades());
-		effect->GetParameterByName("BorderPaddingMaxMin")->SetValue(float2(0, 1));
-		//effect->GetParameterByName("Bias")->SetValue(0.005f);
 		mCurrMaterial->SetTexture("ShadowTex", mCascadedShadowMap->mShadowTexture);
+		effect->GetParameterByName("ShadowView")->SetValue(mCascadedShadowMap->mShadowView);
+		effect->GetParameterByName("NumCascades")->SetValue((int)light->GetShadowCascades());
+		effect->GetParameterByName("BorderPaddingMinMax")->SetValue(mCascadedShadowMap->mBorderPaddingMinMax);
+		effect->GetParameterByName("CascadeScale")->SetValue(mCascadedShadowMap->mShadowCascadeScale);
+		effect->GetParameterByName("CascadeOffset")->SetValue(mCascadedShadowMap->mShadowCascadeOffset);
+		//effect->GetParameterByName("CascadeBlendArea")->SetValue(mCascadedShadowMap->mCascadeBlendArea);
 	}
 
 	String techName = "Directional" + tech;
@@ -513,6 +514,15 @@ void Renderer::DrawPointLightShape( Light* light, const String& tech )
 void Renderer::DrawSpotLightShape( Light* light, const String& tech )
 {
 	const Camera& currCamera = *(mDevice->GetCurrentFrameBuffer()->GetCamera());
+
+	bool bCastShadow = light->GetCastShadow();
+	if (bCastShadow)
+	{
+		// Generate shadow map
+		mCascadedShadowMap->MakeCascadedShadowMap(*light);
+	}
+
+
 
 	const float3& lightColor = light->GetLightColor();
 	mCurrMaterial->GetCustomParameter(EPU_Light_Color)->SetValue(lightColor);

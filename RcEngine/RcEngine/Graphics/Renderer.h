@@ -21,6 +21,7 @@ public:
 	void SetRenderPipeline(const shared_ptr<Pipeline>& pipeline);
 	void RenderScene();
 
+	CascadedShadowMap* GetShadowManager() const { return mCascadedShadowMap; }
 
 //private:
 
