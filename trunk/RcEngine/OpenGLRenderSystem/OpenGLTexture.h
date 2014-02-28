@@ -4,6 +4,7 @@
 #include "OpenGLPrerequisites.h"
 #include "OpenGLGraphicCommon.h"
 #include <Graphics/Texture.h>
+#include <math.h>
 
 namespace RcEngine {
 
@@ -13,11 +14,9 @@ public:
 	OpenGLTexture(TextureType type, PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint );
 	virtual ~OpenGLTexture(void);
 
-	virtual uint32_t GetWidth(uint32_t level) const;
-	virtual uint32_t GetHeight(uint32_t level) const;
-	virtual uint32_t GetDepth(uint32_t level) const; 
-
-	virtual void BuildMipMap();
+	GLuint GetOpenGLTexture() const			{ return mTextureID; }
+	GLenum GetOpenGLTextureTarget() const	{ return mTextureTarget; }
+	bool   RenderBufferHint() const			{ return mRenderBufferHint; }
 
 	virtual void Map1D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
 		uint32_t xOffset, uint32_t width, void*& data);
@@ -40,18 +39,19 @@ public:
 	virtual void Unmap3D(uint32_t arrayIndex, uint32_t level);
 	virtual void UnmapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level);
 
-	GLuint GetOpenGLTexture() const { return mTextureID; }
-	GLenum GetOpenGLTextureTarget() const { return mTargetType; }
+	virtual void BuildMipMap();
+	virtual void CopyToTexture(Texture& destTexture);
 
 protected:
 	GLuint mTextureID;
-	GLenum mTargetType;
+	GLenum mTextureTarget;
 	TextureMapAccess mTextureMapAccess;
 
-	GLuint mPixelBuffer;
+	bool mRenderBufferHint;
+
+	GLuint mPixelBufferID;
 	std::vector<unsigned char> mTextureData;
 };
-
 
 //////////////////////////////////////////////////////////////////////////
 class _OpenGLExport OpenGLTexture1D : public OpenGLTexture
@@ -62,15 +62,10 @@ public:
 
 	~OpenGLTexture1D();
 
-	virtual uint32_t GetWidth(uint32_t level) const;
-
 	virtual void Map1D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
 		uint32_t xOffset, uint32_t width, void*& data);
 
 	virtual void Unmap1D(uint32_t arrayIndex, uint32_t level);
-private:
-	std::vector<uint32_t> mWidths;
-
 };
 
 
@@ -83,24 +78,18 @@ public:
 
 	~OpenGLTexture2D();
 
-	virtual uint32_t GetWidth(uint32_t level) const;
-	virtual uint32_t GetHeight(uint32_t level) const;
-
 	virtual void Map2D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
 		void*& data, uint32_t& rowPitch);
 
 	virtual void Unmap2D(uint32_t arrayIndex, uint32_t level);
 
+	virtual void CopyToTexture(Texture& destTexture);
+
 private:
 	// use texture storage if supported
 	void CreateWithImmutableStorage(ElementInitData* initData);
 	void CreateWithMutableStorage(ElementInitData* initData);
-
-private:
-	std::vector<uint32_t> mWidths;
-	std::vector<uint32_t> mHeights;
-
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -111,23 +100,12 @@ public:
 		uint32_t height, uint32_t depth, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData);
 	~OpenGLTexture3D();
 
-	virtual uint32_t GetWidth(uint32_t level) const;
-	virtual uint32_t GetHeight(uint32_t level) const;
-	virtual uint32_t GetDepth(uint32_t level) const;
-
 	virtual void Map3D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t zOffset,
 		uint32_t width, uint32_t height, uint32_t depth,
 		void*& data, uint32_t& rowPitch, uint32_t& slicePitch);
 
 	virtual void Unmap3D(uint32_t arrayIndex, uint32_t level);
-
-
-private:
-	std::vector<uint32_t> mWidths;
-	std::vector<uint32_t> mHeights;
-	std::vector<uint32_t> mDepths;
-
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -139,9 +117,6 @@ public:
 
 	~OpenGLTextureCube();
 
-	virtual uint32_t GetWidth(uint32_t level) const;
-	virtual uint32_t GetHeight(uint32_t level) const;
-
 	virtual void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, TextureMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
 		void*& data, uint32_t& rowPitch);
@@ -149,8 +124,9 @@ public:
 	virtual void UnmapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level);
 
 private:
-	std::vector<uint32_t> mSizes;
-
+	// use texture storage if supported
+	void CreateWithImmutableStorage(ElementInitData* initData);
+	void CreateWithMutableStorage(ElementInitData* initData);
 };
 
 }

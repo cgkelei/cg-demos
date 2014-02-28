@@ -260,8 +260,7 @@ void App::SetupLights()
 {
 	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
 
-	mDirLight = sceneMan.CreateLight("Sun");
-	mDirLight->SetLightType(LT_Directional);
+	mDirLight = sceneMan.CreateLight("Sun", LT_Directional);
 	mDirLight->SetDirection(float3(0, -8, -1));
 	mDirLight->SetLightColor(float3(1, 1, 1));
 	mDirLight->SetCastShadow(false);
@@ -290,8 +289,7 @@ void App::SetupLights()
 		float3 direction = Normalize(float3(-111.5f, 398.1f, 3.6f) - float3(-111.1, 380.1, 73.4));
 		for (int i = 0; i < 4; ++i)
 		{
-			Light* spotLight = sceneMan.CreateLight("Spot" + std::to_string(i));
-			spotLight->SetLightType(LT_SpotLight);
+			Light* spotLight = sceneMan.CreateLight("Spot" + std::to_string(i), LT_SpotLight);
 			spotLight->SetLightColor(float3(1, 1, 0));
 			spotLight->SetRange(150);
 			spotLight->SetPosition(float3(-278.2f + i * 166.5f, 398.1f, 3.6f));
@@ -305,8 +303,7 @@ void App::SetupLights()
 		direction = Normalize(float3(-111.5f, 398.1f, 35.7f) - float3(-111.1, 380.1, -111.3));
 		for (int i = 0; i < 4; ++i)
 		{
-			Light* spotLight = sceneMan.CreateLight("Spot");
-			spotLight->SetLightType(LT_SpotLight);
+			Light* spotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
 			spotLight->SetLightColor(float3(0, 1, 1));
 			spotLight->SetRange(150);
 			spotLight->SetPosition(float3(-278.2f + i * 166.5f, 398.1f, -35.7f));

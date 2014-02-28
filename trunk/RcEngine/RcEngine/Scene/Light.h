@@ -6,22 +6,23 @@ namespace RcEngine {
 
 enum LightType
 {
-	LT_PointLight = 0,
-	LT_Directional,
+	LT_Directional = 0,
+	LT_PointLight,
 	LT_SpotLight,
 	LT_AreaLight,
+	LT_Count
 };
 
 class _ApiExport Light : public SceneObject
 {
 public:
-	Light(const String& name);
+	Light(const String& name, LightType type);
 	virtual ~Light();
 	
-	void SetLightType(LightType type);
 	void SetPosition(const float3& pos);
 	void SetDirection(const float3& vec);
 	void SetLightColor(const float3& color);
+	void SetLightIntensity(float intensity);
 
 	/** 
 	 * How far light is emitted from the center of the object. Point/Spot light only.
@@ -39,9 +40,7 @@ public:
 	void SetSpotInnerAngle(float innerAngleRadian);
 	void SetSpotOuterAngle(float outerAngleRadian);
 	void SetSpotFalloff(float exponent);
-	
-
-	//void SetSpotlightNearClipDistance(float nearClip);
+	void SetSpotlightNearClip(float nearClip);
 	
 	LightType GetLightType() const					{ return mLightType; }
 	const float3& GetPosition() const				{ return mLightPosition; }
@@ -52,7 +51,7 @@ public:
 	float GetSpotInnerAngle() const					{ return mSpotInnerAngle; }
 	float GetSpotOuterAngle() const					{ return mSpotOuterAngle; }
 	float GetSpotlightFalloff() const				{ return mSpotFalloff; }
-	//float GetSpotlightNearClipDistance() const		{ return mSpotNearClip; }
+	float GetSpotlightNearClip() const				{ return mSpotNearClip; }
 
 	// Cascade shadow map cout
 	bool GetCastShadow() const						{ return mCastShadow; }
@@ -73,8 +72,15 @@ public:
 	static SceneObject* FactoryFunc(const String& name, const NameValuePairList* params);
 
 protected:
+
+	mutable float3 mDerivedPosition;
+	mutable float3 mDerivedDirection;
+	mutable bool mDerivedTransformDirty;
+
 	LightType mLightType;
 	float3 mLightColor;
+	float mLightIntensity;
+
 	float3 mLightDirection;
 	float3 mLightPosition;
 	float3 mAttenuation;
@@ -84,13 +90,7 @@ protected:
 	float mSpotInnerAngle;
 	float mSpotOuterAngle;
 	float mSpotFalloff;
-
 	float mSpotNearClip;
-
-	mutable float3 mDerivedPosition;
-	mutable float3 mDerivedDirection;
-
-	mutable bool mDerivedTransformDirty;
 
 	// for shadow map
 	bool mCastShadow;

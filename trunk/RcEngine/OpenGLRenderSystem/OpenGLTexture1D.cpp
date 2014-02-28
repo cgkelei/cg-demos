@@ -7,73 +7,53 @@ namespace RcEngine {
 OpenGLTexture1D::OpenGLTexture1D( PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData )
 	: OpenGLTexture(TT_Texture1D, format, arraySize, numMipMaps, sampleCount, sampleQuality, accessHint)
 {
-	if( numMipMaps == 0 )
-	{
-		mMipMaps = 1;
-		uint32_t w = width;
-		while( w!= 1)
-		{
-			++mMipMaps;
-			w = std::max<uint32_t>(1U, w / 2);
-		}
-	}
-	else
-	{
-		mMipMaps = numMipMaps;
-	}
+	mTextureTarget = (mTextureArraySize > 1) ? GL_TEXTURE_1D_ARRAY : GL_TEXTURE_1D;
 
-	mWidths.resize(mMipMaps);
-	{
-		uint32_t w = width;
-		for(uint32_t level = 0; level < mMipMaps; level++)
-		{
-			mWidths[level] = w;
-			w = std::max<uint32_t>(1U, w / 2);
-		}
-	}
-
-	uint32_t texelSize = PixelFormatUtils::GetNumElemBytes(mFormat);
+	// numMipMap == 0, will generate mipmap levels automatically
+	mMipLevels = (numMipMaps > 0) ? numMipMaps : Texture::CalculateMipmapLevels(width);
+	mWidth = width;
 
 	GLenum internalFormat, externFormat, formatType;
 	OpenGLMapping::Mapping(internalFormat, externFormat, formatType, mFormat);
+	uint32_t texelSize = PixelFormatUtils::GetNumElemBytes(mFormat);
 
-	if(mSampleCount <= 1)
+	assert(mSampleCount <= 1);
+	glGenTextures(1, &mTextureID);
+	glBindTexture(mTextureTarget, mTextureID);
+	glTexParameteri(mTextureTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(mTextureTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(mTextureTarget, GL_TEXTURE_MAX_LEVEL, mMipLevels - 1);
+
+	// Only CPU side access can use Map
+	bool cpuSideAccess = (accessHint & (EAH_CPU_Read | EAH_CPU_Write)) != 0;
+	if ( cpuSideAccess && GLEW_ARB_pixel_buffer_object)
+		glGenBuffers(1, &mPixelBufferID);  // use PBO to map if supported!
+
+	for (uint32_t arrIndex = 0; arrIndex < mTextureArraySize; ++ arrIndex)
 	{
-		glGenTextures(1, &mTextureID);
-		glBindTexture(mTargetType, mTextureID);
-		glTexParameteri(mTargetType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(mTargetType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(mTargetType, GL_TEXTURE_MAX_LEVEL, mMipMaps - 1);
-
-		for (uint32_t arrIndex = 0; arrIndex < mTextureArraySize; ++ arrIndex)
+		for (uint32_t level = 0; level < mMipLevels; ++ level)
 		{
-			for (uint32_t level = 0; level < mMipMaps; ++ level)
-			{
-				uint32_t levelWidth = mWidths[level];
+			uint32_t levelWidth = GetWidth(level);
 
-				if (PixelFormatUtils::IsCompressed(mFormat))
+			if (PixelFormatUtils::IsCompressed(mFormat))
+			{
+				ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Currently Unsupported Compressed Texture Format",
+					"OpenGLTexture1D::OpenGLTexture1D");
+			}
+			else
+			{
+				if (mTextureArraySize > 1)
 				{
-					ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Currently Unsupported Compressed Texture Format",
-						"OpenGLTexture1D::OpenGLTexture1D");
+					if (0 == arrIndex)
+						glTexImage2D(mTextureTarget, level, internalFormat, levelWidth, mTextureArraySize, 0, externFormat, formatType, NULL);
+
+					glTexSubImage2D(mTextureTarget, level, 0, arrIndex, levelWidth, 1,
+						externFormat, formatType, (NULL == initData) ? NULL : initData[arrIndex * mMipLevels + level].pData);
 				}
 				else
 				{
-					if (mTextureArraySize > 1)
-					{
-						if (0 == arrIndex)
-						{
-							glTexImage2D(mTargetType, level, internalFormat, levelWidth, mTextureArraySize, 0, externFormat, formatType, NULL);
-						}
-
-						glTexSubImage2D(mTargetType, level, 0, arrIndex, levelWidth, 1,
-							externFormat, formatType, (NULL == initData) ? NULL : initData[arrIndex * mMipMaps + level].pData);
-					}
-					else
-					{
-						glTexImage1D(mTargetType, level, internalFormat, levelWidth, 0, externFormat, formatType,
-							(NULL == initData) ? NULL : initData[arrIndex * mMipMaps + level].pData);
-					}
-
+					glTexImage1D(mTextureTarget, level, internalFormat, levelWidth, 0, externFormat, formatType,
+						(NULL == initData) ? NULL : initData[arrIndex * mMipLevels + level].pData);
 				}
 			}
 		}
@@ -84,15 +64,6 @@ OpenGLTexture1D::~OpenGLTexture1D()
 {
 
 }
-
-
-uint32_t OpenGLTexture1D::GetWidth( uint32_t level ) const
-{
-	assert(level < mMipMaps);
-	return mWidths[level];
-}
-
-
 
 void OpenGLTexture1D::Map1D( uint32_t arrayIndex, uint32_t level, TextureMapAccess tma, uint32_t xOffset, uint32_t width, void*& data )
 {

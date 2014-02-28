@@ -295,7 +295,7 @@ void CascadeShadowMapApp::LoadContent()
 	/*mCamera->CreateLookAt(float3(588.8, 635.6, -1888.5), float3(570.4, 623, -1844.9));*/
 	//mCamera->CreateLookAt(float3(2583.9, 1182.3, -292.5), float3(2583.4, 1181.8, -293.0), float3(-0.4, 0.8, -0.4));
 	//mCamera->CreateLookAt(float3(-331.9, 1094.3, 1756.1), float3(-331.8, 1093.7, 1755.4), float3(0.1, 0.8, -0.6));
-	mCamera->CreateLookAt(float3(-601.1, 258.2, 563.4), float3(-600.9, 257.3, 563.0), float3(0.3, 0.5, -0.8));
+	mCamera->CreateLookAt(float3(-395.7, 839.9, 2061.9), float3(-395.4, 839.6, 2061.0), float3(0.1, 0.9, -0.4));
 	mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 8000.0f );
 
 	mCameraControler = new RcEngine::Test::FPSCameraControler;
@@ -322,8 +322,7 @@ void CascadeShadowMapApp::LoadContent()
 
 	mSceneRender->SetRenderPipeline(mPipeline);
 
-	mDirLight = sceneMan.CreateLight("Sun");
-	mDirLight->SetLightType(LT_Directional);
+	mDirLight = sceneMan.CreateLight("Sun", LT_Directional);
 	mDirLight->SetDirection(float3(0, -1, -1));
 	mDirLight->SetLightColor(float3(1, 1, 1));
 	mDirLight->SetCastShadow(true);
@@ -331,8 +330,7 @@ void CascadeShadowMapApp::LoadContent()
 	sceneMan.GetRootSceneNode()->AttachObject(mDirLight);
 
 
-	mSpotLight = sceneMan.CreateLight("Spot");
-	mSpotLight->SetLightType(LT_SpotLight);
+	mSpotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
 	mSpotLight->SetDirection(float3(0, -1.5, -1));
 	mSpotLight->SetLightColor(float3(1, 1, 0));
 	mSpotLight->SetRange(1500.0);
@@ -364,6 +362,8 @@ void CascadeShadowMapApp::Update( float deltaTime )
 		camera.X(), camera.Y(), camera.Z(), target.X(), target.Y(), target.Z(),
 		up.X(), up.Y(), up.Z());
 	mLabel->SetText(buffer);
+
+	
 }
 
 void CascadeShadowMapApp::Render()

@@ -5,59 +5,27 @@ namespace RcEngine {
 
 OpenGLTexture::OpenGLTexture( TextureType type, PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint )
 	: Texture(type, format, numMipMaps, sampleCount, sampleQuality, accessHint), 
-	  mPixelBuffer(0),
-	  mTextureID(0)
+	  mPixelBufferID(0),
+	  mTextureID(0),
+	  mTextureTarget(0),
+	  mRenderBufferHint(false)
 {
 	mTextureArraySize = (std::max)(arraySize, 1U);
 
 	if ( (mTextureArraySize > 1) && !GLEW_EXT_texture_array)
-	{
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Texture Array is not supported!", "OpenGLTexture::OpenGLTexture");
-	}
-
-	switch(mType)
-	{
-	case TT_Texture1D:
-		mTargetType =  (mTextureArraySize > 1) ? GL_TEXTURE_1D_ARRAY : GL_TEXTURE_1D;
-		break;
-	case TT_Texture2D:
-		mTargetType =  (mTextureArraySize > 1) ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D;
-		break;
-	case  TT_Texture3D:
-		mTargetType = GL_TEXTURE_3D;
-		break;
-	case  TT_TextureCube:
-		mTargetType = (mTextureArraySize > 1) ? GL_TEXTURE_CUBE_MAP_ARRAY : GL_TEXTURE_CUBE_MAP;
-		break;
-	default:
-		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Texture type not supported!", "OpenGLTexture::OpenGLTexture");
-	}
 }
 
 
 OpenGLTexture::~OpenGLTexture(void)
 {
-	glDeleteTextures(1, &mTextureID);
-	if (mPixelBuffer)
-		glDeleteBuffers(1, &mPixelBuffer);
-}
+	if (mPixelBufferID > 0)
+		glDeleteBuffers(1, &mPixelBufferID);
 
-uint32_t OpenGLTexture::GetWidth( uint32_t level ) const
-{
-	assert(level < mMipMaps);
-	return 1;
-}
-
-uint32_t OpenGLTexture::GetHeight( uint32_t level ) const
-{
-	assert(level < mMipMaps);
-	return 1;
-}
-
-uint32_t OpenGLTexture::GetDepth( uint32_t level ) const
-{
-	assert(level < mMipMaps);
-	return 1;
+	if (mTextureTarget == GL_RENDERBUFFER)
+		glDeleteTextures(1, &mTextureID);
+	else 
+		glDeleteRenderbuffers(1, &mTextureID);
 }
 
 void OpenGLTexture::Map1D(uint32_t arrayIndex,  uint32_t level, TextureMapAccess tma, uint32_t xOffset, uint32_t width, void*& data )
@@ -100,18 +68,25 @@ void OpenGLTexture::UnmapCube(uint32_t arrayIndex,   CubeMapFace face, uint32_t 
 	ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't be here!", "OpenGLTexture::UnmapCube");
 }
 
+void OpenGLTexture::CopyToTexture( Texture& destTexture )
+{
+	ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't be here!", "OpenGLTexture::CopyToTexture");
+}
+
 void OpenGLTexture::BuildMipMap()
 {
 	if (GLEW_EXT_framebuffer_object)
 	{
-		glBindTexture(mTargetType, mTextureID);
-		glGenerateMipmapEXT(mTargetType);
+		glBindTexture(mTextureTarget, mTextureID);
+		glGenerateMipmapEXT(mTextureTarget);
 	}
 	else
 	{
 		ENGINE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, "Unsupported!", "OpenGLTexture::BuildMipMap");
 	}
 }
+
+
 
 }
 

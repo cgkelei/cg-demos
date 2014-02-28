@@ -1,5 +1,6 @@
 <Effect name="Sky">
 
+<!--
 <Shader name="VS" stage="Vertex" entry="main">
 <ShaderSource>
 <![CDATA[
@@ -48,67 +49,66 @@ void main()
 </ShaderSource>
 </Shader>
 
-<Shader name="VSCubeMap" stage="Vertex" entry="main">
-<ShaderSource>
-<![CDATA[
-
-#version 330
-
-in vec3 Position;
-
-out vec3 oTex;
-
-uniform mat4 World;
-uniform mat4 ViewProj;
-
-void main()
-{
-	vec4 posH = vec4(Position, 1.0) * World * ViewProj;
-	
-	oTex = Position.xyz;
-
-	// we set z = w so that z/w == 1, always on far plane
-	gl_Position = posH.xyww;
-}
-]]>
-</ShaderSource>
-</Shader>
-
-<Shader name="PSCubeMap" stage="Pixel" entry="main">
-<ShaderSource>
-<![CDATA[
-
-#version 330
-
-in vec3 oTex;
-
-out vec4 FragColor;
-
-uniform samplerCube SkyCubeMap;
-
-void main()
-{
-	FragColor = texture(SkyCubeMap, oTex);
-}
-
-]]>
-</ShaderSource>
-</Shader>
-
 <Technique name="SkyBoxPlane">
 	<Pass name="p0">
 		<VertexShader name="VS"/>
 		<PixelShader name="PS"/>
 	</Pass>
 </Technique>
+-->
+
+
+
+
+
+<Shader name="CubeMapVS" stage="Vertex" entry="main">
+	<ShaderSource>
+	<![CDATA[
+	
+#version 330
+
+uniform mat4 WorldViewProj;
+
+in vec3 Position;
+out vec3 oTex;
+
+void main()
+{
+	oTex = Position.xyz;
+	gl_Position = vec4(Position, 1.0) * ;
+	
+	// we set z = w so that z/w == 1, always on far plane
+	gl_Position.z = gl_Position.w;
+}
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Shader name="CubeMapPS" stage="Pixel" entry="main">
+	<ShaderSource>
+	<![CDATA[
+	
+#version 330
+
+uniform samplerCube EnvTex;
+
+in  vec3 oTex;
+out vec4 oFragColor;
+
+void main()
+{
+	oFragColor = textureLod(EnvTex, oTex, 0);
+}
+	]]>
+	</ShaderSource>
+</Shader>
 
 <Technique name="SkyCubeMap">
 	<Pass name="p0">
-		<!-- Make sure we set depth func to LessEqual, Otherwise normalized 
- 		     z value 1 will fail depth test -->
+		<!-- Make sure we set depth func to LessEqual, Otherwise normalized z value 1 will fail depth test -->
 		<State name="DepthFunc" value="LessEqual"/>
-		<VertexShader name="VSCubeMap"/>
-		<PixelShader name="PSCubeMap"/>
+		<VertexShader name="CubeMapVS"/>
+		<PixelShader name="CubeMapPS"/>
 	</Pass>
 </Technique>
 

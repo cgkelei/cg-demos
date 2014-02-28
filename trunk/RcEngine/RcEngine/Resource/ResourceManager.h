@@ -49,6 +49,9 @@ public:
 	shared_ptr<Resource> GetResourceByHandle( ResourceHandle handle );
 	shared_ptr<Resource> GetResourceByName(uint32_t type, const String& name, const String& group );
 
+	template<typename ResType>
+	shared_ptr<ResType> GetResourceByName(uint32_t type, const String& name, const String& group );
+
 	void LoadAllFromDisk();
 
 	void ReleaseResource(ResourceHandle handle);
@@ -65,6 +68,12 @@ protected:
 	unordered_map<String, ResourceGroup> mResourcesWithGroup;
 	
 };
+
+template<typename ResType>
+shared_ptr<ResType> ResourceManager::GetResourceByName(uint32_t type, const String& name, const String& group )
+{
+	return std::static_pointer_cast<ResType>(GetResourceByName(type, name, group));
+}
 
 
 

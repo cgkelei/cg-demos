@@ -8,8 +8,6 @@
 
 namespace RcEngine {
 
-
-
 class _OpenGLExport OpenGLRenderDevice : public RenderDevice
 {
 public:
@@ -24,6 +22,8 @@ public:
 	void ToggleFullscreen(bool fs);
 	bool Fullscreen() const;
 
+	void GetBlitFBO(GLuint& srcFBO, GLuint& dstFBO);
+
 	void SetBlendState(const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask);		
 	void SetRasterizerState(const shared_ptr<RasterizerState>& state);
 	void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0);
@@ -31,11 +31,9 @@ public:
 
 	void AdjustProjectionMatrix(float4x4& pOut);
 
-	//void Draw(RenderTechnique& tech, RenderOperation& operation);
-	void DoRender( EffectTechnique& tech, RenderOperation& operation);
-
 protected:
 	void DoBindFrameBuffer( const shared_ptr<FrameBuffer>& fb );
+	void DoRender( EffectTechnique& tech, RenderOperation& operation);
 
 private:
 	void BindVertexBufferOGL(const shared_ptr<GraphicsBuffer>& vertexBuffer );
@@ -44,6 +42,9 @@ private:
 private:
 	uint32_t mViewportTop, mViewportLeft, mViewportWidth, mViewportHeight;
 	shared_ptr<SamplerState> mCurrentSamplerStates[MaxSamplerCout];		
+
+	// source and destination blit framebuffer
+	GLuint mBlitFBO[2];
 };
 
 }

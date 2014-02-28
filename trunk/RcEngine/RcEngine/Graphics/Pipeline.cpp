@@ -143,7 +143,7 @@ void Pipeline::CreateFrameBuffers()
 
 			shared_ptr<RenderView> view;
 
-			uint32_t accessHint = EAH_CPU_Read | EAH_CPU_Write | EAH_GPU_Read;
+			uint32_t accessHint = EAH_CPU_Read | EAH_GPU_Write | EAH_GPU_Read;
 
 			if (rtDesc.Attach == ATT_DepthStencil)
 			{
@@ -421,7 +421,7 @@ void Pipeline::Resize( uint32_t width, uint32_t height )
 		{
 			PixelFormat fmt = rt.RenderTexture->GetTextureFormat();
 			uint32_t arrSize = rt.RenderTexture->GetTextureArraySize();
-			uint32_t numLevels = rt.RenderTexture->GetNumMipmaps();
+			uint32_t numLevels = rt.RenderTexture->GetMipLevels();
 			uint32_t sampleCount = rt.RenderTexture->GetSampleCount();
 			uint32_t sampleQuality = rt.RenderTexture->GetSampleQuality();
 

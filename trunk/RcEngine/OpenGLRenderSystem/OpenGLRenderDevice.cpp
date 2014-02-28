@@ -26,15 +26,18 @@
 namespace RcEngine {
 
 OpenGLRenderDevice::OpenGLRenderDevice()
-	: mViewportTop(0), mViewportLeft(0), mViewportWidth(0), mViewportHeight(0)
+	: mViewportTop(0), 
+	  mViewportLeft(0),
+	  mViewportWidth(0),
+	  mViewportHeight(0)
 {
 	mRenderDeviceType = RD_OpenGL;
+	mBlitFBO[0] = mBlitFBO[1] = 0; 
 }
-
 
 OpenGLRenderDevice::~OpenGLRenderDevice(void)
 {
-	SAFE_DELETE(mRenderFactory);
+	Release();
 }
 
 void OpenGLRenderDevice::Create()
@@ -46,6 +49,9 @@ void OpenGLRenderDevice::Create()
 void OpenGLRenderDevice::Release()
 {
 	SAFE_DELETE(mRenderFactory);
+
+	if (mBlitFBO[0] != 0)
+		glDeleteFramebuffers(2, mBlitFBO);
 }
 
 void OpenGLRenderDevice::CreateRenderWindow( const RenderSettings& settings )
@@ -99,6 +105,16 @@ void OpenGLRenderDevice::CreateRenderWindow( const RenderSettings& settings )
 	glEnable(GL_TEXTURE_CUBE_MAP);
 
 	OGL_ERROR_CHECK();
+}
+
+void OpenGLRenderDevice::GetBlitFBO( GLuint& srcFBO, GLuint& dstFBO )
+{
+	// Create blit framebuffer
+	if (mBlitFBO[0] == 0)
+		glGenFramebuffers(2, mBlitFBO);
+
+	srcFBO = mBlitFBO[0];
+	dstFBO = mBlitFBO[1];
 }
 
 void OpenGLRenderDevice::AdjustProjectionMatrix( float4x4& pOut )

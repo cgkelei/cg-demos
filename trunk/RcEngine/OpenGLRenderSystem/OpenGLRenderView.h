@@ -34,16 +34,7 @@ protected:
 class _OpenGLExport OpenGLDepthStencilView : public OpenGLRenderView
 {
 public:
-	/**
-	 * This construct will generate a new render buffer object, use as render target.
-	 */
-	OpenGLDepthStencilView(uint32_t width, uint32_t height, uint32_t sampleCount, uint32_t sampleQuality, PixelFormat format);
-	
-	/**
-	 * This construct use a depth format texture as a render target.
-	 */
 	OpenGLDepthStencilView(Texture& texture, uint32_t arrIndex, uint32_t level);
-
 	~OpenGLDepthStencilView(void);
 
 	void ClearDepth(float depth);
@@ -56,12 +47,7 @@ public:
 private:
 	uint32_t mArrIndex;
 	uint32_t mLevel;
-	uint32_t mSampleCount, mSampleQuality;
-
-	GLuint mRenderBufferID;
-	GLuint mTextureID;
-	GLenum mTextureTarget;
-
+	OpenGLTexture2D& mTextureOGL;
 };
 
 class _OpenGLExport OpenGLScreenDepthStencilView : public OpenGLRenderView

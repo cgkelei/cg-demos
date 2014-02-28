@@ -8,7 +8,14 @@
 namespace RcEngine {
 
 Texture::Texture( TextureType type, PixelFormat format, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint )
-	: mType(type), mFormat(format), mSampleCount(sampleCount), mSampleQuality(sampleQuality), mAccessHint(accessHint)
+	: mType(type),
+	  mFormat(format),
+	  mWidth(0),
+	  mHeight(0),
+	  mDepth(0),
+	  mSampleCount(sampleCount),
+	  mSampleQuality(sampleQuality),
+	  mAccessHint(accessHint)
 {
 
 }
@@ -16,6 +23,16 @@ Texture::Texture( TextureType type, PixelFormat format, uint32_t numMipMaps, uin
 Texture::~Texture()
 {
 
+}
+
+uint32_t Texture::CalculateMipmapLevels( uint32_t n )
+{
+	//return int(ceil( log( float(_n) ) / log( 2.f ) )) + 1;
+	//return uint32_t(1.0 + floor(log(float(n)/log(2.f))));
+
+	uint32_t levels = 1;
+	while (n >> levels) levels++;
+	return levels;
 }
 
 TextureResource::TextureResource(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group )
@@ -53,7 +70,6 @@ void _ApiExport SaveTexture( const shared_ptr<Texture> texture, const String& te
 {
 
 }
-
 
 
 } // Namespace RcEngine

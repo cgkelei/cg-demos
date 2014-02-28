@@ -129,7 +129,6 @@ void main()
 	}
 		
 	oFragColor = final * visibility; 
-	//oFragColor.r = 1.0;
 }	
 	
 	]]>
@@ -271,7 +270,7 @@ void main()
 	vec3 specularAlbedo = tap1.aaa;
 	float specularPower = tap0.a * 256.0;
 
-	vec4 lightColor = texture2D(LightAccumulateBuffer, oTex);
+	vec4 lightColor = texture(LightAccumulateBuffer, oTex);
 	                    
 	vec3 diffueLight = lightColor.rgb;
 	vec3 specularLight = lightColor.a / (Luminance(diffueLight) + 1e-6) * diffueLight;
@@ -342,6 +341,15 @@ void main()
 		<PixelShader name="DeferredDirectionalLightingPS">
 			<Macro name="DIRLIGHT"/>
 		</PixelShader>
+		
+		<!-- Only compute lighting in non-background region -->
+		<State name="StencilEnable" value="true"/>
+		<State name="FrontStencilFunc" value="NotEqual"/>
+		<State name="FrontStencilFailOp" value="Keep"/>
+		<State name="FrontStencilDepthFailOp" value="Keep"/>
+		<State name="FrontStencilPassOp" value="Keep"/>
+		<State name="FrontStencilRef" value="0"/>	
+		
 		<State name="DepthEnable" value="false"/>
 		<State name="DepthWriteMask" value="false"/>
 		<State name="BlendEnable" value="true"/>
@@ -458,6 +466,14 @@ void main()
 		</PixelShader>
 		<State name="DepthEnable" value="false"/>
 		<State name="DepthWriteMask" value="false"/>	
+	
+		<!-- Only compute lighting in non-background region -->
+		<State name="StencilEnable" value="true"/>
+		<State name="FrontStencilFunc" value="NotEqual"/>
+		<State name="FrontStencilFailOp" value="Keep"/>
+		<State name="FrontStencilDepthFailOp" value="Keep"/>
+		<State name="FrontStencilPassOp" value="Keep"/>
+		<State name="FrontStencilRef" value="0"/>	
 	</Pass>
 </Technique>
 

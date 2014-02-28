@@ -13,6 +13,7 @@ struct _ApiExport RenderQueueItem
 	RenderQueueItem() {}
 	RenderQueueItem(class Renderable* rd, float key) : Renderable(rd), SortKey(key) { }
 };
+
 typedef std::vector<RenderQueueItem> RenderBucket;
 
 class _ApiExport RenderQueue
@@ -74,8 +75,8 @@ public:
 
 	void AddRenderBucket(Bucket bucket);
 
-	RenderBucket& GetRenderBucket(Bucket bucket);
-	std::map<Bucket, RenderBucket*>& GetAllRenderBuckets() { return mRenderBuckets; }
+	RenderBucket& GetRenderBucket(Bucket bucket, bool sort = true);
+	std::map<Bucket, RenderBucket*>& GetAllRenderBuckets(bool sort = true);
 
 	void AddToQueue(RenderQueueItem item, Bucket bucket);
 	void ClearAllQueue();

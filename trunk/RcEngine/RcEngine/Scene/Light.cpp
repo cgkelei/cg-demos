@@ -5,9 +5,9 @@
 
 namespace RcEngine {
 
-Light::Light( const String& name )
+Light::Light( const String& name, LightType type)
 	: SceneObject(name, SOT_Light, false), 
-	  mLightType(LT_PointLight), 
+	  mLightType(type), 
 	  mLightPosition(float3::Zero()),
 	  mLightDirection(float3(0, 1, 0)),
 	  mLightColor(1, 1, 1),
@@ -15,6 +15,7 @@ Light::Light( const String& name )
 	  mSpotInnerAngle(Mathf::ToRadian(30.0f)), 
 	  mSpotOuterAngle(Mathf::ToRadian(60.0f)), 
 	  mSpotFalloff(1.0f),
+	  mSpotNearClip(1.0f),
 	  mRange(100000),
 	  mDerivedPosition(float3::Zero()), 
 	  mDerivedDirection(float3(0, 0, 1)),
@@ -23,12 +24,21 @@ Light::Light( const String& name )
 	  mSplitLambda(0.75f),
 	  mShadowCascades(3)
 {
-
+	// Init default light intensity
+	if (mLightType == LT_Directional)
+		mLightIntensity = 0.5;
+	else 
+		mLightIntensity = 1.0;
 }
 
 Light::~Light()
 {
 
+}
+
+void Light::SetSpotlightNearClip( float nearClip )
+{
+	mSpotNearClip = nearClip;
 }
 
 void Light::SetPosition( const float3& pos )
@@ -102,16 +112,6 @@ void Light::SetSpotFalloff( float exponent )
 }
 
 
-//void Light::SetSpotlightNearClipDistance( float nearClip )
-//{ 
-//	mSpotNearClip = nearClip;
-//}
-
-void Light::SetLightType( LightType type )
-{
-	mLightType = type;
-}
-
 const float3& Light::GetDerivedPosition() const
 {
 	UpdateTransform();
@@ -149,8 +149,21 @@ void Light::UpdateTransform() const
 
 SceneObject* Light::FactoryFunc( const String& name, const NameValuePairList* params )
 {
-	return new Light(name);
+	auto it = params->find("LightType");
+	if (it != params->end())
+	{
+		if (it->second == "PointLight")
+			return new Light(name, LT_PointLight);
+		else if (it->second == "SpotLight")
+			return new Light(name, LT_SpotLight);
+		else if (it->second == "DirectionalLight")
+			return new Light(name, LT_Directional);
+	}
+	
+	ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Unsupported Light Type!", "Light::FactoryFunc");
 }
+
+
 
 
 

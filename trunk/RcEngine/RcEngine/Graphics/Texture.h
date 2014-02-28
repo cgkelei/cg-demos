@@ -20,11 +20,12 @@ public:
 	PixelFormat GetTextureFormat() const		{ return mFormat; }
 	TextureType GetTextureType() const          { return mType; }
 	uint32_t GetTextureArraySize() const		{ return mTextureArraySize; }
-	uint32_t GetNumMipmaps() const				{ return mMipMaps; }
+	uint32_t GetMipLevels() const				{ return mMipLevels; }
 
-	virtual uint32_t GetWidth(uint32_t level) const = 0;
-	virtual uint32_t GetHeight(uint32_t level) const = 0;
-	virtual uint32_t GetDepth(uint32_t level) const = 0;
+	// return the dimension of the texture, 0 for texture with no height or depth
+	inline uint32_t GetWidth(uint32_t level = 0) const		{ return mWidth >> level; }
+	inline uint32_t GetHeight(uint32_t level = 0) const		{ return mHeight >> level; }
+	inline uint32_t GetDepth(uint32_t level = 0) const		{ return mDepth >> level; }
 
 	virtual void BuildMipMap() = 0;
 
@@ -49,15 +50,23 @@ public:
 	virtual void Unmap3D(uint32_t arrayIndex, uint32_t level) = 0;
 	virtual void UnmapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level) = 0;
 
+	virtual void CopyToTexture(Texture& destTexture) = 0;
+
+protected:
+	// Help function used to compute mipmap levels
+	static uint32_t CalculateMipmapLevels( uint32_t n );
+
 protected:
 
 	uint32_t mSampleCount, mSampleQuality;
-	uint32_t mMipMaps;
+	uint32_t mMipLevels;
 	uint32_t mTextureArraySize;
+	uint32_t mWidth, mHeight, mDepth;
 	uint32_t mAccessHint;
 	PixelFormat mFormat;
 	TextureType mType;
 };
+
 
 // Todo 
 /** 
