@@ -1,0 +1,15 @@
+﻿Build started 2014/2/28 19:46:26.
+     1>Project "E:\Engines\RcEngine\Samples\RenderPath\RenderPath.vcxproj" on node 2 (Build target(s)).
+     1>InitializeBuildStatus:
+         Touching "Release\RenderPath.unsuccessfulbuild".
+       ClCompile:
+         D:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I../../RcEngine /I../../3rdParty /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt App.cpp
+         App.cpp
+     1>App.cpp(293): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>App.cpp(309): error C2660: 'RcEngine::SceneManager::CreateSkyBox' : function does not take 0 arguments
+     1>App.cpp(312): error C2146: syntax error : missing ';' before identifier 'mCameraControler'
+     1>Done Building Project "E:\Engines\RcEngine\Samples\RenderPath\RenderPath.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:01.37
