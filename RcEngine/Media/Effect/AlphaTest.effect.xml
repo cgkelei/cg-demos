@@ -1,4 +1,4 @@
-<Effect name="ModelEffect">
+<Effect name="AlphaTestModelEffect">
 
 <Shader name="ShadowMapVS" stage="Vertex" entry="main">
 	<ShaderSource>
@@ -351,6 +351,17 @@ void main()
 		<VertexShader name="GeneralVS"/>
 		<PixelShader name="GBufferPS"/>
 		<state name="CullMode" value="None"/>
+		<State name="StencilEnable" value="true"/>
+		<State name="FrontStencilRef" value="1"/>
+		<State name="FrontStencilFunc" value="AlwaysPass"/>
+		<State name="FrontStencilFailOp" value="Keep"/>
+		<State name="FrontStencilDepthFailOp" value="Keep"/>
+		<State name="FrontStencilPassOp" value="Replace"/>
+		<State name="BackStencilRef" value="1"/>
+		<State name="BackStencilFunc" value="AlwaysPass"/>
+		<State name="BackStencilFailOp" value="Keep"/>
+		<State name="BackStencilDepthFailOp" value="Keep"/>
+		<State name="BackStencilPassOp" value="Replace"/>
 	</Pass>
 </Technique>
 

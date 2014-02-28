@@ -32,14 +32,50 @@ SceneManager::SceneManager()
 	RegisterType(SOT_Light, "Light Type", nullptr, nullptr, Light::FactoryFunc);
 
 	mAnimationController = new AnimationController;
-	mRenderQueue = new RenderQueue;
 }
 
 SceneManager::~SceneManager()
 {
 	ClearScene();
 	SAFE_DELETE(mAnimationController);
-	SAFE_DELETE(mRenderQueue);
+}
+
+void SceneManager::ClearScene()
+{
+	// clear all scene node
+	for (SceneNode* node : mAllSceneNodes) 
+		delete node;
+
+	mAllSceneNodes.clear();
+
+	// clear all sprite
+	for (Sprite* sprite : mSprites)
+		delete sprite;
+	mSprites.clear();
+
+	// clear all scene object
+	for (auto& kv : mSceneObjectCollections)
+	{
+		for (SceneObject* object : kv.second)
+			delete object;
+	}
+	mSceneObjectCollections.clear();
+
+	// lights has delete by mSceneObjectCollections
+	mAllSceneLights.clear();
+}
+
+void SceneManager::RegisterType( uint32_t type, const String& typeString, ResTypeInitializationFunc inf, ResTypeReleaseFunc rf, ResTypeFactoryFunc ff )
+{
+	SceneObjectRegEntry entry;
+	entry.typeString = typeString;
+	entry.initializationFunc = inf;
+	entry.releaseFunc = rf;
+	entry.factoryFunc = ff;
+	mRegistry[type] = entry;
+
+	// Initialize resource type
+	if( inf != 0 ) (*inf)();
 }
 
 SceneNode* SceneManager::CreateSceneNode( const String& name )
@@ -76,7 +112,6 @@ AnimationController* SceneManager::GetAnimationController() const
 	return mAnimationController;
 }
 
-
 void SceneManager::DestroySceneNode( SceneNode* node )
 {
 	auto found = std::find(mAllSceneNodes.begin(), mAllSceneNodes.end(), node);
@@ -98,12 +133,17 @@ void SceneManager::DestroySceneNode( SceneNode* node )
 	mAllSceneNodes.erase(found);
 }
 
-Light* SceneManager::CreateLight( const String& name )
+Light* SceneManager::CreateLight( const String& name, uint32_t type )
 {
 	if (mRegistry.find(SOT_Light) == mRegistry.end())
 		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Light type haven't Registed", "SceneManager::CreateEntity");
 
-	Light* light = static_cast<Light*>((mRegistry[SOT_Light].factoryFunc)(name, nullptr));
+	static String lightTypeStr[LT_Count] = { "DirectionalLight", "PointLight", "SpotLight", "AreaLight" }; 
+	
+	NameValuePairList params;
+	params["LightType"] = lightTypeStr[type];
+
+	Light* light = static_cast<Light*>((mRegistry[SOT_Light].factoryFunc)(name, &params));
 	mSceneObjectCollections[SOT_Light].push_back(light);
 
 	// keep track of light
@@ -144,7 +184,6 @@ SceneNode* SceneManager::FindSceneNode( const String& name ) const
 Sprite* SceneManager::CreateSprite( const shared_ptr<Texture>& tex, const shared_ptr<Material>& mat )
 {
 	Sprite* sprite = new Sprite();
-	printf("SetSpriteContent\n");
 	sprite->SetSpriteContent(tex, mat);
 	mSprites.push_back(sprite);
 
@@ -163,50 +202,12 @@ void SceneManager::DestroySprite( Sprite* sprite )
 	}
 }
 
-
-void SceneManager::CreateSkyBox( const shared_ptr<Texture>& texture, bool cubemap /*= true*/, float distance /*= 100.0f */ )
+void SceneManager::CreateSkyBox( const shared_ptr<Texture>& texture )
 {
 	SAFE_DELETE(mSkyBox);
-	mSkyBox = new Sky(distance, cubemap);
-
-	if (cubemap)
-		mSkyBox->GetMaterial()->SetTexture("SkyCubeMap", texture);
-	else
-		mSkyBox->GetMaterial()->SetTexture("SkyPlaneMaps", texture);
+	mSkyBox = new SkyBox;
+	mSkyBox->GetMaterial()->SetTexture("EnvTex", texture);
 }
-
-void SceneManager::UpdateRenderQueue(const Camera& cam, RenderOrder order)
-{
-	mRenderQueue->ClearAllQueue();
-
-	GetRootSceneNode()->OnUpdateRenderQueues(cam, order);
-
-	//// Update skynode same with camera positon, add sky box to render queue
-	//if (mSkyBoxNode)
-	//{
-	//	mSkyBoxNode->SetPosition( cam.GetPosition() );
-	//	mRenderQueue->AddToQueue(  RenderQueueItem(SOT_Sky, mSkyBox, 0) ,RenderQueue::BucketBackground);
-	//}
-}
-
-void SceneManager::UpdateOverlayQueue()
-{
-	mRenderQueue->ClearQueue(RenderQueue::BucketOverlay);
-
-	for (Sprite* sprite : mSprites)
-	{
-		if (sprite->Empty() == false)
-		{
-			RenderQueueItem item;
-			item.Renderable = sprite;
-
-			// ignore render order, only handle state change order
-			item.SortKey = (float)sprite->GetMaterial()->GetEffect()->GetResourceHandle();
-			mRenderQueue->AddToQueue(item, RenderQueue::BucketOverlay);
-		}
-	}
-}
-
 
 void SceneManager::UpdateSceneGraph( float delta )
 {
@@ -217,60 +218,65 @@ void SceneManager::UpdateSceneGraph( float delta )
 	GetRootSceneNode()->Update();
 }
 
-void SceneManager::RenderScene()
+void SceneManager::UpdateRenderQueue(const Camera& cam, RenderOrder order)
 {
-	for (auto& kv : mRenderQueue->GetAllRenderBuckets())
+	mRenderQueue.ClearAllQueue();
+
+	GetRootSceneNode()->OnUpdateRenderQueues(cam, order);
+
+	//// Update skynode same with camera positon, add sky box to render queue
+	if (mSkyBox)
 	{
-		RenderBucket& renderBucket = *kv.second;
+		mSkyBox->SetPosition( cam.GetPosition() );
+		mRenderQueue.AddToQueue( RenderQueueItem(mSkyBox, 0), RenderQueue::BucketBackground);
+	}
+}
 
-		if (renderBucket.size())
+void SceneManager::UpdateLightQueue( const Camera& cam )
+{
+	for (Light* light : mAllSceneLights)
+	{
+		switch (light->GetLightType())
 		{
-			std::sort(renderBucket.begin(), renderBucket.end(), [](const RenderQueueItem& lhs, const RenderQueueItem& rhs) {
-				return lhs.SortKey < rhs.SortKey; });
+		case LT_PointLight:
+			{
+				BoundingSpheref sphere(light->GetDerivedPosition(), light->GetRange());
+				if (cam.Visible(sphere))
+					mLightQueue.push_back(light);
+			}
+			break;
+		case LT_SpotLight:
+			{
+				mLightQueue.push_back(light);
+			}
+			break;
+		default:
+			mLightQueue.push_back(light);
+		}
+	}
 
-				for (const RenderQueueItem& renderItem : renderBucket)
-					renderItem.Renderable->Render();
+	std::sort(mLightQueue.begin(), mLightQueue.end(), [](Light* lhs, Light* rhs) { return lhs->GetLightType() < rhs->GetLightType(); });
+}
+
+void SceneManager::UpdateOverlayQueue()
+{
+	mRenderQueue.ClearQueue(RenderQueue::BucketOverlay);
+
+	for (Sprite* sprite : mSprites)
+	{
+		if (sprite->Empty() == false)
+		{
+			RenderQueueItem item;
+			item.Renderable = sprite;
+
+			// ignore render order, only handle state change order
+			item.SortKey = (float)sprite->GetMaterial()->GetEffect()->GetResourceHandle();
+			mRenderQueue.AddToQueue(item, RenderQueue::BucketOverlay);
 		}
 	}
 }
 
-void SceneManager::ClearScene()
-{
-	// clear all scene node
-	for (SceneNode* node : mAllSceneNodes) 
-		delete node;
 
-	mAllSceneNodes.clear();
-
-	// clear all sprite
-	for (Sprite* sprite : mSprites)
-		delete sprite;
-	mSprites.clear();
-
-	// clear all scene object
-	for (auto& kv : mSceneObjectCollections)
-	{
-		for (SceneObject* object : kv.second)
-			delete object;
-	}
-	mSceneObjectCollections.clear();
-
-	// lights has delete by mSceneObjectCollections
-	mAllSceneLights.clear();
-}
-
-void SceneManager::RegisterType( uint32_t type, const String& typeString, ResTypeInitializationFunc inf, ResTypeReleaseFunc rf, ResTypeFactoryFunc ff )
-{
-	SceneObjectRegEntry entry;
-	entry.typeString = typeString;
-	entry.initializationFunc = inf;
-	entry.releaseFunc = rf;
-	entry.factoryFunc = ff;
-	mRegistry[type] = entry;
-
-	// Initialize resource type
-	if( inf != 0 ) (*inf)();
-}
 
 
 }

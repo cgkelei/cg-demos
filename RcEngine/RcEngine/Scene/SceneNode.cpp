@@ -139,10 +139,11 @@ void SceneNode::OnUpdateRenderQueues(const Camera& camera,  RenderOrder order)
 	if (!camera.Visible(GetWorldBoundingBox()))
 		return;
 
+	RenderQueue& renderQueue = mScene->GetRenderQueue();
 	for (SceneObject* pSceneObject : mAttachedObjects)
 	{
 		if (pSceneObject->Renderable() && pSceneObject->IsVisible())
-			pSceneObject->OnUpdateRenderQueue(mScene->GetRenderQueue(), camera, order);
+			pSceneObject->OnUpdateRenderQueue(&renderQueue, camera, order);
 	}
 
 	// recursively call children

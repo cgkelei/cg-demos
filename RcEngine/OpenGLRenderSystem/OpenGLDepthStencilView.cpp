@@ -7,39 +7,12 @@
 
 namespace RcEngine {
 
-OpenGLDepthStencilView::OpenGLDepthStencilView( uint32_t width, uint32_t height, uint32_t sampleCount, uint32_t sampleQuality, PixelFormat format )
-	: mSampleCount(sampleCount), mSampleQuality(sampleQuality), mArrIndex(0), mLevel(-1)
-{
-	//PixelFormatUtils::IsDepth()
-	mWidth = width;
-	mHeight = height;
-	mFormat = format;
-
-	GLenum internalFormat, externFormat, formatType;
-	OpenGLMapping::Mapping(internalFormat, externFormat, formatType, mFormat);
-
-	glGenRenderbuffersEXT(1, &mRenderBufferID);
-	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, mRenderBufferID);
-	if (sampleCount <= 1)
-	{
-		glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
-			internalFormat, mWidth, mHeight);
-	}
-	else
-	{
-		glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, sampleCount,
-			internalFormat, mWidth, mHeight);
-	}
-
-	OGL_ERROR_CHECK();
-}
-
-
 OpenGLDepthStencilView::OpenGLDepthStencilView( Texture& texture, uint32_t arrIndex, uint32_t level )
-	: mArrIndex(arrIndex), mLevel(level)
+	: mTextureOGL(*(static_cast_checked<OpenGLTexture2D*>(&texture))),
+	  mArrIndex(arrIndex),
+	  mLevel(level)
 {
-
-	if(texture.GetTextureType() != TT_Texture2D)
+	if(mTextureOGL.GetTextureType() != TT_Texture2D)
 	{
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Texture Type Error, Only 2D Texture Needed",
 			"OpenGLDepthStencilView::OpenGLDepthStencilView");
@@ -51,17 +24,9 @@ OpenGLDepthStencilView::OpenGLDepthStencilView( Texture& texture, uint32_t arrIn
 			"OpenGLDepthStencilView::OpenGLDepthStencilView");
 	}
 
-	OpenGLTexture& textureOGL = *(static_cast_checked<OpenGLTexture*>(&texture));
-
-	mFormat = textureOGL.GetTextureFormat();
-	mWidth = textureOGL.GetWidth(mLevel);
-	mHeight = textureOGL.GetHeight(mLevel);
-
-	mTextureTarget = textureOGL.GetOpenGLTextureTarget();
-	mTextureID = textureOGL.GetOpenGLTexture();
-
-	mSampleCount = textureOGL.GetSampleCount();
-	mSampleQuality = textureOGL.GetSampleQuality();
+	mWidth = texture.GetWidth(level);
+	mHeight = texture.GetHeight(level);
+	mFormat = texture.GetTextureFormat();
 }
 
 OpenGLDepthStencilView::~OpenGLDepthStencilView()
@@ -69,41 +34,61 @@ OpenGLDepthStencilView::~OpenGLDepthStencilView()
 	
 }
 
-
 void OpenGLDepthStencilView::OnAttach(FrameBuffer& fb, Attachment attr)
 {
-	OGL_ERROR_CHECK();
-
 	assert(attr == ATT_DepthStencil);
 	OpenGLRenderView::OnAttach(fb, attr);
 
-	if(mLevel < 0)
+	GLenum attachment = GL_DEPTH_ATTACHMENT;
+	if (PixelFormatUtils::IsStencil(mFormat))
+		attachment = GL_DEPTH_STENCIL_ATTACHMENT;
+
+	if (GLEW_EXT_direct_state_access)
 	{
-		// use render buffer
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, mRenderBufferID);
-		if (PixelFormatUtils::IsStencil(mFormat))
+		if(mTextureOGL.RenderBufferHint())  
 		{
-			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, mRenderBufferID);
+			GLuint renderBufferID = mTextureOGL.GetOpenGLTexture();
+			glNamedFramebufferRenderbufferEXT(mFrameBufferID, attachment, GL_RENDERBUFFER, renderBufferID);
+		}
+		else
+		{
+			GLuint texID = mTextureOGL.GetOpenGLTexture();
+			if (mTextureOGL.GetOpenGLTextureTarget() == GL_TEXTURE_2D)
+				glNamedFramebufferTextureEXT(mFrameBufferID, attachment, texID, mLevel);
+			else 
+			{
+				ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Depth Texture Array May Error!", "OpenGLDepthStencilView::Attach");
+				glNamedFramebufferTextureLayerEXT(mFrameBufferID, attachment, texID, mLevel, mArrIndex);
+			}
 		}
 	}
 	else
 	{
-		// has mip map, use textue object
-		if(mTextureTarget == GL_TEXTURE_2D)
+		GLuint oldFBO = OpenGLFrameBuffer::GetFBO();
+
+		OpenGLFrameBuffer::BindFBO(mFrameBufferID);
 		{
-			if (mFormat == PF_Depth24Stencil8)
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, mTextureTarget, mTextureID, mLevel);
-			else if (mFormat == PF_Depth16 || mFormat == PF_Depth32)
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, mTextureTarget, mTextureID, mLevel);
+			if (mTextureOGL.RenderBufferHint())
+			{
+				GLuint renderBufferID = mTextureOGL.GetOpenGLTexture();
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, renderBufferID);
+			}
+			else
+			{
+				GLuint texID = mTextureOGL.GetOpenGLTexture();
+				if (mTextureOGL.GetOpenGLTextureTarget() == GL_TEXTURE_2D)
+					glFramebufferTexture(mFrameBufferID, attachment, texID, mLevel);
+				else 
+				{
+					ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Depth Texture Array May Error!", "OpenGLDepthStencilView::Attach");
+					glFramebufferTextureLayer(mFrameBufferID, attachment, texID, mLevel, mArrIndex);
+				}
+			}
 		}
-		else
-		{
-			if (mFormat == PF_Depth24Stencil8)
-				glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, mTextureID, mArrIndex, mLevel);
-			else if (mFormat == PF_Depth16 || mFormat == PF_Depth32)
-				glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, mTextureID, mArrIndex, mLevel);
-		}
+		OpenGLFrameBuffer::BindFBO(oldFBO);
 	}
+
+	OGL_ERROR_CHECK();
 }
 
 void OpenGLDepthStencilView::OnDetach(FrameBuffer& fb, Attachment attr)
@@ -111,31 +96,46 @@ void OpenGLDepthStencilView::OnDetach(FrameBuffer& fb, Attachment attr)
 	assert(attr == ATT_DepthStencil);
 	OpenGLRenderView::OnDetach(fb, attr);
 
-	if(mLevel < 0)
+	if (GLEW_EXT_direct_state_access)
 	{
-		// use render buffer
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, 0);
-		if (PixelFormatUtils::IsStencil(mFormat))
+		if(mTextureOGL.RenderBufferHint())  
 		{
-			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, 0);
+			glNamedFramebufferRenderbufferEXT(mFrameBufferID, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
+		}
+		else
+		{
+			if (mTextureOGL.GetOpenGLTextureTarget() == GL_TEXTURE_2D)
+				glNamedFramebufferTextureEXT(mFrameBufferID, GL_DEPTH_STENCIL_ATTACHMENT, 0, 0);
+			else 
+			{
+				ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Depth Texture Array May Error!", "OpenGLDepthStencilView::OnDetach");
+				glNamedFramebufferTextureLayerEXT(mFrameBufferID, GL_DEPTH_STENCIL_ATTACHMENT, 0, 0, 0);
+			}
 		}
 	}
 	else
 	{
-		if(mTextureTarget == GL_TEXTURE_2D)
+		GLuint oldFBO = OpenGLFrameBuffer::GetFBO();
+	
+		OpenGLFrameBuffer::BindFBO(mFrameBufferID);
 		{
-			if (mFormat == PF_Depth24Stencil8)
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, mTextureTarget, 0, 0);
-			else if (mFormat == PF_Depth16 || mFormat == PF_Depth32)
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, mTextureTarget, 0, 0);
+			if (mTextureOGL.RenderBufferHint())
+			{
+				GLuint renderBufferID = mTextureOGL.GetOpenGLTexture();
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBufferID);
+			}
+			else
+			{
+				if (mTextureOGL.GetOpenGLTextureTarget() == GL_TEXTURE_2D)
+					glFramebufferTexture(mFrameBufferID, GL_DEPTH_STENCIL_ATTACHMENT, 0, 0);
+				else 
+				{
+					ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Depth Texture Array May Error!", "OpenGLDepthStencilView::OnDetach");
+					glFramebufferTextureLayer(mFrameBufferID, GL_DEPTH_STENCIL_ATTACHMENT, 0, 0, 0);
+				}
+			}
 		}
-		else
-		{
-			if (mFormat == PF_Depth24Stencil8)
-				glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, 0, 0, 0);
-			else if (mFormat == PF_Depth16 || mFormat == PF_Depth32)
-				glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, 0, 0, 0);
-		}
+		OpenGLFrameBuffer::BindFBO(oldFBO);
 	}
 
 	OGL_ERROR_CHECK();
@@ -174,8 +174,7 @@ void OpenGLScreenDepthStencilView::OnAttach(FrameBuffer& fb, Attachment attr)
 	assert(attr == ATT_DepthStencil);
 	OpenGLRenderView::OnAttach(fb, attr);
 
-	OpenGLFrameBuffer& framBufferOGL = *(static_cast_checked<OpenGLFrameBuffer*>(&fb));
-	if(framBufferOGL.GetFrameBufferObject() != 0)
+	if(mFrameBufferID != 0)
 	{
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "ScreenDepthStencilView Can Only Attach To Screen Frame Buffer",
 			"OpenGLScreenDepthStencilView::OnAttach");
@@ -184,9 +183,9 @@ void OpenGLScreenDepthStencilView::OnAttach(FrameBuffer& fb, Attachment attr)
 
 void OpenGLScreenDepthStencilView::OnDetach( FrameBuffer& fb, Attachment attr )
 {
-	OpenGLFrameBuffer& framBufferOGL = *(static_cast_checked<OpenGLFrameBuffer*>(&fb));
-
-	if(framBufferOGL.GetFrameBufferObject() != 0)
+	OpenGLRenderView::OnDetach(fb, attr);
+	
+	if(mFrameBufferID != 0)
 	{
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "ScreenDepthStencilView Can Only Attach To Screen Frame Buffer",
 			"OpenGLScreenDepthStencilView::OnDetached");

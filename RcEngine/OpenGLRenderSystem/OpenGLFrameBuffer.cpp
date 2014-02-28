@@ -6,17 +6,30 @@
 
 namespace RcEngine {
 
+GLuint OpenGLFrameBuffer::msCurrFrameBufferObject = 0;
+
+void OpenGLFrameBuffer::BindFBO( GLuint fbo )
+{
+	if (fbo != msCurrFrameBufferObject)
+	{
+		msCurrFrameBufferObject = fbo;
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	}
+}
+
+GLuint OpenGLFrameBuffer::GetFBO()
+{
+	return msCurrFrameBufferObject;
+}
+
+
 OpenGLFrameBuffer::OpenGLFrameBuffer( uint32_t width, uint32_t height, bool offscreen /*= true*/ )
 	: FrameBuffer(width, height, offscreen)
 {
 	if (mOffscreen)
-	{
-		glGenFramebuffersEXT(1, &mFrameBufferObject);
-	} 
+		glGenFramebuffers(1, &mFrameBufferObject);
 	else
-	{
 		mFrameBufferObject = 0;
-	}
 }
 
 RcEngine::OpenGLFrameBuffer::~OpenGLFrameBuffer()
@@ -24,23 +37,21 @@ RcEngine::OpenGLFrameBuffer::~OpenGLFrameBuffer()
 	DetachAll();
 
 	if(mFrameBufferObject != 0)
-		glDeleteFramebuffersEXT(1, &mFrameBufferObject);
+		glDeleteFramebuffers(1, &mFrameBufferObject);
 }
 
 void OpenGLFrameBuffer::DoBind()
 {
-	OGL_ERROR_CHECK();
+	BindFBO(mFrameBufferObject);
 
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferObject);
-	
 	if (mFrameBufferObject != 0 && mColorViews.size())
 	{
-		assert(GL_FRAMEBUFFER_COMPLETE_EXT == glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
+		assert(GL_FRAMEBUFFER_COMPLETE == glCheckFramebufferStatus(GL_FRAMEBUFFER));
 
 		std::vector<GLenum> targets(mColorViews.size());
 		for (size_t i = 0; i < mColorViews.size(); ++ i)
 		{
-			targets[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0_EXT + i);
+			targets[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i);
 		}
 		glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
 	}
@@ -50,9 +61,7 @@ void OpenGLFrameBuffer::DoBind()
 
 void OpenGLFrameBuffer::DoUnbind()
 {
-	OGL_ERROR_CHECK();
 }
-
 
 void OpenGLFrameBuffer::SwapBuffers()
 {
@@ -115,6 +124,7 @@ bool OpenGLFrameBuffer::CheckFramebufferStatus()
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "OpenGL FrameBuffer Error", "OpenGLFrameBuffer::CheckFramebufferStatus");
 	return false;
 }
+
 
 }
 

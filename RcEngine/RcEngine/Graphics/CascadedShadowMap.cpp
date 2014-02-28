@@ -337,17 +337,19 @@ void CascadedShadowMap::MakeCascadedShadowMap(const Light& light)
 	for (uint32_t i = 0; i < light.GetShadowCascades(); ++i)
 	{		
 		mShadowFrameBuffer->SetCamera(mLightCamera[i]);
-
-		mDevice->BindFrameBuffer(mShadowFrameBuffer);	
+	
 		mShadowFrameBuffer->Attach(ATT_Color0, mShadowSplitsRTV[i]);
-		mShadowFrameBuffer->Clear(CF_Depth | CF_Color, ColorRGBA(1, 1, 1, 1), 1.0f, 0);
+		
+		mDevice->BindFrameBuffer(mShadowFrameBuffer);	
 		bool b = mShadowFrameBuffer->CheckFramebufferStatus();
-
+		
+		mShadowFrameBuffer->Clear(CF_Depth | CF_Color, ColorRGBA(1, 1, 1, 1), 1.0f, 0);
+		
 		// Update light render queue 
 		sceneMan.UpdateRenderQueue(*mLightCamera[i], RO_None);
 
-		RenderQueue* renderQueue = sceneMan.GetRenderQueue();	
-		RenderBucket& opaqueBucket = renderQueue->GetRenderBucket(RenderQueue::BucketOpaque);
+		RenderQueue& renderQueue = sceneMan.GetRenderQueue();	
+		RenderBucket& opaqueBucket = renderQueue.GetRenderBucket(RenderQueue::BucketOpaque);
 		if (opaqueBucket.size())
 		{
 			std::sort(opaqueBucket.begin(), opaqueBucket.end(), [](const RenderQueueItem& lhs, const RenderQueueItem& rhs) {

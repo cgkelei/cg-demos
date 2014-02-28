@@ -1,5 +1,6 @@
 #include "OpenGLTexture.h"
 #include <Core/Exception.h>
+#include <math.h>
 
 namespace RcEngine {
 
@@ -7,71 +8,117 @@ OpenGLTextureCube::OpenGLTextureCube( PixelFormat format, uint32_t arraySize, ui
 	: OpenGLTexture(TT_TextureCube, format, arraySize, numMipMaps, sampleCount, sampleQuality, accessHint)
 {
 	assert(height == width);
-	uint32_t size = width;
+	mMipLevels = (numMipMaps > 0) ? numMipMaps : Texture::CalculateMipmapLevels(width);
+	mWidth = mHeight = width;
 
-	if( numMipMaps == 0 )
+	mTextureTarget = (mTextureArraySize > 1) ? GL_TEXTURE_CUBE_MAP_ARRAY : GL_TEXTURE_CUBE_MAP;
+	glGenTextures(1, &mTextureID);
+	glBindTexture(mTextureTarget, mTextureID);
+	glTexParameteri(mTextureTarget, GL_TEXTURE_MAX_LEVEL, mMipLevels - 1);
+
+	//if (GLEW_ARB_texture_storage)
+	//	CreateWithImmutableStorage(initData);
+	//else
+		CreateWithMutableStorage(initData);
+}
+
+
+OpenGLTextureCube::~OpenGLTextureCube()
+{
+
+}
+
+void OpenGLTextureCube::CreateWithImmutableStorage( ElementInitData* initData )
+{
+	/*GLenum internalFormat, externFormat, formatType;
+	OpenGLMapping::Mapping(internalFormat, externFormat, formatType, mFormat);
+	uint32_t texelSize = PixelFormatUtils::GetNumElemBytes(mFormat);
+
+	if (mTextureArraySize > 1)
 	{
-		mMipMaps = 1;
-		uint32_t w = size;
-		while( w > 1)
+		glTexStorage3D(mTextureTarget, mMipMaps, internalFormat, mSizes[0], mSizes[0], mTextureArraySize);
+		if (initData)
 		{
-			++mMipMaps;
-			w = std::max<uint32_t>(1U, w / 2);
+			for (uint32_t  arrIndex = 0; arrIndex < mTextureArraySize; ++ arrIndex)
+			{
+				for(uint32_t face = 0; face < 6; ++face)
+				{
+					for (uint32_t level = 0; level < mMipMaps; ++ level)
+					{
+						uint32_t levelWidth = mSizes[level];
+						uint32_t levelHeight = mSizes[level];
+						if (PixelFormatUtils::IsCompressed(mFormat))
+						{
+							int blockSize = (internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16; 
+							uint32_t imageSize = ((levelWidth+3)/4)*((levelHeight+3)/4)*blockSize; 
+							glCompressedTexSubImage3D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
+								static_cast<GLint>(level),
+								0, 0, static_cast<GLint>(arrIndex),
+								static_cast<GLsizei>(levelWidth),
+								static_cast<GLsizei>(levelHeight),
+								static_cast<GLsizei>(0),
+								externFormat, 
+								static_cast<GLsizei>(imageSize),
+								initData[arrIndex * mMipMaps + level].pData);
+						}
+						else
+						{
+							glTexSubImage3D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
+								static_cast<GLint>(level),
+								0, 0, static_cast<GLint>(arrIndex),
+								static_cast<GLsizei>(levelWidth),
+								static_cast<GLsizei>(levelHeight),
+								static_cast<GLsizei>(1),
+								externFormat,
+								formatType,
+								initData[arrIndex * mMipMaps + level].pData);
+						}
+					}
+				}
+			}
 		}
 	}
 	else
 	{
-		mMipMaps = numMipMaps;
-	}
 
-	mSizes.resize(mMipMaps);
-	{
-		uint32_t w = size;
-		for(uint32_t level = 0; level < mMipMaps; level++)
-		{
-			mSizes[level] = w;
-			w = std::max<uint32_t>(1U, w / 2);
-		}
-	}
+	}*/
+}
 
-	uint32_t texelSize = PixelFormatUtils::GetNumElemBytes(mFormat);
-
+void OpenGLTextureCube::CreateWithMutableStorage( ElementInitData* initData )
+{
 	GLenum internalFormat, externFormat, formatType;
 	OpenGLMapping::Mapping(internalFormat, externFormat, formatType, mFormat);
-
-	glGenTextures(1, &mTextureID);
-	glBindTexture(mTargetType, mTextureID);
-	glTexParameteri(mTargetType, GL_TEXTURE_MAX_LEVEL, mMipMaps - 1);
+	uint32_t texelSize = PixelFormatUtils::GetNumElemBytes(mFormat);
 
 	for (uint32_t arrIndex = 0; arrIndex < mTextureArraySize; ++arrIndex)
 	{
 		for(uint32_t face = 0; face < 6; ++face)
 		{
-			for (uint32_t level = 0; level < mMipMaps; ++level)
+			for (uint32_t level = 0; level < mMipLevels; ++level)
 			{
-				uint32_t levelSize= mSizes[level];
+				uint32_t levelSize= GetWidth(level);
 
 				if (PixelFormatUtils::IsCompressed(mFormat))
 				{
 					int blockSize = (internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16; 
 					uint32_t imageSize = ((levelSize+3)/4)*((levelSize+3)/4)*blockSize; 
 
-					uint32_t imageIndex =  arrIndex*mMipMaps*6 + face*mMipMaps + level;
+					uint32_t imageIndex =  arrIndex*mMipLevels*6 + face*mMipLevels + level;
 
 					if (mTextureArraySize > 1)
 					{	
 						if (0 == arrIndex)
 						{
-							glCompressedTexImage3D(mTargetType, level, internalFormat, levelSize, levelSize, mTextureArraySize,
+							glCompressedTexImage3D(mTextureTarget, level, internalFormat, levelSize, levelSize, mTextureArraySize,
 								0, imageSize, NULL);
 						}
-						glCompressedTexSubImage3D(mTargetType, level, 0, 0, arrIndex, levelSize, levelSize, 1, internalFormat, 
+						glCompressedTexSubImage3D(mTextureTarget, level, 0, 0, arrIndex, levelSize, levelSize, 1, internalFormat, 
 							imageSize, (NULL == initData) ? NULL : initData[imageIndex].pData);
 
 					}
 					else
 					{
-						
+
 						glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, internalFormat, levelSize, levelSize, 0,
 							imageSize, (NULL == initData) ? NULL : initData[imageIndex].pData);
 					}
@@ -82,7 +129,7 @@ OpenGLTextureCube::OpenGLTextureCube( PixelFormat format, uint32_t arraySize, ui
 				{
 					uint32_t imageSize = levelSize * levelSize * texelSize;
 
-					uint32_t imageIndex =  arrIndex * mMipMaps * 6 + face * mMipMaps + level;
+					uint32_t imageIndex =  arrIndex * mMipLevels * 6 + face * mMipLevels + level;
 
 					if(mTextureArraySize > 1)
 					{
@@ -100,27 +147,6 @@ OpenGLTextureCube::OpenGLTextureCube( PixelFormat format, uint32_t arraySize, ui
 		}
 	}
 }
-
-
-OpenGLTextureCube::~OpenGLTextureCube()
-{
-
-}
-
-
-uint32_t OpenGLTextureCube::GetWidth( uint32_t level ) const
-{
-	assert(level < mMipMaps);
-	return mSizes[level];
-}
-
-
-uint32_t OpenGLTextureCube::GetHeight( uint32_t level ) const
-{
-	assert(level < mMipMaps);
-	return mSizes[level];
-}
-
 
 void OpenGLTextureCube::MapCube( uint32_t arrayIndex, CubeMapFace face, uint32_t level, TextureMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height, void*& data, uint32_t& rowPitch )
 {

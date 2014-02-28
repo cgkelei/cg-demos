@@ -392,26 +392,15 @@ void Renderer::DrawGeometry( const String& tech, const  String& matClass, Render
 	const Camera& camera = *(device.GetCurrentFrameBuffer()->GetCamera());	
 	sceneMan.UpdateRenderQueue(camera, order);
 
-	RenderQueue* renderQueue = sceneMan.GetRenderQueue();	
-	for (const auto& kv : renderQueue->GetAllRenderBuckets())
+	RenderBucket& opaquerBucket = sceneMan.GetRenderQueue().GetRenderBucket(RenderQueue::BucketOpaque);	
+	if (opaquerBucket.size())
 	{
-		RenderBucket& renderBucket = *(kv.second);
-
-		if (renderBucket.size())
+		for (const RenderQueueItem& renderItem : opaquerBucket) 
 		{
-			std::sort(renderBucket.begin(), renderBucket.end(), [](const RenderQueueItem& lhs, const RenderQueueItem& rhs) {
-				return lhs.SortKey < rhs.SortKey; });
-
-				for (const RenderQueueItem& renderItem : renderBucket) 
-				{
-					renderItem.Renderable->GetMaterial()->SetCurrentTechnique(tech);
-					renderItem.Renderable->Render();
-				}
+			renderItem.Renderable->GetMaterial()->SetCurrentTechnique(tech);
+			renderItem.Renderable->Render();
 		}
-
-
 	}
-
 	//const shared_ptr<Texture>& rt0 = mCurrPipeline->GetRenderTarget(0, 1);
 	//const shared_ptr<Texture>& rt1 = mCurrPipeline->GetRenderTarget(0, 2);
 	//device.GetRenderFactory()->SaveTexture2D("E:/Normal.tga", rt0, 0, 0);
@@ -439,6 +428,9 @@ void Renderer::DrawLightShape( const String& tech )
 			break;
 		}
 	}
+
+	//RenderDevice& device = Context::GetSingleton().GetRenderDevice();
+	//device.GetRenderFactory()->SaveTexture2D("E:/Light1.pfm", mCurrPipeline->GetRenderTarget(1, 1), 0, 0);
 }
 
 void Renderer::DrawDirectionalLightShape( Light* light, const String& tech )
@@ -522,8 +514,6 @@ void Renderer::DrawSpotLightShape( Light* light, const String& tech )
 		mCascadedShadowMap->MakeCascadedShadowMap(*light);
 	}
 
-
-
 	const float3& lightColor = light->GetLightColor();
 	mCurrMaterial->GetCustomParameter(EPU_Light_Color)->SetValue(lightColor);
 
@@ -581,14 +571,11 @@ void Renderer::DrawOverlays()
 	uiMan.Render();
 	sceneMan.UpdateOverlayQueue();
 
-	RenderBucket& guiBucket = sceneMan.GetRenderQueue()->GetRenderBucket(RenderQueue::BucketOverlay);	
+	RenderBucket& guiBucket = sceneMan.GetRenderQueue().GetRenderBucket(RenderQueue::BucketOverlay);	
 	if (guiBucket.size())
 	{
-		std::sort(guiBucket.begin(), guiBucket.end(), [](const RenderQueueItem& lhs, const RenderQueueItem& rhs) {
-			return lhs.SortKey < rhs.SortKey; });
-
-			for (const RenderQueueItem& renderItem : guiBucket) 
-				renderItem.Renderable->Render();
+		for (const RenderQueueItem& renderItem : guiBucket) 
+			renderItem.Renderable->Render();
 	}
 
 }

@@ -6,12 +6,15 @@
 #include <Core/Prerequisites.h>
 #include <Graphics/Renderable.h>
 #include <Graphics/GraphicsCommon.h>
+#include <Graphics/RenderQueue.h>
 
 namespace RcEngine {
 
-class Sky;
+class SkyBox;
 class SceneObject;
 class Sprite;
+
+typedef std::vector<Light*> LightQueue;
 
 class _ApiExport SceneManager
 {
@@ -57,10 +60,10 @@ public:
 
 	Entity* CreateEntity( const String& entityName, const String& meshName, const String& groupName );
 	
-	Light* CreateLight( const String& name);
+	Light* CreateLight( const String& name, uint32_t lightType);
 	const std::vector<Light*>& GetSceneLights() const  { return mAllSceneLights; }
 
-	void CreateSkyBox( const shared_ptr<Texture>& texture, bool cubemap = true, float distance = 100.0f );
+	void CreateSkyBox( const shared_ptr<Texture>& texture );
 
 	/**
 	 * Update all scene graph node and transform.
@@ -71,12 +74,14 @@ public:
 	 * Update render queue, and remove scene node outside of the camera frustum.
 	 */
 	void UpdateRenderQueue(const Camera& cam, RenderOrder order);
+	void UpdateLightQueue(const Camera& cam);
 	void UpdateOverlayQueue();
 
-	RenderQueue* GetRenderQueue() const { return mRenderQueue; }
+	RenderQueue& GetRenderQueue()						{ return mRenderQueue; }
 
-	void RenderScene();
-
+	// Return lights affect current view frustum
+	LightQueue& GetLightQueue()							{ return mLightQueue; }
+	
 	AnimationController* GetAnimationController() const;
 
 public_internal:
@@ -101,12 +106,15 @@ protected:
 	std::vector<Light*> mAllSceneLights;
 
 	// For sky box
-	Sky* mSkyBox;
+	SkyBox* mSkyBox;
+
+	// Todo: Add GUI Manager
 	std::list<Sprite*> mSprites;
 
 	AnimationController* mAnimationController;
 
-	RenderQueue* mRenderQueue;
+	RenderQueue mRenderQueue;
+	LightQueue  mLightQueue;
 };
 
 

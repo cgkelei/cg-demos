@@ -24,40 +24,63 @@ OpenGLRenderTargetView2D::~OpenGLRenderTargetView2D()
 
 void OpenGLRenderTargetView2D::ClearColor( const ColorRGBA& clr )
 {
-	OGL_ERROR_CHECK();
-
 	DoClear(GL_COLOR_BUFFER_BIT, clr, 0, 0);
-
 	OGL_ERROR_CHECK();
 }
 
 void OpenGLRenderTargetView2D::OnAttach(FrameBuffer& fb, Attachment attr)
 {
-	OGL_ERROR_CHECK();
-
 	OpenGLRenderView::OnAttach(fb, attr);
 
-	uint32_t index = attr - ATT_Color0;
+	GLenum attachment = GL_COLOR_ATTACHMENT0 + (attr - ATT_Color0);
 
-	if(mTextureOGL.GetOpenGLTextureTarget() == GL_TEXTURE_2D)
-	{		
-		if(mTextureOGL.GetSampleCount() <= 1)
+	if (GLEW_EXT_direct_state_access)
+	{
+		if (mTextureOGL.RenderBufferHint())
 		{
-			
-			glFramebufferTexture2D(GL_FRAMEBUFFER,
-				GL_COLOR_ATTACHMENT0_EXT + index, GL_TEXTURE_2D, mTextureOGL.GetOpenGLTexture(), mLevel);
+			GLuint renderBufferID = mTextureOGL.GetOpenGLTexture();
+			glNamedFramebufferRenderbufferEXT(mFrameBufferID, attachment, GL_RENDERBUFFER, renderBufferID);
 		}
 		else
 		{
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER,
-				GL_COLOR_ATTACHMENT0 + index, GL_RENDERBUFFER, mTextureOGL.GetOpenGLTexture());
+			GLuint texID = mTextureOGL.GetOpenGLTexture();
+			if (mTextureOGL.GetOpenGLTextureTarget() == GL_TEXTURE_2D)
+			{
+				//glNamedFramebufferTextureEXT(mFrameBufferID, attachment, texID, mLevel);
+				glNamedFramebufferTexture2DEXT(mFrameBufferID, attachment, mTextureOGL.GetOpenGLTextureTarget(), texID, mLevel);
+			}
+			else 
+			{
+				glNamedFramebufferTextureLayerEXT(mFrameBufferID, attachment, texID, mLevel, mArrIndex);
+			}
 		}
 	}
 	else
 	{
-		// 2D Texture Array
-		glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index,
-			mTextureOGL.GetOpenGLTexture(), mLevel, mArrIndex);
+		GLuint oldFBO = OpenGLFrameBuffer::GetFBO();
+
+		OpenGLFrameBuffer::BindFBO(mFrameBufferID);
+		{
+			if (mTextureOGL.RenderBufferHint())
+			{
+				GLuint renderBufferID = mTextureOGL.GetOpenGLTexture();
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, renderBufferID);
+			}
+			else
+			{
+				GLuint texID = mTextureOGL.GetOpenGLTexture();
+				if (mTextureOGL.GetOpenGLTextureTarget() == GL_TEXTURE_2D)
+				{
+					//glFramebufferTexture(mFrameBufferID, attachment, texID, mLevel);
+					glFramebufferTexture2D(mFrameBufferID, attachment, mTextureOGL.GetOpenGLTextureTarget(), texID, mLevel);
+				}
+				else 
+				{
+					glFramebufferTextureLayer(mFrameBufferID, attachment, texID, mLevel, mArrIndex);
+				}
+			}
+		}
+		OpenGLFrameBuffer::BindFBO(oldFBO);
 	}
 
 	OGL_ERROR_CHECK();
@@ -65,27 +88,50 @@ void OpenGLRenderTargetView2D::OnAttach(FrameBuffer& fb, Attachment attr)
 
 void OpenGLRenderTargetView2D::OnDetach(FrameBuffer& fb, Attachment attr)
 {
-	OGL_ERROR_CHECK();
-
 	OpenGLRenderView::OnDetach(fb, attr);
 
-	uint32_t index = attr - ATT_Color0;
-
-	if(mTextureOGL.GetOpenGLTextureTarget() == GL_TEXTURE_2D)
-	{		
-		if(mTextureOGL.GetSampleCount() <= 1)
-		{
-			glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT + index, GL_TEXTURE_2D, 0, 0);
-		}
+	GLenum attachment = GL_COLOR_ATTACHMENT0 + (attr - ATT_Color0);
+	if (GLEW_EXT_direct_state_access)
+	{
+		if (mTextureOGL.RenderBufferHint())
+			glNamedFramebufferRenderbufferEXT(mFrameBufferID, attachment, GL_RENDERBUFFER, 0);
 		else
 		{
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT + index, GL_RENDERBUFFER_EXT, 0);
+			if (mTextureOGL.GetOpenGLTextureTarget() == GL_TEXTURE_2D)
+			{
+				//glNamedFramebufferTextureEXT(mFrameBufferID, attachment, 0, 0);
+				glNamedFramebufferTexture2DEXT(mFrameBufferID, attachment, mTextureOGL.GetOpenGLTextureTarget(), 0, 0);
+			}
+			else 
+			{
+				glNamedFramebufferTextureLayerEXT(mFrameBufferID, attachment, 0, 0, 0);
+			}
 		}
 	}
 	else
 	{
-		// 2D Texture Array
-		glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, 0, 0, 0);
+		GLuint oldFBO = OpenGLFrameBuffer::GetFBO();
+
+		OpenGLFrameBuffer::BindFBO(mFrameBufferID);
+		{
+			if (mTextureOGL.RenderBufferHint())
+			{
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, 0);
+			}
+			else
+			{
+				if (mTextureOGL.GetOpenGLTextureTarget() == GL_TEXTURE_2D)
+				{
+					//glFramebufferTexture(mFrameBufferID, attachment, 0, 0);
+					glFramebufferTexture2D(mFrameBufferID, attachment, 0, 0, 0);
+				}
+				else 
+				{
+					glFramebufferTextureLayer(mFrameBufferID, attachment, 0, 0, 0);
+				}
+			}
+		}
+		OpenGLFrameBuffer::BindFBO(oldFBO);
 	}
 
 	OGL_ERROR_CHECK();
@@ -106,37 +152,20 @@ OpenGLScreenRenderTargetView2D::~OpenGLScreenRenderTargetView2D()
 
 void OpenGLScreenRenderTargetView2D::OnAttach(FrameBuffer& fb, Attachment attr)
 {
-	OGL_ERROR_CHECK();
-
 	assert(attr == ATT_Color0);
 	OpenGLRenderView::OnAttach(fb, attr);
 
-	OpenGLFrameBuffer& framBufferOGL = *(static_cast_checked<OpenGLFrameBuffer*>(&fb));
-
-	if(framBufferOGL.GetFrameBufferObject() != 0)
+	if(mFrameBufferID != 0)
 	{
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "ScreenDepthStencilView Can Only Attach To Screen Frame Buffer",
 			"OpenGLScreenRenderTargetView2D::OnAttach");
 	}
-
-	OGL_ERROR_CHECK();
 }
 
 void OpenGLScreenRenderTargetView2D::OnDetach(FrameBuffer& fb, Attachment attr)
 {
-	OGL_ERROR_CHECK();
-
 	assert(attr == ATT_Color0);
 	OpenGLRenderView::OnDetach(fb, attr);
-
-	OpenGLFrameBuffer& framBufferOGL = *(static_cast_checked<OpenGLFrameBuffer*>(&fb));
-	if(framBufferOGL.GetFrameBufferObject() != 0)
-	{
-		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "OpenGLScreenRenderTarget2DView Can Only Attach To Screen Frame Buffer",
-			"OpenGLScreenRenderTargetView2D::OnDetach");
-	}
-
-	OGL_ERROR_CHECK();
 }
 
 void OpenGLScreenRenderTargetView2D::ClearColor( const ColorRGBA& clr )

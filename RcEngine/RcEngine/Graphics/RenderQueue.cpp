@@ -19,15 +19,38 @@ RenderQueue::~RenderQueue()
 		delete kv.second;
 }
 
-RenderBucket& RenderQueue::GetRenderBucket( Bucket bucket )
+RenderBucket& RenderQueue::GetRenderBucket( Bucket bucket, bool sortBucket /*= true*/ )
 {
 	if (mRenderBuckets.find(bucket) == mRenderBuckets.end())
 	{
 		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Render bucket not exits!",  "RenderQueue::GetRenderBucket");
 	}
 
-	return (*mRenderBuckets[bucket]);
+	RenderBucket& renderBucker = (*mRenderBuckets[bucket]);
+
+	if (sortBucket)
+	{
+		std::sort(renderBucker.begin(), renderBucker.end(), [](const RenderQueueItem& lhs, const RenderQueueItem& rhs) {
+			return lhs.SortKey < rhs.SortKey; });
+	}
+
+	return renderBucker;
 }
+
+std::map<RenderQueue::Bucket, RenderBucket*>& RenderQueue::GetAllRenderBuckets( bool sortBucket /*= true*/ )
+{
+	if (sortBucket)
+	{
+		for (auto& kv : mRenderBuckets)
+		{
+			std::sort(kv.second->begin(), kv.second->end(), [](const RenderQueueItem& lhs, const RenderQueueItem& rhs) {
+				return lhs.SortKey < rhs.SortKey; });
+		}
+	}
+
+	return mRenderBuckets;
+}
+
 
 void RenderQueue::AddToQueue( RenderQueueItem item, Bucket bucket )
 {

@@ -13,7 +13,6 @@ OpenGLRenderView::OpenGLRenderView(void)
 {
 }
 
-
 OpenGLRenderView::~OpenGLRenderView(void)
 {
 }
@@ -40,26 +39,13 @@ void OpenGLRenderView::ClearDepthStencil( float depth, uint32_t stencil )
 
 void OpenGLRenderView::OnAttach(FrameBuffer& fb, Attachment attr)
 {
-	shared_ptr<FrameBuffer> currentFrameBuffer = Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer();
-	assert( &fb == currentFrameBuffer.get());
-
 	mFrameBufferID = (static_cast_checked<OpenGLFrameBuffer*>(&fb))->GetFrameBufferObject();
 	mAttachment = attr;
-
-	//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferID);
 }
 
 void OpenGLRenderView::OnDetach(FrameBuffer& fb, Attachment attr)
 {
-	/*shared_ptr<FrameBuffer> currentFrameBuffer = Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer();
-	assert( &fb == currentFrameBuffer.get());*/
-
-	mFrameBufferID = (static_cast_checked<OpenGLFrameBuffer*>(&fb))->GetFrameBufferObject();
 	mAttachment = attr;
-
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferID);
-
-	OGL_ERROR_CHECK();
 }
 
 void OpenGLRenderView::DoClear( GLbitfield clearFlagOGL, const ColorRGBA& clr, float depth, uint32_t stencil )
@@ -173,8 +159,6 @@ void OpenGLRenderView::DoClear( GLbitfield clearFlagOGL, const ColorRGBA& clr, f
 	OGL_ERROR_CHECK();
 }
 	
-
-
 }
 
 

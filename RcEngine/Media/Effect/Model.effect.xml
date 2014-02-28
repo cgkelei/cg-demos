@@ -223,11 +223,7 @@ void main()
 #endif
 	
 	// texcoord
-	oTex = iTex;
-#ifndef Direct3D	
-	oTex.y = 1.0 - iTex.y;
-#endif
-
+	oTex = vec2(iTex.x, 1.0 - iTex.y);
 	gl_Position = oPosVS * Proj;
 }
 	]]>
@@ -310,7 +306,7 @@ void main()
 	CompressUnsignedNormalToNormalsBuffer(normal);	
 	
 	FragColor0 = vec4(normal.xyz, Shininess / 255.0);
-    FragColor1 = vec4(albedo.rgb, Specular);	
+	FragColor1 = vec4(albedo.rgb, Specular);	
 }
 	]]>
 	</ShaderSource>
@@ -406,15 +402,6 @@ void main()
 	</ShaderSource>
 </Shader>
 
-<!--
-<Technique name="ShadowMap">
-	<Pass name="p0">
-		<VertexShader name="ShadowMapVS"/>
-		<state name="ColorWriteMask" index="0" r="false" g="false" b="false" a="false"/>
-	</Pass>
-</Technique>
--->
-
 <Technique name="VSM">
 	<Pass name="p0">
 		<VertexShader name="ShadowMapVS"/>
@@ -446,6 +433,12 @@ void main()
 	<Pass name="p0">
 		<VertexShader name="GeneralVS"/>
 		<PixelShader name="GBufferPS"/>
+		<State name="StencilEnable" value="true"/>
+		<State name="FrontStencilRef" value="1"/>
+		<State name="FrontStencilFunc" value="AlwaysPass"/>
+		<State name="FrontStencilFailOp" value="Keep"/>
+		<State name="FrontStencilDepthFailOp" value="Keep"/>
+		<State name="FrontStencilPassOp" value="Replace"/>
 	</Pass>
 </Technique>
 

@@ -351,6 +351,9 @@
     <ClInclude Include="Graphics\CascadedShadowMap.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\RenderPath.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Context.cpp">
@@ -618,6 +621,9 @@
       <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\CascadedShadowMap.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\RenderPath.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
   </ItemGroup>

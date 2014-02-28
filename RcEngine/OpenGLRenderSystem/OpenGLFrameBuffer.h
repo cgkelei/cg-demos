@@ -22,9 +22,16 @@ public:
 
 	GLuint GetFrameBufferObject() const { return mFrameBufferObject; }
 
+public:
+	static void BindFBO(GLuint fbo);
+	static GLuint GetFBO();
+
 private:
 	GLuint mFrameBufferObject;
 
+
+	// Hack: keep current frame buffer binding of OpenGL system
+	static GLuint msCurrFrameBufferObject;
 };
 
 }
