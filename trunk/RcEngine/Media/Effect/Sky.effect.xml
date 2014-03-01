@@ -75,7 +75,7 @@ out vec3 oTex;
 void main()
 {
 	oTex = Position.xyz;
-	gl_Position = vec4(Position, 1.0) * ;
+	gl_Position = vec4(Position, 1.0) * WorldViewProj;
 	
 	// we set z = w so that z/w == 1, always on far plane
 	gl_Position.z = gl_Position.w;
@@ -97,7 +97,7 @@ out vec4 oFragColor;
 
 void main()
 {
-	oFragColor = textureLod(EnvTex, oTex, 0);
+	oFragColor = texture(EnvTex, oTex);
 }
 	]]>
 	</ShaderSource>
@@ -106,9 +106,11 @@ void main()
 <Technique name="SkyCubeMap">
 	<Pass name="p0">
 		<!-- Make sure we set depth func to LessEqual, Otherwise normalized z value 1 will fail depth test -->
-		<State name="DepthFunc" value="LessEqual"/>
 		<VertexShader name="CubeMapVS"/>
 		<PixelShader name="CubeMapPS"/>
+		<State name="DepthEnable" value="false"/>
+		<State name="DepthWriteMask" value="false"/>
+		<State name="CullMode" value="Front"/>
 	</Pass>
 </Technique>
 

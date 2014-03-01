@@ -7,12 +7,12 @@ SamplerStateDesc::SamplerStateDesc()
 	  AddressV(TAM_Clamp), 
 	  AddressW(TAM_Clamp), 
 	  Filter(TF_Min_Mag_Mip_Linear),
-	  BorderColor(0, 0, 0, 0),
+	  BorderColor(1, 1, 1, 1),
 	  MipLODBias(0),
 	  MinLOD(-FLT_MAX),
 	  MaxLOD(FLT_MAX),
 	  MaxAnisotropy(1),
-	  ComparisonFunc(CF_AlwaysFail),
+	  ComparisonFunc(CF_Never),
 	  BindStage(ST_Pixel)
 {
 

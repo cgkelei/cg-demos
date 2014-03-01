@@ -74,9 +74,10 @@ public:
 	 * Update render queue, and remove scene node outside of the camera frustum.
 	 */
 	void UpdateRenderQueue(const Camera& cam, RenderOrder order);
-	void UpdateLightQueue(const Camera& cam);
+	void UpdateBackgroundQueue(const Camera& cam);
 	void UpdateOverlayQueue();
-
+	void UpdateLightQueue(const Camera& cam);
+	
 	RenderQueue& GetRenderQueue()						{ return mRenderQueue; }
 
 	// Return lights affect current view frustum

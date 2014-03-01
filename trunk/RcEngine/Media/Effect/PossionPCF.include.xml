@@ -1,0 +1,69 @@
+<Effect name="PossionPCFUtil">
+<ShaderSource>
+	<![CDATA[
+	
+uniform sampler2DShadow ShadowTex;
+uniform mat4 ShadowViewProj;	
+uniform float PCFRadius;
+
+#define POSSION_PCF_TAP 16
+
+
+const vec2 PoissonDisk[POSSION_PCF_TAP] = vec2[](
+	vec2(0.6708386, -0.06309514),
+	vec2(0.5682299, 0.7497336),
+	vec2(0.09420878, -0.06583713),
+	vec2(0.2901492, -0.4709879),
+	vec2(0.02107739, 0.3769862),
+	vec2(0.8166501, 0.3932711),
+	vec2(0.7746642, -0.5616422),
+	vec2(-0.501952, 0.456011),
+	vec2(0.101596, -0.8854589),
+	vec2(-0.2228841, -0.3665232),
+	vec2(-0.6306319, -0.5816344),
+	vec2(0.1229328, 0.9694096),
+	vec2(-0.5509366, -0.08733594),
+	vec2(-0.9285147, 0.3223248),
+	vec2(-0.9168919, -0.2799536),
+	vec2(-0.3533885, -0.9257185)
+);
+	
+float EvalCascadeShadow(in vec4 posWorldSpace)
+{
+	vec4 shadowCoord = posWorldSpace * ShadowViewProj;
+	shadowCoord.xy = shadowCoord.xy * 0.5 + 0.5 * shadowCoord.w;
+	
+
+	float bais = 0.003;
+	shadowCoord.z -= bais * shadowCoord.w;
+	
+	float sum = 0;
+	for (int i = 0; i < POSSION_PCF_TAP; ++i)
+	{
+		shadowCoord.xy += PoissonDisk[i] * PCFRadius * shadowCoord.w;
+		sum += textureProj(ShadowTex, shadowCoord);	
+	}
+	
+	return sum / float(POSSION_PCF_TAP);
+	
+	//return textureProj(ShadowTex, shadowCoord);
+}	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+		]]>
+</ShaderSource>
+</Effect>

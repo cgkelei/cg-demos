@@ -53,7 +53,8 @@ protected:
 	void DrawBackground();
 
 	void DrawDirectionalLightShape(Light* light, const String& tech);
-
+	void DrawSpotLightShape(Light* light, const String& tech);
+	void DrawPointLightShape(Light* light, const String& tech);
 
 protected:
 
@@ -63,6 +64,7 @@ protected:
 	
 	shared_ptr<Texture> mDepthStencilBuffer;
 	shared_ptr<RenderView> mDepthStencilView;
+	shared_ptr<RenderView> mDepthStencilViewReadOnly;
 
 	shared_ptr<Texture> mLightAccumulateBuffer;
 	shared_ptr<Texture> mDepthStencilBufferLight; // Used for stencil optimization for light volume
@@ -80,6 +82,9 @@ protected:
 	shared_ptr<Material> mDebugViewMaterial;
 
 	CascadedShadowMap* mShadowMan;
+
+	shared_ptr<RenderOperation> mSpotLightShape;
+	shared_ptr<RenderOperation> mPointLightShape;
 };
 
 }

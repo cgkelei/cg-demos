@@ -383,13 +383,12 @@ GLenum OpenGLMapping::Mapping( FillMode fm )
 
 GLenum OpenGLMapping::Mapping( CompareFunction cf )
 {
-
 	switch(cf)
 	{
-	case CF_AlwaysFail:
-		return GL_NEVER;
-	case CF_AlwaysPass:
+	case CF_Always:
 		return GL_ALWAYS;
+	case CF_Never:
+		return GL_NEVER;
 	case CF_Less:
 		return GL_LESS;
 	case CF_LessEqual:
@@ -916,11 +915,13 @@ void OpenGLMapping::UnMapping( EffectParameterType& outType, GLenum glType )
 			break;
 		}
 	case GL_SAMPLER_1D:
+	case GL_SAMPLER_1D_SHADOW:
 		{
 			outType = EPT_Texture1D;
 			break;
 		}
 	case GL_SAMPLER_2D:
+	case GL_SAMPLER_2D_SHADOW:
 		{
 			outType = EPT_Texture2D;
 			break;
@@ -931,16 +932,19 @@ void OpenGLMapping::UnMapping( EffectParameterType& outType, GLenum glType )
 			break;
 		}
 	case GL_SAMPLER_CUBE:
+	case GL_SAMPLER_CUBE_SHADOW:
 		{
 			outType = EPT_TextureCUBE;
 			break;
 		}
 	case GL_SAMPLER_1D_ARRAY:
+	case GL_SAMPLER_1D_ARRAY_SHADOW:
 		{
 			outType = EPT_Texture1DArray;
 			break;
 		}
 	case GL_SAMPLER_2D_ARRAY:
+	case GL_SAMPLER_2D_ARRAY_SHADOW:
 		{
 			outType = EPT_Texture2DArray;
 			break;

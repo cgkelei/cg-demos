@@ -17,6 +17,14 @@
 		<State name="MipLODBias" value="0"/>
 	</Sampler>
 	
+	<Sampler name="PCFSampler">
+		<State name="Filter" value="Min_Mag_Mip_Point"/>
+		<State name="AddressU" value="Border"/>
+		<State name="AddressV" value="Border"/>
+		<State name="BorderColor" r="1.0" g="1.0" b="1.0" a="1.0"/>
+		<State name="ComparisonFunc" value="Less"/>
+	</Sampler>
+	
 	
 	<Parameter type="float4x4" name="WorldView" semantic="WorldViewMatrix"/>
 	<Parameter type="float4x4" name="Projection" semantic="ProjectionMatrix"/>
@@ -31,7 +39,8 @@
 	<Parameter type="texture2d" name="DepthBuffer" stage="PixelShader" sampler="PointSampler" texUnit="1"/>
 	<Parameter type="texture2d" name="GBuffer1" stage="PixelShader" sampler="PointSampler" texUnit="2"/>
 	<Parameter type="texture2d" name="LightAccumulateBuffer" stage="PixelShader" sampler="PointSampler" texUnit="3"/>
-	<Parameter type="texture2d" name="ShadowTex" stage="PixelShader" sampler="ShadowSampler" texUnit="4"/>
+	<Parameter type="texture2d" name="CascadeShadowTex" stage="PixelShader" sampler="ShadowSampler" texUnit="4"/>
+	<Parameter type="texture2d" name="ShadowTex" stage="PixelShader" sampler="PCFSampler" texUnit="4"/>
 	
 	<Effect name="DeferredLighting.effect.xml"/>
 </Material>

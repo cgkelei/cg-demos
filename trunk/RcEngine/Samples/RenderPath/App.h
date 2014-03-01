@@ -7,11 +7,11 @@
 
 using namespace RcEngine;
 
-class CascadeShadowMapApp : public Application
+class RenderPathApp : public Application
 {
 public:
-	CascadeShadowMapApp(const String& config);
-	~CascadeShadowMapApp(void);
+	RenderPathApp(const String& config);
+	~RenderPathApp(void);
 protected:
 
 	void Initialize();
@@ -24,8 +24,10 @@ protected:
 
 private:
 	void VisualizeCascades(bool checked);
-	void CastShadow(bool checked);
+	void SunCastShadow(bool checked);
+	void SpotCastShadow(bool checked);
 	void BlendAreaSliderValueChange( int32_t value );
+	void DumpCameraBtnClicked();
 
 protected:
 	RcEngine::Test::FPSCameraControler* mCameraControler;
@@ -41,8 +43,10 @@ protected:
 	UIWindow* mWindow;
 	Slider* mBlendAreaSlider;
 	Label* mBlendAreaLabel;
+	Button* mSaveCameraBtn;
 	CheckBox* mVisualizeCascadesCheckBox;
-	CheckBox* mCastShadowCheckBox;
+	CheckBox* mSunShadowCheckBox;
+	CheckBox* mSpotShadowCheckBox;
 	Light* mDirLight;
 	Light* mSpotLight;
 	CascadedShadowMap* mCascadedShadowMap;

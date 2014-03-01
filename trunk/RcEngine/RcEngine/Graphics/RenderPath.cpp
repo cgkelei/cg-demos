@@ -257,6 +257,10 @@ DeferredPath::DeferredPath()
 void DeferredPath::OnGraphicsInit()
 {
 	RenderPath::OnGraphicsInit();
+		
+	// Build light volume
+	mSpotLightShape = BuildSpotLightShape();
+	mPointLightShape = BuildPointLightShape();
 
 	Window* appWindow = Context::GetSingleton().GetApplication().GetMainWindow();
 	const uint32_t windowWidth = appWindow->GetWidth();
@@ -283,6 +287,7 @@ void DeferredPath::OnGraphicsInit()
 	mGBufferRTV[0] = factory->CreateRenderTargetView2D(mGBuffer[0], 0, 0);
 	mGBufferRTV[1] = factory->CreateRenderTargetView2D(mGBuffer[1], 0, 0);
 	mDepthStencilView = factory->CreateDepthStencilView(mDepthStencilBuffer, 0, 0);
+	
 
 	mGBufferFB = factory->CreateFrameBuffer(windowWidth, windowHeight);
 	mGBufferFB->Attach(ATT_DepthStencil, mDepthStencilView);
@@ -304,14 +309,15 @@ void DeferredPath::OnGraphicsInit()
 	mHDRBufferRTV = factory->CreateRenderTargetView2D(mHDRBuffer, 0, 0);
 	mHDRFB = factory->CreateFrameBuffer(windowWidth, windowHeight);
 
-	mHDRFB->Attach(ATT_DepthStencil, mDepthStencilView);
+	mDepthStencilViewReadOnly = factory->CreateDepthStencilView(mDepthStencilBuffer, 0, 0);
+	mHDRFB->Attach(ATT_DepthStencil, mDepthStencilViewReadOnly);
 	mHDRFB->Attach(ATT_Color0, mHDRBufferRTV);
-
 
 	// Set as view camera
 	shared_ptr<Camera> viewCamera = mDevice->GetScreenFrameBuffer()->GetCamera();
 	mGBufferFB->SetCamera( viewCamera );
 	mLightAccumulateFB->SetCamera(viewCamera);
+	mHDRFB->SetCamera(viewCamera);
 
 	// Init shadow manager
 	mShadowMan = new CascadedShadowMap(mDevice);
@@ -334,17 +340,15 @@ void DeferredPath::RenderScene()
 	DeferredLighting();
 	DeferredShading();
 	
-	// Draw Sky box
-
-
-
-
 	shared_ptr<FrameBuffer> screenFB = mDevice->GetScreenFrameBuffer();
 	mDevice->BindFrameBuffer(screenFB);
 	screenFB->Clear(CF_Color | CF_Depth, ColorRGBA::Black, 1.0, 0);
 
-	DrawOverlays();
+	mDebugViewMaterial->SetTexture("InputTex", mHDRBuffer);
+	//mDebugViewMaterial->SetTexture("InputTex", mLightAccumulateBuffer);
+	DrawFSQuad(mDebugViewMaterial, "ViewRGB");
 
+	DrawOverlays();
 	screenFB->SwapBuffers();
 }
 
@@ -406,9 +410,33 @@ void DeferredPath::DeferredLighting()
 			{
 				mDepthStencilBufferLightView->ClearStencil(0);
 				stencilZFail = true;
-			}		
+			}	
+
+			if (lightType == LT_SpotLight)
+				DrawSpotLightShape(light, tech);
+			else if (lightType == LT_PointLight)
+				DrawPointLightShape(light, tech);
 		}
 	}
+}
+
+void DeferredPath::DeferredShading()
+{
+	mDevice->BindFrameBuffer(mHDRFB);
+	mHDRBufferRTV->ClearColor(ColorRGBA(0, 0, 0, 0));
+
+	// Draw Sky box first
+	mSceneMan->UpdateBackgroundQueue(*(mGBufferFB->GetCamera()));
+	RenderBucket& bkgBucket = mSceneMan->GetRenderQueue().GetRenderBucket(RenderQueue::BucketBackground, false);
+	for (RenderQueueItem& item : bkgBucket)
+		item.Renderable->Render();
+
+	// Do deferred lighting shading pass
+	mDeferedMaterial->SetTexture("GBuffer0", mGBuffer[0]);
+	mDeferedMaterial->SetTexture("GBuffer1", mGBuffer[1]);
+	mDeferedMaterial->SetTexture("LightAccumulateBuffer", mLightAccumulateBuffer);
+
+	DrawFSQuad(mDeferedMaterial, "Shading");
 }
 
 void DeferredPath::DrawDirectionalLightShape( Light* light, const String& tech )
@@ -416,7 +444,6 @@ void DeferredPath::DrawDirectionalLightShape( Light* light, const String& tech )
 	const Camera& currCamera = *(mDevice->GetCurrentFrameBuffer()->GetCamera());
 
 	bool bCastShadow = light->GetCastShadow();
-
 	if (bCastShadow)
 	{
 		// Generate shadow map
@@ -438,7 +465,7 @@ void DeferredPath::DrawDirectionalLightShape( Light* light, const String& tech )
 	effect->GetParameterByName("ShadowEnabled")->SetValue(bCastShadow);
 	if (bCastShadow)
 	{	
-		mDeferedMaterial->SetTexture("ShadowTex", mShadowMan->mShadowTexture);
+		mDeferedMaterial->SetTexture("CascadeShadowTex", mShadowMan->mShadowTexture);
 		effect->GetParameterByName("ShadowView")->SetValue(mShadowMan->mShadowView);
 		effect->GetParameterByName("NumCascades")->SetValue((int)light->GetShadowCascades());
 		effect->GetParameterByName("BorderPaddingMinMax")->SetValue(mShadowMan->mBorderPaddingMinMax);
@@ -451,20 +478,69 @@ void DeferredPath::DrawDirectionalLightShape( Light* light, const String& tech )
 	DrawFSQuad(mDeferedMaterial, techName);
 }
 
-void DeferredPath::DeferredShading()
+void DeferredPath::DrawSpotLightShape( Light* light, const String& tech )
 {
-	mDevice->BindFrameBuffer(mHDRFB);
-	mHDRBufferRTV->ClearColor(ColorRGBA(0, 0, 0, 0));
+	const Camera& currCamera = *(mDevice->GetCurrentFrameBuffer()->GetCamera());
 
-	mDeferedMaterial->SetTexture("GBuffer0", mGBuffer[0]);
-	mDeferedMaterial->SetTexture("GBuffer1", mGBuffer[1]);
-	mDeferedMaterial->SetTexture("LightAccumulateBuffer", mLightAccumulateBuffer);
+	bool bCastShadow = light->GetCastShadow();
+	if (bCastShadow)
+		mShadowMan->MakeSpotShadowMap(*light);
 
-	DrawFSQuad(mDeferedMaterial, "Shading");
+	shared_ptr<Effect> effect = mDeferedMaterial->GetEffect();
 
-	/*mDevice->GetRenderFactory()->SaveTexture2D("E:/HDR.pfm", mHDRBuffer, 0, 0);*/
+	const float3& lightColor = light->GetLightColor();
+	const float3& worldPos = light->GetDerivedPosition();
+	const float3& worldDir = light->GetDerivedDirection();
+
+	float4 lightPos = float4(worldPos[0], worldPos[1], worldPos[2], 1.0f) * currCamera.GetViewMatrix();
+	float4 lightDir = float4(worldDir[0], worldDir[1], worldDir[2], 0.0f) * currCamera.GetViewMatrix();
+	
+	float spotInnerAngle = light->GetSpotInnerAngle();
+	float spotOuterAngle = light->GetSpotOuterAngle();
+	lightPos[3] = cosf(spotInnerAngle);
+	lightDir[3] = cosf(spotOuterAngle);
+
+	mDeferedMaterial->GetCustomParameter(EPU_Light_Color)->SetValue(lightColor);
+	mDeferedMaterial->GetCustomParameter(EPU_Light_Position)->SetValue(lightPos);
+	mDeferedMaterial->GetCustomParameter(EPU_Light_Dir)->SetValue(lightDir);
+	mDeferedMaterial->GetCustomParameter(EPU_Light_Attenuation)->SetValue(light->GetAttenuation());
+
+	float scaleHeight = light->GetRange();
+	float scaleBase = scaleHeight * tanf(spotOuterAngle * 0.5f);
+
+	float3 rotAxis = Cross(float3(0, 1, 0), worldDir);
+	//float rotAngle = acosf(Dot(float3(0, 1, 0), worldDirection));
+	float4x4 rotation = CreateRotationAxis(rotAxis, acosf(worldDir.Y()));
+
+	float4x4 worldMatrix = CreateScaling(scaleBase, scaleHeight, scaleBase) * rotation *
+						   CreateTranslation(worldPos);
+	
+	float2 camNearFar(currCamera.GetNearPlane(), currCamera.GetFarPlane());
+	effect->GetParameterByName("CameraNearFar")->SetValue(camNearFar);
+	effect->GetParameterByName("ShadowEnabled")->SetValue(bCastShadow);
+
+	if (bCastShadow)
+	{
+		/*TextureLayer shadewTexLayer;
+		shadewTexLayer.Sampler = mShadowMan->mPCFSampleState;
+		shadewTexLayer.Stage = ST_Pixel;
+		shadewTexLayer.Texture = mShadowMan->mShadowDepth;
+		shadewTexLayer.TexUnit = 5; */
+		
+		mDeferedMaterial->SetTexture("ShadowTex", mShadowMan->mShadowDepth);
+		effect->GetParameterByName("ShadowViewProj")->SetValue(mShadowMan->mShadowView);
+		effect->GetParameterByName("PCFRadius")->SetValue(7.0f / float(SHADOW_MAP_SIZE));
+	}
+
+	String techName = "Spot" + tech;
+	mDeferedMaterial->ApplyMaterial(worldMatrix);
+	mDeferedMaterial->SetCurrentTechnique("Spot" + tech);
+	mDevice->Render(*mDeferedMaterial->GetCurrentTechnique(), *mSpotLightShape);
 }
 
+void DeferredPath::DrawPointLightShape(Light* light, const String& tech )
+{
 
+}
 
 }

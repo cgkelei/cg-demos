@@ -23,6 +23,7 @@
 #include <GUI/Label.h>
 #include <GUI/Slider.h>
 #include <GUI/UIWindow.h>
+#include <GUI/Button.h>
 #include <GUI/UIManager.h>
 #include <GUI/CheckBox.h>
 #include <IO/FileSystem.h>
@@ -186,18 +187,18 @@ shared_ptr<RenderOperation> BuildSpotLightShape()
 	return mRenderOperation;
 }
 
-CascadeShadowMapApp::CascadeShadowMapApp( const String& config ) 
+RenderPathApp::RenderPathApp( const String& config ) 
 	:Application(config), mCameraControler(0), mFramePerSecond(0)
 {
 
 }
 
-CascadeShadowMapApp::~CascadeShadowMapApp( void )
+RenderPathApp::~RenderPathApp( void )
 {
 
 }
 
-void CascadeShadowMapApp::Initialize()
+void RenderPathApp::Initialize()
 {
 	mDeferredPath = new DeferredPath();
 	mDeferredPath->OnGraphicsInit();
@@ -208,7 +209,7 @@ void CascadeShadowMapApp::Initialize()
 	InitGUI();
 }
 
-void CascadeShadowMapApp::InitGUI()
+void RenderPathApp::InitGUI()
 {
 	UIElement* rootElem = UIManager::GetSingleton().GetRoot();
 
@@ -217,7 +218,7 @@ void CascadeShadowMapApp::InitGUI()
 	mLabel->SetName("FPSLabel");
 	mLabel->SetPosition(int2(10, 700));
 	mLabel->SetTextColor(ColorRGBA(1, 0, 0, 1));
-	mLabel->SetSize(int2(900, 100));
+	mLabel->SetSize(int2(100, 100));
 	//mFPSLabel->SetFont(UIManager::GetSingleton().GetDefaultFont(), 20.0f);
 	rootElem->AddChild( mLabel );	
 
@@ -231,17 +232,28 @@ void CascadeShadowMapApp::InitGUI()
 
 	int uiY = 50;
 
-	mCastShadowCheckBox = new CheckBox();
-	mCastShadowCheckBox->InitGuiStyle(nullptr);
-	mCastShadowCheckBox->SetName("CastShadowCheckBox");
-	mCastShadowCheckBox->SetPosition(int2(20, uiY));
-	mCastShadowCheckBox->SetSize(int2(150, mCastShadowCheckBox->GetSize().Y()));
-	mCastShadowCheckBox->SetText(L"Cast ShadowCheck");
-	mCastShadowCheckBox->SetChecked(true);
-	mCastShadowCheckBox->EventStateChanged.bind(this, &CascadeShadowMapApp::CastShadow);
-	mWindow->AddChild( mCastShadowCheckBox );	
+	mSunShadowCheckBox = new CheckBox();
+	mSunShadowCheckBox->InitGuiStyle(nullptr);
+	mSunShadowCheckBox->SetName("Sun Shadow");
+	mSunShadowCheckBox->SetPosition(int2(20, uiY));
+	mSunShadowCheckBox->SetSize(int2(150, mSunShadowCheckBox->GetSize().Y()));
+	mSunShadowCheckBox->SetText(L"Sun Shadow");
+	mSunShadowCheckBox->SetChecked(true);
+	mSunShadowCheckBox->EventStateChanged.bind(this, &RenderPathApp::SunCastShadow);
+	mWindow->AddChild( mSunShadowCheckBox );	
+
+	mSpotShadowCheckBox = new CheckBox();
+	mSpotShadowCheckBox->InitGuiStyle(nullptr);
+	mSpotShadowCheckBox->SetName("Spot Shadow");
+	mSpotShadowCheckBox->SetPosition(int2(20 + mSunShadowCheckBox->GetSize().X() + 20, uiY));
+	mSpotShadowCheckBox->SetSize(int2(150, mSunShadowCheckBox->GetSize().Y()));
+	mSpotShadowCheckBox->SetText(L"Spot Shadow");
+	mSpotShadowCheckBox->SetChecked(true);
+	mSpotShadowCheckBox->EventStateChanged.bind(this, &RenderPathApp::SpotCastShadow);
+	mWindow->AddChild( mSpotShadowCheckBox );	
+
 	
-	uiY += mCastShadowCheckBox->GetSize().Y() + 18;
+	uiY += mSunShadowCheckBox->GetSize().Y() + 18;
 
 	mVisualizeCascadesCheckBox = new CheckBox();
 	mVisualizeCascadesCheckBox->InitGuiStyle(nullptr);
@@ -250,7 +262,7 @@ void CascadeShadowMapApp::InitGUI()
 	mVisualizeCascadesCheckBox->SetSize(int2(150, mVisualizeCascadesCheckBox->GetSize().Y()));
 	mVisualizeCascadesCheckBox->SetText(L"Visualize Cascades");
 	mVisualizeCascadesCheckBox->SetChecked(false);
-	mVisualizeCascadesCheckBox->EventStateChanged.bind(this, &CascadeShadowMapApp::VisualizeCascades);
+	mVisualizeCascadesCheckBox->EventStateChanged.bind(this, &RenderPathApp::VisualizeCascades);
 	mWindow->AddChild( mVisualizeCascadesCheckBox );	
 
 	uiY += mVisualizeCascadesCheckBox->GetSize().Y() + 18;
@@ -267,19 +279,28 @@ void CascadeShadowMapApp::InitGUI()
 	//mBlendAreaLabel->SetFont(UIManager::GetSingleton().GetDefaultFont(), 20.0f);
 	mWindow->AddChild( mBlendAreaLabel );	
 
-	//uiY += mBlendAreaLabel->GetSize().Y() + 18;
-
 	mBlendAreaSlider = new Slider(UI_Horizontal);
 	mBlendAreaSlider->InitGuiStyle(nullptr);
 	mBlendAreaSlider->SetName("Slider");	
 	mBlendAreaSlider->SetPosition(int2(20 + mBlendAreaLabel->GetSize().X(), uiY + 5));
 	mBlendAreaSlider->SetTrackLength(120);
 	mBlendAreaSlider->SetValue(50);
-	mBlendAreaSlider->EventValueChanged.bind(this, &CascadeShadowMapApp::BlendAreaSliderValueChange);
+	mBlendAreaSlider->EventValueChanged.bind(this, &RenderPathApp::BlendAreaSliderValueChange);
 	mWindow->AddChild( mBlendAreaSlider );	
+
+	uiY += mBlendAreaLabel->GetSize().Y();
+
+	mSaveCameraBtn = new Button();
+	mSaveCameraBtn->InitGuiStyle(nullptr);
+	mSaveCameraBtn->SetName("Button");	
+	mSaveCameraBtn->SetPosition(int2(20, uiY));
+	mSaveCameraBtn->SetSize(int2(120, 30));
+	mSaveCameraBtn->SetText(L"Dump Camera");
+	mSaveCameraBtn->EventButtonClicked.bind(this, &RenderPathApp::DumpCameraBtnClicked);
+	mWindow->AddChild( mSaveCameraBtn );	
 }
 
-void CascadeShadowMapApp::LoadContent()
+void RenderPathApp::LoadContent()
 {
 	RenderFactory* factory = Context::GetSingleton().GetRenderFactoryPtr();
 	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
@@ -290,7 +311,8 @@ void CascadeShadowMapApp::LoadContent()
 
 	mCamera = device.GetScreenFrameBuffer()->GetCamera();
 	
-	mCamera->CreateLookAt(float3(-395.7, 839.9, 2061.9), float3(-395.4, 839.6, 2061.0), float3(0.1, 0.9, -0.4));
+	mCamera->CreateLookAt(float3(408.8, 1053.9, 279.3), float3(408.6, 1053.1, 278.8), float3(-0.4, 0.6, -0.7));
+	//mCamera->CreateLookAt(float3(-395.7, 839.9, 2061.9), float3(-395.4, 839.6, 2061.0), float3(0.1, 0.9, -0.4));
 	mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 8000.0f );
 
 	mCameraControler = new RcEngine::Test::FPSCameraControler;
@@ -327,6 +349,8 @@ void CascadeShadowMapApp::LoadContent()
 	mSpotLight->SetPosition(float3(0.0f, 800.0f, 0.0f));
 	mSpotLight->SetAttenuation(1.0f, 0.0f);
 	mSpotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(40));
+	mSpotLight->SetCastShadow(true);
+	mSpotLight->SetSpotlightNearClip(100);
 	sceneMan.GetRootSceneNode()->AttachObject(mSpotLight);
 
 	mMaterial = std::static_pointer_cast<Material>(resMan.GetResourceByName(RT_Material, "LightShape.material.xml", "General"));
@@ -337,7 +361,7 @@ void CascadeShadowMapApp::LoadContent()
 	shadowEffect->GetParameterByName("VisiualizeCascades")->SetValue(false);
 }
 
-void CascadeShadowMapApp::Update( float deltaTime )
+void RenderPathApp::Update( float deltaTime )
 {
 	CalculateFrameRate();
 
@@ -348,18 +372,16 @@ void CascadeShadowMapApp::Update( float deltaTime )
 	float3 up = mCamera->GetUp();
 
 	wchar_t buffer[255];
-	int cx = swprintf (buffer, 255, L"FPS: %d, Camera(%.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f)", mFramePerSecond,
-		camera.X(), camera.Y(), camera.Z(), target.X(), target.Y(), target.Z(),
-		up.X(), up.Y(), up.Z());
+	int cx = swprintf (buffer, 255, L"FPS: %d", mFramePerSecond);
 	mLabel->SetText(buffer);
 }
 
-void CascadeShadowMapApp::Render()
+void RenderPathApp::Render()
 {
 	mDeferredPath->RenderScene();
 }
 
-void CascadeShadowMapApp::CalculateFrameRate()
+void RenderPathApp::CalculateFrameRate()
 {
 	static int frameCount = 0;
 	static float baseTime = 0;
@@ -374,7 +396,7 @@ void CascadeShadowMapApp::CalculateFrameRate()
 	}
 }
 
-void CascadeShadowMapApp::VisualizeCascades( bool checked )
+void RenderPathApp::VisualizeCascades( bool checked )
 {
 	EffectParameter* effectParam = mDeferredPath->GetDeferredEffect()->GetParameterByName("VisiualizeCascades");
 	bool enable;
@@ -382,14 +404,19 @@ void CascadeShadowMapApp::VisualizeCascades( bool checked )
 	effectParam->SetValue(!enable);
 }
 
-void CascadeShadowMapApp::CastShadow( bool checked )
+void RenderPathApp::SunCastShadow( bool checked )
 {
 	bool enable = mDirLight->GetCastShadow();
 	mDirLight->SetCastShadow(!enable);
 }
 
+void RenderPathApp::SpotCastShadow( bool checked )
+{
+	bool enable = mSpotLight->GetCastShadow();
+	mSpotLight->SetCastShadow(!enable);
+}
 
-void CascadeShadowMapApp::BlendAreaSliderValueChange( int32_t value )
+void RenderPathApp::BlendAreaSliderValueChange( int32_t value )
 {
 	float area = value / float(100.0) * 0.5f;
 	mDeferredPath->GetShadowManager()->mCascadeBlendArea = area;
@@ -399,6 +426,23 @@ void CascadeShadowMapApp::BlendAreaSliderValueChange( int32_t value )
 	mBlendAreaLabel->SetText(text);
 }
 
+void RenderPathApp::DumpCameraBtnClicked()
+{
+	float3 camera = mCamera->GetPosition();
+	float3 target = mCamera->GetLookAt();
+	float3 up = mCamera->GetUp();
+	
+	FILE * pFile;
+	pFile = fopen ("E:/camera.txt","w");
+	if (pFile!=NULL)
+	{
+		fprintf (pFile, "float3(%.1f, %.1f, %.1f), float3(%.1f, %.1f, %.1f), float3(%.1f, %.1f, %.1f)",
+			camera.X(), camera.Y(), camera.Z(), target.X(), target.Y(), target.Z(),
+			up.X(), up.Y(), up.Z());
+		fclose (pFile);
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	//wchar_t text1[255];
@@ -406,7 +450,7 @@ int main(int argc, char* argv[])
 	//wsprintf(text1, L"BlendArea: %.3f", 1.1111);
 	//std::wcout << L"Test " << text1;
 	
-	CascadeShadowMapApp app("Config.xml");
+	RenderPathApp app("Config.xml");
 	app.Create();
 	app.RunGame();
 	app.Release();
