@@ -148,7 +148,7 @@ void OpenGLDepthStencilView::ClearDepth(float depth)
 
 void OpenGLDepthStencilView::ClearStencil(uint32_t stencil)
 {
-	DoClear(GL_DEPTH_BUFFER_BIT, ColorRGBA(), 0, stencil);
+	DoClear(GL_STENCIL_BUFFER_BIT, ColorRGBA(), 0, stencil);
 }
 
 void OpenGLDepthStencilView::ClearDepthStencil(float depth, uint32_t stencil)

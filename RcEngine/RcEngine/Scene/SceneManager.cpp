@@ -220,11 +220,18 @@ void SceneManager::UpdateSceneGraph( float delta )
 
 void SceneManager::UpdateRenderQueue(const Camera& cam, RenderOrder order)
 {
-	mRenderQueue.ClearAllQueue();
+	mRenderQueue.ClearQueue(RenderQueue::BucketOpaque); 
+	mRenderQueue.ClearQueue(RenderQueue::BucketTransparent);
+	mRenderQueue.ClearQueue(RenderQueue::BucketTranslucent);	// Particles
 
 	GetRootSceneNode()->OnUpdateRenderQueues(cam, order);
+}
 
-	//// Update skynode same with camera positon, add sky box to render queue
+void SceneManager::UpdateBackgroundQueue( const Camera& cam )
+{
+	mRenderQueue.ClearQueue(RenderQueue::BucketBackground); 
+
+	// Update skynode same with camera positon, add sky box to render queue
 	if (mSkyBox)
 	{
 		mSkyBox->SetPosition( cam.GetPosition() );

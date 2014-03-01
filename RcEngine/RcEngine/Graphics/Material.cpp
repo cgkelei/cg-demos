@@ -109,8 +109,8 @@ private:
 		mDefs.insert(std::make_pair("Border", TAM_Border));
 		mDefs.insert(std::make_pair("MirrorOnce", TAM_Mirror_Once));
 
-		mDefs.insert(std::make_pair("AlwaysFail", CF_AlwaysFail));
-		mDefs.insert(std::make_pair("AlwaysPass",  CF_AlwaysPass));
+		mDefs.insert(std::make_pair("Never", CF_Never));
+		mDefs.insert(std::make_pair("Alway",  CF_Always));
 		mDefs.insert(std::make_pair("Less", CF_Less));
 		mDefs.insert(std::make_pair("LessEqual", CF_LessEqual));
 		mDefs.insert(std::make_pair("Equal", CF_Equal));

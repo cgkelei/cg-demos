@@ -86,10 +86,11 @@ void FrameBuffer::Attach( Attachment att, const shared_ptr<RenderView>& view)
 				if(mColorViews[i])
 				{
 					minColorView = i;
+					break;
 				}
 			}
 
-			if(minColorView == index)
+			if(minColorView == index && view)
 			{
 				mWidth = view->GetWidth();
 				mHeight = view->GetHeight();
@@ -98,8 +99,10 @@ void FrameBuffer::Attach( Attachment att, const shared_ptr<RenderView>& view)
 		}
 	}
 
+	if (view)
+		view->OnAttach(*this, att);
+
 	mActice = true;
-	view->OnAttach(*this, att);
 	mDirty = true;
 }
 
@@ -191,7 +194,7 @@ void FrameBuffer::Clear( uint32_t flags, const ColorRGBA& clr, float depth, uint
 		else if (flags & CF_Depth)
 			mDepthStencilView->ClearDepth(depth);
 		else if (flags & CF_Stencil)
-			mDepthStencilView->ClearDepthStencil(depth, stencil);  // Clear stencil only
+			mDepthStencilView->ClearStencil(stencil);
 	}
 }
 

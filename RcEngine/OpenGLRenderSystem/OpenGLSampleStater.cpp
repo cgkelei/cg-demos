@@ -24,6 +24,13 @@ OpenGLSamplerState::OpenGLSamplerState( const SamplerStateDesc& desc )
 	
 	glSamplerParameterfv(mOGLSampler, GL_TEXTURE_BORDER_COLOR, desc.BorderColor());
 
+	if (desc.ComparisonFunc != CF_Never)
+	{
+		// Use GL_COMPARE_REF_TO_TEXTURE
+		glSamplerParameteri(mOGLSampler, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+		glSamplerParameteri(mOGLSampler, GL_TEXTURE_COMPARE_FUNC, OpenGLMapping::Mapping(desc.ComparisonFunc));
+	}
+
 	OGL_ERROR_CHECK();
 }
 

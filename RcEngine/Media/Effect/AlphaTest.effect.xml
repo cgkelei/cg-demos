@@ -67,10 +67,6 @@ void main()
 	float alpha =  texture2D(DiffuseMap, oTex).a;
 	if( alpha < 0.01 ) discard;
 
-#if defined(SSM)
-	oFragDepth.x = oDepth;
-#endif
-
 #ifdef VSM
 	oFragDepth.x = oDepth;
 	oFragDepth.y = oDepth * oDepth;
@@ -89,6 +85,27 @@ void main()
 #ifdef ESM
 	oFragDepth =  exp(ESMConst.x * oDepth);
 #endif 
+}
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Shader name="StandardShadowMapPS" stage="Pixel" entry="main">
+	<ShaderSource>
+	<![CDATA[
+#version 330	
+
+uniform sampler2D DiffuseMap;
+
+in vec2 oTex;
+in float oDepth;
+
+void main()
+{
+	float alpha =  texture2D(DiffuseMap, oTex).a;
+	if( alpha < 0.01 ) discard;
+	
+	gl_FragDepth = gl_FragCoord.z;
 }
 	]]>
 	</ShaderSource>
@@ -326,6 +343,16 @@ void main()
 	</Pass>
 </Technique>
 
+<!-- pission disc PCF-->
+<Technique name="PCF">
+	<Pass name="p0">
+		<VertexShader name="ShadowMapVS"/>
+		<PixelShader name="StandardShadowMapPS"/>
+		<state name="CullMode" value="None"/>
+	</Pass>
+</Technique>
+
+<!--
 <Technique name="EVSM">
 	<Pass name="p0">
 		<VertexShader name="ShadowMapVS"/>
@@ -345,6 +372,7 @@ void main()
 		<state name="CullMode" value="None"/>
 	</Pass>
 </Technique>
+-->
 
 <Technique name="GBuffer">
 	<Pass name="p0">
@@ -353,12 +381,12 @@ void main()
 		<state name="CullMode" value="None"/>
 		<State name="StencilEnable" value="true"/>
 		<State name="FrontStencilRef" value="1"/>
-		<State name="FrontStencilFunc" value="AlwaysPass"/>
+		<State name="FrontStencilFunc" value="Always"/>
 		<State name="FrontStencilFailOp" value="Keep"/>
 		<State name="FrontStencilDepthFailOp" value="Keep"/>
 		<State name="FrontStencilPassOp" value="Replace"/>
 		<State name="BackStencilRef" value="1"/>
-		<State name="BackStencilFunc" value="AlwaysPass"/>
+		<State name="BackStencilFunc" value="Always"/>
 		<State name="BackStencilFailOp" value="Keep"/>
 		<State name="BackStencilDepthFailOp" value="Keep"/>
 		<State name="BackStencilPassOp" value="Replace"/>

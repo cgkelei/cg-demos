@@ -166,8 +166,8 @@ enum AlphaBlendFactor
 
 enum CompareFunction
 {
-	CF_AlwaysFail,
-	CF_AlwaysPass,
+	CF_Always,
+	CF_Never,
 	CF_Less,
 	CF_LessEqual,
 	CF_Equal,

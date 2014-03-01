@@ -24,7 +24,7 @@ public:
 	void MakeSpotShadowMap(const Light& light);
 
 private:
-	void UpdateShadowMapSize(const Light& light);
+	void UpdateShadowMapStorage(const Light& light);
 
 private:	
 	RenderDevice* mDevice;
@@ -36,7 +36,7 @@ private:
 	std::vector<shared_ptr<RenderView>> mShadowSplitsRTV;
 
 	shared_ptr<FrameBuffer> mShadowFrameBuffer;
-	shared_ptr<Texture> mShadowDepth;
+	
 	shared_ptr<Texture> mShadowMapTempBlur;
 	shared_ptr<RenderView> mShadowMapTempBlurRTV;
 
@@ -49,8 +49,14 @@ private:
 	shared_ptr<RenderOperation> mFSQuadShape;
 
 public:
+	shared_ptr<Texture> mShadowDepth;
 	shared_ptr<Texture> mShadowTexture;
 	
+	// ShadowMap SamplState
+	shared_ptr<SamplerState> mPCFSampleState;
+	shared_ptr<SamplerState> mVSMSampleState;
+
+
 	// Light view matrix
 	float4x4 mShadowView; 
 	
@@ -63,7 +69,6 @@ public:
 	float2 mBorderPaddingMinMax;
 
 	bool mMoveLightTexelSize;
-
 	float mCascadeBlendArea;
 };
 

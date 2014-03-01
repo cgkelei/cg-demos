@@ -31,13 +31,7 @@ in vec2 iTex;
 	in vec3 iBinormal;
 #endif
 
-#ifdef _AlphaTest
-out vec3 oNormal;  // not used, just to make iTex attribute at corrent position
-out vec2 oTex;
-#endif
-
 out float oDepth;
-
 
 void main()
 {
@@ -55,11 +49,6 @@ void main()
 	gl_Position = vec4(iPos, 1.0) * WorldView * Proj;
 #endif
 	
-#ifdef _AlphaTest	
-	oNormal = iNormal;
-	oTex = vec2(iTex.x, 1.0-iTex.y);
-#endif
-	
 	oDepth = gl_Position.z * 0.5 + 0.5;
 }	
 	]]>
@@ -72,18 +61,7 @@ void main()
 	
 #version 330	
 
-#ifdef _AlphaTest
-	uniform sampler2D AlphaMap;
-	in vec3 oNormal;
-	in vec2 oTex;
-#endif 
-
 in float oDepth;
-
-// Standard Shadow Maps
-#if defined(SSM)
-out float oFragDepth;
-#endif
 
 // Variance Shadow Maps
 #ifdef VSM
@@ -104,15 +82,6 @@ out float oFragDepth;
 
 void main()
 {
-#ifdef _AlphaTest
-	float alpha =  texture2D(AlphaMap, oTex).a;
-	if( alpha < 0.01 ) discard;
-#endif	
-
-#if defined(SSM)
-	oFragDepth.x = oDepth;
-#endif
-
 #ifdef VSM
 	oFragDepth.x = oDepth;
 	oFragDepth.y = oDepth * oDepth;
@@ -396,7 +365,6 @@ void main()
 #endif
 
 	gl_FragColor = vec4(diffuse.rgb, finalColor.g);
-	
 }
 	]]>
 	</ShaderSource>
@@ -411,6 +379,14 @@ void main()
 	</Pass>
 </Technique>
 
+<!-- pission disc PCF-->
+<Technique name="PCF">
+	<Pass name="p0">
+		<VertexShader name="ShadowMapVS"/>
+	</Pass>
+</Technique>
+
+<!--
 <Technique name="EVSM">
 	<Pass name="p0">
 		<VertexShader name="ShadowMapVS"/>
@@ -428,6 +404,7 @@ void main()
 		</PixelShader>
 	</Pass>
 </Technique>
+-->
 
 <Technique name="GBuffer">
 	<Pass name="p0">
@@ -435,7 +412,7 @@ void main()
 		<PixelShader name="GBufferPS"/>
 		<State name="StencilEnable" value="true"/>
 		<State name="FrontStencilRef" value="1"/>
-		<State name="FrontStencilFunc" value="AlwaysPass"/>
+		<State name="FrontStencilFunc" value="Always"/>
 		<State name="FrontStencilFailOp" value="Keep"/>
 		<State name="FrontStencilDepthFailOp" value="Keep"/>
 		<State name="FrontStencilPassOp" value="Replace"/>

@@ -103,6 +103,7 @@ void OpenGLRenderDevice::CreateRenderWindow( const RenderSettings& settings )
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_TEXTURE_3D);
 	glEnable(GL_TEXTURE_CUBE_MAP);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	OGL_ERROR_CHECK();
 }

@@ -190,8 +190,8 @@ class StateDescDefs
 private:
 	StateDescDefs()
 	{
-		mDefs.insert(std::make_pair("AlwaysFail", CF_AlwaysFail));
-		mDefs.insert(std::make_pair("AlwaysPass",  CF_AlwaysPass));
+		mDefs.insert(std::make_pair("Never", CF_Never));
+		mDefs.insert(std::make_pair("Always",  CF_Always));
 		mDefs.insert(std::make_pair("Less", CF_Less));
 		mDefs.insert(std::make_pair("LessEqual", CF_LessEqual));
 		mDefs.insert(std::make_pair("Equal", CF_Equal));
@@ -249,7 +249,7 @@ public:
 			return iter->second;
 		}
 
-		return CF_AlwaysFail;
+		return CF_Always;
 	}
 
 private:
