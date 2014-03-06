@@ -2,6 +2,8 @@
 #include <MainApp/Application.h>
 #include <Graphics/Renderer.h>
 #include <Graphics/CameraController1.h>
+#include <Graphics/RenderPath.h>
+#include "LightAnimation.h"
 
 using namespace RcEngine;
 
@@ -26,24 +28,31 @@ protected:
 
 	void MouseButtonPress();
 
+	void VisualLights(bool checked);
+	void VisualLightsWireframe(bool checked);
+	void AddPointLight();
+	void DumpLights();
 
 protected:
-	Renderer* mSceneRender;
-	shared_ptr<Pipeline> mDeferredPipeline;
+
 	RcEngine::Test::FPSCameraControler* mCameraControler;
 	shared_ptr<Camera> mCamera;
 	int mFramePerSecond;
 
 	Label* mLabel;
-	UIWindow* mWindow;
+	UIWindow* mControlPanel;
+
+	DeferredPath* mDeferredPath;
+	SceneNode* mCameraTargetNode;
 
 	shared_ptr<RenderOperation> mSphere;
 	shared_ptr<RenderOperation> mCone;
 	shared_ptr<Material> mMaterial;
 
-	Light* mDirLight;
 	Light* mPointLight;
 	Light* mSpotLight;
+
+	LightAnimation mLightAnimation;
 
 	std::vector<Light*> mSpotLights;
 };

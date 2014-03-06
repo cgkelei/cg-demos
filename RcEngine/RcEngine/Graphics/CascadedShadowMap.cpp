@@ -294,7 +294,7 @@ void CascadedShadowMap::UpdateShadowMapStorage( const Light& light )
 		mShadowFrameBuffer->Attach(ATT_DepthStencil, factory->CreateDepthStencilView(mShadowDepth, 0, 0));
 	}
 	
-	if (light.GetLightType() == LT_Directional)
+	if (light.GetLightType() == LT_DirectionalLight)
 	{
 		uint32_t numCascade = light.GetShadowCascades();
 

@@ -35,24 +35,20 @@ float CalculateSpecular(vec3 N, vec3 H, float specPower)
  }
 
  /**
- * @brief Calculate the Fresnel factor using Schlick's approximation
+ * @brief Calculate the Fresnel factor using Schlick's approximation for specular highlight.
  */
-vec3 CalculateFresnel(vec3 specAlbedo, vec3 L, vec3 H) 
+vec3 CalculateFresnel(in vec3 specularColor, in vec3 L, in vec3 H) 
 {
-    vec3 fresnel = specAlbedo;
-    fresnel += (1.0f - specAlbedo) * pow((1.0f - saturate(dot(L, H))), 5.0f);
-    return saturate(fresnel);
+	return specularColor + (1.0 - specularColor) * pow(1.0 - saturate(dot(L, H)), 5.0);
 }
 
 /**
  * @brief Calculate an approximate Fresnel factor using N dot V instead of L dot H
  *        Which is used for environment map fresnel.
  */
-vec3 CalculateAmbiemtFresnel(in vec3 specAlbedo, in vec3 N, in vec3 V) 
+vec3 CalculateAmbiemtFresnel(in vec3 specularColor, in vec3 N, in vec3 V) 
 {
-	vec3 fresnel = specAlbedo;
-    fresnel += (1.0f - specAlbedo) * pow((1.0f - saturate(dot(N, V))), 5.0f);
-    return saturate(fresnel);
+	return specularColor + (1.0 - specularColor) * pow(1.0 - saturate(dot(N, V)), 5.0); 
 }
 
 /*

@@ -25,7 +25,7 @@ Light::Light( const String& name, LightType type)
 	  mShadowCascades(3)
 {
 	// Init default light intensity
-	if (mLightType == LT_Directional)
+	if (mLightType == LT_DirectionalLight)
 		mLightIntensity = 0.5;
 	else 
 		mLightIntensity = 1.0;
@@ -67,6 +67,11 @@ void Light::SetAttenuation( float constant, float linear, float quadratic )
 void Light::SetRange( float range )
 {
 	mRange = range;
+}
+
+void Light::SetLightIntensity( float intensity )
+{
+	mLightIntensity = intensity;
 }
 
 void Light::SetSpotAngle( float innerAngleRadian, float outerAngleRadian, float falloff /*= 1.0*/ )
@@ -157,7 +162,7 @@ SceneObject* Light::FactoryFunc( const String& name, const NameValuePairList* pa
 		else if (it->second == "SpotLight")
 			return new Light(name, LT_SpotLight);
 		else if (it->second == "DirectionalLight")
-			return new Light(name, LT_Directional);
+			return new Light(name, LT_DirectionalLight);
 	}
 	
 	ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Unsupported Light Type!", "Light::FactoryFunc");

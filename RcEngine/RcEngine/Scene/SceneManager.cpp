@@ -241,6 +241,8 @@ void SceneManager::UpdateBackgroundQueue( const Camera& cam )
 
 void SceneManager::UpdateLightQueue( const Camera& cam )
 {
+	mLightQueue.clear();
+
 	for (Light* light : mAllSceneLights)
 	{
 		switch (light->GetLightType())

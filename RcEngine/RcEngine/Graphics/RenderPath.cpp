@@ -23,6 +23,8 @@
 #include <Resource/ResourceManager.h>
 #include <GUI/UIManager.h>
 
+#include <Input/InputSystem.h>
+
 namespace {
 
 using namespace RcEngine;
@@ -247,9 +249,82 @@ void RenderPath::DrawOverlays()
 		renderItem.Renderable->Render();
 }
 
+//----------------------------------------------------------------------------------------------
+ForwardPath::ForwardPath()
+	: RenderPath()
+{
+
+}
+
+void ForwardPath::OnGraphicsInit()
+{
+
+}
+
+void ForwardPath::OnWindowResize( uint32_t width, uint32_t height )
+{
+
+}
+
+void ForwardPath::RenderScene()
+{
+	shared_ptr<FrameBuffer> screenFB = mDevice->GetScreenFrameBuffer();
+	mDevice->BindFrameBuffer(screenFB);
+	screenFB->Clear(CF_Color | CF_Depth, ColorRGBA::Black, 1.0, 0);
+
+	auto viewCamera = screenFB->GetCamera();
+
+	auto v = Normalize(Transform(float3(0, 0, 0), viewCamera->GetViewMatrix()));
+
+	// Draw Sky box first
+	mSceneMan->UpdateBackgroundQueue(*viewCamera);
+	RenderBucket& bkgBucket = mSceneMan->GetRenderQueue().GetRenderBucket(RenderQueue::BucketBackground, false);
+	for (RenderQueueItem& item : bkgBucket)
+		item.Renderable->Render();
+
+	mSceneMan->UpdateLightQueue(*viewCamera);
+	const LightQueue& sceneLights = mSceneMan->GetLightQueue();
+
+	// Draw opaque 
+	mSceneMan->UpdateRenderQueue(*viewCamera, RO_None);   
+
+	RenderBucket& opaqueBucket = mSceneMan->GetRenderQueue().GetRenderBucket(RenderQueue::BucketOpaque);
+
+	for (Light* light : sceneLights)
+	{
+		String techName;
+		if (light->GetLightType() == LT_DirectionalLight)
+		{
+			techName = "ForwardDirectionalLighting";
+
+			for (const RenderQueueItem& renderItem : opaqueBucket) 
+			{
+				auto material = renderItem.Renderable->GetMaterial();
+
+				material->SetCurrentTechnique(techName);
+				
+				float3 lightColor = light->GetLightColor() * light->GetLightIntensity();
+				material->GetEffect()->GetParameterByName("LightColor")->SetValue(lightColor);
+
+				const float3& worldDirection = light->GetDerivedDirection();
+				float4 lightDir(worldDirection[0], worldDirection[1], worldDirection[2], 0.0f);
+				lightDir = lightDir * viewCamera->GetViewMatrix();
+				material->GetEffect()->GetParameterByName("LightDirVS")->SetValue(lightDir);
+
+				renderItem.Renderable->Render();
+			}
+		}
+	}
+
+	// Draw transparent 
+	screenFB->SwapBuffers();
+}
+
 //--------------------------------------------------------------------------------------------
 DeferredPath::DeferredPath()
-	: RenderPath()
+	: RenderPath(),
+	  mVisualLights(false),
+	  mVisualLightsWireframe(false)
 {
 
 }
@@ -277,6 +352,10 @@ void DeferredPath::OnGraphicsInit()
 	mDebugViewMaterial = std::static_pointer_cast<Material>( 
 		resMan.GetResourceByName(RT_Material, "DebugView.material.xml", "General"));
 	mDeferedMaterial->Load();
+
+	mDebugLightMaterial = std::static_pointer_cast<Material>( 
+		resMan.GetResourceByName(RT_Material, "LightShape.material.xml", "General"));
+	mDebugLightMaterial->Load();
 
 	// Init GBuffer
 	uint16_t acessHint = EAH_GPU_Write | EAH_GPU_Read | EAH_CPU_Read;
@@ -323,9 +402,51 @@ void DeferredPath::OnGraphicsInit()
 	mShadowMan = new CascadedShadowMap(mDevice);
 }
 
-void DeferredPath::OnWindowResize( uint32_t width, uint32_t height )
+void DeferredPath::OnWindowResize( uint32_t windowWidth, uint32_t windowHeight )
 {
+	RenderFactory* factory = mDevice->GetRenderFactory();
 
+	mDevice->BindFrameBuffer(mGBufferFB);
+	mGBufferFB->DetachAll();
+	mGBufferFB->Resize(windowWidth, windowHeight);
+
+	uint16_t acessHint = EAH_GPU_Write | EAH_GPU_Read | EAH_CPU_Read;
+	mGBuffer[0] = factory->CreateTexture2D(windowWidth, windowHeight, PF_A8B8G8R8, 1, 1, 0, 0, acessHint, NULL);
+	mGBuffer[1] = factory->CreateTexture2D(windowWidth, windowHeight, PF_A8B8G8R8, 1, 1, 0, 0, acessHint, NULL);
+	mDepthStencilBuffer = factory->CreateTexture2D(windowWidth, windowHeight, PF_Depth24Stencil8, 1, 1, 0, 0, acessHint, NULL);
+
+	mGBufferRTV[0] = factory->CreateRenderTargetView2D(mGBuffer[0], 0, 0);
+	mGBufferRTV[1] = factory->CreateRenderTargetView2D(mGBuffer[1], 0, 0);
+	mDepthStencilView = factory->CreateDepthStencilView(mDepthStencilBuffer, 0, 0);
+
+	mGBufferFB->Attach(ATT_DepthStencil, mDepthStencilView);
+	mGBufferFB->Attach(ATT_Color0, mGBufferRTV[0]);
+	mGBufferFB->Attach(ATT_Color1, mGBufferRTV[1]);
+
+	mDevice->BindFrameBuffer(mLightAccumulateFB);
+	mLightAccumulateFB->DetachAll();
+	mLightAccumulateFB->Resize(windowWidth, windowHeight);
+
+	mLightAccumulateBuffer = factory->CreateTexture2D(windowWidth, windowHeight, PF_A32B32G32R32F, 1, 1, 0, 0, acessHint, NULL);
+	mDepthStencilBufferLight = factory->CreateTexture2D(windowWidth, windowHeight, PF_Depth24Stencil8, 1, 1, 0, 0, acessHint, NULL);
+	mLightAccumulateRTV = factory->CreateRenderTargetView2D(mLightAccumulateBuffer, 0, 0);
+	mDepthStencilBufferLightView = factory->CreateDepthStencilView(mDepthStencilBufferLight, 0, 0);
+
+	mLightAccumulateFB->Attach(ATT_DepthStencil, mDepthStencilBufferLightView);
+	mLightAccumulateFB->Attach(ATT_Color0, mLightAccumulateRTV);
+
+	mDevice->BindFrameBuffer(mHDRFB);
+	mHDRFB->DetachAll();
+	mHDRFB->Resize(windowWidth, windowHeight);
+
+	// HDR buffer
+	mHDRBuffer = factory->CreateTexture2D(windowWidth, windowHeight, PF_A32B32G32R32F, 1, 1, 0, 0, acessHint, NULL);
+	mHDRBufferRTV = factory->CreateRenderTargetView2D(mHDRBuffer, 0, 0);
+	mHDRFB = factory->CreateFrameBuffer(windowWidth, windowHeight);
+
+	mDepthStencilViewReadOnly = factory->CreateDepthStencilView(mDepthStencilBuffer, 0, 0);
+	mHDRFB->Attach(ATT_DepthStencil, mDepthStencilViewReadOnly);
+	mHDRFB->Attach(ATT_Color0, mHDRBufferRTV);
 }
 
 shared_ptr<Effect> DeferredPath::GetDeferredEffect() const
@@ -345,11 +466,69 @@ void DeferredPath::RenderScene()
 	screenFB->Clear(CF_Color | CF_Depth, ColorRGBA::Black, 1.0, 0);
 
 	mDebugViewMaterial->SetTexture("InputTex", mHDRBuffer);
-	//mDebugViewMaterial->SetTexture("InputTex", mLightAccumulateBuffer);
-	DrawFSQuad(mDebugViewMaterial, "ViewRGB");
 
+	//DebugViewMaterial->SetTexture("InputTex", mLightAccumulateBuffer);
+	DrawFSQuad(mDebugViewMaterial, "ViewRGB");
 	DrawOverlays();
-	screenFB->SwapBuffers();
+
+	/*mDeferedMaterial->SetTexture("DepthBuffer", mDepthStencilBuffer);
+	DrawFSQuad(mDeferedMaterial, "CopyDepth");*/
+
+	// Copy depth
+	//mVisualLights =  mVisualLightsWireframe = true;
+	if (mVisualLights)
+	{
+		mDeferedMaterial->SetTexture("DepthBuffer", mDepthStencilBuffer);
+		DrawFSQuad(mDeferedMaterial, "CopyDepth");
+
+		String techName = "LightShape";
+		if (mVisualLightsWireframe)
+			techName = "LightShapeWireFrame";
+
+		const std::vector<Light*>& sceneLights = mSceneMan->GetSceneLights();
+		for (Light* light : sceneLights)
+		{
+			if (light->GetLightType() == LT_PointLight)
+			{
+				auto lightColor = light->GetLightColor();
+				mDebugLightMaterial->SetDiffuseColor(lightColor);
+				
+				float radius = light->GetRange(); 
+				radius = (std::min)(10.0f, radius * 0.1f);
+				float4x4 world = CreateScaling(radius, radius, radius) * CreateTranslation(light->GetDerivedPosition());
+				mDebugLightMaterial->ApplyMaterial(world);
+
+				mDebugLightMaterial->SetCurrentTechnique(techName);
+				mDevice->Render(*mDebugLightMaterial->GetCurrentTechnique(), *mPointLightShape);
+			}
+			else if (light->GetLightType() == LT_SpotLight) 
+			{
+				auto lightColor = light->GetLightColor();
+				mDebugLightMaterial->SetDiffuseColor(lightColor);
+
+				float spotInnerAngle = light->GetSpotInnerAngle();
+				float spotOuterAngle = light->GetSpotOuterAngle();
+
+				float scaleHeight = light->GetRange();
+				float scaleBase = scaleHeight * tanf(spotOuterAngle * 0.5f);
+
+				const float3& worldPos = light->GetDerivedPosition();
+				const float3& worldDir = light->GetDerivedDirection();
+				float3 rotAxis = Cross(float3(0, 1, 0), worldDir);
+				//float rotAngle = acosf(Dot(float3(0, 1, 0), worldDirection));
+				float4x4 rotation = CreateRotationAxis(rotAxis, acosf(worldDir.Y()));
+
+				float4x4 world = CreateScaling(scaleBase, scaleHeight, scaleBase) * rotation *
+										CreateTranslation(worldPos);
+				mDebugLightMaterial->ApplyMaterial(world);
+
+				mDebugLightMaterial->SetCurrentTechnique(techName);
+				mDevice->Render(*mDebugLightMaterial->GetCurrentTechnique(), *mSpotLightShape);
+			}
+		}
+	}
+	//
+	//screenFB->SwapBuffers();
 }
 
 void DeferredPath::GenereateGBuffer()
@@ -370,8 +549,11 @@ void DeferredPath::GenereateGBuffer()
 		renderItem.Renderable->Render();
 	}
 
-	//mDevice->GetRenderFactory()->SaveTexture2D("E:/GBuffer0.tga", mGBuffer[0], 0, 0);
-	//mDevice->GetRenderFactory()->SaveTexture2D("E:/GBuffer1.tga", mGBuffer[1], 0, 0);
+	if ( InputSystem::GetSingleton().MouseButtonPress(MS_MiddleButton) )
+	{
+		mDevice->GetRenderFactory()->SaveTexture2D("E:/GBuffer0.tga", mGBuffer[0], 0, 0);
+		mDevice->GetRenderFactory()->SaveTexture2D("E:/GBuffer1.tga", mGBuffer[1], 0, 0);
+	}
 }
 
 void DeferredPath::ComputeSSAO()
@@ -400,7 +582,7 @@ void DeferredPath::DeferredLighting()
 		Light* light = sceneLights[i];
 		LightType lightType = light->GetLightType();
 	
-		if (lightType == LT_Directional)
+		if (lightType == LT_DirectionalLight)
 		{
 			DrawDirectionalLightShape(light, tech);
 		}
@@ -452,7 +634,7 @@ void DeferredPath::DrawDirectionalLightShape( Light* light, const String& tech )
 
 	shared_ptr<Effect> effect = mDeferedMaterial->GetEffect();
 
-	const float3& lightColor = light->GetLightColor();
+	float3 lightColor = light->GetLightColor() * light->GetLightIntensity();
 	mDeferedMaterial->GetCustomParameter(EPU_Light_Color)->SetValue(lightColor);
 
 	const float3& worldDirection = light->GetDerivedDirection();
@@ -488,7 +670,7 @@ void DeferredPath::DrawSpotLightShape( Light* light, const String& tech )
 
 	shared_ptr<Effect> effect = mDeferedMaterial->GetEffect();
 
-	const float3& lightColor = light->GetLightColor();
+	float3 lightColor = light->GetLightColor() * light->GetLightIntensity();
 	const float3& worldPos = light->GetDerivedPosition();
 	const float3& worldDir = light->GetDerivedDirection();
 
@@ -529,7 +711,8 @@ void DeferredPath::DrawSpotLightShape( Light* light, const String& tech )
 		
 		mDeferedMaterial->SetTexture("ShadowTex", mShadowMan->mShadowDepth);
 		effect->GetParameterByName("ShadowViewProj")->SetValue(mShadowMan->mShadowView);
-		effect->GetParameterByName("PCFRadius")->SetValue(7.0f / float(SHADOW_MAP_SIZE));
+		if (effect->GetParameterByName("PCFRadius"))
+			effect->GetParameterByName("PCFRadius")->SetValue(5.7f / float(SHADOW_MAP_SIZE));
 	}
 
 	String techName = "Spot" + tech;
@@ -540,7 +723,31 @@ void DeferredPath::DrawSpotLightShape( Light* light, const String& tech )
 
 void DeferredPath::DrawPointLightShape(Light* light, const String& tech )
 {
+	const Camera& currCamera = *(mDevice->GetCurrentFrameBuffer()->GetCamera());
 
+	float lightRadius = light->GetRange();
+
+	float3 lightColor = light->GetLightColor() * light->GetLightIntensity();
+	mDeferedMaterial->GetCustomParameter(EPU_Light_Color)->SetValue(lightColor);
+
+	float2 camNearFar(currCamera.GetNearPlane(), currCamera.GetFarPlane());
+	mDeferedMaterial->GetEffect()->GetParameterByName("CameraNearFar")->SetValue(camNearFar);
+
+	const float3& worldPos = light->GetDerivedPosition();
+	float4 lightPos(worldPos[0], worldPos[1], worldPos[2], 1.0f);
+	lightPos = lightPos * currCamera.GetViewMatrix();
+	mDeferedMaterial->GetCustomParameter(EPU_Light_Position)->SetValue(lightPos);
+
+	mDeferedMaterial->GetCustomParameter(EPU_Light_Attenuation)->SetValue(light->GetAttenuation());
+
+	float4x4 worldMatrix(lightRadius,  0.0f,		  0.0f,		    0.0f,
+		0.0f,         lightRadius,   0.0f,		    0.0f,
+		0.0f,         0.0f,          lightRadius,  0.0f,
+		worldPos.X(), worldPos.Y(),  worldPos.Z(), 1.0f);
+
+	mDeferedMaterial->ApplyMaterial(worldMatrix);
+	mDeferedMaterial->SetCurrentTechnique("Point" + tech);
+	mDevice->Render(*mDeferedMaterial->GetCurrentTechnique(), *mPointLightShape);
 }
 
 }

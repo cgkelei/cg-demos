@@ -1888,8 +1888,9 @@ int main()
 	g_ExportSettings.ExportSkeleton = false;
     g_ExportSettings.MergeScene = true;
 	g_ExportSettings.AxisSystem = Axis_OpenGL;
+	g_ExportSettings.MergeWithSameMaterial = false;
 
-	if (fbxProcesser.LoadScene("Sponza/Sponza.FBX"))
+	if (fbxProcesser.LoadScene("E:/Engines/RcEngine/Media/Mesh/Tank/tank.fbx"))
 	{
 		fbxProcesser.ProcessScene();
 		//fbxProcesser.BuildAndSaveXML();

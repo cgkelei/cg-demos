@@ -1,3 +1,6 @@
+#ifndef Light_h__
+#define Light_h__
+
 #include <Core/Prerequisites.h>
 #include <Scene/SceneObject.h>
 #include <Math/Vector.h>
@@ -6,7 +9,7 @@ namespace RcEngine {
 
 enum LightType
 {
-	LT_Directional = 0,
+	LT_DirectionalLight = 0,
 	LT_PointLight,
 	LT_SpotLight,
 	LT_AreaLight,
@@ -52,6 +55,7 @@ public:
 	float GetSpotOuterAngle() const					{ return mSpotOuterAngle; }
 	float GetSpotlightFalloff() const				{ return mSpotFalloff; }
 	float GetSpotlightNearClip() const				{ return mSpotNearClip; }
+	float GetLightIntensity() const					{ return mLightIntensity; }
 
 	// Cascade shadow map cout
 	bool GetCastShadow() const						{ return mCastShadow; }
@@ -100,3 +104,5 @@ protected:
 };
 
 }
+
+#endif // Light_h__

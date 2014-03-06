@@ -700,6 +700,7 @@ void Effect::LoadImpl()
 
 			shared_ptr<ShaderProgram> program = factory.CreateShaderProgram(*this);
 
+			// Vertex shader
 			XMLNodePtr vertexNode = passNode->FirstNode("VertexShader");
 			String vertexName = vertexNode->AttributeString("name", "");
 			if (shaderStages.find(vertexName) != shaderStages.end())
@@ -720,6 +721,30 @@ void Effect::LoadImpl()
 				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, err, "Effect::Load");
 			}
 
+			// Geometry shader (optional) 
+			XMLNodePtr geometryNode = passNode->FirstNode("GeometryShader");
+			if (geometryNode)
+			{
+				String geometryName = geometryNode->AttributeString("name", "");
+				if (shaderStages.find(geometryName) != shaderStages.end())
+				{
+					vector<String> defines, values;
+					CollectShaderMacro(geometryNode, defines, values);
+					for (size_t i = 1; i < effectFlags.size(); ++i)
+					{
+						defines.push_back(effectFlags[i]);
+						values.push_back(String(""));
+					}
+					program->AttachShader(CompileShader(shaderStages[geometryName], defines, values));
+				}
+				else
+				{
+					String err = "PS( " + geometryName + " ) not found!";
+					ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, err, "Effect::Load");
+				}
+			}
+
+			// Pixel shader (optional) 
 			XMLNodePtr pixelNode = passNode->FirstNode("PixelShader");
 			if (pixelNode)
 			{

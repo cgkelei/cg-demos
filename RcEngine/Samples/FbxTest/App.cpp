@@ -185,18 +185,18 @@ shared_ptr<RenderOperation> BuildSpotLightShape()
 	return mRenderOperation;
 }
 
-CascadeShadowMapApp::CascadeShadowMapApp( const String& config ) 
+FBXApp::FBXApp( const String& config ) 
 	:Application(config), mCameraControler(0), mFramePerSecond(0)
 {
 
 }
 
-CascadeShadowMapApp::~CascadeShadowMapApp( void )
+FBXApp::~FBXApp( void )
 {
 
 }
 
-void CascadeShadowMapApp::Initialize()
+void FBXApp::Initialize()
 {
 	mSceneRender = new Renderer;
 	mSceneRender->Init();
@@ -207,7 +207,7 @@ void CascadeShadowMapApp::Initialize()
 	InitGUI();
 }
 
-void CascadeShadowMapApp::InitGUI()
+void FBXApp::InitGUI()
 {
 	UIElement* rootElem = UIManager::GetSingleton().GetRoot();
 
@@ -237,7 +237,7 @@ void CascadeShadowMapApp::InitGUI()
 	mCastShadowCheckBox->SetSize(int2(150, mCastShadowCheckBox->GetSize().Y()));
 	mCastShadowCheckBox->SetText(L"Cast ShadowCheck");
 	mCastShadowCheckBox->SetChecked(true);
-	mCastShadowCheckBox->EventStateChanged.bind(this, &CascadeShadowMapApp::CastShadow);
+	mCastShadowCheckBox->EventStateChanged.bind(this, &FBXApp::CastShadow);
 	mWindow->AddChild( mCastShadowCheckBox );	
 	
 	uiY += mCastShadowCheckBox->GetSize().Y() + 18;
@@ -249,7 +249,7 @@ void CascadeShadowMapApp::InitGUI()
 	mVisualizeCascadesCheckBox->SetSize(int2(150, mVisualizeCascadesCheckBox->GetSize().Y()));
 	mVisualizeCascadesCheckBox->SetText(L"Visualize Cascades");
 	mVisualizeCascadesCheckBox->SetChecked(false);
-	mVisualizeCascadesCheckBox->EventStateChanged.bind(this, &CascadeShadowMapApp::VisualizeCascades);
+	mVisualizeCascadesCheckBox->EventStateChanged.bind(this, &FBXApp::VisualizeCascades);
 	mWindow->AddChild( mVisualizeCascadesCheckBox );	
 
 	uiY += mVisualizeCascadesCheckBox->GetSize().Y() + 18;
@@ -274,11 +274,11 @@ void CascadeShadowMapApp::InitGUI()
 	mBlendAreaSlider->SetPosition(int2(20 + mBlendAreaLabel->GetSize().X(), uiY + 5));
 	mBlendAreaSlider->SetTrackLength(120);
 	mBlendAreaSlider->SetValue(50);
-	mBlendAreaSlider->EventValueChanged.bind(this, &CascadeShadowMapApp::BlendAreaSliderValueChange);
+	mBlendAreaSlider->EventValueChanged.bind(this, &FBXApp::BlendAreaSliderValueChange);
 	mWindow->AddChild( mBlendAreaSlider );	
 }
 
-void CascadeShadowMapApp::LoadContent()
+void FBXApp::LoadContent()
 {
 	RenderFactory* factory = Context::GetSingleton().GetRenderFactoryPtr();
 	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
@@ -347,7 +347,7 @@ void CascadeShadowMapApp::LoadContent()
 	shadowEffect->GetParameterByName("VisiualizeCascades")->SetValue(false);
 }
 
-void CascadeShadowMapApp::Update( float deltaTime )
+void FBXApp::Update( float deltaTime )
 {
 	CalculateFrameRate();
 
@@ -366,7 +366,7 @@ void CascadeShadowMapApp::Update( float deltaTime )
 	
 }
 
-void CascadeShadowMapApp::Render()
+void FBXApp::Render()
 {
 	mSceneRender->RenderScene();
 
@@ -404,7 +404,7 @@ void CascadeShadowMapApp::Render()
 	device.GetScreenFrameBuffer()->SwapBuffers();
 }
 
-void CascadeShadowMapApp::CalculateFrameRate()
+void FBXApp::CalculateFrameRate()
 {
 	static int frameCount = 0;
 	static float baseTime = 0;
@@ -419,7 +419,7 @@ void CascadeShadowMapApp::CalculateFrameRate()
 	}
 }
 
-void CascadeShadowMapApp::VisualizeCascades( bool checked )
+void FBXApp::VisualizeCascades( bool checked )
 {
 	EffectParameter* effectParam = mPipeline->GetMaterial(0)->GetEffect()->GetParameterByName("VisiualizeCascades");
 	bool enable;
@@ -427,14 +427,14 @@ void CascadeShadowMapApp::VisualizeCascades( bool checked )
 	effectParam->SetValue(!enable);
 }
 
-void CascadeShadowMapApp::CastShadow( bool checked )
+void FBXApp::CastShadow( bool checked )
 {
 	bool enable = mDirLight->GetCastShadow();
 	mDirLight->SetCastShadow(!enable);
 }
 
 
-void CascadeShadowMapApp::BlendAreaSliderValueChange( int32_t value )
+void FBXApp::BlendAreaSliderValueChange( int32_t value )
 {
 	float area = value / float(100.0) * 0.5f;
 	mSceneRender->GetShadowManager()->mCascadeBlendArea = area;
@@ -451,7 +451,7 @@ int main(int argc, char* argv[])
 	//wsprintf(text1, L"BlendArea: %.3f", 1.1111);
 	//std::wcout << L"Test " << text1;
 	
-	CascadeShadowMapApp app("Config.xml");
+	FBXApp app("Config.xml");
 	app.Create();
 	app.RunGame();
 	app.Release();

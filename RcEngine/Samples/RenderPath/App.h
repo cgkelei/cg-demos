@@ -21,6 +21,10 @@ protected:
 	void Update(float deltaTime);
 	void Render();
 	void CalculateFrameRate();
+	void WindowResize(uint32_t width, uint32_t height);
+	
+	void SetupScene();
+	void SetupLights();
 
 private:
 	void VisualizeCascades(bool checked);
@@ -50,6 +54,8 @@ protected:
 	Light* mDirLight;
 	Light* mSpotLight;
 	CascadedShadowMap* mCascadedShadowMap;
+
+	Entity* mNanosuit;
 };
 
 

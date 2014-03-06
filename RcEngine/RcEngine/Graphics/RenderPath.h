@@ -31,6 +31,28 @@ protected:
 	shared_ptr<RenderOperation> mFSQuadShape;
 };
 
+class _ApiExport ForwardPath : public RenderPath
+{
+public:
+	ForwardPath();
+	virtual ~ForwardPath() {}
+
+	virtual void OnGraphicsInit();
+	virtual void OnWindowResize(uint32_t width, uint32_t height);
+	virtual void RenderScene();
+
+	CascadedShadowMap* GetShadowManager() const  { return mShadowMan; }
+
+public:
+	CascadedShadowMap* mShadowMan;
+
+	shared_ptr<Texture> mHDRBuffer;
+	shared_ptr<RenderView> mHDRBufferRTV;
+
+	shared_ptr<Texture> mDepthStencilBuffer;
+	shared_ptr<RenderView> mDepthStencilView;
+};
+
 class _ApiExport DeferredPath : public RenderPath
 {
 public:
@@ -80,11 +102,16 @@ protected:
 
 	shared_ptr<Material> mDeferedMaterial;
 	shared_ptr<Material> mDebugViewMaterial;
+	shared_ptr<Material> mDebugLightMaterial;
 
 	CascadedShadowMap* mShadowMan;
 
 	shared_ptr<RenderOperation> mSpotLightShape;
 	shared_ptr<RenderOperation> mPointLightShape;
+
+public:
+	bool mVisualLights;
+	bool mVisualLightsWireframe;
 };
 
 }

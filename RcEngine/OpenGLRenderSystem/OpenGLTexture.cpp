@@ -22,7 +22,7 @@ OpenGLTexture::~OpenGLTexture(void)
 	if (mPixelBufferID > 0)
 		glDeleteBuffers(1, &mPixelBufferID);
 
-	if (mTextureTarget == GL_RENDERBUFFER)
+	if (mRenderBufferHint)
 		glDeleteTextures(1, &mTextureID);
 	else 
 		glDeleteRenderbuffers(1, &mTextureID);

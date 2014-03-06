@@ -42,7 +42,7 @@ public:
 		mDefs.insert(std::make_pair("AmbientMaterialColor", EPU_Material_Ambient_Color));
 		mDefs.insert(std::make_pair("DiffuseMaterialColor", EPU_Material_Diffuse_Color));
 		mDefs.insert(std::make_pair("SpecularMaterialColor", EPU_Material_Specular_Color));
-		mDefs.insert(std::make_pair("PowerMaterial", EPU_Material_Power));
+		mDefs.insert(std::make_pair("SpecularMaterialPower", EPU_Material_Power));
 		mDefs.insert(std::make_pair("EmissiveMaterialColor", EPU_Material_Emissive_Color));
 		mDefs.insert(std::make_pair("DiffuseMaterialMap", EPU_Material_Diffuse_Texture));
 		mDefs.insert(std::make_pair("SpecularMaterialMap", EPU_Material_Specular_Texture));
@@ -434,51 +434,31 @@ void Material::LoadImpl()
 		{
 			String value = paramNode->AttributeString("value", "");
 			if (!value.empty())
-			{
-				std::stringstream sss;
-				sss << value;
-				sss >> mAmbient.R() >> mAmbient.G() >> mAmbient.B() >> mAmbient.A();
-			}			
+				std::sscanf(value.c_str(), "%f %f %f", &mAmbient[0], &mAmbient[1], &mAmbient[2]);				
 		}
 		else if (parameter->Usage == EPU_Material_Diffuse_Color)
 		{
 			String value = paramNode->AttributeString("value", "");
 			if (!value.empty())
-			{
-				std::stringstream sss;
-				sss << value;
-				sss >> mDiffuse.R() >> mDiffuse.G() >> mDiffuse.B() >> mDiffuse.A();
-		
-			}
+				std::sscanf(value.c_str(), "%f %f %f", &mDiffuse[0], &mDiffuse[1], &mDiffuse[2]);		
 		}
 		else if (parameter->Usage == EPU_Material_Specular_Color)
 		{
 			String value = paramNode->AttributeString("value", "");
 			if (!value.empty())
-			{
-				std::stringstream sss;
-				sss << value;
-				sss >> mSpecular.R() >> mSpecular.G() >> mSpecular.B() >> mSpecular.A();
-			}
+				std::sscanf(value.c_str(), "%f %f %f", &mSpecular[0], &mSpecular[1], &mSpecular[2]);		
 		}
 		else if (parameter->Usage == EPU_Material_Emissive_Color)
 		{
 			String value = paramNode->AttributeString("value", "");
 			if (!value.empty())
-			{
-				std::stringstream sss;
-				sss << value;
-				sss >> mEmissive.R() >> mEmissive.G() >> mEmissive.B() >> mEmissive.A();
-			}
+				std::sscanf(value.c_str(), "%f %f %f", &mEmissive[0], &mEmissive[1], &mEmissive[2]);
 		}
 		else if (parameter->Usage == EPU_Material_Power)
 		{
 			String value = paramNode->AttributeString("value", "");
 			if (!value.empty())
-			{
-				mPower = LexicalCast<float>(value);
-			}
-			
+				std::sscanf(value.c_str(), "%f", &mPower);			
 		}
 			
 		mCachedEffectParams.push_back(parameter);
@@ -579,19 +559,17 @@ void Material::ApplyMaterial( const float4x4& world )
 			break;
 		case EPU_Material_Ambient_Color:
 			{
-				float3 color(mAmbient.R(), mAmbient.G(), mAmbient.B());
-				param->EffectParam->SetValue(color);
+				param->EffectParam->SetValue(mAmbient);
 			}
 			break;
 		case EPU_Material_Diffuse_Color:
 			{
-				param->EffectParam->SetValue(float4(mDiffuse.R(), mDiffuse.G(), mDiffuse.B(), mDiffuse.A()));
+				param->EffectParam->SetValue(mDiffuse);
 			}
 			break;
 		case EPU_Material_Specular_Color:
 			{
-				float4 color(mSpecular.R(), mSpecular.G(), mSpecular.B(), mSpecular.A());
-				param->EffectParam->SetValue(color);
+				param->EffectParam->SetValue(mSpecular);
 			}
 			break;
 		case EPU_Material_Power:

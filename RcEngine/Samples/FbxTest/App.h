@@ -6,11 +6,11 @@
 
 using namespace RcEngine;
 
-class CascadeShadowMapApp : public Application
+class FBXApp : public Application
 {
 public:
-	CascadeShadowMapApp(const String& config);
-	~CascadeShadowMapApp(void);
+	FBXApp(const String& config);
+	~FBXApp(void);
 protected:
 
 	void Initialize();
