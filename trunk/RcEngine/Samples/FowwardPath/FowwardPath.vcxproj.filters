@@ -15,25 +15,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="App.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pfm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LightAnimation.h">
+    <ClInclude Include="ForwardPathApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="App.cpp">
+    <ClCompile Include="ForwardPathApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="pfm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LightAnimation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

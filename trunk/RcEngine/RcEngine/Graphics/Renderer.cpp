@@ -415,7 +415,7 @@ void Renderer::DrawLightShape( const String& tech )
 	{
 		switch (light->GetLightType())
 		{
-		case LT_Directional:
+		case LT_DirectionalLight:
 			DrawDirectionalLightShape(light, tech);
 			break;
 		case LT_PointLight:

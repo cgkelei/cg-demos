@@ -33,159 +33,9 @@
 #include <Graphics/RenderOperation.h>
 #include <Graphics/GraphicBuffer.h>
 #include <Graphics/Texture.h>
+#include <Scene/SubEntity.h>
 
 using namespace RcEngine;
-
-shared_ptr<RenderOperation> BuildPointLightShape()
-{
-	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
-
-	const int nRings = 30;
-	const int nSegments = 30;
-	const float r = 1.0f;
-
-	VertexElement vdsc[] = {
-		VertexElement(0, VEF_Float3,  VEU_Position, 0),
-	};
-	shared_ptr<VertexDeclaration> vertexDecl = factory.CreateVertexDeclaration(vdsc, 1);
-
-	int32_t vertexCount = (nRings + 1) * (nSegments+1);
-	int32_t indicesCount =  6 * nRings * (nSegments + 1);
-
-	ElementInitData vInitData;
-	vInitData.pData = nullptr;
-	vInitData.rowPitch = 3 * vertexCount * sizeof(float);
-	vInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> vertexBuffer= factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
-
-	ElementInitData iInitData;
-	iInitData.pData = nullptr;
-	iInitData.rowPitch = indicesCount * sizeof(unsigned short);
-	iInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> indexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
-
-	float* pVertex = static_cast<float*>(vertexBuffer->Map(0, -1, BA_Write_Only));
-	unsigned short* pIndices = static_cast<unsigned short*>(indexBuffer->Map(0, -1, BA_Write_Only));
-
-	float fDeltaRingAngle = Mathf::PI / nRings;
-	float fDeltaSegAngle = Mathf::TWO_PI / nSegments;
-	unsigned short wVerticeIndex = 0 ;
-
-	// Generate the group of rings for the sphere
-	for( int ring = 0; ring <= nRings; ring++ ) {
-		float r0 = r * sinf (ring * fDeltaRingAngle);
-		float y0 = r * cosf (ring * fDeltaRingAngle);
-
-		// Generate the group of segments for the current ring
-		for(int seg = 0; seg <= nSegments; seg++) {
-			float x0 = r0 * sinf(seg * fDeltaSegAngle);
-			float z0 = r0 * cosf(seg * fDeltaSegAngle);
-
-			// Add one vertex to the strip which makes up the sphere
-			*pVertex++ = x0;
-			*pVertex++ = y0;
-			*pVertex++ = z0;
-
-			if (ring != nRings) {
-				// each vertex (except the last) has six indices pointing to it
-				*pIndices++ = wVerticeIndex + nSegments + 1;
-				*pIndices++ = wVerticeIndex;               
-				*pIndices++ = wVerticeIndex + nSegments;
-				*pIndices++ = wVerticeIndex + nSegments + 1;
-				*pIndices++ = wVerticeIndex + 1;
-				*pIndices++ = wVerticeIndex;
-				wVerticeIndex ++;				
-			}
-		}; // end for seg
-	} // end for ring
-
-	vertexBuffer->UnMap();
-	indexBuffer->UnMap();
-
-	shared_ptr<RenderOperation> mRenderOperation(new RenderOperation);
-	mRenderOperation->PrimitiveType = PT_Triangle_List;
-	mRenderOperation->BindVertexStream(vertexBuffer, vertexDecl);
-	mRenderOperation->BindIndexStream(indexBuffer, IBT_Bit16);
-
-	return mRenderOperation;
-}
-
-shared_ptr<RenderOperation> BuildSpotLightShape() 
-{
-	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
-
-	VertexElement vdsc[] = {
-		VertexElement(0, VEF_Float3,  VEU_Position, 0),
-	};
-	shared_ptr<VertexDeclaration> vertexDecl = factory.CreateVertexDeclaration(vdsc, 1);
-
-	float mRadius = 1.f;
-	float mHeight = 1.f;
-	uint16_t nCapSegments = 20;
-
-	uint16_t vertexCount = nCapSegments+1;
-	uint16_t indicesCount = (nCapSegments+nCapSegments-2)*3;
-
-	ElementInitData vInitData;
-	vInitData.pData = nullptr;
-	vInitData.rowPitch = 3 * vertexCount * sizeof(float);
-	vInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> vertexBuffer= factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
-
-	ElementInitData iInitData;
-	iInitData.pData = nullptr;
-	iInitData.rowPitch = indicesCount * sizeof(uint16_t);
-	iInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> indexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
-
-	float* pVertex = static_cast<float*>(vertexBuffer->Map(0, -1, BA_Write_Only));
-	uint16_t* pIndices = static_cast<uint16_t*>(indexBuffer->Map(0, -1, BA_Write_Only));
-
-	std::vector<float3> Vertices;
-	std::vector<int> Indices;
-
-	uint16_t topPointOffset = 0;
-	*pVertex++ = 0.0f;
-	*pVertex++ = 0.0f;
-	*pVertex++ = 0.0f;
-
-	int ringStartOffset = 1;
-	float deltaAngle = (Mathf::TWO_PI / nCapSegments);
-	for (uint16_t i = 0; i < nCapSegments; i++)
-	{
-		float x0 = mRadius* cosf(i*deltaAngle);
-		float z0 = mRadius * sinf(i*deltaAngle);
-
-		*pVertex++ = x0;
-		*pVertex++ = mHeight;
-		*pVertex++ = z0;
-	}
-
-	for (uint16_t i = 0; i < nCapSegments; ++i)
-	{
-		*pIndices++ = topPointOffset;
-		*pIndices++ = ringStartOffset+i;
-		*pIndices++ = ringStartOffset+ (i+1)%nCapSegments;
-	}
-
-	// Caps
-	for (uint16_t i = 0; i < nCapSegments - 2; ++i)
-	{
-		*pIndices++ = ringStartOffset;
-		*pIndices++ = ringStartOffset+i+1+1;
-		*pIndices++ = ringStartOffset+i+1;
-	}
-
-	vertexBuffer->UnMap();
-	indexBuffer->UnMap();
-
-	shared_ptr<RenderOperation> mRenderOperation(new RenderOperation);
-	mRenderOperation->PrimitiveType = PT_Triangle_List;
-	mRenderOperation->BindVertexStream(vertexBuffer, vertexDecl);
-	mRenderOperation->BindIndexStream(indexBuffer, IBT_Bit16);
-
-	return mRenderOperation;
-}
 
 RenderPathApp::RenderPathApp( const String& config ) 
 	:Application(config), mCameraControler(0), mFramePerSecond(0)
@@ -202,9 +52,6 @@ void RenderPathApp::Initialize()
 {
 	mDeferredPath = new DeferredPath();
 	mDeferredPath->OnGraphicsInit();
-
-	mSphere = BuildPointLightShape();
-	mCone = BuildSpotLightShape();
 
 	InitGUI();
 }
@@ -300,6 +147,68 @@ void RenderPathApp::InitGUI()
 	mWindow->AddChild( mSaveCameraBtn );	
 }
 
+void RenderPathApp::SetupScene()
+{
+	ResourceManager& resMan = ResourceManager::GetSingleton();
+	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
+
+	// Ground
+	Entity* entity = sceneMan.CreateEntity("Ground", "./Geo/Ground.mesh",  "Custom");
+	SceneNode* sceneNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Ground");
+	sceneNode->SetScale(float3(2.5,2.5,2.5));
+	sceneNode->SetPosition(float3(0, 0, 0));
+	sceneNode->AttachObject(entity);
+
+	// Teapot 
+	entity = sceneMan.CreateEntity("Teapot", "./Geo/Teapot.mesh",  "Custom");
+	sceneNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Teapot");
+	sceneNode->Rotate(QuaternionFromRotationAxis(float3(0, 1, 0), Mathf::ToRadian(-90.0)));
+	sceneNode->SetPosition(float3(50, 0, 0));
+	sceneNode->AttachObject(entity);
+
+	entity = sceneMan.CreateEntity("Nanosuit", "./Nanosuit/Nanosuit.mesh",  "Custom");
+	sceneNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Nanosuit");
+	sceneNode->SetScale(float3(2,2,2));
+	sceneNode->SetPosition(float3(-50,0,0));
+	sceneNode->AttachObject(entity);
+	auto b = entity->GetWorldBoundingBox();
+
+	entity = sceneMan.CreateEntity("Tank", "./Tank/tank.mesh",  "Custom");
+	sceneNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Tank");
+	sceneNode->SetScale(float3(10, 10, 10));
+	sceneNode->SetPosition(float3(0,0,0));
+	sceneNode->AttachObject(entity);
+
+	// Load Skybox
+	shared_ptr<TextureResource> skyBox = resMan.GetResourceByName<TextureResource>(RT_Texture, "MeadowTrail.dds", "General");
+	sceneMan.CreateSkyBox(skyBox->GetTexture());
+}
+
+void RenderPathApp::SetupLights()
+{
+	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
+
+	//mDirLight = sceneMan.CreateLight("Sun", LT_DirectionalLight);
+	//mDirLight->SetDirection(float3(0, -0.5, -1));
+	//mDirLight->SetLightColor(float3(1, 1, 1));
+	//mDirLight->SetLightIntensity(1.0);
+	//mDirLight->SetCastShadow(true);
+	//mDirLight->SetShadowCascades(4);
+	//sceneMan.GetRootSceneNode()->AttachObject(mDirLight);
+
+	mSpotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
+	mSpotLight->SetDirection(float3(0, -1.5, -1));
+	mSpotLight->SetLightColor(float3(1, 1, 1));
+	mSpotLight->SetRange(300.0);
+	mSpotLight->SetPosition(float3(0.0f, 150.0f, 100.0f));
+	mSpotLight->SetAttenuation(1.0f, 0.0f);
+	mSpotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(60));
+	mSpotLight->SetCastShadow(true);
+	mSpotLight->SetSpotlightNearClip(10);
+	sceneMan.GetRootSceneNode()->AttachObject(mSpotLight);
+
+}
+
 void RenderPathApp::LoadContent()
 {
 	RenderFactory* factory = Context::GetSingleton().GetRenderFactoryPtr();
@@ -307,58 +216,27 @@ void RenderPathApp::LoadContent()
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
 
-	FileSystem::GetSingleton().RegisterPath("../Media/Mesh/Tree", "Custom");
-
 	mCamera = device.GetScreenFrameBuffer()->GetCamera();
 	
-	mCamera->CreateLookAt(float3(408.8, 1053.9, 279.3), float3(408.6, 1053.1, 278.8), float3(-0.4, 0.6, -0.7));
-	//mCamera->CreateLookAt(float3(-395.7, 839.9, 2061.9), float3(-395.4, 839.6, 2061.0), float3(0.1, 0.9, -0.4));
-	mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 8000.0f );
+	mCamera->CreateLookAt(float3(-137.0, 97.3, 82.0), float3(-136.5, 96.8, 81.3), float3(0.3, 0.9, -0.4));
+	mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 1000.0f );
 
 	mCameraControler = new RcEngine::Test::FPSCameraControler;
 	mCameraControler->AttachCamera(*mCamera);
-
-	std::cout << std::endl << std::endl;
-	
-	// Load Scene
-	Entity* sponzaEntity = sceneMan.CreateEntity("Tree", "Tree.mesh",  "Custom");
-	SceneNode* sponzaNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Tree");
-	sponzaNode->SetPosition(float3(0, 0, 0));
-	sponzaNode->AttachObject(sponzaEntity);
-	
-	// Load Skybox
-	shared_ptr<TextureResource> skyBox = resMan.GetResourceByName<TextureResource>(RT_Texture, "MeadowTrail.dds", "General");
-	sceneMan.CreateSkyBox(skyBox->GetTexture());
-
-
-	mCameraControler->SetMoveSpeed(400.0f);
+	mCameraControler->SetMoveSpeed(100.0f);
 	mCameraControler->SetMoveInertia(true);
 
 
-	mDirLight = sceneMan.CreateLight("Sun", LT_Directional);
-	mDirLight->SetDirection(float3(0, -1, -1));
-	mDirLight->SetLightColor(float3(1, 1, 1));
-	mDirLight->SetCastShadow(true);
-	mDirLight->SetShadowCascades(4);
-	sceneMan.GetRootSceneNode()->AttachObject(mDirLight);
-
-	mSpotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
-	mSpotLight->SetDirection(float3(0, -1.5, -1));
-	mSpotLight->SetLightColor(float3(1, 1, 0));
-	mSpotLight->SetRange(1500.0);
-	mSpotLight->SetPosition(float3(0.0f, 800.0f, 0.0f));
-	mSpotLight->SetAttenuation(1.0f, 0.0f);
-	mSpotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(40));
-	mSpotLight->SetCastShadow(true);
-	mSpotLight->SetSpotlightNearClip(100);
-	sceneMan.GetRootSceneNode()->AttachObject(mSpotLight);
-
-	mMaterial = std::static_pointer_cast<Material>(resMan.GetResourceByName(RT_Material, "LightShape.material.xml", "General"));
-	mMaterial->Load();
+	//mMaterial = std::static_pointer_cast<Material>(resMan.GetResourceByName(RT_Material, "LightShape.material.xml", "General"));	
+	//mMaterial = std::static_pointer_cast<Material>(resMan.GetResourceByName(RT_Material, "TangentFrame.material.xml", "General"));
+	//mMaterial->Load();
 
 	shared_ptr<Effect> shadowEffect = mDeferredPath->GetDeferredEffect();
 	shadowEffect->GetParameterByName("ShadowEnabled")->SetValue(true);
 	shadowEffect->GetParameterByName("VisiualizeCascades")->SetValue(false);
+
+	SetupScene();
+	SetupLights();
 }
 
 void RenderPathApp::Update( float deltaTime )
@@ -379,6 +257,46 @@ void RenderPathApp::Update( float deltaTime )
 void RenderPathApp::Render()
 {
 	mDeferredPath->RenderScene();
+
+	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
+
+	//std::vector<float4x4> matWorlds;
+	//for (uint32_t i = 0; i < mNanosuit->GetNumSubEntities(); ++i)
+	//{
+	//	SubEntity* subEnt = mNanosuit->GetSubEntity(i);
+	//	auto subEntRop = subEnt->GetRenderOperation();
+
+	//	RenderOperation pointsRop;
+	//	pointsRop.PrimitiveType = PT_Point_List;
+	//	pointsRop.BindVertexStream(subEntRop->GetStreamUnit(0).Stream, subEntRop->GetStreamUnit(0).VertexDecl);
+	//	
+	//	uint32_t vertexCount = subEntRop->GetStreamUnit(0).Stream->GetBufferSize() / subEntRop->GetStreamUnit(0).VertexDecl->GetVertexSize();
+	//	pointsRop.SetVertexRange(0, vertexCount);
+
+	//	uint32_t matCounts = subEnt->GetWorldTransformsCount();
+	//	matWorlds.resize(matCounts);
+	//	subEnt->GetWorldTransforms(&matWorlds[0]);
+
+	//	//Last matrix is world transform matrix, previous is skin matrices.
+	//	float4x4 world = matWorlds.back();
+
+	//	// Skin matrix
+	//	if (matCounts > 1)
+	//	{	
+	//		EffectParameter* skinMatricesParam = mMaterial->GetCustomParameter("SkinMatrices");
+	//		if (skinMatricesParam)
+	//		{
+	//			// delete last world matrix first
+	//			matWorlds.pop_back();
+	//			skinMatricesParam->SetValue(matWorlds);
+	//		}
+	//	}
+
+	//	mMaterial->ApplyMaterial(world);
+	//	device.Render(*mMaterial->GetCurrentTechnique(), pointsRop);
+	//}
+
+	device.GetScreenFrameBuffer()->SwapBuffers();
 }
 
 void RenderPathApp::CalculateFrameRate()
@@ -442,6 +360,16 @@ void RenderPathApp::DumpCameraBtnClicked()
 		fclose (pFile);
 	}
 }
+
+void RenderPathApp::WindowResize( uint32_t width, uint32_t height )
+{
+	// resize pipeline buffer
+	Camera& camera = *(Context::GetSingleton().GetRenderDevice().GetScreenFrameBuffer()->GetCamera());
+	camera.CreatePerspectiveFov(camera.GetFov(), (float)width/(float)height, camera.GetNearPlane(), camera.GetFarPlane());
+
+	mDeferredPath->OnWindowResize(width, height);
+}
+
 
 int main(int argc, char* argv[])
 {

@@ -1,24 +1,26 @@
-<?xml version="1.0" ?><Material name="column_a">
-	<Sampler name="LinearSampler">
-		<State name="Filter" value="Min_Mag_Mip_Linear"/>
-		<State name="AddressU" value="Wrap"/>
-		<State name="AddressV" value="Wrap"/>
-	</Sampler>
-	
-	<Sampler name="BNFSampler">
-		<State name="Filter" value="Min_Mag_Mip_Point"/>
-		<State name="AddressU" value="Clamp"/>
-		<State name="AddressV" value="Clamp"/>
-	</Sampler>
-	
-	<Parameter name="WorldView" semantic="WorldViewMatrix" type="float4x4"/>
-	<Parameter name="Proj" semantic="ProjectionMatrix" type="float4x4"/>
-	<Parameter name="DiffuseMap" sampler="LinearSampler" semantic="DiffuseMaterialMap" stage="PixelShader" texUnit="0" type="texture2d" value="sponza_column_a_diff.dds"/>
-	<Parameter name="NormalMap" sampler="LinearSampler" semantic="NormalMaterialMap" stage="PixelShader" texUnit="1" type="texture2d" value="sponza_column_a_ddn.dds"/> 
-	<Parameter name="BestNormalFitMap" sampler="BNFSampler" stage="PixelShader" texUnit="1" type="texture2d" value="BestFitNormal.dds"/>
-		
-	<Effect name="Model.effect.xml">
-		<Flag name="_NormalMapping"/> 
-	</Effect>
-	<Queue name="Opaque"/>
+<?xml version="1.0" encoding="utf-8"?>
+<Material>
+<Sampler name="BNFSampler">
+<State name="Filter" value="Min_Mag_Mip_Point"/>
+<State name="AddressU" value="Clamp"/>
+<State name="AddressV" value="Clamp"/>
+</Sampler>
+<Sampler name="LinearSampler">
+<State name="Filter" value="Min_Mag_Mip_Linear"/>
+<State name="AddressU" value="Wrap"/>
+<State name="AddressV" value="Wrap"/>
+</Sampler>
+<Parameter name="WorldView" semantic="WorldViewMatrix" type="float4x4"/>
+<Parameter name="Proj" semantic="ProjectionMatrix" type="float4x4"/>
+<Parameter name="DiffuseMap" sampler="LinearSampler" semantic="DiffuseMaterialMap" stage="PixelShader" texUnit="0" type="texture2d" value="sponza_column_a_diff.dds"/>
+<Parameter name="SpecularMap" sampler="LinearSampler" semantic="SpecularMaterialMap" stage="PixelShader" texUnit="1" type="texture2d" value="sponza_column_a_spec.dds"/>
+<Parameter name="Shininess" semantic="SpecularMaterialPower" type="float" value="2"/>
+<Parameter name="NormalMap" sampler="LinearSampler" semantic="NormalMaterialMap" stage="PixelShader" texUnit="2" type="texture2d" value="sponza_column_a_ddn.dds"/>
+<Parameter name="BestNormalFitMap" sampler="BNFSampler" stage="PixelShader" texUnit="3" type="texture2d" value="BestFitNormal.dds"/>
+<Effect name="Model.effect.xml">
+<Flag name="_DiffuseMap"/>
+<Flag name="_SpecularMap"/>
+<Flag name="_NormalMap"/>
+</Effect>
+<Queue name="Opaque"/>
 </Material>

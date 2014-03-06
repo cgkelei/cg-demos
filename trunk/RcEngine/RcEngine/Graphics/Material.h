@@ -41,9 +41,10 @@ public:
 	EffectParameter* GetCustomParameter(EffectParameterUsage usage) const;
 	EffectParameter* GetCustomParameter(const String& name) const;
 
-	void SetAmbientColor(const ColorRGBA& ambient)		{ mAmbient = ambient; }
-	void SetDiffuseColor(const ColorRGBA& diffuse)		{ mDiffuse = diffuse; }
-	void SetSpecularColor(const ColorRGBA& specular)	{ mSpecular = specular; }
+	void SetAmbientColor(const float3& ambient)		{ mAmbient = ambient; }
+	void SetDiffuseColor(const float3& diffuse)		{ mDiffuse = diffuse; }
+	void SetSpecularColor(const float3& specular)	{ mSpecular = specular; }
+	void SetSpecularPower(float power)				{ mPower = power; }
 
 	void SetTexture(const String& name, const shared_ptr<Texture>& texture);
 
@@ -68,10 +69,10 @@ protected:
 	unordered_map<String, TextureLayer> mTextures;			
 	vector<MaterialParameter*> mCachedEffectParams;
 
-	ColorRGBA mAmbient;
-	ColorRGBA mDiffuse;
-	ColorRGBA mSpecular;
-	ColorRGBA mEmissive;
+	float3 mAmbient;
+	float3 mDiffuse;
+	float3 mSpecular;
+	float3 mEmissive;
 	float mPower;
 
 	uint32_t mQueueBucket;

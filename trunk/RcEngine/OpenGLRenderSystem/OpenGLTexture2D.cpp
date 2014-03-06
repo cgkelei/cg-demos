@@ -39,7 +39,7 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 	
 	if (canUseRenderBuffer)
 	{
-		// Can't use as texture in GLSL, switch to render buffer, may get a speedup 
+		// Can't use as sampler in GLSL, switch to render buffer, may get a speedup 
 		GLenum internalFormat, externFormat, formatType;
 		OpenGLMapping::Mapping(internalFormat, externFormat, formatType, mFormat);
 

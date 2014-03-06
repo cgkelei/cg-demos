@@ -91,8 +91,6 @@ void main()
 	vec3 positionVS = PositionVSFromDepth(oViewRay, linearDepth);
 	
 	vec4 visibility = vec4(1.0);
-	
-	
 	if (ShadowEnabled)
 	{
 		vec4 posWS = vec4(positionVS, 1.0) * InvView;
@@ -105,15 +103,13 @@ void main()
 			visibility *= vCascadeColorsMultiplier[iCascadeSelected];
 	}
 	
-	vec3 L = normalize(-LightDirVS.xyz);
-	
 	// Fetch GBuffer
 	vec4 tap0 = texture2D(GBuffer0, oTex);
 				
-	// Decode view space normal
-	vec3 N = normalize(tap0.xyz * 2.0 - 1.0); 
-	float shininess = tap0.a * 255.0;
-	
+	float shininess = tap0.a * 255.0;  			// specular power
+	vec3 N = normalize(tap0.xyz * 2.0 - 1.0);   // view space normal
+	vec3 L = normalize(-LightDirVS.xyz);		// light vector
+		
 	float nDotl = dot(L, N);
 	if (nDotl > 0.0)
 	{
@@ -130,7 +126,6 @@ void main()
 		
 	oFragColor = final * visibility; 
 }	
-	
 	]]>
 	</ShaderSource>
 </Shader>	
@@ -215,16 +210,12 @@ void main()
 	</ShaderSource>
 </Shader>	
 
-
-
-
-
-<Shader name="DeferredLightingPS" stage="Pixel" entry="main">
+<Shader name="PointLightingPS" stage="Pixel" entry="main">
 	<Include name="DeferredReadUtill.include.xml"/>
 	<Include name="LightingUtil.include.xml"/>
 	<ShaderSource>
 	<![CDATA[
-	
+
 #version 330
 	
 uniform vec2 CameraNearFar;
@@ -237,46 +228,25 @@ uniform vec3 LightFalloff;
 uniform sampler2D GBuffer0;	
 uniform sampler2D DepthBuffer;	
   
-#if defined(DIRLIGHT)       
-in vec2 oTex;
-#elif defined(POINTLIGHT) || defined(SPOTLIGHT)   
 in vec3 oTex;
-#endif
-
 in vec3 oViewRay;
 
 out vec4 oFragColor;
 
-	
 void main()
 {
-  vec4 final = vec4(0.0);
+	vec4 final = vec4(0.0);
 
-#if defined(DIRLIGHT)
-	vec2 tex = oTex;
-#elif defined(POINTLIGHT) || defined(SPOTLIGHT)
 	vec2 tex = oTex.xy / oTex.z;
 	tex = tex * 0.5 + 0.5;
-#endif
-
+	
 	// Convert non-linear depth to view space linear depth
 	float linearDepth = LinearizeDepth( texture2D(DepthBuffer, tex).x, CameraNearFar.x, CameraNearFar.y );
 	// View space lit position
 	vec3 positionVS = PositionVSFromDepth(oViewRay, linearDepth);
-
-#ifdef SPOTLIGHT
-	float spot = SpotLighting(LightPosVS.xyz, LightDirVS.xyz, vec2(LightPosVS.w, LightDirVS.w), positionVS);
-	if(spot > 0.0)
-	{
-#endif
-		
-	// calculate  light vector
-#ifdef DIRLIGHT
-	vec3 L = normalize(-LightDirVS.xyz);
-#else
+	
 	vec3 L = normalize(LightPosVS.xyz - positionVS);
-#endif
-
+	
 	// Fetch GBuffer
 	vec4 tap0 = texture2D(GBuffer0, tex);
 
@@ -284,37 +254,23 @@ void main()
 	vec3 N = normalize(tap0.xyz * 2.0 - 1.0); 
 	float shininess = tap0.a * 255.0;
 	
-	float nDotl = dot(L, N);
-	if (nDotl > 0.0)
+	float NdotL = dot(L, N);
+	if (NdotL > 0.0)
 	{
 		vec3 V = normalize(-positionVS);
 		vec3 H = normalize(V + L);
 		
 		// calculate attenuation
-		float attenuation = 1.0;
-
-#ifdef POINTLIGHT
-		attenuation = CalcAttenuation(LightPosVS.xyz, positionVS, LightFalloff);
-#endif
-
-#ifdef SPOTLIGHT 
-		attenuation = spot * CalcAttenuation(LightPosVS.xyz, positionVS, LightFalloff);	
-#endif
+		float attenuation = CalcAttenuation(LightPosVS.xyz, positionVS, LightFalloff);
 		
-		vec3 diffuse = LightColor * nDotl * attenuation;
+		vec3 diffuseLight = LightColor * NdotL * attenuation;	
+		vec3 specularLight = CalculateSpecular(N, H, shininess) * diffuseLight; // Frensel in moved to calculate in shading pass
 		
-		// Frensel in moved to calculate in shading pass
-		vec3 specular = CalculateSpecular(N, H, shininess) * LightColor * nDotl * attenuation;
-		
-		final = vec4(diffuse, Luminance(specular));
+		final = vec4(diffuseLight, Luminance(specularLight));
 	}
-#ifdef SPOTLIGHT
-	}
-#endif
 		
 	oFragColor = final; 
 }	
-	
 	]]>
 	</ShaderSource>
 </Shader>	
@@ -470,9 +426,7 @@ void main()
 		<VertexShader name="DeferredLightingVS">
 			<Macro name="POINTLIGHT"/>
 		</VertexShader>
-		<PixelShader name="DeferredLightingPS">
-			<Macro name="POINTLIGHT"/>
-		</PixelShader>
+		<PixelShader name="PointLightingPS"/>
 		<State name="DepthEnable" value="false"/>
 		<State name="DepthWriteMask" value="false"/>
 		<State name="DepthFunc" value="LessEqual"/>
