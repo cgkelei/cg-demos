@@ -1,0 +1,19 @@
+<Effect name="DefferedReadUtil">
+<ShaderSource>
+	<![CDATA[
+	
+float LinearizeDepth(in float nonLinearDepth, in float nearPlane, in float farPlane)
+{	
+	return nearPlane * farPlane / (farPlane - (farPlane - nearPlane) * nonLinearDepth);
+}
+	
+vec3 PositionVSFromDepth(in vec3 viewRay, in float linearDepth)
+{
+    // Clamp the view space position to the plane at Z = 1
+	return viewRay * (linearDepth / viewRay.z);
+}
+
+	]]>
+</ShaderSource>
+
+</Effect>

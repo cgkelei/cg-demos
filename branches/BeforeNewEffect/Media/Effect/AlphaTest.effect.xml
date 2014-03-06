@@ -1,0 +1,333 @@
+<Effect name="AlphaTestModelEffect">
+
+<Shader name="ShadowMapVS" stage="Vertex" entry="main">
+	<ShaderSource>
+	<![CDATA[	
+#version 330
+	
+uniform mat4 WorldView;
+uniform mat4 Proj;
+
+// shader input
+layout (location = 0) in vec3 iPos;
+layout (location = 2) in vec2 iTex;    // Need to varying texcoord, if normal attribute not used, it will ignore by compiler, make vertex shader input wrong
+
+#ifdef _NormalMap
+	in vec3 iTangent;
+	in vec3 iBinormal;
+#endif
+
+out vec2 oTex;
+out float oDepth;
+
+void main()
+{
+	gl_Position = vec4(iPos, 1.0) * WorldView * Proj;
+	oTex = vec2(iTex.x, 1.0-iTex.y);
+	oDepth = gl_Position.z * 0.5 + 0.5;
+}	
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Shader name="ShadowMapPS" stage="Pixel" entry="main">
+	<ShaderSource>
+	<![CDATA[
+#version 330	
+
+uniform sampler2D DiffuseMap;
+
+in vec2 oTex;
+in float oDepth;
+
+// Standard Shadow Maps
+#if defined(SSM)
+out float oFragDepth;
+#endif
+
+// Variance Shadow Maps
+#ifdef VSM
+out vec2 oFragDepth;
+#endif 
+
+// Exponential Variance Shadow Maps
+#ifdef EVSM
+uniform vec2 EVSMConst;
+out vec4 oFragDepth;
+#endif 
+
+// Exponential Shadow Maps
+#ifdef ESM
+uniform vec2 ESMConst;
+out float oFragDepth;
+#endif 
+
+void main()
+{
+	float alpha =  texture2D(DiffuseMap, oTex).a;
+	if( alpha < 0.01 ) discard;
+
+#ifdef VSM
+	oFragDepth.x = oDepth;
+	oFragDepth.y = oDepth * oDepth;
+	
+	//vec2 dxdy = vec2(dFdx(oDepth), dFdy(oDepth));
+	//oFragDepth.y = oDepth * oDepth + 0.25 * dot(dxdy, dxdy);
+#endif 
+
+#ifdef EVSM
+	float posDepth = exp(EVSMConst.x * oDepth);
+	float negDepth = -exp(-EVSMConst.y * oDepth);
+
+	oFragDepth = vec4(posDepth, posDepth * posDepth, negDepth, negDepth * negDepth);
+#endif 
+
+#ifdef ESM
+	oFragDepth =  exp(ESMConst.x * oDepth);
+#endif 
+}
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Shader name="StandardShadowMapPS" stage="Pixel" entry="main">
+	<ShaderSource>
+	<![CDATA[
+#version 330	
+
+uniform sampler2D DiffuseMap;
+
+in vec2 oTex;
+in float oDepth;
+
+void main()
+{
+	float alpha =  texture2D(DiffuseMap, oTex).a;
+	if( alpha < 0.01 ) discard;
+	
+	gl_FragDepth = gl_FragCoord.z;
+}
+	]]>
+	</ShaderSource>
+</Shader>
+
+
+<Shader name="GeneralVS" stage="Vertex" entry="main">
+	<ShaderSource>
+	<![CDATA[
+#version 330
+
+uniform mat4 WorldView;
+uniform mat4 Proj;
+
+// shader input
+in vec3 iPos;
+in vec3 iNormal;
+in vec2 iTex;
+
+#ifdef _NormalMap
+	in vec3 iTangent;
+	in vec3 iBinormal;
+#endif
+
+// shader out put
+out vec4 oPosVS;
+out vec2 oTex;
+
+#ifdef _NormalMap
+	out mat3 oTangentToView;
+#else
+	out vec3 oNormalVS;
+#endif
+
+void main()
+{
+	oPosVS = vec4(iPos, 1.0) * WorldView;
+	vec3 normal = normalize(iNormal * mat3(WorldView));
+	
+	// calculate tangent and binormal.
+#ifdef _NormalMap
+	vec3 tangent = normalize(iTangent * mat3(WorldView));
+	vec3 binormal = normalize(iBinormal * mat3(WorldView));
+
+	// actualy this is a world to tangent matrix, because we always use V * Mat.
+	oTangentToView = mat3( tangent, binormal, normal);
+
+	// transpose to get tangent to world matrix
+	oTangentToView = transpose(oTangentToView);
+#else
+	oNormalVS = normal;
+#endif
+	
+	oTex = vec2(iTex.x, 1.0 - iTex.y);
+
+	gl_Position = oPosVS * Proj;
+}
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Shader name="GBufferPS" stage="Pixel" entry="main">
+	<Include name="MaterialInput.include.xml"/>
+	<ShaderSource>
+	<![CDATA[
+
+#version 330
+	
+uniform sampler2D BestNormalFitMap;
+
+// shader input
+in vec4 oPosVS;
+in vec2 oTex;
+
+#ifdef _NormalMap
+	in mat3 oTangentToView;
+#else
+	in vec3 oNormalVS;
+#endif
+
+// shader output
+out vec4 FragColor0; // Normal + shininess
+out vec4 FragColor1; // Diffuse + Specular
+
+void CompressUnsignedNormalToNormalsBuffer(inout vec3 vNormal)
+{
+  // renormalize (needed if any blending or interpolation happened before)
+  vNormal.rgb = normalize(vNormal.rgb);
+  // get unsigned normal for cubemap lookup (note the full float precision is required)
+  vec3 vNormalUns = abs(vNormal.rgb);
+  // get the main axis for cubemap lookup
+  float maxNAbs = max(vNormalUns.z, max(vNormalUns.x, vNormalUns.y));
+  // get texture coordinates in a collapsed cubemap
+  vec2 vTexCoord = vNormalUns.z<maxNAbs?(vNormalUns.y<maxNAbs?vNormalUns.yz:vNormalUns.xz):vNormalUns.xy;
+  vTexCoord = vTexCoord.x < vTexCoord.y ? vTexCoord.yx : vTexCoord.xy;
+  vTexCoord.y /= vTexCoord.x;
+  
+#ifndef Direct3D	
+	vTexCoord.y = 1.0 - vTexCoord.y;
+#endif
+  
+  // fit normal into the edge of unit cube
+  vNormal.rgb /= maxNAbs;
+  // look-up fitting length and scale the normal to get the best fit
+  float fFittingScale = texture2D(BestNormalFitMap, vTexCoord).a;
+  // scale the normal to get the best fit
+  vNormal.rgb *= fFittingScale;
+  // squeeze back to unsigned
+  vNormal.rgb = vNormal.rgb * .5 + .5;
+}
+
+ float Luminance(vec3 color)
+ {
+	return dot(color, vec3(0.2126, 0.7152, 0.0722));
+ }
+
+void main() 
+{	
+	// diffuse material
+#ifdef _DiffuseMap
+	vec4 diffuseTap = texture2D(DiffuseMap, oTex);
+	vec3 albedo = diffuseTap.rgb;
+	#ifdef _AlphaTest
+		if( diffuseTap.a < 0.01 ) discard;
+	#endif	
+#else
+	vec3 albedo = DiffuseColor;
+#endif
+
+	// specular material
+#ifdef _SpecularMap
+	vec4 specularTap = texture2D(SpecularMap, oTex);
+	vec3 specular = specularTap.rgb;
+	#ifdef _GlossyMap
+		float shininess = specularTap.a;
+	#else 
+		float shininess = Shininess / 255.0;
+	#endif
+#else
+	vec3 specular = SpecularColor;
+	float shininess = Shininess / 255.0;
+#endif
+	
+	// normal map
+#ifdef _NormalMap
+	vec3 normal = texture2D( NormalMap, oTex ).rgb * 2.0 - 1.0;
+	normal = normalize(normal * oTangentToView);
+#else
+	vec3 normal = normalize(oNormalVS);
+#endif	
+	
+	//normal = normal * 0.5 + 0.5;
+	CompressUnsignedNormalToNormalsBuffer(normal);	
+	
+	FragColor0 = vec4(normal.xyz, shininess);
+	FragColor1 = vec4(albedo.rgb, Luminance(specular));	 // Specular luminance
+}
+	]]>
+	</ShaderSource>
+</Shader>
+	
+
+<Technique name="VSM">
+	<Pass name="p0">
+		<VertexShader name="ShadowMapVS"/>
+		<PixelShader name="ShadowMapPS">
+			<Macro name="VSM"/>
+		</PixelShader>
+		<state name="CullMode" value="None"/>
+	</Pass>
+</Technique>
+
+<!-- pission disc PCF-->
+<Technique name="PCF">
+	<Pass name="p0">
+		<VertexShader name="ShadowMapVS"/>
+		<PixelShader name="StandardShadowMapPS"/>
+		<state name="CullMode" value="None"/>
+	</Pass>
+</Technique>
+
+<!--
+<Technique name="EVSM">
+	<Pass name="p0">
+		<VertexShader name="ShadowMapVS"/>
+		<PixelShader name="ShadowMapPS">
+			<Macro name="EVSM"/>
+		</PixelShader>
+		<state name="CullMode" value="None"/>
+	</Pass>
+</Technique>
+
+<Technique name="ESM">
+	<Pass name="p0">
+		<VertexShader name="ShadowMapVS"/>
+		<PixelShader name="ShadowMapPS">
+			<Macro name="ESM"/>
+		</PixelShader>
+		<state name="CullMode" value="None"/>
+	</Pass>
+</Technique>
+-->
+
+<Technique name="GBuffer">
+	<Pass name="p0">
+		<VertexShader name="GeneralVS"/>
+		<PixelShader name="GBufferPS"/>
+		<state name="CullMode" value="None"/>
+		<State name="StencilEnable" value="true"/>
+		<State name="FrontStencilRef" value="1"/>
+		<State name="FrontStencilFunc" value="Always"/>
+		<State name="FrontStencilFailOp" value="Keep"/>
+		<State name="FrontStencilDepthFailOp" value="Keep"/>
+		<State name="FrontStencilPassOp" value="Replace"/>
+		<State name="BackStencilRef" value="1"/>
+		<State name="BackStencilFunc" value="Always"/>
+		<State name="BackStencilFailOp" value="Keep"/>
+		<State name="BackStencilDepthFailOp" value="Keep"/>
+		<State name="BackStencilPassOp" value="Replace"/>
+	</Pass>
+</Technique>
+
+</Effect>
+	
+	

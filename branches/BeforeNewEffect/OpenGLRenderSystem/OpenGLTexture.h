@@ -1,0 +1,134 @@
+#ifndef OpenGLTexture_h__
+#define OpenGLTexture_h__
+
+#include "OpenGLPrerequisites.h"
+#include "OpenGLGraphicCommon.h"
+#include <Graphics/Texture.h>
+#include <math.h>
+
+namespace RcEngine {
+
+class _OpenGLExport OpenGLTexture : public Texture
+{
+public:
+	OpenGLTexture(TextureType type, PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint );
+	virtual ~OpenGLTexture(void);
+
+	GLuint GetOpenGLTexture() const			{ return mTextureID; }
+	GLenum GetOpenGLTextureTarget() const	{ return mTextureTarget; }
+	bool   RenderBufferHint() const			{ return mRenderBufferHint; }
+
+	virtual void Map1D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+		uint32_t xOffset, uint32_t width, void*& data);
+
+	virtual void Map2D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
+		void*& data, uint32_t& rowPitch);
+
+	virtual void Map3D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+		uint32_t xOffset, uint32_t yOffset, uint32_t zOffset,
+		uint32_t width, uint32_t height, uint32_t depth,
+		void*& data, uint32_t& rowPitch, uint32_t& slicePitch);
+
+	virtual void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, TextureMapAccess tma,
+		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
+		void*& data, uint32_t& rowPitch);
+
+	virtual void Unmap1D(uint32_t arrayIndex, uint32_t level);
+	virtual void Unmap2D(uint32_t arrayIndex, uint32_t level);
+	virtual void Unmap3D(uint32_t arrayIndex, uint32_t level);
+	virtual void UnmapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level);
+
+	virtual void BuildMipMap();
+	virtual void CopyToTexture(Texture& destTexture);
+
+protected:
+	GLuint mTextureID;
+	GLenum mTextureTarget;
+	TextureMapAccess mTextureMapAccess;
+
+	bool mRenderBufferHint;
+
+	GLuint mPixelBufferID;
+	std::vector<unsigned char> mTextureData;
+};
+
+//////////////////////////////////////////////////////////////////////////
+class _OpenGLExport OpenGLTexture1D : public OpenGLTexture
+{
+public:
+	OpenGLTexture1D(PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width,
+		uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData);
+
+	~OpenGLTexture1D();
+
+	virtual void Map1D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+		uint32_t xOffset, uint32_t width, void*& data);
+
+	virtual void Unmap1D(uint32_t arrayIndex, uint32_t level);
+};
+
+
+//////////////////////////////////////////////////////////////////////////
+class _OpenGLExport OpenGLTexture2D : public OpenGLTexture
+{
+public:
+	OpenGLTexture2D(PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width,
+		uint32_t height, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData);
+
+	~OpenGLTexture2D();
+
+	virtual void Map2D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
+		void*& data, uint32_t& rowPitch);
+
+	virtual void Unmap2D(uint32_t arrayIndex, uint32_t level);
+
+	virtual void CopyToTexture(Texture& destTexture);
+
+private:
+	// use texture storage if supported
+	void CreateWithImmutableStorage(ElementInitData* initData);
+	void CreateWithMutableStorage(ElementInitData* initData);
+};
+
+//////////////////////////////////////////////////////////////////////////
+class _OpenGLExport OpenGLTexture3D : public OpenGLTexture
+{
+public:
+	OpenGLTexture3D(PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width,
+		uint32_t height, uint32_t depth, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData);
+	~OpenGLTexture3D();
+
+	virtual void Map3D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+		uint32_t xOffset, uint32_t yOffset, uint32_t zOffset,
+		uint32_t width, uint32_t height, uint32_t depth,
+		void*& data, uint32_t& rowPitch, uint32_t& slicePitch);
+
+	virtual void Unmap3D(uint32_t arrayIndex, uint32_t level);
+};
+
+//////////////////////////////////////////////////////////////////////////
+class _OpenGLExport OpenGLTextureCube : public OpenGLTexture
+{
+public:
+	OpenGLTextureCube(PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width,
+		uint32_t height, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData);
+
+	~OpenGLTextureCube();
+
+	virtual void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, TextureMapAccess tma,
+		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
+		void*& data, uint32_t& rowPitch);
+
+	virtual void UnmapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level);
+
+private:
+	// use texture storage if supported
+	void CreateWithImmutableStorage(ElementInitData* initData);
+	void CreateWithMutableStorage(ElementInitData* initData);
+};
+
+}
+
+#endif // OpenGLTexture_h__
