@@ -530,51 +530,63 @@ Effect::~Effect()
 	mTechniques.clear();
 }
 
-EffectTechnique* Effect::GetTechniqueByName(const String& techName)
-{
-	auto found = std::find_if(mTechniques.begin(), mTechniques.end(), 
-		[&techName](EffectTechnique* param) { return param->GetTechniqueName() == techName; });
-
-	if (found != mTechniques.end())
-	{
-		return *found;
-	}
-
-	return nullptr;
-}
-
-EffectTechnique* Effect::GetTechniqueByIndex(uint32_t index)
+EffectTechnique* Effect::GetTechniqueByIndex( uint32_t index ) const
 {
 	assert(index >=0 && index < mTechniques.size());
 	return mTechniques[index];
 }
 
+EffectTechnique* Effect::GetTechniqueByName( const String& techName ) const
+{
+	for (EffectTechnique* technique : mTechniques)
+	{
+		if (technique->mName == techName)
+			return technique;
+	}
+
+	return nullptr;
+}
+
 EffectParameter* Effect::GetParameterByName( const String& paraName ) const
 {
-	auto found = mParameters.find(paraName);
+	std::map<String, EffectParameter*>::const_iterator it = mParameters.find(paraName);
 
-	if (found != mParameters.end())
-	{
-		return found->second;
-	}
+	if (it != mParameters.end())
+		return it->second;
 
 	return nullptr;
 }
 
 EffectParameter* Effect::FetchShaderParameter(const String& name, EffectParameterType type, bool array)
 {
-	EffectParameter* effectParam;
-	auto found = mParameters.find(name);
-	if (found != mParameters.end())
+	std::map<String, EffectParameter*>::const_iterator it = mParameters.find(name);
+
+	EffectParameter* retVal;
+
+	if (it == mParameters.end())
 	{
-		effectParam = found->second;
+		retVal = CreateEffectParameter(name, type, array);
+		mParameters.insert(std::make_pair(name, retVal));
 	}
-	else
+	else 
+		retVal = it->second;
+
+	return retVal;
+}
+
+EffectConstantBuffer* Effect::FetchConstantBuffer( const String& name, uint32_t bufferSize )
+{
+	for (EffectConstantBuffer* cbuffer : mConstantBuffers)
 	{
-		effectParam = CreateEffectParameter(name, type, array);
-		mParameters.insert(std::make_pair(name, effectParam));
+		if (cbuffer->GetCBufferName() == name && cbuffer->GetBufferSize() == bufferSize)
+			return cbuffer;
 	}
-	return effectParam;
+
+	// Create new constant buffer
+	EffectConstantBuffer* cbuffer = new EffectConstantBuffer(name, bufferSize);
+	mConstantBuffers.push_back(cbuffer);
+
+	return cbuffer;
 }
 
 
@@ -832,11 +844,8 @@ void Effect::SetCurrentTechnique( uint32_t index )
 	}	
 }
 
-void Effect::MakeEffectParameterDirty()
-{
-	for (auto& kv : mParameters)
-		kv.second->MakeDirty();
-}
+
+
 
 
 } // Namespace RcEngine

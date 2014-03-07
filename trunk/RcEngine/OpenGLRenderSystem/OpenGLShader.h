@@ -4,7 +4,6 @@
 #include "OpenGLPrerequisites.h"
 #include <Graphics/Shader.h>
 
-
 namespace RcEngine {
 
 class _OpenGLExport OpenGLShader : public Shader
@@ -21,7 +20,6 @@ public:
 
 private:
 	GLuint mOGLShaderObject;
-
 };
 
 }

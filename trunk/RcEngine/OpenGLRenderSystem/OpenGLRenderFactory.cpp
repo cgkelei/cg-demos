@@ -157,6 +157,11 @@ shared_ptr<GraphicsBuffer> OpenGLRenderFactory::CreateIndexBuffer( BufferUsage u
 	return std::make_shared<OpenGLGraphicsBuffer>(usage, accessHint, GL_ELEMENT_ARRAY_BUFFER, initData);
 }
 
+shared_ptr<GraphicsBuffer> OpenGLRenderFactory::CreateConstantBuffer( BufferUsage usage, uint32_t accessHint, ElementInitData* initData )
+{
+	return std::make_shared<OpenGLGraphicsBuffer>(usage, accessHint, GL_UNIFORM_BUFFER, initData);
+}
+
 shared_ptr<DepthStencilState> OpenGLRenderFactory::CreateDepthStencilStateImpl( const DepthStencilStateDesc& desc )
 {
 	return std::make_shared<DepthStencilState>(desc);

@@ -3,6 +3,7 @@
 #include "OpenGLShader.h"
 #include "OpenGLTexture.h"
 #include "OpenGLSamplerState.h"
+#include "OpenGLGraphicBuffer.h"
 #include <Graphics/Effect.h>
 #include <Graphics/EffectParameter.h>
 #include <Graphics/RenderDevice.h>
@@ -19,20 +20,22 @@ struct ShaderParameterSetHelper<bool>
 {
 public:
 	ShaderParameterSetHelper(GLint location, EffectParameter* param)
-		: Location(location), Param(param) {}
+		: Location(location), Param(param), UpdateTimeStamp(0) {}
 
 	void operator() ()
 	{
-		if (Param->Dirty())
+		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
-			bool value; Param->GetValue(value);
-			glUniform1ui(Location, value);
-			Param->ClearDirty();
+			UpdateTimeStamp = Param->GetTimeStamp();
+
+			bool value;  Param->GetValue(value);
+			glUniform1i(Location, value);
 		} 
 	}
 
 private:
 	GLint Location;
+	TimeStamp UpdateTimeStamp;
 	EffectParameter* Param;
 };
 
@@ -40,26 +43,30 @@ template<>
 struct ShaderParameterSetHelper<bool*>
 {
 public:
-	ShaderParameterSetHelper(GLint location, EffectParameter* param)
-		: Location(Location), Param(param) {}
+	ShaderParameterSetHelper(GLint location, EffectParameter* param, GLsizei count)
+		: Location(Location), Param(param), UpdateTimeStamp(0), Count(count) {}
 
 	void operator() ()
 	{
-		if (Param->Dirty())
+		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
+			UpdateTimeStamp = Param->GetTimeStamp();
+
 			vector<bool> value; Param->GetValue(value);
 			if (!value.empty())
 			{
+				assert(Count == value.size());
+
 				vector<int32_t> tem(value.begin(), value.end());
 				glUniform1iv(Location, tem.size(), &tem[0]);
 			}
-			Param->ClearDirty();
-		}
-
+		} 
 	}
 
 private:
 	GLint Location;
+	GLsizei Count;
+	TimeStamp UpdateTimeStamp;
 	EffectParameter* Param;
 };
 
@@ -68,20 +75,22 @@ struct ShaderParameterSetHelper<int32_t>
 {
 public:
 	ShaderParameterSetHelper(GLint location, EffectParameter* param)
-		: Location(location), Param(param) { }
+		: Location(location), Param(param), UpdateTimeStamp(0)  { }
 
 	void operator() ()
 	{
-		if (Param->Dirty())
+		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
-			int32_t value; Param->GetValue(value);
+			UpdateTimeStamp = Param->GetTimeStamp();
+
+			bool value;  Param->GetValue(value);
 			glUniform1i(Location, value);
-			Param->ClearDirty();
 		}
 	}
 
 private:
 	GLint Location;
+	TimeStamp UpdateTimeStamp;
 	EffectParameter* Param;
 };
 
@@ -89,21 +98,27 @@ template <>
 struct ShaderParameterSetHelper<int32_t*>
 {
 public:
-	ShaderParameterSetHelper(GLint location, EffectParameter* param)
-		: Location(location), Param(param) { }
+	ShaderParameterSetHelper(GLint location, EffectParameter* param, GLsizei count)
+		: Location(location), Param(param), Count(count), UpdateTimeStamp(0) { }
 
 	void operator() ()
 	{
-		if (Param->Dirty())
+		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
-			vector<int32_t> value; Param->GetValue(value);
+			vector<int32_t> value; 
+			Param->GetValue(value);
+			
+			assert(Count == value.size());
 			glUniform1iv(Location, value.size(), &value[0]);
-			Param->ClearDirty();
+
+			UpdateTimeStamp = Param->GetTimeStamp();
 		}
 	}
 
 private:
 	GLint Location;
+	GLsizei Count;
+	TimeStamp UpdateTimeStamp;
 	EffectParameter* Param;
 };
 
@@ -112,20 +127,22 @@ struct ShaderParameterSetHelper<float>
 {
 public:
 	ShaderParameterSetHelper(GLint location, EffectParameter* param)
-		: Location(location), Param(param) { }
+		: Location(location), Param(param), UpdateTimeStamp(0) { }
 
 	void operator() ()
 	{
-		if (Param->Dirty())
+		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
 			float value; Param->GetValue(value);
 			glUniform1f(Location, value);
-			Param->ClearDirty();
+
+			UpdateTimeStamp = Param->GetTimeStamp();
 		}
 	}
 
 private:
 	GLint Location;
+	TimeStamp UpdateTimeStamp;
 	EffectParameter* Param;
 };
 
@@ -133,21 +150,27 @@ template <>
 struct ShaderParameterSetHelper<float*>
 {
 public:
-	ShaderParameterSetHelper(GLint location, EffectParameter* param)
-		: Location(location), Param(param) { }
+	ShaderParameterSetHelper(GLint location, EffectParameter* param, GLsizei count)
+		: Location(location), Param(param), UpdateTimeStamp(0), Count(count) { }
 
 	void operator() ()
 	{
-		if (Param->Dirty())
+		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
-			vector<float> value; Param->GetValue(value);
+			vector<float> value; 
+			Param->GetValue(value);
+
+			assert(value.size() == Count);
 			glUniform1fv(Location, value.size(), &value[0]);
-			Param->ClearDirty();
+			
+			UpdateTimeStamp = Param->GetTimeStamp();
 		}
 	}
 
 private:
 	GLint Location;
+	GLsizei Count;
+	TimeStamp UpdateTimeStamp;
 	EffectParameter* Param;
 };
 
@@ -156,20 +179,22 @@ struct ShaderParameterSetHelper<float2>
 {
 public:
 	ShaderParameterSetHelper(GLint location, EffectParameter* param)
-		: Location(location), Param(param) { }
+		: Location(location), Param(param), UpdateTimeStamp(0) { }
 
 	void operator() ()
 	{
-		if (Param->Dirty())
+		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
 			float2 value; Param->GetValue(value);
 			glUniform2f(Location, value.X(), value.Y());
-			Param->ClearDirty();
+			
+			UpdateTimeStamp = Param->GetTimeStamp();
 		}
 	}
 
 private:
 	GLint Location;
+	TimeStamp UpdateTimeStamp;
 	EffectParameter* Param;
 };
 
@@ -177,25 +202,28 @@ template <>
 struct ShaderParameterSetHelper<float2*>
 {
 public:
-	ShaderParameterSetHelper(GLint location, EffectParameter* param)
-		: Location(location), Param(param) { }
+	ShaderParameterSetHelper(GLint location, EffectParameter* param, GLsizei count)
+		: Location(location), Param(param), UpdateTimeStamp(0), Count(count) { }
 
 	void operator() ()
 	{
-		if (Param->Dirty())
+		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
 			vector<float2> value; Param->GetValue(value);
 			if (!value.empty())
 			{
-				glUniform2fv(Location, value.size(), 
-					reinterpret_cast<float*>(&value[0][0]));
+				assert(value.size() == Count);
+				glUniform2fv(Location, value.size(),  reinterpret_cast<float*>(&value[0][0]));
 			}
-			Param->ClearDirty();
+
+			UpdateTimeStamp = Param->GetTimeStamp();
 		}
 	}
 
 private:
 	GLint Location;
+	GLsizei Count;
+	TimeStamp UpdateTimeStamp;
 	EffectParameter* Param;
 };
 
@@ -204,20 +232,22 @@ struct ShaderParameterSetHelper<float3>
 {
 public:
 	ShaderParameterSetHelper(GLint location, EffectParameter* param)
-		: Location(location), Param(param) { }
+		: Location(location), Param(param), UpdateTimeStamp(0) { }
 
 	void operator() ()
 	{
-		if (Param->Dirty())
+		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
 			float3 value; Param->GetValue(value);
 			glUniform3f(Location, value[0], value[1], value[2]);
-			Param->ClearDirty();
+
+			UpdateTimeStamp = Param->GetTimeStamp();
 		}
 	}
 
 private:
 	GLint Location;
+	TimeStamp UpdateTimeStamp;
 	EffectParameter* Param;
 };
 
@@ -225,25 +255,28 @@ template <>
 struct ShaderParameterSetHelper<float3*>
 {
 public:
-	ShaderParameterSetHelper(GLint location, EffectParameter* param)
-		: Location(location), Param(param) { }
+	ShaderParameterSetHelper(GLint location, EffectParameter* param, GLsizei count)
+		: Location(location), Param(param), UpdateTimeStamp(0), Count(count) { }
 
 	void operator() ()
 	{
-		if (Param->Dirty())
+		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
 			vector<float3> value; Param->GetValue(value);
 			if (!value.empty())
 			{
-				glUniform3fv(Location, value.size(), 
-					reinterpret_cast<float*>(&value[0][0]));
+				assert(value.size() == Count);
+				glUniform3fv(Location, value.size(),  reinterpret_cast<float*>(&value[0][0]));
 			}
-			Param->ClearDirty();
+
+			UpdateTimeStamp = Param->GetTimeStamp();
 		}
 	}
 
 private:
 	GLint Location;
+	GLsizei Count;
+	TimeStamp UpdateTimeStamp;
 	EffectParameter* Param;
 };
 
@@ -252,20 +285,22 @@ struct ShaderParameterSetHelper<float4>
 {
 public:
 	ShaderParameterSetHelper(GLint location, EffectParameter* param)
-		: Location(location), Param(param) { }
+		: Location(location), Param(param), UpdateTimeStamp(0) { }
 
 	void operator() ()
 	{
-		if (Param->Dirty())
+		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
 			float4 value; Param->GetValue(value);
 			glUniform4f(Location, value[0], value[1], value[2], value[3]);
-			Param->ClearDirty();
+
+			UpdateTimeStamp = Param->GetTimeStamp();
 		}
 	}
 
 private:
 	GLint Location;
+	TimeStamp UpdateTimeStamp;
 	EffectParameter* Param;
 };
 
@@ -273,25 +308,28 @@ template <>
 struct ShaderParameterSetHelper<float4*>
 {
 public:
-	ShaderParameterSetHelper(GLint location, EffectParameter* param)
-		: Location(location), Param(param) { }
+	ShaderParameterSetHelper(GLint location, EffectParameter* param, GLsizei count)
+		: Location(location), Param(param), UpdateTimeStamp(0), Count(count) { }
 
 	void operator() ()
 	{
-		if (Param->Dirty())
+		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
 			vector<float4> value; Param->GetValue(value);
 			if (!value.empty())
 			{
-				glUniform4fv(Location, value.size(), 
-					reinterpret_cast<float*>(&value[0][0]));
+				assert(value.size() == Count);
+				glUniform4fv(Location, value.size(), reinterpret_cast<float*>(&value[0][0]));
 			}
-			Param->ClearDirty();
+
+			UpdateTimeStamp = Param->GetTimeStamp();
 		}
 	}
 
 private:
 	GLint Location;
+	GLsizei Count;
+	TimeStamp UpdateTimeStamp;
 	EffectParameter* Param;
 };
 
@@ -301,22 +339,23 @@ struct ShaderParameterSetHelper<float4x4>
 {
 public:
 	ShaderParameterSetHelper(GLint location, EffectParameter* param)
-		: Location(location), Param(param) { }
+		: Location(location), Param(param), UpdateTimeStamp(0) { }
 
 	void operator() ()
 	{
-		if (Param->Dirty())
+		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
-			float4x4 value; Param->GetValue(value);
+			float4x4 value; 
+			Param->GetValue(value);
 
 			// we know that glsl matrix is column major, so we need transpose out matrix.
 			glUniformMatrix4fv(Location, 1, true, &value[0]);
-			Param->ClearDirty();
 		}
 	}
 
 private:
 	GLint Location;
+	TimeStamp UpdateTimeStamp;
 	EffectParameter* Param;
 };
 
@@ -324,25 +363,26 @@ template <>
 struct ShaderParameterSetHelper<float4x4*>
 {
 public:
-	ShaderParameterSetHelper(GLint location, EffectParameter* param)
-		: Location(location), Param(param) { }
+	ShaderParameterSetHelper(GLint location, EffectParameter* param, GLsizei count)
+		: Location(location), Param(param), UpdateTimeStamp(0), Count(count) { }
 
 	void operator() ()
 	{
-		if (Param->Dirty())
+		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
 			vector<float4x4> value; Param->GetValue(value);
+			Param->GetValue(value);
 			if (!value.empty())
 			{
-				glUniformMatrix4fv(Location, value.size(), true,
-					reinterpret_cast<float*>(&value[0][0]));
+				glUniformMatrix4fv(Location, value.size(), true, reinterpret_cast<float*>(&value[0][0]));
 			}
-			Param->ClearDirty();
-		}	
+		}
 	}
 
 private:
 	GLint Location;
+	GLsizei Count;
+	TimeStamp UpdateTimeStamp;
 	EffectParameter* Param;
 };
 
@@ -352,7 +392,7 @@ struct ShaderParameterSetHelper< TextureLayer >
 {
 public:
 	ShaderParameterSetHelper(GLint location, EffectParameter* param)
-		: Location(location), Param(param) { }
+		: Location(location), Param(param), UpdateTimeStamp(0) { }
 
 	void operator() ()
 	{
@@ -361,24 +401,49 @@ public:
 
 		if (textureOGL)
 		{
-			if (Param->Dirty())
-			{	
+			if (Param->GetTimeStamp() != UpdateTimeStamp)
+			{
 				RenderDevice& device = Context::GetSingleton().GetRenderDevice();
 				device.SetSamplerState(textureLayer.Stage, textureLayer.TexUnit, textureLayer.Sampler);
 
-				Param->ClearDirty();
+				UpdateTimeStamp = Param->GetTimeStamp();
 			}
 
 			glActiveTexture(GL_TEXTURE0+textureLayer.TexUnit);
 			glBindTexture(textureOGL->GetOpenGLTextureTarget(), textureOGL->GetOpenGLTexture());
-			glUniform1i(Location, textureLayer.TexUnit);		
+			glUniform1i(Location, textureLayer.TexUnit);				
 		}
 	}
 
 private:
 	GLint Location;
+	TimeStamp UpdateTimeStamp;
 	EffectParameter* Param;
 };
+
+
+template<>
+struct ShaderParameterSetHelper< EffectConstantBuffer >
+{
+public:
+	ShaderParameterSetHelper(GLuint bindingSlot, EffectConstantBuffer* param)
+		: BindingSlot(bindingSlot), UniformBlock(param) { }
+
+	void operator() ()
+	{
+		// Update uniform buffer if changed
+		UniformBlock->UpdateBuffer();
+
+		shared_ptr<OpenGLGraphicsBuffer> uniformBuffer = std::static_pointer_cast<OpenGLGraphicsBuffer>(UniformBlock->GetBuffer()); 
+		glBindBufferBase(GL_ACTIVE_UNIFORM_BLOCKS, BindingSlot, uniformBuffer->GetBufferID());
+	}
+
+private:
+	GLuint BindingSlot;
+	EffectConstantBuffer* UniformBlock;
+};
+
+
 
 //////////////////////////////////////////////////////////////////////////
 OpenGLShaderProgram::OpenGLShaderProgram(Effect& effect)
@@ -395,9 +460,9 @@ void OpenGLShaderProgram::Bind()
 {
 	glUseProgram(mOGLProgramObject);
 
-	for (ParameterBind& paramBind : mParameterBinds)
+	for (auto& paramBindFunc : mParameterBinds)
 	{
-		paramBind.ShaderParamSetFunc();
+		paramBindFunc();
 		OGL_ERROR_CHECK();
 	}
 }
@@ -473,127 +538,6 @@ void OpenGLShaderProgram::Release()
 	}
 }
 
-OpenGLShaderProgram::ParameterBind OpenGLShaderProgram::GetShaderParamBindFunc(GLint location, EffectParameter* effectParam, bool isArray)
-{
-	ParameterBind paramBind;
-	paramBind.EffectParameter = effectParam;
-	paramBind.Location = location;
-	paramBind.Name = effectParam->GetName();
-	paramBind.Type = effectParam->GetParameterType();
-	paramBind.IsArray = isArray;
-
-	switch(paramBind.Type)
-	{
-	case EPT_Boolean:
-		{
-			if (isArray)
-			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<bool*>(location, effectParam);
-			}
-			else
-			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<bool>(location, effectParam);
-			}	
-		}
-		break;
-	case EPT_Int:
-		{
-			if (isArray)
-			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<int32_t*>(location, effectParam);
-			}
-			else
-			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<int32_t>(location, effectParam);
-			}	
-		}
-		break;
-	case EPT_Float:
-		{
-			if (isArray)
-			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float*>(location, effectParam);
-			}
-			else
-			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float>(location, effectParam);
-			}	
-		}
-		break;
-	case EPT_Float2:
-		{
-			if (isArray)
-			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float2*>(location, effectParam);
-			}
-			else
-			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float2>(location, effectParam);
-			}	
-		}
-		break;
-	case EPT_Float3:
-		{
-			if (isArray)
-			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float3*>(location, effectParam);
-			}
-			else
-			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float3>(location, effectParam);
-			}	
-		}
-		break;
-	case EPT_Float4:
-		{
-			if (isArray)
-			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float4*>(location, effectParam);
-			}
-			else
-			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float4>(location, effectParam);
-			}	
-		}
-		break;
-	case EPT_Matrix4x4:
-		{
-			if (isArray)
-			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float4x4*>(location, effectParam);
-			}
-			else
-			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<float4x4>(location, effectParam);
-			}	
-		}
-		break;
-	case EPT_Texture1D:
-	case EPT_Texture1DArray:
-	case EPT_Texture2D:
-	case EPT_Texture2DArray:
-	case EPT_Texture3D:
-	case EPT_Texture3DArray:
-	case EPT_TextureCUBE:
-	case EPT_TextureCUBEArray:
-		{
-			if (isArray)
-			{
-				assert(false);
-			}
-			else
-			{
-				paramBind.ShaderParamSetFunc = ShaderParameterSetHelper<TextureLayer>(location, effectParam);
-			}
-		}
-		break;
-	default:
-		assert(false);
-	}
-
-	return paramBind;
-}
-
 String GetGLSLTypeString(GLenum type)
 {
 	switch (type)
@@ -636,204 +580,228 @@ String GetGLSLTypeString(GLenum type)
 
 void OpenGLShaderProgram::CaptureAllParameter()
 {
-	GLint activeAttribs;
+	/*GLint activeAttribs;
 	glGetProgramiv(mOGLProgramObject, GL_ACTIVE_ATTRIBUTES, &activeAttribs);
 	if (activeAttribs > 0)
 	{
-		GLint maxLength;
-		glGetProgramiv(mOGLProgramObject, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxLength);
-		vector<char> maxName(maxLength);
+	GLint maxLength;
+	glGetProgramiv(mOGLProgramObject, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxLength);
+	vector<char> maxName(maxLength);
+
+	GLint length;
+	GLint attibSize;
+	GLenum attibType;
+	unsigned int samplerIndex = 0;	
+	}*/
+
+	GLint size, location, maxNameLen;
+	GLsizei nameLen;
+	GLenum type;
+	
+	// Get max character length for active uniform maxNameLen
+	glGetProgramiv(mOGLProgramObject, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLen);
+	std::vector<GLchar> name(maxNameLen);
+	
+	// Active uniforms in each block
+	std::vector<std::vector<const char*>> blockVariableNames;
+	std::vector<std::vector<EffectParameter*>> blockVariables;
+
+	GLint numUniformsInProgram;
+	glGetProgramiv(mOGLProgramObject, GL_ACTIVE_UNIFORMS, &numUniformsInProgram);
+	for (GLuint i = 0; i < GLuint(numUniformsInProgram); ++i)
+	{
+		glGetActiveUniform(mOGLProgramObject, i, maxNameLen, &nameLen, &size, &type, &name[0]);
 		
-		GLint length;
-		GLint attibSize;
-		GLenum attibType;
-		unsigned int samplerIndex = 0;	
+		/**
+		 * Hack:
+		 * OpenGL seems to treat const variable as active uniform with a modified name.
+		 * Don't retrieve it.
+		 */
+		 if (!isalpha(name[0]))
+			 continue;
 
-		/*	for (GLint i = 0; i < activeAttribs; ++i)
+		// Check array type
+		bool isArray = false;
+		if (size > 1 && nameLen > 3) // must contain []
 		{
-		glGetActiveAttrib(mOGLProgramObject, i, maxLength, &length, &attibSize, &attibType, &maxName[0]);
-		String actualName(&maxName[0], length);
-		auto attrPos = glGetAttribLocation(mOGLProgramObject, actualName.c_str());
+			isArray = true;	
 
-			std::cout << actualName << " attr=" << attrPos << " size=" << attibSize << " type=" << GetGLSLTypeString(attibType) << std::endl;
+			// Get variable name without []
+			nameLen = std::distance(name.begin(), std::find(name.begin(), name.begin() + nameLen, '['));
 		}
-		std::cout << std::endl;*/
 
-		/*	auto iPos = glGetAttribLocation(mOGLProgramObject, "iPos");
-		auto iBlendWeights = glGetAttribLocation(mOGLProgramObject, "iBlendWeights");
-		auto iBlendIndices = glGetAttribLocation(mOGLProgramObject, "iBlendIndices");
-		auto iNormal = glGetAttribLocation(mOGLProgramObject, "iNormal");
-		auto iTex = glGetAttribLocation(mOGLProgramObject, "iTex");
-		auto iTangent = glGetAttribLocation(mOGLProgramObject, "iTangent");
-		auto iBinormal = glGetAttribLocation(mOGLProgramObject, "iBinormal");*/
+		// Variable name
+		std::string actualName(&name[0], nameLen);
+
+		// Variable type
+		EffectParameterType effectParamType;
+		OpenGLMapping::UnMapping(effectParamType, type);
+		EffectParameter* effectParam = mEffect.FetchShaderParameter(actualName, effectParamType, isArray);
+
+		// Get uniform block for this uniform
+		GLint blockIdx;
+		glGetActiveUniformsiv(mOGLProgramObject, 1, &i, GL_UNIFORM_BLOCK_INDEX, &blockIdx);
+		if (blockIdx != -1) //GL_INVALID_INDEX
+		{
+			// Uniform block
+			if (blockVariableNames.size() < size_t(blockIdx + 1))
+			{
+				blockVariableNames.resize(blockIdx + 1);
+				blockVariables.resize(blockIdx + 1);
+			}
+
+			blockVariables[i].push_back(effectParam);
+			blockVariableNames[i].push_back(effectParam->GetName().c_str());
+		}
+		else
+		{
+			GLint location = glGetUniformLocation(mOGLProgramObject, &name[0]);
+			AddParameterBind(location, effectParam, size);
+		}
 	}
 
-	// Query and store uniforms from the program.
-	GLint activeUniforms;
-	glGetProgramiv(mOGLProgramObject, GL_ACTIVE_UNIFORMS, &activeUniforms);
-	if (activeUniforms > 0)
+	GLint numBlocks;
+	glGetProgramiv(mOGLProgramObject, GL_ACTIVE_UNIFORM_BLOCKS, &numBlocks);
+	assert(blockVariableNames.size() == numBlocks);
+
+	GLint blockSize, numUniformInBlock;
+	std::vector<GLuint> indices;
+	std::vector<GLint> offset;
+	std::vector<GLint> types;
+	std::vector<GLint> arraySize;
+	std::vector<GLint> arrayStrides;
+	std::vector<GLint> matrixStrides;
+
+	for (GLuint i = 0; i < GLuint(blockVariableNames.size()); ++i)
 	{
-		GLint maxLength;
-		glGetProgramiv(mOGLProgramObject, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxLength);
-		vector<char> maxName(maxLength);
+		glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_NAME_LENGTH, &maxNameLen); 
+		name.resize(maxNameLen);
 
-		GLint length;
-		GLint uniformSize;
-		GLenum uniformType;
-		unsigned int samplerIndex = 0;	
+		// Get uniform block name
+		glGetActiveUniformBlockName(mOGLProgramObject, i, maxNameLen, &nameLen, &name[0]);
+		
+		glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &numUniformInBlock); 
+		assert(blockVariableNames[i].size() == numUniformInBlock);
 
-		for (GLint i = 0; i < activeUniforms; ++i)
+		glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
+		
+		//glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_BINDING, &blockBinding);
+		//glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, &uniformIndices);
+		
+		indices.resize(numUniformInBlock);
+		offset.resize(numUniformInBlock);
+		glGetUniformIndices(mOGLProgramObject, numUniformInBlock, &blockVariableNames[i][0], &indices[0]);
+		glGetActiveUniformsiv(mOGLProgramObject, numUniformInBlock, &indices[0], GL_UNIFORM_OFFSET, &offset[0]);
+		glGetActiveUniformsiv(mOGLProgramObject, numUniformInBlock, &indices[0], GL_UNIFORM_TYPE, &types[0]);
+		glGetActiveUniformsiv(mOGLProgramObject, numUniformInBlock, &indices[0], GL_UNIFORM_SIZE, &arraySize[0]);
+		glGetActiveUniformsiv(mOGLProgramObject, numUniformInBlock, &indices[0], GL_UNIFORM_ARRAY_STRIDE, &arrayStrides[0]);
+		glGetActiveUniformsiv(mOGLProgramObject, numUniformInBlock, &indices[0], GL_UNIFORM_MATRIX_STRIDE, &matrixStrides[0]);
+
+		GLuint blockIdx = glGetUniformBlockIndex(mOGLProgramObject, &name[0]);
+
+		// Get or create constant buffer
+		EffectConstantBuffer* cbuffer = mEffect.FetchConstantBuffer(String(&name[0], nameLen), blockSize);
+		
+		// Can specify binding slot in GLSL ?
+		glUniformBlockBinding(mOGLProgramObject, blockIdx, i);
+		AddConstantBufferBind(i, cbuffer);
+
+		for (size_t j = 0; j < blockVariableNames[i].size(); ++j)
 		{
-			glGetActiveUniform(mOGLProgramObject, i, maxLength, &length, &uniformSize, &uniformType, &maxName[0]);
-
-			bool isArray = false;
-			if (uniformSize > 1 && maxLength > 3)
-			{
-				// This is an array uniform
-				isArray = true;
-				GLint lengthWithoutBracket = 0;
-				while( lengthWithoutBracket < length && maxName[lengthWithoutBracket] != '[') lengthWithoutBracket++;
-				length = lengthWithoutBracket;
-			}
-
-			String actualName(&maxName[0], length);
-
-			/**
-			 * Hack:
-			 * OpenGL seems to treat const variable as active uniform with a modified name.
-			 * Don't retrieve it.
-			 */
-			if (!isalpha(actualName[0]))
-				continue;
-
-			GLint location = glGetUniformLocation(mOGLProgramObject, actualName.c_str());
-
-			EffectParameterType effectParamType;
-			OpenGLMapping::UnMapping(effectParamType, uniformType);
-
-			//printf("\t%s\n", actualName.c_str());
-			//std::cout << actualName << " size=" << uniformSize << " type=" << GetGLSLTypeString(uniformType) << std::endl;
-
-			EffectParameter* effectParam = mEffect.FetchShaderParameter(actualName, effectParamType, isArray);
-
-			mParameterBinds.push_back( GetShaderParamBindFunc(location, effectParam, isArray) );
-
-
-		/*	switch(effectParamType)
-			{
-			case EPT_Boolean:
-				{
-					if (isArray)
-					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<bool*>(location, effectParam);
-					}
-					else
-					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<bool>(location, effectParam);
-					}	
-				}
-				break;
-			case EPT_Int:
-				{
-					if (isArray)
-					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<int32_t*>(location, effectParam);
-					}
-					else
-					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<int32_t>(location, effectParam);
-					}	
-				}
-				break;
-			case EPT_Float:
-				{
-					if (isArray)
-					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float*>(location, effectParam);
-					}
-					else
-					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float>(location, effectParam);
-					}	
-				}
-				break;
-			case EPT_Float2:
-				{
-					if (isArray)
-					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float2*>(location, effectParam);
-					}
-					else
-					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float2>(location, effectParam);
-					}	
-				}
-				break;
-			case EPT_Float3:
-				{
-					if (isArray)
-					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float3*>(location, effectParam);
-					}
-					else
-					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float3>(location, effectParam);
-					}	
-				}
-				break;
-			case EPT_Float4:
-				{
-					if (isArray)
-					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float4*>(location, effectParam);
-					}
-					else
-					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float4>(location, effectParam);
-					}	
-				}
-				break;
-			case EPT_Matrix4x4:
-				{
-					if (isArray)
-					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float4x4*>(location, effectParam);
-					}
-					else
-					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<float4x4>(location, effectParam);
-					}	
-				}
-				break;
-			case EPT_Texture1D:
-			case EPT_Texture1DArray:
-			case EPT_Texture2D:
-			case EPT_Texture2DArray:
-			case EPT_Texture3D:
-			case EPT_Texture3DArray:
-			case EPT_TextureCUBE:
-			case EPT_TextureCUBEArray:
-				{
-					if (isArray)
-					{
-						assert(false);
-					}
-					else
-					{
-						mParameterBinds[i].ShaderParamSetFunc = ShaderParameterSetHelper<TextureLayer>(location, effectParam);
-					}
-				}
-				break;
-			default:
-				assert(false);
-			}
-
-			mParameterBinds[i].Type = effectParamType;*/
+			cbuffer->AddEffectParameter(blockVariables[i][j], offset[j], arraySize[i], arrayStrides[i], matrixStrides[i]);
 		}
-			//mParameterBinds[i].TextureSamplerIndex =  GL_SAMPLER_2D ? (samplerIndex++) : 0;
 	}
 
 	OGL_ERROR_CHECK();
+}
+
+void OpenGLShaderProgram::AddConstantBufferBind( GLuint bindingSlot, EffectConstantBuffer* effectCBuffer )
+{
+	mParameterBinds.push_back(ShaderParameterSetHelper<EffectConstantBuffer>(bindingSlot, effectCBuffer));
+}
+
+void OpenGLShaderProgram::AddParameterBind( GLint location, EffectParameter* effectParam, GLsizei arrSize )
+{
+	switch(effectParam->GetParameterType())
+	{
+	case EPT_Boolean:
+		{
+			if (arrSize > 1)
+				mParameterBinds.push_back( ShaderParameterSetHelper<bool*>(location, effectParam, arrSize) );
+			else 
+				mParameterBinds.push_back( ShaderParameterSetHelper<bool>(location, effectParam) );
+		}
+		break;
+	case EPT_Int:
+		{
+			if (arrSize > 1)
+				mParameterBinds.push_back( ShaderParameterSetHelper<int32_t*>(location, effectParam, arrSize) );
+			else 
+				mParameterBinds.push_back( ShaderParameterSetHelper<int32_t>(location, effectParam) );
+		}
+		break;
+	case EPT_Float:
+		{
+			if (arrSize > 1)
+				mParameterBinds.push_back( ShaderParameterSetHelper<float*>(location, effectParam, arrSize) );
+			else 
+				mParameterBinds.push_back( ShaderParameterSetHelper<float>(location, effectParam) );
+		}
+		break;
+	case EPT_Float2:
+		{
+			if (arrSize > 1)
+				mParameterBinds.push_back( ShaderParameterSetHelper<float2*>(location, effectParam, arrSize) );
+			else 
+				mParameterBinds.push_back( ShaderParameterSetHelper<float2>(location, effectParam) );	
+		}
+		break;
+	case EPT_Float3:
+		{
+			if (arrSize > 1)
+				mParameterBinds.push_back( ShaderParameterSetHelper<float3*>(location, effectParam, arrSize) );
+			else 
+				mParameterBinds.push_back( ShaderParameterSetHelper<float3>(location, effectParam) );	
+		}
+		break;
+	case EPT_Float4:
+		{
+			if (arrSize > 1)
+				mParameterBinds.push_back( ShaderParameterSetHelper<float4*>(location, effectParam, arrSize) );
+			else 
+				mParameterBinds.push_back( ShaderParameterSetHelper<float4>(location, effectParam) );		
+		}
+		break;
+	case EPT_Matrix4x4:
+		{
+			if (arrSize > 1)
+				mParameterBinds.push_back( ShaderParameterSetHelper<float4x4*>(location, effectParam, arrSize) );
+			else 
+				mParameterBinds.push_back( ShaderParameterSetHelper<float4x4>(location, effectParam) );		
+		}
+		break;
+	case EPT_Texture1D:
+	case EPT_Texture1DArray:
+	case EPT_Texture2D:
+	case EPT_Texture2DArray:
+	case EPT_Texture3D:
+	case EPT_Texture3DArray:
+	case EPT_TextureCUBE:
+	case EPT_TextureCUBEArray:
+		{
+			if (arrSize > 1)
+			{
+				assert(false);
+			}
+			else
+			{
+				mParameterBinds.push_back( ShaderParameterSetHelper<TextureLayer>(location, effectParam) );	
+			}
+		}
+		break;
+	default:
+		assert(false);
+	}
 }
 
 shared_ptr<ShaderProgram> OpenGLShaderProgram::Clone( Effect& effect )
