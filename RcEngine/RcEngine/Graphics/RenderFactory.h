@@ -45,6 +45,7 @@ public:
 	//-------------------------------------------------------------------------------------------------------
 	virtual shared_ptr<GraphicsBuffer> CreateVertexBuffer(BufferUsage usage, uint32_t accessHint, ElementInitData* initData) = 0;
 	virtual shared_ptr<GraphicsBuffer> CreateIndexBuffer(BufferUsage usage, uint32_t accessHint, ElementInitData* initData) = 0;
+	virtual shared_ptr<GraphicsBuffer> CreateConstantBuffer(BufferUsage usage, uint32_t accessHint, ElementInitData* initData) = 0;
 
 	// FrameBuffers
 	//-------------------------------------------------------------------------------------------------------	

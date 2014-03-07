@@ -519,10 +519,6 @@ void OpenGLRenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
 		OGL_ERROR_CHECK();
 
 		pass->EndPass();
-
-		// Todo: Design a more elegant effect system
-		if (tech.GetPasses().size() > 1)
-			tech.GetEffect().MakeEffectParameterDirty();
 	}
 }
 

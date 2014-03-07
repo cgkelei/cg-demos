@@ -6,17 +6,21 @@
 
 namespace RcEngine {
 
+class EffectConstantBuffer;
+
 class _OpenGLExport OpenGLShaderProgram : public ShaderProgram
 {
-	struct ParameterBind
-	{
-		String Name;
-		EffectParameterType Type;
-		bool IsArray;
-		GLint Location;
-		std::function<void()> ShaderParamSetFunc;
-		EffectParameter* EffectParameter;
-	};
+	//struct ParameterAssignment
+	//{
+	//	union ParameterType
+	//	{
+	//		EffectParameter* GlobalParam;
+	//		EffectConstantBuffer* UniformBlock;
+	//	};
+
+	//	size_t LastModifyTimeStamp;
+	//	std::function<void()> AssignmentFunc;
+	//};
 
 public:
 	OpenGLShaderProgram(Effect& effect);
@@ -35,11 +39,14 @@ public:
 
 private:
 	void CaptureAllParameter();
-	ParameterBind GetShaderParamBindFunc(GLint location, EffectParameter* effectParam, bool isArray);
+	void AddParameterBind(GLint location, EffectParameter* effectParam, GLsizei arrSize);
+	void AddConstantBufferBind(GLuint bindingSlot, EffectConstantBuffer* effectCBuffer);
 
 private:
 	GLuint mOGLProgramObject;
-	vector<ParameterBind> mParameterBinds;
+	//vector<ParameterBind> mParameterBinds;
+	
+	std::vector<std::function<void()>> mParameterBinds;
 };
 
 }

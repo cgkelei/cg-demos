@@ -1,4 +1,5 @@
 #include "OpenGLGraphicBuffer.h"
+#include <Core/Exception.h>
 
 namespace RcEngine {
 
@@ -39,24 +40,52 @@ GLuint OpenGLGraphicsBuffer::GetBufferID() const
 
 void* OpenGLGraphicsBuffer::Map( uint32_t offset, uint32_t length, BufferAccess options )
 {
-	GLenum mapFlag;
+	/*GLenum mapFlag;
 	void* pMapBuffer = NULL;
 
 	switch(options)
 	{
 	case BA_Read_Only:
-		mapFlag = GL_READ_ONLY;
+	mapFlag = GL_READ_ONLY;
+	break;
+	case BA_Write_Only:
+	mapFlag = GL_WRITE_ONLY;
+	break;
+	case BA_Read_Write:
+	mapFlag = GL_READ_WRITE;
+	break;
+	}
+	glBindBuffer(mTarget, mBufferID);
+	pMapBuffer = glMapBuffer(mTarget, mapFlag);
+	glBindBuffer(mTarget, 0);*/
+
+	// Switch to use glMapBufferRange
+
+	GLbitfield access;
+	void* pMapBuffer = NULL;
+
+	switch(options)
+	{
+	case BA_Read_Only:
+		access = GL_MAP_READ_BIT;
 		break;
 	case BA_Write_Only:
-		mapFlag = GL_WRITE_ONLY;
+		access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT;
 		break;
 	case BA_Read_Write:
-		mapFlag = GL_READ_WRITE;
+		access = GL_MAP_READ_BIT | BA_Read_Write;
 		break;
 	}
 
+	// Map all rest buffer 
+	if (length == -1)
+		length = mSizeInBytes - offset;
+
+	if (offset < 0 ||  offset + length > mSizeInBytes)
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Out of range!", "GraphicsBuffer::Map");
+
 	glBindBuffer(mTarget, mBufferID);
-	pMapBuffer = glMapBuffer(mTarget, mapFlag);
+	pMapBuffer = glMapBufferRange(mTarget, offset, length, access);
 	glBindBuffer(mTarget, 0);
 
 	OGL_ERROR_CHECK();

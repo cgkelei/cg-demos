@@ -5,29 +5,26 @@
 #include <Graphics/GraphicsCommon.h>
 #include <Resource/Resource.h>
 
-
 namespace RcEngine {	
 
 class EffectParameter;
+class EffectConstantBuffer;
 
 class _ApiExport Effect : public Resource
 {
 public:
-	typedef std::map<String, EffectParameter*> EffectParameterMap;
-
-public:
 	Effect(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	~Effect();
 
-	EffectTechnique* GetCurrentTechnique() const						{ return mCurrTechnique; }
-	void SetCurrentTechnique(const String& techName);					
 	void SetCurrentTechnique(uint32_t index);
+	void SetCurrentTechnique(const String& techName);					
+	
+	inline EffectTechnique* GetCurrentTechnique() const 					{ return mCurrTechnique; }
+	inline uint32_t GetNumTechniques() const								{ return mTechniques.size(); }
+						
+	EffectTechnique* GetTechniqueByName(const String& techName) const;
+	EffectTechnique* GetTechniqueByIndex(uint32_t index) const;
 
-	const vector<EffectTechnique*>& GetTechniques()	const				{ return mTechniques; }
-	EffectTechnique* GetTechniqueByName(const String& techName);
-	EffectTechnique* GetTechniqueByIndex(uint32_t index);
-
-	const EffectParameterMap& GetAllParameters() const					{ return mParameters; }
 	EffectParameter* GetParameterByName(const String& paraName) const;
 	
 	shared_ptr<Resource> Clone();
@@ -38,7 +35,7 @@ public_internal:
 	 */
 	EffectParameter* FetchShaderParameter(const String& name, EffectParameterType type, bool array);
 
-	void MakeEffectParameterDirty();
+	EffectConstantBuffer* FetchConstantBuffer(const String& name, uint32_t bufferSize);
 
 protected:
 	void LoadImpl();
@@ -49,9 +46,12 @@ public:
 
 protected:
 	String mEffectName;
-	EffectParameterMap mParameters;
-	vector<EffectTechnique*> mTechniques;
+
 	EffectTechnique* mCurrTechnique;
+	vector<EffectTechnique*> mTechniques;
+	
+	std::vector<EffectConstantBuffer*> mConstantBuffers;
+	std::map<String, EffectParameter*> mParameters;
 };
 
 
