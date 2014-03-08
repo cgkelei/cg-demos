@@ -34,157 +34,6 @@
 
 using namespace RcEngine;
 
-shared_ptr<RenderOperation> BuildPointLightShape()
-{
-	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
-
-	const int nRings = 30;
-	const int nSegments = 30;
-	const float r = 1.0f;
-
-	VertexElement vdsc[] = {
-		VertexElement(0, VEF_Float3,  VEU_Position, 0),
-	};
-	shared_ptr<VertexDeclaration> vertexDecl = factory.CreateVertexDeclaration(vdsc, 1);
-
-	int32_t vertexCount = (nRings + 1) * (nSegments+1);
-	int32_t indicesCount =  6 * nRings * (nSegments + 1);
-
-	ElementInitData vInitData;
-	vInitData.pData = nullptr;
-	vInitData.rowPitch = 3 * vertexCount * sizeof(float);
-	vInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> vertexBuffer= factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
-
-	ElementInitData iInitData;
-	iInitData.pData = nullptr;
-	iInitData.rowPitch = indicesCount * sizeof(unsigned short);
-	iInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> indexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
-
-	float* pVertex = static_cast<float*>(vertexBuffer->Map(0, -1, BA_Write_Only));
-	unsigned short* pIndices = static_cast<unsigned short*>(indexBuffer->Map(0, -1, BA_Write_Only));
-
-	float fDeltaRingAngle = Mathf::PI / nRings;
-	float fDeltaSegAngle = Mathf::TWO_PI / nSegments;
-	unsigned short wVerticeIndex = 0 ;
-
-	// Generate the group of rings for the sphere
-	for( int ring = 0; ring <= nRings; ring++ ) {
-		float r0 = r * sinf (ring * fDeltaRingAngle);
-		float y0 = r * cosf (ring * fDeltaRingAngle);
-
-		// Generate the group of segments for the current ring
-		for(int seg = 0; seg <= nSegments; seg++) {
-			float x0 = r0 * sinf(seg * fDeltaSegAngle);
-			float z0 = r0 * cosf(seg * fDeltaSegAngle);
-
-			// Add one vertex to the strip which makes up the sphere
-			*pVertex++ = x0;
-			*pVertex++ = y0;
-			*pVertex++ = z0;
-
-			if (ring != nRings) {
-				// each vertex (except the last) has six indices pointing to it
-				*pIndices++ = wVerticeIndex + nSegments + 1;
-				*pIndices++ = wVerticeIndex;               
-				*pIndices++ = wVerticeIndex + nSegments;
-				*pIndices++ = wVerticeIndex + nSegments + 1;
-				*pIndices++ = wVerticeIndex + 1;
-				*pIndices++ = wVerticeIndex;
-				wVerticeIndex ++;				
-			}
-		}; // end for seg
-	} // end for ring
-
-	vertexBuffer->UnMap();
-	indexBuffer->UnMap();
-
-	shared_ptr<RenderOperation> mRenderOperation(new RenderOperation);
-	mRenderOperation->PrimitiveType = PT_Triangle_List;
-	mRenderOperation->BindVertexStream(vertexBuffer, vertexDecl);
-	mRenderOperation->BindIndexStream(indexBuffer, IBT_Bit16);
-
-	return mRenderOperation;
-}
-
-shared_ptr<RenderOperation> BuildSpotLightShape() 
-{
-	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
-
-	VertexElement vdsc[] = {
-		VertexElement(0, VEF_Float3,  VEU_Position, 0),
-	};
-	shared_ptr<VertexDeclaration> vertexDecl = factory.CreateVertexDeclaration(vdsc, 1);
-
-	float mRadius = 1.f;
-	float mHeight = 1.f;
-	uint16_t nCapSegments = 20;
-
-	uint16_t vertexCount = nCapSegments+1;
-	uint16_t indicesCount = (nCapSegments+nCapSegments-2)*3;
-
-	ElementInitData vInitData;
-	vInitData.pData = nullptr;
-	vInitData.rowPitch = 3 * vertexCount * sizeof(float);
-	vInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> vertexBuffer= factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
-
-	ElementInitData iInitData;
-	iInitData.pData = nullptr;
-	iInitData.rowPitch = indicesCount * sizeof(uint16_t);
-	iInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> indexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
-
-	float* pVertex = static_cast<float*>(vertexBuffer->Map(0, -1, BA_Write_Only));
-	uint16_t* pIndices = static_cast<uint16_t*>(indexBuffer->Map(0, -1, BA_Write_Only));
-
-	std::vector<float3> Vertices;
-	std::vector<int> Indices;
-
-	uint16_t topPointOffset = 0;
-	*pVertex++ = 0.0f;
-	*pVertex++ = 0.0f;
-	*pVertex++ = 0.0f;
-
-	int ringStartOffset = 1;
-	float deltaAngle = (Mathf::TWO_PI / nCapSegments);
-	for (uint16_t i = 0; i < nCapSegments; i++)
-	{
-		float x0 = mRadius* cosf(i*deltaAngle);
-		float z0 = mRadius * sinf(i*deltaAngle);
-
-		*pVertex++ = x0;
-		*pVertex++ = mHeight;
-		*pVertex++ = z0;
-	}
-
-	for (uint16_t i = 0; i < nCapSegments; ++i)
-	{
-		*pIndices++ = topPointOffset;
-		*pIndices++ = ringStartOffset+i;
-		*pIndices++ = ringStartOffset+ (i+1)%nCapSegments;
-	}
-
-	// Caps
-	for (uint16_t i = 0; i < nCapSegments - 2; ++i)
-	{
-		*pIndices++ = ringStartOffset;
-		*pIndices++ = ringStartOffset+i+1+1;
-		*pIndices++ = ringStartOffset+i+1;
-	}
-
-	vertexBuffer->UnMap();
-	indexBuffer->UnMap();
-
-	shared_ptr<RenderOperation> mRenderOperation(new RenderOperation);
-	mRenderOperation->PrimitiveType = PT_Triangle_List;
-	mRenderOperation->BindVertexStream(vertexBuffer, vertexDecl);
-	mRenderOperation->BindIndexStream(indexBuffer, IBT_Bit16);
-
-	return mRenderOperation;
-}
-
 FBXApp::FBXApp( const String& config ) 
 	:Application(config), mCameraControler(0), mFramePerSecond(0)
 {
@@ -200,9 +49,6 @@ void FBXApp::Initialize()
 {
 	mSceneRender = new Renderer;
 	mSceneRender->Init();
-
-	mSphere = BuildPointLightShape();
-	mCone = BuildSpotLightShape();
 
 	InitGUI();
 }
@@ -292,9 +138,6 @@ void FBXApp::LoadContent()
 		resMan.GetResourceByName(RT_Pipeline, "DeferredLighting.pipeline.xml", "General"));
 
 	mCamera = device.GetScreenFrameBuffer()->GetCamera();
-	/*mCamera->CreateLookAt(float3(588.8, 635.6, -1888.5), float3(570.4, 623, -1844.9));*/
-	//mCamera->CreateLookAt(float3(2583.9, 1182.3, -292.5), float3(2583.4, 1181.8, -293.0), float3(-0.4, 0.8, -0.4));
-	//mCamera->CreateLookAt(float3(-331.9, 1094.3, 1756.1), float3(-331.8, 1093.7, 1755.4), float3(0.1, 0.8, -0.6));
 	mCamera->CreateLookAt(float3(-395.7, 839.9, 2061.9), float3(-395.4, 839.6, 2061.0), float3(0.1, 0.9, -0.4));
 	mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 8000.0f );
 
@@ -322,7 +165,7 @@ void FBXApp::LoadContent()
 
 	mSceneRender->SetRenderPipeline(mPipeline);
 
-	mDirLight = sceneMan.CreateLight("Sun", LT_Directional);
+	mDirLight = sceneMan.CreateLight("Sun", LT_DirectionalLight);
 	mDirLight->SetDirection(float3(0, -1, -1));
 	mDirLight->SetLightColor(float3(1, 1, 1));
 	mDirLight->SetCastShadow(true);
@@ -371,36 +214,6 @@ void FBXApp::Render()
 	mSceneRender->RenderScene();
 
 	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
-
-	//device.BindFrameBuffer(device.GetScreenFrameBuffer());
-
-	//// Target Pos
-	//{
-	//	float3 lookAt = mCamera->GetPosition() + mCamera->GetView() * 50;
-	//	float radius = 0.2f;
-	//	float4x4 worldMatrix = CreateScaling(radius, radius, radius) * 
-	//		CreateTranslation(lookAt);
-
-	//	mMaterial->ApplyMaterial(worldMatrix);
-	//	mMaterial->SetCurrentTechnique("LightShape");
-	//	device.Render(*mMaterial->GetCurrentTechnique(), *mSphere);
-	//}
-
-	/*Light* spotLight = mSpotLight;
-	float scaleHeight = spotLight->GetRange();
-	float scaleBase = scaleHeight * tanf(spotLight->GetSpotOuterAngle() * 0.5f);
-
-	float3 rotAxis = Cross(float3(0, 1, 0), spotLight->GetDerivedDirection());
-	float rotAngle = acosf(Dot(float3(0, 1, 0), spotLight->GetDerivedDirection()));
-	float4x4 rotation = CreateRotationAxis(rotAxis, rotAngle);
-
-	float4x4 world = CreateScaling(scaleBase, scaleHeight, scaleBase) * rotation *
-		CreateTranslation(spotLight->GetDerivedPosition());
-
-	mMaterial->ApplyMaterial(world);
-	mMaterial->SetCurrentTechnique("LightShape");
-	device.Render(*mMaterial->GetCurrentTechnique(), *mCone);*/
-
 	device.GetScreenFrameBuffer()->SwapBuffers();
 }
 

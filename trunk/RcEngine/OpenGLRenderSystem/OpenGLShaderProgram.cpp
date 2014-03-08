@@ -51,15 +51,17 @@ public:
 		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
 			UpdateTimeStamp = Param->GetTimeStamp();
+			
+			assert(Param->GetElementSize() == Count);
+			
+			bool* pValue;
+			Param->GetValue(pValue);
+			
+			vector<GLint> temp(Count);
+			for (GLsizei i = 0; i < Count; ++i)
+				temp[i] = pValue[i];
 
-			vector<bool> value; Param->GetValue(value);
-			if (!value.empty())
-			{
-				assert(Count == value.size());
-
-				vector<int32_t> tem(value.begin(), value.end());
-				glUniform1iv(Location, tem.size(), &tem[0]);
-			}
+			glUniform1iv(Location, Count, &temp[0]);
 		} 
 	}
 
@@ -83,7 +85,7 @@ public:
 		{
 			UpdateTimeStamp = Param->GetTimeStamp();
 
-			bool value;  Param->GetValue(value);
+			int32_t value;  Param->GetValue(value);
 			glUniform1i(Location, value);
 		}
 	}
@@ -105,11 +107,11 @@ public:
 	{
 		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
-			vector<int32_t> value; 
-			Param->GetValue(value);
+			int32_t* pValue;
+			Param->GetValue(pValue);
 			
-			assert(Count == value.size());
-			glUniform1iv(Location, value.size(), &value[0]);
+			assert(Count == Param->GetElementSize());
+			glUniform1iv(Location, Count, pValue);
 
 			UpdateTimeStamp = Param->GetTimeStamp();
 		}
@@ -157,12 +159,12 @@ public:
 	{
 		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
-			vector<float> value; 
-			Param->GetValue(value);
+			float* pValue;
+			Param->GetValue(pValue);
 
-			assert(value.size() == Count);
-			glUniform1fv(Location, value.size(), &value[0]);
-			
+			assert(Count == Param->GetElementSize());
+			glUniform1fv(Location, Count, pValue);
+
 			UpdateTimeStamp = Param->GetTimeStamp();
 		}
 	}
@@ -209,12 +211,11 @@ public:
 	{
 		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
-			vector<float2> value; Param->GetValue(value);
-			if (!value.empty())
-			{
-				assert(value.size() == Count);
-				glUniform2fv(Location, value.size(),  reinterpret_cast<float*>(&value[0][0]));
-			}
+			float2* pValue;
+			Param->GetValue(pValue);
+
+			assert(Count == Param->GetElementSize());
+			glUniform2fv(Location, Count,  reinterpret_cast<float*>(pValue));
 
 			UpdateTimeStamp = Param->GetTimeStamp();
 		}
@@ -262,12 +263,11 @@ public:
 	{
 		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
-			vector<float3> value; Param->GetValue(value);
-			if (!value.empty())
-			{
-				assert(value.size() == Count);
-				glUniform3fv(Location, value.size(),  reinterpret_cast<float*>(&value[0][0]));
-			}
+			float3* pValue;
+			Param->GetValue(pValue);
+
+			assert(Count == Param->GetElementSize());
+			glUniform3fv(Location, Count,  reinterpret_cast<float*>(pValue));
 
 			UpdateTimeStamp = Param->GetTimeStamp();
 		}
@@ -315,12 +315,11 @@ public:
 	{
 		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
-			vector<float4> value; Param->GetValue(value);
-			if (!value.empty())
-			{
-				assert(value.size() == Count);
-				glUniform4fv(Location, value.size(), reinterpret_cast<float*>(&value[0][0]));
-			}
+			float4* pValue;
+			Param->GetValue(pValue);
+
+			assert(Count == Param->GetElementSize());
+			glUniform4fv(Location, Count,  reinterpret_cast<float*>(pValue));
 
 			UpdateTimeStamp = Param->GetTimeStamp();
 		}
@@ -370,12 +369,11 @@ public:
 	{
 		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
-			vector<float4x4> value; Param->GetValue(value);
-			Param->GetValue(value);
-			if (!value.empty())
-			{
-				glUniformMatrix4fv(Location, value.size(), true, reinterpret_cast<float*>(&value[0][0]));
-			}
+			float4x4* pValue;
+			Param->GetValue(pValue);
+
+			assert(Count == Param->GetElementSize());
+			glUniformMatrix4fv(Location, Count, true, reinterpret_cast<float*>(pValue));
 		}
 	}
 
@@ -603,7 +601,7 @@ void OpenGLShaderProgram::CaptureAllParameter()
 	std::vector<GLchar> name(maxNameLen);
 	
 	// Active uniforms in each block
-	std::vector<std::vector<const char*>> blockVariableNames;
+	std::vector<std::vector<const GLchar*>> blockVariableNames;
 	std::vector<std::vector<EffectParameter*>> blockVariables;
 
 	GLint numUniformsInProgram;
@@ -621,11 +619,8 @@ void OpenGLShaderProgram::CaptureAllParameter()
 			 continue;
 
 		// Check array type
-		bool isArray = false;
 		if (size > 1 && nameLen > 3) // must contain []
 		{
-			isArray = true;	
-
 			// Get variable name without []
 			nameLen = std::distance(name.begin(), std::find(name.begin(), name.begin() + nameLen, '['));
 		}
@@ -636,7 +631,7 @@ void OpenGLShaderProgram::CaptureAllParameter()
 		// Variable type
 		EffectParameterType effectParamType;
 		OpenGLMapping::UnMapping(effectParamType, type);
-		EffectParameter* effectParam = mEffect.FetchShaderParameter(actualName, effectParamType, isArray);
+		EffectParameter* effectParam = mEffect.FetchShaderParameter(actualName, effectParamType, size);
 
 		// Get uniform block for this uniform
 		GLint blockIdx;
@@ -650,13 +645,14 @@ void OpenGLShaderProgram::CaptureAllParameter()
 				blockVariables.resize(blockIdx + 1);
 			}
 
-			blockVariables[i].push_back(effectParam);
-			blockVariableNames[i].push_back(effectParam->GetName().c_str());
+			blockVariables[blockIdx].push_back(effectParam);
+			blockVariableNames[blockIdx].push_back(effectParam->GetName().c_str());
 		}
 		else
 		{
-			GLint location = glGetUniformLocation(mOGLProgramObject, &name[0]);
+			location = glGetUniformLocation(mOGLProgramObject, &name[0]);
 			AddParameterBind(location, effectParam, size);
+			effectParam->MakeDirty();
 		}
 	}
 
@@ -664,54 +660,72 @@ void OpenGLShaderProgram::CaptureAllParameter()
 	glGetProgramiv(mOGLProgramObject, GL_ACTIVE_UNIFORM_BLOCKS, &numBlocks);
 	assert(blockVariableNames.size() == numBlocks);
 
-	GLint blockSize, numUniformInBlock;
-	std::vector<GLuint> indices;
-	std::vector<GLint> offset;
-	std::vector<GLint> types;
-	std::vector<GLint> arraySize;
-	std::vector<GLint> arrayStrides;
-	std::vector<GLint> matrixStrides;
-
-	for (GLuint i = 0; i < GLuint(blockVariableNames.size()); ++i)
+	if (numBlocks > 0)
 	{
-		glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_NAME_LENGTH, &maxNameLen); 
-		name.resize(maxNameLen);
+		GLint blockSize, numUniformInBlock;
+		std::vector<GLuint> indices;
+		std::vector<GLint> offset;
+		std::vector<GLint> types;
+		std::vector<GLint> arraySize;
+		std::vector<GLint> arrayStrides;
+		std::vector<GLint> matrixStrides;
 
-		// Get uniform block name
-		glGetActiveUniformBlockName(mOGLProgramObject, i, maxNameLen, &nameLen, &name[0]);
-		
-		glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &numUniformInBlock); 
-		assert(blockVariableNames[i].size() == numUniformInBlock);
-
-		glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
-		
-		//glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_BINDING, &blockBinding);
-		//glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, &uniformIndices);
-		
-		indices.resize(numUniformInBlock);
-		offset.resize(numUniformInBlock);
-		glGetUniformIndices(mOGLProgramObject, numUniformInBlock, &blockVariableNames[i][0], &indices[0]);
-		glGetActiveUniformsiv(mOGLProgramObject, numUniformInBlock, &indices[0], GL_UNIFORM_OFFSET, &offset[0]);
-		glGetActiveUniformsiv(mOGLProgramObject, numUniformInBlock, &indices[0], GL_UNIFORM_TYPE, &types[0]);
-		glGetActiveUniformsiv(mOGLProgramObject, numUniformInBlock, &indices[0], GL_UNIFORM_SIZE, &arraySize[0]);
-		glGetActiveUniformsiv(mOGLProgramObject, numUniformInBlock, &indices[0], GL_UNIFORM_ARRAY_STRIDE, &arrayStrides[0]);
-		glGetActiveUniformsiv(mOGLProgramObject, numUniformInBlock, &indices[0], GL_UNIFORM_MATRIX_STRIDE, &matrixStrides[0]);
-
-		GLuint blockIdx = glGetUniformBlockIndex(mOGLProgramObject, &name[0]);
-
-		// Get or create constant buffer
-		EffectConstantBuffer* cbuffer = mEffect.FetchConstantBuffer(String(&name[0], nameLen), blockSize);
-		
-		// Can specify binding slot in GLSL ?
-		glUniformBlockBinding(mOGLProgramObject, blockIdx, i);
-		AddConstantBufferBind(i, cbuffer);
-
-		for (size_t j = 0; j < blockVariableNames[i].size(); ++j)
+		for (GLuint i = 0; i < GLuint(blockVariableNames.size()); ++i)
 		{
-			cbuffer->AddEffectParameter(blockVariables[i][j], offset[j], arraySize[i], arrayStrides[i], matrixStrides[i]);
+			glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_NAME_LENGTH, &maxNameLen); 
+			name.resize(maxNameLen);
+
+			// Get uniform block name
+			glGetActiveUniformBlockName(mOGLProgramObject, i, maxNameLen, &nameLen, &name[0]);
+
+			glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &numUniformInBlock); 
+			assert(blockVariableNames[i].size() == numUniformInBlock);
+
+			glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
+
+			//glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_BINDING, &blockBinding);
+			//glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, &uniformIndices);
+
+			indices.resize(numUniformInBlock);
+			offset.resize(numUniformInBlock);
+			types.resize(numUniformInBlock);
+			arraySize.resize(numUniformInBlock);
+			arrayStrides.resize(numUniformInBlock);
+			matrixStrides.resize(numUniformInBlock);
+			glGetUniformIndices(mOGLProgramObject, numUniformInBlock, &blockVariableNames[i][0], &indices[0]);
+			glGetActiveUniformsiv(mOGLProgramObject, numUniformInBlock, &indices[0], GL_UNIFORM_OFFSET, &offset[0]);
+			glGetActiveUniformsiv(mOGLProgramObject, numUniformInBlock, &indices[0], GL_UNIFORM_TYPE, &types[0]);
+			glGetActiveUniformsiv(mOGLProgramObject, numUniformInBlock, &indices[0], GL_UNIFORM_SIZE, &arraySize[0]);
+			glGetActiveUniformsiv(mOGLProgramObject, numUniformInBlock, &indices[0], GL_UNIFORM_ARRAY_STRIDE, &arrayStrides[0]);
+			glGetActiveUniformsiv(mOGLProgramObject, numUniformInBlock, &indices[0], GL_UNIFORM_MATRIX_STRIDE, &matrixStrides[0]);
+
+			GLuint blockIdx = glGetUniformBlockIndex(mOGLProgramObject, &name[0]);
+
+			// Get or create constant buffer
+			EffectConstantBuffer* cbuffer = mEffect.FetchConstantBuffer(String(&name[0], nameLen), blockSize);
+
+			// Can specify binding slot in GLSL ?
+			glUniformBlockBinding(mOGLProgramObject, blockIdx, i);
+			AddConstantBufferBind(i, cbuffer);
+
+			for (size_t j = 0; j < blockVariableNames[i].size(); ++j)
+			{
+				EffectParameter* parameter = blockVariables[i][j];
+
+				cbuffer->AddEffectParameter(parameter);
+				parameter->SetCBOffset(offset[j]);
+
+				if (arrayStrides[j] > 0)
+					parameter->SetArrayStride(arrayStrides[j]);
+
+				if (matrixStrides[j] > 0)
+					parameter->SetMatrixStride(matrixStrides[j]);	
+
+				parameter->MakeDirty();
+			}
 		}
 	}
-
+	
 	OGL_ERROR_CHECK();
 }
 

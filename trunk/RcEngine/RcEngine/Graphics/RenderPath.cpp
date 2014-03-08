@@ -651,8 +651,8 @@ void DeferredPath::DrawDirectionalLightShape( Light* light, const String& tech )
 		effect->GetParameterByName("ShadowView")->SetValue(mShadowMan->mShadowView);
 		effect->GetParameterByName("NumCascades")->SetValue((int)light->GetShadowCascades());
 		effect->GetParameterByName("BorderPaddingMinMax")->SetValue(mShadowMan->mBorderPaddingMinMax);
-		effect->GetParameterByName("CascadeScale")->SetValue(mShadowMan->mShadowCascadeScale);
-		effect->GetParameterByName("CascadeOffset")->SetValue(mShadowMan->mShadowCascadeOffset);
+		effect->GetParameterByName("CascadeScale")->SetValue(&(mShadowMan->mShadowCascadeScale[0]), MAX_CASCADES);
+		effect->GetParameterByName("CascadeOffset")->SetValue(&(mShadowMan->mShadowCascadeOffset[0]), MAX_CASCADES); 
 		//effect->GetParameterByName("CascadeBlendArea")->SetValue(mCascadedShadowMap->mCascadeBlendArea);
 	}
 

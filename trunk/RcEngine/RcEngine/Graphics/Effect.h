@@ -33,8 +33,7 @@ public_internal:
 	/**
 	 * Only used by sub render system shader parameter set internal.
 	 */
-	EffectParameter* FetchShaderParameter(const String& name, EffectParameterType type, bool array);
-
+	EffectParameter* FetchShaderParameter(const String& name, EffectParameterType type, uint32_t elementSize);
 	EffectConstantBuffer* FetchConstantBuffer(const String& name, uint32_t bufferSize);
 
 protected:

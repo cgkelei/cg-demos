@@ -27,128 +27,88 @@ struct ShaderStage
 	vector<String> Includes;
 };
 
-EffectParameter* CreateEffectParameter( const String& name, EffectParameterType type, bool array)
+EffectParameter* CreateEffectParameter( const String& name, EffectParameterType type, uint32_t elementSize)
 {
 	switch(type)
 	{
 	case EPT_Boolean:
 		{
-			if (array)
-			{
-				return new EffectParameterBoolArray(name, type);
-			}
-			else
-			{
+			if (elementSize > 1)
+				return new EffectParameterBoolArray(name, type, elementSize);
+			else 
 				return new EffectParameterBool(name, type);
-			}
 		}
 		break;
 	case EPT_Float:
 		{
-			if (array)
-			{
-				return new EffectParameterFloatArray(name, type);
-			}
+			if (elementSize > 1)
+				return new EffectParameterFloatArray(name, type, elementSize);
 			else
-			{
 				return new EffectParameterFloat(name, type);
-			}
 		}
 		break;
 	case EPT_Float2:
 		{
-			if (array)
-			{
-				return new EffectParameterVector2Array(name, type);
-			}
+			if (elementSize > 1)
+				return new EffectParameterVector2Array(name, type, elementSize);
 			else
-			{
 				return new EffectParameterVector2(name, type);
-			}
 		}
 		break;
 	case EPT_Float3:
 		{
-			if (array)
-			{
-				return new EffectParameterVector3Array(name, type);
-			}
+			if (elementSize > 1)
+				return new EffectParameterVector3Array(name, type, elementSize);
 			else
-			{
 				return new EffectParameterVector3(name, type);
-			}
 		}
 		break;
 	case EPT_Float4:
 		{
-			if (array)
-			{
-				return new EffectParameterVector4Array(name, type);
-			}
+			if (elementSize > 1)
+				return new EffectParameterVector4Array(name, type, elementSize);
 			else
-			{
 				return new EffectParameterVector4(name, type);
-			}
 		}
 		break;
 	case EPT_Int:
 		{
-			if (array)
-			{
-				return new EffectParameterIntArray(name, type);
-			}
+			if (elementSize > 1)
+				return new EffectParameterIntArray(name, type, elementSize);
 			else
-			{
 				return new EffectParameterInt(name, type);
-			}
 		}
 		break;
 	case EPT_Int2:
 		{
-			if (array)
-			{
-				return new EffectParameterInt2Array(name, type);
-			}
+			if (elementSize > 1)
+				return new EffectParameterInt2Array(name, type, elementSize);
 			else
-			{
 				return new EffectParameterInt2(name, type);
-			}
 		}
 		break;
 	case EPT_Int3:
 		{
-			if (array)
-			{
-				return new EffectParameterInt3Array(name, type);
-			}
+			if (elementSize > 1)
+				return new EffectParameterInt3Array(name, type, elementSize);
 			else
-			{
 				return new EffectParameterInt3(name, type);
-			}
 		}
 		break;
 	case EPT_Int4:
 		{
-			if (array)
-			{
-				return new EffectParameterInt4Array(name, type);
-			}
+			if (elementSize > 1)
+				return new EffectParameterInt4Array(name, type, elementSize);
 			else
-			{
 				return new EffectParameterInt4(name, type);
-			}
 		}
 		break;
 	case EPT_Matrix4x4:
 		{
-			if (array)
-			{
-				return new EffectParameterMatrixArray(name, type);
-			}
+			if (elementSize > 1)
+				return new EffectParameterMatrixArray(name, type, elementSize);
 			else
-			{
 				return new EffectParameterMatrix(name, type);
-			}
 		}
 		break;
 	case EPT_Texture1D:
@@ -518,16 +478,13 @@ Effect::Effect( ResourceManager* creator, ResourceHandle handle, const String& n
 Effect::~Effect()
 {
 	for (auto iter = mParameters.begin(); iter != mParameters.end(); ++iter)
-	{
 		delete (iter->second);
-	}
-	mParameters.clear();
 
 	for (auto iter = mTechniques.begin(); iter != mTechniques.end(); ++iter)
-	{
 		delete *iter;
-	}
-	mTechniques.clear();
+
+	for (auto iter = mConstantBuffers.begin(); iter != mConstantBuffers.end(); ++iter)
+		delete *iter;
 }
 
 EffectTechnique* Effect::GetTechniqueByIndex( uint32_t index ) const
@@ -557,7 +514,7 @@ EffectParameter* Effect::GetParameterByName( const String& paraName ) const
 	return nullptr;
 }
 
-EffectParameter* Effect::FetchShaderParameter(const String& name, EffectParameterType type, bool array)
+EffectParameter* Effect::FetchShaderParameter( const String& name, EffectParameterType type, uint32_t elementSize )
 {
 	std::map<String, EffectParameter*>::const_iterator it = mParameters.find(name);
 
@@ -565,7 +522,7 @@ EffectParameter* Effect::FetchShaderParameter(const String& name, EffectParamete
 
 	if (it == mParameters.end())
 	{
-		retVal = CreateEffectParameter(name, type, array);
+		retVal = CreateEffectParameter(name, type, elementSize);
 		mParameters.insert(std::make_pair(name, retVal));
 	}
 	else 
@@ -817,10 +774,6 @@ void Effect::SetCurrentTechnique( const String& techName )
 	if (it != mTechniques.end())
 	{
 		mCurrTechnique = *it;
-
-		// make all effect parameter dirty
-		for (auto& kv : mParameters)
-			kv.second->MakeDirty();
 	}
 	else
 	{
@@ -833,10 +786,6 @@ void Effect::SetCurrentTechnique( uint32_t index )
 	if (index < mTechniques.size())
 	{
 		mCurrTechnique = mTechniques[index];
-
-		// make all effect parameter dirty
-		for (auto& kv : mParameters)
-			kv.second->MakeDirty();
 	}
 	else
 	{

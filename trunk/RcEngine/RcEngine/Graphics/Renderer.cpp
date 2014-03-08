@@ -465,8 +465,8 @@ void Renderer::DrawDirectionalLightShape( Light* light, const String& tech )
 		effect->GetParameterByName("ShadowView")->SetValue(mCascadedShadowMap->mShadowView);
 		effect->GetParameterByName("NumCascades")->SetValue((int)light->GetShadowCascades());
 		effect->GetParameterByName("BorderPaddingMinMax")->SetValue(mCascadedShadowMap->mBorderPaddingMinMax);
-		effect->GetParameterByName("CascadeScale")->SetValue(mCascadedShadowMap->mShadowCascadeScale);
-		effect->GetParameterByName("CascadeOffset")->SetValue(mCascadedShadowMap->mShadowCascadeOffset);
+		effect->GetParameterByName("CascadeScale")->SetValue(&(mCascadedShadowMap->mShadowCascadeScale[0]), MAX_CASCADES);
+		effect->GetParameterByName("CascadeOffset")->SetValue(&(mCascadedShadowMap->mShadowCascadeOffset[0]), MAX_CASCADES); 
 		//effect->GetParameterByName("CascadeBlendArea")->SetValue(mCascadedShadowMap->mCascadeBlendArea);
 	}
 
