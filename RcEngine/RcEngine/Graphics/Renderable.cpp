@@ -62,7 +62,7 @@ void Renderable::OnRenderBegin()
 			{
 				// delete last world matrix first
 				matWorlds.pop_back();
-				skinMatricesParam->SetValue(matWorlds);
+				skinMatricesParam->SetValue(&matWorlds[0], matWorlds.size());
 			}
 		}
 	}

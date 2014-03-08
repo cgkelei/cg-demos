@@ -6,7 +6,8 @@ namespace RcEngine {
 OpenGLGraphicsBuffer::OpenGLGraphicsBuffer(BufferUsage usage, uint32_t accessHint, GLenum target, ElementInitData* initData)
 	: GraphicsBuffer(usage, accessHint), mTarget(target)
 {
-	assert((GL_ARRAY_BUFFER == target) || (GL_ELEMENT_ARRAY_BUFFER == target));
+	assert((GL_ARRAY_BUFFER == target) || (GL_ELEMENT_ARRAY_BUFFER == target) ||
+		   (GL_UNIFORM_BUFFER == target));
 
 	glGenBuffers(1, &mBufferID);
 	if (initData != NULL)

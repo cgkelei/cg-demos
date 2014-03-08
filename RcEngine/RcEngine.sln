@@ -25,7 +25,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FbxTest", "Samples\FbxTest\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RenderPath", "Samples\RenderPath\RenderPath.vcxproj", "{CAADBA4F-F7A1-40E4-961F-D2BD2B033E09}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FowwardPath", "Samples\FowwardPath\FowwardPath.vcxproj", "{1CF379D5-7245-412C-A58A-4A581D81E263}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ForwardPath", "Samples\FowwardPath\FowwardPath.vcxproj", "{1CF379D5-7245-412C-A58A-4A581D81E263}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EffectSystemTest", "Samples\EffectSystemTest\EffectSystemTest.vcxproj", "{0E8E4A2E-C546-4521-8DC0-E5E34762AF09}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,6 +79,10 @@ Global
 		{1CF379D5-7245-412C-A58A-4A581D81E263}.Debug|Win32.Build.0 = Debug|Win32
 		{1CF379D5-7245-412C-A58A-4A581D81E263}.Release|Win32.ActiveCfg = Release|Win32
 		{1CF379D5-7245-412C-A58A-4A581D81E263}.Release|Win32.Build.0 = Release|Win32
+		{0E8E4A2E-C546-4521-8DC0-E5E34762AF09}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0E8E4A2E-C546-4521-8DC0-E5E34762AF09}.Debug|Win32.Build.0 = Debug|Win32
+		{0E8E4A2E-C546-4521-8DC0-E5E34762AF09}.Release|Win32.ActiveCfg = Release|Win32
+		{0E8E4A2E-C546-4521-8DC0-E5E34762AF09}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -90,5 +96,6 @@ Global
 		{097AC6AA-4C1F-45A8-923A-5D4AF64CE0A1} = {3B4A1896-1B80-4E14-B14D-03138B4E4C13}
 		{CAADBA4F-F7A1-40E4-961F-D2BD2B033E09} = {3B4A1896-1B80-4E14-B14D-03138B4E4C13}
 		{1CF379D5-7245-412C-A58A-4A581D81E263} = {3B4A1896-1B80-4E14-B14D-03138B4E4C13}
+		{0E8E4A2E-C546-4521-8DC0-E5E34762AF09} = {3B4A1896-1B80-4E14-B14D-03138B4E4C13}
 	EndGlobalSection
 EndGlobal

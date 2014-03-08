@@ -33,8 +33,6 @@ protected:
 	shared_ptr<Pipeline> mPipeline;
 	Renderer* mSceneRender;
 
-	shared_ptr<RenderOperation> mSphere;
-	shared_ptr<RenderOperation> mCone;
 	shared_ptr<Material> mMaterial;
 	Label* mLabel;
 	UIWindow* mWindow;

@@ -106,15 +106,19 @@ inline Vector<Real, Size> Clamp( const Vector<Real, Size>& value, const Vector<R
 template<typename Real>
 inline Vector<Real, 3> Cross( const Vector<Real, 3>& vec1, const Vector<Real, 3>& vec2 );
 
-
 #include <Math/Vector.inl>
 
-typedef Vector<float, 2> float2;
-typedef Vector<float,3> float3;
-typedef Vector<float,4> float4;
+typedef Vector<float,2>  float2;
+typedef Vector<float,3>  float3;
+typedef Vector<float,4>  float4;
 
 typedef Vector<int32_t,2> int2;
+typedef Vector<int32_t,3> int3;
+typedef Vector<int32_t,4> int4;
+
 typedef Vector<uint32_t,2> uint2;
+typedef Vector<uint32_t,3> uint3;
+typedef Vector<uint32_t,4> uint4;
 
 } // Namespace RcEngine
 #endif
