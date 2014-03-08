@@ -148,16 +148,11 @@ void EffectParameter::IncrementTimeStamp()
 #endif // _M_X64
 }
 
-void EffectParameter::SetCBOffset( uint32_t offset )
-{
-	assert(mConstantBuffer != nullptr);
-	mCBOffset = offset;
-}
-
-void EffectParameter::SetConstantBuffer( EffectConstantBuffer* cbuffer )
+void EffectParameter::SetConstantBuffer( EffectConstantBuffer* cbuffer, uint32_t offset )
 {
 	assert(mConstantBuffer == nullptr);
 	mConstantBuffer = cbuffer;
+	mCBOffset = offset;
 }
 
 void EffectParameter::MakeDirty()
@@ -174,7 +169,10 @@ EffectConstantBuffer::EffectConstantBuffer( const String& name, uint32_t bufferS
 	mBackingStore = new uint8_t[bufferSize];
 
 	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
-	mCBuffer = factory.CreateConstantBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
+	ElementInitData initData;
+	initData.pData = NULL;
+	initData.rowPitch = bufferSize;
+	mCBuffer = factory.CreateConstantBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, &initData);
 }
 
 EffectConstantBuffer::~EffectConstantBuffer()
@@ -182,7 +180,7 @@ EffectConstantBuffer::~EffectConstantBuffer()
 	delete[] mBackingStore;
 }
 
-void EffectConstantBuffer::AddEffectParameter( EffectParameter* parameter )
+void EffectConstantBuffer::AddEffectParameter( EffectParameter* parameter, uint32_t offset )
 {
 	std::vector<EffectParameter*>::iterator it;
 	it = std::find_if(mParameters.begin(), mParameters.end(), [&](const EffectParameter* param) {
@@ -190,7 +188,7 @@ void EffectConstantBuffer::AddEffectParameter( EffectParameter* parameter )
 	
 	if (it == mParameters.end())
 	{
-		parameter->SetConstantBuffer(this);
+		parameter->SetConstantBuffer(this, offset);
 		mParameters.push_back(parameter);
 	}
 }
@@ -201,7 +199,7 @@ void EffectConstantBuffer::UpdateBuffer()
 	{
 		void* pBuffer = mCBuffer->Map(0, MAP_ALL_BUFFER, BA_Write_Only);
 		memcpy(pBuffer, mBackingStore, mBufferSize);
-		
+		mCBuffer->UnMap();
 		mDirty = false;
 	}
 }

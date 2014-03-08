@@ -433,7 +433,7 @@ public:
 		UniformBlock->UpdateBuffer();
 
 		shared_ptr<OpenGLGraphicsBuffer> uniformBuffer = std::static_pointer_cast<OpenGLGraphicsBuffer>(UniformBlock->GetBuffer()); 
-		glBindBufferBase(GL_ACTIVE_UNIFORM_BLOCKS, BindingSlot, uniformBuffer->GetBufferID());
+		glBindBufferBase(GL_UNIFORM_BUFFER, BindingSlot, uniformBuffer->GetBufferID());
 	}
 
 private:
@@ -711,9 +711,7 @@ void OpenGLShaderProgram::CaptureAllParameter()
 			for (size_t j = 0; j < blockVariableNames[i].size(); ++j)
 			{
 				EffectParameter* parameter = blockVariables[i][j];
-
-				cbuffer->AddEffectParameter(parameter);
-				parameter->SetCBOffset(offset[j]);
+				cbuffer->AddEffectParameter(parameter, offset[j]);
 
 				if (arrayStrides[j] > 0)
 					parameter->SetArrayStride(arrayStrides[j]);

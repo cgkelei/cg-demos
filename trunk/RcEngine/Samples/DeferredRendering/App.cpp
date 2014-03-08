@@ -93,11 +93,11 @@ void App::SetupLights()
 {
 	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
 
-	Light* mDirLight = sceneMan.CreateLight("Sun", LT_DirectionalLight);
+	/*Light* mDirLight = sceneMan.CreateLight("Sun", LT_DirectionalLight);
 	mDirLight->SetDirection(float3(0, -8, -1));
 	mDirLight->SetLightColor(float3(1, 1, 1));
 	mDirLight->SetCastShadow(false);
-	sceneMan.GetRootSceneNode()->AttachObject(mDirLight);
+	sceneMan.GetRootSceneNode()->AttachObject(mDirLight);*/
 
 	//mPointLight = sceneMan.CreateLight("Point", LT_PointLight);
 	//mPointLight->SetLightColor(float3(1, 1, 0));
@@ -157,7 +157,7 @@ void App::Render()
 {
 	mDeferredPath->RenderScene();
 
-	//RenderDevice& device = Context::GetSingleton().GetRenderDevice();
+	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
 
 	//device.BindFrameBuffer(device.GetScreenFrameBuffer());
 	//device.GetScreenFrameBuffer()->Clear(CF_Depth, ColorRGBA::Black, 1.0f, 0);
@@ -204,9 +204,7 @@ void App::Render()
 	//glReadPixels(0, 0, mMainWindow->GetWidth(), mMainWindow->GetHeight(), GL_DEPTH_COMPONENT, GL_FLOAT, &gSceneDepth[0]);
 	//
 	
-
-
-	//device.GetScreenFrameBuffer()->SwapBuffers();
+	device.GetScreenFrameBuffer()->SwapBuffers();
 }
 
 void App::Update( float deltaTime )

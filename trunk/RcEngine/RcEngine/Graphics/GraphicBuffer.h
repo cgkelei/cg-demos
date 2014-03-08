@@ -6,7 +6,7 @@
 
 namespace RcEngine {
 
-#define MAP_ALL_BUFFER -1
+#define MAP_ALL_BUFFER 0xFFFFFFFF
 
 class _ApiExport GraphicsBuffer
 {

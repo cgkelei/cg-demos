@@ -1619,7 +1619,7 @@ void FbxProcesser::BuildAndSaveBinary( )
 					stream.WriteString(clipName);
 
 					FileStream clipStream;
-					clipStream.Open(clipName, FILE_WRITE);
+					clipStream.Open(mOutputPath + clipName, FILE_WRITE);
 
 					clipStream.WriteString(kv.first);
 					clipStream.WriteFloat(clip.Duration);
@@ -1885,12 +1885,12 @@ int main()
 	FbxProcesser fbxProcesser;
 	fbxProcesser.Initialize();
 
-	g_ExportSettings.ExportSkeleton = false;
+	g_ExportSettings.ExportSkeleton = true;
     g_ExportSettings.MergeScene = true;
 	g_ExportSettings.AxisSystem = Axis_OpenGL;
 	g_ExportSettings.MergeWithSameMaterial = false;
 
-	if (fbxProcesser.LoadScene("E:/Engines/RcEngine/Media/Mesh/Tank/tank.fbx"))
+	if (fbxProcesser.LoadScene("E:/Engines/RcEngine/Media/Mesh/Dude/dude.fbx"))
 	{
 		fbxProcesser.ProcessScene();
 		//fbxProcesser.BuildAndSaveXML();
