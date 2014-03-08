@@ -79,7 +79,7 @@ void* OpenGLGraphicsBuffer::Map( uint32_t offset, uint32_t length, BufferAccess 
 	}
 
 	// Map all rest buffer 
-	if (length == -1)
+	if (length == MAP_ALL_BUFFER)
 		length = mSizeInBytes - offset;
 
 	if (offset < 0 ||  offset + length > mSizeInBytes)

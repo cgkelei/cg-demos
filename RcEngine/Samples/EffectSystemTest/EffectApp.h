@@ -2,6 +2,7 @@
 #include <MainApp/Application.h>
 #include <Graphics/Renderer.h>
 #include <Graphics/CameraController1.h>
+#include <Graphics/RenderPath.h>
 
 using namespace RcEngine;
 
@@ -20,5 +21,9 @@ protected:
 	void Render();
 	void CalculateFrameRate();
 
+private:
+	DeferredPath* mDeferredPath;
+	RcEngine::Test::FPSCameraControler* mCameraControler;
+	shared_ptr<Camera> mCamera;
 };
 

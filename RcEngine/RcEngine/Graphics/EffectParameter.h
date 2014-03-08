@@ -37,7 +37,7 @@ public:
 	void GetRawValue(void *pData, uint32_t offset, uint32_t count);
 
 public_internal:
-	void AddEffectParameter(EffectParameter* parameter); 
+	void AddEffectParameter(EffectParameter* parameter, uint32_t offset); 
 
 protected:
 	String mCBName;
@@ -100,12 +100,9 @@ public:
 public_internal:
 	// Make constant buffer dirty
 	inline TimeStamp GetTimeStamp() const					{ return mLastModifiedTime; }
-	inline uint32_t GetCBOffset() const						{ return mCBOffset; }
-	
-	void SetCBOffset(uint32_t offset);
-	void SetConstantBuffer(EffectConstantBuffer* cbuffer);
 	
 	void MakeDirty();
+	void SetConstantBuffer(EffectConstantBuffer* cbuffer, uint32_t offset);	
 
 	virtual void SetArrayStride(uint32_t stride);
 	virtual void SetMatrixStride(uint32_t matStride);
@@ -348,7 +345,7 @@ public:
 		: EffectParameter(name, type) { }
 	~EffectParameterTexture() { }
 
-	void GetValue(TextureLayer& value)
+	void GetValue(TextureLayer& value) const
 	{
 		value = mTextureLayer;
 	}

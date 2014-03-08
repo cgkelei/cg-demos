@@ -344,7 +344,7 @@ void DeferredPath::OnGraphicsInit()
 	RenderFactory* factory = mDevice->GetRenderFactory();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
-	// Load defered lighting effect
+	// Load deferred lighting effect
 	mDeferedMaterial = std::static_pointer_cast<Material>( 
 		resMan.GetResourceByName(RT_Material, "Lighting.material.xml", "General"));
 	mDeferedMaterial->Load();
