@@ -29,6 +29,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ForwardPath", "Samples\Foww
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EffectSystemTest", "Samples\EffectSystemTest\EffectSystemTest.vcxproj", "{0E8E4A2E-C546-4521-8DC0-E5E34762AF09}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Direct3D11RenderSystem", "Direct3D11RenderSystem\Direct3D11RenderSystem.vcxproj", "{9D87FBBF-A444-4AB6-BCF8-C40F83974286}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -83,6 +85,10 @@ Global
 		{0E8E4A2E-C546-4521-8DC0-E5E34762AF09}.Debug|Win32.Build.0 = Debug|Win32
 		{0E8E4A2E-C546-4521-8DC0-E5E34762AF09}.Release|Win32.ActiveCfg = Release|Win32
 		{0E8E4A2E-C546-4521-8DC0-E5E34762AF09}.Release|Win32.Build.0 = Release|Win32
+		{9D87FBBF-A444-4AB6-BCF8-C40F83974286}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9D87FBBF-A444-4AB6-BCF8-C40F83974286}.Debug|Win32.Build.0 = Debug|Win32
+		{9D87FBBF-A444-4AB6-BCF8-C40F83974286}.Release|Win32.ActiveCfg = Release|Win32
+		{9D87FBBF-A444-4AB6-BCF8-C40F83974286}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
