@@ -7,7 +7,7 @@ OpenGLGraphicsBuffer::OpenGLGraphicsBuffer(BufferUsage usage, uint32_t accessHin
 	: GraphicsBuffer(usage, accessHint), mTarget(target)
 {
 	assert((GL_ARRAY_BUFFER == target) || (GL_ELEMENT_ARRAY_BUFFER == target) ||
-		   (GL_UNIFORM_BUFFER == target));
+		(GL_UNIFORM_BUFFER == target) || (GL_SHADER_STORAGE_BUFFER == target) );
 
 	glGenBuffers(1, &mBufferID);
 	if (initData != NULL)

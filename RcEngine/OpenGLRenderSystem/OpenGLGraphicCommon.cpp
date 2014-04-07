@@ -837,118 +837,123 @@ void OpenGLMapping::UnMapping( EffectParameterType& outType, GLenum glType )
 	case GL_FLOAT:
 		{
 			outType = EPT_Float;
-			break;
 		}
+		break;
 	case GL_FLOAT_VEC2:
 		{
 			outType = EPT_Float2;
-			break;
 		}
+		break;
 	case GL_FLOAT_VEC3:
 		{
 			outType = EPT_Float3;
-			break;
 		}
+		break;
 	case GL_FLOAT_VEC4:
 		{
 			outType = EPT_Float4;
-			break;
 		}
+		break;
 	case GL_UNSIGNED_INT:
 		{
 			outType = EPT_Uint;
-			break;
 		}
+		break;
 	case GL_UNSIGNED_INT_VEC2:
 		{
 			outType = EPT_Uint2;
-			break;
 		}
+		break;
 	case GL_UNSIGNED_INT_VEC3:
 		{
 			outType = EPT_Uint3;
-			break;
 		}
+		break;
 	case GL_UNSIGNED_INT_VEC4:
 		{
 			outType = EPT_Uint4;
-			break;
 		}
+		break;
 	case GL_INT:
 		{
 			outType = EPT_Int;
-			break;
 		}
+		break;
 	case GL_INT_VEC2:
 		{
 			outType = EPT_Int2;
-			break;
 		}
+		break;
 	case GL_INT_VEC3:
 		{
 			outType = EPT_Int3;
-			break;
 		}
+		break;
 	case GL_INT_VEC4:
 		{
 			outType = EPT_Int4;
-			break;
 		}
+		break;
 	case GL_BOOL:
 		{
 			outType = EPT_Boolean;
-			break;
 		}
+		break;
 	case GL_FLOAT_MAT2:
 		{
 			outType = EPT_Matrix2x2;
-			break;
 		}
+		break;
 	case GL_FLOAT_MAT3:
 		{
 			outType = EPT_Matrix3x3;
-			break;
 		}
+		break;
 	case GL_FLOAT_MAT4:
 		{
 			outType = EPT_Matrix4x4;
-			break;
 		}
+		break;
 	case GL_SAMPLER_1D:
 	case GL_SAMPLER_1D_SHADOW:
 		{
 			outType = EPT_Texture1D;
-			break;
 		}
+		break;
 	case GL_SAMPLER_2D:
 	case GL_SAMPLER_2D_SHADOW:
 		{
 			outType = EPT_Texture2D;
-			break;
 		}
+		break;
 	case GL_SAMPLER_3D:
 		{
 			outType = EPT_Texture3D;
-			break;
 		}
+		break;
 	case GL_SAMPLER_CUBE:
 	case GL_SAMPLER_CUBE_SHADOW:
 		{
 			outType = EPT_TextureCUBE;
-			break;
 		}
+		break;
 	case GL_SAMPLER_1D_ARRAY:
 	case GL_SAMPLER_1D_ARRAY_SHADOW:
 		{
 			outType = EPT_Texture1DArray;
-			break;
 		}
+		break;
 	case GL_SAMPLER_2D_ARRAY:
 	case GL_SAMPLER_2D_ARRAY_SHADOW:
 		{
 			outType = EPT_Texture2DArray;
-			break;
 		}
+		break;
+	case GL_SAMPLER_BUFFER:
+		{
+			outType = EPT_TextureBuffer;
+		}
+		break;
 	default:
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported Shader Parameter Type", 
 			"OpenGLMapping::UnMapping");
