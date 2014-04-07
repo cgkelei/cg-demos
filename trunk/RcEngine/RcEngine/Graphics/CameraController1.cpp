@@ -176,6 +176,19 @@ void FPSCameraControler::AttachCamera( Camera& camera )
 
 	mCameraRot = QuaternionInverse(quat);
 	QuaternionToYawPitchRoll(mCameraYawAngle, mCameraPitchAngle, mCameraRollAngle, mCameraRot);
+
+
+	//float3 X = mAttachedCamera->GetRight();
+	//float3 Y = mAttachedCamera->GetUp();
+	//float3 Z = mAttachedCamera->GetView();
+
+	//float4x4 rot(X[0], X[1], X[2], 0,
+	//	Y[0], Y[1], Y[2], 0,
+	//	Z[0], Z[1], Z[2], 0,
+	//	0, 0, 0, 1);
+
+	//float y, p, r;
+	//RotationMatrixToYawPitchRoll(y, p, r, rot);
 }
 
 

@@ -301,6 +301,7 @@ enum EffectParameterType
 	EPT_Texture2DArray,
 	EPT_Texture3DArray,
 	EPT_TextureCUBEArray,
+	EPT_TextureBuffer,
 	EPT_Sampler,
 	EPT_Struct,
 	EPT_Count

@@ -102,7 +102,6 @@ void EffectApp::LoadContent()
 	shared_ptr<TextureResource> skyBox = resMan.GetResourceByName<TextureResource>(RT_Texture, "MeadowTrail.dds", "General");
 	sceneMan.CreateSkyBox(skyBox->GetTexture());
 
-
 	Light* spotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
 	spotLight->SetDirection(float3(0, -1.5, -1));
 	spotLight->SetLightColor(float3(1, 1, 1));
