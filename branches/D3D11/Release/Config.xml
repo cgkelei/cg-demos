@@ -1,0 +1,23 @@
+<Application Title = "OpenGL Demo">
+	<Graphics Left="200" Top="200" Width="1024" Height="768" ColorForamt="R8G8B8A8" DepthStencilFormat="Depth32" FullScreen="0">
+		<Sample Count="0" Quality="0"/>
+		<SyncInterval Interval="1"/>
+	</Graphics>
+	
+	<Resource>
+		<Group Name="General">
+			<Path Name="../Media/Effect"/>
+			<Path Name="../Media/Material"/>
+			<Path Name="../Media/Pipiline"/>
+			<Path Name="../Media/Texture"/>
+			<Path Name="../Media/Font"/>
+			<Path Name="../Media/GuiSkin"/>
+		</Group>
+
+		<Group Name="Custom">
+			<Path Name="../Media/Mesh"/>
+		</Group>
+	</Resource>
+	
+</Application>
+

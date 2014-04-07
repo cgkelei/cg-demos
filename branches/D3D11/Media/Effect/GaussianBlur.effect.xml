@@ -1,0 +1,121 @@
+<Effect name="GaussianBlur">
+
+<Shader name="GaussianBlurVS" stage="Vertex" entry="main">
+	<ShaderSource>
+	<![CDATA[
+#version 330
+	
+in vec2 iPos;
+out vec2 oTex;
+
+void main()
+{
+	// Map [-1, -1] to [0, 1]
+	oTex = iPos * 0.5 + 0.5;
+	gl_Position = vec4(iPos, 0.0, 1.0);
+}		
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Shader name="ShadowBlurXPS" stage="Pixel" entry="main">
+	<ShaderSource>
+	<![CDATA[
+#version 330
+	
+uniform sampler2DArray InputTex;	
+uniform float ArraySlice;
+
+in vec2 oTex;
+
+void main()
+{
+	vec2 filtered  = vec2(0.0);
+	
+	// box filter
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(-2, 0)).rg;
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(-1, 0)).rg;
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(0,  0)).rg;
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(1,  0)).rg;
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(2,  0)).rg;
+	gl_FragColor = vec4(filtered  * 0.2, 0.0, 1.0);
+	
+	
+	//filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(-3, 0)).rg;
+	//filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(3, 0)).rg;
+	//gl_FragColor = vec4(filtered * (1.0 / 7.0), 0.0, 1.0);
+	
+	
+	/*
+	// 5 tap gaussian filter
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(-2, 0)).rg * 0.0097576614950975;
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(-1, 0)).rg * 0.20584891912478;
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(0,  0)).rg * 0.56878683876025;
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(1,  0)).rg * 0.20584891912478;
+	filtered  += textureLodOffset(InputTex, vec3(oTex, ArraySlice), 0, ivec2(2,  0)).rg * 0.012439754406416;
+	
+	gl_FragColor = sum;*/
+}		
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Shader name="ShadowBlurYPS" stage="Pixel" entry="main">
+	<ShaderSource>
+	<![CDATA[
+#version 330
+
+uniform sampler2D InputTex;	
+
+in vec2 oTex;
+
+void main()
+{
+	vec2 filtered = vec2(0.0);
+	
+	// box filter
+	filtered += textureLodOffset(InputTex, oTex, 0, ivec2(-2, 0)).rg;
+	filtered += textureLodOffset(InputTex, oTex, 0, ivec2(-1, 0)).rg;
+	filtered += textureLodOffset(InputTex, oTex, 0, ivec2(0,  0)).rg;
+	filtered += textureLodOffset(InputTex, oTex, 0, ivec2(1,  0)).rg;
+	filtered += textureLodOffset(InputTex, oTex, 0, ivec2(2,  0)).rg;
+
+	gl_FragColor = vec4(filtered * 0.2, 0.0, 1.0);
+	
+	//filtered  += textureLodOffset(InputTex, oTex, 0, ivec2(-3,  0)).rg;
+	//filtered  += textureLodOffset(InputTex, oTex, 0, ivec2(3,  0)).rg;
+	//gl_FragColor = vec4(filtered * (1.0 / 7.0), 0.0, 1.0);
+	
+	/*
+	// 5 tap gaussian filter
+	filtered += textureOffset(InputTex, oTex, ivec2(0, -2)).rg * 0.0097576614950975;
+	filtered += textureOffset(InputTex, oTex, ivec2(0, -1)).rg * 0.20584891912478;
+	filtered += textureOffset(InputTex, oTex, ivec2(0,  0)).rg * 0.56878683876025;
+	filtered += textureOffset(InputTex, oTex, ivec2(0,  1)).rg * 0.20584891912478;
+	filtered += textureOffset(InputTex, oTex, ivec2(0,  2)).rg * 0.012439754406416;
+	
+	gl_FragColor = filtered;*/
+}		
+	]]>
+	</ShaderSource>
+</Shader>
+
+<Technique name="ShadowMapBlurX">
+	<Pass name="p0">
+		<VertexShader name="GaussianBlurVS"/>
+		<PixelShader name="ShadowBlurXPS"/>
+		<State name="DepthEnable" value="false"/>
+		<State name="DepthWriteMask" value="false"/>	
+	</Pass>
+</Technique>
+
+<Technique name="ShadowMapBlurY">
+	<Pass name="p0">
+		<VertexShader name="GaussianBlurVS"/>
+		<PixelShader name="ShadowBlurYPS"/>
+		<State name="DepthEnable" value="false"/>
+		<State name="DepthWriteMask" value="false"/>	
+	</Pass>
+</Technique>
+
+</Effect>

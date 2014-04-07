@@ -1,0 +1,29 @@
+<Effect name="PossionPCFUtil">
+<ShaderSource>
+	<![CDATA[
+	
+// Material input for all shader
+	
+#ifdef _DiffuseMap
+	uniform sampler2D DiffuseMap;
+#else 
+	uniform vec3 DiffuseColor;
+#endif
+
+#ifdef _SpecularMap
+	uniform sampler2D SpecularMap;
+#else
+	uniform vec3 SpecularColor;
+#endif
+
+#ifndef _GlossyMap
+	uniform float Shininess;
+#endif	
+
+#ifdef _NormalMap
+	uniform sampler2D NormalMap;
+#endif
+
+	]]>
+</ShaderSource>
+</Effect>
