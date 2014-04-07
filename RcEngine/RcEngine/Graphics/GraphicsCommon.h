@@ -265,6 +265,17 @@ enum Attachment
 	ATT_Color7
 };
 
+enum TexCreateFlag
+{
+	TexCreate_GenerateMipmaps,
+	TexCreate_UAV,
+	TexCreate_SRGB,
+	TexCreate_ShaderResource,
+	TexCreate_RenderTarget,
+	TexCreate_DepthStencilTarget,
+	TexCreate_ResolveTarget
+};
+
 struct ElementInitData
 {
 	const void* pData;
