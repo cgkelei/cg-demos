@@ -6,14 +6,22 @@
 
 namespace RcEngine {
 
-class D3D11RenderDevice : public RenderDevice
+class _D3D11Export D3D11RenderDevice : public RenderDevice
 {
 public:
 	D3D11RenderDevice();
 	~D3D11RenderDevice();
 
+	virtual void Create() = 0;
+	virtual void Release() = 0;
+	virtual void ToggleFullscreen(bool fs) = 0;
+	virtual bool Fullscreen() const = 0;
+	virtual void CreateRenderWindow(const RenderSettings& settings) = 0;	
+	virtual void AdjustProjectionMatrix(float4x4& pOut) = 0;
 
-private:
+protected:
+	virtual void DoBindFrameBuffer(const shared_ptr<FrameBuffer>& fb) = 0;
+	virtual void DoRender( EffectTechnique& tech, RenderOperation& op ) = 0;
 
 
 };

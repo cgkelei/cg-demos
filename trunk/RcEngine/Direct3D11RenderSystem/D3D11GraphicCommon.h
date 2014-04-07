@@ -7,12 +7,13 @@
 
 namespace RcEngine {
 
-class _OpenGLExport D3D11Mapping
+class _D3D11Export D3D11Mapping
 {
 public:
 
 	static void MapUsage(uint32_t accessHint, D3D11_USAGE& usage, UINT& CPUAccessFlags); 
 	static DXGI_FORMAT Mapping(PixelFormat inPixelFormat);
+
 };
 
 }

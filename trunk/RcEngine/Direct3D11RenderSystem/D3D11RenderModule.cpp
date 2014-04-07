@@ -14,7 +14,7 @@ D3D11RenderModule::~D3D11RenderModule(void)
 {
 }
 
-const String& D3D11RenderModule::GetName() const const
+const String& D3D11RenderModule::GetName() const
 {
 	static String DeviceName("Direct3D 11");
 	return DeviceName;

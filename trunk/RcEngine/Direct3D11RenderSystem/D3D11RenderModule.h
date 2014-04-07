@@ -6,13 +6,13 @@
 
 namespace RcEngine {
 
-class D3D11RenderModule : public IRenderModule
+class _D3D11Export D3D11RenderModule : public IRenderModule
 {
 public:
 	D3D11RenderModule(void);
 	~D3D11RenderModule(void);
 
-	const String& GetName() const const ;
+	const String& GetName() const;
 	RenderDevice* GetRenderDevice();
 
 	void Initialise();
