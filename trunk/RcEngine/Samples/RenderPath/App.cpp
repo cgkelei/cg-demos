@@ -152,6 +152,9 @@ void RenderPathApp::SetupScene()
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
 
+	shared_ptr<TextureResource> tex = resMan.GetResourceByName<TextureResource>(RT_Texture, "seafloor.dds", "General");
+	auto fmt = tex->GetTexture()->GetTextureFormat();
+
 	// Ground
 	Entity* entity = sceneMan.CreateEntity("Ground", "./Geo/Ground.mesh",  "Custom");
 	SceneNode* sceneNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Ground");

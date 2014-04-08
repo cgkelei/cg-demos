@@ -42,18 +42,14 @@ class _ApiExport DepthStencilState
 {
 public:
 	DepthStencilState(const DepthStencilStateDesc& desc) 
-		: mDesc( desc )
-	{
-
-	}
+		: mDesc( desc ) {}
+	virtual ~DepthStencilState() {}
 
 	const DepthStencilStateDesc& GetDesc() const					{ return mDesc; } 
 
 protected:
 	DepthStencilStateDesc mDesc;
 };
-
-
 
 } // Namespace RcEngine
 

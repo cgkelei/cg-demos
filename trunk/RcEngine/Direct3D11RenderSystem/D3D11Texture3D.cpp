@@ -12,7 +12,7 @@ D3D11Texture3D::D3D11Texture3D( PixelFormat format, uint32_t arraySize, uint32_t
 
 D3D11Texture3D::~D3D11Texture3D()
 {
-	
+	SAFE_RELEASE(mTexture3D);
 }
 
 void D3D11Texture3D::Map3D( uint32_t arrayIndex, uint32_t level, TextureMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t zOffset, uint32_t width, uint32_t height, uint32_t depth, void*& data, uint32_t& rowPitch, uint32_t& slicePitch )

@@ -92,17 +92,18 @@
   <ItemGroup>
     <ClInclude Include="D3D11GraphicCommon.h" />
     <ClInclude Include="D3D11RenderModule.h" />
+    <ClInclude Include="D3D11RenderView.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="D3D11DepthStencilView.cpp" />
     <ClCompile Include="D3D11GraphicCommon.cpp" />
     <ClCompile Include="D3D11RenderModule.cpp" />
+    <ClCompile Include="D3D11RenderTargetView.cpp" />
+    <ClCompile Include="D3D11RenderView.cpp" />
     <ClCompile Include="D3D11Texture1D.cpp" />
     <ClCompile Include="D3D11Texture2D.cpp" />
     <ClCompile Include="D3D11Texture3D.cpp" />
     <ClCompile Include="D3D11TextureCube.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
