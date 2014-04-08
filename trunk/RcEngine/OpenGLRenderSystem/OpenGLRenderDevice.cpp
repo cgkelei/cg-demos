@@ -328,8 +328,7 @@ void OpenGLRenderDevice::SetRasterizerState( const shared_ptr<RasterizerState>& 
 			glFrontFace(stateDesc.FrontCounterClockwise ? GL_CW : GL_CCW);
 		}
 
-		if ( (currDesc.DepthBias != stateDesc.DepthBias)
-			|| (currDesc.SlopeScaledDepthBias != stateDesc.SlopeScaledDepthBias))
+		if (currDesc.DepthBias != stateDesc.DepthBias || currDesc.SlopeScaledDepthBias != stateDesc.SlopeScaledDepthBias)
 		{
 			// Bias is in {0, 16}, scale the unit addition appropriately
 			glPolygonOffset(stateDesc.SlopeScaledDepthBias, stateDesc.DepthBias);
@@ -362,8 +361,7 @@ void OpenGLRenderDevice::SetDepthStencilState( const shared_ptr<DepthStencilStat
 {
 	OGL_ERROR_CHECK();
 
-	if ( (mCurrentDepthStencilState != state) || (mCurrentFrontStencilRef != frontStencilRef) 
-		|| (mCurrentBackStencilRef != backStencilRef) )
+	if ( mCurrentDepthStencilState != state || mCurrentFrontStencilRef != frontStencilRef || mCurrentBackStencilRef != backStencilRef )
 	{
 		const DepthStencilStateDesc& currDesc = mCurrentDepthStencilState->GetDesc();
 		const DepthStencilStateDesc& stateDesc = state->GetDesc();
@@ -399,17 +397,17 @@ void OpenGLRenderDevice::SetDepthStencilState( const shared_ptr<DepthStencilStat
 			glStencilMask(stateDesc.StencilWriteMask);
 		}
 
-		if ((currDesc.FrontStencilFunc != stateDesc.FrontStencilFunc)
-			|| (mCurrentFrontStencilRef != frontStencilRef)
-			|| (currDesc.StencilReadMask != stateDesc.StencilReadMask))
+		if (currDesc.FrontStencilFunc != stateDesc.FrontStencilFunc || 
+			currDesc.StencilReadMask != stateDesc.StencilReadMask   || 
+			mCurrentFrontStencilRef != frontStencilRef)
 		{
 			glActiveStencilFaceEXT(GL_FRONT);
 			glStencilFunc(OpenGLMapping::Mapping(stateDesc.FrontStencilFunc), frontStencilRef, stateDesc.StencilReadMask);
 		}
 
-		if ((currDesc.FrontStencilFailOp != stateDesc.FrontStencilFailOp)
-			|| (currDesc.FrontStencilDepthFailOp != stateDesc.FrontStencilDepthFailOp)
-			|| (currDesc.FrontStencilPassOp != stateDesc.FrontStencilPassOp))
+		if (currDesc.FrontStencilFailOp != stateDesc.FrontStencilFailOp || 
+			currDesc.FrontStencilDepthFailOp != stateDesc.FrontStencilDepthFailOp || 
+			currDesc.FrontStencilPassOp != stateDesc.FrontStencilPassOp)
 		{
 			glActiveStencilFaceEXT(GL_FRONT);
 			glStencilOp(OpenGLMapping::Mapping(stateDesc.FrontStencilFailOp),
@@ -417,17 +415,17 @@ void OpenGLRenderDevice::SetDepthStencilState( const shared_ptr<DepthStencilStat
 						OpenGLMapping::Mapping(stateDesc.FrontStencilPassOp));
 		}
 
-		if ((currDesc.BackStencilFunc != stateDesc.BackStencilFunc)
-			|| (mCurrentBackStencilRef != backStencilRef)
-			|| (currDesc.StencilReadMask != stateDesc.StencilReadMask))
+		if (currDesc.BackStencilFunc != stateDesc.BackStencilFunc ||
+			currDesc.StencilReadMask != stateDesc.StencilReadMask ||
+			mCurrentBackStencilRef != backStencilRef)
 		{
 			glActiveStencilFaceEXT(GL_BACK);
 			glStencilFunc(OpenGLMapping::Mapping(stateDesc.BackStencilFunc), backStencilRef, stateDesc.StencilReadMask);
 		}
 
-		if ((currDesc.BackStencilFailOp != stateDesc.BackStencilFailOp)
-			|| (currDesc.BackStencilDepthFailOp != stateDesc.BackStencilDepthFailOp)
-			|| (currDesc.BackStencilPassOp != stateDesc.BackStencilPassOp))
+		if (currDesc.BackStencilFailOp != stateDesc.BackStencilFailOp ||
+			currDesc.BackStencilDepthFailOp != stateDesc.BackStencilDepthFailOp ||
+			currDesc.BackStencilPassOp != stateDesc.BackStencilPassOp)
 		{
 			glActiveStencilFaceEXT(GL_BACK);
 			glStencilOp(OpenGLMapping::Mapping(stateDesc.BackStencilFailOp),

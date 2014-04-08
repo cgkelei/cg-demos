@@ -1,47 +1,89 @@
 #include "OpenGLShader.h"
+#include "OpenGLGraphicCommon.h"
+#include <Core/Exception.h>
 
 namespace RcEngine {
 
-static GLenum MapToOpenGL( ShaderType type )
+enum GLSLVersion
 {
-	switch (type)
-	{
-	case ST_Vertex:
-		return GL_VERTEX_SHADER;
-	case ST_Pixel:
-		return GL_FRAGMENT_SHADER;
-	case ST_Geomerty:
-		return GL_GEOMETRY_SHADER;
-	case ST_Compute:
-		return GL_COMPUTE_SHADER;
-	}
-	throw std::exception("Error");
+	GLSL400 = 0,
+	GLSL410,
+	GLSL420,
+	GLSL430,
+	GLSL440
+};
+
+static String GLSLVersion[] = {
+	"#version 400\n",
+	"#version 410\n",
+	"#version 420\n",
+	"#version 430\n",
+	"#version 440\n"
+};
+
+const String& GetSupportedGLSLVersion() 
+{
+	if (GLEW_VERSION_4_4)
+		return GLSLVersion[GLSL440];
+	else if (GLEW_VERSION_4_3)
+		return GLSLVersion[GLSL430]; 
+	else if (GLEW_VERSION_4_2)
+		return GLSLVersion[GLSL420]; 
+	else if (GLEW_VERSION_4_1)
+		return GLSLVersion[GLSL410]; 
+	else if (GLEW_VERSION_4_0)
+		return GLSLVersion[GLSL400]; 
+	else
+		ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Only supported OpenGL 4.0 above hardware!", "GetSupportedGLSLVersion");
 }
 
 
+
 OpenGLShader::OpenGLShader( ShaderType shaderType )
-	: Shader(shaderType), mOGLShaderObject(0)
+	: Shader(shaderType),
+	  ShaderOGL(0)
 {
 
 }
 
 OpenGLShader::~OpenGLShader()
 {
-	Release();
-}
-void OpenGLShader::Release()
-{
-	if (mOGLShaderObject)
+	if (ShaderOGL)
 	{
-		glDeleteShader(mOGLShaderObject);
-		mOGLShaderObject = 0;
-		mValidate = false;
-		mCompileOutput.clear();
+		glDeleteShader(ShaderOGL);
+		ShaderOGL = 0;
 	}
 }
 
+
 bool OpenGLShader::Compile( const String& source, const String& entryPoint /*= ""*/ )
 {
+	ShaderOGL = glCreateShader(OpenGLMapping::Mapping(mShaderType));
+		
+	String version = GetVersion()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	mShaderSource = source;
 
 	mOGLShaderObject = glCreateShader( MapToOpenGL(mShaderType) );

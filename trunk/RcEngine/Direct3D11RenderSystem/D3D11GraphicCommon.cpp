@@ -127,7 +127,7 @@ DXGI_FORMAT D3D11Mapping::Mapping( PixelFormat inPixelFormat )
 	case RcEngine::PF_Count:
 		break;
 	default:
-		break;
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid PixelFormat", "D3D11Mapping::Mapping");
 	}
 }
 
@@ -136,23 +136,175 @@ D3D11_COMPARISON_FUNC D3D11Mapping::Mapping( CompareFunction cmpFunc )
 	switch (cmpFunc)
 	{
 	case CF_Always:
-		return 
+		return D3D11_COMPARISON_ALWAYS;
 	case CF_Never:
-		break;
+		return D3D11_COMPARISON_NEVER;
 	case CF_Less:
-		break;
+		return D3D11_COMPARISON_LESS;
 	case CF_LessEqual:
-		break;
-	case RcEngine::CF_Equal:
-		break;
-	case RcEngine::CF_NotEqual:
-		break;
-	case RcEngine::CF_GreaterEqual:
-		break;
-	case RcEngine::CF_Greater:
-		break;
+		return D3D11_COMPARISON_LESS_EQUAL;
+	case CF_Equal:
+		return D3D11_COMPARISON_EQUAL;
+	case CF_NotEqual:
+		return D3D11_COMPARISON_NOT_EQUAL;
+	case CF_GreaterEqual:
+		return D3D11_COMPARISON_GREATER_EQUAL;
+	case CF_Greater:
+		return D3D11_COMPARISON_GREATER;
 	default:
-		break;
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid CompareFunction", "D3D11Mapping::Mapping");
+	}
+}
+
+D3D11_STENCIL_OP D3D11Mapping::Mapping( StencilOperation sop )
+{
+	switch(sop)
+	{
+	case SOP_Zero:
+		return D3D11_STENCIL_OP_ZERO;
+	case SOP_Keep:
+		return D3D11_STENCIL_OP_KEEP;
+	case SOP_Replace:
+		return D3D11_STENCIL_OP_REPLACE;
+	case SOP_Incr:
+		return D3D11_STENCIL_OP_INCR;
+	case SOP_Invert:
+		return D3D11_STENCIL_OP_INVERT;
+	case SOP_Decr:
+		return D3D11_STENCIL_OP_DECR;
+	case SOP_Incr_Wrap:
+		return D3D11_STENCIL_OP_INCR_SAT;
+	case SOP_Decr_Wrap:
+		return D3D11_STENCIL_OP_DECR_SAT;
+	default:
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid StencilOperation", "D3D11Mapping::Mapping");
+	}
+}
+
+D3D11_BLEND_OP D3D11Mapping::Mapping( BlendOperation bop )
+{
+	switch (bop)
+	{
+	case BOP_Add:
+		return D3D11_BLEND_OP_ADD;
+	case BOP_Sub:
+		return D3D11_BLEND_OP_SUBTRACT;
+	case BOP_Rev_Sub:
+		return D3D11_BLEND_OP_REV_SUBTRACT;
+	case BOP_Min:
+		return D3D11_BLEND_OP_MIN;
+	case BOP_Max:
+		return D3D11_BLEND_OP_MAX;
+	default:
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid BlendOperation", "D3D11Mapping::Mapping");
+	}
+}
+
+D3D11_BLEND D3D11Mapping::Mapping( AlphaBlendFactor blend )
+{
+	switch (blend)
+	{
+	case ABF_Zero:
+		return D3D11_BLEND_ZERO;
+	case ABF_One:
+		return D3D11_BLEND_ONE;
+	case ABF_Src_Alpha:
+		return D3D11_BLEND_SRC_ALPHA;
+	case ABF_Dst_Alpha:
+		return D3D11_BLEND_DEST_ALPHA;
+	case ABF_Inv_Src_Alpha:
+		return D3D11_BLEND_INV_SRC_ALPHA;
+	case ABF_Inv_Dst_Alpha:
+		return D3D11_BLEND_INV_DEST_ALPHA;
+	case ABF_Src_Color:
+		return D3D11_BLEND_SRC_COLOR;
+	case ABF_Dst_Color:
+		return D3D11_BLEND_DEST_COLOR;
+	case ABF_Inv_Src_Color:
+		return D3D11_BLEND_INV_SRC_COLOR;
+	case ABF_Inv_Dst_Color:
+		return D3D11_BLEND_INV_DEST_COLOR;
+	case ABF_Src_Alpha_Sat:
+		return D3D11_BLEND_SRC_ALPHA_SAT;
+	case ABF_Blend_Factor:
+		return D3D11_BLEND_BLEND_FACTOR;
+	case ABF_Inv_Blend_Factor:
+		return D3D11_BLEND_INV_BLEND_FACTOR;
+	default:
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid Blend", "D3D11Mapping::Mapping");
+	}
+}
+
+D3D11_CULL_MODE D3D11Mapping::Mapping( CullMode mode )
+{
+	switch (mode)
+	{
+	case CM_None:
+		return D3D11_CULL_NONE;
+	case CM_Front:
+		return D3D11_CULL_FRONT;
+	case CM_Back:
+		return D3D11_CULL_BACK;
+	default:
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid CullMode", "D3D11Mapping::Mapping");
+	}
+}
+
+D3D11_FILL_MODE D3D11Mapping::Mapping( FillMode mode )
+{
+	switch (mode)
+	{
+	case FM_Solid:
+		return D3D11_FILL_SOLID;
+	case FM_WireFrame:
+		return D3D11_FILL_WIREFRAME;
+	default:
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid FillMode", "D3D11Mapping::Mapping");
+	}
+}
+
+D3D11_TEXTURE_ADDRESS_MODE D3D11Mapping::Mapping( TextureAddressMode mode )
+{
+	switch (mode)
+	{
+	case TAM_Wrap:
+		return D3D11_TEXTURE_ADDRESS_WRAP;
+	case TAM_Mirror:
+		return D3D11_TEXTURE_ADDRESS_MIRROR;
+	case TAM_Clamp:
+		return D3D11_TEXTURE_ADDRESS_CLAMP;
+	case TAM_Border:
+		return D3D11_TEXTURE_ADDRESS_BORDER;
+	case TAM_Mirror_Once:
+		return D3D11_TEXTURE_ADDRESS_MIRROR_ONCE;
+	default:
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid TextureAddressMode", "D3D11Mapping::Mapping");
+	}
+}
+D3D11_FILTER D3D11Mapping::Mapping( TextureFilter filter, bool compare /*= false*/ )
+{
+	switch (filter)
+	{
+	case TF_Min_Mag_Mip_Point:
+		return compare ? D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT : D3D11_FILTER_MIN_MAG_MIP_POINT;
+	case TF_Min_Mag_Point_Mip_Linear:
+		return compare ? D3D11_FILTER_COMPARISON_MIN_MAG_POINT_MIP_LINEAR : D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+	case TF_Min_Point_Mag_Linear_Mip_Point:
+		return compare ? D3D11_FILTER_COMPARISON_MIN_POINT_MAG_LINEAR_MIP_POINT : D3D11_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
+	case TF_Min_Point_Mag_Mip_Linear:
+		return compare ? D3D11_FILTER_COMPARISON_MIN_POINT_MAG_MIP_LINEAR : D3D11_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+	case TF_Min_Linear_Mag_Mip_Point:
+		return compare ? D3D11_FILTER_COMPARISON_MIN_LINEAR_MAG_MIP_POINT : D3D11_FILTER_MIN_LINEAR_MAG_MIP_POINT;
+	case TF_Min_Linear_Mag_Point_Mip_Linear:
+		return compare ? D3D11_FILTER_COMPARISON_MIN_LINEAR_MAG_POINT_MIP_LINEAR : D3D11_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+	case TF_Min_Mag_Linear_Mip_Point:
+		return compare ? D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT : D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+	case TF_Min_Mag_Mip_Linear:
+		return compare ? D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR : D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	case TF_Anisotropic:
+		return compare ? D3D11_FILTER_COMPARISON_ANISOTROPIC : D3D11_FILTER_ANISOTROPIC;
+	default:
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid TextureFilter", "D3D11Mapping::Mapping");
 	}
 }
 

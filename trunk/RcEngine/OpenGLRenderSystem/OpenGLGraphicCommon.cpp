@@ -518,6 +518,27 @@ void OpenGLMapping::Mapping( GLenum& min, GLenum& mag, TextureFilter filter )
 	}
 }
 
+GLenum OpenGLMapping::Mapping( ShaderType type )
+{
+	switch (type)
+	{
+	case ST_Vertex:
+		return GL_VERTEX_SHADER;
+	case ST_Hull:
+		return GL_TESS_CONTROL_SHADER;
+	case ST_Domain:
+		return GL_TESS_EVALUATION_SHADER;
+	case ST_Pixel:
+		return GL_FRAGMENT_SHADER;
+	case ST_Geomerty:
+		return GL_GEOMETRY_SHADER;
+	case ST_Compute:
+		return GL_COMPUTE_SHADER;
+	default:
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid ShaderType", "OpenGLMapping::Mapping");
+	}
+}
+
 PixelFormat OpenGLMapping::UnMapping( GLenum internalformat, GLenum format, GLenum type )
 {
 	switch(internalformat)

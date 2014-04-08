@@ -243,11 +243,11 @@ void CollectRenderStates(XMLNodePtr passNode, DepthStencilStateDesc& dsDesc, Ble
 		}
 		else if (name == "StencilReadMask")
 		{
-			dsDesc.StencilReadMask = LexicalCast<uint16_t>(value);
+			dsDesc.StencilReadMask = LexicalCast<uint8_t>(value);
 		}
 		else if (name == "StencilWriteMask")
 		{
-			dsDesc.StencilWriteMask = LexicalCast<uint16_t>(value);
+			dsDesc.StencilWriteMask = LexicalCast<uint8_t>(value);
 		}
 		else if (name == "FrontStencilRef")
 		{

@@ -482,10 +482,13 @@ enum EffectParameterUsage
 
 enum ShaderType
 {
-	ST_Vertex,
-	ST_Pixel,
+	ST_Vertex = 0,
+	ST_Hull,
+	ST_Domain,
 	ST_Geomerty,
-	ST_Compute
+	ST_Pixel,
+	ST_Compute,
+	ST_Count
 };
 
 enum RenderOrder

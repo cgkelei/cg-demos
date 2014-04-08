@@ -14,7 +14,8 @@ struct _ApiExport SamplerStateDesc
 public:
 	SamplerStateDesc();
 
-	ShaderType BindStage;
+	ShaderType				   BindStage;
+	bool					   CompareSampler;
 
 	TextureFilter              Filter;
 	TextureAddressMode		   AddressU;

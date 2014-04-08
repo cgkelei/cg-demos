@@ -14,7 +14,13 @@ public:
 	static void MapUsage(uint32_t accessHint, D3D11_USAGE& usage, UINT& CPUAccessFlags); 
 	static DXGI_FORMAT Mapping(PixelFormat inPixelFormat);
 	static D3D11_COMPARISON_FUNC Mapping(CompareFunction cmpFunc);
-
+	static D3D11_STENCIL_OP Mapping(StencilOperation sop);
+	static D3D11_BLEND_OP Mapping(BlendOperation bop);
+	static D3D11_BLEND Mapping(AlphaBlendFactor blend);
+	static D3D11_CULL_MODE Mapping(CullMode mode); 
+	static D3D11_FILL_MODE Mapping(FillMode mode);
+	static D3D11_TEXTURE_ADDRESS_MODE Mapping(TextureAddressMode mode);
+	static D3D11_FILTER Mapping(TextureFilter filter, bool compare = false);
 };
 
 }
