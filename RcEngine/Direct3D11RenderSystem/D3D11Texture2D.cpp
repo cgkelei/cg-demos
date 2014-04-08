@@ -5,7 +5,7 @@ namespace RcEngine {
 
 D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width,
 							   uint32_t height, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint,
-							   uint32_t flag, ElementInitData* initData )
+							   uint32_t flags, ElementInitData* initData )
 	: D3D11TextureBase(TT_Texture2D, format, arraySize, numMipMaps, sampleCount, sampleQuality, accessHint, flags),
 	  mTexture2D(nullptr)
 {
@@ -111,6 +111,12 @@ D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t
 		D3D11_VERRY(pd3dDevice->CreateShaderResourceView(mTexture2D, &viewDesc, &mShaderResourceView));
 	}
 }
+
+D3D11Texture2D::~D3D11Texture2D()
+{
+	SAFE_RELEASE(mTexture2D);
+}
+
 
 void D3D11Texture1D::Map1D( uint32_t arrayIndex, uint32_t level, TextureMapAccess tma, uint32_t xOffset, uint32_t width, void*& data )
 {

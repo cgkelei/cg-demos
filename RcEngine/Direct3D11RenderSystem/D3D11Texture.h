@@ -45,6 +45,7 @@ public:
 
 	virtual void CopyToTexture(Texture& destTexture);
 
+	inline uint32_t GetTextureCreateFlags() const							{ return mFlags; }
 	inline ID3D11ShaderResourceView* GetD11ShaderResourceView() const		{ return mShaderResourceView; }
 
 protected:
@@ -87,6 +88,8 @@ public:
 		ElementInitData* initData);
 
 	~D3D11Texture2D();
+
+	ID3D11Texture2D* GetTexture() const { return mTexture2D; }
 
 	void Map2D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
 			   uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,

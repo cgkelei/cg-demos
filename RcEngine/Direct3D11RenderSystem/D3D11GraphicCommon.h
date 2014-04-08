@@ -13,6 +13,7 @@ public:
 
 	static void MapUsage(uint32_t accessHint, D3D11_USAGE& usage, UINT& CPUAccessFlags); 
 	static DXGI_FORMAT Mapping(PixelFormat inPixelFormat);
+	static D3D11_COMPARISON_FUNC Mapping(CompareFunction cmpFunc);
 
 };
 

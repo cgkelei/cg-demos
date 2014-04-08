@@ -41,10 +41,8 @@ class _ApiExport BlendState
 {
 public:
 	BlendState(const BlendStateDesc& desc) 
-		: mDesc(desc)
-	{
-
-	}
+		: mDesc(desc) { }
+	virtual ~BlendState() {}
 
 	const BlendStateDesc& GetDesc() const					{ return mDesc; }
 

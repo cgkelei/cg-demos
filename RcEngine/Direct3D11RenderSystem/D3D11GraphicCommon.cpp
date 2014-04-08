@@ -131,4 +131,29 @@ DXGI_FORMAT D3D11Mapping::Mapping( PixelFormat inPixelFormat )
 	}
 }
 
+D3D11_COMPARISON_FUNC D3D11Mapping::Mapping( CompareFunction cmpFunc )
+{
+	switch (cmpFunc)
+	{
+	case CF_Always:
+		return 
+	case CF_Never:
+		break;
+	case CF_Less:
+		break;
+	case CF_LessEqual:
+		break;
+	case RcEngine::CF_Equal:
+		break;
+	case RcEngine::CF_NotEqual:
+		break;
+	case RcEngine::CF_GreaterEqual:
+		break;
+	case RcEngine::CF_Greater:
+		break;
+	default:
+		break;
+	}
+}
+
 }
