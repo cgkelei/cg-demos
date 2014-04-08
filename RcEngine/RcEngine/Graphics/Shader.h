@@ -6,25 +6,20 @@
 
 namespace RcEngine {
 
+typedef std::pair<String, String> ShaderMacro;
+
 class _ApiExport Shader
 {
 public:
 	Shader(ShaderType shaderType);
 	virtual ~Shader();
 	
-	virtual void Release() = 0;
+	inline ShaderType GetShaderType() const		{ return mShaderType; }
 
-	virtual bool Compile(const String& source, const String& entryPoint = "") = 0; 
+	virtual bool Compile(const String& source, const std::vector<String>& includes,
+			const std::vector<ShaderMacro>& macros, const String& entryPoint = "") = 0;
 
-	const String& GetCompileInfo() const	{ return mCompileOutput; }
-	ShaderType GetShaderType() const  { return mShaderType; }
-
-	bool Validate() const { return mValidate; } 
-
-	void AddInclude(const String& include);
-	void AddDefine(const String& name, const String& value);
-
-	void DumpSource(const char* filename);
+	virtual bool Compile(const std::vector<uint8_t>& bytecode) = 0;
 
 private:
 	Shader( const Shader& );
@@ -32,14 +27,6 @@ private:
 
 protected:
 	ShaderType mShaderType;
-	String mShaderSource;
-	String mShaderIncludes;
-	vector<String> mDefines;
-	vector<String> mDefineValues;
-	String mCompileOutput;
-	bool mValidate;
-	
-
 };
 
 }

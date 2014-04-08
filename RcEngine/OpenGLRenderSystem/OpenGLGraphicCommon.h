@@ -21,6 +21,8 @@ public:
 	static GLenum Mapping(CompareFunction cf);
 	static GLenum Mapping(StencilOperation sop);
 	static GLenum Mapping(TextureAddressMode mode);
+	static GLenum Mapping(ShaderType type);
+
 
 	static void Mapping(GLenum& min, GLenum& mag, TextureFilter filter);
 

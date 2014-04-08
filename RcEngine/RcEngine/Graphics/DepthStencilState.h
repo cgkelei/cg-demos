@@ -20,8 +20,8 @@ struct _ApiExport DepthStencilStateDesc
 	CompareFunction		       DepthFunc;
 
 	bool                       StencilEnable;
-	uint16_t                   StencilReadMask;
-	uint16_t                   StencilWriteMask;
+	uint8_t                    StencilReadMask;
+	uint8_t                    StencilWriteMask;
 
 	StencilOperation		   FrontStencilFailOp;
 	StencilOperation		   FrontStencilDepthFailOp;

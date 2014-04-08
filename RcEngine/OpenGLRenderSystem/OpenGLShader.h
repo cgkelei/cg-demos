@@ -16,11 +16,12 @@ public:
 	
 	bool Compile(const String& source, const String& entryPoint = "");
 
-	GLuint GetShaderObject() const { return mOGLShaderObject; }
 
-private:
-	GLuint mOGLShaderObject;
+public:
+	GLuint ShaderOGL;
 };
+
+
 
 }
 

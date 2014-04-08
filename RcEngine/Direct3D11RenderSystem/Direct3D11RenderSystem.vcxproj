@@ -84,26 +84,30 @@
     <Text Include="D3D11Texture.cpp" />
     <Text Include="D3D11RenderDevice.cpp" />
     <Text Include="D3D11RenderDevice.h" />
-    <Text Include="D3D11SamplerState.h" />
     <Text Include="D3D11Prerequisites.h" />
-    <Text Include="D3D11SamplerState.cpp" />
     <Text Include="DllMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3D11GraphicCommon.h" />
     <ClInclude Include="D3D11RenderModule.h" />
+    <ClInclude Include="D3D11RenderState.h" />
     <ClInclude Include="D3D11RenderView.h" />
+    <ClInclude Include="D3D11Shader.h" />
+    <ClInclude Include="D3D11VertexDeclaration.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3D11DepthStencilView.cpp" />
     <ClCompile Include="D3D11GraphicCommon.cpp" />
     <ClCompile Include="D3D11RenderModule.cpp" />
+    <ClCompile Include="D3D11RenderState.cpp" />
     <ClCompile Include="D3D11RenderTargetView.cpp" />
     <ClCompile Include="D3D11RenderView.cpp" />
+    <ClCompile Include="D3D11Shader.cpp" />
     <ClCompile Include="D3D11Texture1D.cpp" />
     <ClCompile Include="D3D11Texture2D.cpp" />
     <ClCompile Include="D3D11Texture3D.cpp" />
     <ClCompile Include="D3D11TextureCube.cpp" />
+    <ClCompile Include="D3D11VertexDeclaration.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

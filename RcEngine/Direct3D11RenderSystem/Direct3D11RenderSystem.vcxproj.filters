@@ -27,12 +27,6 @@
     <Text Include="D3D11RenderDevice.cpp">
       <Filter>Source Files</Filter>
     </Text>
-    <Text Include="D3D11SamplerState.h">
-      <Filter>Header Files</Filter>
-    </Text>
-    <Text Include="D3D11SamplerState.cpp">
-      <Filter>Source Files</Filter>
-    </Text>
     <Text Include="D3D11Prerequisites.h">
       <Filter>Header Files</Filter>
     </Text>
@@ -48,6 +42,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D3D11RenderView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D11RenderState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D11Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D11VertexDeclaration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -77,6 +80,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="D3D11RenderTargetView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D11RenderState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D11Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D11VertexDeclaration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -13,7 +13,8 @@ SamplerStateDesc::SamplerStateDesc()
 	  MaxLOD(FLT_MAX),
 	  MaxAnisotropy(1),
 	  ComparisonFunc(CF_Never),
-	  BindStage(ST_Pixel)
+	  BindStage(ST_Pixel),
+	  CompareSampler(false)
 {
 
 }

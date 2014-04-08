@@ -16,8 +16,8 @@ public:
 	D3D11DepthStencilState(const DepthStencilStateDesc& desc);
 	~D3D11DepthStencilState();
 
-private:
-	ID3D11DepthStencilState* IDepthStencilState;
+public:
+	ID3D11DepthStencilState* StateD3D11;
 };
 
 class _D3D11Export D3D11BlendState : public BlendState
@@ -26,9 +26,8 @@ public:
 	D3D11BlendState(const BlendStateDesc& desc);
 	~D3D11BlendState();
 
-private:
-	ID3D11BlendState* mBlendState;
-
+public:
+	ID3D11BlendState* StateD3D11;
 };
 
 class _D3D11Export D3D11RasterizerState : public RasterizerState
@@ -37,8 +36,8 @@ public:
 	D3D11RasterizerState(const RasterizerStateDesc& desc);
 	~D3D11RasterizerState();
 
-private:
-	ID3D11RasterizerState* mRasterizerState;
+public:
+	ID3D11RasterizerState* StateD3D11;
 };
 
 class _D3D11Export D3D11SamplerState : public SamplerState
@@ -47,14 +46,10 @@ public:
 	D3D11SamplerState(const SamplerStateDesc& desc);
 	~D3D11SamplerState();
 
-
-private:
-	ID3D11SamplerState* mSamplerState;
-}
+public:
+	ID3D11SamplerState* StateD3D11;
+};
 	
-	
-
-
 }
 
 

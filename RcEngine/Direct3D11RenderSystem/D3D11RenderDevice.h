@@ -18,6 +18,11 @@ public:
 	bool Fullscreen() const;
 	void CreateRenderWindow(const RenderSettings& settings);	
 	void AdjustProjectionMatrix(float4x4& pOut);
+	void SetSamplerState(ShaderType stage, uint32_t unit, const shared_ptr<SamplerState>& state);
+	void SetBlendState(const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask);
+	void SetRasterizerState(const shared_ptr<RasterizerState>& state);
+	void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0);
+
 
 protected:
 	void DoBindFrameBuffer(const shared_ptr<FrameBuffer>& fb);
@@ -25,8 +30,10 @@ protected:
 
 
 private:
-
-
+	ID3D11DeviceContext* mDeviceContext;
+	
+	typedef std::pair<ShaderType, uint32_t> SamplerSlot;
+	std::map<SamplerSlot, shared_ptr<SamplerState>> mCurrentSamplers;
 };
 
 }
