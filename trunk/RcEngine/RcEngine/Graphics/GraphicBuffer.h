@@ -28,6 +28,27 @@ protected:
 	uint32_t mSizeInBytes;
 };
 
+class _ApiExport VertexBuffer
+{
+
+};
+
+class _ApiExport IndexBuffer
+{
+
+};
+
+class _ApiExport UniformBuffer
+{
+public:
+	UniformBuffer();
+	~UniformBuffer();
+
+private:
+
+};
+
+
 
 } // Namespace RcEngine
 

@@ -10,6 +10,7 @@
 #include <Graphics/DepthStencilState.h>
 #include <Graphics/RasterizerState.h>
 #include <Graphics/SamplerState.h>
+#include <Graphics/Shader.h>
 
 namespace RcEngine {
 
@@ -62,7 +63,6 @@ public:
 	shared_ptr<VertexDeclaration> CreateVertexDeclaration(const std::vector<VertexElement>& elems);
 	shared_ptr<VertexDeclaration> CreateVertexDeclaration(VertexElement* elems, uint32_t count);
 
-
 	/**
 	 * Create a depth-stencil state object that encapsulates depth-stencil test information.
 	 */
@@ -79,14 +79,19 @@ public:
 	shared_ptr<RasterizerState> CreateRasterizerState( const RasterizerStateDesc& desc );
 
 	/**
+	 * Create HLSL/GLSL shader, Set BinaryHint to true to use pre-compiled shader bytecode.
+	 */
+	virtual void SetShaderBinaryHint(bool bEnable) = 0;
+	shared_ptr<Shader> CreateShader(ShaderType shaderType, const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint = "");
+
+	/**
 	 * Create a sampler state object.
 	 */
 	shared_ptr<SamplerState> CreateSamplerState( const SamplerStateDesc& desc );
 
 	virtual shared_ptr<Shader> CreateShader(ShaderType type) = 0;
 	virtual shared_ptr<ShaderProgram> CreateShaderProgram(Effect& effect) = 0;
-
-
+	
 	/**
 	 * Todo
 	 * Implement texture load and save
@@ -97,17 +102,21 @@ public:
 
 protected:
 
-	virtual shared_ptr<DepthStencilState> CreateDepthStencilStateImpl( const DepthStencilStateDesc& desc ) = 0; 
 	virtual shared_ptr<BlendState> CreateBlendStateImpl( const BlendStateDesc& desc ) = 0;
-	virtual shared_ptr<RasterizerState> CreateRasterizerStateImpl( const RasterizerStateDesc& desc ) = 0;
 	virtual shared_ptr<SamplerState> CreateSamplerStateImpl( const SamplerStateDesc& desc ) = 0;
+	virtual shared_ptr<RasterizerState> CreateRasterizerStateImpl( const RasterizerStateDesc& desc ) = 0;
+	virtual shared_ptr<DepthStencilState> CreateDepthStencilStateImpl( const DepthStencilStateDesc& desc ) = 0; 
+
+	virtual shared_ptr<Shader> CreateShaderImpl(ShaderType shaderType) = 0;
 
 protected:
-	std::map<DepthStencilStateDesc, shared_ptr<DepthStencilState> > mDepthStecilStatePool;
-	std::map<RasterizerStateDesc, shared_ptr<RasterizerState> > mRasterizerStatePool;
-	std::map<SamplerStateDesc, shared_ptr<SamplerState> > mSamplerStatePool;
-	std::map<BlendStateDesc, shared_ptr<BlendState> > mBlendStatePool;
+	bool mShaderBinaryHint;
 
+	std::map<String, shared_ptr<Shader> > mShaderPool;
+	std::map<BlendStateDesc, shared_ptr<BlendState> > mBlendStatePool;
+	std::map<SamplerStateDesc, shared_ptr<SamplerState> > mSamplerStatePool;
+	std::map<RasterizerStateDesc, shared_ptr<RasterizerState> > mRasterizerStatePool;
+	std::map<DepthStencilStateDesc, shared_ptr<DepthStencilState> > mDepthStecilStatePool;
 };
 
 

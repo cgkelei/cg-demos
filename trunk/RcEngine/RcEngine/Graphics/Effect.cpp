@@ -394,25 +394,40 @@ void CollectRenderStates(XMLNodePtr passNode, DepthStencilStateDesc& dsDesc, Ble
 	}
 }
 
+inline ShaderType ParseShaderStage(const String& stage)
+{
+	if (stage == "Vertex")
+		return ST_Vertex;
+	else if (stage == "Hull")
+		return ST_Hull;
+	else if (stage == "Domain")
+		return ST_Domain;
+	else if (stage == "Geometry")
+		return ST_Geomerty;
+	else if (stage == "Pixel")
+		return ST_Pixel;
+	else if (stage == "Compute")
+		return ST_Compute;
+}
+
 shared_ptr<Shader> CompileShader(const ShaderStage& shaderStage, const vector<String>& defines, const vector<String>& values)
 {
-	shared_ptr<Shader> retVal;
-
 	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 
-	ShaderType shaderType;
-	if (shaderStage.Stage == String("Vertex"))
-	{
-		shaderType = ST_Vertex;		
-	}
-	else if (shaderStage.Stage == String("Pixel"))
-	{
-		shaderType = ST_Pixel;
-	}
-	else if (shaderStage.Stage == String("Geometry"))
-	{
-		shaderType = ST_Geomerty;
-	}
+	ShaderType shaderType = ParseShaderStage(shaderStage.Stage);
+
+
+	shared_ptr<Shader> retVal;
+
+	
+
+	
+
+
+
+
+
+
 
 	retVal = factory.CreateShader(shaderType);
 
@@ -444,23 +459,21 @@ shared_ptr<Shader> CompileShader(const ShaderStage& shaderStage, const vector<St
 	return retVal;
 }
 
-void CollectShaderMacro(const XMLNodePtr& node, vector<String>& defines, vector<String>& values)
+void CollectShaderMacro(const XMLNodePtr& node, std::vector<ShaderMacro>& shaderMacros)
 {
 	for (XMLNodePtr macroNode = node->FirstNode("Macro"); macroNode; macroNode = macroNode->NextSibling("Macro"))
 	{
 		String name = macroNode->Attribute("name")->ValueString();	
 		String value = macroNode->AttributeString("value", "");
-		defines.push_back(name);
-		values.push_back(value);
+		shaderMacros.push_back(ShaderMacro(name, value));
 	}
 
 	RenderDeviceType rdType = Context::GetSingleton().GetRenderDevice().GetRenderDeviceType();
-	
+
 	// Deal with OpenGL and Direct3D texcoord Y reverse
 	if (rdType == RD_Direct3D11)
 	{
-		defines.push_back("Direct3D");
-		values.push_back("");
+		shaderMacros.push_back(ShaderMacro("Direct3D", ""));
 	}
 }
 
@@ -578,9 +591,10 @@ void Effect::LoadImpl()
 {
 	FileSystem& fileSystem = FileSystem::GetSingleton();
 	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
-	
+
+	// effect flags used to build shader macro
 	vector<String> effectFlags;
-	
+
 	//split the effect name to get effect file and flags
 	std::istringstream iss(mResourceName); 
 	do 
@@ -600,159 +614,241 @@ void Effect::LoadImpl()
 	// effect name 
 	mEffectName = root->AttributeString("name", "");
 
-	// store all shader this effect will use
-	unordered_map<String, ShaderStage> shaderStages;
-
-	XMLNodePtr shaderNode; 
-	for (shaderNode = root->FirstNode("Shader");  shaderNode; shaderNode = shaderNode->NextSibling("Shader"))
-	{
-		String name = shaderNode->AttributeString("name", "");
-
-		ShaderStage& shaderStage = shaderStages[name];
-
-		shaderStage.Name = name;
-		shaderStage.Stage = shaderNode->AttributeString("stage", "");	
-		shaderStage.Entry = shaderNode->AttributeString("entry", "");
-
-		// Parse shader include headers
-		vector<String> includes;
-		for (XMLNodePtr includeNode = shaderNode->FirstNode("Include");  includeNode; includeNode = includeNode->NextSibling("Include"))
-		{
-			String includeName = includeNode->Attribute("name")->ValueString();
-
-			shared_ptr<Stream> streamPtr = FileSystem::GetSingleton().OpenStream(includeName, mGroup);
-			Stream& includeStream = *streamPtr;
-
-			XMLDoc includeDoc;
-			XMLNodePtr includeSourceNode = includeDoc.Parse(includeStream)->FirstNode("ShaderSource")->FirstNode();
-
-			if (includeSourceNode->NodeType() != XML_Node_CData)
-				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Effect shader include source(CDATA) does't exit", "Effect::LoadImpl");
-
-			
-			String includeSource = includeSourceNode->ValueString(); 
-			shaderStage.Includes.push_back(includeSource);
-		}
-
-		// Parse shader source
-		XMLNodePtr shaderSourceNode = shaderNode->FirstNode("ShaderSource")->FirstNode();
-		if (shaderSourceNode->NodeType() == XML_Node_CData)
-			shaderStage.Source =  shaderSourceNode->ValueString();	
-		else
-			ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Effect shader include source(CDATA) does't exit", "Effect::LoadImpl");	
-	}
-
-	// Parse effect technique
 	XMLNodePtr technqueNode;
 	for (technqueNode = root->FirstNode("Technique");  technqueNode; technqueNode = technqueNode->NextSibling("Technique"))
 	{
 		EffectTechnique* technique = new EffectTechnique(*this);
-
+	
 		technique->mName = technqueNode->AttributeString("name", "");
-
-		XMLNodePtr passNode;
+	
+		String filename, entryPoint;
+		XMLNodePtr passNode, shaderNode;
 		for (passNode = technqueNode->FirstNode("Pass");  passNode; passNode = passNode->NextSibling("Pass"))
 		{
 			EffectPass* pass = new EffectPass;
 			pass->mName = passNode->AttributeString("name", "");
-
+	
 			DepthStencilStateDesc dsDesc;
 			BlendStateDesc blendDesc;
 			RasterizerStateDesc rasDesc;
-
-			CollectRenderStates(passNode, dsDesc, blendDesc, rasDesc,  
-				pass->mBlendColor, pass->mSampleMask, pass->mFrontStencilRef, pass->mBackStencilRef);
-
+	
+			CollectRenderStates(passNode, dsDesc, blendDesc, rasDesc, pass->mBlendColor, pass->mSampleMask, pass->mFrontStencilRef, pass->mBackStencilRef);
+	
 			pass->mDepthStencilState = factory.CreateDepthStencilState(dsDesc);
 			pass->mBlendState = factory.CreateBlendState(blendDesc);
 			pass->mRasterizerState = factory.CreateRasterizerState(rasDesc);
 
-			shared_ptr<ShaderProgram> program = factory.CreateShaderProgram(*this);
-
-			// Vertex shader
-			XMLNodePtr vertexNode = passNode->FirstNode("VertexShader");
-			String vertexName = vertexNode->AttributeString("name", "");
-			if (shaderStages.find(vertexName) != shaderStages.end())
+			static String shaderNodeNames[] = {"VertexShader", "HullShader", "DomainShader", "GeometryShader", "PixelShader", "ComputeShader"};
+			for (int i = 0; i < 6; ++i)
 			{
-				vector<String> defines, values;
-				CollectShaderMacro(vertexNode, defines, values);
-
-				for (size_t i = 1; i < effectFlags.size(); ++i)
+				shaderNode = passNode->FirstNode(shaderNodeNames[i]);
+				if (shaderNode)
 				{
-					defines.push_back(effectFlags[i]);
-					values.push_back(String(""));
-				}
-				program->AttachShader(CompileShader(shaderStages[vertexName], defines, values));
-			}
-			else
-			{
-				String err = "VS( " + vertexName + " ) not found!";
-				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, err, "Effect::Load");
-			}
+					filename = shaderNode->AttributeString("name", "");
+					entryPoint = shaderNode->AttributeString("entry", "");
 
-			// Geometry shader (optional) 
-			XMLNodePtr geometryNode = passNode->FirstNode("GeometryShader");
-			if (geometryNode)
-			{
-				String geometryName = geometryNode->AttributeString("name", "");
-				if (shaderStages.find(geometryName) != shaderStages.end())
-				{
-					vector<String> defines, values;
-					CollectShaderMacro(geometryNode, defines, values);
+					std::vector<ShaderMacro> shaderMacros;
+					CollectShaderMacro(shaderNode, shaderMacros);
+
 					for (size_t i = 1; i < effectFlags.size(); ++i)
 					{
-						defines.push_back(effectFlags[i]);
-						values.push_back(String(""));
+						shaderMacros.push_back(ShaderMacro(effectFlags[i], ""));
 					}
-					program->AttachShader(CompileShader(shaderStages[geometryName], defines, values));
-				}
-				else
-				{
-					String err = "PS( " + geometryName + " ) not found!";
-					ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, err, "Effect::Load");
+
+					shared_ptr<Shader> vertexShader = factory.CreateShader(ST_Vertex, filename, shaderMacros, entryPoint);
 				}
 			}
 
-			// Pixel shader (optional) 
-			XMLNodePtr pixelNode = passNode->FirstNode("PixelShader");
-			if (pixelNode)
-			{
-				String pixelName = pixelNode->AttributeString("name", "");
-				if (shaderStages.find(pixelName) != shaderStages.end())
-				{
-					vector<String> defines, values;
-					CollectShaderMacro(pixelNode, defines, values);
-					for (size_t i = 1; i < effectFlags.size(); ++i)
-					{
-						defines.push_back(effectFlags[i]);
-						values.push_back(String(""));
-					}
-					program->AttachShader(CompileShader(shaderStages[pixelName], defines, values));
-				}
-				else
-				{
-					String err = "PS( " + pixelName + " ) not found!";
-					ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, err, "Effect::Load");
-				}
-			}
-			
-			if (!program->LinkProgram())
-			{
-				std::cout << program->GetLinkInfo() << std::endl;
-				ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Effect error!",
-					"Effect::LoadForm");
-			}
 
 
-			pass->mShaderProgram = program;
-			technique->mPasses.push_back(pass);
 		}
-
-		mTechniques.push_back(technique);
 	}
+	
 
-	mCurrTechnique = mTechniques.front();
+
 }
+
+//void Effect::LoadImpl()
+//{
+//	FileSystem& fileSystem = FileSystem::GetSingleton();
+//	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
+//	
+//	vector<String> effectFlags;
+//	
+//	//split the effect name to get effect file and flags
+//	std::istringstream iss(mResourceName); 
+//	do 
+//	{ 
+//		String sub; 
+//		iss >> sub; 
+//		if (!sub.empty())
+//			effectFlags.push_back(sub);	
+//	} while (iss); 
+//
+//	shared_ptr<Stream> effectStream = fileSystem.OpenStream(effectFlags[0], mGroup);
+//	Stream& source = *effectStream;	
+//
+//	XMLDoc doc;
+//	XMLNodePtr root = doc.Parse(source);
+//
+//	// effect name 
+//	mEffectName = root->AttributeString("name", "");
+//
+//	// store all shader this effect will use
+//	unordered_map<String, ShaderStage> shaderStages;
+//
+//	XMLNodePtr shaderNode; 
+//	for (shaderNode = root->FirstNode("Shader");  shaderNode; shaderNode = shaderNode->NextSibling("Shader"))
+//	{
+//		String name = shaderNode->AttributeString("name", "");
+//
+//		ShaderStage& shaderStage = shaderStages[name];
+//
+//		shaderStage.Name = name;
+//		shaderStage.Stage = shaderNode->AttributeString("stage", "");	
+//		shaderStage.Entry = shaderNode->AttributeString("entry", "");
+//
+//		// Parse shader include headers
+//		vector<String> includes;
+//		for (XMLNodePtr includeNode = shaderNode->FirstNode("Include");  includeNode; includeNode = includeNode->NextSibling("Include"))
+//		{
+//			String includeName = includeNode->Attribute("name")->ValueString();
+//
+//			shared_ptr<Stream> streamPtr = FileSystem::GetSingleton().OpenStream(includeName, mGroup);
+//			Stream& includeStream = *streamPtr;
+//
+//			XMLDoc includeDoc;
+//			XMLNodePtr includeSourceNode = includeDoc.Parse(includeStream)->FirstNode("ShaderSource")->FirstNode();
+//
+//			if (includeSourceNode->NodeType() != XML_Node_CData)
+//				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Effect shader include source(CDATA) does't exit", "Effect::LoadImpl");
+//
+//			
+//			String includeSource = includeSourceNode->ValueString(); 
+//			shaderStage.Includes.push_back(includeSource);
+//		}
+//
+//		// Parse shader source
+//		XMLNodePtr shaderSourceNode = shaderNode->FirstNode("ShaderSource")->FirstNode();
+//		if (shaderSourceNode->NodeType() == XML_Node_CData)
+//			shaderStage.Source =  shaderSourceNode->ValueString();	
+//		else
+//			ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Effect shader include source(CDATA) does't exit", "Effect::LoadImpl");	
+//	}
+//
+//	// Parse effect technique
+//	XMLNodePtr technqueNode;
+//	for (technqueNode = root->FirstNode("Technique");  technqueNode; technqueNode = technqueNode->NextSibling("Technique"))
+//	{
+//		EffectTechnique* technique = new EffectTechnique(*this);
+//
+//		technique->mName = technqueNode->AttributeString("name", "");
+//
+//		XMLNodePtr passNode;
+//		for (passNode = technqueNode->FirstNode("Pass");  passNode; passNode = passNode->NextSibling("Pass"))
+//		{
+//			EffectPass* pass = new EffectPass;
+//			pass->mName = passNode->AttributeString("name", "");
+//
+//			DepthStencilStateDesc dsDesc;
+//			BlendStateDesc blendDesc;
+//			RasterizerStateDesc rasDesc;
+//
+//			CollectRenderStates(passNode, dsDesc, blendDesc, rasDesc,  
+//				pass->mBlendColor, pass->mSampleMask, pass->mFrontStencilRef, pass->mBackStencilRef);
+//
+//			pass->mDepthStencilState = factory.CreateDepthStencilState(dsDesc);
+//			pass->mBlendState = factory.CreateBlendState(blendDesc);
+//			pass->mRasterizerState = factory.CreateRasterizerState(rasDesc);
+//
+//			shared_ptr<ShaderProgram> program = factory.CreateShaderProgram(*this);
+//
+//			// Vertex shader
+//			XMLNodePtr vertexNode = passNode->FirstNode("VertexShader");
+//			String vertexName = vertexNode->AttributeString("name", "");
+//			if (shaderStages.find(vertexName) != shaderStages.end())
+//			{
+//				vector<ShaderMacro> shaderMacros;
+//				CollectShaderMacro(vertexNode, shaderMacros);
+//
+//				for (size_t i = 1; i < effectFlags.size(); ++i)
+//				{
+//					shaderMacros.push_back(ShaderMacro(effectFlags[i], ""));
+//				}
+//
+//				shared_ptr<Shader> vertexShader = factory.CreateShader(ST_Vertex,  )
+//
+//				//program->AttachShader(CompileShader(shaderStages[vertexName], defines, values));
+//			}
+//			else
+//			{
+//				String err = "VS( " + vertexName + " ) not found!";
+//				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, err, "Effect::Load");
+//			}
+//
+//			// Geometry shader (optional) 
+//			XMLNodePtr geometryNode = passNode->FirstNode("GeometryShader");
+//			if (geometryNode)
+//			{
+//				String geometryName = geometryNode->AttributeString("name", "");
+//				if (shaderStages.find(geometryName) != shaderStages.end())
+//				{
+//					vector<String> defines, values;
+//					CollectShaderMacro(geometryNode, defines, values);
+//					for (size_t i = 1; i < effectFlags.size(); ++i)
+//					{
+//						defines.push_back(effectFlags[i]);
+//						values.push_back(String(""));
+//					}
+//					program->AttachShader(CompileShader(shaderStages[geometryName], defines, values));
+//				}
+//				else
+//				{
+//					String err = "PS( " + geometryName + " ) not found!";
+//					ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, err, "Effect::Load");
+//				}
+//			}
+//
+//			// Pixel shader (optional) 
+//			XMLNodePtr pixelNode = passNode->FirstNode("PixelShader");
+//			if (pixelNode)
+//			{
+//				String pixelName = pixelNode->AttributeString("name", "");
+//				if (shaderStages.find(pixelName) != shaderStages.end())
+//				{
+//					vector<String> defines, values;
+//					CollectShaderMacro(pixelNode, defines, values);
+//					for (size_t i = 1; i < effectFlags.size(); ++i)
+//					{
+//						defines.push_back(effectFlags[i]);
+//						values.push_back(String(""));
+//					}
+//					program->AttachShader(CompileShader(shaderStages[pixelName], defines, values));
+//				}
+//				else
+//				{
+//					String err = "PS( " + pixelName + " ) not found!";
+//					ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, err, "Effect::Load");
+//				}
+//			}
+//			
+//			if (!program->LinkProgram())
+//			{
+//				std::cout << program->GetLinkInfo() << std::endl;
+//				ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Effect error!",
+//					"Effect::LoadForm");
+//			}
+//
+//
+//			pass->mShaderProgram = program;
+//			technique->mPasses.push_back(pass);
+//		}
+//
+//		mTechniques.push_back(technique);
+//	}
+//
+//	mCurrTechnique = mTechniques.front();
+//}
 
 void Effect::UnloadImpl()
 {

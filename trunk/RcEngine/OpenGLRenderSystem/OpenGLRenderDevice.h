@@ -23,6 +23,14 @@ public:
 	bool Fullscreen() const;
 
 	void GetBlitFBO(GLuint& srcFBO, GLuint& dstFBO);
+	
+	// Bind shader to pipeline stage
+	void BindVertexShader(GLuint shaderOGL)			{ glUseProgramStages(mProgramPipeline, GL_VERTEX_SHADER_BIT, shaderOGL); }
+	void BindTessControlShader(GLuint shaderOGL)    { glUseProgramStages(mProgramPipeline, GL_TESS_CONTROL_SHADER_BIT, shaderOGL); }
+	void BindTessEvalShader(GLuint shaderOGL)       { glUseProgramStages(mProgramPipeline, GL_TESS_EVALUATION_SHADER_BIT, shaderOGL); }
+	void BindGeometryShader(GLuint shaderOGL)       { glUseProgramStages(mProgramPipeline, GL_GEOMETRY_SHADER_BIT, shaderOGL); }
+	void BindPixelShader(GLuint shaderOGL)          { glUseProgramStages(mProgramPipeline, GL_FRAGMENT_SHADER_BIT, shaderOGL); }
+	void BindComputeShader(GLuint shaderOGL)        { glUseProgramStages(mProgramPipeline, GL_COMPUTE_SHADER_BIT, shaderOGL); }
 
 	void SetBlendState(const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask);		
 	void SetRasterizerState(const shared_ptr<RasterizerState>& state);
@@ -45,6 +53,9 @@ private:
 
 	// source and destination blit framebuffer
 	GLuint mBlitFBO[2];
+
+	// shader pipeline
+	GLuint mProgramPipeline;
 };
 
 }

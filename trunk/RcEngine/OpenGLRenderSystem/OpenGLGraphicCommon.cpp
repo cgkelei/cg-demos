@@ -851,130 +851,38 @@ PixelFormat OpenGLMapping::UnMapping( GLenum internalformat, GLenum format, GLen
 	}
 }
 
-void OpenGLMapping::UnMapping( EffectParameterType& outType, GLenum glType )
+EffectParameterType OpenGLMapping::UnMapping( GLenum glType )
 {
 	switch (glType)
 	{
-	case GL_FLOAT:
-		{
-			outType = EPT_Float;
-		}
-		break;
-	case GL_FLOAT_VEC2:
-		{
-			outType = EPT_Float2;
-		}
-		break;
-	case GL_FLOAT_VEC3:
-		{
-			outType = EPT_Float3;
-		}
-		break;
-	case GL_FLOAT_VEC4:
-		{
-			outType = EPT_Float4;
-		}
-		break;
-	case GL_UNSIGNED_INT:
-		{
-			outType = EPT_Uint;
-		}
-		break;
-	case GL_UNSIGNED_INT_VEC2:
-		{
-			outType = EPT_Uint2;
-		}
-		break;
-	case GL_UNSIGNED_INT_VEC3:
-		{
-			outType = EPT_Uint3;
-		}
-		break;
-	case GL_UNSIGNED_INT_VEC4:
-		{
-			outType = EPT_Uint4;
-		}
-		break;
-	case GL_INT:
-		{
-			outType = EPT_Int;
-		}
-		break;
-	case GL_INT_VEC2:
-		{
-			outType = EPT_Int2;
-		}
-		break;
-	case GL_INT_VEC3:
-		{
-			outType = EPT_Int3;
-		}
-		break;
-	case GL_INT_VEC4:
-		{
-			outType = EPT_Int4;
-		}
-		break;
-	case GL_BOOL:
-		{
-			outType = EPT_Boolean;
-		}
-		break;
-	case GL_FLOAT_MAT2:
-		{
-			outType = EPT_Matrix2x2;
-		}
-		break;
-	case GL_FLOAT_MAT3:
-		{
-			outType = EPT_Matrix3x3;
-		}
-		break;
-	case GL_FLOAT_MAT4:
-		{
-			outType = EPT_Matrix4x4;
-		}
-		break;
-	case GL_SAMPLER_1D:
-	case GL_SAMPLER_1D_SHADOW:
-		{
-			outType = EPT_Texture1D;
-		}
-		break;
-	case GL_SAMPLER_2D:
-	case GL_SAMPLER_2D_SHADOW:
-		{
-			outType = EPT_Texture2D;
-		}
-		break;
-	case GL_SAMPLER_3D:
-		{
-			outType = EPT_Texture3D;
-		}
-		break;
-	case GL_SAMPLER_CUBE:
-	case GL_SAMPLER_CUBE_SHADOW:
-		{
-			outType = EPT_TextureCUBE;
-		}
-		break;
-	case GL_SAMPLER_1D_ARRAY:
-	case GL_SAMPLER_1D_ARRAY_SHADOW:
-		{
-			outType = EPT_Texture1DArray;
-		}
-		break;
+	case GL_FLOAT:			                   return EPT_Float;
+	case GL_FLOAT_VEC2:		                   return EPT_Float2;
+	case GL_FLOAT_VEC3:	                       return EPT_Float3;
+	case GL_FLOAT_VEC4:		                   return EPT_Float4;
+	case GL_UNSIGNED_INT:	                   return EPT_Uint;
+	case GL_UNSIGNED_INT_VEC2:				   return EPT_Uint2;
+	case GL_UNSIGNED_INT_VEC3:				   return EPT_Uint3;
+	case GL_UNSIGNED_INT_VEC4:				   return EPT_Uint4;
+	case GL_INT:							   return EPT_Int;
+	case GL_INT_VEC2:						   return EPT_Int2;
+	case GL_INT_VEC3:						   return EPT_Int3;
+	case GL_INT_VEC4:						   return EPT_Int4;
+	case GL_BOOL:							   return EPT_Boolean;
+	case GL_FLOAT_MAT2:						   return EPT_Matrix2x2;
+	case GL_FLOAT_MAT3:						   return EPT_Matrix3x3;
+	case GL_FLOAT_MAT4:						   return EPT_Matrix4x4;
+	case GL_SAMPLER_1D:						   //return EPT_Texture1D;
+	case GL_SAMPLER_1D_SHADOW:			       return EPT_Texture1D;
+	case GL_SAMPLER_2D:						   //return EPT_Texture2D;
+	case GL_SAMPLER_2D_SHADOW:				   return EPT_Texture2D;
+	case GL_SAMPLER_3D:						   return EPT_Texture3D;
+	case GL_SAMPLER_CUBE:					   //return EPT_TextureCUBE;
+	case GL_SAMPLER_CUBE_SHADOW:			   return EPT_TextureCUBE;
+	case GL_SAMPLER_1D_ARRAY:				   //return EPT_Texture1DArray;
+	case GL_SAMPLER_1D_ARRAY_SHADOW:		   return EPT_Texture1DArray;
 	case GL_SAMPLER_2D_ARRAY:
-	case GL_SAMPLER_2D_ARRAY_SHADOW:
-		{
-			outType = EPT_Texture2DArray;
-		}
-		break;
-	case GL_SAMPLER_BUFFER:
-		{
-			outType = EPT_TextureBuffer;
-		}
-		break;
+	case GL_SAMPLER_2D_ARRAY_SHADOW:		   return EPT_Texture2DArray;
+	case GL_SAMPLER_BUFFER:					   return EPT_TextureBuffer;
 	default:
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported Shader Parameter Type", 
 			"OpenGLMapping::UnMapping");

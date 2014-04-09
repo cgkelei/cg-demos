@@ -1,10 +1,32 @@
 #include "D3D11Shader.h"
 #include <Core/Loger.h>
+#include <Core/Exception.h>
 #include <Core/Utility.h>
 
 namespace RcEngine {
 
 ID3D11Device* g_pd3d11Device = nullptr;
+ID3D11DeviceContext* g_pDeviceContext = nullptr;
+
+bool LoadBinary(const char* filename, std::vector<uint8_t>& byteCode)
+{
+	FILE* fp = fopen(filename, "rb");
+	if (fp)
+	{
+		fseek(fp, 0, SEEK_END);
+		long len = ftell(fp);
+
+		long len = ftell(fp);
+		byteCode.resize(len);
+
+		fseek(fp, 0, SEEK_SET);
+		fread(&byteCode[0], len, 1, fp);
+		fclose(fp);
+
+		return true;
+	}
+	return false;
+}
 
 // Helper function to dynamic compile HLSL shader code
 HRESULT CompileHLSL(const String& filename, const std::vector<ShaderMacro>& macros, 
@@ -65,17 +87,26 @@ D3D11VertexShader::~D3D11VertexShader()
 	SAFE_RELEASE(ShaderD3D11);
 }
 
-bool D3D11VertexShader::Compile( const std::vector<uint8_t>& bytecode )
+bool D3D11VertexShader::LoadFromByteCode( const String& filename )
 {
-	HRESULT hr = g_pd3d11Device->CreateVertexShader(&bytecode[0], bytecode.size(), nullptr, &ShaderD3D11);
-	assert(SUCCEEDED(hr));
-
-	// Keep shader code, need to create input layout
-	ShaderCode = bytecode;
+	if ( LoadBinary(filename.c_str(), ShaderCode) == false )
+	{
+		ShaderCode.clear();
+		ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, filename + " not exits!", "OpenGLShader::LoadFromByteCode");
+		return false;
+	}
+	
+	HRESULT hr = g_pd3d11Device->CreateVertexShader(&ShaderCode[0], ShaderCode.size(), nullptr, &ShaderD3D11);
+	if (FAILED(hr))
+	{
+		EngineLoger::LogError("HLSL Vertex Shader %s compile failed\n", filename.c_str());
+		return false;
+	}
+	
 	return true;
 }
 
-bool D3D11VertexShader::Complie( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
+bool D3D11VertexShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
 {
 	ID3DBlob* shaderBlob = nullptr;
 
@@ -95,7 +126,7 @@ bool D3D11VertexShader::Complie( const String& filename, const std::vector<Shade
 	return SUCCEEDED(hr);
 }
 
-
+//////////////////////////////////////////////////////////////////////////
 D3D11HullShader::D3D11HullShader()
 	: Shader(ST_Vertex),
 	  ShaderD3D11(nullptr)
@@ -108,8 +139,44 @@ D3D11HullShader::~D3D11HullShader()
 	SAFE_RELEASE(ShaderD3D11);
 }
 
+bool D3D11HullShader::LoadFromByteCode( const String& filename )
+{
+	std::vector<uint8_t> byteCode;
+	if ( LoadBinary(filename.c_str(), byteCode) == false )
+	{
+		byteCode.clear();
+		ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, filename + " not exits!", "OpenGLShader::LoadFromByteCode");
+		return false;
+	}
 
+	HRESULT hr = g_pd3d11Device->CreateHullShader(&byteCode[0], byteCode.size(), nullptr, &ShaderD3D11);
+	if (FAILED(hr))
+	{
+		EngineLoger::LogError("HLSL Hull Shader %s compile failed\n", filename.c_str());
+		return false;
+	}
 
+	return true;
+}
+
+bool D3D11HullShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
+{
+	ID3DBlob* shaderBlob = nullptr;
+
+	HRESULT hr = CompileHLSL(filename, macros, entryPoint, "hs_5_0", &shaderBlob);
+	if (SUCCEEDED(hr))
+	{
+		hr = g_pd3d11Device->CreateHullShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
+		D3D11_VERRY(hr);
+	}
+
+	if (shaderBlob)
+		shaderBlob->Release();
+
+	return SUCCEEDED(hr);
+}
+
+//////////////////////////////////////////////////////////////////////////
 D3D11DomainShader::D3D11DomainShader()
 	: Shader(ST_Vertex),
 	  ShaderD3D11(nullptr)
@@ -122,7 +189,44 @@ D3D11DomainShader::~D3D11DomainShader()
 	SAFE_RELEASE(ShaderD3D11);
 }
 
+bool D3D11DomainShader::LoadFromByteCode( const String& filename )
+{
+	std::vector<uint8_t> byteCode;
+	if ( LoadBinary(filename.c_str(), byteCode) == false )
+	{
+		byteCode.clear();
+		ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, filename + " not exits!", "OpenGLShader::LoadFromByteCode");
+		return false;
+	}
 
+	HRESULT hr = g_pd3d11Device->CreateDomainShader(&byteCode[0], byteCode.size(), nullptr, &ShaderD3D11);
+	if (FAILED(hr))
+	{
+		EngineLoger::LogError("HLSL Hull Shader %s compile failed\n", filename.c_str());
+		return false;
+	}
+
+	return true;
+}
+
+bool D3D11DomainShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
+{
+	ID3DBlob* shaderBlob = nullptr;
+
+	HRESULT hr = CompileHLSL(filename, macros, entryPoint, "ds_5_0", &shaderBlob);
+	if (SUCCEEDED(hr))
+	{
+		hr = g_pd3d11Device->CreateDomainShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
+		D3D11_VERRY(hr);
+	}
+
+	if (shaderBlob)
+		shaderBlob->Release();
+
+	return SUCCEEDED(hr);
+}
+
+//////////////////////////////////////////////////////////////////////////
 D3D11GeometryShader::D3D11GeometryShader()
 	: Shader(ST_Geomerty),
 	  ShaderD3D11(nullptr)
@@ -135,6 +239,44 @@ D3D11GeometryShader::~D3D11GeometryShader()
 	SAFE_RELEASE(ShaderD3D11);
 }
 
+bool D3D11GeometryShader::LoadFromByteCode( const String& filename )
+{
+	std::vector<uint8_t> byteCode;
+	if ( LoadBinary(filename.c_str(), byteCode) == false )
+	{
+		byteCode.clear();
+		ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, filename + " not exits!", "OpenGLShader::LoadFromByteCode");
+		return false;
+	}
+
+	HRESULT hr = g_pd3d11Device->CreateGeometryShader(&byteCode[0], byteCode.size(), nullptr, &ShaderD3D11);
+	if (FAILED(hr))
+	{
+		EngineLoger::LogError("HLSL Hull Shader %s compile failed\n", filename.c_str());
+		return false;
+	}
+
+	return true;
+}
+
+bool D3D11GeometryShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
+{
+	ID3DBlob* shaderBlob = nullptr;
+
+	HRESULT hr = CompileHLSL(filename, macros, entryPoint, "gs_5_0", &shaderBlob);
+	if (SUCCEEDED(hr))
+	{
+		hr = g_pd3d11Device->CreateGeometryShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
+		D3D11_VERRY(hr);
+	}
+
+	if (shaderBlob)
+		shaderBlob->Release();
+
+	return SUCCEEDED(hr);
+}
+
+//////////////////////////////////////////////////////////////////////////
 D3D11PixelShader::D3D11PixelShader()
 	: Shader(ST_Pixel),
 	  ShaderD3D11(nullptr)
@@ -144,9 +286,47 @@ D3D11PixelShader::D3D11PixelShader()
 
 D3D11PixelShader::~D3D11PixelShader()
 {
-
+	SAFE_RELEASE(ShaderD3D11);
 }
 
+bool D3D11PixelShader::LoadFromByteCode( const String& filename )
+{
+	std::vector<uint8_t> byteCode;
+	if ( LoadBinary(filename.c_str(), byteCode) == false )
+	{
+		byteCode.clear();
+		ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, filename + " not exits!", "OpenGLShader::LoadFromByteCode");
+		return false;
+	}
+
+	HRESULT hr = g_pd3d11Device->CreatePixelShader(&byteCode[0], byteCode.size(), nullptr, &ShaderD3D11);
+	if (FAILED(hr))
+	{
+		EngineLoger::LogError("HLSL Hull Shader %s compile failed\n", filename.c_str());
+		return false;
+	}
+
+	return true;
+}
+
+bool D3D11PixelShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
+{
+	ID3DBlob* shaderBlob = nullptr;
+
+	HRESULT hr = CompileHLSL(filename, macros, entryPoint, "ps_5_0", &shaderBlob);
+	if (SUCCEEDED(hr))
+	{
+		hr = g_pd3d11Device->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
+		D3D11_VERRY(hr);
+	}
+
+	if (shaderBlob)
+		shaderBlob->Release();
+
+	return SUCCEEDED(hr);
+}
+
+//////////////////////////////////////////////////////////////////////////
 D3D11ComputeShader::D3D11ComputeShader()
 	: Shader(ST_Compute),
 	  ShaderD3D11(nullptr)
@@ -157,6 +337,111 @@ D3D11ComputeShader::D3D11ComputeShader()
 D3D11ComputeShader::~D3D11ComputeShader()
 {
 	SAFE_RELEASE(ShaderD3D11);
+}
+
+bool D3D11ComputeShader::LoadFromByteCode( const String& filename )
+{
+	std::vector<uint8_t> byteCode;
+	if ( LoadBinary(filename.c_str(), byteCode) == false )
+	{
+		byteCode.clear();
+		ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, filename + " not exits!", "OpenGLShader::LoadFromByteCode");
+		return false;
+	}
+
+	HRESULT hr = g_pd3d11Device->CreateComputeShader(&byteCode[0], byteCode.size(), nullptr, &ShaderD3D11);
+	if (FAILED(hr))
+	{
+		EngineLoger::LogError("HLSL Hull Shader %s compile failed\n", filename.c_str());
+		return false;
+	}
+
+	return true;
+}
+
+bool D3D11ComputeShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
+{
+	ID3DBlob* shaderBlob = nullptr;
+
+	HRESULT hr = CompileHLSL(filename, macros, entryPoint, "cs_5_0", &shaderBlob);
+	if (SUCCEEDED(hr))
+	{
+		hr = g_pd3d11Device->CreateComputeShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
+		D3D11_VERRY(hr);
+	}
+
+	if (shaderBlob)
+		shaderBlob->Release();
+
+	return SUCCEEDED(hr);
+}
+
+//////////////////////////////////////////////////////////////////////////
+D3D11ShaderProgram::D3D11ShaderProgram( Effect& effect )
+	: ShaderProgram(effect)
+{
+
+}
+
+D3D11ShaderProgram::~D3D11ShaderProgram()
+{
+
+}
+
+void D3D11ShaderProgram::Bind()
+{
+	if (mShaderStage[ST_Vertex])
+	{
+		ID3D11VertexShader* shaderD3D11 = (static_cast<D3D11VertexShader*>(mShaderStage[ST_Vertex].get()))->ShaderD3D11;
+		g_pDeviceContext->VSSetShader(shaderD3D11, nullptr, 0);
+	
+		// input layout
+	}
+
+	if (mShaderStage[ST_Hull])
+	{
+		ID3D11HullShader* shaderD3D11 = (static_cast<D3D11HullShader*>(mShaderStage[ST_Hull].get()))->ShaderD3D11;
+		g_pDeviceContext->HSSetShader(shaderD3D11, nullptr, 0);
+	}
+
+	if (mShaderStage[ST_Domain])
+	{
+		ID3D11DomainShader* shaderD3D11 = (static_cast<D3D11DomainShader*>(mShaderStage[ST_Domain].get()))->ShaderD3D11;
+		g_pDeviceContext->DSSetShader(shaderD3D11, nullptr, 0);
+	}
+
+	if (mShaderStage[ST_Geomerty])
+	{
+		ID3D11GeometryShader* shaderD3D11 = (static_cast<D3D11GeometryShader*>(mShaderStage[ST_Geomerty].get()))->ShaderD3D11;
+		g_pDeviceContext->GSSetShader(shaderD3D11, nullptr, 0);
+	}
+
+	if (mShaderStage[ST_Pixel])
+	{
+		ID3D11PixelShader* shaderD3D11 = (static_cast<D3D11PixelShader*>(mShaderStage[ST_Pixel].get()))->ShaderD3D11;
+		g_pDeviceContext->PSSetShader(shaderD3D11, nullptr, 0);
+	}
+
+	if (mShaderStage[ST_Compute])
+	{
+		ID3D11ComputeShader* shaderD3D11 = (static_cast<D3D11ComputeShader*>(mShaderStage[ST_Compute].get()))->ShaderD3D11;
+		g_pDeviceContext->CSSetShader(shaderD3D11, nullptr, 0);
+
+		// Set all UAV
+	
+	}
+
+	// Commit all shader resource
+}
+
+void D3D11ShaderProgram::Unbind()
+{
+	g_pDeviceContext->VSSetShader(nullptr, nullptr, 0);
+	g_pDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	g_pDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	g_pDeviceContext->GSSetShader(nullptr, nullptr, 0);
+	g_pDeviceContext->PSSetShader(nullptr, nullptr, 0);
+	g_pDeviceContext->CSSetShader(nullptr, nullptr, 0);
 }
 
 }

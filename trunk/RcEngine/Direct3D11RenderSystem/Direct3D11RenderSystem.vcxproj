@@ -93,6 +93,7 @@
     <ClInclude Include="D3D11RenderState.h" />
     <ClInclude Include="D3D11RenderView.h" />
     <ClInclude Include="D3D11Shader.h" />
+    <ClInclude Include="D3D11ShaderProgram.h" />
     <ClInclude Include="D3D11VertexDeclaration.h" />
   </ItemGroup>
   <ItemGroup>
@@ -103,6 +104,7 @@
     <ClCompile Include="D3D11RenderTargetView.cpp" />
     <ClCompile Include="D3D11RenderView.cpp" />
     <ClCompile Include="D3D11Shader.cpp" />
+    <ClCompile Include="D3D11ShaderProgram.cpp" />
     <ClCompile Include="D3D11Texture1D.cpp" />
     <ClCompile Include="D3D11Texture2D.cpp" />
     <ClCompile Include="D3D11Texture3D.cpp" />

@@ -13,9 +13,10 @@ namespace RcEngine {
 
 enum RenderDeviceType
 {
-	RD_OpenGL,
+	RD_OpenGL = 0,
 	RD_OpenGL_ES,
-	RD_Direct3D11
+	RD_Direct3D11,
+	RD_Count
 };
 
 class _ApiExport RenderDevice
