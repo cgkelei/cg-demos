@@ -354,6 +354,9 @@
     <ClInclude Include="Graphics\RenderPath.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Loger.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Context.cpp">
@@ -625,6 +628,9 @@
     </ClCompile>
     <ClCompile Include="Graphics\RenderPath.cpp">
       <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Loger.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

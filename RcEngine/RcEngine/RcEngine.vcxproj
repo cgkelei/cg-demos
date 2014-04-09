@@ -16,6 +16,7 @@
     <ClInclude Include="Core\DynLib.h" />
     <ClInclude Include="Core\Exception.h" />
     <ClInclude Include="Core\IModule.h" />
+    <ClInclude Include="Core\Loger.h" />
     <ClInclude Include="Core\ModuleManager.h" />
     <ClInclude Include="Core\Prerequisites.h" />
     <ClInclude Include="Core\Singleton.h" />
@@ -122,6 +123,7 @@
     <ClCompile Include="Core\DynLib.cpp" />
     <ClCompile Include="Core\Exception.cpp" />
     <ClCompile Include="Core\IModule.cpp" />
+    <ClCompile Include="Core\Loger.cpp" />
     <ClCompile Include="Core\ModuleManager.cpp" />
     <ClCompile Include="Core\StringHash.cpp" />
     <ClCompile Include="Core\Timer.cpp" />

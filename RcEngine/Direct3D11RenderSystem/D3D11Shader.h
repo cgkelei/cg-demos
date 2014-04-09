@@ -12,12 +12,15 @@ public:
 	D3D11VertexShader();
 	~D3D11VertexShader();
 
-	void Release() {}
-	bool Compile(const String& source, const String& entryPoint = "");
+	// Create Shader from bytecode
+	virtual bool Compile(const std::vector<uint8_t>& bytecode);
+
+	// Create shader from file
+	virtual bool Complie(const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint = "");
 
 public:
 	ID3D11VertexShader* ShaderD3D11;
-	std::vector<uint8_t> mCode;
+	std::vector<uint8_t> ShaderCode;
 };
 
 class _D3D11Export D3D11HullShader : public Shader
@@ -26,8 +29,10 @@ public:
 	D3D11HullShader();
 	~D3D11HullShader();
 
-	void Release() {}
-	bool Compile(const String& source, const String& entryPoint = "");
+	bool Compile(const String& source, const std::vector<String>& includes,
+		const std::vector<ShaderMacro>& macros, const String& entryPoint = "");
+
+	bool Compile(const std::vector<uint8_t>& bytecode);
 
 public:
 	ID3D11HullShader* ShaderD3D11;
@@ -39,8 +44,10 @@ public:
 	D3D11DomainShader();
 	~D3D11DomainShader();
 
-	void Release() {}
-	bool Compile(const String& source, const String& entryPoint = "");
+	bool Compile(const String& source, const std::vector<String>& includes,
+		const std::vector<ShaderMacro>& macros, const String& entryPoint = "");
+
+	bool Compile(const std::vector<uint8_t>& bytecode);
 
 public:
 	ID3D11DomainShader* ShaderD3D11;
@@ -52,8 +59,10 @@ public:
 	D3D11GeometryShader();
 	~D3D11GeometryShader();
 
-	void Release() {}
-	bool Compile(const String& source, const String& entryPoint = "");
+	bool Compile(const String& source, const std::vector<String>& includes,
+		const std::vector<ShaderMacro>& macros, const String& entryPoint = "");
+
+	bool Compile(const std::vector<uint8_t>& bytecode);
 
 public:
 	ID3D11GeometryShader* ShaderD3D11;
@@ -65,8 +74,10 @@ public:
 	D3D11PixelShader();
 	~D3D11PixelShader();
 
-	void Release() {}
-	bool Compile(const String& source, const String& entryPoint = "");
+	bool Compile(const String& source, const std::vector<String>& includes,
+		const std::vector<ShaderMacro>& macros, const String& entryPoint = "");
+
+	bool Compile(const std::vector<uint8_t>& bytecode);
 
 public:
 	ID3D11PixelShader* ShaderD3D11;
@@ -78,15 +89,14 @@ public:
 	D3D11ComputeShader();
 	~D3D11ComputeShader();
 
-	void Release() {}
-	bool Compile(const String& source, const String& entryPoint = "");
+	bool Compile(const String& source, const std::vector<String>& includes,
+		const std::vector<ShaderMacro>& macros, const String& entryPoint = "");
+
+	bool Compile(const std::vector<uint8_t>& bytecode);
 
 public:
 	ID3D11ComputeShader* ShaderD3D11;
 };
-
-
-
 
 }
 
