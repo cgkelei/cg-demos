@@ -2,6 +2,7 @@
 #define D3D11Prerequisites_h__
 
 #include <d3d11.h>
+#include <D3Dcompiler.h>
 
 //////////////////////////////////////////////////////////////////////////
 #include <Core/Prerequisites.h>
