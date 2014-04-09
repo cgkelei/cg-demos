@@ -1,12 +1,28 @@
 #include <Graphics/RenderFactory.h>
 #include <Graphics/Material.h>
 #include <Graphics/Effect.h>
+#include <Graphics/Shader.h>
+#include <Graphics/RenderDevice.h>
 #include <Graphics/VertexDeclaration.h>
 #include <IO/FileStream.h>
+#include <IO/FileSystem.h>
 #include <Core/Exception.h>
+#include <Core/Context.h>
+
 
 namespace RcEngine {
 
+static String ShaderDirectory[RD_Count][2] = { 
+	{"GLSL", "GLBC"},
+	{"GLSL", "GLBC"},
+	{"HLSL", "HLBC"}
+};
+
+static String ShaderSuffix[RD_Count][2] = { 
+	{".glsl", ".glbc"},
+	{".glsl", ".glbc"},
+	{".hlsl", ".hlbc"}
+};
 
 RenderFactory::RenderFactory(void)
 {
@@ -88,5 +104,44 @@ shared_ptr<SamplerState> RenderFactory::CreateSamplerState( const SamplerStateDe
 
 	return mSamplerStatePool[desc];
 }
+
+shared_ptr<Shader> RenderFactory::CreateShader( ShaderType shaderType, const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
+{
+	String fullShaderName = filename;
+	for (const ShaderMacro& macro : macros)
+	{
+		fullShaderName += macro.first + macro.second;
+	}
+	fullShaderName += entryPoint;
+
+	RenderDeviceType deviceType = Context::GetSingleton().GetRenderDevice().GetRenderDeviceType();
+
+	if (mShaderPool.find(fullShaderName) == mShaderPool.end())
+	{
+		shared_ptr<Shader> shader = CreateShaderImpl(shaderType);
+
+		if (mShaderBinaryHint)
+		{
+			// Try to load binary shader code
+			String byteCodeFile = ShaderDirectory[deviceType][1] + fullShaderName + ShaderSuffix[deviceType][1];
+			String filepath = FileSystem::GetSingleton().Locate(byteCodeFile);
+
+			shader->LoadFromByteCode(filepath);
+		}
+		else
+		{
+			// Try to load binary shader code
+			String byteCodeFile = ShaderDirectory[deviceType][0] + filename + ShaderSuffix[deviceType][0];
+			String filepath = FileSystem::GetSingleton().Locate(byteCodeFile);
+
+			shader->LoadFromFile(filepath, macros, entryPoint);
+		}
+
+		mShaderPool.insert(std::make_pair(fullShaderName, shader));
+	}
+
+	return mShaderPool[fullShaderName];
+}
+
 
 } // Namespace RcEngine

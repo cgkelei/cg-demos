@@ -6,19 +6,21 @@
 
 namespace RcEngine {
 
-typedef std::pair<String, String> ShaderMacro;
+class Effect;
 
 class _ApiExport Shader
 {
+public:
+	typedef std::pair<String, String> Macro;
+
 public:
 	Shader(ShaderType shaderType);
 	virtual ~Shader();
 	
 	inline ShaderType GetShaderType() const		{ return mShaderType; }
 
-	virtual bool Compile(const std::vector<uint8_t>& bytecode) = 0;
-
-	virtual bool Complie(const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint = "") = 0;
+	virtual bool LoadFromByteCode(const String& filename) = 0;
+	virtual bool LoadFromFile(const String& filename, const std::vector<Macro>& macros, const String& entryPoint = "") = 0;
 
 private:
 	Shader( const Shader& );
@@ -27,6 +29,27 @@ private:
 protected:
 	ShaderType mShaderType;
 };
+
+/**
+ * Combination of shader stages.
+ */
+class _ApiExport ShaderProgram
+{
+public:
+	ShaderProgram(Effect& effect);
+	virtual~ ShaderProgram();
+
+	void AttachShader(ShaderType shaderType, const shared_ptr<Shader>& shader);
+	void DetachShader(ShaderType shaderType, const shared_ptr<Shader>& shader);
+
+	virtual void Bind() = 0;
+	virtual void Unbind() = 0;
+
+protected:
+	Effect& mEffect;
+	shared_ptr<Shader> mShaderStage[ST_Count];
+};
+
 
 }
 

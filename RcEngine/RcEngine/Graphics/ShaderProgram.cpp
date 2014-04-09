@@ -12,17 +12,17 @@ ShaderProgram::ShaderProgram(Effect& effect)
 
 ShaderProgram::~ ShaderProgram()
 {
-	mAttachedShaders.clear();
+	
 }
 
-void ShaderProgram::AttachShader( const shared_ptr<Shader>& shader )
+void ShaderProgram::AttachShader( ShaderType shaderType, const shared_ptr<Shader>& shader )
 {
-	mAttachedShaders.push_back(shader);
+	mShaderStage[shaderType] = shader;
 }
 
-void Release()
+void ShaderProgram::DetachShader( ShaderType shaderType, const shared_ptr<Shader>& shader )
 {
-
+	mShaderStage[shaderType] = nullptr;
 }
 
 }
