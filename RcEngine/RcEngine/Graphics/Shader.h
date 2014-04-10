@@ -41,7 +41,7 @@ public:
 
 	void AttachShader(ShaderType shaderType, const shared_ptr<Shader>& shader);
 	void DetachShader(ShaderType shaderType, const shared_ptr<Shader>& shader);
-
+	
 	virtual void Bind() = 0;
 	virtual void Unbind() = 0;
 

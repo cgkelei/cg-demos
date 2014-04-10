@@ -82,6 +82,7 @@ private:
 	OpenGLTexture2D& mTextureOGL;
 };
 
+//////////////////////////////////////////////////////////////////////////
 class _OpenGLExport OpenGLScreenRenderTargetView2D :  public OpenGLRenderView
 {
 public:
@@ -92,6 +93,10 @@ public:
 	void OnAttach(FrameBuffer& fb, Attachment attr);
 	void OnDetach(FrameBuffer& fb, Attachment attr);
 };
+
+//////////////////////////////////////////////////////////////////////////
+
+
 
 }
 #endif // OpenGLRenderView_h__

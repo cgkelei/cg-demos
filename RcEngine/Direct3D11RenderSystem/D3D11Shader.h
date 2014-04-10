@@ -98,6 +98,7 @@ public:
 	D3D11ShaderProgram(Effect& effect);
 	~D3D11ShaderProgram();
 
+	virtual bool Link();
 	virtual void Bind();
 	virtual void Unbind();
 

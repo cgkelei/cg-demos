@@ -159,7 +159,6 @@ void OpenGLRenderView::DoClear( GLbitfield clearFlagOGL, const ColorRGBA& clr, f
 	OGL_ERROR_CHECK();
 }
 	
-}
 
 
 

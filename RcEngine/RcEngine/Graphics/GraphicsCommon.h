@@ -267,13 +267,22 @@ enum Attachment
 
 enum TexCreateFlag
 {
-	TexCreate_GenerateMipmaps,
-	TexCreate_UAV,
-	TexCreate_SRGB,
-	TexCreate_ShaderResource,
-	TexCreate_RenderTarget,
-	TexCreate_DepthStencilTarget,
-	TexCreate_ResolveTarget
+	TexCreate_GenerateMipmaps			= 1UL << 0,
+	TexCreate_UAV					    = 1UL << 1,
+	TexCreate_SRGB					    = 1UL << 2,
+	TexCreate_ShaderResource		    = 1UL << 3,
+	TexCreate_RenderTarget				= 1UL << 4,
+	TexCreate_DepthStencilTarget	    = 1UL << 5,
+	TexCreate_ResolveTarget				= 1UL << 6,
+};
+
+enum BufferCreateFlag
+{
+	BufferCreate_Vertex			= 1UL << 0,
+	BufferCreate_Index			= 1UL << 1,
+	BufferCreate_Uniform		= 1UL << 2,
+	BufferCreate_StreamOutput   = 1UL << 3,
+	BufferCreate_Structured     = 1UL << 4,
 };
 
 struct ElementInitData

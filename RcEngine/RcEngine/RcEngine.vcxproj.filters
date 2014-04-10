@@ -357,6 +357,9 @@
     <ClInclude Include="Core\Loger.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\UnorderedAccessView.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Context.cpp">
@@ -631,6 +634,9 @@
     </ClCompile>
     <ClCompile Include="Core\Loger.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\UnorderedAccessView.cpp">
+      <Filter>Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

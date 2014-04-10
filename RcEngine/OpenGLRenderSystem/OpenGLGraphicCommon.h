@@ -29,7 +29,7 @@ public:
 	// Reference glTexImage* function
 	static void Mapping(GLenum& outInternalformat, GLenum& outFormat, GLenum& outType, PixelFormat inPixelFormat);
 	static PixelFormat UnMapping( GLenum inInternalformat, GLenum inFormat, GLenum inType);
-	static EffectParameterType UnMapping(& outType, GLenum glType);
+	static EffectParameterType UnMapping(GLenum glType);
 
 	/**
 	 * Return if the opengl type is interger.

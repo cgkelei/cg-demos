@@ -233,8 +233,11 @@ void OpenGLShader::ShaderReflect()
 			uniformParameter.Name = actualName;
 			uniformParameter.Type = OpenGLMapping::UnMapping(type);
 			uniformParameter.ArraySize = size;
-			uniformParameter.Location = glGetUniformLocation(ShaderOGL, &name[0]);
+			uniformParameter.Location = glGetProgramResourceLocation(ShaderOGL, GL_UNIFORM, &name[0]);
+			//uniformParameter.Location = glGetUniformLocation(ShaderOGL, &name[0]);
 			uniformParameter.Offset = -1;
+
+			
 		}
 		else
 		{
@@ -324,12 +327,12 @@ void OpenGLShader::ShaderReflect()
 OpenGLShaderPipeline::OpenGLShaderPipeline( Effect& effect )
 	: ShaderProgram(effect)
 {
-	
+
 }
 
 OpenGLShaderPipeline::~OpenGLShaderPipeline()
 {
-	
+
 }
 
 void OpenGLShaderPipeline::Bind()

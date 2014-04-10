@@ -18,11 +18,6 @@ struct _OpenGLExport UniformParameter
 	int32_t MatrixStride;
 };
 
-//struct _OpenGLExport UniformBuffer
-//{
-//	
-//};
-
 
 class _OpenGLExport OpenGLShader : public Shader
 {
@@ -50,17 +45,8 @@ public:
 	virtual void Bind();
 	virtual void Unbind();
 
-private:
-	struct GlobalCommit
-	{
-		GLuint ShaderOGL;
-		GLuint ParamLocation;
-	};
-
-	struct UniformCommit
-	{
-
-	};
+public:
+	GLuint PipelineOGL;
 };
 
 

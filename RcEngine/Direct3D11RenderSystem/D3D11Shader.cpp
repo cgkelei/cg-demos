@@ -29,7 +29,7 @@ bool LoadBinary(const char* filename, std::vector<uint8_t>& byteCode)
 }
 
 // Helper function to dynamic compile HLSL shader code
-HRESULT CompileHLSL(const String& filename, const std::vector<ShaderMacro>& macros, 
+HRESULT CompileHLSL(const String& filename, const std::vector<Shader::Macro>& macros, 
 					const String& entryPoint, const String& shaderModel, ID3DBlob** ppBlobOut)
 {
 	HRESULT hr = S_OK;
@@ -106,7 +106,7 @@ bool D3D11VertexShader::LoadFromByteCode( const String& filename )
 	return true;
 }
 
-bool D3D11VertexShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
+bool D3D11VertexShader::LoadFromFile( const String& filename, const std::vector<Shader::Macro>& macros, const String& entryPoint /*= ""*/ )
 {
 	ID3DBlob* shaderBlob = nullptr;
 
@@ -159,7 +159,7 @@ bool D3D11HullShader::LoadFromByteCode( const String& filename )
 	return true;
 }
 
-bool D3D11HullShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
+bool D3D11HullShader::LoadFromFile( const String& filename, const std::vector<Shader::Macro>& macros, const String& entryPoint /*= ""*/ )
 {
 	ID3DBlob* shaderBlob = nullptr;
 
@@ -209,7 +209,7 @@ bool D3D11DomainShader::LoadFromByteCode( const String& filename )
 	return true;
 }
 
-bool D3D11DomainShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
+bool D3D11DomainShader::LoadFromFile( const String& filename, const std::vector<Shader::Macro>& macros, const String& entryPoint /*= ""*/ )
 {
 	ID3DBlob* shaderBlob = nullptr;
 
@@ -259,7 +259,7 @@ bool D3D11GeometryShader::LoadFromByteCode( const String& filename )
 	return true;
 }
 
-bool D3D11GeometryShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
+bool D3D11GeometryShader::LoadFromFile( const String& filename, const std::vector<Shader::Macro>& macros, const String& entryPoint /*= ""*/ )
 {
 	ID3DBlob* shaderBlob = nullptr;
 
@@ -309,7 +309,7 @@ bool D3D11PixelShader::LoadFromByteCode( const String& filename )
 	return true;
 }
 
-bool D3D11PixelShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
+bool D3D11PixelShader::LoadFromFile( const String& filename, const std::vector<Shader::Macro>& macros, const String& entryPoint /*= ""*/ )
 {
 	ID3DBlob* shaderBlob = nullptr;
 
@@ -359,7 +359,7 @@ bool D3D11ComputeShader::LoadFromByteCode( const String& filename )
 	return true;
 }
 
-bool D3D11ComputeShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
+bool D3D11ComputeShader::LoadFromFile( const String& filename, const std::vector<Shader::Macro>& macros, const String& entryPoint /*= ""*/ )
 {
 	ID3DBlob* shaderBlob = nullptr;
 
@@ -427,8 +427,6 @@ void D3D11ShaderProgram::Bind()
 		ID3D11ComputeShader* shaderD3D11 = (static_cast<D3D11ComputeShader*>(mShaderStage[ST_Compute].get()))->ShaderD3D11;
 		g_pDeviceContext->CSSetShader(shaderD3D11, nullptr, 0);
 
-		// Set all UAV
-	
 	}
 
 	// Commit all shader resource
@@ -436,12 +434,17 @@ void D3D11ShaderProgram::Bind()
 
 void D3D11ShaderProgram::Unbind()
 {
-	g_pDeviceContext->VSSetShader(nullptr, nullptr, 0);
-	g_pDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	g_pDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	g_pDeviceContext->GSSetShader(nullptr, nullptr, 0);
-	g_pDeviceContext->PSSetShader(nullptr, nullptr, 0);
-	g_pDeviceContext->CSSetShader(nullptr, nullptr, 0);
+	if (mShaderStage[ST_Vertex]) g_pDeviceContext->VSSetShader(nullptr, nullptr, 0);
+	if (mShaderStage[ST_Hull]) g_pDeviceContext->HSSetShader(nullptr, nullptr, 0);
+	if (mShaderStage[ST_Domain]) g_pDeviceContext->DSSetShader(nullptr, nullptr, 0);
+	if (mShaderStage[ST_Geomerty]) g_pDeviceContext->GSSetShader(nullptr, nullptr, 0);
+	if (mShaderStage[ST_Pixel]) g_pDeviceContext->PSSetShader(nullptr, nullptr, 0);
+	if (mShaderStage[ST_Compute]) g_pDeviceContext->CSSetShader(nullptr, nullptr, 0);
+}
+
+bool D3D11ShaderProgram::Link()
+{
+
 }
 
 }

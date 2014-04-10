@@ -883,6 +883,13 @@ EffectParameterType OpenGLMapping::UnMapping( GLenum glType )
 	case GL_SAMPLER_2D_ARRAY:
 	case GL_SAMPLER_2D_ARRAY_SHADOW:		   return EPT_Texture2DArray;
 	case GL_SAMPLER_BUFFER:					   return EPT_TextureBuffer;
+	
+	case GL_IMAGE_1D:					       return EPT_Texture1D;
+	case GL_IMAGE_1D_ARRAY:					   return EPT_Texture1D;
+	case GL_IMAGE_2D:						   return EPT_Texture2D;
+	case GL_IMAGE_2D_ARRAY:					   return EPT_Texture2D;
+	case GL_IMAGE_3D:					       return EPT_Texture3D;
+
 	default:
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported Shader Parameter Type", 
 			"OpenGLMapping::UnMapping");

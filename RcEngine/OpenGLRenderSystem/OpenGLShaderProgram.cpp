@@ -441,6 +441,11 @@ private:
 	EffectConstantBuffer* UniformBlock;
 };
 
+template<>
+struct ShaderParameterSetHelper<U>
+{
+
+};
 
 
 //////////////////////////////////////////////////////////////////////////
