@@ -105,6 +105,7 @@
     <ClCompile Include="OpenGLTexture2D.cpp" />
     <ClCompile Include="OpenGLTexture3D.cpp" />
     <ClCompile Include="OpenGLTextureCube.cpp" />
+    <ClCompile Include="OpenGLUAV.cpp" />
     <ClCompile Include="pfm.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -121,6 +122,7 @@
     <ClInclude Include="OpenGLShader.h" />
     <ClInclude Include="OpenGLShaderProgram.h" />
     <ClInclude Include="OpenGLTexture.h" />
+    <ClInclude Include="OpenGLUAV.h" />
     <ClInclude Include="pfm.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

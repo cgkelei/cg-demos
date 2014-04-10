@@ -11,44 +11,24 @@ namespace RcEngine {
 class _ApiExport GraphicsBuffer
 {
 public:
-	GraphicsBuffer(BufferUsage usage, uint32_t accessHint);
+	GraphicsBuffer(BufferUsage usage, uint32_t accessHint, uint32_t flags);
 	virtual ~GraphicsBuffer(void);
 
 	inline BufferUsage		GetBufferUsage() const { return mBufferUsage; }
 	inline uint32_t			GetAccessHint() const  { return mAccessHint; }
 	inline uint32_t			GetBufferSize() const  { return mSizeInBytes; }
+	inline uint32_t         GetFlags() const       { return mFlags; }
 
 	virtual void ResizeBuffer(uint32_t sizeInByte) = 0;
 	virtual void* Map(uint32_t offset, uint32_t length, BufferAccess options) = 0;
 	virtual void UnMap() = 0;
 
 protected:
-	BufferUsage mBufferUsage;
-	uint32_t mAccessHint;	// CPU access flags 
 	uint32_t mSizeInBytes;
+	BufferUsage mBufferUsage;
+	uint32_t mAccessHint;		// CPU/GPU access flags 
+	uint32_t mFlags;            // Buffer create flags
 };
-
-class _ApiExport VertexBuffer
-{
-
-};
-
-class _ApiExport IndexBuffer
-{
-
-};
-
-class _ApiExport UniformBuffer
-{
-public:
-	UniformBuffer();
-	~UniformBuffer();
-
-private:
-
-};
-
-
 
 } // Namespace RcEngine
 

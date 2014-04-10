@@ -48,6 +48,11 @@ public:
 	virtual shared_ptr<GraphicsBuffer> CreateIndexBuffer(BufferUsage usage, uint32_t accessHint, ElementInitData* initData) = 0;
 	virtual shared_ptr<GraphicsBuffer> CreateConstantBuffer(BufferUsage usage, uint32_t accessHint, ElementInitData* initData) = 0;
 
+	// Create structured buffer, for D3D11's ID3D11Buffer, for OpenGL's shader storage object
+	virtual shared_ptr<GraphicsBuffer> CreateStructuredBuffer(ElementInitData* initData) = 0;
+	virtual shared_ptr<GraphicsBuffer> CreateStructuredUAV(const GraphicsBuffer& buffer) = 0;
+	virtual shared_ptr<GraphicsBuffer> CreateStructuredSRV(const GraphicsBuffer& buffer) = 0;
+
 	// FrameBuffers
 	//-------------------------------------------------------------------------------------------------------	
 	virtual shared_ptr<FrameBuffer> CreateFrameBuffer(uint32_t width, uint32_t height) = 0;

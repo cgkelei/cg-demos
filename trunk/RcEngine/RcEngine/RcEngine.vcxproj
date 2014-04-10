@@ -68,6 +68,7 @@
     <ClInclude Include="Graphics\Sky.h" />
     <ClInclude Include="Graphics\SpriteBatch.h" />
     <ClInclude Include="Graphics\Texture.h" />
+    <ClInclude Include="Graphics\UnorderedAccessView.h" />
     <ClInclude Include="Graphics\VertexDeclaration.h" />
     <ClInclude Include="Graphics\VertexElement.h" />
     <ClInclude Include="GUI\Button.h" />
@@ -171,6 +172,7 @@
     <ClCompile Include="Graphics\Sky.cpp" />
     <ClCompile Include="Graphics\SpriteBatch.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
+    <ClCompile Include="Graphics\UnorderedAccessView.cpp" />
     <ClCompile Include="Graphics\VertexDeclaration.cpp" />
     <ClCompile Include="Graphics\VertexElement.cpp" />
     <ClCompile Include="GUI\Button.cpp" />

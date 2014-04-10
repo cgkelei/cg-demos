@@ -35,6 +35,9 @@ protected:
 	PixelFormat mFormat;
 };
 
+
+
+
 } // Namespace RcEngine
 
 
