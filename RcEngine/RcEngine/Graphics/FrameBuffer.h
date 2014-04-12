@@ -57,7 +57,6 @@ public:
 
 	shared_ptr<RenderView> GetAttachedView(Attachment att);
 
-
 	/**
 	 * Clear all render target of the frame buffer.
 	 * note that before do clear, you need to bind the frame buffer as current device 
@@ -69,7 +68,7 @@ public:
 	virtual void Resize(uint32_t width, uint32_t height) = 0;
 	virtual bool CheckFramebufferStatus();
 	
-	void Attach(Attachment att, const shared_ptr<RenderView>& view);
+	void Attach(Attachment att, const shared_ptr<RHRenderView>& view);
 	void Detach(Attachment att);
 	void DetachAll();
 

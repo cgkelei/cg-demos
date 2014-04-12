@@ -2,11 +2,11 @@
 #define D3D11Shader_h__
 
 #include "D3D11Prerequisites.h"
-#include <Graphics/Shader.h>
+#include <Graphics/RHResource.h>
 
 namespace RcEngine {
 
-class _D3D11Export D3D11VertexShader : public Shader
+class _D3D11Export D3D11VertexShader : public RHShader
 {
 public:
 	D3D11VertexShader();
@@ -21,7 +21,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11HullShader : public Shader
+class _D3D11Export D3D11HullShader : public RHShader
 {
 public:
 	D3D11HullShader();
@@ -35,7 +35,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11DomainShader : public Shader
+class _D3D11Export D3D11DomainShader : public RHShader
 {
 public:
 	D3D11DomainShader();
@@ -49,7 +49,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11GeometryShader : public Shader
+class _D3D11Export D3D11GeometryShader : public RHShader
 {
 public:
 	D3D11GeometryShader();
@@ -63,7 +63,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11PixelShader : public Shader
+class _D3D11Export D3D11PixelShader : public RHShader
 {
 public:
 	D3D11PixelShader();
@@ -77,7 +77,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11ComputeShader : public Shader
+class _D3D11Export D3D11ComputeShader : public RHShader
 {
 public:
 	D3D11ComputeShader();

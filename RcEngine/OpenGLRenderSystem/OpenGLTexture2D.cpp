@@ -6,11 +6,11 @@
 
 namespace RcEngine {
 
-OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width, uint32_t height, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData )
-	: OpenGLTexture(TT_Texture2D, format, arraySize, numMipMaps, sampleCount, sampleQuality, accessHint)
+OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width, uint32_t height, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, uint32_t flags, ElementInitData* initData )
+	: OpenGLTexture(TT_Texture2D, format, arraySize, numMipMaps, sampleCount, sampleQuality, accessHint, flags)
 {
 	// numMipMap == 0, will generate mipmap levels automatically
-	mMipLevels = (numMipMaps > 0) ? numMipMaps : Texture::CalculateMipmapLevels((std::max)(width, height));
+	mMipLevels = (numMipMaps > 0) ? numMipMaps : RHTexture::CalculateMipmapLevels((std::max)(width, height));
 	mWidth = width;
 	mHeight = height;
 
@@ -26,11 +26,11 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 
 	// OpenGL Texture target type
 	if (sampleCount <= 1)
-		mTextureTarget = (mTextureArraySize > 1) ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D;
+		TextureTarget = (mTextureArraySize > 1) ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D;
 	else
 	{
 		assert(mMipLevels <= 1);
-		mTextureTarget =  (mTextureArraySize > 1) ? GL_TEXTURE_2D_MULTISAMPLE_ARRAY : GL_TEXTURE_2D_MULTISAMPLE;
+		TextureTarget =  (mTextureArraySize > 1) ? GL_TEXTURE_2D_MULTISAMPLE_ARRAY : GL_TEXTURE_2D_MULTISAMPLE;
 	}
 
 	// Check if we can use render buffer, it may faster than render texture
@@ -43,8 +43,8 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 		GLenum internalFormat, externFormat, formatType;
 		OpenGLMapping::Mapping(internalFormat, externFormat, formatType, mFormat);
 
-		glGenRenderbuffers(1, &mTextureID);
-		glBindRenderbuffer(GL_RENDERBUFFER, mTextureID);
+		glGenRenderbuffers(1, &TextureOGL);
+		glBindRenderbuffer(GL_RENDERBUFFER, TextureOGL);
 
 		if (sampleCount <= 1)
 			glRenderbufferStorage(GL_RENDERBUFFER, internalFormat, width, height);
@@ -55,11 +55,11 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 	}
 	else
 	{		
-		glGenTextures(1, &mTextureID);
-		glBindTexture(mTextureTarget, mTextureID);
-		glTexParameteri(mTextureTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(mTextureTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(mTextureTarget, GL_TEXTURE_MAX_LEVEL, mMipLevels - 1);
+		glGenTextures(1, &TextureOGL);
+		glBindTexture(TextureTarget, TextureOGL);
+		glTexParameteri(TextureTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(TextureTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(TextureTarget, GL_TEXTURE_MAX_LEVEL, mMipLevels - 1);
 
 		// Use texture storage to init, faster
 		if (GLEW_ARB_texture_storage)
@@ -67,11 +67,6 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 		else
 			CreateWithMutableStorage(initData);
 	}
-}
-
-OpenGLTexture2D::~OpenGLTexture2D()
-{
-	
 }
 
 void OpenGLTexture2D::CreateWithImmutableStorage(ElementInitData* initData)
@@ -82,7 +77,7 @@ void OpenGLTexture2D::CreateWithImmutableStorage(ElementInitData* initData)
 
 	if (mTextureArraySize > 1)
 	{
-		glTexStorage3D(mTextureTarget, mMipLevels, internalFormat, mWidth, mHeight, mTextureArraySize);
+		glTexStorage3D(TextureTarget, mMipLevels, internalFormat, mWidth, mHeight, mTextureArraySize);
 		if (initData)
 		{
 			for (uint32_t  arrIndex = 0; arrIndex < mTextureArraySize; ++ arrIndex)
@@ -95,7 +90,7 @@ void OpenGLTexture2D::CreateWithImmutableStorage(ElementInitData* initData)
 					{
 						int blockSize = (internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16; 
 						uint32_t imageSize = ((levelWidth+3)/4)*((levelHeight+3)/4)*blockSize; 
-						glCompressedTexSubImage3D(mTextureTarget,
+						glCompressedTexSubImage3D(TextureTarget,
 							static_cast<GLint>(level),
 							0, 0, static_cast<GLint>(arrIndex),
 							static_cast<GLsizei>(levelWidth),
@@ -107,7 +102,7 @@ void OpenGLTexture2D::CreateWithImmutableStorage(ElementInitData* initData)
 					}
 					else
 					{
-						glTexSubImage3D(mTextureTarget,
+						glTexSubImage3D(TextureTarget,
 							static_cast<GLint>(level),
 							0, 0, static_cast<GLint>(arrIndex),
 							static_cast<GLsizei>(levelWidth),
@@ -123,7 +118,7 @@ void OpenGLTexture2D::CreateWithImmutableStorage(ElementInitData* initData)
 	}
 	else
 	{
-		glTexStorage2D(mTextureTarget, mMipLevels, internalFormat, mWidth, mHeight);
+		glTexStorage2D(TextureTarget, mMipLevels, internalFormat, mWidth, mHeight);
 		if (initData)
 		{
 			for (uint32_t level = 0; level < mMipLevels; ++ level)
@@ -135,7 +130,7 @@ void OpenGLTexture2D::CreateWithImmutableStorage(ElementInitData* initData)
 					int blockSize = (internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16; 
 					uint32_t imageSize = ((levelWidth+3)/4)*((levelHeight+3)/4)*blockSize; 
 
-					glCompressedTexSubImage2D(mTextureTarget,
+					glCompressedTexSubImage2D(TextureTarget,
 						static_cast<GLint>(level), 0, 0,
 						static_cast<GLsizei>(levelWidth),
 						static_cast<GLsizei>(levelHeight),
@@ -145,7 +140,7 @@ void OpenGLTexture2D::CreateWithImmutableStorage(ElementInitData* initData)
 				}
 				else
 				{
-					glTexSubImage2D(mTextureTarget,
+					glTexSubImage2D(TextureTarget,
 						static_cast<GLint>(level), 0, 0,
 						static_cast<GLsizei>(levelWidth),
 						static_cast<GLsizei>(levelHeight),
@@ -181,11 +176,11 @@ void OpenGLTexture2D::CreateWithMutableStorage(ElementInitData* initData)
 				{	
 					if (0 == arrIndex)
 					{
-						glCompressedTexImage3D(mTextureTarget, level, internalFormat, levelWidth, levelHeight, 
+						glCompressedTexImage3D(TextureTarget, level, internalFormat, levelWidth, levelHeight, 
 							mTextureArraySize, 0, imageSize, NULL);
 					}
 
-					glCompressedTexSubImage3D(mTextureTarget, level, 0, 0, arrIndex, levelWidth, levelHeight, 1, internalFormat, 
+					glCompressedTexSubImage3D(TextureTarget, level, 0, 0, arrIndex, levelWidth, levelHeight, 1, internalFormat, 
 							imageSize, initData[arrIndex * mMipLevels + level].pData);
 				}
 				else
@@ -200,14 +195,14 @@ void OpenGLTexture2D::CreateWithMutableStorage(ElementInitData* initData)
 				{
 					if (0 == arrIndex)
 					{
-						glTexImage3D(mTextureTarget, level, internalFormat, levelWidth, levelHeight,
+						glTexImage3D(TextureTarget, level, internalFormat, levelWidth, levelHeight,
 							mTextureArraySize, 0, externFormat, formatType, NULL);
 					}
 
 					// OpenGL bugs. init texture array mipmaps with NULL storage cause crash.
 					if (initData)
 					{
-						glTexSubImage3D(mTextureTarget, level, 0, 0, arrIndex, levelWidth, levelHeight, 1,
+						glTexSubImage3D(TextureTarget, level, 0, 0, arrIndex, levelWidth, levelHeight, 1,
 							externFormat, formatType, (NULL == initData) ? NULL : initData[arrIndex * mMipLevels + level].pData);
 					}
 					else
@@ -219,7 +214,7 @@ void OpenGLTexture2D::CreateWithMutableStorage(ElementInitData* initData)
 				}
 				else
 				{
-					glTexImage2D(mTextureTarget, level, internalFormat, levelWidth, levelHeight, 0, externFormat, formatType,
+					glTexImage2D(TextureTarget, level, internalFormat, levelWidth, levelHeight, 0, externFormat, formatType,
 						(NULL == initData) ? NULL : initData[arrIndex * mMipLevels + level].pData);
 				}
 			}
@@ -264,31 +259,31 @@ void OpenGLTexture2D::Map2D( uint32_t arrayIndex, uint32_t level, TextureMapAcce
 				glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, mPixelBufferID);
 				glBufferData(GL_PIXEL_PACK_BUFFER_ARB, imageSize, NULL, GL_STREAM_DRAW);
 
-				glBindTexture(mTextureTarget, mTextureID);
+				glBindTexture(TextureTarget, TextureOGL);
 
 				if (PixelFormatUtils::IsCompressed(mFormat))
 				{
-					glGetCompressedTexImage(mTextureTarget, level, NULL);
+					glGetCompressedTexImage(TextureTarget, level, NULL);
 					p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY));
 				}
 				else
 				{
-					glGetTexImage(mTextureTarget, level, externFormat, formatType, NULL);
+					glGetTexImage(TextureTarget, level, externFormat, formatType, NULL);
 					p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY));
 				}
 			}
 			else
 			{
 				mTextureData.resize(imageSize);
-				glBindTexture(mTextureTarget, mTextureID);
+				glBindTexture(TextureTarget, TextureOGL);
 				if (PixelFormatUtils::IsCompressed(mFormat))
 				{
-					glGetCompressedTexImage(mTextureTarget, level, &mTextureData[0]);
+					glGetCompressedTexImage(TextureTarget, level, &mTextureData[0]);
 					p = &mTextureData[0];
 				}
 				else
 				{
-					glGetTexImage(mTextureTarget, level, externFormat, formatType, &mTextureData[0]);
+					glGetTexImage(TextureTarget, level, externFormat, formatType, &mTextureData[0]);
 					p = &mTextureData[0];
 				}
 			}
@@ -357,7 +352,7 @@ void OpenGLTexture2D::Unmap2D( uint32_t arrayIndex, uint32_t level )
 				imageSize = ((levelWidth+3)/4)*((levelHeight+3)/4)*blockSize; 
 			}
 
-			glBindTexture(mTextureTarget, mTextureID);
+			glBindTexture(TextureTarget, TextureOGL);
 
 			uint8_t* p;
 			if (mPixelBufferID != 0) 
@@ -373,22 +368,22 @@ void OpenGLTexture2D::Unmap2D( uint32_t arrayIndex, uint32_t level )
 			if (PixelFormatUtils::IsCompressed(mFormat))
 			{
 				if (mTextureArraySize > 1)
-					glCompressedTexSubImage3D(mTextureTarget, level, 0, 0, arrayIndex,levelWidth, levelHeight, 1, externFormat, imageSize, p);
+					glCompressedTexSubImage3D(TextureTarget, level, 0, 0, arrayIndex,levelWidth, levelHeight, 1, externFormat, imageSize, p);
 				else
-					glCompressedTexSubImage2D(mTextureTarget, level, 0, 0, levelWidth, levelHeight, externFormat, imageSize, p);
+					glCompressedTexSubImage2D(TextureTarget, level, 0, 0, levelWidth, levelHeight, externFormat, imageSize, p);
 			}
 			else
 			{
 				if (mTextureArraySize > 1)
-					glTexSubImage3D(mTextureTarget, level, 0, 0, arrayIndex, levelWidth, levelHeight, 1, externFormat, formatType, p);
+					glTexSubImage3D(TextureTarget, level, 0, 0, arrayIndex, levelWidth, levelHeight, 1, externFormat, formatType, p);
 				else
-					glTexSubImage2D(mTextureTarget, level, 0, 0, levelWidth, levelHeight, externFormat, formatType, p);
+					glTexSubImage2D(TextureTarget, level, 0, 0, levelWidth, levelHeight, externFormat, formatType, p);
 			}
 		}
 	}
 }
 
-void OpenGLTexture2D::CopyToTexture( Texture& destTexture )
+void OpenGLTexture2D::CopyToTexture( RHTexture& destTexture )
 {
 	assert(mFormat == destTexture.GetTextureFormat() && mType == destTexture.GetTextureType());
 	OpenGLTexture2D& destTextureOGL = *(static_cast<OpenGLTexture2D*>(&destTexture));
@@ -400,11 +395,11 @@ void OpenGLTexture2D::CopyToTexture( Texture& destTexture )
 			uint32_t levelWidth = GetWidth(level);
 			uint32_t levelHeight = GetHeight(level);
 
-			GLuint srtTex = GetOpenGLTexture();
-			GLuint dstTex = destTextureOGL.GetOpenGLTexture();
+			GLuint srtTex = TextureOGL;
+			GLuint dstTex = destTextureOGL.TextureOGL;
 
-			GLenum srcTarget = GetOpenGLTextureTarget();
-			GLenum dstTarget = destTextureOGL.GetOpenGLTextureTarget();
+			GLenum srcTarget = TextureTarget;
+			GLenum dstTarget = destTextureOGL.TextureTarget;
 
 			if (GLEW_ARB_copy_image)
 			{

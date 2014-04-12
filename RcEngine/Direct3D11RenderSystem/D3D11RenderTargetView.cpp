@@ -11,8 +11,7 @@ D3D11RenderTargetView2D::D3D11RenderTargetView2D( Texture& texture, uint32_t arr
 	  mLevel(level),
 	  mRenderTargetView2D(nullptr)
 {
-	uint32_t flags = mTextureD3D11.GetTextureCreateFlags();
-	assert(flags & TexCreate_RenderTarget);
+	assert(mTextureD3D11.CreateFlags & TexCreate_RenderTarget);
 
 	ID3D11Device*           g_pd3dDevice = NULL;
 

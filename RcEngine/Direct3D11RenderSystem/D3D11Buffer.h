@@ -1,0 +1,26 @@
+#ifndef D3D11Buffer_h__
+#define D3D11Buffer_h__
+#pragma once
+
+#include "D3D11Prerequisites.h"
+#include <Graphics/RHResource.h>
+
+namespace RcEngine {
+
+class D3D11Buffer : public RHBuffer
+{
+public:
+	D3D11Buffer(uint32_t bufferSize, uint32_t accessHint, uint32_t flags, D3D11_BIND_FLAG target, uint32_t structSize, ElementInitData* initData);
+	~D3D11Buffer(void);
+
+	void ResizeBuffer(uint32_t size);
+	void* Map(uint32_t offset, uint32_t length, BufferAccess options);
+	void UnMap();
+
+public:
+	ID3D11Buffer* BufferD3D11;
+	uint32_t mCreateFlags;
+};
+
+}
+#endif // D3D11Buffer_h__

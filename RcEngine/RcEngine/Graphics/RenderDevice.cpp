@@ -18,10 +18,7 @@ RenderDevice::RenderDevice(void)
 	  mCurrentBlendState(nullptr),
 	  mCurrentRasterizerState(nullptr), 
 	  mCurrentDepthStencilState(nullptr),
-	  mCurrentFrontStencilRef(0),
-	  mCurrentBackStencilRef(0),
-	  mCurrentBlendFactor(ColorRGBA::Black),
-	  mCurrentSampleMask(0)
+	  
 {
 	Context::GetSingleton().SetRenderDevice(this);
 }
