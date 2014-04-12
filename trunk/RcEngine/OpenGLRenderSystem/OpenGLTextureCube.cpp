@@ -11,10 +11,10 @@ OpenGLTextureCube::OpenGLTextureCube( PixelFormat format, uint32_t arraySize, ui
 	mMipLevels = (numMipMaps > 0) ? numMipMaps : Texture::CalculateMipmapLevels(width);
 	mWidth = mHeight = width;
 
-	mTextureTarget = (mTextureArraySize > 1) ? GL_TEXTURE_CUBE_MAP_ARRAY : GL_TEXTURE_CUBE_MAP;
-	glGenTextures(1, &mTextureID);
-	glBindTexture(mTextureTarget, mTextureID);
-	glTexParameteri(mTextureTarget, GL_TEXTURE_MAX_LEVEL, mMipLevels - 1);
+	TextureTarget = (mTextureArraySize > 1) ? GL_TEXTURE_CUBE_MAP_ARRAY : GL_TEXTURE_CUBE_MAP;
+	glGenTextures(1, &TextureOGL);
+	glBindTexture(TextureTarget, TextureOGL);
+	glTexParameteri(TextureTarget, GL_TEXTURE_MAX_LEVEL, mMipLevels - 1);
 
 	//if (GLEW_ARB_texture_storage)
 	//	CreateWithImmutableStorage(initData);
@@ -109,10 +109,10 @@ void OpenGLTextureCube::CreateWithMutableStorage( ElementInitData* initData )
 					{	
 						if (0 == arrIndex)
 						{
-							glCompressedTexImage3D(mTextureTarget, level, internalFormat, levelSize, levelSize, mTextureArraySize,
+							glCompressedTexImage3D(TextureTarget, level, internalFormat, levelSize, levelSize, mTextureArraySize,
 								0, imageSize, NULL);
 						}
-						glCompressedTexSubImage3D(mTextureTarget, level, 0, 0, arrIndex, levelSize, levelSize, 1, internalFormat, 
+						glCompressedTexSubImage3D(TextureTarget, level, 0, 0, arrIndex, levelSize, levelSize, 1, internalFormat, 
 							imageSize, (NULL == initData) ? NULL : initData[imageIndex].pData);
 
 					}

@@ -4,8 +4,8 @@
 namespace RcEngine {
 
 D3D11Texture1D::D3D11Texture1D( PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, uint32_t flags, ElementInitData* initData )
-	: D3D11TextureBase(TT_Texture1D, format, arraySize, numMipMaps, sampleCount, sampleQuality, accessHint, flags),
-	  mTexture1D(nullptr)
+	: D3D11Texture(TT_Texture1D, format, arraySize, numMipMaps, sampleCount, sampleQuality, accessHint, flags),
+	  TextureD3D11(nullptr)
 {
 	mWidth = width;
 
@@ -16,24 +16,24 @@ D3D11Texture1D::D3D11Texture1D( PixelFormat format, uint32_t arraySize, uint32_t
 	
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
 	texDesc.CPUAccessFlags = 0;
-	D3D11Mapping::MapUsage(accessHint, texDesc.Usage, texDesc.CPUAccessFlags);
+	D3D11Mapping::Mapping(accessHint, texDesc.Usage, texDesc.CPUAccessFlags);
 
 	texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	texDesc.MiscFlags = 0;
 	
 	// Generate mipmaps if enable
-	if (mFlags & TexCreate_GenerateMipmaps)
+	if (mCreateFlags & TexCreate_GenerateMipmaps)
 	{
 		texDesc.MiscFlags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
-		mMipLevels = Texture::CalculateMipmapLevels(mWidth);
+		mMipLevels = RHTexture::CalculateMipmapLevels(mWidth);
 	}
 	else
 		mMipLevels = numMipMaps;
 
-	if (mFlags & TexCreate_UAV)
+	if (mCreateFlags & TexCreate_UAV)
 		texDesc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
 
-	if (mFlags & TexCreate_RenderTarget)
+	if (mCreateFlags & TexCreate_RenderTarget)
 		texDesc.BindFlags |= D3D11_BIND_RENDER_TARGET;
 
 	/////////////////////////
@@ -53,13 +53,13 @@ D3D11Texture1D::D3D11Texture1D( PixelFormat format, uint32_t arraySize, uint32_t
 			}
 		}
 
-		D3D11_VERRY(pd3dDevice->CreateTexture1D( &texDesc, &subResourceData[0], &mTexture1D));
+		D3D11_VERRY(pd3dDevice->CreateTexture1D( &texDesc, &subResourceData[0], &TextureD3D11));
 	}
 	else 
-		D3D11_VERRY(pd3dDevice->CreateTexture1D( &texDesc, NULL, &mTexture1D));
+		D3D11_VERRY(pd3dDevice->CreateTexture1D( &texDesc, NULL, &TextureD3D11));
 
 
-	if (mFlags & TexCreate_ShaderResource)
+	/*if (mCreateFlags & TexCreate_ShaderResource)
 	{
 		D3D11_SHADER_RESOURCE_VIEW_DESC  viewDesc;
 		viewDesc.Format = texDesc.Format;
@@ -79,8 +79,8 @@ D3D11Texture1D::D3D11Texture1D( PixelFormat format, uint32_t arraySize, uint32_t
 			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1DARRAY;
 		}
 	
-		D3D11_VERRY(pd3dDevice->CreateShaderResourceView(mTexture1D, &viewDesc, &mShaderResourceView));
-	}
+		D3D11_VERRY(pd3dDevice->CreateShaderResourceView(TextureD3D11, &viewDesc, &ShaderResourceViewD3D11));
+	}*/
 }
 
 D3D11Texture1D::~D3D11Texture1D()

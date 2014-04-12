@@ -45,6 +45,4 @@
 #define SAFE_RELEASE(p)      { if (p) { (p)->Release(); (p)=NULL; } }
 #endif
 
-
-
 #endif // D3D11Prerequisites_h__

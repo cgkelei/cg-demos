@@ -9,8 +9,8 @@ D3D11DepthStencilView::D3D11DepthStencilView( Texture& texture, uint32_t arrInde
 	  mArrIndex(arrIndex),
 	  mLevel(level)
 {
-	uint32_t flags = mTextureD3D11.GetTextureCreateFlags();
-	assert(flags & TexCreate_DepthStencilTarget);
+	uint32_t createFlags = mTextureD3D11.GetCreateFlags();
+	assert(createFlags & TexCreate_DepthStencilTarget);
 
 	ID3D11Device*           g_pd3dDevice = NULL;
 

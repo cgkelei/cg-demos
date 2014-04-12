@@ -6,8 +6,8 @@ namespace RcEngine {
 OpenGLTexture::OpenGLTexture( TextureType type, PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint )
 	: Texture(type, format, numMipMaps, sampleCount, sampleQuality, accessHint), 
 	  mPixelBufferID(0),
-	  mTextureID(0),
-	  mTextureTarget(0),
+	  TextureOGL(0),
+	  TextureTarget(0),
 	  mRenderBufferHint(false)
 {
 	mTextureArraySize = (std::max)(arraySize, 1U);
@@ -23,9 +23,9 @@ OpenGLTexture::~OpenGLTexture(void)
 		glDeleteBuffers(1, &mPixelBufferID);
 
 	if (mRenderBufferHint)
-		glDeleteTextures(1, &mTextureID);
+		glDeleteTextures(1, &TextureOGL);
 	else 
-		glDeleteRenderbuffers(1, &mTextureID);
+		glDeleteRenderbuffers(1, &TextureOGL);
 }
 
 void OpenGLTexture::Map1D(uint32_t arrayIndex,  uint32_t level, TextureMapAccess tma, uint32_t xOffset, uint32_t width, void*& data )
@@ -77,8 +77,8 @@ void OpenGLTexture::BuildMipMap()
 {
 	if (GLEW_EXT_framebuffer_object)
 	{
-		glBindTexture(mTextureTarget, mTextureID);
-		glGenerateMipmapEXT(mTextureTarget);
+		glBindTexture(TextureTarget, TextureOGL);
+		glGenerateMipmapEXT(TextureTarget);
 	}
 	else
 	{

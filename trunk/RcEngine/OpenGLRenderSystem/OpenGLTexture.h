@@ -2,21 +2,28 @@
 #define OpenGLTexture_h__
 
 #include "OpenGLPrerequisites.h"
-#include "OpenGLGraphicCommon.h"
-#include <Graphics/Texture.h>
-#include <math.h>
+#include <Graphics/RHResource.h>
 
 namespace RcEngine {
 
-class _OpenGLExport OpenGLTexture : public Texture
+class _OpenGLExport OpenGLTexture : public RHTexture
 {
 public:
-	OpenGLTexture(TextureType type, PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint );
+	OpenGLTexture(
+		TextureType type, 
+		PixelFormat format,
+		uint32_t arraySize, 
+		uint32_t numMipMaps, 
+		uint32_t sampleCount, 
+		uint32_t sampleQuality, 
+		uint32_t accessHint,
+		uint32_t flags);
 	virtual ~OpenGLTexture(void);
 
-	GLuint GetOpenGLTexture() const			{ return mTextureID; }
-	GLenum GetOpenGLTextureTarget() const	{ return mTextureTarget; }
-	bool   RenderBufferHint() const			{ return mRenderBufferHint; }
+	/**
+	 * Return true if use render buffer.
+	 */
+	inline bool RenderBufferHint() const { return mRenderBufferHint; }
 
 	virtual void Map1D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
 		uint32_t xOffset, uint32_t width, void*& data);
@@ -40,13 +47,15 @@ public:
 	virtual void UnmapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level);
 
 	virtual void BuildMipMap();
-	virtual void CopyToTexture(Texture& destTexture);
+	virtual void CopyToTexture(RHTexture& destTexture);
+
+public:
+	/** Texture object if not use render buffer */
+	GLuint TextureOGL;
+	GLenum TextureTarget;
 
 protected:
-	GLuint mTextureID;
-	GLenum mTextureTarget;
 	TextureMapAccess mTextureMapAccess;
-
 	bool mRenderBufferHint;
 
 	GLuint mPixelBufferID;
@@ -57,10 +66,16 @@ protected:
 class _OpenGLExport OpenGLTexture1D : public OpenGLTexture
 {
 public:
-	OpenGLTexture1D(PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width,
-		uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData);
-
-	~OpenGLTexture1D();
+	OpenGLTexture1D(
+		PixelFormat format, 
+		uint32_t arraySize, 
+		uint32_t numMipMaps,
+		uint32_t width,
+		uint32_t sampleCount, 
+		uint32_t sampleQuality, 
+		uint32_t accessHint, 
+		uint32_t flags,
+		ElementInitData* initData);
 
 	virtual void Map1D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
 		uint32_t xOffset, uint32_t width, void*& data);
@@ -73,10 +88,17 @@ public:
 class _OpenGLExport OpenGLTexture2D : public OpenGLTexture
 {
 public:
-	OpenGLTexture2D(PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width,
-		uint32_t height, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData);
-
-	~OpenGLTexture2D();
+	OpenGLTexture2D(
+		PixelFormat format,
+		uint32_t arraySize,
+		uint32_t numMipMaps,
+		uint32_t width,
+		uint32_t height, 
+		uint32_t sampleCount,
+		uint32_t sampleQuality, 
+		uint32_t accessHint,
+		uint32_t flags,
+		ElementInitData* initData);
 
 	virtual void Map2D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
@@ -84,7 +106,7 @@ public:
 
 	virtual void Unmap2D(uint32_t arrayIndex, uint32_t level);
 
-	virtual void CopyToTexture(Texture& destTexture);
+	virtual void CopyToTexture(RHTexture& destTexture);
 
 private:
 	// use texture storage if supported
@@ -96,9 +118,17 @@ private:
 class _OpenGLExport OpenGLTexture3D : public OpenGLTexture
 {
 public:
-	OpenGLTexture3D(PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width,
-		uint32_t height, uint32_t depth, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData);
-	~OpenGLTexture3D();
+	OpenGLTexture3D(PixelFormat format,
+		uint32_t arraySize, 
+		uint32_t numMipMaps,
+		uint32_t width,
+		uint32_t height, 
+		uint32_t depth, 
+		uint32_t sampleCount, 
+		uint32_t sampleQuality,
+		uint32_t accessHint, 
+		uint32_t flags,
+		ElementInitData* initData);
 
 	virtual void Map3D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t zOffset,
@@ -112,10 +142,17 @@ public:
 class _OpenGLExport OpenGLTextureCube : public OpenGLTexture
 {
 public:
-	OpenGLTextureCube(PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width,
-		uint32_t height, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData);
-
-	~OpenGLTextureCube();
+	OpenGLTextureCube(
+		PixelFormat format,
+		uint32_t arraySize,
+		uint32_t numMipMaps, 
+		uint32_t width,
+		uint32_t height, 
+		uint32_t sampleCount, 
+		uint32_t sampleQuality,
+		uint32_t accessHint,
+		uint32_t flags,
+		ElementInitData* initData);
 
 	virtual void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, TextureMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,

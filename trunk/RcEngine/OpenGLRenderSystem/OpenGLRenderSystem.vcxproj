@@ -87,6 +87,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
+    <ClCompile Include="OpenGLBuffer.cpp" />
     <ClCompile Include="OpenGLDepthStencilView.cpp" />
     <ClCompile Include="OpenGLFrameBuffer.cpp" />
     <ClCompile Include="OpenGLGraphicBuffer.cpp" />
@@ -100,15 +101,17 @@
     <ClCompile Include="OpenGLSampleStater.cpp" />
     <ClCompile Include="OpenGLShader.cpp" />
     <ClCompile Include="OpenGLShaderProgram.cpp" />
+    <ClCompile Include="OpenGLShaderResourceView.cpp" />
     <ClCompile Include="OpenGLTexture.cpp" />
     <ClCompile Include="OpenGLTexture1D.cpp" />
     <ClCompile Include="OpenGLTexture2D.cpp" />
     <ClCompile Include="OpenGLTexture3D.cpp" />
     <ClCompile Include="OpenGLTextureCube.cpp" />
-    <ClCompile Include="OpenGLUAV.cpp" />
+    <ClCompile Include="OpenGLUnorderedAccessView.cpp" />
     <ClCompile Include="pfm.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="OpenGLBuffer.h" />
     <ClInclude Include="OpenGLFrameBuffer.h" />
     <ClInclude Include="OpenGLGraphicBuffer.h" />
     <ClInclude Include="OpenGLGraphicCommon.h" />
@@ -121,8 +124,9 @@
     <ClInclude Include="OpenGLSamplerState.h" />
     <ClInclude Include="OpenGLShader.h" />
     <ClInclude Include="OpenGLShaderProgram.h" />
+    <ClInclude Include="OpenGLShaderResourceView.h" />
     <ClInclude Include="OpenGLTexture.h" />
-    <ClInclude Include="OpenGLUAV.h" />
+    <ClInclude Include="OpenGLUnorderedAccessView.h" />
     <ClInclude Include="pfm.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

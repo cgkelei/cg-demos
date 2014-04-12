@@ -23,6 +23,8 @@ public:
 	static GLenum Mapping(TextureAddressMode mode);
 	static GLenum Mapping(ShaderType type);
 
+	// OpenGL usage
+	static GLenum Mapping(uint32_t accessHint);
 
 	static void Mapping(GLenum& min, GLenum& mag, TextureFilter filter);
 

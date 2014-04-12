@@ -539,6 +539,29 @@ GLenum OpenGLMapping::Mapping( ShaderType type )
 	}
 }
 
+GLenum OpenGLMapping::Mapping( uint32_t accessHint )
+{
+	GLenum usage = GL_STATIC_DRAW;
+
+	if (accessHint & EAH_GPU_Write)
+	{
+		usage = GL_DYNAMIC_COPY;
+	}
+	else if (accessHint & EAH_CPU_Write)
+	{
+		usage = GL_DYNAMIC_DRAW;
+	}
+	else if (accessHint == EAH_GPU_Read)
+	{
+		// Only sample by GPU
+		usage = GL_STATIC_DRAW;
+	}
+	else
+	{
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid access hint", "D3D11Mapping::MapUsage");
+	}
+}
+
 PixelFormat OpenGLMapping::UnMapping( GLenum internalformat, GLenum format, GLenum type )
 {
 	switch(internalformat)

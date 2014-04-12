@@ -1,72 +1,68 @@
 #ifndef GraphicsCommon_h__
 #define GraphicsCommon_h__
 
-#include <Core/Prerequisites.h>
-
 namespace RcEngine {
 
-enum VertexElementFormat
+enum ElementAccessHint
 {
-	VEF_Float = 0,
-	VEF_Float2,
-	VEF_Float3,
-	VEF_Float4,
-	VEF_Int,
-	VEF_Int2,
-	VEF_Int3,
-	VEF_Int4,
-	VEF_UInt,
-	VEF_UInt2,
-	VEF_UInt3,
-	VEF_UInt4,
-	VEF_Bool,
-	VEF_Bool2,
-	VEF_Bool3,
-	VEF_Bool4,
-	VEF_Count
+	EAH_CPU_Read						= 1UL << 0,
+	EAH_CPU_Write						= 1UL << 1,
+	EAH_GPU_Read						= 1UL << 2,
+	EAH_GPU_Write						= 1UL << 3,
 };
 
-
-enum VertexElementUsage
+enum BufferCreateFlag
 {
-	/** Position, 3 float per vertex
-	*/
-	VEU_Position = 0, 
-		
-	/** Blending weight data
-	*/
-	VEU_BlendWeight = 1,
-		
-	/** Blending indices data
-	*/
-	VEU_BlendIndices = 2, 
-		
-	/** Vertex normal data.
-	*/
-	VEU_Normal = 3,
-		
-	/** Color
-	*/
-	VEU_Color = 4,
-	
-	/**  Texture coordinates
-	*/
-	VEU_TextureCoordinate = 5,
-		
-	/** Vertex tangent data.
-	*/
-	VEU_Tangent = 6,	
-
-	/** Vertex binormal data.
-	*/
-	VEU_Binormal = 7,
+	BufferCreate_Vertex					= 1UL << 0,
+	BufferCreate_Index					= 1UL << 1,
+	BufferCreate_Uniform				= 1UL << 2,
+	BufferCreate_StreamOutput			= 1UL << 3,
+	BufferCreate_Structured				= 1UL << 4,
 };
 
-enum TextureMapAccess
+enum TexCreateFlag
 {
-	TMA_Read_Only,
-	TMA_Write_Only,
-	TMA_Read_Write
+	TexCreate_GenerateMipmaps			= 1UL << 0,
+	TexCreate_UAV					    = 1UL << 1,
+	TexCreate_SRGB					    = 1UL << 2,
+	TexCreate_ShaderResource		    = 1UL << 3,
+	TexCreate_RenderTarget				= 1UL << 4,
+	TexCreate_DepthStencilTarget	    = 1UL << 5,
+	TexCreate_ResolveTarget				= 1UL << 6,
+};
+
+enum TextureType
+{
+	TT_Texture1D,
+	TT_Texture2D,
+	TT_Texture3D,
+	TT_TextureCube
+};
+
+enum ResourceMapAccess
+{
+	RMA_Read_Only,
+	RMA_Write_Only,
+	RMA_Read_Write,
+	RMA_Write_Discard,
+	RMA_Write_NO_Overwrite
+};
+
+enum IndexBufferType
+{
+	IBT_Bit16 = 0,
+	IBT_Bit32
+};
+
+enum ShaderType
+{
+	ST_Vertex = 0,
+	ST_Hull,
+	ST_Domain,
+	ST_Geomerty,
+	ST_Pixel,
+	ST_Compute,
+	ST_Count
 };
 
 enum TextureAddressMode
@@ -108,34 +104,6 @@ enum TextureFilter
 	TF_Min_Mag_Linear_Mip_Point                     = 0x14,
 	TF_Min_Mag_Mip_Linear                           = 0x15,
 	TF_Anisotropic                                  = 0x55,
-};
-	
-enum CubeMapFace
-{
-	CMF_PositiveX,
-	CMF_NegativeX,
-	CMF_PositiveY,
-	CMF_NegativeY,
-	CMF_PositiveZ,
-	CMF_NegativeZ,
-};
-
-enum TextureType
-{
-	TT_Texture1D,
-	TT_Texture2D,
-	TT_Texture3D,
-	TT_TextureCube
-};
-	
-enum PrimitiveType
-{
-	PT_Point_List = 1, 
-	PT_Line_List = 2, 
-	PT_Line_Strip = 3, 
-	PT_Triangle_List = 4, 
-	PT_Triangle_Strip = 5, 
-	PT_Triangle_Fan = 6 
 };
 
 enum BlendOperation
@@ -198,11 +166,11 @@ enum StencilOperation
 
 enum ColorWriteMask
 {
-	CWM_Red     = 1,
-	CWM_Green   = 2,
-	CWM_Blue    = 4,
-	CWM_Alpha   = 8,
-	CWM_All     = ( CWM_Red | CWM_Green |  CWM_Blue | CWM_Alpha ) 
+	CWM_Red				= 1UL << 0,
+	CWM_Green			= 1UL << 1,
+	CWM_Blue			= 1UL << 2,
+	CWM_Alpha			= 1UL << 3,
+	CWM_All				= (CWM_Red | CWM_Green |  CWM_Blue | CWM_Alpha) 
 };
 
 enum FillMode
@@ -213,48 +181,14 @@ enum FillMode
 
 enum CullMode 
 {
-	CM_None    = 1,
-	CM_Front   = 2,
-	CM_Back    = 3 
-};
-
-enum BufferUsage
-{
-	BU_Static,
-	BU_Dynamic
-};
-
-enum BufferAccess
-{
-	BA_Read_Only,
-	BA_Write_Only,
-	BA_Read_Write
-};
-
-enum ClearFlag
-{
-	CF_Color = 0x0001, /** Clear color buffer */
-	CF_Depth = 0x0002, /** Clear z-buffer */
-	CF_Stencil = 0x0004, /** Clear stencil buffer */
-};
-
-enum IndexBufferType
-{
-	IBT_Bit16 = 0,
-	IBT_Bit32
-};
-
-enum ElementAccessHint
-{
-	EAH_CPU_Read = 1UL << 0,
-	EAH_CPU_Write = 1UL << 1,
-	EAH_GPU_Read = 1UL << 2,
-	EAH_GPU_Write = 1UL << 3,
+	CM_None,
+	CM_Front,
+	CM_Back 
 };
 
 enum Attachment
 {
-	ATT_DepthStencil,
+	ATT_DepthStencil = 0,
 	ATT_Color0,
 	ATT_Color1,
 	ATT_Color2,
@@ -265,32 +199,90 @@ enum Attachment
 	ATT_Color7
 };
 
-enum TexCreateFlag
+enum ClearFlag
 {
-	TexCreate_GenerateMipmaps			= 1UL << 0,
-	TexCreate_UAV					    = 1UL << 1,
-	TexCreate_SRGB					    = 1UL << 2,
-	TexCreate_ShaderResource		    = 1UL << 3,
-	TexCreate_RenderTarget				= 1UL << 4,
-	TexCreate_DepthStencilTarget	    = 1UL << 5,
-	TexCreate_ResolveTarget				= 1UL << 6,
+	CF_Color	= 0x0001, /** Clear color buffer */
+	CF_Depth	= 0x0002, /** Clear z-buffer */
+	CF_Stencil	= 0x0004, /** Clear stencil buffer */
 };
 
-enum BufferCreateFlag
+enum VertexElementFormat
 {
-	BufferCreate_Vertex			= 1UL << 0,
-	BufferCreate_Index			= 1UL << 1,
-	BufferCreate_Uniform		= 1UL << 2,
-	BufferCreate_StreamOutput   = 1UL << 3,
-	BufferCreate_Structured     = 1UL << 4,
+	VEF_Float = 0,
+	VEF_Float2,
+	VEF_Float3,
+	VEF_Float4,
+	VEF_Int,
+	VEF_Int2,
+	VEF_Int3,
+	VEF_Int4,
+	VEF_UInt,
+	VEF_UInt2,
+	VEF_UInt3,
+	VEF_UInt4,
+	VEF_Bool,
+	VEF_Bool2,
+	VEF_Bool3,
+	VEF_Bool4,
+	VEF_Count
 };
 
-struct ElementInitData
+enum VertexElementUsage
 {
-	const void* pData;
-	uint32_t rowPitch;
-	uint32_t slicePitch;
+	/** Position, 3 float per vertex
+	*/
+	VEU_Position = 0, 
+		
+	/** Blending weight data
+	*/
+	VEU_BlendWeight = 1,
+		
+	/** Blending indices data
+	*/
+	VEU_BlendIndices = 2, 
+		
+	/** Vertex normal data.
+	*/
+	VEU_Normal = 3,
+		
+	/** Color
+	*/
+	VEU_Color = 4,
+	
+	/**  Texture coordinates
+	*/
+	VEU_TextureCoordinate = 5,
+		
+	/** Vertex tangent data.
+	*/
+	VEU_Tangent = 6,	
+
+	/** Vertex binormal data.
+	*/
+	VEU_Binormal = 7,
 };
+
+enum CubeMapFace
+{
+	CMF_PositiveX,
+	CMF_NegativeX,
+	CMF_PositiveY,
+	CMF_NegativeY,
+	CMF_PositiveZ,
+	CMF_NegativeZ,
+};
+
+enum PrimitiveType
+{
+	PT_Point_List = 1, 
+	PT_Line_List = 2, 
+	PT_Line_Strip = 3, 
+	PT_Triangle_List = 4, 
+	PT_Triangle_Strip = 5, 
+	PT_Triangle_Fan = 6 
+};
+
+
 
 /// <summary>
 /// Effect Parameter type enumeration.
@@ -486,18 +478,6 @@ enum EffectParameterUsage
 	 * Camera info(focal len, near, far)
 	 */
 	EPU_Camera_Info
-};
-
-
-enum ShaderType
-{
-	ST_Vertex = 0,
-	ST_Hull,
-	ST_Domain,
-	ST_Geomerty,
-	ST_Pixel,
-	ST_Compute,
-	ST_Count
 };
 
 enum RenderOrder

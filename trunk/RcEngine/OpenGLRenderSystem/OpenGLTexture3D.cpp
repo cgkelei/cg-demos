@@ -4,27 +4,27 @@
 
 namespace RcEngine {
 
-OpenGLTexture3D::OpenGLTexture3D( PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width, uint32_t height, uint32_t depth, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, ElementInitData* initData )
-	: OpenGLTexture(TT_Texture3D, format, arraySize, numMipMaps, sampleCount, sampleQuality, accessHint)	  
+OpenGLTexture3D::OpenGLTexture3D( PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width, uint32_t height, uint32_t depth, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, uint32_t flags, ElementInitData* initData )
+	: OpenGLTexture(TT_Texture3D, format, arraySize, numMipMaps, sampleCount, sampleQuality, accessHint, flags)	  
 {
 	// No 3D Texture Array 
 	assert(arraySize == 1);
-	mTextureTarget = GL_TEXTURE_3D;
+	TextureTarget = GL_TEXTURE_3D;
 	mWidth = width; 
 	mHeight = height;
 	mDepth = depth;
 
-	mMipLevels = (numMipMaps > 0) ? numMipMaps : Texture::CalculateMipmapLevels((std::max)(width, (std::max)(height, depth)));
+	mMipLevels = (numMipMaps > 0) ? numMipMaps : RHTexture::CalculateMipmapLevels((std::max)(width, (std::max)(height, depth)));
 
 	GLenum internalFormat, externFormat, formatType;
 	OpenGLMapping::Mapping(internalFormat, externFormat, formatType, mFormat);
 	uint32_t texelSize = PixelFormatUtils::GetNumElemBytes(mFormat);
 
-	glGenTextures(1, &mTextureID);
-	glBindTexture(mTextureTarget, mTextureID);
-	glTexParameteri(mTextureTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(mTextureTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(mTextureTarget, GL_TEXTURE_MAX_LEVEL, mMipLevels - 1);
+	glGenTextures(1, &TextureOGL);
+	glBindTexture(TextureTarget, TextureOGL);
+	glTexParameteri(TextureTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(TextureTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(TextureTarget, GL_TEXTURE_MAX_LEVEL, mMipLevels - 1);
 
 	for (uint32_t level = 0; level < mMipLevels; ++ level)
 	{
@@ -39,17 +39,13 @@ OpenGLTexture3D::OpenGLTexture3D( PixelFormat format, uint32_t arraySize, uint32
 		}
 		else
 		{
-			glTexImage3D(mTextureTarget, level, internalFormat, levelWidth, levelHeight, levelDepth, 0,
+			glTexImage3D(TextureTarget, level, internalFormat, levelWidth, levelHeight, levelDepth, 0,
 				externFormat, formatType, (NULL == initData) ? NULL : initData[level].pData);
 
 		}
 	}
 }
 
-OpenGLTexture3D::~OpenGLTexture3D()
-{
-
-};
 
 void OpenGLTexture3D::Map3D( uint32_t arrayIndex, uint32_t level, TextureMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t zOffset, uint32_t width, uint32_t height, uint32_t depth, void*& data, uint32_t& rowPitch, uint32_t& slicePitch )
 {
