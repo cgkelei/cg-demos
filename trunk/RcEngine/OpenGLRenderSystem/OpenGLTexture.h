@@ -20,24 +20,22 @@ public:
 		uint32_t flags);
 	virtual ~OpenGLTexture(void);
 
-	/**
-	 * Return true if use render buffer.
-	 */
-	inline bool RenderBufferHint() const { return mRenderBufferHint; }
+	inline GLuint GetTextureOGL() const		    { return mTextureOGL; }
+	inline GLuint GetTextureTarget() const		{ return mTextureTarget; }
 
-	virtual void Map1D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+	virtual void Map1D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma,
 		uint32_t xOffset, uint32_t width, void*& data);
 
-	virtual void Map2D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+	virtual void Map2D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
 		void*& data, uint32_t& rowPitch);
 
-	virtual void Map3D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+	virtual void Map3D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t zOffset,
 		uint32_t width, uint32_t height, uint32_t depth,
 		void*& data, uint32_t& rowPitch, uint32_t& slicePitch);
 
-	virtual void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, TextureMapAccess tma,
+	virtual void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, ResourceMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
 		void*& data, uint32_t& rowPitch);
 
@@ -49,17 +47,15 @@ public:
 	virtual void BuildMipMap();
 	virtual void CopyToTexture(RHTexture& destTexture);
 
-public:
-	/** Texture object if not use render buffer */
-	GLuint TextureOGL;
-	GLenum TextureTarget;
-
 protected:
-	TextureMapAccess mTextureMapAccess;
-	bool mRenderBufferHint;
+
+	/** Texture object if not use render buffer */
+	GLuint mTextureOGL;
+	GLenum mTextureTarget;
 
 	GLuint mPixelBufferID;
-	std::vector<unsigned char> mTextureData;
+
+	ResourceMapAccess mTextureMapAccess;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -71,13 +67,11 @@ public:
 		uint32_t arraySize, 
 		uint32_t numMipMaps,
 		uint32_t width,
-		uint32_t sampleCount, 
-		uint32_t sampleQuality, 
 		uint32_t accessHint, 
 		uint32_t flags,
 		ElementInitData* initData);
 
-	virtual void Map1D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+	virtual void Map1D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma,
 		uint32_t xOffset, uint32_t width, void*& data);
 
 	virtual void Unmap1D(uint32_t arrayIndex, uint32_t level);
@@ -100,7 +94,7 @@ public:
 		uint32_t flags,
 		ElementInitData* initData);
 
-	virtual void Map2D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+	virtual void Map2D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
 		void*& data, uint32_t& rowPitch);
 
@@ -118,19 +112,17 @@ private:
 class _OpenGLExport OpenGLTexture3D : public OpenGLTexture
 {
 public:
-	OpenGLTexture3D(PixelFormat format,
-		uint32_t arraySize, 
+	OpenGLTexture3D(
+		PixelFormat format,
 		uint32_t numMipMaps,
 		uint32_t width,
 		uint32_t height, 
 		uint32_t depth, 
-		uint32_t sampleCount, 
-		uint32_t sampleQuality,
 		uint32_t accessHint, 
 		uint32_t flags,
 		ElementInitData* initData);
 
-	virtual void Map3D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+	virtual void Map3D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t zOffset,
 		uint32_t width, uint32_t height, uint32_t depth,
 		void*& data, uint32_t& rowPitch, uint32_t& slicePitch);
@@ -154,7 +146,7 @@ public:
 		uint32_t flags,
 		ElementInitData* initData);
 
-	virtual void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, TextureMapAccess tma,
+	virtual void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, ResourceMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
 		void*& data, uint32_t& rowPitch);
 

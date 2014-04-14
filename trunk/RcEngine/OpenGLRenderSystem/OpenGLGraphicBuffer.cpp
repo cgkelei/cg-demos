@@ -19,7 +19,7 @@ OpenGLGraphicsBuffer::OpenGLGraphicsBuffer(BufferUsage usage, uint32_t accessHin
 	}
 
 	glBindBuffer(mTarget, 0);
-
+	
 	OGL_ERROR_CHECK();
 }
 

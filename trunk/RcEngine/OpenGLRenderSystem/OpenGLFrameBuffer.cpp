@@ -1,85 +1,55 @@
 #include "OpenGLFrameBuffer.h"
-#include "OpenGLRenderDevice.h"
-#include "OpenGLRenderView.h"
+#include "OpenGLDevice.h"
 #include <Core/Exception.h>
-#include <Core/Context.h>
+//#include <Core/Context.h>
 
 namespace RcEngine {
 
-GLuint OpenGLFrameBuffer::msCurrFrameBufferObject = 0;
-
-void OpenGLFrameBuffer::BindFBO( GLuint fbo )
-{
-	if (fbo != msCurrFrameBufferObject)
-	{
-		msCurrFrameBufferObject = fbo;
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-	}
-}
-
-GLuint OpenGLFrameBuffer::GetFBO()
-{
-	return msCurrFrameBufferObject;
-}
-
-
 OpenGLFrameBuffer::OpenGLFrameBuffer( uint32_t width, uint32_t height, bool offscreen /*= true*/ )
-	: FrameBuffer(width, height, offscreen)
+	: RHFrameBuffer(width, height, offscreen)
 {
 	if (mOffscreen)
-		glGenFramebuffers(1, &mFrameBufferObject);
+		glGenFramebuffers(1, &mFrameBufferOGL);
 	else
-		mFrameBufferObject = 0;
+		mFrameBufferOGL = 0;
 }
 
-RcEngine::OpenGLFrameBuffer::~OpenGLFrameBuffer()
+OpenGLFrameBuffer::~OpenGLFrameBuffer()
 {
 	DetachAll();
 
-	if(mFrameBufferObject != 0)
-		glDeleteFramebuffers(1, &mFrameBufferObject);
+	if(mFrameBufferOGL != 0)
+		glDeleteFramebuffers(1, &mFrameBufferOGL);
 }
 
-void OpenGLFrameBuffer::DoBind()
+void OpenGLFrameBuffer::OnBind()
 {
-	BindFBO(mFrameBufferObject);
+	gOpenGLDevice->BindFBO(mFrameBufferOGL);
 
-	if (mFrameBufferObject != 0 && mColorViews.size())
+	if (mFrameBufferOGL != 0 && mColorViews.size())
 	{
 		assert(GL_FRAMEBUFFER_COMPLETE == glCheckFramebufferStatus(GL_FRAMEBUFFER));
 
 		std::vector<GLenum> targets(mColorViews.size());
 		for (size_t i = 0; i < mColorViews.size(); ++ i)
 		{
-			targets[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i);
+			if (mColorViews[i])
+				targets[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i);
 		}
 		glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
 	}
 
+
 	OGL_ERROR_CHECK();
 }
 
-void OpenGLFrameBuffer::DoUnbind()
+void OpenGLFrameBuffer::OnUnbind()
 {
 }
 
 void OpenGLFrameBuffer::SwapBuffers()
 {
 
-}
-
-void OpenGLFrameBuffer::Resize( uint32_t width, uint32_t height )
-{
-	if ((width != mWidth) || (height != mHeight))
-	{
-		mViewport.Width = width;
-		mViewport.Height = height;
-		mWidth = width;
-		mHeight = height;
-		mViewport.Top = 0;
-		mViewport.Left = 0;
-		mDirty = true;
-	}
 }
 
 bool OpenGLFrameBuffer::CheckFramebufferStatus()

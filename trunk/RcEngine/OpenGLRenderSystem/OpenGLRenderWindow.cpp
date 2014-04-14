@@ -1,5 +1,5 @@
 #include "OpenGLRenderWindow.h"
-#include "OpenGLRenderDevice.h"
+#include "OpenGLDevice.h"
 #include <Core/Context.h>
 #include <Core/Exception.h>
 #include <Core/Utility.h>
@@ -11,11 +11,14 @@ namespace RcEngine {
 OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
 	: OpenGLFrameBuffer(settings.Width, settings.Height, false)
 {
-	mColorFormat = settings.ColorFormat;
-	mColorDepth = PixelFormatUtils::GetNumElemBits(settings.ColorFormat);
 	mFullscreen = settings.Fullscreen;
-	mIsDepthBuffered = PixelFormatUtils::IsDepth(settings.DepthStencilFormat);
-	PixelFormatUtils::GetNumDepthStencilBits(settings.DepthStencilFormat, mDepthBits, mStencilBits);
+
+	uint32_t colorDepth, depthBits, stencilBits;
+
+	colorDepth = PixelFormatUtils::GetNumElemBits(settings.ColorFormat);
+	PixelFormatUtils::GetNumDepthStencilBits(settings.DepthStencilFormat, depthBits, stencilBits);
+
+	bool isDepthBuffered = PixelFormatUtils::IsDepth(settings.DepthStencilFormat);
 
 #ifdef RcWindows
 	Window* mainWindow = Context::GetSingleton().GetApplication().GetMainWindow();
@@ -30,9 +33,9 @@ OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
 		DEVMODE dmScreenSettings;								
 		memset(&dmScreenSettings,0,sizeof(dmScreenSettings));	
 		dmScreenSettings.dmSize=sizeof(dmScreenSettings);	
-		dmScreenSettings.dmPelsWidth	= mWidth;				
-		dmScreenSettings.dmPelsHeight	= mHeight;				
-		dmScreenSettings.dmBitsPerPel	= mColorDepth;					
+		dmScreenSettings.dmPelsWidth	= settings.Width;				
+		dmScreenSettings.dmPelsHeight	= settings.Height;				
+		dmScreenSettings.dmBitsPerPel	= colorDepth;					
 		dmScreenSettings.dmFields=DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
 
 		// Try To Set Selected Mode And Get Results.  NOTE: CDS_FULLSCREEN Gets Rid Of Start Bar.
@@ -44,7 +47,7 @@ OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
 	}
 	else
 	{
-		mColorDepth = ::GetDeviceCaps(mHdc, BITSPIXEL);
+		colorDepth = ::GetDeviceCaps(mHdc, BITSPIXEL);
 		mLeft = settings.Left;
 		mTop = settings.Top;
 	}
@@ -55,9 +58,9 @@ OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
 	pfd.nVersion	= 1;
 	pfd.dwFlags		= PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 	pfd.iPixelType	= PFD_TYPE_RGBA;
-	pfd.cColorBits	= static_cast<BYTE>(mColorDepth);
-	pfd.cDepthBits	= static_cast<BYTE>(mDepthBits);
-	pfd.cStencilBits = static_cast<BYTE>(mStencilBits);
+	pfd.cColorBits	= static_cast<BYTE>(colorDepth);
+	pfd.cDepthBits	= static_cast<BYTE>(depthBits);
+	pfd.cStencilBits = static_cast<BYTE>(stencilBits);
 	pfd.iLayerType	= PFD_MAIN_PLANE;
 
 	GLuint pixelFormat = ::ChoosePixelFormat(mHdc,&pfd);
@@ -100,7 +103,6 @@ OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
 	}
 
 	mDescription = oss.str();
-	mActice = true;
 }
 
 OpenGLRenderWindow::~OpenGLRenderWindow()

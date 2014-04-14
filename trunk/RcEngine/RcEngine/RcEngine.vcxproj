@@ -27,10 +27,11 @@
     <ClInclude Include="Graphics\PixelFormat.h" />
     <ClInclude Include="Graphics\RHDevice.h" />
     <ClInclude Include="Graphics\RHFactory.h" />
-    <ClInclude Include="Graphics\RHRenderView.h" />
+    <ClInclude Include="Graphics\RHOperation.h" />
     <ClInclude Include="Graphics\RHResource.h" />
     <ClInclude Include="Graphics\RHFrameBuffer.h" />
     <ClInclude Include="Graphics\RHState.h" />
+    <ClInclude Include="Graphics\RHVertexDeclaration.h" />
     <ClInclude Include="Graphics\RHView.h" />
     <ClInclude Include="Math\BoundingBox.h" />
     <ClInclude Include="Math\BoundingSphere.h" />
@@ -58,10 +59,11 @@
     <ClCompile Include="Graphics\PixelFormat.cpp" />
     <ClCompile Include="Graphics\RHDevice.cpp" />
     <ClCompile Include="Graphics\RHFactory.cpp" />
-    <ClCompile Include="Graphics\RHRenderView.cpp" />
+    <ClCompile Include="Graphics\RHOperation.cpp" />
     <ClCompile Include="Graphics\RHResource.cpp" />
     <ClCompile Include="Graphics\RHFrameBuffer.cpp" />
     <ClCompile Include="Graphics\RHState.cpp" />
+    <ClCompile Include="Graphics\RHVertexDeclaration.cpp" />
     <ClCompile Include="Graphics\RHView.cpp" />
     <ClCompile Include="Math\ColorRGBA.cpp" />
   </ItemGroup>

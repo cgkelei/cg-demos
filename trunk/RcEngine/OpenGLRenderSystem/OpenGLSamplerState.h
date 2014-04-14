@@ -2,22 +2,20 @@
 #define OpenGLSamplerState_h__
 
 #include "OpenGLPrerequisites.h"
-#include "OpenGLGraphicCommon.h"
-#include <Graphics/SamplerState.h>
+#include <Graphics/RHState.h>
 
 namespace RcEngine {
 
-
-class _OpenGLExport OpenGLSamplerState : public SamplerState
+class _OpenGLExport OpenGLSamplerState : public RHSamplerState
 {
 public:
-	OpenGLSamplerState(const SamplerStateDesc& desc);
+	OpenGLSamplerState(const RHSamplerStateDesc& desc);
 	~OpenGLSamplerState();
 
-	GLuint GetSamplerObject() const { return mOGLSampler; }
-		
+	inline GLuint GetSamplerOGL() const { return mSamplerOGL; }
+
 private:
-	GLuint mOGLSampler;
+	GLuint mSamplerOGL;
 };
 
 }

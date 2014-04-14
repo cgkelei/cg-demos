@@ -30,6 +30,7 @@ protected:
 	uint32_t mFlags;            // Buffer create flags
 };
 
+
 } // Namespace RcEngine
 
 #endif // GraphicBuffer_h__

@@ -1,5 +1,5 @@
 #include "OpenGLRenderModule.h"
-#include "OpenGLRenderDevice.h"
+#include "OpenGLDevice.h"
 
 namespace RcEngine {
 
@@ -23,8 +23,8 @@ const std::string& OpenGLRenderModule::GetName() const
 
 void OpenGLRenderModule::Initialise()
 {
-	mRenderDevice = new OpenGLRenderDevice();
-	mRenderDevice->Create();
+	RenderSettings setting;
+	mRenderDevice = new OpenGLDevice(setting);
 }
 
 void OpenGLRenderModule::Shutdown()
@@ -34,7 +34,7 @@ void OpenGLRenderModule::Shutdown()
 }
 
 
-RenderDevice* OpenGLRenderModule::GetRenderDevice()
+RHDevice* OpenGLRenderModule::GetRenderDevice()
 {
 	return mRenderDevice;
 }

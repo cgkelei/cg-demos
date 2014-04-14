@@ -49,7 +49,7 @@ inline void CheckOpenGLError(const char* func, const char* fname, int line)
 namespace RcEngine
 {
 
-class OpenGLRenderDevice;
+class OpenGLDevice;
 class OpenGLTexture;
 class OpenGLTexture1D;
 class OpenGLTexture2D;

@@ -18,9 +18,8 @@ public:
 	bool Fullscreen() const;
 	void SwapBuffers();
 
-protected:
-	void DoBind();
-	void DoUnbind();
+	void OnBind();
+	void OnUnbind();
 
 private:
 	int32_t mLeft, mTop;
@@ -32,8 +31,6 @@ private:
 	HGLRC mHrc;
 	HWND mHwnd;
 #endif
-			
-
 };
 
 }

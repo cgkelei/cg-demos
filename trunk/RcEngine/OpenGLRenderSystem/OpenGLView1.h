@@ -35,14 +35,51 @@ class _OpenGLExport OpenGLStructuredBufferSRV : public OpenGLBufferSRV
 {
 public:
 	OpenGLStructuredBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount);
-	~OpenGLStructuredBufferSRV();
 };
 
 class _OpenGLExport OpenGLTextureSRV : public RHTextureSRV
 {
 public:
 	OpenGLTextureSRV(const shared_ptr<RHTexture>& texture);
-	~OpenGLTextureSRV();
+
+public:
+	GLenum TargetOGL;
+	GLenum TextureTargetOGL;
+};
+
+//////////////////////////////////////////////////////////////////////////
+class _OpenGLExport OpenGLBufferUAV : public RHBufferUAV
+{
+public:
+	OpenGLBufferUAV(const shared_ptr<RHBuffer>& buffer);
+	virtual ~OpenGLBufferUAV();
+
+public:
+	GLuint BufferOGL;
+	GLenum BufferTargetOGL;
+};
+
+class _OpenGLExport OpenGLTextureBufferUAV : public OpenGLBufferUAV
+{
+public:
+	OpenGLTextureBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format);
+	~OpenGLTextureBufferUAV();
+
+public:
+	GLuint TextureOGL;
+	GLenum FormatOGL;
+};
+
+class _OpenGLExport OpenGLStructuredBufferUAV : public OpenGLBufferUAV
+{
+public:
+	OpenGLStructuredBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount);
+};
+
+class _OpenGLExport OpenGLTextureUAV : public RHTextureUAV
+{
+public:
+	OpenGLTextureUAV(const shared_ptr<RHTexture>& texture);
 
 public:
 	GLenum TargetOGL;

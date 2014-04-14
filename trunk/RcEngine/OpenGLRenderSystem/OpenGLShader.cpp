@@ -1,9 +1,8 @@
 #include "OpenGLShader.h"
 #include "OpenGLGraphicCommon.h"
-#include "OpenGLRenderDevice.h"
+//#include "OpenGLDevice.h"
 #include <Core/Exception.h>
 #include <Core/Loger.h>
-#include <Core/Context.h>
 
 namespace RcEngine {
 
@@ -66,65 +65,47 @@ inline bool LoadBinary(const char* filename, GLenum & format, std::vector<uint8_
 
 //////////////////////////////////////////////////////////////////////////
 OpenGLShader::OpenGLShader( ShaderType shaderType )
-	: Shader(shaderType),
-	  ShaderOGL(0)
+	: RHShader(shaderType),
+	  mShaderOGL(0)
 {
 
 }
 
 OpenGLShader::~OpenGLShader()
 {
-	if (ShaderOGL)
+	if (mShaderOGL)
 	{
-		glDeleteProgram(ShaderOGL);
-		ShaderOGL = 0;
+		glDeleteProgram(mShaderOGL);
+		mShaderOGL = 0;
 	}
 }
 
 
 bool OpenGLShader::LoadFromByteCode( const String& filename )
 {
-	FILE* File = fopen(filename.c_str(), "rb");
-
-	GLenum format;
-	GLuint size;
-	std::vector<uint8_t> bytecode;
-
-	if(File)
-	{
-		fread(&format, sizeof(GLenum), 1, File);
-		fread(&size, sizeof(GLuint), 1, File);
-		
-		bytecode.resize(size);
-		fread(&bytecode[0], size, 1, File);
-		fclose(File);
-		return true;
-	}
-	return false;
-
-	ShaderOGL = glCreateProgram();
-
-	GLint success = 0;
 	GLenum format;
 	std::vector<uint8_t> byteCode;
 
-	if ( LoadBinary(filename.c_str(), format, bytecode) == false )
+	if ( LoadBinary(filename.c_str(), format, byteCode) == false )
 	{
 		ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, filename + " not exits!", "OpenGLShader::LoadFromByteCode");
 		return false;
 	}
 
-	glProgramBinary(ShaderOGL, format, &bytecode[0], byteCode.size());
-	glProgramParameteri(ShaderOGL, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
-	glGetProgramiv(ShaderOGL, GL_LINK_STATUS, &success);
+	GLint success;
+
+	mShaderOGL = glCreateProgram();
+	glProgramBinary(mShaderOGL, format, &byteCode[0], byteCode.size());
+	glProgramParameteri(mShaderOGL, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+	glGetProgramiv(mShaderOGL, GL_LINK_STATUS, &success);
 
 	if (success != GL_TRUE)
 	{
 		int length;
-		glGetProgramiv(ShaderOGL, GL_INFO_LOG_LENGTH, &length);
+		glGetProgramiv(mShaderOGL, GL_INFO_LOG_LENGTH, &length);
 
 		std::vector<char> compileOutput(length);
-		glGetProgramInfoLog(ShaderOGL, length, &length, &compileOutput[0]);
+		glGetProgramInfoLog(mShaderOGL, length, &length, &compileOutput[0]);
 
 		EngineLoger::LogError("GLSL %s compile failed\n\n%s\n\n", filename.c_str(), &compileOutput[0]);
 	}
@@ -133,15 +114,15 @@ bool OpenGLShader::LoadFromByteCode( const String& filename )
 	return (success == GL_TRUE);
 }
 
-bool OpenGLShader::LoadFromFile( const String& filename, const std::vector<Shader::Macro>& macros, const String& entryPoint /*= ""*/ )
+bool OpenGLShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
 {
 	assert(GLEW_ARB_separate_shader_objects);
 
 	String shaderSource;
 
-	for (const Shader::Macro& macro : macros)
+	for (const ShaderMacro& macro : macros)
 	{
-		shaderSource += "#define " + macro.first + " " + macro.second + "\r\n";
+		shaderSource += "#define " + macro.Name + " " + macro.Definition + "\r\n";
 	}
 
 	// Add #line 1
@@ -155,7 +136,7 @@ bool OpenGLShader::LoadFromFile( const String& filename, const std::vector<Shade
 	{
 		char const* pSource = shaderSource.c_str();
 
-		ShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShaderType), 1, &pSource);
+		mShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShaderType), 1, &pSource);
 	}
 	else
 	{
@@ -165,19 +146,19 @@ bool OpenGLShader::LoadFromFile( const String& filename, const std::vector<Shade
 		pSource[0] = latestVersion.c_str();
 		pSource[1] = shaderSource.c_str();
 
-		ShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShaderType), 2, pSource);
+		mShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShaderType), 2, pSource);
 	}
 	
 	int success;
-	glGetProgramiv(ShaderOGL, GL_LINK_STATUS, &success);
+	glGetProgramiv(mShaderOGL, GL_LINK_STATUS, &success);
 	
 	if (success != GL_TRUE)
 	{
 		int length;
-		glGetProgramiv(ShaderOGL, GL_INFO_LOG_LENGTH, &length);
+		glGetProgramiv(mShaderOGL, GL_INFO_LOG_LENGTH, &length);
 
 		std::vector<char> compileOutput(length);
-		glGetProgramInfoLog(ShaderOGL, length, &length, &compileOutput[0]);
+		glGetProgramInfoLog(mShaderOGL, length, &length, &compileOutput[0]);
 
 		EngineLoger::LogError("GLSL %s compile failed\n\n%s\n\n", filename.c_str(), &compileOutput[0]);
 	}
@@ -193,17 +174,17 @@ void OpenGLShader::ShaderReflect()
 	GLenum type;
 	
 	// Get max character length for active uniform maxNameLen
-	glGetProgramiv(ShaderOGL, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLen);
+	glGetProgramiv(mShaderOGL, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLen);
 	std::vector<GLchar> name(maxNameLen);
 	
 	// Active uniforms in each block
 	std::vector<std::vector<String>> blockVariableNames;
 
 	GLint numUniformsInProgram;
-	glGetProgramiv(ShaderOGL, GL_ACTIVE_UNIFORMS, &numUniformsInProgram);
+	glGetProgramiv(mShaderOGL, GL_ACTIVE_UNIFORMS, &numUniformsInProgram);
 	for (GLuint i = 0; i < GLuint(numUniformsInProgram); ++i)
 	{
-		glGetActiveUniform(ShaderOGL, i, maxNameLen, &nameLen, &size, &type, &name[0]);
+		glGetActiveUniform(mShaderOGL, i, maxNameLen, &nameLen, &size, &type, &name[0]);
 		
 		/**
 		 * Hack:
@@ -225,7 +206,7 @@ void OpenGLShader::ShaderReflect()
 
 		// Get uniform block for this uniform
 		GLint blockIdx;
-		glGetActiveUniformsiv(ShaderOGL, 1, &i, GL_UNIFORM_BLOCK_INDEX, &blockIdx);
+		glGetActiveUniformsiv(mShaderOGL, 1, &i, GL_UNIFORM_BLOCK_INDEX, &blockIdx);
 		if (blockIdx == GL_INVALID_INDEX) // Global uniform parameter
 		{
 			UniformParameter uniformParameter;
@@ -233,7 +214,7 @@ void OpenGLShader::ShaderReflect()
 			uniformParameter.Name = actualName;
 			uniformParameter.Type = OpenGLMapping::UnMapping(type);
 			uniformParameter.ArraySize = size;
-			uniformParameter.Location = glGetProgramResourceLocation(ShaderOGL, GL_UNIFORM, &name[0]);
+			uniformParameter.Location = glGetProgramResourceLocation(mShaderOGL, GL_UNIFORM, &name[0]);
 			//uniformParameter.Location = glGetUniformLocation(ShaderOGL, &name[0]);
 			uniformParameter.Offset = -1;
 
@@ -252,7 +233,7 @@ void OpenGLShader::ShaderReflect()
 	}
 
 	GLint numBlocks;
-	glGetProgramiv(ShaderOGL, GL_ACTIVE_UNIFORM_BLOCKS, &numBlocks);
+	glGetProgramiv(mShaderOGL, GL_ACTIVE_UNIFORM_BLOCKS, &numBlocks);
 	assert(blockVariableNames.size() == numBlocks);
 
 	if (numBlocks > 0)
@@ -267,16 +248,16 @@ void OpenGLShader::ShaderReflect()
 
 		for (GLuint i = 0; i < GLuint(blockVariableNames.size()); ++i)
 		{
-			glGetActiveUniformBlockiv(ShaderOGL, i, GL_UNIFORM_BLOCK_NAME_LENGTH, &maxNameLen); 
+			glGetActiveUniformBlockiv(mShaderOGL, i, GL_UNIFORM_BLOCK_NAME_LENGTH, &maxNameLen); 
 			name.resize(maxNameLen);
 
 			// Get uniform block name
-			glGetActiveUniformBlockName(ShaderOGL, i, maxNameLen, &nameLen, &name[0]);
+			glGetActiveUniformBlockName(mShaderOGL, i, maxNameLen, &nameLen, &name[0]);
 
-			glGetActiveUniformBlockiv(ShaderOGL, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &numUniformInBlock); 
+			glGetActiveUniformBlockiv(mShaderOGL, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &numUniformInBlock); 
 			assert(blockVariableNames[i].size() == numUniformInBlock);
 
-			glGetActiveUniformBlockiv(ShaderOGL, i, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
+			glGetActiveUniformBlockiv(mShaderOGL, i, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
 
 			//glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_BINDING, &blockBinding);
 			//glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, &uniformIndices);
@@ -292,17 +273,17 @@ void OpenGLShader::ShaderReflect()
 			for (size_t j = 0; j < pBlockVariableNames.size(); ++j)
 				pBlockVariableNames[j] = blockVariableNames[i][j].c_str();
 
-			glGetUniformIndices(ShaderOGL, numUniformInBlock, &pBlockVariableNames[0], &indices[0]);
-			glGetActiveUniformsiv(ShaderOGL, numUniformInBlock, &indices[0], GL_UNIFORM_OFFSET, &offset[0]);
-			glGetActiveUniformsiv(ShaderOGL, numUniformInBlock, &indices[0], GL_UNIFORM_TYPE, &types[0]);
-			glGetActiveUniformsiv(ShaderOGL, numUniformInBlock, &indices[0], GL_UNIFORM_SIZE, &arraySize[0]);
-			glGetActiveUniformsiv(ShaderOGL, numUniformInBlock, &indices[0], GL_UNIFORM_ARRAY_STRIDE, &arrayStrides[0]);
-			glGetActiveUniformsiv(ShaderOGL, numUniformInBlock, &indices[0], GL_UNIFORM_MATRIX_STRIDE, &matrixStrides[0]);
+			glGetUniformIndices(mShaderOGL, numUniformInBlock, &pBlockVariableNames[0], &indices[0]);
+			glGetActiveUniformsiv(mShaderOGL, numUniformInBlock, &indices[0], GL_UNIFORM_OFFSET, &offset[0]);
+			glGetActiveUniformsiv(mShaderOGL, numUniformInBlock, &indices[0], GL_UNIFORM_TYPE, &types[0]);
+			glGetActiveUniformsiv(mShaderOGL, numUniformInBlock, &indices[0], GL_UNIFORM_SIZE, &arraySize[0]);
+			glGetActiveUniformsiv(mShaderOGL, numUniformInBlock, &indices[0], GL_UNIFORM_ARRAY_STRIDE, &arrayStrides[0]);
+			glGetActiveUniformsiv(mShaderOGL, numUniformInBlock, &indices[0], GL_UNIFORM_MATRIX_STRIDE, &matrixStrides[0]);
 
-			GLuint blockIdx = glGetUniformBlockIndex(ShaderOGL, &name[0]);
+			GLuint blockIdx = glGetUniformBlockIndex(mShaderOGL, &name[0]);
 
 			// Can specify binding slot in GLSL ?
-			glUniformBlockBinding(ShaderOGL, blockIdx, i);
+			glUniformBlockBinding(mShaderOGL, blockIdx, i);
 
 			for (size_t j = 0; j < blockVariableNames[i].size(); ++j)
 			{
@@ -324,70 +305,70 @@ void OpenGLShader::ShaderReflect()
 }
 
 //////////////////////////////////////////////////////////////////////////
-OpenGLShaderPipeline::OpenGLShaderPipeline( Effect& effect )
-	: ShaderProgram(effect)
-{
-
-}
-
-OpenGLShaderPipeline::~OpenGLShaderPipeline()
-{
-
-}
-
-void OpenGLShaderPipeline::Bind()
-{
-	OpenGLRenderDevice& deviceOGL = *(static_cast<OpenGLRenderDevice*>(Context::GetSingleton().GetRenderDevicePtr()));
-
-	if (mShaderStage[ST_Vertex])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStage[ST_Vertex].get()))->ShaderOGL;
-		deviceOGL.BindVertexShader(shaderOGL);
-		// input layout
-	}
-
-	if (mShaderStage[ST_Hull])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStage[ST_Hull].get()))->ShaderOGL;
-		deviceOGL.BindTessControlShader(shaderOGL);
-	}
-
-	if (mShaderStage[ST_Domain])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStage[ST_Domain].get()))->ShaderOGL;
-		deviceOGL.BindTessEvalShader(shaderOGL);
-	}
-
-	if (mShaderStage[ST_Geomerty])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStage[ST_Geomerty].get()))->ShaderOGL;
-		deviceOGL.BindGeometryShader(shaderOGL);
-	}
-
-	if (mShaderStage[ST_Pixel])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStage[ST_Pixel].get()))->ShaderOGL;
-		deviceOGL.BindPixelShader(shaderOGL);
-	}
-
-	if (mShaderStage[ST_Compute])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStage[ST_Compute].get()))->ShaderOGL;
-		deviceOGL.BindComputeShader(shaderOGL);
-	}
-}
-
-void OpenGLShaderPipeline::Unbind()
-{
-	OpenGLRenderDevice& deviceOGL = *(static_cast<OpenGLRenderDevice*>(Context::GetSingleton().GetRenderDevicePtr()));
-
-	if (mShaderStage[ST_Vertex])	deviceOGL.BindVertexShader(0);
-	if (mShaderStage[ST_Hull])		deviceOGL.BindTessControlShader(0);
-	if (mShaderStage[ST_Domain])	deviceOGL.BindTessEvalShader(0);
-	if (mShaderStage[ST_Geomerty])	deviceOGL.BindGeometryShader(0);
-	if (mShaderStage[ST_Pixel])		deviceOGL.BindPixelShader(0);
-	if (mShaderStage[ST_Compute])	deviceOGL.BindComputeShader(0);
-}
+//OpenGLShaderPipeline::OpenGLShaderPipeline( Effect& effect )
+//	: ShaderProgram(effect)
+//{
+//
+//}
+//
+//OpenGLShaderPipeline::~OpenGLShaderPipeline()
+//{
+//
+//}
+//
+//void OpenGLShaderPipeline::Bind()
+//{
+//	OpenGLDevice& deviceOGL = *(static_cast<OpenGLDevice*>(Context::GetSingleton().GetRenderDevicePtr()));
+//
+//	if (mShaderStage[ST_Vertex])
+//	{
+//		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStage[ST_Vertex].get()))->ShaderOGL;
+//		deviceOGL.BindVertexShader(shaderOGL);
+//		// input layout
+//	}
+//
+//	if (mShaderStage[ST_Hull])
+//	{
+//		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStage[ST_Hull].get()))->ShaderOGL;
+//		deviceOGL.BindTessControlShader(shaderOGL);
+//	}
+//
+//	if (mShaderStage[ST_Domain])
+//	{
+//		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStage[ST_Domain].get()))->ShaderOGL;
+//		deviceOGL.BindTessEvalShader(shaderOGL);
+//	}
+//
+//	if (mShaderStage[ST_Geomerty])
+//	{
+//		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStage[ST_Geomerty].get()))->ShaderOGL;
+//		deviceOGL.BindGeometryShader(shaderOGL);
+//	}
+//
+//	if (mShaderStage[ST_Pixel])
+//	{
+//		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStage[ST_Pixel].get()))->ShaderOGL;
+//		deviceOGL.BindPixelShader(shaderOGL);
+//	}
+//
+//	if (mShaderStage[ST_Compute])
+//	{
+//		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStage[ST_Compute].get()))->ShaderOGL;
+//		deviceOGL.BindComputeShader(shaderOGL);
+//	}
+//}
+//
+//void OpenGLShaderPipeline::Unbind()
+//{
+//	OpenGLDevice& deviceOGL = *(static_cast<OpenGLDevice*>(Context::GetSingleton().GetRenderDevicePtr()));
+//
+//	if (mShaderStage[ST_Vertex])	deviceOGL.BindVertexShader(0);
+//	if (mShaderStage[ST_Hull])		deviceOGL.BindTessControlShader(0);
+//	if (mShaderStage[ST_Domain])	deviceOGL.BindTessEvalShader(0);
+//	if (mShaderStage[ST_Geomerty])	deviceOGL.BindGeometryShader(0);
+//	if (mShaderStage[ST_Pixel])		deviceOGL.BindPixelShader(0);
+//	if (mShaderStage[ST_Compute])	deviceOGL.BindComputeShader(0);
+//}
 
 
 }

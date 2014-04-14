@@ -2,7 +2,8 @@
 #define OpenGLShader_h__
 
 #include "OpenGLPrerequisites.h"
-#include <Graphics/Shader.h>
+#include <Graphics/RHResource.h>
+#include <Graphics/GraphicsCommon.h>
 
 namespace RcEngine {
 
@@ -18,36 +19,35 @@ struct _OpenGLExport UniformParameter
 	int32_t MatrixStride;
 };
 
-
-class _OpenGLExport OpenGLShader : public Shader
+class _OpenGLExport OpenGLShader : public RHShader
 {
 public:
 	OpenGLShader(ShaderType shaderType);
 	virtual ~OpenGLShader();
-	
-	virtual bool LoadFromByteCode(const String& filename) = 0;
-	virtual bool LoadFromFile(const String& filename, const std::vector<Macro>& macros, const String& entryPoint = "") = 0;
+
+	virtual bool LoadFromByteCode(const String& filename);
+	virtual bool LoadFromFile(const String& filename, const vector<ShaderMacro>& macros, const String& entryPoint = "");
 
 private:
 	void ShaderReflect();
 
-public:
-	GLuint ShaderOGL;
+private:
+	GLuint mShaderOGL;
 	std::vector<UniformParameter> ShaderParameters;
 };
 
-class _OpenGLExport OpenGLShaderPipeline : public ShaderProgram
-{
-public:
-	OpenGLShaderPipeline(Effect& effect);
-	~OpenGLShaderPipeline();
-
-	virtual void Bind();
-	virtual void Unbind();
-
-public:
-	GLuint PipelineOGL;
-};
+//class _OpenGLExport OpenGLShaderPipeline : public ShaderProgram
+//{
+//public:
+//	OpenGLShaderPipeline(Effect& effect);
+//	~OpenGLShaderPipeline();
+//
+//	virtual void Bind();
+//	virtual void Unbind();
+//
+//public:
+//	GLuint PipelineOGL;
+//};
 
 
 }

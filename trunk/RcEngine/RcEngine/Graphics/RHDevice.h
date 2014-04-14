@@ -19,66 +19,70 @@ enum RenderDeviceType
 	RD_Count
 };
 
+struct RenderSettings
+{
+	bool Fullscreen;
+	int32_t Left, Top;
+	uint32_t Width, Height;
+	PixelFormat ColorFormat;
+	PixelFormat DepthStencilFormat;
+	uint32_t SyncInterval;
+	uint32_t SampleCount, SampleQuality;
+	RenderDeviceType RHDeviceType;
+};
+
 class RHShaderPipeline;
-class RHRenderFactory;
+class RHFactory;
+class RHFrameBuffer;
+class RHOperation;
 
 class _ApiExport RHDevice
 {
 public:
-	RHDevice(RenderDeviceType deviceType);
+	RHDevice(const RenderSettings& settings);
 	virtual ~RHDevice(void);
 
-	virtual void Create() = 0;
-	virtual void Destroy() = 0;
-	virtual void ToggleFullscreen(bool fs) = 0;
+	inline bool Fullscreen() const												    { return mIsFullscreen; }
+	inline RenderDeviceType GetDeviceType() const							        { return mRenderSettings.RHDeviceType; }
+	inline RHFactory* GetFactory() const									        { return mRenderFactory; }
+																  
+	inline shared_ptr<RHFrameBuffer> GetCurrentFrameBuffer() const					{ return mCurrentFrameBuffer; }
+	inline shared_ptr<RHFrameBuffer> GetScreenFrameBuffer() const					{ return mScreenFrameBuffer; }
 
-	virtual void CreateRenderWindow(const RenderSettings& settings) = 0;	
+	virtual void ToggleFullscreen(bool fs) = 0;
 	virtual void AdjustProjectionMatrix(float4x4& pOut) = 0;
 
-	virtual void BindShaderPipeline(const shared_ptr<RHShaderPipeline>& pipeline) = 0;
-
-	void Resize(uint32_t width, uint32_t height);
-
-	void BindFrameBuffer(const shared_ptr<FrameBuffer>& fb);
-
-	inline bool Fullscreen() const								  { return mIsFullscreen; }
-	inline RenderDeviceType GetRenderDeviceType() const			  { return mDeviceType; }
-	inline RHRenderFactory* GetRenderFactory() const			  { return mRenderFactory; }
-																  
-	inline shared_ptr<FrameBuffer> GetCurrentFrameBuffer() const  { return mCurrentFrameBuffer; }
-	inline shared_ptr<FrameBuffer> GetScreenFrameBuffer() const	  { return mScreenFrameBuffer; }
-
-	inline shared_ptr<DepthStencilState> GetCurrentDepthStencilState() const	{ return mCurrentDepthStencilState; }
-	inline shared_ptr<BlendState> GetCurrentBlendState() const					{ return mCurrentBlendState; }
-
-	virtual void SetRasterizerState(const shared_ptr<RasterizerState>& state) = 0;
-	virtual void SetSamplerState(ShaderType stage, uint32_t unit, const shared_ptr<SamplerState>& state) = 0;
-	virtual void SetBlendState(const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask) = 0;
-	virtual void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0) = 0;
+	virtual void SetRasterizerState(const shared_ptr<RHRasterizerState>& state) = 0;
+	virtual void SetSamplerState(ShaderType stage, uint32_t unit, const shared_ptr<RHSamplerState>& state) = 0;
+	virtual void SetBlendState(const shared_ptr<RHBlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask) = 0;
+	virtual void SetDepthStencilState(const shared_ptr<RHDepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0) = 0;
+	virtual void SetViewport()
+	void BindFrameBuffer(const shared_ptr<RHFrameBuffer>& fb);
+	void BindShaderPipeline(const shared_ptr<RHShaderPipeline>& pipeline);
+	void Draw(const RHOperation& operation);
 
 protected:
-	virtual void DoBindFrameBuffer(const shared_ptr<FrameBuffer>& fb) = 0;
+	virtual void DoBindFrameBuffer(const shared_ptr<RHFrameBuffer>& fb) = 0;
+	virtual void DoDraw(const RHOperation& operation) = 0;
 
 protected:
 
 	RenderSettings mRenderSettings;
-	RenderDeviceType mDeviceType;
-	RHRenderFactory* mRenderFactory;
+	RHFactory* mRenderFactory;
 
 	uint32_t mWidth, mHeight;
 	bool mIsFullscreen;
 
-	shared_ptr<FrameBuffer> mCurrentFrameBuffer;
-	shared_ptr<FrameBuffer> mScreenFrameBuffer;
-	shared_ptr<BlendState> mCurrentBlendState;
-	shared_ptr<RasterizerState> mCurrentRasterizerState;
-	shared_ptr<DepthStencilState> mCurrentDepthStencilState;
+	shared_ptr<RHShaderPipeline> mCurrentShaderPipeline;
+	shared_ptr<RHFrameBuffer> mCurrentFrameBuffer;
+	shared_ptr<RHFrameBuffer> mScreenFrameBuffer;
+	shared_ptr<RHBlendState> mCurrentBlendState;
+	shared_ptr<RHRasterizerState> mCurrentRasterizerState;
+	shared_ptr<RHDepthStencilState> mCurrentDepthStencilState;
 
 	ColorRGBA mCurrentBlendFactor;
 	uint32_t mCurrentSampleMask;
 	uint16_t mCurrentFrontStencilRef, mCurrentBackStencilRef;	
-	
-	shared_ptr<RHShaderPipeline> mCurrentShaderPipeline;
 };
 
 } // Namespace RcEngine

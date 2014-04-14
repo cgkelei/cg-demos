@@ -13,7 +13,7 @@ protected:
 public:
 	virtual ~IRenderModule();
 
-	virtual RenderDevice* GetRenderDevice() = 0;
+	virtual RHDevice* GetRenderDevice() = 0;
 };
 
 
