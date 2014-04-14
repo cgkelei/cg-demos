@@ -1,50 +1,21 @@
-#include "D3D11RenderDevice.h"
-#include "D3D11RenderState.h"
+#include "D3D11Device.h"
+#include "D3D11State.h"
 #include <Core/Exception.h>
 
 namespace RcEngine {
 
-void D3D11RenderDevice::Create()
+D3D11Device* gD3D11Device = nullptr;
+
+D3D11Device::D3D11Device( const RenderSettings& settings )
+	: RHDevice(settings),
+	  mDeviceContext(nullptr),
+	  mDevice(nullptr)
 {
 
 }
 
-void D3D11RenderDevice::Release()
-{
 
-}
-
-void D3D11RenderDevice::ToggleFullscreen( bool fs )
-{
-
-}
-
-bool D3D11RenderDevice::Fullscreen() const
-{
-
-}
-
-void D3D11RenderDevice::CreateRenderWindow( const RenderSettings& settings )
-{
-
-}
-
-void D3D11RenderDevice::AdjustProjectionMatrix( float4x4& pOut )
-{
-
-}
-
-void D3D11RenderDevice::DoBindFrameBuffer( const shared_ptr<FrameBuffer>& fb )
-{
-
-}
-
-void D3D11RenderDevice::DoRender( EffectTechnique& tech, RenderOperation& op )
-{
-
-}
-
-void D3D11RenderDevice::SetSamplerState( ShaderType stage, uint32_t unit, const shared_ptr<SamplerState>& state )
+void D3D11Device::SetSamplerState( ShaderType stage, uint32_t unit, const shared_ptr<RHSamplerState>& state )
 {
 	SamplerSlot samSlot(stage, unit);
 
@@ -65,7 +36,7 @@ void D3D11RenderDevice::SetSamplerState( ShaderType stage, uint32_t unit, const 
 
 	if (needUpdate)
 	{
-		ID3D11SamplerState* samplerStateD3D11 = (static_pointer_cast_checked<D3D11SamplerState>(state))->StateD3D11;
+		ID3D11SamplerState* samplerStateD3D11 = (static_cast<D3D11SamplerState*>(state.get()))->StateD3D11;
 		switch (stage)
 		{
 		case ST_Vertex:
@@ -87,7 +58,7 @@ void D3D11RenderDevice::SetSamplerState( ShaderType stage, uint32_t unit, const 
 	}
 }
 
-void D3D11RenderDevice::SetBlendState( const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask )
+void D3D11Device::SetBlendState( const shared_ptr<RHBlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask )
 {
 	if (mCurrentBlendState != state || mCurrentBlendFactor != blendFactor || mCurrentSampleMask != sampleMask)
 	{
@@ -102,21 +73,21 @@ void D3D11RenderDevice::SetBlendState( const shared_ptr<BlendState>& state, cons
 	}
 }
 
-void D3D11RenderDevice::SetRasterizerState( const shared_ptr<RasterizerState>& state )
+void D3D11Device::SetRasterizerState( const shared_ptr<RHRasterizerState>& state )
 {
 	if (mCurrentRasterizerState != state)
 	{
-		mDeviceContext->RSSetState((static_pointer_cast_checked<D3D11RasterizerState>(state))->StateD3D11);
+		mDeviceContext->RSSetState((static_cast<D3D11RasterizerState*>(state.get()))->StateD3D11);
 		mCurrentRasterizerState = state;
 	}
 }
 
-void D3D11RenderDevice::SetDepthStencilState( const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef /*= 0*/, uint16_t backStencilRef /*= 0*/ )
+void D3D11Device::SetDepthStencilState( const shared_ptr<RHDepthStencilState>& state, uint16_t frontStencilRef /*= 0*/, uint16_t backStencilRef /*= 0*/ )
 {
 	if (mCurrentDepthStencilState != state || frontStencilRef != mCurrentFrontStencilRef || mCurrentBackStencilRef != mCurrentBackStencilRef)
 	{
 		mDeviceContext->OMSetDepthStencilState(
-			(static_pointer_cast_checked<D3D11DepthStencilState>(state))->StateD3D11, 
+			(static_cast<D3D11DepthStencilState*>(state.get()))->StateD3D11,
 			frontStencilRef);
 
 		mCurrentDepthStencilState = state;

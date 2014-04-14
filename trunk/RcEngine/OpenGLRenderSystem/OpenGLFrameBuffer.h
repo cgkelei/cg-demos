@@ -100,20 +100,29 @@ private:
 	uint32_t mLevel;
 };
 
+class _OpenGLExport OpenGLRenderTargetArrayView : public OpenGLRenderView
+{
+public:
+	OpenGLRenderTargetArrayView(const shared_ptr<RHTexture>& texture,  uint32_t level);
+
+protected:
+	void OnAttach(RHFrameBuffer& fb, Attachment attr);
+	void OnDetach(RHFrameBuffer& fb, Attachment attr);
+
+protected:
+	uint32_t mLevel;
+};
 //////////////////////////////////////////////////////////////////////////
 class _OpenGLExport OpenGLScreenRenderTargetView2D :  public OpenGLRenderView
 {
 public:
-	OpenGLScreenRenderTargetView2D(PixelFormat format);
+	OpenGLScreenRenderTargetView2D();
 
 	void ClearColor(const ColorRGBA& clr);
 
 protected:
 	void OnAttach(RHFrameBuffer& fb, Attachment attr);
 	void OnDetach(RHFrameBuffer& fb, Attachment attr);
-
-private:
-	PixelFormat mFormat;
 };
 
 }

@@ -27,7 +27,7 @@ RenderDevice* D3D11RenderModule::GetRenderDevice()
 
 void D3D11RenderModule::Initialise()
 {
-	mRenderDevice = new D3D11RenderDevice();
+	mRenderDevice = new D3D11Device();
 }
 
 void D3D11RenderModule::Shutdown()

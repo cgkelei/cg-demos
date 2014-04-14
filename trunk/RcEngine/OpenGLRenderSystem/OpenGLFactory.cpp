@@ -128,6 +128,11 @@ shared_ptr<RHRenderView> OpenGLFactory::CreateDepthStencilView( const shared_ptr
 	return shared_ptr<RHRenderView>( new OpenGLDepthStencilView(texture, arrayIndex, level) );
 }
 
+shared_ptr<RHRenderView> OpenGLFactory::CreateRenderTargetViewArray( const shared_ptr<RHTexture>& texture, uint32_t level )
+{
+	return shared_ptr<RHRenderView>( new OpenGLRenderTargetArrayView(texture, level) );
+}
+
 shared_ptr<RHShader> OpenGLFactory::CreateShader( ShaderType type )
 {
 	return shared_ptr<RHShader>( new OpenGLShader(type) );

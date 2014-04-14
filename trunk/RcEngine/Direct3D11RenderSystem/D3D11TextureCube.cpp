@@ -1,5 +1,6 @@
 #include "D3D11Texture.h"
 #include "D3D11GraphicCommon.h"
+#include "D3D11Device.h"
 
 namespace RcEngine{
 
@@ -25,7 +26,7 @@ D3D11TextureCube::D3D11TextureCube( PixelFormat format, uint32_t arraySize, uint
 	D3D11Mapping::Mapping(accessHint, texDesc.Usage, texDesc.CPUAccessFlags);
 
 	// Generate mipmaps if enable
-	if (CreateFlags & TexCreate_GenerateMipmaps)
+	if (mCreateFlags & TexCreate_GenerateMipmaps)
 	{
 		texDesc.MiscFlags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
 		mMipLevels = RHTexture::CalculateMipmapLevels((std::max)(width, height));
@@ -33,11 +34,11 @@ D3D11TextureCube::D3D11TextureCube( PixelFormat format, uint32_t arraySize, uint
 	else
 		mMipLevels = numMipMaps;
 
-	if (CreateFlags & TexCreate_RenderTarget)
+	if (mCreateFlags & TexCreate_RenderTarget)
 		texDesc.BindFlags |= D3D11_BIND_RENDER_TARGET;
 
-	ID3D11Device* pd3dDevice;
-	D3D11_VERRY(pd3dDevice->CreateTexture2D( &texDesc, NULL, &TextureD3D11));
+	//HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateTexture2D( &texDesc, NULL, &TextureD3D11);
+	D3D11_VERRY(gD3D11Device->GetDeviceD3D11()->CreateTexture2D( &texDesc, NULL, &TextureD3D11));
 
 	/*if (CreateFlags & TexCreate_ShaderResource)
 	{
@@ -63,7 +64,7 @@ D3D11TextureCube::D3D11TextureCube( PixelFormat format, uint32_t arraySize, uint
 	}*/
 }
 
-void D3D11TextureCube::MapCube( uint32_t arrayIndex, CubeMapFace face, uint32_t level, TextureMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height, void*& data, uint32_t& rowPitch )
+void D3D11TextureCube::MapCube( uint32_t arrayIndex, CubeMapFace face, uint32_t level, ResourceMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height, void*& data, uint32_t& rowPitch )
 {
 
 }

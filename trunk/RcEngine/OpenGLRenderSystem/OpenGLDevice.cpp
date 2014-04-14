@@ -124,12 +124,8 @@ void OpenGLDevice::AdjustProjectionMatrix( float4x4& pOut )
 	pOut =  pOut * scale * translate;
 }
 
-void OpenGLDevice::DoBindFrameBuffer( const shared_ptr<RHFrameBuffer>& fb )
-{	
-	OGL_ERROR_CHECK();
-
-	const RHViewport& vp = fb->GetViewport();
-
+void OpenGLDevice::SetViewport( const RHViewport& vp )
+{
 	if (vp.Left != mViewportLeft || vp.Top != mViewportTop || vp.Height !=mViewportHeight || vp.Width != mViewportWidth)
 	{
 		glViewport(vp.Left, vp.Top, vp.Width, vp.Height);
@@ -141,6 +137,7 @@ void OpenGLDevice::DoBindFrameBuffer( const shared_ptr<RHFrameBuffer>& fb )
 
 	OGL_ERROR_CHECK();
 }
+
 
 void OpenGLDevice::ToggleFullscreen( bool fs )
 {

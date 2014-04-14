@@ -35,6 +35,7 @@ class RHShaderPipeline;
 class RHFactory;
 class RHFrameBuffer;
 class RHOperation;
+struct RHViewport;
 
 class _ApiExport RHDevice
 {
@@ -48,6 +49,8 @@ public:
 																  
 	inline shared_ptr<RHFrameBuffer> GetCurrentFrameBuffer() const					{ return mCurrentFrameBuffer; }
 	inline shared_ptr<RHFrameBuffer> GetScreenFrameBuffer() const					{ return mScreenFrameBuffer; }
+	inline shared_ptr<RHDepthStencilState> GetCurrentDepthStencilState() const	    { return mCurrentDepthStencilState; }
+	inline shared_ptr<RHBlendState> GetCurrentBlendState() const					{ return mCurrentBlendState; }
 
 	virtual void ToggleFullscreen(bool fs) = 0;
 	virtual void AdjustProjectionMatrix(float4x4& pOut) = 0;
@@ -56,14 +59,14 @@ public:
 	virtual void SetSamplerState(ShaderType stage, uint32_t unit, const shared_ptr<RHSamplerState>& state) = 0;
 	virtual void SetBlendState(const shared_ptr<RHBlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask) = 0;
 	virtual void SetDepthStencilState(const shared_ptr<RHDepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0) = 0;
-	virtual void SetViewport()
+	
 	void BindFrameBuffer(const shared_ptr<RHFrameBuffer>& fb);
 	void BindShaderPipeline(const shared_ptr<RHShaderPipeline>& pipeline);
 	void Draw(const RHOperation& operation);
 
 protected:
-	virtual void DoBindFrameBuffer(const shared_ptr<RHFrameBuffer>& fb) = 0;
 	virtual void DoDraw(const RHOperation& operation) = 0;
+	virtual void SetViewport(const RHViewport& vp) = 0;
 
 protected:
 

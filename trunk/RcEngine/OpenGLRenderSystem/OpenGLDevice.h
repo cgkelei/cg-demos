@@ -45,7 +45,7 @@ public:
 protected:
 	void CreateRenderWindow();
 
-	void DoBindFrameBuffer( const shared_ptr<RHFrameBuffer>& fb );
+	virtual void SetViewport(const RHViewport& vp);
 	/*void DoRender( EffectTechnique& tech, RenderOperation& operation);*/
 
 	void DoDraw(const RHOperation& operation);

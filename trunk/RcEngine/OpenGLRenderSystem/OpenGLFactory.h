@@ -81,6 +81,7 @@ public:
 	// Render target view
 	virtual shared_ptr<RHRenderView> CreateRenderTargetView2D(const shared_ptr<RHTexture>& texture, uint32_t arrayIndex, uint32_t level);
 	virtual shared_ptr<RHRenderView> CreateDepthStencilView(const shared_ptr<RHTexture>& texture, uint32_t arrayIndex, uint32_t level);
+	virtual shared_ptr<RHRenderView> CreateRenderTargetViewArray(const shared_ptr<RHTexture>& texture, uint32_t level);
 
 protected:
 	virtual shared_ptr<RHBlendState> CreateBlendStateImpl(const RHBlendStateDesc& desc);
