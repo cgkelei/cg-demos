@@ -14,14 +14,14 @@ public:
 	~OpenGLRenderModule(void);
 
 	const std::string& GetName() const ;
-	RenderDevice* GetRenderDevice();
+	RHDevice* GetRenderDevice();
 	
 	void Initialise();
 	void Shutdown();
 		
 
 private:
-	RenderDevice* mRenderDevice;
+	RHDevice* mRenderDevice;
 };
 
 }

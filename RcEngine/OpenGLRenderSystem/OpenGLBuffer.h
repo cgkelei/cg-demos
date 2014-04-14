@@ -9,12 +9,19 @@ namespace RcEngine {
 class _OpenGLExport OpenGLBuffer : public RHBuffer
 {
 public:
-	OpenGLBuffer(uint32_t bufferSize, uint32_t accessHint, uint32_t flags, GLenum target, uint32_t structSize, ElementInitData* initData);
+	OpenGLBuffer(uint32_t bufferSize, uint32_t accessHint, uint32_t flags, GLenum target, ElementInitData* initData);
 	~OpenGLBuffer(void);
 
-public:
-	GLenum BufferTargetOGL;
-	GLenum BufferOGL;
+	inline GLuint GetBufferOGL() const		{ return mBufferOGL; }
+	inline GLuint GetBufferTarget() const   { return mBufferTarget; }
+
+	virtual void ResizeBuffer(uint32_t size);
+	virtual void* Map(uint32_t offset, uint32_t length, ResourceMapAccess mapType);
+	virtual void UnMap() ;
+
+private:
+	GLenum mBufferTarget;
+	GLenum mBufferOGL;
 };
 
 

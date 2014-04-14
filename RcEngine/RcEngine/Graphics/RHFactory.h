@@ -8,21 +8,6 @@
 
 namespace RcEngine {
 
-struct RHBlendStateDesc;
-struct RHSamplerStateDesc;
-struct RHRasterizerStateDesc;
-struct RHDepthStencilStateDesc;
-
-class RHBlendState;
-class RHSamplerState;
-class RHRasterizerState;
-class RHDepthStencilSate;
-
-class RHShader;
-
-class RHBuffer;
-class RHTexture;
-
 class RHBufferSRV;
 class RHBufferUAV;
 class RHTextureSRV;
@@ -31,26 +16,24 @@ class RHTextureUAV;
 struct ElementInitData;
 struct ShaderMacro;
 
-class _ApiExport RHRenderFactory
+class _ApiExport RHFactory
 {
 public:
-	RHRenderFactory();
-	virtual ~RHRenderFactory() {}
+	RHFactory();
+	virtual ~RHFactory() {}
 
 	// States
 	shared_ptr<RHBlendState> CreateBlendState( const RHBlendStateDesc& desc );
 	shared_ptr<RHSamplerState> CreateSamplerState( const RHSamplerStateDesc& desc );
 	shared_ptr<RHRasterizerState> CreateRasterizerState( const RHRasterizerStateDesc& desc );
-	shared_ptr<RHDepthStencilSate> CreateDepthStencilState( const RHDepthStencilStateDesc& desc ); 
+	shared_ptr<RHDepthStencilState> CreateDepthStencilState( const RHDepthStencilStateDesc& desc ); 
 	
 	// Buffer resource
-	virtual shared_ptr<RHBuffer> CreateVertexBuffer(uint32_t accessHint, uint32_t createFlags, ElementInitData* initData) = 0;
-	virtual shared_ptr<RHBuffer> CreateIndexBuffer(uint32_t accessHint, uint32_t createFlags,ElementInitData* initData) = 0;
-	virtual shared_ptr<RHBuffer> CreateUniformBuffer(uint32_t accessHint, uint32_t createFlags,ElementInitData* initData) = 0;
-	virtual shared_ptr<RHBuffer> CreateTextureBuffer(uint32_t accessHint, uint32_t createFlags, ElementInitData* initData) = 0;
-	
-	/** ElementInitData's slicePitch for StructureByteStride */
-	virtual shared_ptr<RHBuffer> CreateStructuredBuffer(uint32_t accessHint, uint32_t createFlags, ElementInitData* initData) = 0;
+	virtual shared_ptr<RHBuffer> CreateVertexBuffer(uint32_t buffreSize, uint32_t accessHint, uint32_t createFlags, ElementInitData* initData) = 0;
+	virtual shared_ptr<RHBuffer> CreateIndexBuffer(uint32_t buffreSize, uint32_t accessHint, uint32_t createFlags,ElementInitData* initData) = 0;
+	virtual shared_ptr<RHBuffer> CreateUniformBuffer(uint32_t buffreSize, uint32_t accessHint, uint32_t createFlags,ElementInitData* initData) = 0;
+	virtual shared_ptr<RHBuffer> CreateTextureBuffer(uint32_t buffreSize, uint32_t accessHint, uint32_t createFlags, ElementInitData* initData) = 0;
+	virtual shared_ptr<RHBuffer> CreateStructuredBuffer(uint32_t buffreSize, uint32_t strutureStride, uint32_t accessHint, uint32_t createFlags, ElementInitData* initData) = 0;
 
 	// Texture resource
 	virtual shared_ptr<RHTexture> CreateTexture1D(
@@ -58,8 +41,6 @@ public:
 		PixelFormat format, 
 		uint32_t arrSize, 
 		uint32_t numMipMaps,
-		uint32_t sampleCount, 
-		uint32_t sampleQuality,
 		uint32_t accessHint, 
 		uint32_t createFlags,
 		ElementInitData* initData) = 0;
@@ -81,10 +62,7 @@ public:
 		uint32_t height,
 		uint32_t depth, 
 		PixelFormat format, 
-		uint32_t arraySize,
 		uint32_t numMipMaps, 
-		uint32_t sampleCount,
-		uint32_t sampleQuality, 
 		uint32_t accessHint, 
 		uint32_t createFlags,
 		ElementInitData* initData) = 0;
@@ -116,26 +94,30 @@ public:
 
 	// Shader resource view
 	virtual shared_ptr<RHTextureSRV> CreateTextureSRV(const shared_ptr<RHTexture>& texture) = 0;
-	virtual shared_ptr<RHBufferUAV> CreateStructuredBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount) = 0;
-	virtual shared_ptr<RHBufferUAV> CreateTextureBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format) = 0;
+	virtual shared_ptr<RHBufferSRV> CreateStructuredBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount) = 0;
+	virtual shared_ptr<RHBufferSRV> CreateTextureBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format) = 0;
 
 	// Unordered access view
 	virtual shared_ptr<RHTextureUAV> CreateTextureUAV(const shared_ptr<RHTexture>& texture) = 0;
 	virtual shared_ptr<RHBufferUAV> CreateStructuredBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount) = 0;
 	virtual shared_ptr<RHBufferUAV> CreateTextureBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format) = 0;
 
+	// Render target view
+	virtual shared_ptr<RHRenderView> CreateRenderTargetView2D(const shared_ptr<RHTexture>& texture, uint32_t arrayIndex, uint32_t level) = 0;
+	virtual shared_ptr<RHRenderView> CreateDepthStencilView(const shared_ptr<RHTexture>& texture, uint32_t arrayIndex, uint32_t level) = 0;
+
 protected:
 	virtual shared_ptr<RHBlendState> CreateBlendStateImpl(const RHBlendStateDesc& desc) = 0;
 	virtual shared_ptr<RHSamplerState> CreateSamplerStateImpl(const RHSamplerStateDesc& desc) = 0;
 	virtual shared_ptr<RHRasterizerState> CreateRasterizerStateImpl(const RHRasterizerStateDesc& desc) = 0;
-	virtual shared_ptr<RHDepthStencilSate> CreateDepthStencilStateImpl(const RHDepthStencilStateDesc& desc) = 0;
+	virtual shared_ptr<RHDepthStencilState> CreateDepthStencilStateImpl(const RHDepthStencilStateDesc& desc) = 0;
 
 protected:
 	std::map<String, shared_ptr<RHShader> > mShaderPool;
-	std::map<RHBlendStateDesc, shared_ptr<BlendState> > mBlendStatePool;
-	std::map<RHSamplerStateDesc, shared_ptr<SamplerState> > mSamplerStatePool;
-	std::map<RHRasterizerStateDesc, shared_ptr<RasterizerState> > mRasterizerStatePool;
-	std::map<RHDepthStencilStateDesc, shared_ptr<DepthStencilState> > mDepthStecilStatePool;
+	std::map<RHBlendStateDesc, shared_ptr<RHBlendState> > mBlendStatePool;
+	std::map<RHSamplerStateDesc, shared_ptr<RHSamplerState> > mSamplerStatePool;
+	std::map<RHRasterizerStateDesc, shared_ptr<RHRasterizerState> > mRasterizerStatePool;
+	std::map<RHDepthStencilStateDesc, shared_ptr<RHDepthStencilState> > mDepthStecilStatePool;
 };
 
 

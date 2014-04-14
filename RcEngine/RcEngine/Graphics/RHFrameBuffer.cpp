@@ -3,6 +3,13 @@
 namespace RcEngine {
 
 //////////////////////////////////////////////////////////////////////////
+RHRenderView::RHRenderView( const shared_ptr<RHTexture>& texture )
+	: mTexture(texture)
+{
+
+}
+
+//////////////////////////////////////////////////////////////////////////
 RHFrameBuffer::RHFrameBuffer( uint32_t width, uint32_t height, bool offscreen /*= true*/ )
 	: mOffscreen(offscreen),
 	  mDirty(true),
@@ -144,5 +151,6 @@ void RHFrameBuffer::Clear( uint32_t flags, const ColorRGBA& clr, float depth, ui
 			mDepthStencilView->ClearStencil(stencil);
 	}
 }
+
 
 }

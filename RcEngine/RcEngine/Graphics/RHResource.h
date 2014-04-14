@@ -40,7 +40,7 @@ public:
 	virtual ~RHBuffer() {}
 
 	inline uint32_t	GetAccessHint() const   { return mAccessHint; }
-	inline uint32_t	GetBufferSize() const   { return mSize; }
+	inline uint32_t	GetBufferSize() const   { return mBufferSize; }
 	inline uint32_t	GetCreateFlags() const	{ return mCreateFlags; }
 
 	virtual void ResizeBuffer(uint32_t size) = 0;
@@ -48,7 +48,7 @@ public:
 	virtual void UnMap() = 0;
 
 protected:
-	uint32_t mSize;
+	uint32_t mBufferSize;
 	uint32_t mAccessHint;
 	uint32_t mCreateFlags;
 };

@@ -9,7 +9,7 @@ RHResouce::RHResouce()
 
 
 RHBuffer::RHBuffer( uint32_t bufferSize, uint32_t accessHint, uint32_t flags )
-	: mSize(bufferSize),
+	: mBufferSize(bufferSize),
 	  mAccessHint(accessHint),
 	  mCreateFlags(flags)
 {

@@ -39,7 +39,7 @@ void OpenGLRenderView::ClearDepthStencil( float depth, uint32_t stencil )
 
 void OpenGLRenderView::OnAttach(FrameBuffer& fb, Attachment attr)
 {
-	mFrameBufferID = (static_cast_checked<OpenGLFrameBuffer*>(&fb))->GetFrameBufferObject();
+	mFrameBufferOGL = (static_cast_checked<OpenGLFrameBuffer*>(&fb))->GetFrameBufferObject();
 	mAttachment = attr;
 }
 
@@ -54,7 +54,7 @@ void OpenGLRenderView::DoClear( GLbitfield clearFlagOGL, const ColorRGBA& clr, f
 
 	shared_ptr<FrameBuffer> currentFrameBuffer = device.GetCurrentFrameBuffer();
 	OpenGLFrameBuffer& frameBufferOGL= *static_cast_checked<OpenGLFrameBuffer*>(currentFrameBuffer.get());
-	assert(mFrameBufferID == frameBufferOGL.GetFrameBufferObject());
+	assert(mFrameBufferOGL == frameBufferOGL.GetFrameBufferObject());
 
 	const DepthStencilStateDesc& currDepthStencilDesc = device.GetCurrentDepthStencilState()->GetDesc();
 	const BlendStateDesc& currBlendDesc = device.GetCurrentBlendState()->GetDesc();
@@ -62,7 +62,7 @@ void OpenGLRenderView::DoClear( GLbitfield clearFlagOGL, const ColorRGBA& clr, f
 	// mark all clear channel write mask true ,so we can clear it
 	if (clearFlagOGL & GL_COLOR_BUFFER_BIT)
 	{
-		if (GLEW_EXT_draw_buffers2 && mFrameBufferID != 0)
+		if (GLEW_EXT_draw_buffers2 && mFrameBufferOGL != 0)
 		{
 			// separate render target blend enables and color write masks supported
 			int32_t bufferIdx = mAttachment - ATT_Color0;
@@ -89,7 +89,7 @@ void OpenGLRenderView::DoClear( GLbitfield clearFlagOGL, const ColorRGBA& clr, f
 	}
 
 	// do the clear
-	if (GLEW_EXT_draw_buffers2 && mFrameBufferID != 0)
+	if (GLEW_EXT_draw_buffers2 && mFrameBufferOGL != 0)
 	{
 		if (clearFlagOGL & GL_COLOR_BUFFER_BIT)
 		{
@@ -131,7 +131,7 @@ void OpenGLRenderView::DoClear( GLbitfield clearFlagOGL, const ColorRGBA& clr, f
 	// set mask back
 	if (clearFlagOGL & GL_COLOR_BUFFER_BIT)
 	{
-		if (GLEW_EXT_draw_buffers2 && mFrameBufferID != 0)
+		if (GLEW_EXT_draw_buffers2 && mFrameBufferOGL != 0)
 		{
 			// separate render target blend enables and color write masks supported
 			int32_t bufferIdx = mAttachment - ATT_Color0;

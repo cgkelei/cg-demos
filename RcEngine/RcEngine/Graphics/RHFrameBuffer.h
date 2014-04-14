@@ -32,6 +32,7 @@ public:
 	friend class RHFrameBuffer;
 
 public: 
+	RHRenderView(const shared_ptr<RHTexture>& texture);
 	virtual ~RHRenderView() {}
 	
 	virtual void ClearColor(const ColorRGBA& clr) = 0;
@@ -46,6 +47,9 @@ protected:
 	 */
 	virtual void OnAttach(RHFrameBuffer& fb, Attachment attr) = 0;
 	virtual void OnDetach(RHFrameBuffer& fb, Attachment attr) = 0;
+
+protected:
+	shared_ptr<RHTexture> mTexture; 
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -57,6 +61,7 @@ public:
 
 	inline uint32_t GetWidth() const	{ return mViewport.Width; }
 	inline uint32_t GetHeight() const	{ return mViewport.Height; }
+	inline bool IsDirty() const			{ return mDirty; }
 
 	void SetViewport(const RHViewport& vp);
 	inline const RHViewport& GetViewport() const { return mViewport; }
@@ -75,7 +80,6 @@ public:
 	void Clear(uint32_t flags, const ColorRGBA& clr, float depth, uint32_t stencil);
 
 	virtual void SwapBuffers() = 0;
-	virtual void Resize(uint32_t width, uint32_t height) = 0;
 
 	//Called when this frame buffer is binded
 	virtual void OnBind() = 0;

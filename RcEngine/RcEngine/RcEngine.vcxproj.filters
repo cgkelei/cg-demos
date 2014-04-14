@@ -126,9 +126,6 @@
     <ClInclude Include="Graphics\RHResource.h">
       <Filter>Graphics\New</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\RHRenderView.h">
-      <Filter>Graphics\New</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\RHView.h">
       <Filter>Graphics\New</Filter>
     </ClInclude>
@@ -139,6 +136,12 @@
       <Filter>Graphics\New</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\RHFrameBuffer.h">
+      <Filter>Graphics\New</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RHVertexDeclaration.h">
+      <Filter>Graphics\New</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RHOperation.h">
       <Filter>Graphics\New</Filter>
     </ClInclude>
   </ItemGroup>
@@ -182,9 +185,6 @@
     <ClCompile Include="Graphics\RHResource.cpp">
       <Filter>Graphics\New</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\RHRenderView.cpp">
-      <Filter>Graphics\New</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\RHView.cpp">
       <Filter>Graphics\New</Filter>
     </ClCompile>
@@ -195,6 +195,12 @@
       <Filter>Graphics\New</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\RHFrameBuffer.cpp">
+      <Filter>Graphics\New</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\RHVertexDeclaration.cpp">
+      <Filter>Graphics\New</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\RHOperation.cpp">
       <Filter>Graphics\New</Filter>
     </ClCompile>
   </ItemGroup>
