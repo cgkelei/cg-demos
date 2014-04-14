@@ -1,5 +1,6 @@
 #include "D3D11Texture.h"
 #include "D3D11GraphicCommon.h"
+#include "D3D11Device.h"
 
 namespace RcEngine {
 
@@ -36,9 +37,6 @@ D3D11Texture1D::D3D11Texture1D( PixelFormat format, uint32_t arraySize, uint32_t
 	if (mCreateFlags & TexCreate_RenderTarget)
 		texDesc.BindFlags |= D3D11_BIND_RENDER_TARGET;
 
-	/////////////////////////
-	ID3D11Device* pd3dDevice;
-
 	if (initData)
 	{
 		uint32_t numSubResource = mTextureArraySize * numMipMaps;
@@ -53,10 +51,10 @@ D3D11Texture1D::D3D11Texture1D( PixelFormat format, uint32_t arraySize, uint32_t
 			}
 		}
 
-		D3D11_VERRY(pd3dDevice->CreateTexture1D( &texDesc, &subResourceData[0], &TextureD3D11));
+		D3D11_VERRY(gD3D11Device->GetDeviceD3D11()->CreateTexture1D( &texDesc, &subResourceData[0], &TextureD3D11));
 	}
 	else 
-		D3D11_VERRY(pd3dDevice->CreateTexture1D( &texDesc, NULL, &TextureD3D11));
+		D3D11_VERRY(gD3D11Device->GetDeviceD3D11()->CreateTexture1D( &texDesc, NULL, &TextureD3D11));
 
 
 	/*if (mCreateFlags & TexCreate_ShaderResource)
@@ -70,6 +68,9 @@ D3D11Texture1D::D3D11Texture1D( PixelFormat format, uint32_t arraySize, uint32_t
 			viewDesc.Texture1D.MipLevels = numMipMaps;
 			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1D;
 		}
+
+
+
 		else
 		{
 			viewDesc.Texture1DArray.FirstArraySlice = 0;

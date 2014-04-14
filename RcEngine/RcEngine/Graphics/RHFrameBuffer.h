@@ -8,6 +8,9 @@
 
 namespace RcEngine {
 
+/**
+ * No Multiple Viewports support.
+ */
 struct _ApiExport RHViewport
 {
 	RHViewport() {}

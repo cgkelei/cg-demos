@@ -1,5 +1,6 @@
 #include "D3D11Texture.h"
 #include "D3D11GraphicCommon.h"
+#include "D3D11Device.h"
 
 namespace RcEngine {
 
@@ -28,7 +29,7 @@ D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t
 	texDesc.MiscFlags = 0;
 	
 	// Generate mipmaps if enable
-	if (CreateFlags & TexCreate_GenerateMipmaps)
+	if (mCreateFlags & TexCreate_GenerateMipmaps)
 	{
 		texDesc.MiscFlags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
 		
@@ -38,16 +39,13 @@ D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t
 	else
 		mMipLevels = numMipMaps;
 
-	if (CreateFlags & TexCreate_UAV)
+	if (mCreateFlags & TexCreate_UAV)
 		texDesc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
 
-	if (CreateFlags & TexCreate_RenderTarget)
+	if (mCreateFlags & TexCreate_RenderTarget)
 		texDesc.BindFlags |= D3D11_BIND_RENDER_TARGET;
-	else if (CreateFlags & TexCreate_DepthStencilTarget)
+	else if (mCreateFlags & TexCreate_DepthStencilTarget)
 		texDesc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
-
-	/////////////////////////
-	ID3D11Device* pd3dDevice;
 
 	if (initData)
 	{
@@ -64,10 +62,14 @@ D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t
 			}
 		}
 
-		D3D11_VERRY(pd3dDevice->CreateTexture2D( &texDesc, &subResourceData[0], &TextureD3D11));
+		//HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateTexture2D( &texDesc, &subResourceData[0], &TextureD3D11);
+		D3D11_VERRY(gD3D11Device->GetDeviceD3D11()->CreateTexture2D( &texDesc, &subResourceData[0], &TextureD3D11));
 	}
 	else 
-		D3D11_VERRY(pd3dDevice->CreateTexture2D( &texDesc, NULL, &TextureD3D11));
+	{
+		//HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateTexture2D( &texDesc, NULL, &TextureD3D11);
+		D3D11_VERRY(gD3D11Device->GetDeviceD3D11()->CreateTexture2D( &texDesc, NULL, &TextureD3D11));
+	}
 	
 	// Create shader resource view
 	//if (CreateFlags & TexCreate_ShaderResource)
@@ -116,7 +118,7 @@ D3D11Texture2D::~D3D11Texture2D()
 }
 
 
-void D3D11Texture1D::Map1D( uint32_t arrayIndex, uint32_t level, TextureMapAccess tma, uint32_t xOffset, uint32_t width, void*& data )
+void D3D11Texture1D::Map1D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma, uint32_t xOffset, uint32_t width, void*& data )
 {
 
 }

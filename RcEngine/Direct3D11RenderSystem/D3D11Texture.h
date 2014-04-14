@@ -22,19 +22,19 @@ public:
 
 	virtual void BuildMipMap();
 
-	virtual void Map1D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+	virtual void Map1D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma,
 		uint32_t xOffset, uint32_t width, void*& data);
 
-	virtual void Map2D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+	virtual void Map2D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
 		void*& data, uint32_t& rowPitch);
 
-	virtual void Map3D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+	virtual void Map3D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t zOffset,
 		uint32_t width, uint32_t height, uint32_t depth,
 		void*& data, uint32_t& rowPitch, uint32_t& slicePitch);
 
-	virtual void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, TextureMapAccess tma,
+	virtual void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, ResourceMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
 		void*& data, uint32_t& rowPitch);
 
@@ -43,7 +43,7 @@ public:
 	virtual void Unmap3D(uint32_t arrayIndex, uint32_t level);
 	virtual void UnmapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level);
 
-	virtual void CopyToTexture(Texture& destTexture);
+	virtual void CopyToTexture(RHTexture& destTexture);
 };
 
 class _D3D11Export D3D11Texture1D : public D3D11Texture
@@ -53,7 +53,7 @@ public:
 		uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, uint32_t flags, ElementInitData* initData);
 	~D3D11Texture1D();
 
-	void Map1D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+	void Map1D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma,
 		uint32_t xOffset, uint32_t width, void*& data);
 
 	void Unmap1D(uint32_t arrayIndex, uint32_t level);
@@ -81,7 +81,7 @@ public:
 
 	ID3D11Texture2D* GetTexture() const { return TextureD3D11; }
 
-	void Map2D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+	void Map2D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma,
 			   uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
 			   void*& data, uint32_t& rowPitch);
 
@@ -108,7 +108,7 @@ public:
 		ElementInitData* initData);
 	~D3D11Texture3D();
 
-	void Map3D(uint32_t arrayIndex, uint32_t level, TextureMapAccess tma,
+	void Map3D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma,
 		uint32_t xOffset, uint32_t yOffset, uint32_t zOffset,
 		uint32_t width, uint32_t height, uint32_t depth,
 		void*& data, uint32_t& rowPitch, uint32_t& slicePitch);
@@ -136,7 +136,7 @@ public:
 
 	~D3D11TextureCube();
 
-	void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, TextureMapAccess tma,
+	void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, ResourceMapAccess tma,
 			    uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
 		        void*& data, uint32_t& rowPitch);
 

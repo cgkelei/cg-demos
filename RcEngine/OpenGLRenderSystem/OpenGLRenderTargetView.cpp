@@ -1,5 +1,6 @@
 #include "OpenGLFrameBuffer.h"
 #include "OpenGLTexture.h"
+#include "OpenGLDevice.h"
 #include <Core/Exception.h>
 
 namespace RcEngine {
@@ -9,6 +10,7 @@ OpenGLRenderTargetView2D::OpenGLRenderTargetView2D(const shared_ptr<RHTexture>& 
 	  mArrIndex(arrIndex),
 	  mLevel(level)
 {
+
 }
 
 void OpenGLRenderTargetView2D::ClearColor( const ColorRGBA& clr )
@@ -39,21 +41,21 @@ void OpenGLRenderTargetView2D::OnAttach(RHFrameBuffer& fb, Attachment attr)
 	}
 	else
 	{
-		GLuint oldFBO = OpenGLFrameBuffer::GetFBO();
+		GLuint oldFBO = gOpenGLDevice->GetCurrentFBO();
 
-		OpenGLFrameBuffer::BindFBO(mFrameBufferOGL);
+		gOpenGLDevice->BindFBO(mFrameBufferOGL);
 		{
 			if (pTextureOGL->GetTextureTarget() == GL_TEXTURE_2D)
 			{
-				//glFramebufferTexture(mFrameBufferID, attachment, texID, mLevel);
-				glFramebufferTexture2D(mFrameBufferOGL, attachment, GL_TEXTURE_2D, pTextureOGL->GetTextureOGL(), mLevel);
+				//glFramebufferTexture(GL_FRAMEBUFFER, attachment, pTextureOGL->GetTextureOGL(), mLevel);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, pTextureOGL->GetTextureOGL(), mLevel);
 			}
 			else 
 			{
-				glFramebufferTextureLayer(mFrameBufferOGL, attachment, pTextureOGL->GetTextureOGL(), mLevel, mArrIndex);
+				glFramebufferTextureLayer(GL_FRAMEBUFFER, attachment, pTextureOGL->GetTextureOGL(), mLevel, mArrIndex);
 			}
 		}
-		OpenGLFrameBuffer::BindFBO(oldFBO);
+		gOpenGLDevice->BindFBO(oldFBO);
 	}
 
 	OGL_ERROR_CHECK();
@@ -68,7 +70,7 @@ void OpenGLRenderTargetView2D::OnDetach(RHFrameBuffer& fb, Attachment attr)
 	{
 		if (mTexture->GetTextureArraySize() <= 1)
 		{
-			//glNamedFramebufferTextureEXT(mFrameBufferID, attachment, 0, 0);
+			//glNamedFramebufferTextureEXT(mFrameBufferOGL, attachment, 0, 0);
 			glNamedFramebufferTexture2DEXT(mFrameBufferOGL, attachment, GL_TEXTURE_2D, 0, 0);
 		}
 		else 
@@ -78,25 +80,84 @@ void OpenGLRenderTargetView2D::OnDetach(RHFrameBuffer& fb, Attachment attr)
 	}
 	else
 	{
-		GLuint oldFBO = OpenGLFrameBuffer::GetFBO();
+		GLuint oldFBO = gOpenGLDevice->GetCurrentFBO();
 
-		OpenGLFrameBuffer::BindFBO(mFrameBufferOGL);
+		gOpenGLDevice->BindFBO(mFrameBufferOGL);
 		{
 			if (mTexture->GetTextureArraySize() <= 1)
 			{
-				//glFramebufferTexture(mFrameBufferID, attachment, 0, 0);
-				glFramebufferTexture2D(mFrameBufferOGL, attachment, 0, 0, 0);
+				//glFramebufferTexture(GL_FRAMEBUFFER, attachment, 0, 0);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, 0, 0, 0);
 			}
 			else 
 			{
-				glFramebufferTextureLayer(mFrameBufferOGL, attachment, 0, 0, 0);
+				glFramebufferTextureLayer(GL_FRAMEBUFFER, attachment, 0, 0, 0);
 			}
 		}
-		OpenGLFrameBuffer::BindFBO(oldFBO);
+		gOpenGLDevice->BindFBO(oldFBO);
 	}
 
 	OGL_ERROR_CHECK();
 }
+
+//////////////////////////////////////////////////////////////////////////
+OpenGLRenderTargetArrayView::OpenGLRenderTargetArrayView( const shared_ptr<RHTexture>& texture, uint32_t level )
+	: OpenGLRenderView(texture),
+	  mLevel(level)
+{
+
+}
+
+void OpenGLRenderTargetArrayView::OnAttach( RHFrameBuffer& fb, Attachment attr )
+{
+	OpenGLRenderView::OnAttach(fb, attr);
+
+	GLenum attachment = GL_COLOR_ATTACHMENT0 + (attr - ATT_Color0);
+
+	OpenGLTexture* pTextureOGL = static_cast<OpenGLTexture*>(mTexture.get());
+
+	if (GLEW_EXT_direct_state_access)
+	{
+		glNamedFramebufferTextureEXT(mFrameBufferOGL, attachment, pTextureOGL->GetTextureOGL(), mLevel);
+	}
+	else
+	{
+		GLuint oldFBO = gOpenGLDevice->GetCurrentFBO();
+
+		gOpenGLDevice->BindFBO(mFrameBufferOGL);
+		{
+			glFramebufferTexture(GL_FRAMEBUFFER, attachment, pTextureOGL->GetTextureOGL(), mLevel);
+		}
+		gOpenGLDevice->BindFBO(oldFBO);
+	}
+
+	OGL_ERROR_CHECK();
+}
+
+void OpenGLRenderTargetArrayView::OnDetach( RHFrameBuffer& fb, Attachment attr )
+{
+	OpenGLRenderView::OnDetach(fb, attr);
+
+	GLenum attachment = GL_COLOR_ATTACHMENT0 + (attr - ATT_Color0);
+	if (GLEW_EXT_direct_state_access)
+	{
+		glNamedFramebufferTextureEXT(mFrameBufferOGL, attachment, 0, 0);
+	}
+	else
+	{
+		GLuint oldFBO = gOpenGLDevice->GetCurrentFBO();
+
+		gOpenGLDevice->BindFBO(mFrameBufferOGL);
+		{
+			glFramebufferTexture(GL_FRAMEBUFFER, attachment, 0, 0);
+		}
+		gOpenGLDevice->BindFBO(oldFBO);
+	}
+
+	OGL_ERROR_CHECK();
+}
+
+
 
 //////////////////////////////////////////////////////////////////////////
 OpenGLScreenRenderTargetView2D::OpenGLScreenRenderTargetView2D()

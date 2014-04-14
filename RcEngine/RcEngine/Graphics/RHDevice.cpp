@@ -23,21 +23,21 @@ RHDevice::~RHDevice( void )
 
 void RHDevice::BindFrameBuffer( const shared_ptr<RHFrameBuffer>& fb )
 {
-	if( mCurrentFrameBuffer && (fb != mCurrentFrameBuffer) )
-	{	
-		mCurrentFrameBuffer->OnUnbind();
+	if (mCurrentFrameBuffer != fb)
+	{
+		if (mCurrentFrameBuffer)
+			mCurrentFrameBuffer->OnUnbind();
+
+		mCurrentFrameBuffer = fb;
 	}
-
-	mCurrentFrameBuffer = fb; 
-
+	
 	if(mCurrentFrameBuffer->IsDirty())
 	{
 		// update FBO info
 		mCurrentFrameBuffer->OnBind();
-	}
 
-	// this will update viewport info
-	DoBindFrameBuffer(mCurrentFrameBuffer);
+		SetViewport(mCurrentFrameBuffer->GetViewport());
+	}
 }
 
 void RHDevice::Draw( const RHOperation& operation )
@@ -55,9 +55,6 @@ void RHDevice::BindShaderPipeline( const shared_ptr<RHShaderPipeline>& pipeline 
 		mCurrentShaderPipeline->OnBind();
 	}
 }
-
-
-
 
 
 }

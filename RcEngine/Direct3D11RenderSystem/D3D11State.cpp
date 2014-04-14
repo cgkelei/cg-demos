@@ -1,13 +1,12 @@
-#include "D3D11RenderState.h"
+#include "D3D11State.h"
 #include "D3D11GraphicCommon.h"
+#include "D3D11Device.h"
 
 namespace RcEngine {
 
-ID3D11Device* g_pd3dDevice;
-
-D3D11DepthStencilState::D3D11DepthStencilState( const DepthStencilStateDesc& desc )
-	:DepthStencilState(desc),
-	 StateD3D11(nullptr)
+D3D11DepthStencilState::D3D11DepthStencilState( const RHDepthStencilStateDesc& desc )
+	: RHDepthStencilState(desc),
+	  StateD3D11(nullptr)
 {
 	CD3D11_DEPTH_STENCIL_DESC depthStencilDesc(D3D11_DEFAULT);
 
@@ -28,17 +27,17 @@ D3D11DepthStencilState::D3D11DepthStencilState( const DepthStencilStateDesc& des
 	depthStencilDesc.BackFace.StencilPassOp = D3D11Mapping::Mapping(mDesc.BackStencilPassOp);
 	depthStencilDesc.BackFace.StencilFunc = D3D11Mapping::Mapping(mDesc.BackStencilFunc);
 
-	D3D11_VERRY(g_pd3dDevice->CreateDepthStencilState(&depthStencilDesc, &StateD3D11));
+	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateDepthStencilState(&depthStencilDesc, &StateD3D11);
+	D3D11_VERRY(hr);
 }
-
 D3D11DepthStencilState::~D3D11DepthStencilState()
 {
 	SAFE_RELEASE(StateD3D11);
 }
 
 
-D3D11BlendState::D3D11BlendState( const BlendStateDesc& desc )
-	: BlendState(desc),
+D3D11BlendState::D3D11BlendState( const RHBlendStateDesc& desc )
+	: RHBlendState(desc),
 	  StateD3D11(nullptr)
 {
 	CD3D11_BLEND_DESC blendDesc(D3D11_DEFAULT);
@@ -57,7 +56,8 @@ D3D11BlendState::D3D11BlendState( const BlendStateDesc& desc )
 		blendDesc.RenderTarget[i].SrcBlendAlpha = D3D11Mapping::Mapping(mDesc.RenderTarget[i].SrcBlendAlpha);
 	}
 
-	D3D11_VERRY(g_pd3dDevice->CreateBlendState(&blendDesc, &StateD3D11));
+	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateBlendState(&blendDesc, &StateD3D11);
+	D3D11_VERRY(hr);
 }
 
 D3D11BlendState::~D3D11BlendState()
@@ -66,8 +66,8 @@ D3D11BlendState::~D3D11BlendState()
 }
 
 
-D3D11RasterizerState::D3D11RasterizerState( const RasterizerStateDesc& desc )
-	: RasterizerState(desc),
+D3D11RasterizerState::D3D11RasterizerState( const RHRasterizerStateDesc& desc )
+	: RHRasterizerState(desc),
 	  StateD3D11(nullptr)
 {
 	CD3D11_RASTERIZER_DESC rasDesc(D3D11_DEFAULT);
@@ -81,7 +81,8 @@ D3D11RasterizerState::D3D11RasterizerState( const RasterizerStateDesc& desc )
 	rasDesc.CullMode = D3D11Mapping::Mapping(mDesc.PolygonCullMode);
 	rasDesc.FillMode = D3D11Mapping::Mapping(mDesc.PolygonFillMode);
 	
-	D3D11_VERRY(g_pd3dDevice->CreateRasterizerState(&rasDesc, &StateD3D11));
+	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateRasterizerState(&rasDesc, &StateD3D11);
+	D3D11_VERRY(hr);
 }
 
 D3D11RasterizerState::~D3D11RasterizerState()
@@ -90,8 +91,8 @@ D3D11RasterizerState::~D3D11RasterizerState()
 }
 
 
-D3D11SamplerState::D3D11SamplerState( const SamplerStateDesc& desc )
-	: SamplerState(desc),
+D3D11SamplerState::D3D11SamplerState( const RHSamplerStateDesc& desc )
+	: RHSamplerState(desc),
 	  StateD3D11(nullptr)
 {
 	CD3D11_SAMPLER_DESC samplerDesc(D3D11_DEFAULT);
@@ -112,7 +113,8 @@ D3D11SamplerState::D3D11SamplerState( const SamplerStateDesc& desc )
 	samplerDesc.MaxLOD = mDesc.MaxLOD;
 	samplerDesc.MaxAnisotropy = mDesc.MaxAnisotropy;
 	
-	D3D11_VERRY(g_pd3dDevice->CreateSamplerState(&samplerDesc, &StateD3D11));
+	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateSamplerState(&samplerDesc, &StateD3D11);
+	D3D11_VERRY(hr);
 }
 
 D3D11SamplerState::~D3D11SamplerState()
