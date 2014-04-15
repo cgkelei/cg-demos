@@ -27,6 +27,7 @@ struct _ApiExport RHViewport
 };
 
 class RHFrameBuffer;
+class RHUnorderedAccessView;
 
 //////////////////////////////////////////////////////////////////////////
 class _ApiExport RHRenderView
@@ -93,6 +94,9 @@ protected:
 
 	vector<shared_ptr<RHRenderView> > mColorViews;
 	shared_ptr<RHRenderView> mDepthStencilView;
+
+	// Unordered access view, used in per-pixel list method, like OIT.
+	vector<shared_ptr<RHUnorderedAccessView>> mUAVs;
 	
 	bool mOffscreen;
 	bool mDirty;
