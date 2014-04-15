@@ -13,13 +13,13 @@ public:
 	~D3D11RenderModule(void);
 
 	const String& GetName() const;
-	RenderDevice* GetRenderDevice();
+	RHDevice* GetRenderDevice();
 
 	void Initialise();
 	void Shutdown();
 
 private:
-	RenderDevice* mRenderDevice;
+	RHDevice* mRenderDevice;
 };
 
 }

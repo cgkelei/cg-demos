@@ -4,7 +4,6 @@
 
 namespace RcEngine {
 
-
 OpenGLTexture1D::OpenGLTexture1D( PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width, uint32_t accessHint, uint32_t flags, ElementInitData* initData )
 	: OpenGLTexture(TT_Texture1D, format, arraySize, numMipMaps, 1, 0, accessHint, flags)
 {

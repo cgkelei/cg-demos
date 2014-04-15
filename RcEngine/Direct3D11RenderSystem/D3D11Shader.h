@@ -13,7 +13,7 @@ public:
 	~D3D11VertexShader();
 
 	virtual bool LoadFromByteCode(const String& filename);
-	virtual bool LoadFromFile(const String& filename, const std::vector<Macro>& macros, const String& entryPoint = "");
+	virtual bool LoadFromFile(const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint = "");
 
 public:
 	ID3D11VertexShader* ShaderD3D11;
@@ -28,7 +28,7 @@ public:
 	~D3D11HullShader();
 
 	virtual bool LoadFromByteCode(const String& filename);
-	virtual bool LoadFromFile(const String& filename, const std::vector<Macro>& macros, const String& entryPoint = "");
+	virtual bool LoadFromFile(const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint = "");
 
 public:
 	ID3D11HullShader* ShaderD3D11;
@@ -42,7 +42,7 @@ public:
 	~D3D11DomainShader();
 
 	virtual bool LoadFromByteCode(const String& filename);
-	virtual bool LoadFromFile(const String& filename, const std::vector<Macro>& macros, const String& entryPoint = "");
+	virtual bool LoadFromFile(const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint = "");
 
 public:
 	ID3D11DomainShader* ShaderD3D11;
@@ -56,7 +56,7 @@ public:
 	~D3D11GeometryShader();
 
 	virtual bool LoadFromByteCode(const String& filename);
-	virtual bool LoadFromFile(const String& filename, const std::vector<Macro>& macros, const String& entryPoint = "");
+	virtual bool LoadFromFile(const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint = "");
 
 public:
 	ID3D11GeometryShader* ShaderD3D11;
@@ -70,7 +70,7 @@ public:
 	~D3D11PixelShader();
 
 	virtual bool LoadFromByteCode(const String& filename);
-	virtual bool LoadFromFile(const String& filename, const std::vector<Macro>& macros, const String& entryPoint = "");
+	virtual bool LoadFromFile(const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint = "");
 
 public:
 	ID3D11PixelShader* ShaderD3D11;
@@ -84,7 +84,7 @@ public:
 	~D3D11ComputeShader();
 
 	virtual bool LoadFromByteCode(const String& filename);
-	virtual bool LoadFromFile(const String& filename, const std::vector<Macro>& macros, const String& entryPoint = "");
+	virtual bool LoadFromFile(const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint = "");
 
 public:
 	ID3D11ComputeShader* ShaderD3D11;
@@ -92,19 +92,19 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11ShaderProgram : public ShaderProgram
-{
-public:
-	D3D11ShaderProgram(Effect& effect);
-	~D3D11ShaderProgram();
-
-	virtual bool Link();
-	virtual void Bind();
-	virtual void Unbind();
-
-protected:
-	std::vector<std::function<void()>> mParameterBinds;
-};
+//class _D3D11Export D3D11ShaderProgram : public RHShaderProgram
+//{
+//public:
+//	D3D11ShaderProgram(Effect& effect);
+//	~D3D11ShaderProgram();
+//
+//	virtual bool Link();
+//	virtual void Bind();
+//	virtual void Unbind();
+//
+//protected:
+//	std::vector<std::function<void()>> mParameterBinds;
+//};
 
 }
 

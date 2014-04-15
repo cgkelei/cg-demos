@@ -15,8 +15,6 @@ bool LoadBinary(const char* filename, std::vector<uint8_t>& byteCode)
 	{
 		fseek(fp, 0, SEEK_END);
 		long len = ftell(fp);
-
-		long len = ftell(fp);
 		byteCode.resize(len);
 
 		fseek(fp, 0, SEEK_SET);
@@ -29,7 +27,7 @@ bool LoadBinary(const char* filename, std::vector<uint8_t>& byteCode)
 }
 
 // Helper function to dynamic compile HLSL shader code
-HRESULT CompileHLSL(const String& filename, const std::vector<Shader::Macro>& macros, 
+HRESULT CompileHLSL(const String& filename, const std::vector<ShaderMacro>& macros, 
 					const String& entryPoint, const String& shaderModel, ID3DBlob** ppBlobOut)
 {
 	HRESULT hr = S_OK;
@@ -48,8 +46,8 @@ HRESULT CompileHLSL(const String& filename, const std::vector<Shader::Macro>& ma
 	std::vector<D3D10_SHADER_MACRO> d3dMacro(macros.size());
 	for (size_t i = 0; i < macros.size(); ++i)
 	{
-		d3dMacro[i].Name = macros[i].first.c_str();
-		d3dMacro[i].Definition = macros[i].second.c_str();
+		d3dMacro[i].Name = macros[i].Name.c_str();
+		d3dMacro[i].Definition = macros[i].Definition.c_str();
 	}
 
 	// Convert to wchar
@@ -76,7 +74,7 @@ HRESULT CompileHLSL(const String& filename, const std::vector<Shader::Macro>& ma
 
 //////////////////////////////////////////////////////////////////////////
 D3D11VertexShader::D3D11VertexShader()
-	: Shader(ST_Vertex),
+	: RHShader(ST_Vertex),
 	  ShaderD3D11(nullptr)
 {
 
@@ -106,7 +104,7 @@ bool D3D11VertexShader::LoadFromByteCode( const String& filename )
 	return true;
 }
 
-bool D3D11VertexShader::LoadFromFile( const String& filename, const std::vector<Shader::Macro>& macros, const String& entryPoint /*= ""*/ )
+bool D3D11VertexShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
 {
 	ID3DBlob* shaderBlob = nullptr;
 
@@ -114,7 +112,7 @@ bool D3D11VertexShader::LoadFromFile( const String& filename, const std::vector<
 	if (SUCCEEDED(hr))
 	{
 		hr = g_pd3d11Device->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
-		D3D11_VERRY(hr);
+		//D3D11_VERRY(hr);
 
 		ShaderCode.resize(shaderBlob->GetBufferSize());
 		std::memcpy(&ShaderCode[0], shaderBlob->GetBufferPointer(), ShaderCode.size());
@@ -128,7 +126,7 @@ bool D3D11VertexShader::LoadFromFile( const String& filename, const std::vector<
 
 //////////////////////////////////////////////////////////////////////////
 D3D11HullShader::D3D11HullShader()
-	: Shader(ST_Vertex),
+	: RHShader(ST_Hull),
 	  ShaderD3D11(nullptr)
 {
 
@@ -159,7 +157,7 @@ bool D3D11HullShader::LoadFromByteCode( const String& filename )
 	return true;
 }
 
-bool D3D11HullShader::LoadFromFile( const String& filename, const std::vector<Shader::Macro>& macros, const String& entryPoint /*= ""*/ )
+bool D3D11HullShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
 {
 	ID3DBlob* shaderBlob = nullptr;
 
@@ -167,7 +165,7 @@ bool D3D11HullShader::LoadFromFile( const String& filename, const std::vector<Sh
 	if (SUCCEEDED(hr))
 	{
 		hr = g_pd3d11Device->CreateHullShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
-		D3D11_VERRY(hr);
+		//D3D11_VERRY(hr);
 	}
 
 	if (shaderBlob)
@@ -178,7 +176,7 @@ bool D3D11HullShader::LoadFromFile( const String& filename, const std::vector<Sh
 
 //////////////////////////////////////////////////////////////////////////
 D3D11DomainShader::D3D11DomainShader()
-	: Shader(ST_Vertex),
+	: RHShader(ST_Domain),
 	  ShaderD3D11(nullptr)
 {
 
@@ -209,7 +207,7 @@ bool D3D11DomainShader::LoadFromByteCode( const String& filename )
 	return true;
 }
 
-bool D3D11DomainShader::LoadFromFile( const String& filename, const std::vector<Shader::Macro>& macros, const String& entryPoint /*= ""*/ )
+bool D3D11DomainShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
 {
 	ID3DBlob* shaderBlob = nullptr;
 
@@ -217,7 +215,7 @@ bool D3D11DomainShader::LoadFromFile( const String& filename, const std::vector<
 	if (SUCCEEDED(hr))
 	{
 		hr = g_pd3d11Device->CreateDomainShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
-		D3D11_VERRY(hr);
+		//D3D11_VERRY(hr);
 	}
 
 	if (shaderBlob)
@@ -228,7 +226,7 @@ bool D3D11DomainShader::LoadFromFile( const String& filename, const std::vector<
 
 //////////////////////////////////////////////////////////////////////////
 D3D11GeometryShader::D3D11GeometryShader()
-	: Shader(ST_Geomerty),
+	: RHShader(ST_Geomerty),
 	  ShaderD3D11(nullptr)
 {
 
@@ -259,7 +257,7 @@ bool D3D11GeometryShader::LoadFromByteCode( const String& filename )
 	return true;
 }
 
-bool D3D11GeometryShader::LoadFromFile( const String& filename, const std::vector<Shader::Macro>& macros, const String& entryPoint /*= ""*/ )
+bool D3D11GeometryShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
 {
 	ID3DBlob* shaderBlob = nullptr;
 
@@ -267,7 +265,7 @@ bool D3D11GeometryShader::LoadFromFile( const String& filename, const std::vecto
 	if (SUCCEEDED(hr))
 	{
 		hr = g_pd3d11Device->CreateGeometryShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
-		D3D11_VERRY(hr);
+		//D3D11_VERRY(hr);
 	}
 
 	if (shaderBlob)
@@ -278,7 +276,7 @@ bool D3D11GeometryShader::LoadFromFile( const String& filename, const std::vecto
 
 //////////////////////////////////////////////////////////////////////////
 D3D11PixelShader::D3D11PixelShader()
-	: Shader(ST_Pixel),
+	: RHShader(ST_Pixel),
 	  ShaderD3D11(nullptr)
 {
 
@@ -309,7 +307,7 @@ bool D3D11PixelShader::LoadFromByteCode( const String& filename )
 	return true;
 }
 
-bool D3D11PixelShader::LoadFromFile( const String& filename, const std::vector<Shader::Macro>& macros, const String& entryPoint /*= ""*/ )
+bool D3D11PixelShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
 {
 	ID3DBlob* shaderBlob = nullptr;
 
@@ -317,7 +315,7 @@ bool D3D11PixelShader::LoadFromFile( const String& filename, const std::vector<S
 	if (SUCCEEDED(hr))
 	{
 		hr = g_pd3d11Device->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
-		D3D11_VERRY(hr);
+		//D3D11_VERRY(hr);
 	}
 
 	if (shaderBlob)
@@ -328,7 +326,7 @@ bool D3D11PixelShader::LoadFromFile( const String& filename, const std::vector<S
 
 //////////////////////////////////////////////////////////////////////////
 D3D11ComputeShader::D3D11ComputeShader()
-	: Shader(ST_Compute),
+	: RHShader(ST_Compute),
 	  ShaderD3D11(nullptr)
 {
 
@@ -359,7 +357,7 @@ bool D3D11ComputeShader::LoadFromByteCode( const String& filename )
 	return true;
 }
 
-bool D3D11ComputeShader::LoadFromFile( const String& filename, const std::vector<Shader::Macro>& macros, const String& entryPoint /*= ""*/ )
+bool D3D11ComputeShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
 {
 	ID3DBlob* shaderBlob = nullptr;
 
@@ -367,7 +365,7 @@ bool D3D11ComputeShader::LoadFromFile( const String& filename, const std::vector
 	if (SUCCEEDED(hr))
 	{
 		hr = g_pd3d11Device->CreateComputeShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
-		D3D11_VERRY(hr);
+		//D3D11_VERRY(hr);
 	}
 
 	if (shaderBlob)
@@ -377,74 +375,74 @@ bool D3D11ComputeShader::LoadFromFile( const String& filename, const std::vector
 }
 
 //////////////////////////////////////////////////////////////////////////
-D3D11ShaderProgram::D3D11ShaderProgram( Effect& effect )
-	: ShaderProgram(effect)
-{
-
-}
-
-D3D11ShaderProgram::~D3D11ShaderProgram()
-{
-
-}
-
-void D3D11ShaderProgram::Bind()
-{
-	if (mShaderStage[ST_Vertex])
-	{
-		ID3D11VertexShader* shaderD3D11 = (static_cast<D3D11VertexShader*>(mShaderStage[ST_Vertex].get()))->ShaderD3D11;
-		g_pDeviceContext->VSSetShader(shaderD3D11, nullptr, 0);
-	
-		// input layout
-	}
-
-	if (mShaderStage[ST_Hull])
-	{
-		ID3D11HullShader* shaderD3D11 = (static_cast<D3D11HullShader*>(mShaderStage[ST_Hull].get()))->ShaderD3D11;
-		g_pDeviceContext->HSSetShader(shaderD3D11, nullptr, 0);
-	}
-
-	if (mShaderStage[ST_Domain])
-	{
-		ID3D11DomainShader* shaderD3D11 = (static_cast<D3D11DomainShader*>(mShaderStage[ST_Domain].get()))->ShaderD3D11;
-		g_pDeviceContext->DSSetShader(shaderD3D11, nullptr, 0);
-	}
-
-	if (mShaderStage[ST_Geomerty])
-	{
-		ID3D11GeometryShader* shaderD3D11 = (static_cast<D3D11GeometryShader*>(mShaderStage[ST_Geomerty].get()))->ShaderD3D11;
-		g_pDeviceContext->GSSetShader(shaderD3D11, nullptr, 0);
-	}
-
-	if (mShaderStage[ST_Pixel])
-	{
-		ID3D11PixelShader* shaderD3D11 = (static_cast<D3D11PixelShader*>(mShaderStage[ST_Pixel].get()))->ShaderD3D11;
-		g_pDeviceContext->PSSetShader(shaderD3D11, nullptr, 0);
-	}
-
-	if (mShaderStage[ST_Compute])
-	{
-		ID3D11ComputeShader* shaderD3D11 = (static_cast<D3D11ComputeShader*>(mShaderStage[ST_Compute].get()))->ShaderD3D11;
-		g_pDeviceContext->CSSetShader(shaderD3D11, nullptr, 0);
-
-	}
-
-	// Commit all shader resource
-}
-
-void D3D11ShaderProgram::Unbind()
-{
-	if (mShaderStage[ST_Vertex]) g_pDeviceContext->VSSetShader(nullptr, nullptr, 0);
-	if (mShaderStage[ST_Hull]) g_pDeviceContext->HSSetShader(nullptr, nullptr, 0);
-	if (mShaderStage[ST_Domain]) g_pDeviceContext->DSSetShader(nullptr, nullptr, 0);
-	if (mShaderStage[ST_Geomerty]) g_pDeviceContext->GSSetShader(nullptr, nullptr, 0);
-	if (mShaderStage[ST_Pixel]) g_pDeviceContext->PSSetShader(nullptr, nullptr, 0);
-	if (mShaderStage[ST_Compute]) g_pDeviceContext->CSSetShader(nullptr, nullptr, 0);
-}
-
-bool D3D11ShaderProgram::Link()
-{
-
-}
+//D3D11ShaderProgram::D3D11ShaderProgram( Effect& effect )
+//	: ShaderProgram(effect)
+//{
+//
+//}
+//
+//D3D11ShaderProgram::~D3D11ShaderProgram()
+//{
+//
+//}
+//
+//void D3D11ShaderProgram::Bind()
+//{
+//	if (mShaderStage[ST_Vertex])
+//	{
+//		ID3D11VertexShader* shaderD3D11 = (static_cast<D3D11VertexShader*>(mShaderStage[ST_Vertex].get()))->ShaderD3D11;
+//		g_pDeviceContext->VSSetShader(shaderD3D11, nullptr, 0);
+//	
+//		// input layout
+//	}
+//
+//	if (mShaderStage[ST_Hull])
+//	{
+//		ID3D11HullShader* shaderD3D11 = (static_cast<D3D11HullShader*>(mShaderStage[ST_Hull].get()))->ShaderD3D11;
+//		g_pDeviceContext->HSSetShader(shaderD3D11, nullptr, 0);
+//	}
+//
+//	if (mShaderStage[ST_Domain])
+//	{
+//		ID3D11DomainShader* shaderD3D11 = (static_cast<D3D11DomainShader*>(mShaderStage[ST_Domain].get()))->ShaderD3D11;
+//		g_pDeviceContext->DSSetShader(shaderD3D11, nullptr, 0);
+//	}
+//
+//	if (mShaderStage[ST_Geomerty])
+//	{
+//		ID3D11GeometryShader* shaderD3D11 = (static_cast<D3D11GeometryShader*>(mShaderStage[ST_Geomerty].get()))->ShaderD3D11;
+//		g_pDeviceContext->GSSetShader(shaderD3D11, nullptr, 0);
+//	}
+//
+//	if (mShaderStage[ST_Pixel])
+//	{
+//		ID3D11PixelShader* shaderD3D11 = (static_cast<D3D11PixelShader*>(mShaderStage[ST_Pixel].get()))->ShaderD3D11;
+//		g_pDeviceContext->PSSetShader(shaderD3D11, nullptr, 0);
+//	}
+//
+//	if (mShaderStage[ST_Compute])
+//	{
+//		ID3D11ComputeShader* shaderD3D11 = (static_cast<D3D11ComputeShader*>(mShaderStage[ST_Compute].get()))->ShaderD3D11;
+//		g_pDeviceContext->CSSetShader(shaderD3D11, nullptr, 0);
+//
+//	}
+//
+//	// Commit all shader resource
+//}
+//
+//void D3D11ShaderProgram::Unbind()
+//{
+//	if (mShaderStage[ST_Vertex]) g_pDeviceContext->VSSetShader(nullptr, nullptr, 0);
+//	if (mShaderStage[ST_Hull]) g_pDeviceContext->HSSetShader(nullptr, nullptr, 0);
+//	if (mShaderStage[ST_Domain]) g_pDeviceContext->DSSetShader(nullptr, nullptr, 0);
+//	if (mShaderStage[ST_Geomerty]) g_pDeviceContext->GSSetShader(nullptr, nullptr, 0);
+//	if (mShaderStage[ST_Pixel]) g_pDeviceContext->PSSetShader(nullptr, nullptr, 0);
+//	if (mShaderStage[ST_Compute]) g_pDeviceContext->CSSetShader(nullptr, nullptr, 0);
+//}
+//
+//bool D3D11ShaderProgram::Link()
+//{
+//
+//}
 
 }

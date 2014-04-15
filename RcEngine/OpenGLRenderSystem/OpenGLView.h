@@ -43,8 +43,15 @@ public:
 	OpenGLTextureSRV(const shared_ptr<RHTexture>& texture);
 
 public:
-	GLenum TargetOGL;
+	GLenum TextureOGL;
 	GLenum TextureTargetOGL;
+};
+
+class _OpenGLExport OpenGLTextureViewSRV : public OpenGLTextureSRV
+{
+public:
+	OpenGLTextureViewSRV(const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize);
+	virtual ~OpenGLTextureViewSRV();
 };
 
 //////////////////////////////////////////////////////////////////////////

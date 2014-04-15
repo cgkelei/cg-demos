@@ -10,7 +10,7 @@ namespace RcEngine {
 class D3D11Buffer : public RHBuffer
 {
 public:
-	D3D11Buffer(uint32_t bufferSize, uint32_t accessHint, uint32_t flags, D3D11_BIND_FLAG target, uint32_t structSize, ElementInitData* initData);
+	D3D11Buffer(uint32_t bufferSize, uint32_t accessHint, uint32_t flags, uint32_t structSize, ElementInitData* initData);
 	~D3D11Buffer(void);
 
 	void ResizeBuffer(uint32_t size);

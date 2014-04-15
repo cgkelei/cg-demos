@@ -49,16 +49,17 @@ shared_ptr<RHBuffer> OpenGLFactory::CreateUniformBuffer( uint32_t buffreSize, ui
 		new OpenGLBuffer(buffreSize, accessHint, createFlags, GL_UNIFORM_BUFFER, initData) );
 }
 
-shared_ptr<RHBuffer> OpenGLFactory::CreateTextureBuffer( uint32_t buffreSize, uint32_t accessHint, uint32_t createFlags, ElementInitData* initData )
+shared_ptr<RHBuffer> OpenGLFactory::CreateTextureBuffer( PixelFormat format, uint32_t elementCount, uint32_t accessHint, uint32_t createFlags, ElementInitData* initData )
 {
+	uint32_t texelSize = PixelFormatUtils::GetNumElemBytes(format);
 	return std::shared_ptr<OpenGLBuffer>(
-		new OpenGLBuffer(buffreSize, accessHint, createFlags, GL_TEXTURE_BUFFER, initData) );
+		new OpenGLBuffer(texelSize * elementCount, accessHint, createFlags, GL_TEXTURE_BUFFER, initData) );
 }
 
-shared_ptr<RHBuffer> OpenGLFactory::CreateStructuredBuffer( uint32_t buffreSize, uint32_t strutureStride, uint32_t accessHint, uint32_t createFlags, ElementInitData* initData )
+shared_ptr<RHBuffer> OpenGLFactory::CreateStructuredBuffer(uint32_t strutureStride, uint32_t elementCount, uint32_t accessHint, uint32_t createFlags, ElementInitData* initData)
 {
 	return std::shared_ptr<OpenGLBuffer>(
-		new OpenGLBuffer(buffreSize, accessHint, createFlags, GL_SHADER_STORAGE_BUFFER, initData) );
+		new OpenGLBuffer(strutureStride * elementCount, accessHint, createFlags, GL_SHADER_STORAGE_BUFFER, initData) );
 }
 
 shared_ptr<RHTexture> OpenGLFactory::CreateTexture1D( uint32_t width, PixelFormat format, uint32_t arrSize, uint32_t numMipMaps, uint32_t accessHint, uint32_t createFlags, ElementInitData* initData )
@@ -86,11 +87,6 @@ shared_ptr<RHTexture> OpenGLFactory::CreateTextureCube( uint32_t width, uint32_t
 {
 	return shared_ptr<OpenGLTextureCube>(
 		new OpenGLTextureCube(format, arraySize, numMipMaps, width, height, sampleCount, sampleQuality, accessHint, createFlags, initData) );
-}
-
-shared_ptr<RHTextureSRV> OpenGLFactory::CreateTextureSRV( const shared_ptr<RHTexture>& texture )
-{
-	return shared_ptr<OpenGLTextureSRV>( new OpenGLTextureSRV(texture) );
 }
 
 shared_ptr<RHBufferSRV> OpenGLFactory::CreateTextureBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format )
@@ -136,6 +132,36 @@ shared_ptr<RHRenderView> OpenGLFactory::CreateRenderTargetViewArray( const share
 shared_ptr<RHShader> OpenGLFactory::CreateShader( ShaderType type )
 {
 	return shared_ptr<RHShader>( new OpenGLShader(type) );
+}
+
+shared_ptr<RHTextureSRV> OpenGLFactory::CreateTexture1DSRV( const shared_ptr<RHTexture>& texture )
+{
+	return shared_ptr<RHTextureSRV>( new OpenGLTextureSRV(texture) );
+}
+
+shared_ptr<RHTextureSRV> OpenGLFactory::CreateTexture2DSRV( const shared_ptr<RHTexture>& texture )
+{
+	return shared_ptr<RHTextureSRV>( new OpenGLTextureSRV(texture) );
+}
+
+shared_ptr<RHTextureSRV> OpenGLFactory::CreateTexture3DSRV( const shared_ptr<RHTexture>& texture )
+{
+	return shared_ptr<RHTextureSRV>( new OpenGLTextureSRV(texture) );
+}
+
+shared_ptr<RHTextureSRV> OpenGLFactory::CreateTextureCubeSRV( const shared_ptr<RHTexture>& texture )
+{
+	return shared_ptr<RHTextureSRV>( new OpenGLTextureSRV(texture) );
+}
+
+shared_ptr<RHTextureSRV> OpenGLFactory::CreateTexture1DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
+{
+	return shared_ptr<RHTextureSRV>( new OpenGLTextureViewSRV(texture, mostDetailedMip, mipLevels, firstArraySlice, arraySize) );
+}
+
+shared_ptr<RHTextureSRV> OpenGLFactory::CreateTexture2DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
+{
+	return shared_ptr<RHTextureSRV>( new OpenGLTextureViewSRV(texture, mostDetailedMip, mipLevels, firstArraySlice, arraySize) );
 }
 
 //shared_ptr<ShaderProgram> OpenGLRenderFactory::CreateShaderProgram( Effect& effect )

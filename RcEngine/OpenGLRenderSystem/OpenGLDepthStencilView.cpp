@@ -1,5 +1,6 @@
 #include "OpenGLFrameBuffer.h"
 #include "OpenGLTexture.h"
+#include "OpenGLDevice.h"
 #include <Core/Exception.h>
 
 namespace RcEngine {
@@ -19,7 +20,7 @@ void OpenGLDepthStencilView::OnAttach(RHFrameBuffer& fb, Attachment attr)
 	assert(attr == ATT_DepthStencil);
 	OpenGLRenderView::OnAttach(fb, attr);
 
-	OpenGLTexture* pTextureOGL = static_cast<OpenGLTexture*>(mTexture.get());
+	OpenGLTexture* pTextureOGL = static_cast_checked<OpenGLTexture*>(mTexture.get());
 
 	GLenum attachment = GL_DEPTH_ATTACHMENT;
 	if (PixelFormatUtils::IsStencil(pTextureOGL->GetTextureFormat()))
@@ -37,9 +38,9 @@ void OpenGLDepthStencilView::OnAttach(RHFrameBuffer& fb, Attachment attr)
 	}
 	else
 	{
-		GLuint oldFBO = OpenGLFrameBuffer::GetFBO();
+		GLuint oldFBO = gOpenGLDevice->GetCurrentFBO();
 
-		OpenGLFrameBuffer::BindFBO(mFrameBufferOGL);
+		gOpenGLDevice->BindFBO(mFrameBufferOGL);
 		{
 			if (pTextureOGL->GetTextureTarget() == GL_TEXTURE_2D)
 				glFramebufferTexture(mFrameBufferOGL, attachment, pTextureOGL->GetTextureOGL(), mLevel);
@@ -49,7 +50,7 @@ void OpenGLDepthStencilView::OnAttach(RHFrameBuffer& fb, Attachment attr)
 				glFramebufferTextureLayer(mFrameBufferOGL, attachment, pTextureOGL->GetTextureOGL(), mLevel, mArrIndex);
 			}
 		}
-		OpenGLFrameBuffer::BindFBO(oldFBO);
+		gOpenGLDevice->BindFBO(oldFBO);
 	}
 
 	OGL_ERROR_CHECK();
@@ -72,9 +73,9 @@ void OpenGLDepthStencilView::OnDetach(RHFrameBuffer& fb, Attachment attr)
 	}
 	else
 	{
-		GLuint oldFBO = OpenGLFrameBuffer::GetFBO();
+		GLuint oldFBO = gOpenGLDevice->GetCurrentFBO();
 
-		OpenGLFrameBuffer::BindFBO(mFrameBufferOGL);
+		gOpenGLDevice->BindFBO(mFrameBufferOGL);
 		{
 			if (mTexture->GetTextureArraySize() <= 1)
 				glFramebufferTexture(mFrameBufferOGL, GL_DEPTH_STENCIL_ATTACHMENT, 0, 0);
@@ -84,7 +85,7 @@ void OpenGLDepthStencilView::OnDetach(RHFrameBuffer& fb, Attachment attr)
 				glFramebufferTextureLayer(mFrameBufferOGL, GL_DEPTH_STENCIL_ATTACHMENT, 0, 0, 0);
 			}
 		}
-		OpenGLFrameBuffer::BindFBO(oldFBO);
+		gOpenGLDevice->BindFBO(oldFBO);
 	}
 
 	OGL_ERROR_CHECK();

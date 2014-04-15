@@ -25,7 +25,7 @@ void OpenGLRenderTargetView2D::OnAttach(RHFrameBuffer& fb, Attachment attr)
 
 	GLenum attachment = GL_COLOR_ATTACHMENT0 + (attr - ATT_Color0);
 
-	OpenGLTexture* pTextureOGL = static_cast<OpenGLTexture*>(mTexture.get());
+	OpenGLTexture* pTextureOGL = static_cast_checked<OpenGLTexture*>(mTexture.get());
 
 	if (GLEW_EXT_direct_state_access)
 	{
@@ -114,7 +114,7 @@ void OpenGLRenderTargetArrayView::OnAttach( RHFrameBuffer& fb, Attachment attr )
 
 	GLenum attachment = GL_COLOR_ATTACHMENT0 + (attr - ATT_Color0);
 
-	OpenGLTexture* pTextureOGL = static_cast<OpenGLTexture*>(mTexture.get());
+	OpenGLTexture* pTextureOGL = static_cast_checked<OpenGLTexture*>(mTexture.get());
 
 	if (GLEW_EXT_direct_state_access)
 	{

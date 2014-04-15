@@ -44,37 +44,56 @@ public:
 	ID3D11ShaderResourceView* ShaderResourceViewD3D11;
 };
 
-// Texture shader resource view creator for each type
-typedef bool (TextureSRVCreator)(const RHTexture& texture, ID3D11ShaderResourceView** pTextureSRV);
-
-
-template<D3D11_SRV_DIMENSION SRV, TextureSRVCreator CreateFunc>
-class _D3D11Export D3D11TextureSRVTemplate : public D3D11TextureSRV
+class _D3D11Export D3D11Texture1DSRV : public D3D11TextureSRV
 {
 public:
-	D3D11TextureSRVTemplate(const shared_ptr<RHTexture>& texture)
-		: D3D11TextureSRV(texture)
-	{
-		bool success = CreateFunc(texture, &ShaderResourceViewD3D11);
-	}
+	D3D11Texture1DSRV(const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize);
 };
 
-// Helper function to create texture shader resource view
-bool CreateTexture1DSRV(const RHTexture& texture, ID3D11ShaderResourceView** pTextureSRV);
-bool CreateTexture1DArraySRV(const RHTexture& texture, ID3D11ShaderResourceView** pTextureSRV);
-bool CreateTexture2DSRV(const RHTexture& texture, ID3D11ShaderResourceView** pTextureSRV);
-bool CreateTexture2DArraySRV(const RHTexture& texture, ID3D11ShaderResourceView** pTextureSRV);
-bool CreateTexture3DSRV(const RHTexture& texture, ID3D11ShaderResourceView** pTextureSRV);
-bool CreateTextureCubeSRV(const RHTexture& texture, ID3D11ShaderResourceView** pTextureSRV);
-bool CreateTextureCubeArraySRV(const RHTexture& texture, ID3D11ShaderResourceView** pTextureSRV);
+class _D3D11Export D3D11Texture2DSRV : public D3D11TextureSRV
+{
+public:
+	D3D11Texture2DSRV(const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize);
+};
 
-typedef D3D11TextureSRVTemplate<D3D11_SRV_DIMENSION_TEXTURE1D, CreateTexture1DSRV> D3D11Texture1DSRV;
-typedef D3D11TextureSRVTemplate<D3D11_SRV_DIMENSION_TEXTURE1DARRAY, CreateTexture1DArraySRV> D3D11Texture1DArraySRV;
-typedef D3D11TextureSRVTemplate<D3D11_SRV_DIMENSION_TEXTURE2D, CreateTexture2DSRV> D3D11Texture2DSRV;
-typedef D3D11TextureSRVTemplate<D3D11_SRV_DIMENSION_TEXTURE1DARRAY, CreateTexture2DArraySRV> D3D11Texture2DArraySRV;
-typedef D3D11TextureSRVTemplate<D3D11_SRV_DIMENSION_TEXTURE3D, CreateTexture3DSRV> D3D11Texture3DSRV;
-typedef D3D11TextureSRVTemplate<D3D11_SRV_DIMENSION_TEXTURECUBE, CreateTextureCubeSRV> D3D11TextureCubeSRV;
-typedef D3D11TextureSRVTemplate<D3D11_SRV_DIMENSION_TEXTURECUBEARRAY, CreateTextureCubeArraySRV> D3D11TextureCubeArraySRV;
+class _D3D11Export D3D11Texture3DSRV : public D3D11TextureSRV
+{
+public:
+	D3D11Texture3DSRV(const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels);
+};
+
+class _D3D11Export D3D11TextureCubeSRV : public D3D11TextureSRV
+{
+public:
+	D3D11TextureCubeSRV(const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize);
+};
+
+//// Texture shader resource view creator for each type
+//typedef bool (TextureSRVCreator)(const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV);
+//
+//
+//template<TextureType type, TextureSRVCreator CreateFunc>
+//class _D3D11Export D3D11TextureSRVTemplate : public D3D11TextureSRV
+//{
+//public:
+//	D3D11TextureSRVTemplate(const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize)
+//		: D3D11TextureSRV(texture)
+//	{
+//		bool success = CreateFunc(texture, &ShaderResourceViewD3D11);
+//	}
+//};
+//
+//// Helper function to create texture shader resource view
+//bool CreateTexture1DSRV(const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV);
+//bool CreateTexture2DSRV(const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV);
+//bool CreateTexture3DSRV(const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV);
+//bool CreateTextureCubeSRV(const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV);
+//
+//typedef D3D11TextureSRVTemplate<TT_Texture1D, CreateTexture1DSRV> D3D11Texture1DSRV;
+//typedef D3D11TextureSRVTemplate<TT_Texture2D, CreateTexture2DSRV> D3D11Texture2DSRV;
+//typedef D3D11TextureSRVTemplate<TT_Texture3D, CreateTexture3DSRV> D3D11Texture3DSRV;
+//typedef D3D11TextureSRVTemplate<TT_TextureCube, CreateTextureCubeSRV> D3D11TextureCubeSRV;
+
 
 // Unordered Access View
 //////////////////////////////////////////////////////////////////////////
@@ -116,9 +135,6 @@ class _D3D11Export D3D11Texture2DUAV : public D3D11TextureUAV
 {
 public:
 	D3D11Texture2DUAV(const shared_ptr<RHTexture>& texture, uint32_t level);
-
-public:
-	ID3D11UnorderedAccessView* UnorderedAccessViewD3D11;
 };
 }
 

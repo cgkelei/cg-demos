@@ -49,180 +49,281 @@ D3D11TextureBufferSRV::D3D11TextureBufferSRV( const shared_ptr<RHBuffer>& buffer
 	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(bufferD3D11, &desc, &ShaderResourceViewD3D11);
 }
 
-bool CreateTexture1DSRV( const RHTexture& texture, ID3D11ShaderResourceView** pTextureSRV )
+//////////////////////////////////////////////////////////////////////////
+D3D11TextureSRV::D3D11TextureSRV( const shared_ptr<RHTexture>& texture )
+	: RHTextureSRV(texture),
+	  ShaderResourceViewD3D11(nullptr)
 {
-	assert(texture.GetTextureType() == TT_Texture1D && texture.GetTextureArraySize() <= 1);
-	
-	bool success = false;
 
-	uint32_t createFlags = texture.GetCreateFlags();
-	if (createFlags & TexCreate_ShaderResource)
-	{
-		D3D11_SHADER_RESOURCE_VIEW_DESC  viewDesc;
-		viewDesc.Format = D3D11Mapping::Mapping(texture.GetTextureFormat());
-
-		viewDesc.Texture1D.MostDetailedMip = 0;
-		viewDesc.Texture1D.MipLevels = texture.GetMipLevels();
-		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1D;
-
-		const D3D11Texture1D* textureD3D11 = static_cast<const D3D11Texture1D*>(&texture);
-		HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
-		success = SUCCEEDED(hr);
-	}
-
-	return success;
 }
 
-bool CreateTexture1DArraySRV(const RHTexture& texture, ID3D11ShaderResourceView** pTextureSRV )
+D3D11TextureSRV::~D3D11TextureSRV()
 {
-	assert(texture.GetTextureType() == TT_Texture1D && texture.GetTextureArraySize() > 1);
-	
-	bool success = false;
+	SAFE_RELEASE(ShaderResourceViewD3D11);
+}
 
-	uint32_t createFlags = texture.GetCreateFlags();
-	if (createFlags & TexCreate_ShaderResource)
+
+D3D11Texture1DSRV::D3D11Texture1DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
+	: D3D11TextureSRV(texture)
+{
+	assert(mipLevels > 0 && arraySize > 0);
+
+	uint32_t createFlags = texture->GetCreateFlags();
+	assert(createFlags & TexCreate_ShaderResource);
+
+	D3D11Texture1D* textureD3D11 = static_cast_checked<D3D11Texture1D*>(texture.get());
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC  viewDesc;
+	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
+
+	if (textureD3D11->GetTextureArraySize() <= 1)
+	{	
+		viewDesc.Texture1D.MostDetailedMip = mostDetailedMip;
+		viewDesc.Texture1D.MipLevels = mipLevels;
+		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1D;	
+	}
+	else
 	{
-		D3D11_SHADER_RESOURCE_VIEW_DESC  viewDesc;
-		viewDesc.Format = D3D11Mapping::Mapping(texture.GetTextureFormat());
-
-		viewDesc.Texture1DArray.FirstArraySlice = 0;
-		viewDesc.Texture1DArray.ArraySize = texture.GetTextureArraySize();
-		viewDesc.Texture1DArray.MostDetailedMip = 0;
-		viewDesc.Texture1DArray.MipLevels = texture.GetMipLevels();
+		viewDesc.Texture1DArray.FirstArraySlice = firstArraySlice;
+		viewDesc.Texture1DArray.ArraySize = arraySize;
+		viewDesc.Texture1DArray.MostDetailedMip = mostDetailedMip;
+		viewDesc.Texture1DArray.MipLevels = mipLevels;
 		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1DARRAY;
-
-		const D3D11Texture1D* textureD3D11 = static_cast<const D3D11Texture1D*>(&texture);
-		HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
-		success = SUCCEEDED(hr);
 	}
 
-	return success;
+	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
 }
 
-bool CreateTexture2DSRV( const RHTexture& texture, ID3D11ShaderResourceView** pTextureSRV )
+
+D3D11Texture2DSRV::D3D11Texture2DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
+	: D3D11TextureSRV(texture)
 {
-	assert(texture.GetTextureType() == TT_Texture2D && texture.GetTextureArraySize() <= 1);
-	
-	bool success = false;
+	assert(mipLevels > 0 && arraySize > 0);
 
-	uint32_t createFlags = texture.GetCreateFlags();
-	if (createFlags & TexCreate_ShaderResource)
+	uint32_t createFlags = texture->GetCreateFlags();
+	assert(createFlags & TexCreate_ShaderResource);
+
+	D3D11Texture2D* textureD3D11 = static_cast_checked<D3D11Texture2D*>(texture.get());
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
+
+	if (textureD3D11->GetTextureArraySize() <= 1)
 	{
-		D3D11_SHADER_RESOURCE_VIEW_DESC  viewDesc;
-		viewDesc.Format = D3D11Mapping::Mapping(texture.GetTextureFormat());
-
-		if (texture.GetSampleCount() > 1 && (createFlags & TexCreate_RenderTarget))
+		if (textureD3D11->GetSampleCount() <= 1)
 		{
-			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
-		}
-		else
-		{
-			viewDesc.Texture2D.MostDetailedMip = 0;
-			viewDesc.Texture2D.MipLevels = texture.GetMipLevels();
+			viewDesc.Texture2D.MostDetailedMip = mostDetailedMip;
+			viewDesc.Texture2D.MipLevels = mipLevels;
 			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		}
-
-		const D3D11Texture2D* textureD3D11 = static_cast<const D3D11Texture2D*>(&texture);
-		HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
-		success = SUCCEEDED(hr);
-	}
-	
-	return success;
-}
-
-bool CreateTexture2DArraySRV( const RHTexture& texture, ID3D11ShaderResourceView** pTextureSRV )
-{
-	assert(texture.GetTextureType() == TT_Texture2D && texture.GetTextureArraySize() > 1);
-
-	bool success = false;
-
-	uint32_t createFlags = texture.GetCreateFlags();
-	if (createFlags & TexCreate_ShaderResource)
-	{
-		D3D11_SHADER_RESOURCE_VIEW_DESC  viewDesc;
-		viewDesc.Format = D3D11Mapping::Mapping(texture.GetTextureFormat());
-
-		if (texture.GetSampleCount() > 1 && (createFlags & TexCreate_RenderTarget))
+		else
 		{
-			viewDesc.Texture2DMSArray.ArraySize = texture.GetTextureArraySize();
-			viewDesc.Texture2DMSArray.FirstArraySlice = 0;
-			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;
+			assert(createFlags & TexCreate_RenderTarget);
+			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+		}
+	}
+	else
+	{
+		if (textureD3D11->GetSampleCount() <= 1)
+		{
+			viewDesc.Texture2DArray.FirstArraySlice = firstArraySlice;
+			viewDesc.Texture2DArray.ArraySize = arraySize;
+			viewDesc.Texture2DArray.MostDetailedMip = mostDetailedMip;
+			viewDesc.Texture2DArray.MipLevels = mipLevels;
+			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
 		}
 		else
 		{
-			viewDesc.Texture2DArray.FirstArraySlice = 0;
-			viewDesc.Texture2DArray.ArraySize = texture.GetTextureArraySize();
-			viewDesc.Texture2DArray.MostDetailedMip = 0;
-			viewDesc.Texture2DArray.MipLevels = texture.GetMipLevels();
-			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+			viewDesc.Texture2DMSArray.ArraySize = firstArraySlice;
+			viewDesc.Texture2DMSArray.FirstArraySlice = arraySize;
+			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;
 		}
-
-		const D3D11Texture2D* textureD3D11 = static_cast<const D3D11Texture2D*>(&texture);
-		HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
-		success = SUCCEEDED(hr);
 	}
 
-	return success;
+	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
 }
 
-bool CreateTexture3DSRV( const RHTexture& texture, ID3D11ShaderResourceView** pTextureSRV )
+D3D11Texture3DSRV::D3D11Texture3DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels )
+: D3D11TextureSRV(texture)
 {
-	return false;
+	assert(mipLevels > 0);
+
+	uint32_t createFlags = texture->GetCreateFlags();
+	assert(createFlags & TexCreate_ShaderResource);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
+	viewDesc.Texture3D.MostDetailedMip = mostDetailedMip;
+	viewDesc.Texture3D.MipLevels = mipLevels;
+	viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
+
+	D3D11Texture3D* textureD3D11 = static_cast_checked<D3D11Texture3D*>(texture.get());
+	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
 }
 
-bool CreateTextureCubeSRV( const RHTexture& texture, ID3D11ShaderResourceView** pTextureSRV )
+D3D11TextureCubeSRV::D3D11TextureCubeSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
+	: D3D11TextureSRV(texture)
 {
-	assert(texture.GetTextureType() == TT_TextureCube && texture.GetTextureArraySize() <= 1);
+	assert(mipLevels > 0 && arraySize > 0);
 
-	bool success = false;
+	uint32_t createFlags = texture->GetCreateFlags();
+	assert(createFlags & TexCreate_ShaderResource);
 
-	uint32_t createFlags = texture.GetCreateFlags();
-	if (createFlags & TexCreate_ShaderResource)
+	D3D11TextureCube* textureD3D11 = static_cast_checked<D3D11TextureCube*>(texture.get());
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
+
+	if (textureD3D11->GetTextureArraySize() <= 1)
 	{
-		D3D11_SHADER_RESOURCE_VIEW_DESC  viewDesc;
-		viewDesc.Format = D3D11Mapping::Mapping(texture.GetTextureFormat());
-
-		viewDesc.TextureCube.MostDetailedMip = 0;
-		viewDesc.TextureCube.MipLevels = texture.GetMipLevels();
+		viewDesc.TextureCube.MostDetailedMip = mostDetailedMip;
+		viewDesc.TextureCube.MipLevels = mipLevels;
 		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
-
-		const D3D11TextureCube* textureD3D11 = static_cast<const D3D11TextureCube*>(&texture);
-		HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
-		success = SUCCEEDED(hr);
 	}
-
-	return success;
-}
-
-bool CreateTextureCubeArraySRV( const RHTexture& texture, ID3D11ShaderResourceView** pTextureSRV)
-{
-	assert(texture.GetTextureType() == TT_TextureCube && texture.GetTextureArraySize() > 1);
-
-	bool success = false;
-
-	uint32_t createFlags = texture.GetCreateFlags();
-	if (createFlags & TexCreate_ShaderResource)
+	else
 	{
-		D3D11_SHADER_RESOURCE_VIEW_DESC  viewDesc;
-		viewDesc.Format = D3D11Mapping::Mapping(texture.GetTextureFormat());
-
-		viewDesc.TextureCubeArray.MostDetailedMip = 0;
-		viewDesc.TextureCubeArray.MipLevels = texture.GetMipLevels();
-		viewDesc.TextureCubeArray.First2DArrayFace = 0;
-		viewDesc.TextureCubeArray.NumCubes = texture.GetTextureArraySize();
+		// Need test
+		assert(false);
+		viewDesc.TextureCubeArray.MostDetailedMip = mostDetailedMip;
+		viewDesc.TextureCubeArray.MipLevels = mipLevels;
+		viewDesc.TextureCubeArray.First2DArrayFace = firstArraySlice;
+		viewDesc.TextureCubeArray.NumCubes = arraySize;
 		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBEARRAY;
-
-		viewDesc.TextureCube.MostDetailedMip = 0;
-		viewDesc.TextureCube.MipLevels = 
-		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
-
-		const D3D11TextureCube* textureD3D11 = static_cast<const D3D11TextureCube*>(&texture);
-		HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
-		success = SUCCEEDED(hr);
 	}
 
-	return success;
+	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
 }
+
+//bool CreateTexture1DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV )
+//{
+//	assert(mipLevels > 0 && arraySize > 0);
+//
+//	uint32_t createFlags = texture->GetCreateFlags();
+//	assert(createFlags & TexCreate_ShaderResource);
+//
+//	D3D11Texture1D* textureD3D11 = static_cast_checked<D3D11Texture1D*>(texture.get());
+//
+//	D3D11_SHADER_RESOURCE_VIEW_DESC  viewDesc;
+//	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
+//
+//	if (textureD3D11->GetTextureArraySize() <= 1)
+//	{	
+//		viewDesc.Texture1D.MostDetailedMip = mostDetailedMip;
+//		viewDesc.Texture1D.MipLevels = mipLevels;
+//		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1D;	
+//	}
+//	else
+//	{
+//		viewDesc.Texture1DArray.FirstArraySlice = firstArraySlice;
+//		viewDesc.Texture1DArray.ArraySize = arraySize;
+//		viewDesc.Texture1DArray.MostDetailedMip = mostDetailedMip;
+//		viewDesc.Texture1DArray.MipLevels = mipLevels;
+//		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1DARRAY;
+//	}
+//
+//	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
+//	
+//	return SUCCEEDED(hr);
+//}
+//
+//bool CreateTexture2DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV )
+//{
+//	assert(mipLevels > 0 && arraySize > 0);
+//
+//	uint32_t createFlags = texture->GetCreateFlags();
+//	assert(createFlags & TexCreate_ShaderResource);
+//
+//	D3D11Texture2D* textureD3D11 = static_cast_checked<D3D11Texture2D*>(texture.get());
+//
+//	D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+//	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
+//
+//	if (textureD3D11->GetTextureArraySize() <= 1)
+//	{
+//		if (textureD3D11->GetSampleCount() <= 1)
+//		{
+//			viewDesc.Texture2D.MostDetailedMip = mostDetailedMip;
+//			viewDesc.Texture2D.MipLevels = mipLevels;
+//			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+//		}
+//		else
+//		{
+//			assert(createFlags & TexCreate_RenderTarget);
+//			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+//		}
+//	}
+//	else
+//	{
+//		if (textureD3D11->GetSampleCount() <= 1)
+//		{
+//			viewDesc.Texture2DArray.FirstArraySlice = firstArraySlice;
+//			viewDesc.Texture2DArray.ArraySize = arraySize;
+//			viewDesc.Texture2DArray.MostDetailedMip = mostDetailedMip;
+//			viewDesc.Texture2DArray.MipLevels = mipLevels;
+//			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+//		}
+//		else
+//		{
+//			viewDesc.Texture2DMSArray.ArraySize = firstArraySlice;
+//			viewDesc.Texture2DMSArray.FirstArraySlice = arraySize;
+//			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;
+//		}
+//	}
+//
+//	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
+//	return SUCCEEDED(hr);
+//}
+//
+//bool CreateTexture3DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV )
+//{
+//	assert(mipLevels > 0);
+//
+//	uint32_t createFlags = texture->GetCreateFlags();
+//	assert(createFlags & TexCreate_ShaderResource);
+//
+//	D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+//	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
+//	viewDesc.Texture3D.MostDetailedMip = mostDetailedMip;
+//	viewDesc.Texture3D.MipLevels = mipLevels;
+//	viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
+//
+//	D3D11Texture3D* textureD3D11 = static_cast_checked<D3D11Texture3D*>(texture.get());
+//	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
+//	return SUCCEEDED(hr);
+//}
+//
+//bool CreateTextureCubeSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV )
+//{
+//	assert(mipLevels > 0 && arraySize > 0);
+//
+//	uint32_t createFlags = texture->GetCreateFlags();
+//	assert(createFlags & TexCreate_ShaderResource);
+//
+//	D3D11TextureCube* textureD3D11 = static_cast_checked<D3D11TextureCube*>(texture.get());
+//
+//	D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+//	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
+//
+//	if (textureD3D11->GetTextureArraySize() <= 1)
+//	{
+//		viewDesc.TextureCube.MostDetailedMip = mostDetailedMip;
+//		viewDesc.TextureCube.MipLevels = mipLevels;
+//		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+//	}
+//	else
+//	{
+//		// Need test
+//		assert(false);
+//		viewDesc.TextureCubeArray.MostDetailedMip = mostDetailedMip;
+//		viewDesc.TextureCubeArray.MipLevels = mipLevels;
+//		viewDesc.TextureCubeArray.First2DArrayFace = firstArraySlice;
+//		viewDesc.TextureCubeArray.NumCubes = arraySize;
+//		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBEARRAY;
+//	}
+//
+//	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
+//	return SUCCEEDED(hr);
+//}
 
 //////////////////////////////////////////////////////////////////////////
 D3D11BufferUAV::D3D11BufferUAV( const shared_ptr<RHBuffer>& buffer )
@@ -310,6 +411,8 @@ D3D11Texture2DUAV::D3D11Texture2DUAV( const shared_ptr<RHTexture>& texture, uint
 
 	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateUnorderedAccessView(textureD3D11->TextureD3D11, &desc, &UnorderedAccessViewD3D11);
 }
+
+
 
 
 
