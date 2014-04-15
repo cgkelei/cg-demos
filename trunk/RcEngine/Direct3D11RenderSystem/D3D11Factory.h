@@ -1,28 +1,23 @@
+#ifndef D3D11RenderFactory_h__
+#define D3D11RenderFactory_h__
 #pragma once
-#ifndef OpenGLRenderFactory_h__
-#define OpenGLRenderFactory_h__
 
-#include "OpenGLPrerequisites.h"
-#include "OpenGLGraphicCommon.h"
+#include "D3D11Prerequisites.h"
 #include <Graphics/RHFactory.h>
 
 namespace RcEngine {
 
-class _OpenGLExport OpenGLFactory : public RHFactory
+class _D3D11Export D3D11Factory : public RHFactory 
 {
 public:
-	OpenGLFactory(void) {}
-	~OpenGLFactory(void) {}
-	
+	D3D11Factory(ID3D11Device* deviceD3D11);
+
 	// Buffer resource
 	virtual shared_ptr<RHBuffer> CreateVertexBuffer(uint32_t buffreSize, uint32_t accessHint, uint32_t createFlags, ElementInitData* initData);
 	virtual shared_ptr<RHBuffer> CreateIndexBuffer(uint32_t buffreSize, uint32_t accessHint, uint32_t createFlags,ElementInitData* initData);
 	virtual shared_ptr<RHBuffer> CreateUniformBuffer(uint32_t buffreSize, uint32_t accessHint, uint32_t createFlags,ElementInitData* initData);
 	virtual shared_ptr<RHBuffer> CreateTextureBuffer(PixelFormat format, uint32_t elementCount, uint32_t accessHint, uint32_t createFlags, ElementInitData* initData);
 	virtual shared_ptr<RHBuffer> CreateStructuredBuffer(uint32_t strutureStride, uint32_t elementCount, uint32_t accessHint, uint32_t createFlags, ElementInitData* initData);
-
-	// Shader
-	virtual shared_ptr<RHShader> CreateShader(ShaderType type);
 
 	// Texture resource
 	virtual shared_ptr<RHTexture> CreateTexture1D(
@@ -68,22 +63,28 @@ public:
 		uint32_t createFlags,
 		ElementInitData* initData);
 
+	// Shader resource
+	virtual shared_ptr<RHShader> CreateShader(ShaderType type);
+
 	// Shader resource view
+	virtual shared_ptr<RHBufferSRV> CreateStructuredBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount);
+	virtual shared_ptr<RHBufferSRV> CreateTextureBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format);
+
 	virtual shared_ptr<RHTextureSRV> CreateTexture1DSRV(const shared_ptr<RHTexture>& texture);
 	virtual shared_ptr<RHTextureSRV> CreateTexture2DSRV(const shared_ptr<RHTexture>& texture);
 	virtual shared_ptr<RHTextureSRV> CreateTexture3DSRV(const shared_ptr<RHTexture>& texture);
 	virtual shared_ptr<RHTextureSRV> CreateTextureCubeSRV(const shared_ptr<RHTexture>& texture);
 
-	// Create shader resource view from a subset of texture
+	/**
+	 * Create shader resource view from a subset of texture.
+	 *
+	 * Set mipLevels to -1 to indicate all the mipmap levels from mostDetailedMip on down to least detailed
+	 */
 	virtual shared_ptr<RHTextureSRV> CreateTexture1DSRV(const shared_ptr<RHTexture>& texture,
 		uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize);
-
+	
 	virtual shared_ptr<RHTextureSRV> CreateTexture2DSRV(const shared_ptr<RHTexture>& texture,
 		uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize);
-
-
-	virtual shared_ptr<RHBufferSRV> CreateStructuredBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount);
-	virtual shared_ptr<RHBufferSRV> CreateTextureBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format);
 
 	// Unordered access view
 	virtual shared_ptr<RHTextureUAV> CreateTextureUAV(const shared_ptr<RHTexture>& texture);
@@ -91,8 +92,8 @@ public:
 	virtual shared_ptr<RHBufferUAV> CreateTextureBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format);
 
 	// Render target view
-	virtual shared_ptr<RHRenderView> CreateRenderTargetView2D(const shared_ptr<RHTexture>& texture, uint32_t arrayIndex, uint32_t level);
 	virtual shared_ptr<RHRenderView> CreateDepthStencilView(const shared_ptr<RHTexture>& texture, uint32_t arrayIndex, uint32_t level);
+	virtual shared_ptr<RHRenderView> CreateRenderTargetView2D(const shared_ptr<RHTexture>& texture, uint32_t arrayIndex, uint32_t level);
 	virtual shared_ptr<RHRenderView> CreateRenderTargetViewArray(const shared_ptr<RHTexture>& texture, uint32_t level);
 
 protected:
@@ -100,8 +101,12 @@ protected:
 	virtual shared_ptr<RHSamplerState> CreateSamplerStateImpl(const RHSamplerStateDesc& desc);
 	virtual shared_ptr<RHRasterizerState> CreateRasterizerStateImpl(const RHRasterizerStateDesc& desc);
 	virtual shared_ptr<RHDepthStencilState> CreateDepthStencilStateImpl(const RHDepthStencilStateDesc& desc);
+
+private:
+	ID3D11Device* mDeviceD3D11;
 };
 
 }
 
-#endif // OpenGLRenderFactory_h__
+
+#endif // D3D11RenderFactory_h__

@@ -1,5 +1,5 @@
 #include "D3D11RenderModule.h"
-#include "D3D11RenderDevice.h"
+#include "D3D11Device.h"
 
 namespace RcEngine {
 
@@ -20,14 +20,15 @@ const String& D3D11RenderModule::GetName() const
 	return DeviceName;
 }
 
-RenderDevice* D3D11RenderModule::GetRenderDevice()
+RHDevice* D3D11RenderModule::GetRenderDevice()
 {
 	return mRenderDevice;
 }
 
 void D3D11RenderModule::Initialise()
 {
-	mRenderDevice = new D3D11Device();
+	RenderSettings settings;
+	mRenderDevice = new D3D11Device(settings);
 }
 
 void D3D11RenderModule::Shutdown()

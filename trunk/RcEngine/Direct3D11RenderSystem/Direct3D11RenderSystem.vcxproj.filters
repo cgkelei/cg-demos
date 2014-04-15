@@ -21,9 +21,6 @@
     <Text Include="D3D11Texture.cpp">
       <Filter>Source Files</Filter>
     </Text>
-    <Text Include="D3D11RenderDevice.cpp">
-      <Filter>Source Files</Filter>
-    </Text>
     <Text Include="D3D11Prerequisites.h">
       <Filter>Header Files</Filter>
     </Text>
@@ -62,6 +59,9 @@
     <ClInclude Include="D3D11FrameBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="D3D11Factory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3D11RenderModule.cpp">
@@ -88,9 +88,6 @@
     <ClCompile Include="D3D11RenderTargetView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="D3D11RenderState.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="D3D11Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -103,9 +100,6 @@
     <ClCompile Include="D3D11Buffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="D3D11RenderFactory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="D3D11Device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -116,6 +110,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="D3D11FrameBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D11Factory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

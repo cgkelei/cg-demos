@@ -11,32 +11,34 @@ class RHBuffer;
 class RHTexture;
 class RHFrameBuffer;
 
-enum SRVResourceType
+enum SRVResourceDimension
 {
 	SRV_Buffer,
-	SRV_Texture
+	SRV_Texture,
 };
 
-enum UAVResourceType
+enum UAVResourceDimension
 {
 	UAV_Buffer,
-	SRV_Texture
+	UAV_Texture,
 };
 
 //////////////////////////////////////////////////////////////////////////
 class _ApiExport RHShaderResourceView
 {
 public:
-	virtual ~RHShaderResourceView();
+	virtual ~RHShaderResourceView() {}
 
-	
+	inline SRVResourceDimension GetViewDimension() const { return mViewDimension; }
+
+protected:
+	SRVResourceDimension mViewDimension;
 };
 
 class _ApiExport RHTextureSRV : public RHShaderResourceView
 {
 public:
 	RHTextureSRV(const shared_ptr<RHTexture>& texture);
-	virtual ~RHTextureSRV();
 
 protected:
 	shared_ptr<RHTexture> mTexture;
@@ -46,7 +48,6 @@ class _ApiExport RHBufferSRV : public RHShaderResourceView
 {
 public:
 	RHBufferSRV(const shared_ptr<RHBuffer>& buffer);
-	virtual ~RHBufferSRV();
 
 protected:
 	shared_ptr<RHBuffer> mBuffer;
@@ -56,14 +57,18 @@ protected:
 class _ApiExport RHUnorderedAccessView 
 {
 public:
-	virtual ~RHUnorderedAccessView();
+	virtual ~RHUnorderedAccessView() {}
+
+	inline UAVResourceDimension GetViewDimension() const { return mViewDimension; }
+
+protected:
+	UAVResourceDimension mViewDimension;
 };
 
 class _ApiExport RHTextureUAV : public RHUnorderedAccessView
 {
 public:
 	RHTextureUAV(const shared_ptr<RHTexture>& texture);
-	virtual ~RHTextureUAV();
 
 protected:
 	shared_ptr<RHTexture> mTexture;
@@ -73,7 +78,6 @@ class _ApiExport RHBufferUAV : public RHUnorderedAccessView
 {
 public:
 	RHBufferUAV(const shared_ptr<RHBuffer>& buffer);
-	virtual ~RHBufferUAV();
 
 protected:
 	shared_ptr<RHBuffer> mBuffer;

@@ -1,10 +1,9 @@
 #include "OpenGLRenderWindow.h"
 #include "OpenGLDevice.h"
-#include <Core/Context.h>
-#include <Core/Exception.h>
-#include <Core/Utility.h>
 #include <MainApp/Application.h>
 #include <MainApp/Window.h>
+#include <Core/Exception.h>
+#include <Core/Utility.h>
 
 namespace RcEngine {
 
@@ -120,9 +119,9 @@ bool OpenGLRenderWindow::Fullscreen() const
 	return false;
 }
 
-void OpenGLRenderWindow::DoBind()
+void OpenGLRenderWindow::OnBind()
 {
-	OpenGLFrameBuffer::BindFBO(0);
+	gOpenGLDevice->BindFBO(0);
 
 	GLenum targets[] = { GL_BACK };
 	glDrawBuffers(1, &targets[0]);
@@ -130,7 +129,7 @@ void OpenGLRenderWindow::DoBind()
 	OGL_ERROR_CHECK();
 }
 
-void OpenGLRenderWindow::DoUnbind()
+void OpenGLRenderWindow::OnUnbind()
 {
 
 }

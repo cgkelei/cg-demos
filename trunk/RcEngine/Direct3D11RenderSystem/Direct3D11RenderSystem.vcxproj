@@ -82,13 +82,13 @@
   <ItemGroup>
     <Text Include="D3D11Texture.h" />
     <Text Include="D3D11Texture.cpp" />
-    <Text Include="D3D11RenderDevice.cpp" />
     <Text Include="D3D11Prerequisites.h" />
     <Text Include="DllMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3D11Buffer.h" />
     <ClInclude Include="D3D11Device.h" />
+    <ClInclude Include="D3D11Factory.h" />
     <ClInclude Include="D3D11FrameBuffer.h" />
     <ClInclude Include="D3D11GraphicCommon.h" />
     <ClInclude Include="D3D11RenderModule.h" />
@@ -102,11 +102,10 @@
     <ClCompile Include="D3D11Buffer.cpp" />
     <ClCompile Include="D3D11DepthStencilView.cpp" />
     <ClCompile Include="D3D11Device.cpp" />
+    <ClCompile Include="D3D11Factory.cpp" />
     <ClCompile Include="D3D11FrameBuffer.cpp" />
     <ClCompile Include="D3D11GraphicCommon.cpp" />
-    <ClCompile Include="D3D11RenderFactory.cpp" />
     <ClCompile Include="D3D11RenderModule.cpp" />
-    <ClCompile Include="D3D11RenderState.cpp" />
     <ClCompile Include="D3D11RenderTargetView.cpp" />
     <ClCompile Include="D3D11Shader.cpp" />
     <ClCompile Include="D3D11ShaderProgram.cpp" />

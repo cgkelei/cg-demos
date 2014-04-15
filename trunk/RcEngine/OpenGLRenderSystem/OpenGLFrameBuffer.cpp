@@ -128,7 +128,7 @@ void OpenGLRenderView::ClearDepthStencil( float depth, uint32_t stencil )
 
 void OpenGLRenderView::OnAttach(RHFrameBuffer& fb, Attachment attr)
 {
-	mFrameBufferOGL = (static_cast<OpenGLFrameBuffer*>(&fb))->GetFrameBufferOGL();
+	mFrameBufferOGL = (static_cast_checked<OpenGLFrameBuffer*>(&fb))->GetFrameBufferOGL();
 	mAttachment = attr;
 }
 

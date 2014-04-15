@@ -420,7 +420,7 @@ void OpenGLDevice::SetSamplerState( ShaderType stage, uint32_t unit, const share
 	{
 		mCurrentSamplerStates[unit] = state;
 
-		OpenGLSamplerState* pSamplerState = static_cast<OpenGLSamplerState*>(state.get());
+		OpenGLSamplerState* pSamplerState = static_cast_checked<OpenGLSamplerState*>(state.get());
 		glBindSampler(unit, pSamplerState->GetSamplerOGL());
 
 		OGL_ERROR_CHECK();
@@ -429,7 +429,7 @@ void OpenGLDevice::SetSamplerState( ShaderType stage, uint32_t unit, const share
 
 void OpenGLDevice::SetupVertexArray( const RHOperation& operation )
 {
-	OpenGLVertexDeclaration* vertexDeclOGL = static_cast<OpenGLVertexDeclaration*>(operation.mVertexDecl.get());
+	OpenGLVertexDeclaration* vertexDeclOGL = static_cast_checked<OpenGLVertexDeclaration*>(operation.mVertexDecl.get());
 
 	GLuint vertexArrayOGL;
 	bool bCreated = vertexDeclOGL->GetOrGenVertexArrayOGL(vertexArrayOGL);
@@ -442,7 +442,7 @@ void OpenGLDevice::SetupVertexArray( const RHOperation& operation )
 		{
 			const RHVertexElement& attribute = vertexDeclOGL->mVertexElemets[attribIndex];
 
-			OpenGLBuffer* bufferOGL = static_cast<OpenGLBuffer*>(operation.mVertexStreams[attribute.InputSlot].get());
+			OpenGLBuffer* bufferOGL = static_cast_checked<OpenGLBuffer*>(operation.mVertexStreams[attribute.InputSlot].get());
 			glBindBuffer(GL_ARRAY_BUFFER, bufferOGL->GetBufferOGL());
 
 

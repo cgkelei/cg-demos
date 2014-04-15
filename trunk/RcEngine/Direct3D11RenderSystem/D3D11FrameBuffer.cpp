@@ -1,5 +1,6 @@
 #include "D3D11FrameBuffer.h"
 #include "D3D11Device.h"
+#include "D3D11View.h"
 
 namespace RcEngine {
 
@@ -18,29 +19,48 @@ void D3D11FrameBuffer::OnBind()
 {
 	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->GetDeviceContextD3D11();
 
-
-	if (mFrameBufferOGL != 0 && mColorViews.size())
+	vector<ID3D11RenderTargetView*> rtvD3D11;
+	for (const auto& colorView : mColorViews)
 	{
-		assert(GL_FRAMEBUFFER_COMPLETE == glCheckFramebufferStatus(GL_FRAMEBUFFER));
-
-		std::vector<GLenum> targets(mColorViews.size());
-		for (size_t i = 0; i < mColorViews.size(); ++ i)
+		if (colorView)
 		{
-			if (mColorViews[i])
-				targets[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i);
+			rtvD3D11.push_back((static_cast_checked<D3D11TargetView*>(colorView.get())->RenderTargetViewD3D11));
 		}
-		glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
 	}
 
-	deviceContextD3D11->OMSetRenderTargetsAndUnorderedAccessViews()
+	ID3D11DepthStencilView* dsvD3D11 = nullptr;
+	if (mDepthStencilView)
+		dsvD3D11 = (static_cast_checked<D3D11DepthStencilView*>(mDepthStencilView.get())->DepthStencilViewD3D11);
 
-	OGL_ERROR_CHECK();
+	if (mUnorderedAccessViews.size())
+	{		
+		vector<ID3D11UnorderedAccessView*> uavD3D11;
+		for (const auto& uavView : mUnorderedAccessViews)
+		{
+			if (uavView->GetViewDimension() == UAV_Texture)
+				uavD3D11.push_back(static_cast_checked<D3D11TextureUAV*>(uavView.get())->UnorderedAccessViewD3D11);
+			else if (uavView->GetViewDimension() == UAV_Buffer)
+				uavD3D11.push_back(static_cast_checked<D3D11BufferUAV*>(uavView.get())->UnorderedAccessViewD3D11);
+
+		}
+		
+		deviceContextD3D11->OMSetRenderTargetsAndUnorderedAccessViews(rtvD3D11.size(), &rtvD3D11[0], dsvD3D11,
+			0, uavD3D11.size(), &uavD3D11[0], nullptr);
+	}
+	else
+	{
+		deviceContextD3D11->OMSetRenderTargets(rtvD3D11.size(), &rtvD3D11[0], dsvD3D11);
+	}
 }
 
 void D3D11FrameBuffer::OnUnbind()
 {
 
 }
+
+
+
+
 
 }
 

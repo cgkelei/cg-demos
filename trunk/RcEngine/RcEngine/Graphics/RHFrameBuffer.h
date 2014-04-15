@@ -96,7 +96,7 @@ protected:
 	shared_ptr<RHRenderView> mDepthStencilView;
 
 	// Unordered access view, used in per-pixel list method, like OIT.
-	vector<shared_ptr<RHUnorderedAccessView>> mUAVs;
+	vector<shared_ptr<RHUnorderedAccessView>> mUnorderedAccessViews;
 	
 	bool mOffscreen;
 	bool mDirty;

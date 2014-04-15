@@ -55,7 +55,7 @@ void D3D11Texture::UnmapCube(uint32_t arrayIndex,   CubeMapFace face, uint32_t l
 	ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't be here!", "OpenGLTexture::UnmapCube");
 }
 
-void D3D11Texture::CopyToTexture( Texture& destTexture )
+void D3D11Texture::CopyToTexture( RHTexture& destTexture )
 {
 	ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't be here!", "OpenGLTexture::CopyToTexture");
 }

@@ -280,6 +280,7 @@ D3D11_TEXTURE_ADDRESS_MODE D3D11Mapping::Mapping( TextureAddressMode mode )
 		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid TextureAddressMode", "D3D11Mapping::Mapping");
 	}
 }
+
 D3D11_FILTER D3D11Mapping::Mapping( TextureFilter filter, bool compare /*= false*/ )
 {
 	switch (filter)
@@ -306,5 +307,33 @@ D3D11_FILTER D3D11Mapping::Mapping( TextureFilter filter, bool compare /*= false
 		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid TextureFilter", "D3D11Mapping::Mapping");
 	}
 }
+
+uint32_t D3D11Mapping::Mapping( uint32_t bufferCreateFlags )
+{
+	uint32_t bindFlag = 0;
+
+	if (bufferCreateFlags & BufferCreate_Uniform)
+	{
+		bindFlag = D3D11_BIND_CONSTANT_BUFFER;
+	}
+	else if (bufferCreateFlags & BufferCreate_Index)
+	{
+		bindFlag = D3D11_BIND_INDEX_BUFFER;
+	}
+	else
+	{
+		if (bufferCreateFlags & BufferCreate_Vertex)
+			bindFlag |= D3D11_BIND_VERTEX_BUFFER;
+		
+		if (bufferCreateFlags & BufferCreate_StreamOutput)
+			bindFlag |= D3D11_BIND_STREAM_OUTPUT;
+
+		if (bufferCreateFlags & (BufferCreate_Texture | BufferCreate_Structured) )
+			bindFlag |= D3D11_BIND_SHADER_RESOURCE;
+	}
+
+	return bindFlag;
+}
+
 
 }
