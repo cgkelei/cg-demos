@@ -89,12 +89,12 @@
   <ItemGroup>
     <ClInclude Include="D3D11Buffer.h" />
     <ClInclude Include="D3D11Device.h" />
+    <ClInclude Include="D3D11FrameBuffer.h" />
     <ClInclude Include="D3D11GraphicCommon.h" />
     <ClInclude Include="D3D11RenderModule.h" />
     <ClInclude Include="D3D11Shader.h" />
     <ClInclude Include="D3D11ShaderProgram.h" />
     <ClInclude Include="D3D11State.h" />
-    <ClInclude Include="D3D11UnorderedAccessView.h" />
     <ClInclude Include="D3D11VertexDeclaration.h" />
     <ClInclude Include="D3D11View.h" />
   </ItemGroup>
@@ -102,6 +102,7 @@
     <ClCompile Include="D3D11Buffer.cpp" />
     <ClCompile Include="D3D11DepthStencilView.cpp" />
     <ClCompile Include="D3D11Device.cpp" />
+    <ClCompile Include="D3D11FrameBuffer.cpp" />
     <ClCompile Include="D3D11GraphicCommon.cpp" />
     <ClCompile Include="D3D11RenderFactory.cpp" />
     <ClCompile Include="D3D11RenderModule.cpp" />
@@ -114,7 +115,6 @@
     <ClCompile Include="D3D11Texture2D.cpp" />
     <ClCompile Include="D3D11Texture3D.cpp" />
     <ClCompile Include="D3D11TextureCube.cpp" />
-    <ClCompile Include="D3D11UnorderedAccessView.cpp" />
     <ClCompile Include="D3D11VertexDeclaration.cpp" />
     <ClCompile Include="D3D11View.cpp" />
   </ItemGroup>
