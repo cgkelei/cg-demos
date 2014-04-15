@@ -14,7 +14,7 @@ public:
 	~D3D11Buffer(void);
 
 	void ResizeBuffer(uint32_t size);
-	void* Map(uint32_t offset, uint32_t length, BufferAccess options);
+	void* Map(uint32_t offset, uint32_t length, ResourceMapAccess options);
 	void UnMap();
 
 public:

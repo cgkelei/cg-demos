@@ -11,11 +11,25 @@ class RHBuffer;
 class RHTexture;
 class RHFrameBuffer;
 
+enum SRVResourceType
+{
+	SRV_Buffer,
+	SRV_Texture
+};
+
+enum UAVResourceType
+{
+	UAV_Buffer,
+	SRV_Texture
+};
+
 //////////////////////////////////////////////////////////////////////////
 class _ApiExport RHShaderResourceView
 {
 public:
 	virtual ~RHShaderResourceView();
+
+	
 };
 
 class _ApiExport RHTextureSRV : public RHShaderResourceView

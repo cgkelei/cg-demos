@@ -16,6 +16,7 @@ public:
 	~D3D11Device();
 
 	inline ID3D11Device* GetDeviceD3D11() const { return mDevice; }
+	inline ID3D11DeviceContext* GetDeviceContextD3D11() const { return mDeviceContext; }
 
 	void ToggleFullscreen(bool fs);
 	void AdjustProjectionMatrix(float4x4& pOut);

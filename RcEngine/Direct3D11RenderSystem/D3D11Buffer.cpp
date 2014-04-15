@@ -6,8 +6,8 @@ namespace RcEngine {
 ID3D11Device* g_pDevice;
 
 D3D11Buffer::D3D11Buffer( uint32_t bufferSize, uint32_t accessHint, uint32_t flags, D3D11_BIND_FLAG target, uint32_t structSize, ElementInitData* initData )
-	: RHBuffer(bufferSize, accessHint),
-	  mCreateFlags(flags)
+	: RHBuffer(bufferSize, accessHint, flags),
+	  BufferD3D11(nullptr)
 {
 	D3D11_BUFFER_DESC desc;
 	
@@ -65,9 +65,9 @@ D3D11Buffer::~D3D11Buffer(void)
 {
 }
 
-void* D3D11Buffer::Map( uint32_t offset, uint32_t length, BufferAccess options )
+void* D3D11Buffer::Map( uint32_t offset, uint32_t length, ResourceMapAccess options )
 {
-
+	return NULL;
 }
 
 void D3D11Buffer::UnMap()
