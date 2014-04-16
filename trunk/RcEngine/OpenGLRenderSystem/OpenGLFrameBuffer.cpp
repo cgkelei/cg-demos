@@ -40,6 +40,11 @@ void OpenGLFrameBuffer::OnBind()
 		glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
 	}
 
+	if (mUnorderedAccessViews.size())
+	{
+
+	}
+
 
 	OGL_ERROR_CHECK();
 }

@@ -37,11 +37,7 @@ void D3D11FrameBuffer::OnBind()
 		vector<ID3D11UnorderedAccessView*> uavD3D11;
 		for (const auto& uavView : mUnorderedAccessViews)
 		{
-			if (uavView->GetViewDimension() == UAV_Texture)
-				uavD3D11.push_back(static_cast_checked<D3D11TextureUAV*>(uavView.get())->UnorderedAccessViewD3D11);
-			else if (uavView->GetViewDimension() == UAV_Buffer)
-				uavD3D11.push_back(static_cast_checked<D3D11BufferUAV*>(uavView.get())->UnorderedAccessViewD3D11);
-
+			uavD3D11.push_back(static_cast_checked<D3D11UnorderedAccessView*>(uavView.get())->UnorderedAccessViewD3D11);
 		}
 		
 		deviceContextD3D11->OMSetRenderTargetsAndUnorderedAccessViews(rtvD3D11.size(), &rtvD3D11[0], dsvD3D11,

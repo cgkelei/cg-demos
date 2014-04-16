@@ -6,40 +6,40 @@
 namespace RcEngine {
 
 OpenGLBufferSRV::OpenGLBufferSRV( const shared_ptr<RHBuffer>& buffer )
-	: RHBufferSRV(buffer),
-	  BufferOGL(0)
-{
-
-}
-
-OpenGLBufferSRV::~OpenGLBufferSRV()
+	: mBuffer(buffer)
 {
 
 }
 
 OpenGLTextureBufferSRV::OpenGLTextureBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format )
 	: OpenGLBufferSRV(buffer),
-	  TextureOGL(0)
+	  mTextureOGL(0)
 {
 	OpenGLBuffer* pTBO = static_cast<OpenGLBuffer*>(buffer.get());
 	assert(pTBO->GetBufferTarget() == GL_TEXTURE_BUFFER);
 
-	glGenTextures(1, &TextureOGL);
-
 	GLenum outFormat, type;
-	OpenGLMapping::Mapping(FormatOGL, outFormat, type, format);
-	
-	BufferTargetOGL = GL_TEXTURE_BUFFER;
-	BufferOGL = pTBO->GetBufferOGL();
+	OpenGLMapping::Mapping(mFormatOGL, outFormat, type, format);
 
-	glBindTexture(GL_TEXTURE_BUFFER, TextureOGL);
-	glTexBuffer(GL_TEXTURE_BUFFER, FormatOGL, BufferOGL);
+	glGenTextures(1, &mTextureOGL);
+	glBindTexture(GL_TEXTURE_BUFFER, mTextureOGL);
+	glTexBuffer(GL_TEXTURE_BUFFER, mFormatOGL, pTBO->GetBufferOGL());
 }
 
 OpenGLTextureBufferSRV::~OpenGLTextureBufferSRV()
 {
-	if (TextureOGL > 0)
-		glDeleteTextures(1, &TextureOGL);
+	if (mTextureOGL > 0)
+		glDeleteTextures(1, &mTextureOGL);
+}
+
+void OpenGLTextureBufferSRV::BindSRV( GLuint unit )
+{
+	// Now bind it for read-write to one of the image units
+	glActiveTexture(GL_TEXTURE0 + unit);
+	glBindTexture(GL_TEXTURE_BUFFER, mTextureOGL);
+	
+	// Not sure whether it needs to call again.
+	//glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, tbo);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -48,127 +48,122 @@ OpenGLStructuredBufferSRV::OpenGLStructuredBufferSRV( const shared_ptr<RHBuffer>
 {
 	OpenGLBuffer* pSSBO = static_cast<OpenGLBuffer*>(buffer.get());
 	assert(pSSBO->GetBufferTarget() == GL_SHADER_STORAGE_BUFFER);
-
-	BufferTargetOGL = GL_SHADER_STORAGE_BUFFER;
-	BufferOGL = pSSBO->GetBufferOGL();
+	mBufferOGL = pSSBO->GetBufferOGL();
 }
 
-//////////////////////////////////////////////////////////////////////////
-OpenGLTextureSRV::OpenGLTextureSRV( const shared_ptr<RHTexture>& texture )
-	: RHTextureSRV(texture)
+void OpenGLStructuredBufferSRV::BindSRV( GLuint bindingPoint )
 {
-	OpenGLTexture* pTextureOGL = static_cast<OpenGLTexture*>(texture.get());
-	
-	TextureOGL = pTextureOGL->GetTextureOGL();
-	TextureTargetOGL = pTextureOGL->GetTextureTarget();
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindingPoint, mBufferOGL);
 }
 
 //////////////////////////////////////////////////////////////////////////
-OpenGLTextureViewSRV::OpenGLTextureViewSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
-	: OpenGLTextureSRV(texture)
+OpenGLTextureSRV::OpenGLTextureSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
+	: mTexture(texture), 
+	  mNeedDelete(false)
 {
 	assert(mipLevels > 0 && arraySize > 0);
 
-	OpenGLTexture* pTextureInternalOGL = static_cast<OpenGLTexture*>(texture.get());
+	uint32_t numLevels = texture->GetMipLevels();
+	uint32_t numLayers = texture->GetTextureArraySize();
 
 	GLenum internalFormat, externFormat, formatType;
 	OpenGLMapping::Mapping(internalFormat, externFormat, formatType, texture->GetTextureFormat());
 
-	// check mipmap levels
-	if (mipLevels == -1) // -1 for all remain levels
+	OpenGLTexture* pTextureOGL = static_cast_checked<OpenGLTexture*>(texture.get());
+
+	if (mostDetailedMip == 0 && mipLevels == numLevels && firstArraySlice == 0 && arraySize == numLayers)
 	{
-		assert(mostDetailedMip < mipLevels);
-		mipLevels = pTextureInternalOGL->GetMipLevels() - mostDetailedMip;
+		mNeedDelete = false;
+		mTextureTargetOGL = pTextureOGL->GetTextureTarget();
+		mTextureOGL = pTextureOGL->GetTextureOGL();
 	}
 	else
 	{
-		assert(mostDetailedMip + mipLevels <= pTextureInternalOGL->GetMipLevels());
-	}
+		assert(GLEW_ARB_texture_view);
+		mNeedDelete = true;
 
-	// Check array size
-	assert(firstArraySlice + arraySize <=  pTextureInternalOGL->GetTextureArraySize());
-	
-	glGenTextures(1, &TextureOGL);
-	switch (pTextureInternalOGL->GetTextureTarget())
-	{
-	case GL_TEXTURE_1D:
+		glGenTextures(1, &mTextureOGL);
+		switch (pTextureOGL->GetTextureTarget())
 		{
-			TextureTargetOGL = GL_TEXTURE_1D;
-			glTextureView(TextureOGL, TextureTargetOGL, pTextureInternalOGL->GetTextureOGL(), internalFormat, mostDetailedMip, mipLevels, 0, 1);
+		case GL_TEXTURE_1D:
+			{
+				mTextureTargetOGL = GL_TEXTURE_1D;
+				glTextureView(mTextureOGL, mTextureTargetOGL, pTextureOGL->GetTextureOGL(), internalFormat, mostDetailedMip, mipLevels, 0, 1);
+			}
+			break;
+		case GL_TEXTURE_1D_ARRAY:
+			{
+				mTextureTargetOGL = (arraySize > 1) ? GL_TEXTURE_1D_ARRAY : GL_TEXTURE_1D;
+				glTextureView(mTextureOGL, mTextureTargetOGL, pTextureOGL->GetTextureOGL(), internalFormat, mostDetailedMip, mipLevels, firstArraySlice, arraySize);
+			}
+			break;
+		case GL_TEXTURE_2D:
+			{
+				mTextureTargetOGL = GL_TEXTURE_2D;
+				glTextureView(mTextureOGL, mTextureTargetOGL, pTextureOGL->GetTextureOGL(), internalFormat, mostDetailedMip, mipLevels, 0, 1);
+			}
+			break;
+		case GL_TEXTURE_2D_MULTISAMPLE:
+			{
+				mTextureTargetOGL = GL_TEXTURE_2D_MULTISAMPLE;
+				glTextureView(mTextureOGL, mTextureTargetOGL, pTextureOGL->GetTextureOGL(), internalFormat, 0, 1, 0, 1);
+			}
+			break;
+		case GL_TEXTURE_2D_ARRAY:
+			{
+				mTextureTargetOGL = (arraySize > 1) ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D;
+				glTextureView(mTextureOGL, mTextureTargetOGL, pTextureOGL->GetTextureOGL(), internalFormat, mostDetailedMip, mipLevels, firstArraySlice, arraySize);
+			}
+			break;
+		case GL_TEXTURE_2D_MULTISAMPLE_ARRAY:
+			{
+				mTextureTargetOGL = (arraySize > 1) ? GL_TEXTURE_2D_MULTISAMPLE_ARRAY : GL_TEXTURE_2D_MULTISAMPLE;
+				glTextureView(mTextureOGL, mTextureTargetOGL, pTextureOGL->GetTextureOGL(), internalFormat, 0, 1, firstArraySlice, arraySize);
+			}
+			break;
+		case GL_TEXTURE_3D:
+			{
+				mTextureTargetOGL = GL_TEXTURE_3D;
+				glTextureView(mTextureOGL, mTextureTargetOGL, pTextureOGL->GetTextureOGL(), internalFormat, mostDetailedMip, mipLevels, 0, 1);
+			}
+			break;
+		case GL_TEXTURE_CUBE_MAP:
+			{
+				mTextureTargetOGL = GL_TEXTURE_CUBE_MAP;
+				glTextureView(mTextureOGL, mTextureTargetOGL, pTextureOGL->GetTextureOGL(), internalFormat, mostDetailedMip, mipLevels, 0, 1);
+			}
+			break;
+		case GL_TEXTURE_CUBE_MAP_ARRAY:
+			{
+				mTextureTargetOGL = (arraySize > 1) ? GL_TEXTURE_CUBE_MAP_ARRAY : GL_TEXTURE_CUBE_MAP;
+				glTextureView(mTextureOGL, mTextureTargetOGL, pTextureOGL->GetTextureOGL(), internalFormat, mostDetailedMip, mipLevels, firstArraySlice, arraySize);
+			}
+			break;
+		default:
+			assert(false);
+			break;
 		}
-		break;
-	case GL_TEXTURE_1D_ARRAY:
-		{
-			TextureTargetOGL = (arraySize > 1) ? GL_TEXTURE_1D_ARRAY : GL_TEXTURE_1D;
-			glTextureView(TextureOGL, TextureTargetOGL, pTextureInternalOGL->GetTextureOGL(), internalFormat, mostDetailedMip, mipLevels, firstArraySlice, arraySize);
-		}
-		break;
-	case GL_TEXTURE_2D:
-		{
-			TextureTargetOGL = GL_TEXTURE_2D;
-			glTextureView(TextureOGL, TextureTargetOGL, pTextureInternalOGL->GetTextureOGL(), internalFormat, mostDetailedMip, mipLevels, 0, 1);
-		}
-		break;
-	case GL_TEXTURE_2D_MULTISAMPLE:
-		{
-			TextureTargetOGL = GL_TEXTURE_2D_MULTISAMPLE;
-			glTextureView(TextureOGL, TextureTargetOGL, pTextureInternalOGL->GetTextureOGL(), internalFormat, 0, 1, 0, 1);
-		}
-		break;
-	case GL_TEXTURE_2D_ARRAY:
-		{
-			TextureTargetOGL = (arraySize > 1) ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D;
-			glTextureView(TextureOGL, TextureTargetOGL, pTextureInternalOGL->GetTextureOGL(), internalFormat, mostDetailedMip, mipLevels, firstArraySlice, arraySize);
-		}
-		break;
-	case GL_TEXTURE_2D_MULTISAMPLE_ARRAY:
-		{
-			TextureTargetOGL = (arraySize > 1) ? GL_TEXTURE_2D_MULTISAMPLE_ARRAY : GL_TEXTURE_2D_MULTISAMPLE;
-			glTextureView(TextureOGL, TextureTargetOGL, pTextureInternalOGL->GetTextureOGL(), internalFormat, 0, 1, firstArraySlice, arraySize);
-		}
-		break;
-	case GL_TEXTURE_3D:
-		{
-			TextureTargetOGL = GL_TEXTURE_3D;
-			glTextureView(TextureOGL, TextureTargetOGL, pTextureInternalOGL->GetTextureOGL(), internalFormat, mostDetailedMip, mipLevels, 0, 1);
-		}
-		break;
-	case GL_TEXTURE_CUBE_MAP:
-		{
-			TextureTargetOGL = GL_TEXTURE_CUBE_MAP;
-			glTextureView(TextureOGL, TextureTargetOGL, pTextureInternalOGL->GetTextureOGL(), internalFormat, mostDetailedMip, mipLevels, 0, 1);
-		}
-		break;
-	case GL_TEXTURE_CUBE_MAP_ARRAY:
-		{
-			TextureTargetOGL = (arraySize > 1) ? GL_TEXTURE_CUBE_MAP_ARRAY : GL_TEXTURE_CUBE_MAP;
-			glTextureView(TextureOGL, TextureTargetOGL, pTextureInternalOGL->GetTextureOGL(), internalFormat, mostDetailedMip, mipLevels, firstArraySlice, arraySize);
-		}
-		break;
-	default:
-		assert(false);
-		break;
 	}
 }
 
-OpenGLTextureViewSRV::~OpenGLTextureViewSRV()
+OpenGLTextureSRV::~OpenGLTextureSRV()
 {
-	glDeleteTextures(1, &TextureOGL);
+	if (mNeedDelete)
+		glDeleteTextures(1, &mTextureOGL);
+}
+
+void OpenGLTextureSRV::BindSRV( GLuint unit )
+{
+	glActiveTexture(GL_TEXTURE0 + unit);
+	glBindTexture(mTextureTargetOGL, mTextureOGL);
 }
 
 //////////////////////////////////////////////////////////////////////////
 OpenGLBufferUAV::OpenGLBufferUAV( const shared_ptr<RHBuffer>& buffer )
-	: RHBufferUAV(buffer),
-	  BufferOGL(0)  
+	: mBuffer(buffer)
 {
 
 }
-
-OpenGLBufferUAV::~OpenGLBufferUAV()
-{
-
-}
-
 //////////////////////////////////////////////////////////////////////////
 OpenGLTextureBufferUAV::OpenGLTextureBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format )
 	: OpenGLBufferUAV(buffer)
@@ -176,38 +171,41 @@ OpenGLTextureBufferUAV::OpenGLTextureBufferUAV( const shared_ptr<RHBuffer>& buff
 	OpenGLBuffer* pTBO = static_cast<OpenGLBuffer*>(buffer.get());
 	assert(pTBO->GetBufferTarget() == GL_TEXTURE_BUFFER);
 
-	glGenTextures(1, &TextureOGL);
-
 	GLenum outFormat, type;
-	OpenGLMapping::Mapping(FormatOGL, outFormat, type, format);
-	
-	BufferTargetOGL = GL_TEXTURE_BUFFER;
-	BufferOGL = pTBO->GetBufferOGL();
+	OpenGLMapping::Mapping(mFormatOGL, outFormat, type, format);
 
-	glBindTexture(GL_TEXTURE_BUFFER, TextureOGL);
-	glTexBuffer(GL_TEXTURE_BUFFER, FormatOGL, BufferOGL);
+	glGenTextures(1, &mTextureOGL);
+	glBindTexture(GL_TEXTURE_BUFFER, mTextureOGL);
+	glTexBuffer(GL_TEXTURE_BUFFER, mFormatOGL, pTBO->GetBufferOGL());
 }
 
 OpenGLTextureBufferUAV::~OpenGLTextureBufferUAV()
 {
-	if (TextureOGL > 0)
-		glDeleteTextures(1, &TextureOGL);
+	glDeleteTextures(1, &mTextureOGL);
 }
 
-//////////////////////////////////////////////////////////////////////////
+void OpenGLTextureBufferUAV::BindUAV( GLuint unit )
+{
+	glBindImageTexture(unit, mTextureOGL, 0, GL_FALSE, 0, GL_READ_WRITE, mFormatOGL);
+}
+
+////////////////////////////////////////////////////////////////////////
 OpenGLStructuredBufferUAV::OpenGLStructuredBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount )
 	: OpenGLBufferUAV(buffer)
 {
 	OpenGLBuffer* pSSBO = static_cast<OpenGLBuffer*>(buffer.get());
 	assert(pSSBO->GetBufferTarget() == GL_SHADER_STORAGE_BUFFER);
-
-	BufferTargetOGL = GL_SHADER_STORAGE_BUFFER;
-	BufferOGL = pSSBO->GetBufferOGL();
+	mBufferOGL = pSSBO->GetBufferOGL();
 }
 
-//////////////////////////////////////////////////////////////////////////
+void OpenGLStructuredBufferUAV::BindUAV( GLuint bindingPoint )
+{
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mBufferOGL);
+}
+
+////////////////////////////////////////////////////////////////////////
 OpenGLTextureUAV::OpenGLTextureUAV( const shared_ptr<RHTexture>& texture )
-	: RHTextureUAV(texture)
+	: mTexture(texture)
 {
 	OpenGLTexture* pTextureOGL = static_cast<OpenGLTexture*>(texture.get());
 
