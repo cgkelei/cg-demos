@@ -12,16 +12,35 @@ class RHTexture;
 
 // Shader Resource View
 //////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11BufferSRV : public RHBufferSRV
+class _D3D11Export D3D11ShaderResouceView : public RHShaderResourceView
 {
 public:
-	D3D11BufferSRV(const shared_ptr<RHBuffer>& buffer);
-	virtual ~D3D11BufferSRV();
+	D3D11ShaderResouceView();
+	virtual ~D3D11ShaderResouceView();
 
 public:
 	ID3D11ShaderResourceView* ShaderResourceViewD3D11;
 };
 
+class _D3D11Export D3D11BufferSRV : public D3D11ShaderResouceView
+{
+public:
+	D3D11BufferSRV(const shared_ptr<RHBuffer>& buffer);
+
+protected:
+	shared_ptr<RHBuffer> mBuffer;
+};
+
+class _D3D11Export D3D11TextureSRV : public D3D11ShaderResouceView
+{
+public:
+	D3D11TextureSRV(const shared_ptr<RHTexture>& texture);
+
+public:
+	shared_ptr<RHTexture> mTexture;
+};
+
+//////////////////////////////////////////////////////////////////////////
 class _D3D11Export D3D11StructuredBufferSRV : public D3D11BufferSRV
 {
 public:
@@ -34,16 +53,8 @@ public:
 	D3D11TextureBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format);
 };
 
-class _D3D11Export D3D11TextureSRV : public RHTextureSRV
-{
-public:
-	D3D11TextureSRV(const shared_ptr<RHTexture>& texture);
-	virtual ~D3D11TextureSRV();
-
-public:
-	ID3D11ShaderResourceView* ShaderResourceViewD3D11;
-};
-
+// Texture SRV
+//////////////////////////////////////////////////////////////////////////
 class _D3D11Export D3D11Texture1DSRV : public D3D11TextureSRV
 {
 public:
@@ -97,24 +108,32 @@ public:
 
 // Unordered Access View
 //////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11BufferUAV : public RHBufferUAV
+class _D3D11Export D3D11UnorderedAccessView : public RHUnorderedAccessView
 {
 public:
-	D3D11BufferUAV(const shared_ptr<RHBuffer>& buffer);
-	virtual ~D3D11BufferUAV();
+	D3D11UnorderedAccessView();
+	virtual ~D3D11UnorderedAccessView();
 
 public:
 	ID3D11UnorderedAccessView* UnorderedAccessViewD3D11;
 };
 
-class _D3D11Export D3D11TextureUAV : public RHTextureUAV
+class _D3D11Export D3D11BufferUAV : public D3D11UnorderedAccessView
+{
+public:
+	D3D11BufferUAV(const shared_ptr<RHBuffer>& buffer);
+
+protected:
+	shared_ptr<RHBuffer> mBuffer;
+};
+
+class _D3D11Export D3D11TextureUAV : public D3D11UnorderedAccessView
 {
 public:
 	D3D11TextureUAV(const shared_ptr<RHTexture>& texture);
-	virtual ~D3D11TextureUAV();
 
-public:
-	ID3D11UnorderedAccessView* UnorderedAccessViewD3D11;
+protected:
+	shared_ptr<RHTexture> mTexture;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -131,11 +150,30 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11Texture2DUAV : public D3D11TextureUAV
+class _D3D11Export D3D11Texture1DUAV  : public D3D11TextureUAV
 {
 public:
-	D3D11Texture2DUAV(const shared_ptr<RHTexture>& texture, uint32_t level);
+	D3D11Texture1DUAV(const shared_ptr<RHTexture>& texture, uint32_t mipSlice, uint32_t firstArraySlice, uint32_t arraySize);
 };
+
+class _D3D11Export D3D11Texture2DUAV  : public D3D11TextureUAV
+{
+public:
+	D3D11Texture2DUAV(const shared_ptr<RHTexture>& texture, uint32_t mipSlice, uint32_t firstArraySlice, uint32_t arraySize);
+};
+
+class _D3D11Export D3D11Texture3DUAV  : public D3D11TextureUAV
+{
+public:
+	D3D11Texture3DUAV(const shared_ptr<RHTexture>& texture, uint32_t mipSlice, uint32_t firstWSlice, uint32_t wSize);
+};
+
+class _D3D11Export D3D11TextureCubeUAV  : public D3D11TextureUAV
+{
+public:
+	D3D11TextureCubeUAV(const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize);
+};
+
 }
 
 #endif // D3D11ShaderResourceView_h__
