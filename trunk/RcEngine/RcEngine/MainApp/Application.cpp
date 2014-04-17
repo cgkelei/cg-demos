@@ -1,47 +1,39 @@
 #include <MainApp/Application.h>
 #include <MainApp/Window.h>
-#include <Graphics/GraphicsCommon.h>
-#include <Graphics/RenderDevice.h>
-#include <Graphics/RenderFactory.h>
-#include <Graphics/FrameBuffer.h>
-#include <Graphics/Camera.h>
-#include <Graphics/Material.h>
-#include <Graphics/Effect.h>
-#include <Graphics/Texture.h>
-#include <Graphics/AnimationClip.h>
-#include <Graphics/Mesh.h>
-#include <Graphics/Pipeline.h>
-#include <Graphics/Font.h>
-#include <Scene/SceneManager.h>
-#include <Core/Exception.h>
-#include <Core/Context.h>
-#include <Core/XMLDom.h>
-#include <Core/IModule.h>
+#include <Core/Environment.h>
 #include <Core/ModuleManager.h>
-#include <Resource/ResourceManager.h>
+#include <Core/Exception.h>
+#include <Core/XMLDom.h>
 #include <Input/InputSystem.h>
-#include <Input/InputEvent.h>
+#include <Graphics/GraphicsCommon.h>
 #include <IO/FileSystem.h>
 #include <IO/FileStream.h>
-#include <GUI/UIManager.h>
+#include <Resource/ResourceManager.h>
 
 // C++ 11 thread
 #include <thread>
 
 namespace RcEngine {
 
+Application* Application::msApp = nullptr;
+
 Application::Application( const String& config )
-	: mEndGame(false), mAppPaused(false), mConfigFile(config)
+	: mEndGame(false),
+	  mAppPaused(false),
+	  mConfigFile(config)
 {
-	Context::Initialize();
+	msApp = this;
+
+	Environment::Initialize();
+	InputSystem::Initialize();
 	ModuleManager::Initialize();
 	FileSystem::Initialize();
-	ResourceManager::Initialize();
-	InputSystem::Initialize();
-	UIManager::Initialize();
+	//ResourceManager::Initialize();
+	
+	//UIManager::Initialize();
 
 	// todo add sub scene manager
-	new SceneManager;
+	/*new SceneManager;
 
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 	resMan.RegisterType(RT_Mesh, "Mesh", Mesh::FactoryFunc);
@@ -50,11 +42,11 @@ Application::Application( const String& config )
 	resMan.RegisterType(RT_Animation, "Animation",AnimationClip::FactoryFunc);
 	resMan.RegisterType(RT_Texture, "Texture", TextureResource::FactoryFunc);
 	resMan.RegisterType(RT_Pipeline, "Pipeline", Pipeline::FactoryFunc);
-	resMan.RegisterType(RT_Font, "Font", Font::FactoryFunc);
+	resMan.RegisterType(RT_Font, "Font", Font::FactoryFunc);*/
 
-	ReadConfiguration();
+	LoadConfiguration();
 
-	Context::GetSingleton().SetApplication(this);
+	Environment::GetSingleton().mApplication = this;
 }
 
 Application::~Application( void )
@@ -78,14 +70,9 @@ void Application::RunGame()
 
 	mTimer.Reset();
 
-	int i = 0;
 	do 
 	{
 		Tick();
-
-		//i++;
-		//if (i==5)
-		//	mEndGame = true;
 	} while ( !mEndGame );
 
 	UnloadContent();
@@ -93,8 +80,7 @@ void Application::RunGame()
 
 void Application::Tick()
 {
-	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
-	RenderDevice& renderDevice = Context::GetSingleton().GetRenderDevice();
+	/*SceneManager& sceneMan = Environment::GetSingleton().GetSceneManager();*/
 	InputSystem& inputSystem = InputSystem::GetSingleton();
 
 	if (!mActice)
@@ -123,10 +109,10 @@ void Application::Tick()
 	Update(deltaTime);
 	
 	// update scene graph
-	sceneMan.UpdateSceneGraph(deltaTime);
+	//sceneMan.UpdateSceneGraph(deltaTime);
 
 	// Update UI
-	UIManager::GetSingleton().Update(deltaTime);
+	//UIManager::GetSingleton().Update(deltaTime);
 
 	// render
 	Render();
@@ -141,7 +127,7 @@ void Application::ProcessEventQueue()
 	{
 		bool eventConsumed = false;
 
-		eventConsumed = UIManager::GetSingleton().OnEvent(event);
+		//eventConsumed = UIManager::GetSingleton().OnEvent(event);
 		
 		if (!eventConsumed)
 		{
@@ -166,7 +152,6 @@ void Application::ProcessEventQueue()
 void Application::LoadAllModules()
 {
 	ModuleManager::GetSingleton().Load(MT_Render_OpengGL);
-	ModuleManager::GetSingleton().GetMoudleByType(MT_Render_OpengGL)->Initialise();
 }
 
 void Application::UnloadAllModules()
@@ -177,13 +162,11 @@ void Application::UnloadAllModules()
 void Application::Window_ApplicationActivated()
 {
 	mActice = true;
-	Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->SetActice(true);
 }
 
 void Application::Window_ApplicationDeactivated()
 {
 	mActice = false;
-	Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer()->SetActice(false);
 }
 
 void Application::Window_Suspend()
@@ -208,10 +191,10 @@ void Application::Window_UserResized()
 	uint32_t width = mMainWindow->GetWidth();
 	uint32_t height = mMainWindow->GetHeight();
 
-	if (mSettings.Width != width || mSettings.Height != height)
+	if (mAppSettings.Width != width || mAppSettings.Height != height)
 	{
-		Context::GetSingleton().GetRenderDevice().Resize(width, height);	
-		UIManager::GetSingleton().OnWindowResize(width, height);
+		//Environment::GetSingleton().GetRHDevice()->Resize(width, height);	
+		//UIManager::GetSingleton().OnWindowResize(width, height);
 		//Context::GetSingleton().GetInputSystem().Resize(width, height);
 
 		WindowResize(width, height);
@@ -226,7 +209,7 @@ void Application::Window_Close()
 void Application::Create()
 {
 	// Create main window
-	mMainWindow = new Window(mAppTitle, mSettings);
+	mMainWindow = new Window(mAppSettings);
 	mMainWindow->PaintEvent.bind(this, &Application::Window_Paint);
 	mMainWindow->SuspendEvent.bind(this, &Application::Window_Suspend);
 	mMainWindow->ResumeEvent.bind(this, &Application::Window_Resume);
@@ -238,11 +221,8 @@ void Application::Create()
 	// load all modules
 	LoadAllModules();
 
-	// Create render window
-	Context::GetSingleton().GetRenderDevice().CreateRenderWindow(mSettings);
-
 	// UI Graphics initailize
-	UIManager::GetSingleton().OnGraphicsInitialize();
+	//UIManager::GetSingleton().OnGraphicsInitialize();
 
 	// Show main window
 	mMainWindow->ShowWindow();
@@ -251,20 +231,20 @@ void Application::Create()
 void Application::Release()
 {
 	// Delete Scene Manager
-	SceneManager* pSceneMan = Context::GetSingleton().GetSceneManagerPtr();
-	delete pSceneMan;
+	//SceneManager* pSceneMan = Environment::GetSingleton().GetSceneManagerPtr();
+	//delete pSceneMan;
 
-	UIManager::Finalize();
+	/*UIManager::Finalize();
 	InputSystem::Finalize();
 	FileSystem::Finalize();
-	ResourceManager::Finalize();
+	ResourceManager::Finalize();*/
 	
-	Context::Finalize();
+	Environment::Finalize();
 
 	//ModuleManager::Finalize();	
 }
 
-void Application::ReadConfiguration()
+void Application::LoadConfiguration()
 {
 	FileStream config;
 	if ( !config.Open(mConfigFile) )
@@ -281,25 +261,25 @@ void Application::ReadConfiguration()
 
 	XMLNodePtr graphicNode = appNode->FirstNode("Graphics");
 
-	mSettings.Left = graphicNode->Attribute("Left")->ValueInt();
-	mSettings.Top = graphicNode->Attribute("Top")->ValueInt();
-	mSettings.Width = graphicNode->Attribute("Width")->ValueUInt();
-	mSettings.Height = graphicNode->Attribute("Height")->ValueUInt();
-	mSettings.Fullscreen = graphicNode->Attribute("FullScreen")->ValueInt() != 0;
-	mSettings.ColorFormat = PixelFormatUtils::GetPixelFormat(graphicNode->Attribute("ColorForamt")->ValueString());
-	mSettings.DepthStencilFormat = PixelFormatUtils::GetPixelFormat(graphicNode->Attribute("DepthStencilFormat")->ValueString());
+	mAppSettings.Left = graphicNode->Attribute("Left")->ValueInt();
+	mAppSettings.Top = graphicNode->Attribute("Top")->ValueInt();
+	mAppSettings.Width = graphicNode->Attribute("Width")->ValueUInt();
+	mAppSettings.Height = graphicNode->Attribute("Height")->ValueUInt();
+	mAppSettings.Fullscreen = graphicNode->Attribute("FullScreen")->ValueInt() != 0;
+	mAppSettings.ColorFormat = PixelFormatUtils::GetPixelFormat(graphicNode->Attribute("ColorForamt")->ValueString());
+	mAppSettings.DepthStencilFormat = PixelFormatUtils::GetPixelFormat(graphicNode->Attribute("DepthStencilFormat")->ValueString());
 
 	XMLNodePtr sampleNode = graphicNode->FirstNode("Sample");
 	if (sampleNode)
 	{
-		mSettings.SampleCount = sampleNode->Attribute("Count")->ValueUInt();
-		mSettings.SampleQuality = sampleNode->Attribute("Quality")->ValueUInt();
+		mAppSettings.SampleCount = sampleNode->Attribute("Count")->ValueUInt();
+		mAppSettings.SampleQuality = sampleNode->Attribute("Quality")->ValueUInt();
 	}
 
 	XMLNodePtr syncNode = graphicNode->FirstNode("SyncInterval");
 	if (syncNode)
 	{
-		mSettings.SyncInterval = syncNode->Attribute("Interval")->ValueUInt();
+		mAppSettings.SyncInterval = syncNode->Attribute("Interval")->ValueUInt();
 	}
 
 	XMLNodePtr resNode = appNode->FirstNode("Resource");

@@ -4,8 +4,8 @@
 
 namespace RcEngine {
 
-D3D11FrameBuffer::D3D11FrameBuffer( uint32_t width, uint32_t height, bool offscreen /*= true*/ )
-	: RHFrameBuffer(width, height, offscreen)
+D3D11FrameBuffer::D3D11FrameBuffer( bool offscreen /*= true*/ )
+	: RHFrameBuffer(offscreen)
 {
 
 }
@@ -17,7 +17,7 @@ void D3D11FrameBuffer::SwapBuffers()
 
 void D3D11FrameBuffer::OnBind()
 {
-	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->GetDeviceContextD3D11();
+	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
 
 	vector<ID3D11RenderTargetView*> rtvD3D11;
 	for (const auto& colorView : mColorViews)
@@ -27,6 +27,8 @@ void D3D11FrameBuffer::OnBind()
 			rtvD3D11.push_back((static_cast_checked<D3D11TargetView*>(colorView.get())->RenderTargetViewD3D11));
 		}
 	}
+
+	ID3D11RenderTargetView** pRTVD3D11 = rtvD3D11.size() ? (&rtvD3D11[0]) : nullptr;
 
 	ID3D11DepthStencilView* dsvD3D11 = nullptr;
 	if (mDepthStencilView)
@@ -40,19 +42,26 @@ void D3D11FrameBuffer::OnBind()
 			uavD3D11.push_back(static_cast_checked<D3D11UnorderedAccessView*>(uavView.get())->UnorderedAccessViewD3D11);
 		}
 		
-		deviceContextD3D11->OMSetRenderTargetsAndUnorderedAccessViews(rtvD3D11.size(), &rtvD3D11[0], dsvD3D11,
-			0, uavD3D11.size(), &uavD3D11[0], nullptr);
+		ID3D11UnorderedAccessView** pUAVD3D11 = uavD3D11.size() ? (&uavD3D11[0]) : nullptr;
+
+		deviceContextD3D11->OMSetRenderTargetsAndUnorderedAccessViews(rtvD3D11.size(), pRTVD3D11, dsvD3D11,
+			0, uavD3D11.size(), pUAVD3D11, nullptr);
 	}
 	else
 	{
-		deviceContextD3D11->OMSetRenderTargets(rtvD3D11.size(), &rtvD3D11[0], dsvD3D11);
+		deviceContextD3D11->OMSetRenderTargets(rtvD3D11.size(), pRTVD3D11, dsvD3D11);
 	}
+
+	mDirty = false;
 }
 
 void D3D11FrameBuffer::OnUnbind()
 {
-
+	mDirty = true;
 }
+
+
+
 
 
 

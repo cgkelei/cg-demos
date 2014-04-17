@@ -3,27 +3,49 @@
 
 #include <Core/Prerequisites.h>
 #include <Core/Singleton.h>
-#include <Core/DynLib.h>
 
 namespace RcEngine{
 
+class DynLib;
+class IModule;
+class ModuleManager;
 
-class ModuleInfo
+enum ModuleType
+{
+	MT_Render_OpengGL = 0,
+	MT_Render_D3D11,
+	MT_Count
+};
+
+//! Module names for plugin import
+const String ModuleNames[MT_Count] =
+{
+#ifdef _DEBUG
+	"OpenGLRenderSystem_d",
+	"D3D11RenderSystem_d",
+#else
+	"OpenGLRenderSystem",
+	"D3D11RenderSystem",
+#endif
+};
+
+class _ApiExport ModuleInfo
 {
 public:
-	ModuleInfo() {};
-	~ModuleInfo() {};
+	ModuleInfo() : DynLib(nullptr) {}
+
+	String		ModuleName;
+	ModuleType	ModuleType;
+	IModule*	ModuleSystem;
 
 private:
-	//bool operator == (const ModuleInfo &other) const;
+	DynLib*		DynLib;
+
+	// Can't copy
 	ModuleInfo &operator = (const ModuleInfo &other);
 	ModuleInfo(const ModuleInfo &other);
-		
-public:
-	String mModuleName;
-	IModule* mModuleSystem;
-	ModuleType mModuleType;
-	DynLib* mDynLib;
+
+	friend class ModuleManager;
 };
 
 class _ApiExport ModuleManager : public Singleton<ModuleManager>

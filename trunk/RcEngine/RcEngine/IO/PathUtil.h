@@ -1,11 +1,9 @@
 #ifndef PathUtil_h__
 #define PathUtil_h__
 
-
 #include <Core/Prerequisites.h>
 
 namespace RcEngine {
-
 
 class _ApiExport PathUtil
 {

@@ -2,6 +2,7 @@
 #define Resource_h__
 
 #include <Core/Prerequisites.h>
+#include <mutex>
 
 namespace RcEngine {
 
@@ -77,7 +78,7 @@ protected:
 	ResourceHandle mResourceHandle;
 	ResourceTypes mResourceType;
 
-	fast_mutex mMutex; 
+	std::mutex mMutex; 
 };
 
 }

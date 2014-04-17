@@ -1,10 +1,8 @@
 #ifndef StreamWriter_h__
 #define StreamWriter_h__
 
-#include "Core/Prerequisites.h"
-#include "Core/Singleton.h"
-
-
+#include <Core/Prerequisites.h>
+#include <Core/Singleton.h>
 
 namespace RcEngine {
 

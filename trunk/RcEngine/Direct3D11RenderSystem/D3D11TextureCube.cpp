@@ -37,8 +37,8 @@ D3D11TextureCube::D3D11TextureCube( PixelFormat format, uint32_t arraySize, uint
 	if (mCreateFlags & TexCreate_RenderTarget)
 		texDesc.BindFlags |= D3D11_BIND_RENDER_TARGET;
 
-	//HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateTexture2D( &texDesc, NULL, &TextureD3D11);
-	D3D11_VERRY(gD3D11Device->GetDeviceD3D11()->CreateTexture2D( &texDesc, NULL, &TextureD3D11));
+	//HRESULT hr = gD3D11Device->DeviceD3D11->CreateTexture2D( &texDesc, NULL, &TextureD3D11);
+	D3D11_VERRY(gD3D11Device->DeviceD3D11->CreateTexture2D( &texDesc, NULL, &TextureD3D11));
 
 	/*if (CreateFlags & TexCreate_ShaderResource)
 	{

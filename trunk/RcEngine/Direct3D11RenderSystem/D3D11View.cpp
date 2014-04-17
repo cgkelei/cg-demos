@@ -36,7 +36,7 @@ D3D11StructuredBufferSRV::D3D11StructuredBufferSRV( const shared_ptr<RHBuffer>& 
 	desc.Buffer.ElementWidth = elementCount;
 
 	ID3D11Buffer* bufferD3D11 = (static_cast<D3D11Buffer*>(buffer.get()))->BufferD3D11;
-	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(bufferD3D11, &desc, &ShaderResourceViewD3D11);
+	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(bufferD3D11, &desc, &ShaderResourceViewD3D11);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ D3D11TextureBufferSRV::D3D11TextureBufferSRV( const shared_ptr<RHBuffer>& buffer
 	//assert(PixelFormatUtils::GetNumElemBytes(format) * elementCount == buffer->GetBufferSize());
 
 	ID3D11Buffer* bufferD3D11 = (static_cast<D3D11Buffer*>(buffer.get()))->BufferD3D11;
-	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(bufferD3D11, &desc, &ShaderResourceViewD3D11);
+	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(bufferD3D11, &desc, &ShaderResourceViewD3D11);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ D3D11Texture1DSRV::D3D11Texture1DSRV( const shared_ptr<RHTexture>& texture, uint
 		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1DARRAY;
 	}
 
-	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
+	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -141,7 +141,7 @@ D3D11Texture2DSRV::D3D11Texture2DSRV( const shared_ptr<RHTexture>& texture, uint
 		}
 	}
 
-	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
+	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -158,7 +158,7 @@ D3D11Texture3DSRV::D3D11Texture3DSRV( const shared_ptr<RHTexture>& texture, uint
 	viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
 
 	D3D11Texture3D* textureD3D11 = static_cast_checked<D3D11Texture3D*>(texture.get());
-	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
+	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
 }
 
 
@@ -189,7 +189,7 @@ D3D11Texture3DSRV::D3D11Texture3DSRV( const shared_ptr<RHTexture>& texture, uint
 //		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1DARRAY;
 //	}
 //
-//	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
+//	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
 //	
 //	return SUCCEEDED(hr);
 //}
@@ -238,7 +238,7 @@ D3D11Texture3DSRV::D3D11Texture3DSRV( const shared_ptr<RHTexture>& texture, uint
 //		}
 //	}
 //
-//	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
+//	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
 //	return SUCCEEDED(hr);
 //}
 //
@@ -256,7 +256,7 @@ D3D11Texture3DSRV::D3D11Texture3DSRV( const shared_ptr<RHTexture>& texture, uint
 //	viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
 //
 //	D3D11Texture3D* textureD3D11 = static_cast_checked<D3D11Texture3D*>(texture.get());
-//	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
+//	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
 //	return SUCCEEDED(hr);
 //}
 //
@@ -289,7 +289,7 @@ D3D11Texture3DSRV::D3D11Texture3DSRV( const shared_ptr<RHTexture>& texture, uint
 //		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBEARRAY;
 //	}
 //
-//	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
+//	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, pTextureSRV);
 //	return SUCCEEDED(hr);
 //}
 
@@ -338,7 +338,7 @@ D3D11TextureBufferUAV::D3D11TextureBufferUAV( const shared_ptr<RHBuffer>& buffer
 	//desc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_APPEND;
 
 	ID3D11Buffer* bufferD3D11 = (static_cast<D3D11Buffer*>(buffer.get()))->BufferD3D11;
-	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateUnorderedAccessView(bufferD3D11, &desc, &UnorderedAccessViewD3D11);
+	HRESULT hr = gD3D11Device->DeviceD3D11->CreateUnorderedAccessView(bufferD3D11, &desc, &UnorderedAccessViewD3D11);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -359,7 +359,7 @@ D3D11StructuredBufferUAV::D3D11StructuredBufferUAV( const shared_ptr<RHBuffer>& 
 	//desc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_APPEND;
 
 	ID3D11Buffer* bufferD3D11 = (static_cast<D3D11Buffer*>(buffer.get()))->BufferD3D11;
-	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateUnorderedAccessView(bufferD3D11, &desc, &UnorderedAccessViewD3D11);
+	HRESULT hr = gD3D11Device->DeviceD3D11->CreateUnorderedAccessView(bufferD3D11, &desc, &UnorderedAccessViewD3D11);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -379,7 +379,7 @@ D3D11StructuredBufferUAV::D3D11StructuredBufferUAV( const shared_ptr<RHBuffer>& 
 //	desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
 //	desc.Texture2D.MipSlice = level;
 //
-//	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateUnorderedAccessView(textureD3D11->TextureD3D11, &desc, &UnorderedAccessViewD3D11);
+//	HRESULT hr = gD3D11Device->DeviceD3D11->CreateUnorderedAccessView(textureD3D11->TextureD3D11, &desc, &UnorderedAccessViewD3D11);
 //}
 
 D3D11Texture1DUAV::D3D11Texture1DUAV( const shared_ptr<RHTexture>& texture, uint32_t mipSlice, uint32_t firstArraySlice, uint32_t arraySize )
@@ -406,7 +406,7 @@ D3D11Texture1DUAV::D3D11Texture1DUAV( const shared_ptr<RHTexture>& texture, uint
 		viewDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE1DARRAY;
 	}
 
-	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateUnorderedAccessView(textureD3D11->TextureD3D11, &viewDesc, &UnorderedAccessViewD3D11);
+	HRESULT hr = gD3D11Device->DeviceD3D11->CreateUnorderedAccessView(textureD3D11->TextureD3D11, &viewDesc, &UnorderedAccessViewD3D11);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -435,26 +435,26 @@ D3D11Texture2DUAV::D3D11Texture2DUAV( const shared_ptr<RHTexture>& texture, uint
 		viewDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
 	}
 
-	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateUnorderedAccessView(textureD3D11->TextureD3D11, &viewDesc, &UnorderedAccessViewD3D11);
+	HRESULT hr = gD3D11Device->DeviceD3D11->CreateUnorderedAccessView(textureD3D11->TextureD3D11, &viewDesc, &UnorderedAccessViewD3D11);
 }
 
 //////////////////////////////////////////////////////////////////////////
-D3D11Texture3DUAV::D3D11Texture3DUAV( const shared_ptr<RHTexture>& texture, uint32_t mipSlice, uint32_t firstWSlice, uint32_t wSize )
-	: D3D11TextureUAV(texture)
-{
-	uint32_t createFlags = texture->GetCreateFlags();
-	assert(createFlags & TexCreate_UAV);
-
-	D3D11_UNORDERED_ACCESS_VIEW_DESC viewDesc;
-	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
-	viewDesc.Texture3D.FirstWSlice = firstWSlice;
-	viewDesc.Texture3D.WSize = wSize;
-	viewDesc.Texture3D.MipSlice = mipSlice;
-	viewDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE3D;
-
-	D3D11Texture3D* textureD3D11 = static_cast_checked<D3D11Texture3D*>(texture.get());
-	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateUnorderedAccessView(textureD3D11->TextureD3D11, &viewDesc, &UnorderedAccessViewD3D11);
-}
+//D3D11Texture3DUAV::D3D11Texture3DUAV( const shared_ptr<RHTexture>& texture, uint32_t mipSlice, uint32_t firstWSlice, uint32_t wSize )
+//	: D3D11TextureUAV(texture)
+//{
+//	uint32_t createFlags = texture->GetCreateFlags();
+//	assert(createFlags & TexCreate_UAV);
+//
+//	D3D11_UNORDERED_ACCESS_VIEW_DESC viewDesc;
+//	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
+//	viewDesc.Texture3D.FirstWSlice = firstWSlice;
+//	viewDesc.Texture3D.WSize = wSize;
+//	viewDesc.Texture3D.MipSlice = mipSlice;
+//	viewDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE3D;
+//
+//	D3D11Texture3D* textureD3D11 = static_cast_checked<D3D11Texture3D*>(texture.get());
+//	HRESULT hr = gD3D11Device->DeviceD3D11->CreateUnorderedAccessView(textureD3D11->TextureD3D11, &viewDesc, &UnorderedAccessViewD3D11);
+//}
 
 //D3D11TextureCubeSRV::D3D11TextureCubeSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
 //	: D3D11TextureSRV(texture)
@@ -486,7 +486,7 @@ D3D11Texture3DUAV::D3D11Texture3DUAV( const shared_ptr<RHTexture>& texture, uint
 //		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBEARRAY;
 //	}
 //
-//	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
+//	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
 //}
 
 }

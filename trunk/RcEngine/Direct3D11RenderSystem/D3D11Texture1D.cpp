@@ -4,7 +4,6 @@
 
 namespace RcEngine {
 
-
 D3D11Texture1D::D3D11Texture1D( PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t width, uint32_t accessHint, uint32_t flags, ElementInitData* initData )
 	: D3D11Texture(TT_Texture1D, format, arraySize, numMipMaps, 1, 0, accessHint, flags),
 	  TextureD3D11(nullptr)
@@ -52,10 +51,10 @@ D3D11Texture1D::D3D11Texture1D( PixelFormat format, uint32_t arraySize, uint32_t
 			}
 		}
 
-		D3D11_VERRY(gD3D11Device->GetDeviceD3D11()->CreateTexture1D( &texDesc, &subResourceData[0], &TextureD3D11));
+		D3D11_VERRY(gD3D11Device->DeviceD3D11->CreateTexture1D( &texDesc, &subResourceData[0], &TextureD3D11));
 	}
 	else 
-		D3D11_VERRY(gD3D11Device->GetDeviceD3D11()->CreateTexture1D( &texDesc, NULL, &TextureD3D11));
+		D3D11_VERRY(gD3D11Device->DeviceD3D11->CreateTexture1D( &texDesc, NULL, &TextureD3D11));
 
 
 	/*if (mCreateFlags & TexCreate_ShaderResource)

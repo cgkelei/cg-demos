@@ -5,16 +5,6 @@
 
 namespace RcEngine {
 
-class _ApiExport IRenderModule : public IModule
-{
-protected:
-	IRenderModule();
-
-public:
-	virtual ~IRenderModule();
-
-	virtual RHDevice* GetRenderDevice() = 0;
-};
 
 
 } // Namespace RcEngine

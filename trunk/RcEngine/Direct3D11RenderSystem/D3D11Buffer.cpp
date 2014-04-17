@@ -47,7 +47,7 @@ D3D11Buffer::D3D11Buffer( uint32_t bufferSize, uint32_t accessHint, uint32_t fla
 	}
 
 	HRESULT hr;
-	ID3D11Device* deviceD3D11 = gD3D11Device->GetDeviceD3D11();
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
 	if (initData)
 	{
 		D3D11_SUBRESOURCE_DATA subData;

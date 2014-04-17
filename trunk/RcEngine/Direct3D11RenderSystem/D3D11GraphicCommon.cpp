@@ -123,8 +123,6 @@ DXGI_FORMAT D3D11Mapping::Mapping( PixelFormat inPixelFormat )
 		return DXGI_FORMAT_D24_UNORM_S8_UINT;
 	case RcEngine::PF_Depth32:
 		return DXGI_FORMAT_D32_FLOAT;
-	case RcEngine::PF_Count:
-		break;
 	default:
 		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid PixelFormat", "D3D11Mapping::Mapping");
 	}
@@ -333,6 +331,27 @@ uint32_t D3D11Mapping::Mapping( uint32_t bufferCreateFlags )
 	}
 
 	return bindFlag;
+}
+
+DXGI_FORMAT D3D11Mapping::Mapping( VertexElementFormat format )
+{
+	switch (format)
+	{
+	case VEF_Float: return DXGI_FORMAT_R32_FLOAT;
+	case VEF_Float2: return DXGI_FORMAT_R32G32_FLOAT;
+	case VEF_Float3: return DXGI_FORMAT_R32G32B32_FLOAT;
+	case VEF_Float4: return DXGI_FORMAT_R32G32B32A32_FLOAT;
+	case VEF_Int: return DXGI_FORMAT_R32_SINT;
+	case VEF_Int2: return DXGI_FORMAT_R32G32_SINT;
+	case VEF_Int3: return DXGI_FORMAT_R32G32B32_SINT;
+	case VEF_Int4: return DXGI_FORMAT_R32G32B32A32_SINT;
+	case VEF_UInt: return DXGI_FORMAT_R32_UINT;
+	case VEF_UInt2: return DXGI_FORMAT_R32G32_UINT;
+	case VEF_UInt3: return DXGI_FORMAT_R32G32B32_UINT;
+	case VEF_UInt4: return DXGI_FORMAT_R32G32B32A32_UINT;
+	default:
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid VertexElementFormat", "D3D11Mapping::Mapping");
+	}
 }
 
 

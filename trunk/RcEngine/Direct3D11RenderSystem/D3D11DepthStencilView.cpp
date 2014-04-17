@@ -6,6 +6,12 @@
 
 namespace RcEngine {
 
+	D3D11DepthStencilView::D3D11DepthStencilView( ID3D11DepthStencilView* dsv )
+	: RHRenderView(nullptr),
+	  DepthStencilViewD3D11(dsv)
+{
+
+}
 
 D3D11DepthStencilView::D3D11DepthStencilView( const shared_ptr<RHTexture>& texture, uint32_t arrIndex, uint32_t level )
 	: RHRenderView(texture),
@@ -48,7 +54,7 @@ D3D11DepthStencilView::D3D11DepthStencilView( const shared_ptr<RHTexture>& textu
 	}
 
 	ID3D11Texture2D* textureD3D11 = (static_cast<D3D11Texture2D*>(texture.get()))->TextureD3D11;
-	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateDepthStencilView(textureD3D11, &viewDesc, &DepthStencilViewD3D11);
+	HRESULT hr = gD3D11Device->DeviceD3D11->CreateDepthStencilView(textureD3D11, &viewDesc, &DepthStencilViewD3D11);
 	//D3D11_VERRY(g_pd3dDevice->CreateDepthStencilView(mTextureD3D11.GetTexture(), &viewDesc, &mDepthStencilView));
 }
 
@@ -64,19 +70,19 @@ void D3D11DepthStencilView::ClearColor( const ColorRGBA& clr )
 
 void D3D11DepthStencilView::ClearDepth( float depth )
 {
-	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->GetDeviceContextD3D11();
+	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
 	deviceContextD3D11->ClearDepthStencilView(DepthStencilViewD3D11, D3D11_CLEAR_DEPTH, depth, 0);
 }
 
 void D3D11DepthStencilView::ClearStencil( uint32_t stencil )
 {
-	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->GetDeviceContextD3D11();
+	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
 	deviceContextD3D11->ClearDepthStencilView(DepthStencilViewD3D11, D3D11_CLEAR_STENCIL, 0.0f, stencil);
 }
 
 void D3D11DepthStencilView::ClearDepthStencil( float depth, uint32_t stencil )
 {
-	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->GetDeviceContextD3D11();
+	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
 	deviceContextD3D11->ClearDepthStencilView(DepthStencilViewD3D11, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
 }
 

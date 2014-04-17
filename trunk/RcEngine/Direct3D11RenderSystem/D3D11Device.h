@@ -12,11 +12,8 @@ extern D3D11Device* gD3D11Device;
 class _D3D11Export D3D11Device : public RHDevice
 {
 public:
-	D3D11Device(const RenderSettings& settings);
+	D3D11Device();
 	~D3D11Device();
-
-	inline ID3D11Device* GetDeviceD3D11() const { return mDevice; }
-	inline ID3D11DeviceContext* GetDeviceContextD3D11() const { return mDeviceContext; }
 
 	void ToggleFullscreen(bool fs);
 	void AdjustProjectionMatrix(float4x4& pOut);
@@ -27,13 +24,16 @@ public:
 
 protected:
 	void SetViewport(const RHViewport& vp);
+	void DoDraw(const RHOperation& operation);
 	//void DoRender( EffectTechnique& tech, RenderOperation& op );
 
+	void CreateRenderWindow();
 
-private:
-	ID3D11DeviceContext* mDeviceContext;
-	ID3D11Device* mDevice;
+public:
+	ID3D11DeviceContext* DeviceContextD3D11;
+	ID3D11Device* DeviceD3D11;
 	
+private:
 	typedef std::pair<ShaderType, uint32_t> SamplerSlot;
 	std::map<SamplerSlot, shared_ptr<RHSamplerState>> mCurrentSamplers;
 };

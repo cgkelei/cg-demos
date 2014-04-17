@@ -24,9 +24,19 @@ RHTexture::RHTexture( TextureType type, PixelFormat format, uint32_t numMipMaps,
 	  mMipLevels(numMipMaps),
 	  mAccessHint(accessHint),
 	  mCreateFlags(flags),
-	  mTextureArraySize(0)
+	  mTextureArraySize(1)
 {
 
+}
+
+uint32_t RHTexture::CalculateMipmapLevels( uint32_t n )
+{
+	//return int(ceil( log( float(_n) ) / log( 2.f ) )) + 1;
+	//return uint32_t(1.0 + floor(log(float(n)/log(2.f))));
+
+	uint32_t levels = 1;
+	while (n >> levels) levels++;
+	return levels;
 }
 
 

@@ -2,7 +2,7 @@
 #define OpenGLShaderResourceView_h__
 
 #include "OpenGLPrerequisites.h"
-#include <Graphics/RHView.h>
+#include <Graphics/RHResource.h>
 
 namespace RcEngine {
 
@@ -130,7 +130,7 @@ protected:
 class _OpenGLExport OpenGLTextureUAV : public OpenGLUnorderedAccessView
 {
 public:
-	OpenGLTextureUAV(const shared_ptr<RHTexture>& texture);
+	OpenGLTextureUAV(const shared_ptr<RHTexture>& texture, uint32_t mipSlice, uint32_t firstArraySlice, uint32_t arraySize);
 	virtual ~OpenGLTextureUAV();
 
 	virtual void BindUAV(GLuint unit);
@@ -138,9 +138,13 @@ public:
 protected:
 	shared_ptr<RHTexture> mTexture;
 
-	GLenum mTextureOGL;
-	GLenum mTextureTargetOGL;
-	bool mNeedDelete;
+	GLuint mTextureOGL;
+	GLenum mFormatOGL;
+
+	uint32_t mLevel;
+	uint32_t mFirstLayer;
+	uint32_t mNumLayers;
+	GLboolean mNeedDelete;
 };
 
 }

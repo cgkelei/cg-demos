@@ -14,9 +14,10 @@
 //#include <Graphics/Effect.h>
 //#include <Graphics/EffectPass.h>
 #include <Graphics/RHOperation.h>
+#include <MainApp/Application.h>
 #include <Core/Exception.h>
-//#include <Core/Context.h>
 #include <Math/MathUtil.h>
+
 
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
@@ -24,9 +25,8 @@ namespace RcEngine {
 
 OpenGLDevice* gOpenGLDevice = NULL;
 
-OpenGLDevice::OpenGLDevice( const RenderSettings& settings )
-	: RHDevice(settings), 
-	  mViewportTop(0), 
+OpenGLDevice::OpenGLDevice()
+	: mViewportTop(0), 
 	  mViewportLeft(0),
 	  mViewportWidth(0),
 	  mViewportHeight(0),
@@ -36,7 +36,6 @@ OpenGLDevice::OpenGLDevice( const RenderSettings& settings )
 	mBlitFBO[0] = mBlitFBO[1] = 0; 
 
 	mRenderFactory = new OpenGLFactory();
-	/*Context::GetSingleton().SetRenderFactory(mRenderFactory);*/
 }
 
 OpenGLDevice::~OpenGLDevice(void)
@@ -49,15 +48,17 @@ OpenGLDevice::~OpenGLDevice(void)
 
 void OpenGLDevice::CreateRenderWindow()
 {
-	mScreenFrameBuffer = std::make_shared<OpenGLRenderWindow>(mRenderSettings);
+	const ApplicationSettings& appSettings = Application::msApp->GetAppSettings();
+
+	mScreenFrameBuffer = std::make_shared<OpenGLRenderWindow>();
 	
 	BindFrameBuffer(mScreenFrameBuffer);
-	
-	mScreenFrameBuffer->Attach(ATT_Color0, std::make_shared<OpenGLScreenRenderTargetView2D>());
-	//if(mScreenFrameBuffer->IsDepthBuffered())
+
+	mScreenFrameBuffer->AttachRTV(ATT_Color0, std::make_shared<OpenGLScreenRenderTargetView2D>());
+	if(PixelFormatUtils::IsDepth(appSettings.DepthStencilFormat))
 	{
-		mScreenFrameBuffer->Attach(ATT_DepthStencil,
-			std::make_shared<OpenGLScreenDepthStencilView>(mRenderSettings.DepthStencilFormat));
+		// Have depth buffer, attach it
+		mScreenFrameBuffer->AttachRTV(ATT_DepthStencil, std::make_shared<OpenGLScreenDepthStencilView>(appSettings.DepthStencilFormat));
 	}
 
 	//Create default render state
@@ -523,6 +524,11 @@ void OpenGLDevice::DoDraw(const RHOperation& operation)
 				glDrawArraysInstanced(primitiveTypeOGL, operation.mVertexStart, operation.mVertexCount, operation.mNumInstances);
 		}
 	}
+}
+
+void OpenGLDevice::SetupIndexBuffer( const RHOperation& operation )
+{
+
 }
 
 

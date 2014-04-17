@@ -1,13 +1,14 @@
 #include "OpenGLFrameBuffer.h"
 #include "OpenGLDevice.h"
+#include "OpenGLView.h"
 #include <Graphics/RHState.h>
 #include <Core/Exception.h>
 //#include <Core/Context.h>
 
 namespace RcEngine {
 
-OpenGLFrameBuffer::OpenGLFrameBuffer( uint32_t width, uint32_t height, bool offscreen /*= true*/ )
-	: RHFrameBuffer(width, height, offscreen)
+OpenGLFrameBuffer::OpenGLFrameBuffer( bool offscreen /*= true*/ )
+	: RHFrameBuffer(offscreen)
 {
 	if (mOffscreen)
 		glGenFramebuffers(1, &mFrameBufferOGL);
@@ -42,15 +43,23 @@ void OpenGLFrameBuffer::OnBind()
 
 	if (mUnorderedAccessViews.size())
 	{
-
+		for (size_t i = 0; i < mUnorderedAccessViews.size(); ++i)
+		{
+			if (mUnorderedAccessViews[i])
+			{
+				OpenGLUnorderedAccessView* pOpenGLUAV = static_cast_checked<OpenGLUnorderedAccessView*>(mUnorderedAccessViews[i].get());
+				pOpenGLUAV->BindUAV(i);
+			}
+		}
 	}
 
-
+	mDirty = false;
 	OGL_ERROR_CHECK();
 }
 
 void OpenGLFrameBuffer::OnUnbind()
 {
+	mDirty = true;
 }
 
 void OpenGLFrameBuffer::SwapBuffers()

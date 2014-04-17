@@ -29,9 +29,6 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="D3D11RenderModule.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="D3D11GraphicCommon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -62,11 +59,14 @@
     <ClInclude Include="D3D11Factory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="D3D11RenderWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D11Module.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="D3D11RenderModule.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="D3D11Texture1D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -113,6 +113,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="D3D11Factory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D11RenderWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D11Module.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

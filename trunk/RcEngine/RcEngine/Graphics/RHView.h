@@ -7,17 +7,7 @@
 
 namespace RcEngine {
 
-class _ApiExport RHShaderResourceView
-{
-public:
-	virtual ~RHShaderResourceView() {}
-};
 
-class _ApiExport RHUnorderedAccessView 
-{
-public:
-	virtual ~RHUnorderedAccessView() {}
-};
 
 }
 

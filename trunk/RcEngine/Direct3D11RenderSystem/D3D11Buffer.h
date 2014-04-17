@@ -7,7 +7,7 @@
 
 namespace RcEngine {
 
-class D3D11Buffer : public RHBuffer
+class _D3D11Export D3D11Buffer : public RHBuffer
 {
 public:
 	D3D11Buffer(uint32_t bufferSize, uint32_t accessHint, uint32_t flags, uint32_t structSize, ElementInitData* initData);

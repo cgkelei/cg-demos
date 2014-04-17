@@ -1,12 +1,82 @@
 #include <Core/ModuleManager.h>
 #include <Core/Utility.h>
 #include <Core/IModule.h>
+#include <Core/Exception.h>
+#include <windows.h>
 
 namespace RcEngine{
 
+typedef void (*DLL_START_PLUGIN)(IModule** pModule);
+
+class DynLib
+{
+public:
+	DynLib(const String& name) : mName(name) {}
+	~DynLib() { Unload(); }
+
+	const String& GetName() const { return mName; }
+
+	void Load()
+	{
+		String name = mName;
+		if (name.substr(name.length() - 4, 4) != ".dll")
+			name += ".dll";
+
+		std::wstring wname;
+		Convert(wname, name);
+		m_hInst = (HINSTANCE)LoadLibraryEx(wname.c_str(), 0,  LOAD_WITH_ALTERED_SEARCH_PATH );
+		if (!m_hInst)
+		{
+			LPVOID lpMsgBuf; 
+			FormatMessage( 
+				FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+				FORMAT_MESSAGE_FROM_SYSTEM | 
+				FORMAT_MESSAGE_IGNORE_INSERTS, 
+				NULL, 
+				GetLastError(), 
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), 
+				(LPTSTR) &lpMsgBuf, 
+				0, 
+				NULL 
+				); 
+			
+			fprintf(stderr, "%s\n", (char*)lpMsgBuf);
+
+			// Free the buffer.
+			LocalFree( lpMsgBuf );
+
+
+			String error = "Load " + name + " failed!";
+			ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND,  error, "DynLib::Load");
+		}
+	}
+
+	void Unload()
+	{
+		if (m_hInst)
+		{
+			FreeLibrary(m_hInst);
+			m_hInst = 0;
+		}
+	}
+
+	void* GetSymbol( const String& strName ) const throw()
+	{
+		return (void*)GetProcAddress(m_hInst, strName.c_str());
+	}
+
+	std::string DynLibError()
+	{
+
+	}
+
+private:
+	String mName;
+	HINSTANCE m_hInst;
+};
+
+//////////////////////////////////////////////////////////////////////////
 SINGLETON_DECL(ModuleManager)
-
-
 
 ModuleManager::ModuleManager(void)
 {
@@ -17,18 +87,19 @@ ModuleManager::~ModuleManager(void)
 	UnloadAll();
 }
 
-
 bool ModuleManager::Load(const String& name, ModuleType modType)
 {
 	ModuleInfo* info = GetMoudleInfoByName(name);
 	if(!info)
 	{
 		info = new ModuleInfo();
-		info->mModuleName = name;
-		info->mModuleType = modType;
-		info->mDynLib = new DynLib(name);
-		DLL_START_PLUGIN pFunc = (DLL_START_PLUGIN)info->mDynLib->GetSymbol("dllStartPlugin");
-		pFunc(&info->mModuleSystem);
+		info->ModuleName = name;
+		info->ModuleType = modType;
+		info->DynLib = new DynLib(name);
+		DLL_START_PLUGIN pFunc = (DLL_START_PLUGIN)info->DynLib->GetSymbol("dllStartPlugin");
+		pFunc(&info->ModuleSystem);
+
+		info->ModuleSystem->Initialise();
 		mMoudles.push_back(info);
 	}
 	return true;
@@ -40,12 +111,14 @@ bool ModuleManager::Load( ModuleType modType )
 	if(!info)
 	{
 		info = new ModuleInfo();
-		info->mModuleName = ModuleNames[modType];
-		info->mModuleType = modType;
-		info->mDynLib = new DynLib(ModuleNames[modType]);
-		info->mDynLib->Load();
-		DLL_START_PLUGIN pFunc = (DLL_START_PLUGIN)info->mDynLib->GetSymbol("dllStartPlugin");
-		pFunc(&info->mModuleSystem);
+		info->ModuleName = ModuleNames[modType];
+		info->ModuleType = modType;
+		info->DynLib = new DynLib(ModuleNames[modType]);
+		info->DynLib->Load();
+		DLL_START_PLUGIN pFunc = (DLL_START_PLUGIN)info->DynLib->GetSymbol("dllStartPlugin");
+		pFunc(&info->ModuleSystem);
+
+		info->ModuleSystem->Initialise();
 		mMoudles.push_back(info);
 	}
 	return true;
@@ -61,13 +134,15 @@ bool ModuleManager::Unload( ModuleType modType )
 	return true;
 }
 
-void ModuleManager::Unload( ModuleInfo* info )
+void ModuleManager::Unload( ModuleInfo* module )
 {
-	assert(info);
-	DLL_START_PLUGIN pFunc = (DLL_START_PLUGIN)info->mDynLib->GetSymbol("dllStopPlugin");
-	pFunc(&info->mModuleSystem);
-	info->mDynLib->Unload();
-	delete info->mDynLib;
+	assert(module);
+	module->ModuleSystem->Shutdown();
+
+	DLL_START_PLUGIN pFunc = (DLL_START_PLUGIN)module->DynLib->GetSymbol("dllStopPlugin");
+	pFunc(&module->ModuleSystem);
+	module->DynLib->Unload();
+	delete module->DynLib;
 }
 
 bool ModuleManager::LoadAll()
@@ -77,74 +152,80 @@ bool ModuleManager::LoadAll()
 
 bool ModuleManager::UnloadAll()
 {
-	for (auto iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
+	for (ModuleInfo* moudleInfo : mMoudles)
 	{
-		(*iter)->mModuleSystem->Shutdown();
-		Unload(*iter);
-		delete *iter;
+		Unload(moudleInfo);
+		delete moudleInfo;
 	}
+
 	mMoudles.clear();
 	return true;
 }
 
-bool ModuleManager::HasMoudle( const String& strModule )
+bool ModuleManager::HasMoudle( const String& name )
 {
-	for(auto iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
+	for (ModuleInfo* moudleInfo : mMoudles)
 	{
-		if((*iter)->mModuleName == strModule)
+		if(moudleInfo->ModuleName == name)
 			return true;
 	}
+
 	return false;
 }
 
 bool ModuleManager::HasModule( ModuleType modType )
 {
-	for(auto iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
+	for (ModuleInfo* moudleInfo : mMoudles)
 	{
-		if((*iter)->mModuleType == modType)
+		if(moudleInfo->ModuleType == modType)
 			return true;
 	}
+
 	return false;
 }
 
-IModule* ModuleManager::GetModuleByName( const String &strModule )
+IModule* ModuleManager::GetModuleByName( const String& moudleName )
 {
-	for(auto iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
+	for (ModuleInfo* moudleInfo : mMoudles)
 	{
-		if((*iter)->mModuleName == strModule)
-			return (*iter)->mModuleSystem;
+		if(moudleInfo->ModuleName == moudleName)
+			return moudleInfo->ModuleSystem;
 	}
-	return 0;
+
+	return nullptr;
 }
 
-IModule* ModuleManager::GetMoudleByType( ModuleType modType )
+IModule* ModuleManager::GetMoudleByType( ModuleType moudleTpye )
 {
-	for(auto iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
+	for (ModuleInfo* moudleInfo : mMoudles)
 	{
-		if((*iter)->mModuleType == modType)
-			return (*iter)->mModuleSystem;
+		if(moudleInfo->ModuleType == moudleTpye)
+			return moudleInfo->ModuleSystem;
 	}
-	return 0;
+
+	return nullptr;
 }
 
-ModuleInfo* ModuleManager::GetMoudleInfoByName( const String &strModule )
+ModuleInfo* ModuleManager::GetMoudleInfoByName( const String &moudleName )
 {
-	for(auto iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
+	for (ModuleInfo* moudleInfo : mMoudles)
 	{
-		if((*iter)->mModuleName == strModule)
-			return (*iter);
+		if(moudleInfo->ModuleName == moudleName)
+			return moudleInfo;
 	}
-	return 0;
+
+	return nullptr;
 }
 
-ModuleInfo* ModuleManager::GetMoudleInfoByType( ModuleType modType )
+ModuleInfo* ModuleManager::GetMoudleInfoByType( ModuleType moudleTpye )
 {
-	for(auto iter = mMoudles.begin(); iter != mMoudles.end(); ++iter)
+	for (ModuleInfo* moudleInfo : mMoudles)
 	{
-		if((*iter)->mModuleType == modType)
-			return (*iter);
+		if(moudleInfo->ModuleType == moudleTpye)
+			return moudleInfo;
 	}
-	return 0;
+
+	return nullptr;
 }
 
 

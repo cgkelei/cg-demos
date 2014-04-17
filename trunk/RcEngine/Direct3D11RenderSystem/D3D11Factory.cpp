@@ -5,6 +5,7 @@
 #include "D3D11View.h"
 #include "D3D11Shader.h"
 #include "D3D11State.h"
+#include "D3D11VertexDeclaration.h"
 #include <Core/Exception.h>
 
 namespace RcEngine {
@@ -86,54 +87,84 @@ shared_ptr<RHShader> D3D11Factory::CreateShader( ShaderType type )
 	}
 }
 
-shared_ptr<RHBufferSRV> D3D11Factory::CreateStructuredBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount )
+shared_ptr<RHShaderResourceView> D3D11Factory::CreateStructuredBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount )
 {
-	return shared_ptr<RHBufferSRV>( new D3D11StructuredBufferSRV(buffer, elementCount) );
+	return shared_ptr<RHShaderResourceView>( new D3D11StructuredBufferSRV(buffer, elementCount) );
 }
 
-shared_ptr<RHBufferSRV> D3D11Factory::CreateTextureBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format )
+shared_ptr<RHShaderResourceView> D3D11Factory::CreateTextureBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format )
 {
-	return shared_ptr<RHBufferSRV>( new D3D11TextureBufferSRV(buffer, elementCount, format) );
+	return shared_ptr<RHShaderResourceView>( new D3D11TextureBufferSRV(buffer, elementCount, format) );
 }
 
-shared_ptr<RHTextureSRV> D3D11Factory::CreateTexture1DSRV( const shared_ptr<RHTexture>& texture )
+shared_ptr<RHShaderResourceView> D3D11Factory::CreateTexture1DSRV( const shared_ptr<RHTexture>& texture )
 {
-	return shared_ptr<RHTextureSRV>( new D3D11Texture1DSRV(texture, 0, texture->GetMipLevels(), 0, texture->GetTextureArraySize()) );
+	return shared_ptr<RHShaderResourceView>( new D3D11Texture1DSRV(texture, 0, texture->GetMipLevels(), 0, texture->GetTextureArraySize()) );
 }
 
-shared_ptr<RHTextureSRV> D3D11Factory::CreateTexture1DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
+shared_ptr<RHShaderResourceView> D3D11Factory::CreateTexture1DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
 {
-	return shared_ptr<RHTextureSRV>( new D3D11Texture1DSRV(texture, mostDetailedMip, mipLevels, firstArraySlice, arraySize) );
+	return shared_ptr<RHShaderResourceView>( new D3D11Texture1DSRV(texture, mostDetailedMip, mipLevels, firstArraySlice, arraySize) );
 }
 
-shared_ptr<RHTextureSRV> D3D11Factory::CreateTexture2DSRV( const shared_ptr<RHTexture>& texture )
+shared_ptr<RHShaderResourceView> D3D11Factory::CreateTexture2DSRV( const shared_ptr<RHTexture>& texture )
 {
-	return shared_ptr<RHTextureSRV>( new D3D11Texture2DSRV(texture, 0, texture->GetMipLevels(), 0, texture->GetTextureArraySize()) );
+	return shared_ptr<RHShaderResourceView>( new D3D11Texture2DSRV(texture, 0, texture->GetMipLevels(), 0, texture->GetTextureArraySize()) );
 }
 
-shared_ptr<RHTextureSRV> D3D11Factory::CreateTexture2DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
+shared_ptr<RHShaderResourceView> D3D11Factory::CreateTexture2DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
 {
-	return shared_ptr<RHTextureSRV>( new D3D11Texture2DSRV(texture, mostDetailedMip, mipLevels, firstArraySlice, arraySize) );
+	return shared_ptr<RHShaderResourceView>( new D3D11Texture2DSRV(texture, mostDetailedMip, mipLevels, firstArraySlice, arraySize) );
 }
 
-shared_ptr<RHTextureSRV> D3D11Factory::CreateTexture3DSRV( const shared_ptr<RHTexture>& texture )
+shared_ptr<RHShaderResourceView> D3D11Factory::CreateTexture3DSRV( const shared_ptr<RHTexture>& texture )
 {
-	return shared_ptr<RHTextureSRV>( new D3D11Texture3DSRV(texture, 0, texture->GetMipLevels()) );
+	return shared_ptr<RHShaderResourceView>( new D3D11Texture3DSRV(texture, 0, texture->GetMipLevels()) );
 }
 
-shared_ptr<RHTextureSRV> D3D11Factory::CreateTextureCubeSRV( const shared_ptr<RHTexture>& texture )
+shared_ptr<RHShaderResourceView> D3D11Factory::CreateTextureCubeSRV( const shared_ptr<RHTexture>& texture )
 {
-	return shared_ptr<RHTextureSRV>( new D3D11TextureCubeSRV(texture, 0, texture->GetMipLevels(), 0, texture->GetTextureArraySize()) );
+	return shared_ptr<RHShaderResourceView>( new D3D11TextureCubeSRV(texture, 0, texture->GetMipLevels(), 0, texture->GetTextureArraySize()) );
 }
 
-shared_ptr<RHBufferUAV> D3D11Factory::CreateStructuredBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount )
+shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateStructuredBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount )
 {
-	return shared_ptr<RHBufferUAV>( new D3D11StructuredBufferUAV(buffer, elementCount) );
+	return shared_ptr<RHUnorderedAccessView>( new D3D11StructuredBufferUAV(buffer, elementCount) );
 }
 
-shared_ptr<RHBufferUAV> D3D11Factory::CreateTextureBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format )
+shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateTextureBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format )
 {
-	return shared_ptr<RHBufferUAV>( new D3D11TextureBufferUAV(buffer, elementCount, format) );
+	return shared_ptr<RHUnorderedAccessView>( new D3D11TextureBufferUAV(buffer, elementCount, format) );
+}
+
+shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateTexture1DUAV( const shared_ptr<RHTexture>& texture )
+{
+	return shared_ptr<RHUnorderedAccessView>( new D3D11Texture1DUAV(texture, 0, 0, texture->GetTextureArraySize()) );
+}
+
+shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateTexture1DUAV( const shared_ptr<RHTexture>& texture, uint32_t level, uint32_t firstArraySlice, uint32_t arraySize )
+{
+	return shared_ptr<RHUnorderedAccessView>( new D3D11Texture1DUAV(texture, level, firstArraySlice, arraySize) );
+}
+
+shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateTexture2DUAV( const shared_ptr<RHTexture>& texture )
+{
+	return shared_ptr<RHUnorderedAccessView>( new D3D11Texture2DUAV(texture, 0, 0, texture->GetTextureArraySize()) );
+}
+
+shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateTexture2DUAV( const shared_ptr<RHTexture>& texture, uint32_t level, uint32_t firstArraySlice, uint32_t arraySize )
+{
+	return shared_ptr<RHUnorderedAccessView>( new D3D11Texture1DUAV(texture, level, firstArraySlice, arraySize) );
+}
+
+shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateTexture3DUAV( const shared_ptr<RHTexture>& texture )
+{
+	ENGINE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, "3D UAV not implemented!", "D3D11Factory::CreateTexture3DUAV");
+}
+
+shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateTextureCubeUAV( const shared_ptr<RHTexture>& texture )
+{
+	ENGINE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, "CubeMap UAV not implemented!", "D3D11Factory::CreateTextureCubeUAV");
 }
 
 shared_ptr<RHRenderView> D3D11Factory::CreateDepthStencilView( const shared_ptr<RHTexture>& texture, uint32_t arrayIndex, uint32_t level )
@@ -170,6 +201,13 @@ shared_ptr<RHDepthStencilState> D3D11Factory::CreateDepthStencilStateImpl( const
 {
 	return shared_ptr<RHDepthStencilState>( new D3D11DepthStencilState(desc) );
 }
+
+shared_ptr<RHVertexDeclaration> D3D11Factory::CreateVertexDeclaration( RHVertexElement* elems, uint32_t count )
+{
+	return shared_ptr<RHVertexDeclaration>( new D3D11VertexDeclaration(elems, count) );
+}
+
+
 
 
 

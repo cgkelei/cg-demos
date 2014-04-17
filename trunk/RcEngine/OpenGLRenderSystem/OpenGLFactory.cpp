@@ -5,6 +5,7 @@
 #include "OpenGLSamplerState.h"
 #include "OpenGLShader.h"
 #include "OpenGLFrameBuffer.h"
+#include "OpenGLVertexDeclaration.h"
 #include <Core/Exception.h>
 #include <Graphics/RHState.h>
 #include "pfm.h"
@@ -89,29 +90,24 @@ shared_ptr<RHTexture> OpenGLFactory::CreateTextureCube( uint32_t width, uint32_t
 		new OpenGLTextureCube(format, arraySize, numMipMaps, width, height, sampleCount, sampleQuality, accessHint, createFlags, initData) );
 }
 
-shared_ptr<RHBufferSRV> OpenGLFactory::CreateTextureBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format )
+shared_ptr<RHShaderResourceView> OpenGLFactory::CreateTextureBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format )
 {
-	return shared_ptr<RHBufferSRV>( new OpenGLTextureBufferSRV(buffer, elementCount, format) );
+	return shared_ptr<RHShaderResourceView>( new OpenGLTextureBufferSRV(buffer, elementCount, format) );
 }
 
-shared_ptr<RHBufferSRV> OpenGLFactory::CreateStructuredBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount )
+shared_ptr<RHShaderResourceView> OpenGLFactory::CreateStructuredBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount )
 {
-	return shared_ptr<RHBufferSRV>( new OpenGLStructuredBufferSRV(buffer, elementCount) );
+	return shared_ptr<RHShaderResourceView>( new OpenGLStructuredBufferSRV(buffer, elementCount) );
 }
 
-shared_ptr<RHTextureUAV> OpenGLFactory::CreateTextureUAV( const shared_ptr<RHTexture>& texture )
+shared_ptr<RHUnorderedAccessView> OpenGLFactory::CreateStructuredBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount )
 {
-	return shared_ptr<RHTextureUAV>( new OpenGLTextureUAV(texture) );
+	return shared_ptr<RHUnorderedAccessView>( new OpenGLStructuredBufferUAV(buffer, elementCount) );
 }
 
-shared_ptr<RHBufferUAV> OpenGLFactory::CreateStructuredBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount )
+shared_ptr<RHUnorderedAccessView> OpenGLFactory::CreateTextureBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format )
 {
-	return shared_ptr<RHBufferUAV>( new OpenGLStructuredBufferUAV(buffer, elementCount) );
-}
-
-shared_ptr<RHBufferUAV> OpenGLFactory::CreateTextureBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format )
-{
-	return shared_ptr<RHBufferUAV>( new OpenGLTextureBufferUAV(buffer, elementCount, format) );
+	return shared_ptr<RHUnorderedAccessView>( new OpenGLTextureBufferUAV(buffer, elementCount, format) );
 }
 
 shared_ptr<RHRenderView> OpenGLFactory::CreateRenderTargetView2D( const shared_ptr<RHTexture>& texture, uint32_t arrayIndex, uint32_t level )
@@ -134,34 +130,69 @@ shared_ptr<RHShader> OpenGLFactory::CreateShader( ShaderType type )
 	return shared_ptr<RHShader>( new OpenGLShader(type) );
 }
 
-shared_ptr<RHTextureSRV> OpenGLFactory::CreateTexture1DSRV( const shared_ptr<RHTexture>& texture )
+shared_ptr<RHShaderResourceView> OpenGLFactory::CreateTexture1DSRV( const shared_ptr<RHTexture>& texture )
 {
-	return shared_ptr<RHTextureSRV>( new OpenGLTextureSRV(texture) );
+	return shared_ptr<RHShaderResourceView>( new OpenGLTextureSRV(texture, 0, texture->GetMipLevels(), 0, texture->GetTextureArraySize()) );
 }
 
-shared_ptr<RHTextureSRV> OpenGLFactory::CreateTexture2DSRV( const shared_ptr<RHTexture>& texture )
+shared_ptr<RHShaderResourceView> OpenGLFactory::CreateTexture2DSRV( const shared_ptr<RHTexture>& texture )
 {
-	return shared_ptr<RHTextureSRV>( new OpenGLTextureSRV(texture) );
+	return shared_ptr<RHShaderResourceView>( new OpenGLTextureSRV(texture, 0, texture->GetMipLevels(), 0, texture->GetTextureArraySize()) );
 }
 
-shared_ptr<RHTextureSRV> OpenGLFactory::CreateTexture3DSRV( const shared_ptr<RHTexture>& texture )
+shared_ptr<RHShaderResourceView> OpenGLFactory::CreateTexture3DSRV( const shared_ptr<RHTexture>& texture )
 {
-	return shared_ptr<RHTextureSRV>( new OpenGLTextureSRV(texture) );
+	return shared_ptr<RHShaderResourceView>( new OpenGLTextureSRV(texture, 0, texture->GetMipLevels(), 0, texture->GetTextureArraySize()) );
 }
 
-shared_ptr<RHTextureSRV> OpenGLFactory::CreateTextureCubeSRV( const shared_ptr<RHTexture>& texture )
+shared_ptr<RHShaderResourceView> OpenGLFactory::CreateTextureCubeSRV( const shared_ptr<RHTexture>& texture )
 {
-	return shared_ptr<RHTextureSRV>( new OpenGLTextureSRV(texture) );
+	return shared_ptr<RHShaderResourceView>( new OpenGLTextureSRV(texture, 0, texture->GetMipLevels(), 0, texture->GetTextureArraySize()) );
 }
 
-shared_ptr<RHTextureSRV> OpenGLFactory::CreateTexture1DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
+shared_ptr<RHShaderResourceView> OpenGLFactory::CreateTexture1DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
 {
-	return shared_ptr<RHTextureSRV>( new OpenGLTextureViewSRV(texture, mostDetailedMip, mipLevels, firstArraySlice, arraySize) );
+	return shared_ptr<RHShaderResourceView>( new OpenGLTextureSRV(texture, mostDetailedMip, mipLevels, firstArraySlice, arraySize) );
 }
 
-shared_ptr<RHTextureSRV> OpenGLFactory::CreateTexture2DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
+shared_ptr<RHShaderResourceView> OpenGLFactory::CreateTexture2DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
 {
-	return shared_ptr<RHTextureSRV>( new OpenGLTextureViewSRV(texture, mostDetailedMip, mipLevels, firstArraySlice, arraySize) );
+	return shared_ptr<RHShaderResourceView>( new OpenGLTextureSRV(texture, mostDetailedMip, mipLevels, firstArraySlice, arraySize) );
+}
+
+shared_ptr<RHUnorderedAccessView> OpenGLFactory::CreateTexture1DUAV( const shared_ptr<RHTexture>& texture )
+{
+	return shared_ptr<RHUnorderedAccessView>( new OpenGLTextureUAV(texture, 0, 0, texture->GetTextureArraySize() ) );
+}
+
+shared_ptr<RHUnorderedAccessView> OpenGLFactory::CreateTexture1DUAV( const shared_ptr<RHTexture>& texture, uint32_t level, uint32_t firstArraySlice, uint32_t arraySize )
+{
+	return shared_ptr<RHUnorderedAccessView>( new OpenGLTextureUAV(texture, level, firstArraySlice, arraySize ) );
+}
+
+shared_ptr<RHUnorderedAccessView> OpenGLFactory::CreateTexture2DUAV( const shared_ptr<RHTexture>& texture )
+{
+	return shared_ptr<RHUnorderedAccessView>( new OpenGLTextureUAV(texture, 0, 0, texture->GetTextureArraySize() ) );
+}
+
+shared_ptr<RHUnorderedAccessView> OpenGLFactory::CreateTexture2DUAV( const shared_ptr<RHTexture>& texture, uint32_t level, uint32_t firstArraySlice, uint32_t arraySize )
+{
+	return shared_ptr<RHUnorderedAccessView>( new OpenGLTextureUAV(texture, level, firstArraySlice, arraySize ) );
+}
+
+shared_ptr<RHUnorderedAccessView> OpenGLFactory::CreateTexture3DUAV( const shared_ptr<RHTexture>& texture )
+{
+	ENGINE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, "3D UAV not implemented!", "OpenGLFactory::CreateTexture3DUAV");
+}
+
+shared_ptr<RHUnorderedAccessView> OpenGLFactory::CreateTextureCubeUAV( const shared_ptr<RHTexture>& texture )
+{
+	ENGINE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, "CubeMap UAV not implemented!", "OpenGLFactory::CreateTextureCubeUAV");
+}
+
+shared_ptr<RHVertexDeclaration> OpenGLFactory::CreateVertexDeclaration( RHVertexElement* elems, uint32_t count )
+{
+	return shared_ptr<RHVertexDeclaration>( new OpenGLVertexDeclaration(elems, count) );
 }
 
 //shared_ptr<ShaderProgram> OpenGLRenderFactory::CreateShaderProgram( Effect& effect )

@@ -560,6 +560,8 @@ GLenum OpenGLMapping::Mapping( uint32_t accessHint )
 	{
 		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid access hint", "D3D11Mapping::MapUsage");
 	}
+
+	return usage;
 }
 
 PixelFormat OpenGLMapping::UnMapping( GLenum internalformat, GLenum format, GLenum type )

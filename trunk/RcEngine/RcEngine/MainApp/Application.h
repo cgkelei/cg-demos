@@ -3,8 +3,7 @@
 
 #include <Core/Prerequisites.h>
 #include <Core/Timer.h>
-#include <Core/Context.h>
-#include <Graphics/RenderSettings.h>
+#include <MainApp/AppSettings.h>
 
 namespace RcEngine {
 
@@ -33,7 +32,8 @@ public:
 	/// </summary>
 	void RunGame();
 
-	Window* GetMainWindow() { return mMainWindow; }
+	inline Window* GetMainWindow() { return mMainWindow; }
+	inline const ApplicationSettings& GetAppSettings() const { return mAppSettings; }
 
 	bool Active() const { return mActice; }
 	
@@ -71,7 +71,7 @@ private:
 	void Tick();
 	void LoadAllModules();
 	void UnloadAllModules();
-	void ReadConfiguration();
+	void LoadConfiguration();
 	void ProcessEventQueue();
 
 	void Window_UserResized();
@@ -97,15 +97,16 @@ protected:
 
 	Timer mTimer;
 
-	RenderSettings mSettings;
+	ApplicationSettings mAppSettings;
 
 	String mAppTitle;
+	String mConfigFile; 
 
 	// in case multiple threads are used
-	volatile bool mEndGame;
+	volatile bool mEndGame;	
 
-	std::string mConfigFile; 
-
+public:
+	static Application* msApp;
 };
 
 } // Namespace RcEngine

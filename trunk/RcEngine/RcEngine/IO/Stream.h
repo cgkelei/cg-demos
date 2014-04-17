@@ -1,7 +1,7 @@
 #ifndef Stream_h__
 #define Stream_h__
 
-#include "Core/Prerequisites.h"
+#include <Core/Prerequisites.h>
 
 namespace RcEngine {
 

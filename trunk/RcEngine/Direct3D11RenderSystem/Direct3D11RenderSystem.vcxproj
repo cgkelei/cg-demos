@@ -51,7 +51,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;D3D11ENGINEDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;D3D11ENGINEDLL_EXPORTS;RcWindows;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>../RcEngine;../3rdParty</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -91,7 +91,8 @@
     <ClInclude Include="D3D11Factory.h" />
     <ClInclude Include="D3D11FrameBuffer.h" />
     <ClInclude Include="D3D11GraphicCommon.h" />
-    <ClInclude Include="D3D11RenderModule.h" />
+    <ClInclude Include="D3D11Module.h" />
+    <ClInclude Include="D3D11RenderWindow.h" />
     <ClInclude Include="D3D11Shader.h" />
     <ClInclude Include="D3D11ShaderProgram.h" />
     <ClInclude Include="D3D11State.h" />
@@ -105,8 +106,9 @@
     <ClCompile Include="D3D11Factory.cpp" />
     <ClCompile Include="D3D11FrameBuffer.cpp" />
     <ClCompile Include="D3D11GraphicCommon.cpp" />
-    <ClCompile Include="D3D11RenderModule.cpp" />
+    <ClCompile Include="D3D11Module.cpp" />
     <ClCompile Include="D3D11RenderTargetView.cpp" />
+    <ClCompile Include="D3D11RenderWindow.cpp" />
     <ClCompile Include="D3D11Shader.cpp" />
     <ClCompile Include="D3D11ShaderProgram.cpp" />
     <ClCompile Include="D3D11State.cpp" />

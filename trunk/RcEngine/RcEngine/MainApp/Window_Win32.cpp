@@ -1,4 +1,5 @@
 #include <MainApp/Window.h>
+#include <MainApp/AppSettings.h>
 #include <Core/Utility.h>
 #include <Core/Exception.h>
 #include <Input/InputEvent.h>
@@ -189,6 +190,7 @@ static void MakeKeyEvent(int vkCode, int lParam, InputEvent& e)
 
 }
 
+//////////////////////////////////////////////////////////////////////////
 namespace RcEngine {
 
 LRESULT CALLBACK Window::WndProcStatic( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
@@ -200,8 +202,11 @@ LRESULT CALLBACK Window::WndProcStatic( HWND hWnd, UINT message, WPARAM wParam, 
 	return 0;
 }
 
-Window::Window( const std::string& title, const RenderSettings& settings )
-	: mName(title), mInSizeMove(false), mMaximized(false), mMinimized(false), mMouseVisible(true)
+Window::Window(const ApplicationSettings& settings )
+	: mInSizeMove(false),
+	  mMaximized(false),
+	  mMinimized(false),
+	  mMouseVisible(true)
 {
 	msWindow = this;
 	mhInstance	= GetModuleHandle(NULL);
@@ -226,7 +231,7 @@ Window::Window( const std::string& title, const RenderSettings& settings )
 	mFullscreen = settings.Fullscreen;
 
 	std::wstring wtitle;
-	Convert(wtitle, title);
+	Convert(wtitle, settings.AppTitle);
 
 	wcex.cbSize			    = sizeof(WNDCLASSEX);
 	wcex.style              = CS_HREDRAW | CS_VREDRAW;

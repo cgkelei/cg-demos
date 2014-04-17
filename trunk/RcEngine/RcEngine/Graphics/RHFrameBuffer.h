@@ -26,9 +26,6 @@ struct _ApiExport RHViewport
 	uint32_t Left, Top, Width, Height;
 };
 
-class RHFrameBuffer;
-class RHUnorderedAccessView;
-
 //////////////////////////////////////////////////////////////////////////
 class _ApiExport RHRenderView
 {
@@ -53,27 +50,30 @@ protected:
 	virtual void OnDetach(RHFrameBuffer& fb, Attachment attr) = 0;
 
 protected:
-	shared_ptr<RHTexture> mTexture; 
+	shared_ptr<RHTexture> mTexture;  // Keep a reference of texture, keep it alive, never use it
 };
 
 //////////////////////////////////////////////////////////////////////////
 class _ApiExport RHFrameBuffer
 {
 public:
-	RHFrameBuffer(uint32_t width, uint32_t height, bool offscreen = true);
+	RHFrameBuffer(bool offscreen = true);
 	virtual ~RHFrameBuffer();
 
-	inline uint32_t GetWidth() const	{ return mViewport.Width; }
-	inline uint32_t GetHeight() const	{ return mViewport.Height; }
 	inline bool IsDirty() const			{ return mDirty; }
 
 	void SetViewport(const RHViewport& vp);
 	inline const RHViewport& GetViewport() const { return mViewport; }
 
-	shared_ptr<RHRenderView> GetAttachedView(Attachment att);
+	shared_ptr<RHRenderView> GetRTV(Attachment att) const;
+	shared_ptr<RHUnorderedAccessView> GetUAV(uint32_t index) const;
 
-	void Attach(Attachment att, const shared_ptr<RHRenderView>& view);
-	void Detach(Attachment att);
+	void AttachRTV(Attachment att, const shared_ptr<RHRenderView>& rtv);
+	void AttachUAV(uint32_t index, const shared_ptr<RHUnorderedAccessView>& uav);
+
+	void DetachRTV(Attachment att);
+	void DetachUAV(uint32_t index);
+
 	void DetachAll();
 
 	/**
@@ -90,6 +90,8 @@ public:
 	virtual void OnUnbind() = 0;
 
 protected:
+
+	// Todo: add multiple viewports support
 	RHViewport mViewport;
 
 	vector<shared_ptr<RHRenderView> > mColorViews;

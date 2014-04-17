@@ -4,36 +4,35 @@
 #include <MainApp/Window.h>
 #include <Core/Exception.h>
 #include <Core/Utility.h>
+#include <Core/Environment.h>
 
 namespace RcEngine {
 
-OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
-	: OpenGLFrameBuffer(settings.Width, settings.Height, false)
+OpenGLRenderWindow::OpenGLRenderWindow( )
+	: OpenGLFrameBuffer(false)
 {
-	mFullscreen = settings.Fullscreen;
+	const ApplicationSettings& appSettings = Environment::GetSingleton().GetApplication()->GetAppSettings();
+
+	mFullscreen = appSettings.Fullscreen;
 
 	uint32_t colorDepth, depthBits, stencilBits;
 
-	colorDepth = PixelFormatUtils::GetNumElemBits(settings.ColorFormat);
-	PixelFormatUtils::GetNumDepthStencilBits(settings.DepthStencilFormat, depthBits, stencilBits);
+	colorDepth = PixelFormatUtils::GetNumElemBits(appSettings.ColorFormat);
+	PixelFormatUtils::GetNumDepthStencilBits(appSettings.DepthStencilFormat, depthBits, stencilBits);
 
-	bool isDepthBuffered = PixelFormatUtils::IsDepth(settings.DepthStencilFormat);
+	bool isDepthBuffered = PixelFormatUtils::IsDepth(appSettings.DepthStencilFormat);
 
 #ifdef RcWindows
-	Window* mainWindow = Context::GetSingleton().GetApplication().GetMainWindow();
-	mHwnd = mainWindow->GetHwnd();
+	mHwnd = Window::msWindow->GetHwnd();
 	mHdc = GetDC(mHwnd);
 	
 	if (mFullscreen)												
 	{
-		mLeft = 0;
-		mTop = 0;
-
 		DEVMODE dmScreenSettings;								
 		memset(&dmScreenSettings,0,sizeof(dmScreenSettings));	
 		dmScreenSettings.dmSize=sizeof(dmScreenSettings);	
-		dmScreenSettings.dmPelsWidth	= settings.Width;				
-		dmScreenSettings.dmPelsHeight	= settings.Height;				
+		dmScreenSettings.dmPelsWidth	= appSettings.Width;				
+		dmScreenSettings.dmPelsHeight	= appSettings.Height;				
 		dmScreenSettings.dmBitsPerPel	= colorDepth;					
 		dmScreenSettings.dmFields=DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
 
@@ -47,8 +46,6 @@ OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
 	else
 	{
 		colorDepth = ::GetDeviceCaps(mHdc, BITSPIXEL);
-		mLeft = settings.Left;
-		mTop = settings.Top;
 	}
 
 	PIXELFORMATDESCRIPTOR pfd;
@@ -79,10 +76,10 @@ OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
 	}
 
 	if (WGLEW_EXT_swap_control)
-		wglSwapIntervalEXT(settings.SyncInterval);
+		wglSwapIntervalEXT(appSettings.SyncInterval);
 #endif
 
-	uint32_t sampleCount = settings.SampleCount;
+	uint32_t sampleCount = appSettings.SampleCount;
 	if(sampleCount > 1)
 	{
 
@@ -106,7 +103,7 @@ OpenGLRenderWindow::OpenGLRenderWindow( const RenderSettings& settings )
 
 OpenGLRenderWindow::~OpenGLRenderWindow()
 {
-	Window* win = Context::GetSingleton().GetApplication().GetMainWindow();
+	
 }
 
 void OpenGLRenderWindow::ToggleFullscreen( bool fs )

@@ -5,6 +5,10 @@
 #include <sys/stat.h>
 #include <direct.h>
 
+#ifndef MAX_PATH
+	#define MAX_PATH 260
+#endif
+
 namespace RcEngine {
 
 SINGLETON_DECL(FileSystem)
