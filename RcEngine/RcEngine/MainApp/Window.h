@@ -2,7 +2,6 @@
 #define Window_h__
 
 #include <Core/Prerequisites.h>
-#include <Graphics/RenderSettings.h>
 
 #if defined(RcWindows) 
 	#include <Windows.h>
@@ -11,11 +10,14 @@
 
 namespace RcEngine {
 
+struct ApplicationSettings;
+class InputSystem;
+
 class _ApiExport Window
 {
 public:
-	Window(const std::string& name, const RenderSettings& settings);
-	virtual ~Window(void);
+	Window(const ApplicationSettings& settings);
+	~Window(void);
 
 #ifdef RcWindows
 	HWND GetHwnd() const		{ return mhWnd; }

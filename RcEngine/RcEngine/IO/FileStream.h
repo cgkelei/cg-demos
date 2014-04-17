@@ -39,8 +39,6 @@ protected:
 	String mFileName;
 	FileMode mFileMode;
 	void* mFileHandle;
-
-
 };
 
 } //Namespace RcEngine

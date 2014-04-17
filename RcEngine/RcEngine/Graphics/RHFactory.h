@@ -8,13 +8,12 @@
 
 namespace RcEngine {
 
-class RHBufferSRV;
-class RHBufferUAV;
-class RHTextureSRV;
-class RHTextureUAV;
+class RHShaderResourceView;
+class RHUnorderedAccessView;
 
 struct ElementInitData;
 struct ShaderMacro;
+struct RHVertexElement;
 
 class _ApiExport RHFactory
 {
@@ -28,6 +27,9 @@ public:
 	shared_ptr<RHRasterizerState> CreateRasterizerState( const RHRasterizerStateDesc& desc );
 	shared_ptr<RHDepthStencilState> CreateDepthStencilState( const RHDepthStencilStateDesc& desc ); 
 	
+	// Vertex Input Layout
+	virtual shared_ptr<RHVertexDeclaration> CreateVertexDeclaration(RHVertexElement* elems, uint32_t count) = 0;
+
 	// Buffer resource
 	virtual shared_ptr<RHBuffer> CreateVertexBuffer(uint32_t buffreSize, uint32_t accessHint, uint32_t createFlags, ElementInitData* initData) = 0;
 	virtual shared_ptr<RHBuffer> CreateIndexBuffer(uint32_t buffreSize, uint32_t accessHint, uint32_t createFlags,ElementInitData* initData) = 0;
@@ -83,7 +85,7 @@ public:
 	virtual shared_ptr<RHShader> CreateShader(ShaderType type) = 0;
 	
 	// Utility function
-	shared_ptr<RHTextureSRV> LoadTextureSRVFromFile(const String& filename);
+	shared_ptr<RHShaderResourceView> LoadTextureSRVFromFile(const String& filename);
 	shared_ptr<RHTexture> LoadTextureFromFile(const String& filename);
 
 	shared_ptr<RHShader> LoadShaderFromFile(
@@ -93,30 +95,39 @@ public:
 		const String& entryPoint = "");
 
 	// Shader resource view
-	virtual shared_ptr<RHBufferSRV> CreateStructuredBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount) = 0;
-	virtual shared_ptr<RHBufferSRV> CreateTextureBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format) = 0;
+	virtual shared_ptr<RHShaderResourceView> CreateStructuredBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount) = 0;
+	virtual shared_ptr<RHShaderResourceView> CreateTextureBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format) = 0;
 
-	virtual shared_ptr<RHTextureSRV> CreateTexture1DSRV(const shared_ptr<RHTexture>& texture) = 0;
-	virtual shared_ptr<RHTextureSRV> CreateTexture2DSRV(const shared_ptr<RHTexture>& texture) = 0;
-	virtual shared_ptr<RHTextureSRV> CreateTexture3DSRV(const shared_ptr<RHTexture>& texture) = 0;
-	virtual shared_ptr<RHTextureSRV> CreateTextureCubeSRV(const shared_ptr<RHTexture>& texture) = 0;
+	virtual shared_ptr<RHUnorderedAccessView> CreateStructuredBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount) = 0;
+	virtual shared_ptr<RHUnorderedAccessView> CreateTextureBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format) = 0;
+
+
+	virtual shared_ptr<RHShaderResourceView> CreateTexture1DSRV(const shared_ptr<RHTexture>& texture) = 0;
+	virtual shared_ptr<RHShaderResourceView> CreateTexture2DSRV(const shared_ptr<RHTexture>& texture) = 0;
+	virtual shared_ptr<RHShaderResourceView> CreateTexture3DSRV(const shared_ptr<RHTexture>& texture) = 0;
+	virtual shared_ptr<RHShaderResourceView> CreateTextureCubeSRV(const shared_ptr<RHTexture>& texture) = 0;
+
+	virtual shared_ptr<RHUnorderedAccessView> CreateTexture1DUAV(const shared_ptr<RHTexture>& texture) = 0;
+	virtual shared_ptr<RHUnorderedAccessView> CreateTexture2DUAV(const shared_ptr<RHTexture>& texture) = 0;
+	virtual shared_ptr<RHUnorderedAccessView> CreateTexture3DUAV(const shared_ptr<RHTexture>& texture) = 0;
+	virtual shared_ptr<RHUnorderedAccessView> CreateTextureCubeUAV(const shared_ptr<RHTexture>& texture) = 0;
 
 	/**
 	 * Create shader resource view from a subset of texture.
 	 *
 	 * Set mipLevels to -1 to indicate all the mipmap levels from mostDetailedMip on down to least detailed
 	 */
-	virtual shared_ptr<RHTextureSRV> CreateTexture1DSRV(const shared_ptr<RHTexture>& texture,
+	virtual shared_ptr<RHShaderResourceView> CreateTexture1DSRV(const shared_ptr<RHTexture>& texture,
 		uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize) = 0;
 	
-	virtual shared_ptr<RHTextureSRV> CreateTexture2DSRV(const shared_ptr<RHTexture>& texture,
+	virtual shared_ptr<RHShaderResourceView> CreateTexture2DSRV(const shared_ptr<RHTexture>& texture,
 		uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize) = 0;
+	
+	virtual shared_ptr<RHUnorderedAccessView> CreateTexture1DUAV(const shared_ptr<RHTexture>& texture,
+		uint32_t level, uint32_t firstArraySlice, uint32_t arraySize) = 0;
 
-	// Unordered access view
-	virtual shared_ptr<RHBufferUAV> CreateStructuredBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount) = 0;
-	virtual shared_ptr<RHBufferUAV> CreateTextureBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format) = 0;
-
-	virtual shared_ptr<RHTextureUAV> CreateTextureUAV(const shared_ptr<RHTexture>& texture) = 0;
+	virtual shared_ptr<RHUnorderedAccessView> CreateTexture2DUAV(const shared_ptr<RHTexture>& texture,
+		uint32_t level, uint32_t firstArraySlice, uint32_t arraySize) = 0;
 
 	// Render target view
 	virtual shared_ptr<RHRenderView> CreateDepthStencilView(const shared_ptr<RHTexture>& texture, uint32_t arrayIndex, uint32_t level) = 0;

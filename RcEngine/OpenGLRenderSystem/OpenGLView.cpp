@@ -204,13 +204,57 @@ void OpenGLStructuredBufferUAV::BindUAV( GLuint bindingPoint )
 }
 
 ////////////////////////////////////////////////////////////////////////
-OpenGLTextureUAV::OpenGLTextureUAV( const shared_ptr<RHTexture>& texture )
-	: mTexture(texture)
+OpenGLTextureUAV::OpenGLTextureUAV( const shared_ptr<RHTexture>& texture, uint32_t mipSlice, uint32_t firstArraySlice, uint32_t arraySize )
+	: mTexture(texture),
+	  mLevel(mipSlice)
 {
-	OpenGLTexture* pTextureOGL = static_cast<OpenGLTexture*>(texture.get());
+	uint32_t numLayers = texture->GetTextureArraySize();
 
-	TargetOGL = pTextureOGL->GetTextureOGL();
-	TextureTargetOGL = pTextureOGL->GetTextureTarget();
+	GLenum externFormat, formatType;
+	OpenGLMapping::Mapping(mFormatOGL, externFormat, formatType, texture->GetTextureFormat());
+
+	OpenGLTexture* pTextureOGL = static_cast_checked<OpenGLTexture*>(texture.get());
+	
+	if (firstArraySlice != 0 && arraySize > 1)
+	{
+		assert(GLEW_ARB_texture_view);
+		mNeedDelete = true;
+
+		glGenTextures(1, &mTextureOGL);
+		switch (pTextureOGL->GetTextureTarget())
+		{
+		case GL_TEXTURE_1D_ARRAY:
+			{
+				glTextureView(mTextureOGL, GL_TEXTURE_1D_ARRAY, pTextureOGL->GetTextureOGL(), mFormatOGL, mipSlice, 1, firstArraySlice, arraySize);
+			}
+			break;
+		case GL_TEXTURE_2D_ARRAY:
+			{
+				glTextureView(mTextureOGL, GL_TEXTURE_2D_ARRAY, pTextureOGL->GetTextureOGL(), mFormatOGL, mipSlice, 1, firstArraySlice, arraySize);
+			}
+			break;
+		default:
+			assert(false);
+			break;
+		}
+	}
+	else
+	{
+		mFirstLayer = firstArraySlice;
+		mNeedDelete = false;
+	}
+}
+
+OpenGLTextureUAV::~OpenGLTextureUAV()
+{
+	if (mNeedDelete)
+		glDeleteTextures(1, &mTextureOGL);
+}
+
+void OpenGLTextureUAV::BindUAV( GLuint unit )
+{
+	GLboolean layered = (mNumLayers == 1) ? GL_FALSE : GL_TRUE;
+	glBindImageTexture(unit, mTextureOGL, mLevel, layered, mFirstLayer, GL_READ_WRITE, mFormatOGL);
 }
 
 }

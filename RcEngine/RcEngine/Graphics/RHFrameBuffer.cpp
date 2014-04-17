@@ -1,4 +1,6 @@
 #include <Graphics/RHFrameBuffer.h>
+#include <Graphics/RHResource.h>
+#include <Core/Exception.h>
 
 namespace RcEngine {
 
@@ -10,10 +12,9 @@ RHRenderView::RHRenderView( const shared_ptr<RHTexture>& texture )
 }
 
 //////////////////////////////////////////////////////////////////////////
-RHFrameBuffer::RHFrameBuffer( uint32_t width, uint32_t height, bool offscreen /*= true*/ )
+RHFrameBuffer::RHFrameBuffer( bool offscreen /*= true*/ )
 	: mOffscreen(offscreen),
-	  mDirty(true),
-	  mViewport(0, 0, width, height)  
+	  mDirty(true)
 {
 	
 }
@@ -32,7 +33,7 @@ void RHFrameBuffer::SetViewport( const RHViewport& vp )
 	}
 }
 
-shared_ptr<RHRenderView> RHFrameBuffer::GetAttachedView( Attachment att )
+shared_ptr<RHRenderView> RHFrameBuffer::GetRTV( Attachment att ) const
 {
 	switch(att)
 	{
@@ -42,13 +43,23 @@ shared_ptr<RHRenderView> RHFrameBuffer::GetAttachedView( Attachment att )
 	default:
 		uint32_t index = att - ATT_Color0;
 		if(mColorViews.size() < index + 1)
-			return NULL;
+		{
+			ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Try to get render target view which it not exit!", "RHFrameBuffer::GetRenderTargetView");
+		}
 		else
 			return mColorViews[index];
 	}
 }
 
-void RHFrameBuffer::Attach( Attachment att, const shared_ptr<RHRenderView>& view )
+shared_ptr<RHUnorderedAccessView> RHFrameBuffer::GetUAV( uint32_t index ) const
+{
+	if (index >= mUnorderedAccessViews.size())
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Try to get unordered access view which it not exit!", "RHFrameBuffer::GetUnorderedAccessView");
+	
+	return mUnorderedAccessViews[index];
+}
+
+void RHFrameBuffer::AttachRTV( Attachment att, const shared_ptr<RHRenderView>& view )
 {
 	switch(att)
 	{
@@ -56,7 +67,7 @@ void RHFrameBuffer::Attach( Attachment att, const shared_ptr<RHRenderView>& view
 		{
 			if(mDepthStencilView)
 			{
-				Detach(ATT_DepthStencil);
+				DetachRTV(ATT_DepthStencil);
 			}
 			mDepthStencilView = view;
 		}
@@ -67,7 +78,7 @@ void RHFrameBuffer::Attach( Attachment att, const shared_ptr<RHRenderView>& view
 
 			// if it already has an render target attach it, detach if first. 
 			if(index < mColorViews.size() && mColorViews[index])
-				Detach(att);
+				DetachRTV(att);
 
 			if(mColorViews.size() < index + 1)
 				mColorViews.resize(index + 1);
@@ -82,7 +93,25 @@ void RHFrameBuffer::Attach( Attachment att, const shared_ptr<RHRenderView>& view
 	mDirty = true;
 }
 
-void RHFrameBuffer::Detach( Attachment att )
+void RHFrameBuffer::AttachUAV( uint32_t index, const shared_ptr<RHUnorderedAccessView>& uav )
+{
+	if(mUnorderedAccessViews.size() < index + 1)
+		mUnorderedAccessViews.resize(index + 1);
+
+	mUnorderedAccessViews[index] = uav;
+	mDirty = true;
+}
+
+void RHFrameBuffer::DetachUAV( uint32_t index )
+{
+	if(mUnorderedAccessViews.size() < index + 1)
+		mUnorderedAccessViews.resize(index + 1);
+
+	mUnorderedAccessViews[index] = nullptr;
+	mDirty = true;
+}
+
+void RHFrameBuffer::DetachRTV( Attachment att )
 {
 	switch(att)
 	{
@@ -115,13 +144,17 @@ void RHFrameBuffer::DetachAll()
 	{
 		if (mColorViews[i])
 		{
-			Detach((Attachment)(ATT_DepthStencil + i));
+			DetachRTV((Attachment)(ATT_DepthStencil + i));
 		}
 	}
 	mColorViews.clear();
 
 	if (mDepthStencilView)
-		Detach(ATT_DepthStencil);
+		DetachRTV(ATT_DepthStencil);
+
+	mUnorderedAccessViews.clear();
+
+	mDirty = true;
 }
 
 void RHFrameBuffer::Clear( uint32_t flags, const ColorRGBA& clr, float depth, uint32_t stencil )
@@ -151,6 +184,5 @@ void RHFrameBuffer::Clear( uint32_t flags, const ColorRGBA& clr, float depth, ui
 			mDepthStencilView->ClearStencil(stencil);
 	}
 }
-
 
 }

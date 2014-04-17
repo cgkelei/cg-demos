@@ -32,6 +32,18 @@ private:
 	RHResouce& operator= ( const RHResouce& );
 };
 
+class _ApiExport RHShaderResourceView
+{
+public:
+	virtual ~RHShaderResourceView() {}
+};
+
+class _ApiExport RHUnorderedAccessView 
+{
+public:
+	virtual ~RHUnorderedAccessView() {}
+};
+
 //////////////////////////////////////////////////////////////////////////
 class _ApiExport RHBuffer : public RHResouce
 {

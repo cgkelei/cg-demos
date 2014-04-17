@@ -40,8 +40,6 @@
 #include <rapidxml/rapidxml_print.hpp>
 #include <FastDelegate/FastDelegate.h>
 #include <FastDelegate/FastDelegateBind.h>
-#include <TinyThread/source/tinythread.h>
-#include <TinyThread/source/fast_mutex.h>
 
 typedef fastdelegate::FastDelegate0<> EventHandler;
 typedef fastdelegate::FastDelegate1<bool*, void> CancellableEventHandler;
@@ -71,7 +69,6 @@ using std::weak_ptr;
 using std::vector;
 using std::unordered_map;
 using std::unordered_set;
-using namespace tthread;
 
 /// Name / value parameter pair (first = name, second = value)
 typedef std::map<String, String> NameValuePairList;
@@ -99,18 +96,10 @@ shared_ptr<Ty> static_pointer_cast_checked(const shared_ptr<Other>& sp)
 
 namespace RcEngine {
 
-class Window;
-class Stream;
-class Timer;
-class IModule;
-class Resource;
-class ResourceManager;
-class InputSystem;
-
-class RHDevice;
-class RHFactory;
 class RHRenderView;
 class RHFrameBuffer;
+class RHShaderResourceView;
+class RHUnorderedAccessView;
 class RHTexture;
 class RHBuffer;
 class RHDepthStencilState;
@@ -119,8 +108,12 @@ class RHBlendState;
 class RHSamplerState;
 class RHShader;
 class RHVertexDeclaration;
+class RHVertexDeclaration;
+class RHShaderPipeline;
+class RHOperation;
 
-class VertexDeclaration;
+class Stream;
+
 class Camera;
 class Renderable;
 class Mesh;

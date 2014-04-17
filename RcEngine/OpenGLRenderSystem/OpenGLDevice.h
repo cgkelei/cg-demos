@@ -16,9 +16,8 @@ extern OpenGLDevice* gOpenGLDevice;
 class _OpenGLExport OpenGLDevice : public RHDevice
 {
 public:
-	OpenGLDevice(const RenderSettings& settings);
+	OpenGLDevice();
 	~OpenGLDevice(void);
-
 
 	void GetBlitFBO(GLuint& srcFBO, GLuint& dstFBO);
 	

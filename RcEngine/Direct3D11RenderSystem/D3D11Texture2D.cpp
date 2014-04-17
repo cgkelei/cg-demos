@@ -62,13 +62,13 @@ D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t
 			}
 		}
 
-		//HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateTexture2D( &texDesc, &subResourceData[0], &TextureD3D11);
-		D3D11_VERRY(gD3D11Device->GetDeviceD3D11()->CreateTexture2D( &texDesc, &subResourceData[0], &TextureD3D11));
+		//HRESULT hr = gD3D11Device->DeviceD3D11->CreateTexture2D( &texDesc, &subResourceData[0], &TextureD3D11);
+		D3D11_VERRY(gD3D11Device->DeviceD3D11->CreateTexture2D( &texDesc, &subResourceData[0], &TextureD3D11));
 	}
 	else 
 	{
-		//HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateTexture2D( &texDesc, NULL, &TextureD3D11);
-		D3D11_VERRY(gD3D11Device->GetDeviceD3D11()->CreateTexture2D( &texDesc, NULL, &TextureD3D11));
+		//HRESULT hr = gD3D11Device->DeviceD3D11->CreateTexture2D( &texDesc, NULL, &TextureD3D11);
+		D3D11_VERRY(gD3D11Device->DeviceD3D11->CreateTexture2D( &texDesc, NULL, &TextureD3D11));
 	}
 	
 	// Create shader resource view

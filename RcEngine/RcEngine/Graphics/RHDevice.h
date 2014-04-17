@@ -3,7 +3,6 @@
 
 #include <Core/Prerequisites.h>
 #include <Graphics/GraphicsCommon.h>
-#include <Graphics/RenderSettings.h>
 #include <Math/ColorRGBA.h>
 #include <Math/Matrix.h>
 
@@ -11,40 +10,16 @@
 
 namespace RcEngine {
 
-enum RenderDeviceType
-{
-	RD_OpenGL = 0,
-	RD_OpenGL_ES,
-	RD_Direct3D11,
-	RD_Count
-};
-
-struct RenderSettings
-{
-	bool Fullscreen;
-	int32_t Left, Top;
-	uint32_t Width, Height;
-	PixelFormat ColorFormat;
-	PixelFormat DepthStencilFormat;
-	uint32_t SyncInterval;
-	uint32_t SampleCount, SampleQuality;
-	RenderDeviceType RHDeviceType;
-};
-
-class RHShaderPipeline;
 class RHFactory;
-class RHFrameBuffer;
-class RHOperation;
 struct RHViewport;
 
 class _ApiExport RHDevice
 {
 public:
-	RHDevice(const RenderSettings& settings);
+	RHDevice();
 	virtual ~RHDevice(void);
 
 	inline bool Fullscreen() const												    { return mIsFullscreen; }
-	inline RenderDeviceType GetDeviceType() const							        { return mRenderSettings.RHDeviceType; }
 	inline RHFactory* GetFactory() const									        { return mRenderFactory; }
 																  
 	inline shared_ptr<RHFrameBuffer> GetCurrentFrameBuffer() const					{ return mCurrentFrameBuffer; }
@@ -69,8 +44,6 @@ protected:
 	virtual void SetViewport(const RHViewport& vp) = 0;
 
 protected:
-
-	RenderSettings mRenderSettings;
 	RHFactory* mRenderFactory;
 
 	uint32_t mWidth, mHeight;

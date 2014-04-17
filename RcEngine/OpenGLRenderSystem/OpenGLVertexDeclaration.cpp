@@ -2,10 +2,11 @@
 
 namespace RcEngine {
 
-OpenGLVertexDeclaration::OpenGLVertexDeclaration()
-	: mVertexArrayOGL(0)
+OpenGLVertexDeclaration::OpenGLVertexDeclaration( const RHVertexElement* element, uint32_t count )
+	: RHVertexDeclaration(element, count),
+	  mVertexArrayOGL(0)
 {
-	
+
 }
 
 OpenGLVertexDeclaration::~OpenGLVertexDeclaration()

@@ -9,7 +9,7 @@ namespace RcEngine {
 class _OpenGLExport OpenGLFrameBuffer : public RHFrameBuffer
 {
 public:
-	OpenGLFrameBuffer(uint32_t width, uint32_t height, bool offscreen = true);
+	OpenGLFrameBuffer(bool offscreen = true);
 	virtual ~OpenGLFrameBuffer();
 
 	inline GLuint GetFrameBufferOGL() const { return mFrameBufferOGL; }

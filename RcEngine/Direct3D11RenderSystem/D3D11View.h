@@ -3,7 +3,7 @@
 #pragma once
 
 #include "D3D11Prerequisites.h"
-#include <Graphics/RHView.h>
+#include <Graphics/RHResource.h>
 
 namespace RcEngine {
 
@@ -162,17 +162,17 @@ public:
 	D3D11Texture2DUAV(const shared_ptr<RHTexture>& texture, uint32_t mipSlice, uint32_t firstArraySlice, uint32_t arraySize);
 };
 
-class _D3D11Export D3D11Texture3DUAV  : public D3D11TextureUAV
-{
-public:
-	D3D11Texture3DUAV(const shared_ptr<RHTexture>& texture, uint32_t mipSlice, uint32_t firstWSlice, uint32_t wSize);
-};
+//class _D3D11Export D3D11Texture3DUAV  : public D3D11TextureUAV
+//{
+//public:
+//	D3D11Texture3DUAV(const shared_ptr<RHTexture>& texture, uint32_t mipSlice, uint32_t firstWSlice, uint32_t wSize);
+//};
 
-class _D3D11Export D3D11TextureCubeUAV  : public D3D11TextureUAV
-{
-public:
-	D3D11TextureCubeUAV(const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize);
-};
+//class _D3D11Export D3D11TextureCubeUAV  : public D3D11TextureUAV
+//{
+//public:
+//	D3D11TextureCubeUAV(const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize);
+//};
 
 }
 

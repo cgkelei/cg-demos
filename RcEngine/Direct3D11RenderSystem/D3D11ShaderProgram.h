@@ -3,20 +3,20 @@
 #pragma once
 
 #include "D3D11Prerequisites.h"
-#include <Graphics/ShaderProgram.h>
+#include <Graphics/RHResource.h>
 
 namespace RcEngine {
 
-class _D3D11Export D3D11ShaderProgram : public ShaderProgram
-{
-public:
-	D3D11ShaderProgram(void);
-	~D3D11ShaderProgram(void);
-
-
-private:
-
-};
+//class _D3D11Export D3D11ShaderProgram : public ShaderProgram
+//{
+//public:
+//	D3D11ShaderProgram(void);
+//	~D3D11ShaderProgram(void);
+//
+//
+//private:
+//
+//};
 
 }
 

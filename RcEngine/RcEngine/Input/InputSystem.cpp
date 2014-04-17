@@ -1,7 +1,7 @@
 #include <Input/InputSystem.h>
 #include <MainApp/Application.h>
 #include <MainApp/Window.h>
-#include <Core/Context.h>
+#include <Core/Environment.h>
 
 namespace RcEngine{
 
@@ -91,7 +91,7 @@ void InputSystem::BeginEvents()
 
 void InputSystem::EndEvents()
 {
-	Window* mainWindow = Context::GetSingleton().GetApplication().GetMainWindow();
+	Window* mainWindow = Environment::GetSingleton().GetApplication()->GetMainWindow();
 
 	mMouseMove = mMousePos - mLastMousePos;
 
@@ -288,7 +288,7 @@ void InputSystem::Dispatch( float deltaTime )
 
 void InputSystem::ForceCursorToCenter()
 {
-	Window* mainWindow = Context::GetSingleton().GetApplication().GetMainWindow();
+	Window* mainWindow = Environment::GetSingleton().GetApplication()->GetMainWindow();
 	mainWindow->ForceMouseToCenter();
 }
 

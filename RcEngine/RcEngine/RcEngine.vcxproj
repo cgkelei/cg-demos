@@ -12,7 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\CompileConfig.h" />
-    <ClInclude Include="Core\DynLib.h" />
+    <ClInclude Include="Core\Environment.h" />
     <ClInclude Include="Core\Exception.h" />
     <ClInclude Include="Core\IModule.h" />
     <ClInclude Include="Core\Loger.h" />
@@ -23,6 +23,7 @@
     <ClInclude Include="Core\Timer.h" />
     <ClInclude Include="Core\Utility.h" />
     <ClInclude Include="Core\Variant.h" />
+    <ClInclude Include="Core\XMLDom.h" />
     <ClInclude Include="Graphics\GraphicsCommon.h" />
     <ClInclude Include="Graphics\PixelFormat.h" />
     <ClInclude Include="Graphics\RHDevice.h" />
@@ -32,7 +33,16 @@
     <ClInclude Include="Graphics\RHFrameBuffer.h" />
     <ClInclude Include="Graphics\RHState.h" />
     <ClInclude Include="Graphics\RHVertexDeclaration.h" />
-    <ClInclude Include="Graphics\RHView.h" />
+    <ClInclude Include="Input\InputEvent.h" />
+    <ClInclude Include="Input\InputSystem.h" />
+    <ClInclude Include="IO\FileStream.h" />
+    <ClInclude Include="IO\FileSystem.h" />
+    <ClInclude Include="IO\MemoryStream.h" />
+    <ClInclude Include="IO\PathUtil.h" />
+    <ClInclude Include="IO\Stream.h" />
+    <ClInclude Include="MainApp\Application.h" />
+    <ClInclude Include="MainApp\AppSettings.h" />
+    <ClInclude Include="MainApp\Window.h" />
     <ClInclude Include="Math\BoundingBox.h" />
     <ClInclude Include="Math\BoundingSphere.h" />
     <ClInclude Include="Math\ColorRGBA.h" />
@@ -45,9 +55,11 @@
     <ClInclude Include="Math\Ray.h" />
     <ClInclude Include="Math\Rectangle.h" />
     <ClInclude Include="Math\Vector.h" />
+    <ClInclude Include="Resource\Resource.h" />
+    <ClInclude Include="Resource\ResourceManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Core\DynLib.cpp" />
+    <ClCompile Include="Core\Environment.cpp" />
     <ClCompile Include="Core\Exception.cpp" />
     <ClCompile Include="Core\IModule.cpp" />
     <ClCompile Include="Core\Loger.cpp" />
@@ -56,6 +68,7 @@
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="Core\Utility.cpp" />
     <ClCompile Include="Core\Variant.cpp" />
+    <ClCompile Include="Core\XMLDom.cpp" />
     <ClCompile Include="Graphics\PixelFormat.cpp" />
     <ClCompile Include="Graphics\RHDevice.cpp" />
     <ClCompile Include="Graphics\RHFactory.cpp" />
@@ -64,8 +77,19 @@
     <ClCompile Include="Graphics\RHFrameBuffer.cpp" />
     <ClCompile Include="Graphics\RHState.cpp" />
     <ClCompile Include="Graphics\RHVertexDeclaration.cpp" />
-    <ClCompile Include="Graphics\RHView.cpp" />
+    <ClCompile Include="Input\InputSystem.cpp" />
+    <ClCompile Include="IO\FileStream.cpp" />
+    <ClCompile Include="IO\FileSystem.cpp" />
+    <ClCompile Include="IO\MemoryStream.cpp" />
+    <ClCompile Include="IO\PathUtil.cpp" />
+    <ClCompile Include="IO\Stream.cpp" />
+    <ClCompile Include="MainApp\Application.cpp" />
+    <ClCompile Include="MainApp\Window.cpp" />
+    <ClCompile Include="MainApp\Window_Android.cpp" />
+    <ClCompile Include="MainApp\Window_Win32.cpp" />
     <ClCompile Include="Math\ColorRGBA.cpp" />
+    <ClCompile Include="Resource\Resource.cpp" />
+    <ClCompile Include="Resource\ResourceManage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Math\BoundingBox.inl" />

@@ -45,8 +45,8 @@ struct _ApiExport RHVertexElement
 class _ApiExport RHVertexDeclaration 
 {
 public:
-	RHVertexDeclaration();
-	virtual ~RHVertexDeclaration();
+	RHVertexDeclaration(const RHVertexElement* element, uint32_t count);
+	virtual ~RHVertexDeclaration() {}
 
 public:
 	std::vector<RHVertexElement> mVertexElemets;

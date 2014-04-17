@@ -36,11 +36,17 @@ void D3D11TargetView::ClearDepthStencil( float depth, uint32_t stencil )
 
 void D3D11TargetView::ClearColor( const ColorRGBA& clr )
 {
-	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->GetDeviceContextD3D11();
+	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
 	deviceContextD3D11->ClearRenderTargetView(RenderTargetViewD3D11, clr());
 }
 
 //////////////////////////////////////////////////////////////////////////
+D3D11RenderTargetView2D::D3D11RenderTargetView2D( ID3D11RenderTargetView* rtv )
+	: D3D11TargetView(nullptr)
+{
+	RenderTargetViewD3D11 = rtv;
+}
+
 D3D11RenderTargetView2D::D3D11RenderTargetView2D( const shared_ptr<RHTexture>& texture, uint32_t arrIndex, uint32_t level )
 	: D3D11TargetView(texture)
 {
@@ -82,7 +88,7 @@ D3D11RenderTargetView2D::D3D11RenderTargetView2D( const shared_ptr<RHTexture>& t
 	}
 
 	ID3D11Texture2D* textureD3D11 = (static_cast_checked<D3D11Texture2D*>(texture.get()))->TextureD3D11;
-	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateRenderTargetView(textureD3D11, &viewDesc, &RenderTargetViewD3D11);
+	HRESULT hr = gD3D11Device->DeviceD3D11->CreateRenderTargetView(textureD3D11, &viewDesc, &RenderTargetViewD3D11);
 	//D3D11_VERRY(g_pd3dDevice->CreateRenderTargetView(mTextureD3D11.GetTexture(), &viewDesc, &mRenderTargetView2D));
 }
 
@@ -110,7 +116,7 @@ D3D11RenderTargetViewArray::D3D11RenderTargetViewArray( const shared_ptr<RHTextu
 	}
 
 	ID3D11Texture2D* textureD3D11 = (static_cast_checked<D3D11Texture2D*>(texture.get()))->TextureD3D11;
-	HRESULT hr = gD3D11Device->GetDeviceD3D11()->CreateRenderTargetView(textureD3D11, &viewDesc, &RenderTargetViewD3D11);
+	HRESULT hr = gD3D11Device->DeviceD3D11->CreateRenderTargetView(textureD3D11, &viewDesc, &RenderTargetViewD3D11);
 }
 
 

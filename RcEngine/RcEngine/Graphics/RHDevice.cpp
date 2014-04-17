@@ -2,12 +2,12 @@
 #include <Graphics/RHFactory.h>
 #include <Graphics/RHFrameBuffer.h>
 #include <Graphics/RHResource.h>
+#include <Graphics/RHOperation.h>
 
 namespace RcEngine {
 
-RHDevice::RHDevice( const RenderSettings& settings )
-	: mRenderSettings(settings),
-	  mRenderFactory(nullptr),
+RHDevice::RHDevice(  )
+	:  mRenderFactory(nullptr),
 	  mCurrentFrontStencilRef(0),
 	  mCurrentBackStencilRef(0),
 	  mCurrentBlendFactor(ColorRGBA::Black),

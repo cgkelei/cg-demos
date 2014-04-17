@@ -6,12 +6,10 @@
 
 namespace RcEngine {
 
-struct RenderSettings;
-
 class _OpenGLExport OpenGLRenderWindow : public OpenGLFrameBuffer
 {
 public:
-	OpenGLRenderWindow(const RenderSettings& settings);
+	OpenGLRenderWindow();
 	~OpenGLRenderWindow();
 
 	void ToggleFullscreen(bool fs);
@@ -22,7 +20,6 @@ public:
 	void OnUnbind();
 
 private:
-	int32_t mLeft, mTop;
 	bool mFullscreen;
 	std::string mDescription;
 

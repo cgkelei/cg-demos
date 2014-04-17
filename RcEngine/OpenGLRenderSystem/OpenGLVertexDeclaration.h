@@ -9,9 +9,12 @@ namespace RcEngine {
 class _OpenGLExport OpenGLVertexDeclaration : public RHVertexDeclaration
 {
 public:
-	OpenGLVertexDeclaration();
+	OpenGLVertexDeclaration(const RHVertexElement* element, uint32_t count);
 	~OpenGLVertexDeclaration();
 
+	/**
+	 * Return false for newly created VAO.
+	 */
 	bool GetOrGenVertexArrayOGL(GLuint& vao);
 
 private:

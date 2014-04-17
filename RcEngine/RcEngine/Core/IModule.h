@@ -20,7 +20,6 @@ public:
 			
 	// Shutdown module
 	virtual void Shutdown() = 0;
-
 };
 
 } // Namespace RcEngine

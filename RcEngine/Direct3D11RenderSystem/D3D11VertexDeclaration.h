@@ -3,23 +3,25 @@
 #pragma once
 
 #include "D3D11Prerequisites.h"
-#include <Graphics/VertexDeclaration.h>
-
+#include <Graphics/RHVertexDeclaration.h>
 
 namespace RcEngine {
 
-class _D3D11Export D3D11VertexDeclaration : public VertexDeclaration
+class _D3D11Export D3D11VertexDeclaration : public RHVertexDeclaration
 {
 public:
-	D3D11VertexDeclaration(void);
+	D3D11VertexDeclaration(const RHVertexElement* element, uint32_t count);
 	~D3D11VertexDeclaration(void);
 
-	inline ID3D11InputLayout* GetInputLayout() const { return mInputLayout; }
+	void CreateInputLayoutD3D11(std::vector<uint8_t>& code);
+public:
 
-private:
-	ID3D11InputLayout* mInputLayout;
+	/**
+	 * Hack: InputLayoutD3D11 will be created if it used in draw call
+	 *       and InputLayoutD3D11 is still NULL.
+	 */
+	ID3D11InputLayout* InputLayoutD3D11;
 };
-
 
 }
 
