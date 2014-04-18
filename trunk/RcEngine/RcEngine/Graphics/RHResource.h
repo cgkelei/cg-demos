@@ -139,10 +139,10 @@ public:
 	RHShader(ShaderType shaderType);
 	virtual ~RHShader() {}
 
-	inline ShaderType GetShaderType() const		{ return mShaderType; }
+	inline ShaderType GetShaderType() const	{ return mShaderType; }
 
 	virtual bool LoadFromByteCode(const String& filename) = 0;
-	virtual bool LoadFromFile(const String& filename, const vector<ShaderMacro>& macros, const String& entryPoint = "") = 0;
+	virtual bool LoadFromFile(const String& filename, const ShaderMacro* macros, uint32_t macroCount, const String& entryPoint = "") = 0;
 
 protected:
 	ShaderType mShaderType;

@@ -13,7 +13,8 @@ D3D11Device::D3D11Device( )
 	: DeviceContextD3D11(nullptr),
 	  DeviceD3D11(nullptr)
 {
-
+	gD3D11Device = this;
+	mRHFactory = new D3D11Factory();
 }
 
 D3D11Device::~D3D11Device()
@@ -118,7 +119,7 @@ void D3D11Device::CreateRenderWindow()
 {
 	const ApplicationSettings& appSettings = Application::msApp->GetAppSettings();
 
-	shared_ptr<D3D11RenderWindow> d3d11RenderWindow = std::make_shared<D3D11RenderWindow>();
+	shared_ptr<D3D11RenderWindow> d3d11RenderWindow = std::make_shared<D3D11RenderWindow>(appSettings.Width, appSettings.Height);
 	
 	HRESULT hr = S_OK;
 
@@ -137,8 +138,8 @@ void D3D11Device::CreateRenderWindow()
 	{
 		// ERROR
 	}
-	d3d11RenderWindow->AttachRTV(ATT_Color0, std::make_shared<D3D11RenderTargetView2D>(pRenderTargetView) );
 
+	d3d11RenderWindow->AttachRTV(ATT_Color0, std::make_shared<D3D11RenderTargetView2D>(pRenderTargetView) );
 	if(PixelFormatUtils::IsDepth(appSettings.DepthStencilFormat))
 	{
 		// Have depth buffer, attach it
@@ -155,13 +156,23 @@ void D3D11Device::CreateRenderWindow()
 			TexCreate_DepthStencilTarget,
 			nullptr);
 
-		shared_ptr<RHRenderView> depthStencilView = factory->CreateDepthStencilView(depthStencilTexture, 0, 0);
-
-		d3d11RenderWindow->AttachRTV(ATT_DepthStencil, depthStencilView);
+		d3d11RenderWindow->AttachRTV(ATT_DepthStencil, factory->CreateDepthStencilView(depthStencilTexture, 0, 0));
 	}
 
+	d3d11RenderWindow->SetViewport(RHViewport(0, 0, appSettings.Width, appSettings.Height));
 	BindFrameBuffer(d3d11RenderWindow);
+
 	mScreenFrameBuffer = d3d11RenderWindow;
+}
+
+void D3D11Device::ToggleFullscreen( bool fs )
+{
+
+}
+
+void D3D11Device::AdjustProjectionMatrix( float4x4& pOut )
+{
+
 }
 
 }

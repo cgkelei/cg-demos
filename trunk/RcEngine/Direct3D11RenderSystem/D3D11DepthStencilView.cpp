@@ -6,13 +6,6 @@
 
 namespace RcEngine {
 
-	D3D11DepthStencilView::D3D11DepthStencilView( ID3D11DepthStencilView* dsv )
-	: RHRenderView(nullptr),
-	  DepthStencilViewD3D11(dsv)
-{
-
-}
-
 D3D11DepthStencilView::D3D11DepthStencilView( const shared_ptr<RHTexture>& texture, uint32_t arrIndex, uint32_t level )
 	: RHRenderView(texture),
 	  DepthStencilViewD3D11(nullptr)
@@ -20,42 +13,48 @@ D3D11DepthStencilView::D3D11DepthStencilView( const shared_ptr<RHTexture>& textu
 	uint32_t createFlags = texture->GetCreateFlags();
 	assert(createFlags & TexCreate_DepthStencilTarget);
 
-	D3D11_DEPTH_STENCIL_VIEW_DESC viewDesc;
-	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
+	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+	ZeroMemory( &descDSV, sizeof(descDSV) );
+	descDSV.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
 
 	uint32_t textureArraySize = texture->GetTextureArraySize();
 	if (textureArraySize <= 1)
 	{
 		if (texture->GetSampleCount() > 1)
 		{
-			viewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
+			descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
 		}
 		else
 		{
-			viewDesc.Texture2D.MipSlice = level;
-			viewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+			descDSV.Texture2D.MipSlice = level;
+			descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 		}
 	}
 	else
 	{
 		if (texture->GetSampleCount() > 1)
 		{
-			viewDesc.Texture2DMSArray.FirstArraySlice = arrIndex;
-			viewDesc.Texture2DMSArray.ArraySize = 1;
-			viewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY;
+			descDSV.Texture2DMSArray.FirstArraySlice = arrIndex;
+			descDSV.Texture2DMSArray.ArraySize = 1;
+			descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY;
 		}
 		else
 		{
-			viewDesc.Texture2DArray.FirstArraySlice = arrIndex;
-			viewDesc.Texture2DArray.ArraySize = 1;
-			viewDesc.Texture2DArray.MipSlice = level;
-			viewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+			descDSV.Texture2DArray.FirstArraySlice = arrIndex;
+			descDSV.Texture2DArray.ArraySize = 1;
+			descDSV.Texture2DArray.MipSlice = level;
+			descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
 		}
 	}
 
 	ID3D11Texture2D* textureD3D11 = (static_cast<D3D11Texture2D*>(texture.get()))->TextureD3D11;
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateDepthStencilView(textureD3D11, &viewDesc, &DepthStencilViewD3D11);
-	//D3D11_VERRY(g_pd3dDevice->CreateDepthStencilView(mTextureD3D11.GetTexture(), &viewDesc, &mDepthStencilView));
+	HRESULT hr = gD3D11Device->DeviceD3D11->CreateDepthStencilView(textureD3D11, &descDSV, &DepthStencilViewD3D11);
+	
+	if (FAILED(hr))
+	{
+		// Error
+		assert(false);
+	}
 }
 
 D3D11DepthStencilView::~D3D11DepthStencilView()

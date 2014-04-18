@@ -25,7 +25,7 @@ D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t
 	texDesc.CPUAccessFlags = 0;
 	D3D11Mapping::Mapping(accessHint, texDesc.Usage, texDesc.CPUAccessFlags);
 
-	texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	texDesc.BindFlags = 0;
 	texDesc.MiscFlags = 0;
 	
 	// Generate mipmaps if enable
@@ -35,12 +35,19 @@ D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t
 		
 		// May defer it to DeviceContext::GenerateMips called.
 		mMipLevels = RHTexture::CalculateMipmapLevels((std::max)(width, height));
+		texDesc.MipLevels = mMipLevels;
 	}
 	else
+	{
 		mMipLevels = numMipMaps;
+		texDesc.MipLevels = mMipLevels;
+	}
 
 	if (mCreateFlags & TexCreate_UAV)
 		texDesc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
+
+	if (mCreateFlags & TexCreate_ShaderResource)
+		texDesc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
 
 	if (mCreateFlags & TexCreate_RenderTarget)
 		texDesc.BindFlags |= D3D11_BIND_RENDER_TARGET;
@@ -117,16 +124,16 @@ D3D11Texture2D::~D3D11Texture2D()
 	SAFE_RELEASE(TextureD3D11);
 }
 
-
-void D3D11Texture1D::Map1D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma, uint32_t xOffset, uint32_t width, void*& data )
+void D3D11Texture2D::Map2D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height, void*& data, uint32_t& rowPitch )
 {
 
 }
 
-void D3D11Texture1D::Unmap1D( uint32_t arrayIndex, uint32_t level )
+void D3D11Texture2D::Unmap2D( uint32_t arrayIndex, uint32_t level )
 {
 
 }
+
 
 
 }

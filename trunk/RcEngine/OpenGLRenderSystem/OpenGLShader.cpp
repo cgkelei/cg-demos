@@ -1,8 +1,9 @@
 #include "OpenGLShader.h"
 #include "OpenGLGraphicCommon.h"
-//#include "OpenGLDevice.h"
 #include <Core/Exception.h>
 #include <Core/Loger.h>
+#include <fstream>
+#include <iterator>
 
 namespace RcEngine {
 
@@ -114,20 +115,18 @@ bool OpenGLShader::LoadFromByteCode( const String& filename )
 	return (success == GL_TRUE);
 }
 
-bool OpenGLShader::LoadFromFile( const String& filename, const std::vector<ShaderMacro>& macros, const String& entryPoint /*= ""*/ )
+bool OpenGLShader::LoadFromFile( const String& filename, const ShaderMacro* macros, uint32_t macroCount, const String& entryPoint /*= ""*/ )
 {
 	assert(GLEW_ARB_separate_shader_objects);
 
 	String shaderSource;
 
-	for (const ShaderMacro& macro : macros)
-	{
-		shaderSource += "#define " + macro.Name + " " + macro.Definition + "\r\n";
-	}
+	for (uint32_t i = 0; i < macroCount; ++i)
+		shaderSource += "#define " + macros[i].Name + " " +  macros[i].Definition + "\r\n";
 
 	// Add #line 1
 	//shaderSource += "#line 1";
-	
+
 	// Load source code into string
 	std::ifstream fileStream(filename);
 	shaderSource.append((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
@@ -148,10 +147,10 @@ bool OpenGLShader::LoadFromFile( const String& filename, const std::vector<Shade
 
 		mShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShaderType), 2, pSource);
 	}
-	
+
 	int success;
 	glGetProgramiv(mShaderOGL, GL_LINK_STATUS, &success);
-	
+
 	if (success != GL_TRUE)
 	{
 		int length;

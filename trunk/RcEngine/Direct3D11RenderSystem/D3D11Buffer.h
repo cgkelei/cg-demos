@@ -19,7 +19,6 @@ public:
 
 public:
 	ID3D11Buffer* BufferD3D11;
-	uint32_t mCreateFlags;
 };
 
 }

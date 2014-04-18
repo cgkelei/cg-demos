@@ -7,8 +7,8 @@
 
 namespace RcEngine {
 
-D3D11RenderWindow::D3D11RenderWindow( )
-	: D3D11FrameBuffer(false),
+D3D11RenderWindow::D3D11RenderWindow( uint32_t width, uint32_t height )
+	: D3D11FrameBuffer(width, height),
 	  SwapChainD3D11(nullptr),
 	  FeatureLevelD3D11(D3D_FEATURE_LEVEL_11_0)
 {
@@ -16,11 +16,6 @@ D3D11RenderWindow::D3D11RenderWindow( )
 
 	mSyncInterval = appSettings.SyncInterval;
 	assert(DXGI_FORMAT_R8G8B8A8_UNORM == D3D11Mapping::Mapping(appSettings.ColorFormat));
-
-	RECT rc;
-	GetClientRect( mHwnd, &rc );
-	UINT width = rc.right - rc.left;
-	UINT height = rc.bottom - rc.top;
 
 	UINT createDeviceFlags = 0;
 
@@ -37,14 +32,18 @@ D3D11RenderWindow::D3D11RenderWindow( )
 
 	DXGI_SWAP_CHAIN_DESC sd;
 	ZeroMemory( &sd, sizeof( sd ) );
+
 	sd.BufferCount = 1;
 	sd.BufferDesc.Width = width;
 	sd.BufferDesc.Height = height;
 	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	sd.BufferDesc.RefreshRate.Numerator = 60;
 	sd.BufferDesc.RefreshRate.Denominator = 1;
+	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	sd.SampleDesc.Count = appSettings.SampleCount;
+	sd.SampleDesc.Quality = appSettings.SampleQuality;
 	sd.Windowed = appSettings.Fullscreen ? FALSE : TRUE;
-	sd.OutputWindow = Window::msWindow->GetHwnd();
+	sd.OutputWindow = Window::msWindow->GetHwnd();;
 
 	HRESULT hr = S_OK;
 	hr = D3D11CreateDeviceAndSwapChain( NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, createDeviceFlags, featureLevels, numFeatureLevels,
@@ -53,6 +52,7 @@ D3D11RenderWindow::D3D11RenderWindow( )
 	if( FAILED( hr ) )
 	{
 		// ERROR
+		assert(false);
 	}
 }
 

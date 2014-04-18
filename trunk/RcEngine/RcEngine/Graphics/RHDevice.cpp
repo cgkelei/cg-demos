@@ -3,22 +3,25 @@
 #include <Graphics/RHFrameBuffer.h>
 #include <Graphics/RHResource.h>
 #include <Graphics/RHOperation.h>
+#include <Core/Environment.h>
 
 namespace RcEngine {
 
 RHDevice::RHDevice(  )
-	:  mRenderFactory(nullptr),
+	: mRHFactory(nullptr),
 	  mCurrentFrontStencilRef(0),
 	  mCurrentBackStencilRef(0),
 	  mCurrentBlendFactor(ColorRGBA::Black),
 	  mCurrentSampleMask(0)
 {
 
+
+	Environment::GetSingleton().mRHDevice = this;
 }
 
 RHDevice::~RHDevice( void )
 {
-	SAFE_DELETE(mRenderFactory);
+	SAFE_DELETE(mRHFactory);
 }
 
 void RHDevice::BindFrameBuffer( const shared_ptr<RHFrameBuffer>& fb )

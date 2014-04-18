@@ -91,7 +91,8 @@ public:
 	shared_ptr<RHShader> LoadShaderFromFile(
 		ShaderType shaderType, 
 		const String& filename, 
-		const vector<ShaderMacro>& macros,
+		const ShaderMacro* macros,
+		uint32_t macroCount,
 		const String& entryPoint = "");
 
 	// Shader resource view
@@ -141,7 +142,9 @@ protected:
 	virtual shared_ptr<RHDepthStencilState> CreateDepthStencilStateImpl(const RHDepthStencilStateDesc& desc) = 0;
 
 protected:
-	std::map<String, shared_ptr<RHShader> > mShaderPool;
+
+	typedef size_t ShaderHashCode;
+	std::map<ShaderHashCode, shared_ptr<RHShader> > mShaderPool;
 	std::map<RHBlendStateDesc, shared_ptr<RHBlendState> > mBlendStatePool;
 	std::map<RHSamplerStateDesc, shared_ptr<RHSamplerState> > mSamplerStatePool;
 	std::map<RHRasterizerStateDesc, shared_ptr<RHRasterizerState> > mRasterizerStatePool;

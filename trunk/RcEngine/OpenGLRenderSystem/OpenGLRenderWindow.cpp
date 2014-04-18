@@ -8,33 +8,33 @@
 
 namespace RcEngine {
 
-OpenGLRenderWindow::OpenGLRenderWindow( )
-	: OpenGLFrameBuffer(false)
+OpenGLRenderWindow::OpenGLRenderWindow( uint32_t width, uint32_t height )
+	: OpenGLFrameBuffer(width, height, false)
 {
 	const ApplicationSettings& appSettings = Environment::GetSingleton().GetApplication()->GetAppSettings();
 
 	mFullscreen = appSettings.Fullscreen;
 
 	uint32_t colorDepth, depthBits, stencilBits;
-
 	colorDepth = PixelFormatUtils::GetNumElemBits(appSettings.ColorFormat);
 	PixelFormatUtils::GetNumDepthStencilBits(appSettings.DepthStencilFormat, depthBits, stencilBits);
-
-	bool isDepthBuffered = PixelFormatUtils::IsDepth(appSettings.DepthStencilFormat);
 
 #ifdef RcWindows
 	mHwnd = Window::msWindow->GetHwnd();
 	mHdc = GetDC(mHwnd);
-	
+
+	// Todo: Add fullscreen support
+	assert(mFullscreen == false);
 	if (mFullscreen)												
 	{
 		DEVMODE dmScreenSettings;								
 		memset(&dmScreenSettings,0,sizeof(dmScreenSettings));	
-		dmScreenSettings.dmSize=sizeof(dmScreenSettings);	
-		dmScreenSettings.dmPelsWidth	= appSettings.Width;				
-		dmScreenSettings.dmPelsHeight	= appSettings.Height;				
+
+		dmScreenSettings.dmSize			= sizeof(dmScreenSettings);	
+		dmScreenSettings.dmPelsWidth	= width;				
+		dmScreenSettings.dmPelsHeight	= height;				
 		dmScreenSettings.dmBitsPerPel	= colorDepth;					
-		dmScreenSettings.dmFields=DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
+		dmScreenSettings.dmFields       = DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
 
 		// Try To Set Selected Mode And Get Results.  NOTE: CDS_FULLSCREEN Gets Rid Of Start Bar.
 		if(ChangeDisplaySettings(&dmScreenSettings,CDS_FULLSCREEN)!=DISP_CHANGE_SUCCESSFUL)
@@ -50,23 +50,24 @@ OpenGLRenderWindow::OpenGLRenderWindow( )
 
 	PIXELFORMATDESCRIPTOR pfd;
 	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
-	pfd.nSize		= sizeof(PIXELFORMATDESCRIPTOR);
-	pfd.nVersion	= 1;
-	pfd.dwFlags		= PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-	pfd.iPixelType	= PFD_TYPE_RGBA;
-	pfd.cColorBits	= static_cast<BYTE>(colorDepth);
-	pfd.cDepthBits	= static_cast<BYTE>(depthBits);
+	
+	pfd.nSize		 = sizeof(PIXELFORMATDESCRIPTOR);
+	pfd.nVersion	 = 1;
+	pfd.dwFlags		 = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+	pfd.iPixelType	 = PFD_TYPE_RGBA;
+	pfd.cColorBits	 = static_cast<BYTE>(colorDepth);
+	pfd.cDepthBits	 = static_cast<BYTE>(depthBits);
 	pfd.cStencilBits = static_cast<BYTE>(stencilBits);
-	pfd.iLayerType	= PFD_MAIN_PLANE;
+	pfd.iLayerType	 = PFD_MAIN_PLANE;
 
 	GLuint pixelFormat = ::ChoosePixelFormat(mHdc,&pfd);
 	assert(pixelFormat != 0);
 
-	::SetPixelFormat(mHdc,pixelFormat,&pfd);
+	SetPixelFormat(mHdc,pixelFormat,&pfd);
 
-	mHrc = ::wglCreateContext(mHdc);
-	::wglMakeCurrent(mHdc, mHrc);
-	
+	mHrc = wglCreateContext(mHdc);
+	wglMakeCurrent(mHdc, mHrc);
+
 	// init glew
 	GLenum err = glewInit();
 	if (GLEW_OK != err)

@@ -20,7 +20,6 @@
 #include <functional>
 #include <cassert>
 #include <iostream>
-#include <fstream>
 #include <sstream>
 #include <cmath>
 #include <algorithm>
@@ -63,6 +62,7 @@ typedef fastdelegate::FastDelegate3<uint32_t, int32_t, float> InputRangeHandler;
 
 //////////////////////////////////////////////////////////////////////////
 typedef std::string String;
+typedef std::wstring WString;
 
 using std::shared_ptr;
 using std::weak_ptr;

@@ -98,8 +98,6 @@ protected:
 	Timer mTimer;
 
 	ApplicationSettings mAppSettings;
-
-	String mAppTitle;
 	String mConfigFile; 
 
 	// in case multiple threads are used

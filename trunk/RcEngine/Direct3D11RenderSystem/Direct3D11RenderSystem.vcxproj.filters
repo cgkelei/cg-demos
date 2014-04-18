@@ -18,14 +18,8 @@
     <Text Include="D3D11Texture.h">
       <Filter>Header Files</Filter>
     </Text>
-    <Text Include="D3D11Texture.cpp">
-      <Filter>Source Files</Filter>
-    </Text>
     <Text Include="D3D11Prerequisites.h">
       <Filter>Header Files</Filter>
-    </Text>
-    <Text Include="DllMain.cpp">
-      <Filter>Source Files</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>
@@ -119,6 +113,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="D3D11Module.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D11Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DllMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

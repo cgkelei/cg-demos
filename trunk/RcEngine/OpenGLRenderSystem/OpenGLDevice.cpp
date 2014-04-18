@@ -35,7 +35,7 @@ OpenGLDevice::OpenGLDevice()
 	gOpenGLDevice = this;
 	mBlitFBO[0] = mBlitFBO[1] = 0; 
 
-	mRenderFactory = new OpenGLFactory();
+	mRHFactory = new OpenGLFactory();
 }
 
 OpenGLDevice::~OpenGLDevice(void)
@@ -50,9 +50,7 @@ void OpenGLDevice::CreateRenderWindow()
 {
 	const ApplicationSettings& appSettings = Application::msApp->GetAppSettings();
 
-	mScreenFrameBuffer = std::make_shared<OpenGLRenderWindow>();
-	
-	BindFrameBuffer(mScreenFrameBuffer);
+	mScreenFrameBuffer = std::make_shared<OpenGLRenderWindow>(appSettings.Width, appSettings.Height);
 
 	mScreenFrameBuffer->AttachRTV(ATT_Color0, std::make_shared<OpenGLScreenRenderTargetView2D>());
 	if(PixelFormatUtils::IsDepth(appSettings.DepthStencilFormat))
@@ -60,11 +58,15 @@ void OpenGLDevice::CreateRenderWindow()
 		// Have depth buffer, attach it
 		mScreenFrameBuffer->AttachRTV(ATT_DepthStencil, std::make_shared<OpenGLScreenDepthStencilView>(appSettings.DepthStencilFormat));
 	}
-
+	mScreenFrameBuffer->SetViewport(RHViewport(0, 0, appSettings.Width, appSettings.Height));
+	
+	// Bind as default
+	BindFrameBuffer(mScreenFrameBuffer);
+	
 	//Create default render state
-	mCurrentDepthStencilState = mRenderFactory->CreateDepthStencilState(RHDepthStencilStateDesc());
-	mCurrentBlendState = mRenderFactory->CreateBlendState(RHBlendStateDesc());
-	mCurrentRasterizerState = mRenderFactory->CreateRasterizerState(RHRasterizerStateDesc());
+	mCurrentDepthStencilState = mRHFactory->CreateDepthStencilState(RHDepthStencilStateDesc());
+	mCurrentBlendState = mRHFactory->CreateBlendState(RHBlendStateDesc());
+	mCurrentRasterizerState = mRHFactory->CreateRasterizerState(RHRasterizerStateDesc());
 
 	// enable default render state
 	glEnable(GL_DEPTH_TEST);

@@ -22,10 +22,10 @@ const String ModuleNames[MT_Count] =
 {
 #ifdef _DEBUG
 	"OpenGLRenderSystem_d",
-	"D3D11RenderSystem_d",
+	"Direct3D11RenderSystem_d",
 #else
 	"OpenGLRenderSystem",
-	"D3D11RenderSystem",
+	"Direct3D11RenderSystem",
 #endif
 };
 

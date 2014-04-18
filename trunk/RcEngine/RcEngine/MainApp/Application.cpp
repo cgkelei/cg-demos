@@ -28,7 +28,7 @@ Application::Application( const String& config )
 	InputSystem::Initialize();
 	ModuleManager::Initialize();
 	FileSystem::Initialize();
-	//ResourceManager::Initialize();
+	ResourceManager::Initialize();
 	
 	//UIManager::Initialize();
 
@@ -151,7 +151,11 @@ void Application::ProcessEventQueue()
 
 void Application::LoadAllModules()
 {
-	ModuleManager::GetSingleton().Load(MT_Render_OpengGL);
+	ModuleType deviceType = MT_Render_OpengGL;
+	if (mAppSettings.RHDeviceType == RD_Direct3D11)
+		deviceType = MT_Render_D3D11;
+
+	ModuleManager::GetSingleton().Load(deviceType);
 }
 
 void Application::UnloadAllModules()
@@ -257,7 +261,7 @@ void Application::LoadConfiguration()
 	XMLDoc xmlConfig;
 	XMLNodePtr appNode = xmlConfig.Parse(config);
 
-	mAppTitle = appNode->Attribute("Title")->ValueString();
+	mAppSettings.AppTitle = appNode->AttributeString("Title", "RcEngine");
 
 	XMLNodePtr graphicNode = appNode->FirstNode("Graphics");
 
@@ -269,18 +273,36 @@ void Application::LoadConfiguration()
 	mAppSettings.ColorFormat = PixelFormatUtils::GetPixelFormat(graphicNode->Attribute("ColorForamt")->ValueString());
 	mAppSettings.DepthStencilFormat = PixelFormatUtils::GetPixelFormat(graphicNode->Attribute("DepthStencilFormat")->ValueString());
 
-	XMLNodePtr sampleNode = graphicNode->FirstNode("Sample");
-	if (sampleNode)
+	XMLNodePtr node;
+	
+	node = graphicNode->FirstNode("Sample");
+	if (node)
 	{
-		mAppSettings.SampleCount = sampleNode->Attribute("Count")->ValueUInt();
-		mAppSettings.SampleQuality = sampleNode->Attribute("Quality")->ValueUInt();
+		mAppSettings.SampleCount = node->AttributeUInt("Count", 1);
+		mAppSettings.SampleQuality = node->AttributeUInt("Quality", 0); 
 	}
 
-	XMLNodePtr syncNode = graphicNode->FirstNode("SyncInterval");
-	if (syncNode)
+	node = graphicNode->FirstNode("SyncInterval");
+	if (node)
 	{
-		mAppSettings.SyncInterval = syncNode->Attribute("Interval")->ValueUInt();
+		mAppSettings.SyncInterval = node->AttributeUInt("Interval", 0);  
 	}
+
+	node = appNode->FirstNode("RenderSystem");
+	if (node)
+	{
+		String name = node->AttributeString("System", "OpenGL");
+		if (name == "OpenGL")
+			mAppSettings.RHDeviceType = RD_OpenGL;
+		else if (name == "Direct3D11")
+			mAppSettings.RHDeviceType = RD_Direct3D11;
+		else
+		{
+			assert(false);
+		}
+	}
+	else
+		mAppSettings.RHDeviceType = RD_OpenGL;
 
 	XMLNodePtr resNode = appNode->FirstNode("Resource");
 	for (XMLNodePtr groupNode = resNode->FirstNode("Group"); groupNode; groupNode = groupNode->NextSibling("Group"))

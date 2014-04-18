@@ -31,6 +31,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EffectSystemTest", "Samples
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Direct3D11RenderSystem", "Direct3D11RenderSystem\Direct3D11RenderSystem.vcxproj", "{9D87FBBF-A444-4AB6-BCF8-C40F83974286}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FrameworkTest", "Samples\FrameworkTest\FrameworkTest.vcxproj", "{3B177D83-7D91-4EFD-9C59-201D58A4B56D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -89,6 +91,10 @@ Global
 		{9D87FBBF-A444-4AB6-BCF8-C40F83974286}.Debug|Win32.Build.0 = Debug|Win32
 		{9D87FBBF-A444-4AB6-BCF8-C40F83974286}.Release|Win32.ActiveCfg = Release|Win32
 		{9D87FBBF-A444-4AB6-BCF8-C40F83974286}.Release|Win32.Build.0 = Release|Win32
+		{3B177D83-7D91-4EFD-9C59-201D58A4B56D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3B177D83-7D91-4EFD-9C59-201D58A4B56D}.Debug|Win32.Build.0 = Debug|Win32
+		{3B177D83-7D91-4EFD-9C59-201D58A4B56D}.Release|Win32.ActiveCfg = Release|Win32
+		{3B177D83-7D91-4EFD-9C59-201D58A4B56D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -103,5 +109,6 @@ Global
 		{CAADBA4F-F7A1-40E4-961F-D2BD2B033E09} = {3B4A1896-1B80-4E14-B14D-03138B4E4C13}
 		{1CF379D5-7245-412C-A58A-4A581D81E263} = {3B4A1896-1B80-4E14-B14D-03138B4E4C13}
 		{0E8E4A2E-C546-4521-8DC0-E5E34762AF09} = {3B4A1896-1B80-4E14-B14D-03138B4E4C13}
+		{3B177D83-7D91-4EFD-9C59-201D58A4B56D} = {3B4A1896-1B80-4E14-B14D-03138B4E4C13}
 	EndGlobalSection
 EndGlobal
