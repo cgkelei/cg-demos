@@ -9,7 +9,7 @@ namespace RcEngine {
 class _OpenGLExport OpenGLRenderWindow : public OpenGLFrameBuffer
 {
 public:
-	OpenGLRenderWindow();
+	OpenGLRenderWindow(uint32_t width, uint32_t height);
 	~OpenGLRenderWindow();
 
 	void ToggleFullscreen(bool fs);

@@ -6,7 +6,7 @@
 
 namespace RcEngine {
 
-class RHDevice;
+class OpenGLDevice;
 
 class _OpenGLExport OpenGLModule : public IModule
 {
@@ -19,7 +19,7 @@ public:
 	void Shutdown();
 	
 private:
-	RHDevice* mRenderDevice;
+	OpenGLDevice* mRenderDevice;
 };
 
 }

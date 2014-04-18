@@ -211,9 +211,8 @@ Window::Window(const ApplicationSettings& settings )
 	msWindow = this;
 	mhInstance	= GetModuleHandle(NULL);
 
-	// Input Event Queue
-	mInputSystem = InputSystem::GetSingletonPtr();
-		
+	// Init input mappings
+	mInputSystem = InputSystem::GetSingletonPtr();	
 	if (!mInputSystem)
 		ENGINE_EXCEPT(Exception::ERR_RT_ASSERTION_FAILED, "Input System Not Initialized!", "Window::Window");
 
@@ -223,16 +222,10 @@ Window::Window(const ApplicationSettings& settings )
 		VKMappingInitialized = true;
 	}
 
-	WNDCLASSEX	wcex;						// Windows Class Structure
-	DWORD		dwExStyle;				// Window Extended Style
-	DWORD		dwStyle;				// Window Style
-	RECT		WindowRect;				// Grabs Rectangle Upper Left / Lower Right Values
+	// Register wnd class
+	WString wtitle = StringToWString(settings.AppTitle);
 
-	mFullscreen = settings.Fullscreen;
-
-	std::wstring wtitle;
-	Convert(wtitle, settings.AppTitle);
-
+	WNDCLASSEX	wcex;					
 	wcex.cbSize			    = sizeof(WNDCLASSEX);
 	wcex.style              = CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc        = (Window::WndProcStatic);
@@ -241,59 +234,65 @@ Window::Window(const ApplicationSettings& settings )
 	wcex.hInstance          = mhInstance;
 	wcex.hIcon              = NULL;
 	wcex.hCursor            = LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground      = static_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH));
-	wcex.lpszMenuName       = 0;
+	wcex.hbrBackground      = ( HBRUSH )( COLOR_WINDOW + 1 );
+	wcex.lpszMenuName       = NULL;
 	wcex.lpszClassName      = wtitle.c_str();
 	wcex.hIconSm            = NULL;
 
-	if (!RegisterClassEx(&wcex))									// Attempt To Register The Window Class
+	if (!RegisterClassEx(&wcex))
 	{
 		MessageBox(NULL,TEXT("Failed To Register The Window Class."), TEXT("ERROR"),  MB_OK|MB_ICONEXCLAMATION);
 	}
 
-	if (settings.Fullscreen)												// Are We Still In Fullscreen Mode?
+	// Create window
+	DWORD		dwExStyle;												
+	DWORD		dwStyle;											
+								
+	mFullscreen = settings.Fullscreen;
+
+	if (settings.Fullscreen)									
 	{
-		dwExStyle=WS_EX_APPWINDOW;								// Window Extended Style
-		dwStyle=WS_POPUP;										// Windows Style
-		::ShowCursor(FALSE);										// Hide Mouse Pointer
+		dwExStyle=WS_EX_APPWINDOW;							
+		dwStyle=WS_POPUP;										
+		::ShowCursor(FALSE);									
 	}
 	else
 	{
-		dwExStyle=WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;			// Window Extended Style
-		dwStyle=WS_OVERLAPPEDWINDOW;							// Windows Style
+		dwExStyle=WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;			
+		dwStyle=WS_OVERLAPPEDWINDOW;						
 	}
 
-	WindowRect.left = (long)settings.Left;
-	WindowRect.top=(long)settings.Top;		
-	WindowRect.right=(long)settings.Width+WindowRect.left ;		
-	WindowRect.bottom=(long)settings.Height+WindowRect.top;
+	RECT		rc;		
+	rc.left	  = static_cast<LONG>(settings.Left);
+	rc.top	  = static_cast<LONG>(settings.Top);	
+	rc.right  = static_cast<LONG>(settings.Width + rc.left);	
+	rc.bottom = static_cast<LONG>(settings.Height + rc.top);
+	AdjustWindowRectEx(&rc, dwStyle, FALSE, dwExStyle);		
 
-	::AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);		// Adjust Window To True Requested Size
 
-	// Create The Window
-	if (!(mhWnd = ::CreateWindowEx(dwExStyle,							// Extended Style For The Window
-		wtitle.c_str(),							// Class Name
-		wtitle.c_str(),						// Window Title
-		dwStyle |							// Defined Window Style
-		WS_CLIPSIBLINGS |					// Required Window Style
-		WS_CLIPCHILDREN,					// Required Window Style
-		WindowRect.left, WindowRect.top,	// Window Position
-		WindowRect.right-WindowRect.left,	// Calculate Window Width
-		WindowRect.bottom-WindowRect.top,	// Calculate Window Height
-		NULL,								// No Parent Window
-		NULL,								// No Menu
-		mhInstance,							// Instance
-		NULL)))								// Dont Pass Anything To WM_CREATE
+	if (!(mhWnd = CreateWindowEx(dwExStyle,							    // Extended Style For The Window
+		wtitle.c_str(),													// Class Name
+		wtitle.c_str(),						                            // Window Title
+		dwStyle |							                            // Defined Window Style
+		WS_CLIPSIBLINGS |					                            // Required Window Style
+		WS_CLIPCHILDREN,					                            // Required Window Style
+		rc.left, rc.top,	                                            // Window Position
+		rc.right-rc.left,	                                            // Calculate Window Width
+		rc.bottom-rc.top,	                                            // Calculate Window Height
+		NULL,								                            // No Parent Window
+		NULL,								                            // No Menu
+		mhInstance,							                            // Instance
+		NULL)))								                            // Dont Pass Anything To WM_CREATE
 	{
 		MessageBox(NULL,TEXT("Window Creation Error."),TEXT("ERROR"),MB_OK|MB_ICONEXCLAMATION);
 	}
 
 
-	::GetClientRect(mhWnd, &WindowRect);
-	mLeft = settings.Left;
-	mTop = settings.Top;
-	mWidth = WindowRect.right - WindowRect.left;
-	mHeight = WindowRect.bottom - WindowRect.top;
+	GetClientRect(mhWnd, &rc);
+	mLeft = rc.left;
+	mTop = rc.top;
+	mWidth = rc.right - rc.left;
+	mHeight = rc.bottom - rc.top;
 }
 
 
@@ -526,8 +525,7 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 
 	case WM_DESTROY:
 		{
-			std::wstring wtitle;
-			Convert(wtitle, mName);
+			WString wtitle = StringToWString(mName);
 			UnregisterClass(wtitle.c_str(), mhInstance);
 
 			OnClose();
@@ -542,8 +540,7 @@ LRESULT Window::WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 
 void Window::SetTitle( const String& title )
 {
-	std::wstring text;
-	Convert(text, title);
+	WString text = StringToWString(title);
 	::SetWindowText(mhWnd, text.c_str());
 }
 

@@ -1,10 +1,12 @@
 #include <Graphics/RHFactory.h>
+#include <Graphics/RHResource.h>
+#include <Core/Environment.h>
 
 namespace RcEngine {
 
 RHFactory::RHFactory()
 {
-
+	Environment::GetSingleton().mRHFactory = this;
 }
 
 shared_ptr<RHBlendState> RHFactory::CreateBlendState( const RHBlendStateDesc& desc )
@@ -45,6 +47,17 @@ shared_ptr<RHDepthStencilState> RHFactory::CreateDepthStencilState( const RHDept
 	}
 
 	return mDepthStecilStatePool[desc];
+}
+
+shared_ptr<RHShader> RHFactory::LoadShaderFromFile( ShaderType shaderType, const String& filename, const ShaderMacro* macros, uint32_t macroCount, const String& entryPoint /*= ""*/ )
+{
+	//mShaderPool
+	shared_ptr<RHShader> shader = CreateShader(shaderType);
+
+	// Todo: load binary code if exits
+	shader->LoadFromFile(filename, macros, macroCount, entryPoint);
+
+	return shader;
 }
 
 }

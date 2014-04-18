@@ -20,7 +20,7 @@ public:
 	virtual ~RHDevice(void);
 
 	inline bool Fullscreen() const												    { return mIsFullscreen; }
-	inline RHFactory* GetFactory() const									        { return mRenderFactory; }
+	inline RHFactory* GetFactory() const									        { return mRHFactory; }
 																  
 	inline shared_ptr<RHFrameBuffer> GetCurrentFrameBuffer() const					{ return mCurrentFrameBuffer; }
 	inline shared_ptr<RHFrameBuffer> GetScreenFrameBuffer() const					{ return mScreenFrameBuffer; }
@@ -44,7 +44,7 @@ protected:
 	virtual void SetViewport(const RHViewport& vp) = 0;
 
 protected:
-	RHFactory* mRenderFactory;
+	RHFactory* mRHFactory;
 
 	uint32_t mWidth, mHeight;
 	bool mIsFullscreen;

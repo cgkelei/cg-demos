@@ -12,11 +12,12 @@ RHRenderView::RHRenderView( const shared_ptr<RHTexture>& texture )
 }
 
 //////////////////////////////////////////////////////////////////////////
-RHFrameBuffer::RHFrameBuffer( bool offscreen /*= true*/ )
-	: mOffscreen(offscreen),
+RHFrameBuffer::RHFrameBuffer( uint32_t width, uint32_t height )
+	: mWidth(width),
+	  mHeight(height),
 	  mDirty(true)
 {
-	
+
 }
 
 RHFrameBuffer::~RHFrameBuffer()

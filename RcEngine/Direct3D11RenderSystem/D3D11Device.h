@@ -15,6 +15,7 @@ public:
 	D3D11Device();
 	~D3D11Device();
 
+	void CreateRenderWindow();
 	void ToggleFullscreen(bool fs);
 	void AdjustProjectionMatrix(float4x4& pOut);
 	void SetSamplerState(ShaderType stage, uint32_t unit, const shared_ptr<RHSamplerState>& state);
@@ -26,8 +27,6 @@ protected:
 	void SetViewport(const RHViewport& vp);
 	void DoDraw(const RHOperation& operation);
 	//void DoRender( EffectTechnique& tech, RenderOperation& op );
-
-	void CreateRenderWindow();
 
 public:
 	ID3D11DeviceContext* DeviceContextD3D11;

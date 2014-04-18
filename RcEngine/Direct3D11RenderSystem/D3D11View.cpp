@@ -29,6 +29,7 @@ D3D11StructuredBufferSRV::D3D11StructuredBufferSRV( const shared_ptr<RHBuffer>& 
 	: D3D11BufferSRV(buffer)
 {
 	D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+	ZeroMemory( &desc, sizeof(desc) );
 
 	desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
 	desc.Format = DXGI_FORMAT_UNKNOWN;
@@ -44,6 +45,7 @@ D3D11TextureBufferSRV::D3D11TextureBufferSRV( const shared_ptr<RHBuffer>& buffer
 	: D3D11BufferSRV(buffer)
 {
 	D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+	ZeroMemory( &desc, sizeof(desc) );
 
 	desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
 	desc.Format = D3D11Mapping::Mapping(format);
@@ -75,6 +77,8 @@ D3D11Texture1DSRV::D3D11Texture1DSRV( const shared_ptr<RHTexture>& texture, uint
 	D3D11Texture1D* textureD3D11 = static_cast_checked<D3D11Texture1D*>(texture.get());
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC  viewDesc;
+	ZeroMemory( &viewDesc, sizeof(viewDesc) );
+
 	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
 
 	if (textureD3D11->GetTextureArraySize() <= 1)
@@ -107,6 +111,7 @@ D3D11Texture2DSRV::D3D11Texture2DSRV( const shared_ptr<RHTexture>& texture, uint
 	D3D11Texture2D* textureD3D11 = static_cast_checked<D3D11Texture2D*>(texture.get());
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+	ZeroMemory( &viewDesc, sizeof(viewDesc) );
 	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
 
 	if (textureD3D11->GetTextureArraySize() <= 1)
@@ -152,6 +157,8 @@ D3D11Texture3DSRV::D3D11Texture3DSRV( const shared_ptr<RHTexture>& texture, uint
 	assert(createFlags & TexCreate_ShaderResource);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+	ZeroMemory( &viewDesc, sizeof(viewDesc) );
+
 	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
 	viewDesc.Texture3D.MostDetailedMip = mostDetailedMip;
 	viewDesc.Texture3D.MipLevels = mipLevels;
@@ -160,6 +167,46 @@ D3D11Texture3DSRV::D3D11Texture3DSRV( const shared_ptr<RHTexture>& texture, uint
 	D3D11Texture3D* textureD3D11 = static_cast_checked<D3D11Texture3D*>(texture.get());
 	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
 }
+
+//////////////////////////////////////////////////////////////////////////
+D3D11TextureCubeSRV::D3D11TextureCubeSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
+	: D3D11TextureSRV(texture)
+{
+	uint32_t createFlags = texture->GetCreateFlags();
+	assert(createFlags & TexCreate_ShaderResource);
+	
+	D3D11TextureCube* textureD3D11 = static_cast_checked<D3D11TextureCube*>(texture.get());
+	
+	D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+	ZeroMemory( &viewDesc, sizeof(viewDesc) );
+
+	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
+	
+	if (textureD3D11->GetTextureArraySize() <= 1)
+	{
+		viewDesc.TextureCube.MostDetailedMip = mostDetailedMip;
+		viewDesc.TextureCube.MipLevels = mipLevels;
+		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+	}
+	else
+	{
+		// Need test
+		assert(false);
+		viewDesc.TextureCubeArray.MostDetailedMip = mostDetailedMip;
+		viewDesc.TextureCubeArray.MipLevels = mipLevels;
+		viewDesc.TextureCubeArray.First2DArrayFace = firstArraySlice;
+		viewDesc.TextureCubeArray.NumCubes = arraySize;
+		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBEARRAY;
+	}
+	
+	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
+	if (FAILED(hr))
+	{
+		// Error
+	}
+}
+
+
 
 
 //bool CreateTexture1DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV )
@@ -325,6 +372,7 @@ D3D11TextureBufferUAV::D3D11TextureBufferUAV( const shared_ptr<RHBuffer>& buffer
 	: D3D11BufferUAV(buffer)
 {
 	D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
+	ZeroMemory( &desc, sizeof(desc) );
 
 	desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 	desc.Format = D3D11Mapping::Mapping(format);
@@ -346,6 +394,7 @@ D3D11StructuredBufferUAV::D3D11StructuredBufferUAV( const shared_ptr<RHBuffer>& 
 	: D3D11BufferUAV(buffer)
 {
 	D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
+	ZeroMemory( &desc, sizeof(desc) );
 
 	desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 	desc.Format = DXGI_FORMAT_UNKNOWN;
@@ -391,6 +440,8 @@ D3D11Texture1DUAV::D3D11Texture1DUAV( const shared_ptr<RHTexture>& texture, uint
 	D3D11Texture1D* textureD3D11 = static_cast_checked<D3D11Texture1D*>(texture.get());
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC viewDesc;
+	ZeroMemory( &viewDesc, sizeof(viewDesc) );
+
 	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
 
 	if (textureD3D11->GetTextureArraySize() <= 1)
@@ -420,6 +471,8 @@ D3D11Texture2DUAV::D3D11Texture2DUAV( const shared_ptr<RHTexture>& texture, uint
 	D3D11Texture2D* textureD3D11 = static_cast_checked<D3D11Texture2D*>(texture.get());
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC viewDesc;
+	ZeroMemory( &viewDesc, sizeof(viewDesc) );
+
 	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
 
 	if (textureD3D11->GetTextureArraySize() <= 1)

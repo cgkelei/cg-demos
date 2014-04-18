@@ -4,8 +4,8 @@
 
 namespace RcEngine {
 
-D3D11FrameBuffer::D3D11FrameBuffer( bool offscreen /*= true*/ )
-	: RHFrameBuffer(offscreen)
+D3D11FrameBuffer::D3D11FrameBuffer( uint32_t width, uint32_t height )
+	: RHFrameBuffer(width, height)
 {
 
 }

@@ -10,9 +10,8 @@
 
 namespace RcEngine {
 
-D3D11Factory::D3D11Factory( ID3D11Device* deviceD3D11 )
-	: RHFactory(),
-	  mDeviceD3D11(deviceD3D11)
+D3D11Factory::D3D11Factory()
+	: RHFactory()
 {
 
 }

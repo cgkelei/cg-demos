@@ -4,17 +4,9 @@
 
 #include <Core/Prerequisites.h>
 #include <type_traits>
+#include <codecvt>
 
 namespace RcEngine {
-
-// Convert Build-In type to String
-template <typename T>
-inline std::string ToString(const T& value)
-{
-	std::stringstream str;
-	str << value;
-	return str.str();
-}
 
 // Convert string to other number type
 template <typename Target, typename Source>
@@ -57,7 +49,17 @@ inline T EndianSwapBytes(T value)
 	return SwapBytes<T, sizeof(T)>(value);
 }
 
-std::wstring& Convert(std::wstring& dest, std::string const & src);
+inline WString StringToWString(const String& src)
+{
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> convert;
+	return convert.from_bytes(src);
+}
+
+inline String WStringToString(const WString& src)
+{
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> convert;
+	return convert.to_bytes(src);
+}
 
 /**
  * Convert float to uint32

@@ -57,7 +57,7 @@ protected:
 class _ApiExport RHFrameBuffer
 {
 public:
-	RHFrameBuffer(bool offscreen = true);
+	RHFrameBuffer(uint32_t width, uint32_t height);
 	virtual ~RHFrameBuffer();
 
 	inline bool IsDirty() const			{ return mDirty; }
@@ -91,6 +91,8 @@ public:
 
 protected:
 
+	uint32_t mWidth, mHeight;
+
 	// Todo: add multiple viewports support
 	RHViewport mViewport;
 
@@ -100,7 +102,6 @@ protected:
 	// Unordered access view, used in per-pixel list method, like OIT.
 	vector<shared_ptr<RHUnorderedAccessView>> mUnorderedAccessViews;
 	
-	bool mOffscreen;
 	bool mDirty;
 
 	//shared_ptr<Camera> mCamera;

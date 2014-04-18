@@ -26,7 +26,7 @@ public:
 	virtual ~OpenGLShader();
 
 	virtual bool LoadFromByteCode(const String& filename);
-	virtual bool LoadFromFile(const String& filename, const vector<ShaderMacro>& macros, const String& entryPoint = "");
+	virtual bool LoadFromFile(const String& filename, const ShaderMacro* macros, uint32_t macroCount, const String& entryPoint = "");
 
 private:
 	void ShaderReflect();

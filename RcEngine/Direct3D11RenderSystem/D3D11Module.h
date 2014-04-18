@@ -6,7 +6,7 @@
 
 namespace RcEngine {
 
-class RHDevice;
+class D3D11Device;
 
 class _D3D11Export D3D11Module : public IModule
 {
@@ -19,7 +19,7 @@ public:
 	void Shutdown();
 
 private:
-	RHDevice* mRenderDevice;
+	D3D11Device* mRenderDevice;
 };
 
 }

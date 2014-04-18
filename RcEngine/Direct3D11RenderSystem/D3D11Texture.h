@@ -18,7 +18,7 @@ public:
 		uint32_t sampleQuality,
 		uint32_t accessHint,
 		uint32_t flags);
-	virtual ~D3D11Texture();
+	virtual ~D3D11Texture() {}
 
 	virtual void BuildMipMap();
 

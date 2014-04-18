@@ -12,7 +12,7 @@ struct  RenderSettings;
 class _D3D11Export D3D11RenderWindow : public D3D11FrameBuffer
 {
 public:
-	D3D11RenderWindow();
+	D3D11RenderWindow(uint32_t width, uint32_t height);
 	~D3D11RenderWindow();
 
 	void ToggleFullscreen(bool fs);
@@ -24,7 +24,6 @@ public:
 private:
 	std::string mDescription;
 	uint32_t mSyncInterval;
-	HWND mHwnd;
 };
 
 }

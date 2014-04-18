@@ -1,4 +1,4 @@
-#include "D3D11RenderModule.h"
+#include "D3D11Module.h"
 
 extern "C" void _D3D11Export dllStartPlugin(RcEngine::IModule** pMoudle) 
 {

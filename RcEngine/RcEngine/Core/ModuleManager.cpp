@@ -22,8 +22,7 @@ public:
 		if (name.substr(name.length() - 4, 4) != ".dll")
 			name += ".dll";
 
-		std::wstring wname;
-		Convert(wname, name);
+		WString wname = StringToWString(name);
 		m_hInst = (HINSTANCE)LoadLibraryEx(wname.c_str(), 0,  LOAD_WITH_ALTERED_SEARCH_PATH );
 		if (!m_hInst)
 		{

@@ -355,6 +355,12 @@ void OpenGLTexture2D::Map2D( uint32_t arrayIndex, uint32_t level, ResourceMapAcc
 //	}
 }
 
+void OpenGLTexture2D::Unmap2D( uint32_t arrayIndex, uint32_t level )
+{
+
+}
+
+
 void OpenGLTexture2D::CopyToTexture( RHTexture& destTexture )
 {
 	/*assert(mFormat == destTexture.GetTextureFormat() && mType == destTexture.GetTextureType());

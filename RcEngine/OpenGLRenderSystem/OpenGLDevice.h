@@ -19,6 +19,8 @@ public:
 	OpenGLDevice();
 	~OpenGLDevice(void);
 
+	void CreateRenderWindow();
+
 	void GetBlitFBO(GLuint& srcFBO, GLuint& dstFBO);
 	
 	inline GLuint GetCurrentFBO() const { return mCurrentFBO; }
@@ -39,10 +41,8 @@ public:
 	void SetRasterizerState(const shared_ptr<RHRasterizerState>& state);
 	void SetDepthStencilState(const shared_ptr<RHDepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0);
 	void SetSamplerState(ShaderType stage, uint32_t unit, const shared_ptr<RHSamplerState>& state);
-
 	
 protected:
-	void CreateRenderWindow();
 
 	virtual void SetViewport(const RHViewport& vp);
 	/*void DoRender( EffectTechnique& tech, RenderOperation& operation);*/

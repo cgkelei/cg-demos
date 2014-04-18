@@ -55,6 +55,7 @@ D3D11RenderTargetView2D::D3D11RenderTargetView2D( const shared_ptr<RHTexture>& t
 	ID3D11Device*           g_pd3dDevice = NULL;
 
 	D3D11_RENDER_TARGET_VIEW_DESC  viewDesc;
+	ZeroMemory( &viewDesc, sizeof(viewDesc) );
 	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
 
 	uint32_t textureArraySize = texture->GetTextureArraySize();
@@ -99,6 +100,7 @@ D3D11RenderTargetViewArray::D3D11RenderTargetViewArray( const shared_ptr<RHTextu
 	assert(texture->GetTextureArraySize() > 1);
 
 	D3D11_RENDER_TARGET_VIEW_DESC  viewDesc;
+	ZeroMemory( &viewDesc, sizeof(viewDesc) );
 	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
 
 	if (texture->GetSampleCount() > 1)

@@ -23,6 +23,7 @@ const String& D3D11Module::GetName() const
 void D3D11Module::Initialise()
 {
 	mRenderDevice = new D3D11Device();
+	mRenderDevice->CreateRenderWindow();
 }
 
 void D3D11Module::Shutdown()

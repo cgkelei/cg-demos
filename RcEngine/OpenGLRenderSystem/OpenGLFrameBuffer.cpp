@@ -7,15 +7,14 @@
 
 namespace RcEngine {
 
-OpenGLFrameBuffer::OpenGLFrameBuffer( bool offscreen /*= true*/ )
-	: RHFrameBuffer(offscreen)
+OpenGLFrameBuffer::OpenGLFrameBuffer( uint32_t width, uint32_t height, bool offscreen /*= true*/ )
+	: RHFrameBuffer(width, height)
 {
-	if (mOffscreen)
+	if (offscreen)
 		glGenFramebuffers(1, &mFrameBufferOGL);
 	else
 		mFrameBufferOGL = 0;
 }
-
 OpenGLFrameBuffer::~OpenGLFrameBuffer()
 {
 	DetachAll();

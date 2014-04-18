@@ -23,6 +23,7 @@ const std::string& OpenGLModule::GetName() const
 void OpenGLModule::Initialise()
 {
 	mRenderDevice = new OpenGLDevice();
+	mRenderDevice->CreateRenderWindow();
 }
 
 void OpenGLModule::Shutdown()

@@ -10,7 +10,7 @@ namespace RcEngine {
 class _D3D11Export D3D11Factory : public RHFactory 
 {
 public:
-	D3D11Factory(ID3D11Device* deviceD3D11);
+	D3D11Factory();
 
 	virtual shared_ptr<RHVertexDeclaration> CreateVertexDeclaration(RHVertexElement* elems, uint32_t count);
 
@@ -112,9 +112,6 @@ protected:
 	virtual shared_ptr<RHSamplerState> CreateSamplerStateImpl(const RHSamplerStateDesc& desc);
 	virtual shared_ptr<RHRasterizerState> CreateRasterizerStateImpl(const RHRasterizerStateDesc& desc);
 	virtual shared_ptr<RHDepthStencilState> CreateDepthStencilStateImpl(const RHDepthStencilStateDesc& desc);
-
-private:
-	ID3D11Device* mDeviceD3D11;
 };
 
 }

@@ -354,5 +354,52 @@ DXGI_FORMAT D3D11Mapping::Mapping( VertexElementFormat format )
 	}
 }
 
+void D3D11Mapping::UnMapping( D3D10_SRV_DIMENSION dimension, TextureType& oTexType, bool& oTexArray )
+{
+	switch (dimension)
+	{
+	case D3D10_SRV_DIMENSION_TEXTURE1D:
+		{
+			oTexType = TT_Texture1D;
+			oTexArray = false;
+		}
+		break;
+	case D3D10_SRV_DIMENSION_TEXTURE1DARRAY:
+		{
+			oTexType = TT_Texture1D;
+			oTexArray = true;
+		}
+		break;
+	case D3D10_SRV_DIMENSION_TEXTURE2D:
+	case D3D10_SRV_DIMENSION_TEXTURE2DMS:
+		{
+			oTexType = TT_Texture2D;
+			oTexArray = false;
+		}
+		break;
+	case D3D10_SRV_DIMENSION_TEXTURE2DARRAY:
+	case D3D10_SRV_DIMENSION_TEXTURE2DMSARRAY:
+		{
+			oTexType = TT_Texture2D;
+			oTexArray = true;
+		}
+		break;
+	case D3D10_SRV_DIMENSION_TEXTURE3D:
+		{
+			oTexType = TT_Texture3D;
+			oTexArray = false;
+		}
+		break;
+	case D3D10_SRV_DIMENSION_TEXTURECUBE:
+		{
+			oTexType = TT_TextureCube;
+			oTexArray = false;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
 
 }
