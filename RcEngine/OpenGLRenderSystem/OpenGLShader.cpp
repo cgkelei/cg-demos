@@ -208,16 +208,13 @@ void OpenGLShader::ShaderReflect()
 		glGetActiveUniformsiv(mShaderOGL, 1, &i, GL_UNIFORM_BLOCK_INDEX, &blockIdx);
 		if (blockIdx == GL_INVALID_INDEX) // Global uniform parameter
 		{
-			UniformParameter uniformParameter;
-
-			uniformParameter.Name = actualName;
-			uniformParameter.Type = OpenGLMapping::UnMapping(type);
-			uniformParameter.ArraySize = size;
-			uniformParameter.Location = glGetProgramResourceLocation(mShaderOGL, GL_UNIFORM, &name[0]);
-			//uniformParameter.Location = glGetUniformLocation(ShaderOGL, &name[0]);
-			uniformParameter.Offset = -1;
-
 			
+			GlobalParam uniform;
+
+			uniform.Name = actualName;
+			uniform.Type = OpenGLMapping::UnMapping(type);
+			uniform.ArraySize = size;
+			uniform.Location = glGetProgramResourceLocation(mShaderOGL, GL_UNIFORM, &name[0]);
 		}
 		else
 		{

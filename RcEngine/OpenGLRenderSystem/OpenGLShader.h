@@ -7,17 +7,32 @@
 
 namespace RcEngine {
 
-struct _OpenGLExport UniformParameter
+struct GlobalParam
 {
 	String Name;
+	GLint Location;
+	GLuint ArraySize;
 	EffectParameterType Type;
-	int32_t ArraySize;
-	GLint Location; // -1 for uniform block parameter
-	
-	int32_t Offset; 
-	int32_t ArrayStride;
-	int32_t MatrixStride;
 };
+
+struct UniformBufferParam
+{
+	String Name;
+	uint32_t BufferSize;
+};
+
+struct SRVParam
+{
+	String Name;
+	GLuint Binding;
+};
+
+struct UAVParam
+{
+	String Name;
+	GLuint Binding;
+};
+
 
 class _OpenGLExport OpenGLShader : public RHShader
 {
@@ -33,21 +48,25 @@ private:
 
 private:
 	GLuint mShaderOGL;
-	std::vector<UniformParameter> ShaderParameters;
+	
+	std::vector<SRVParam> mSRVParams;
+	std::vector<UAVParam> mSRVParams;
+	std::vector<GlobalParam> mGlobalParams;
+	std::vector<UniformBufferParam> mUniformBuffers;
 };
 
-//class _OpenGLExport OpenGLShaderPipeline : public ShaderProgram
-//{
-//public:
-//	OpenGLShaderPipeline(Effect& effect);
-//	~OpenGLShaderPipeline();
-//
-//	virtual void Bind();
-//	virtual void Unbind();
-//
-//public:
-//	GLuint PipelineOGL;
-//};
+class _OpenGLExport OpenGLShaderPipeline : public RHShaderPipeline
+{
+public:
+	OpenGLShaderPipeline();
+	~OpenGLShaderPipeline();
+
+	virtual void OnBind();
+	virtual void OnUnbind();
+
+protected:
+
+};
 
 
 }
