@@ -96,12 +96,12 @@ public:
 		uint32_t level, uint32_t firstArraySlice, uint32_t arraySize);
 
 
-	virtual shared_ptr<RHShaderResourceView> CreateStructuredBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount);
-	virtual shared_ptr<RHShaderResourceView> CreateTextureBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format);
+	virtual shared_ptr<RHShaderResourceView> CreateStructuredBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, uint32_t strutureStride);
+	virtual shared_ptr<RHShaderResourceView> CreateTextureBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, PixelFormat format);
 
 	// Unordered access view
-	virtual shared_ptr<RHUnorderedAccessView> CreateStructuredBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount);
-	virtual shared_ptr<RHUnorderedAccessView> CreateTextureBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format);
+	virtual shared_ptr<RHUnorderedAccessView> CreateStructuredBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, uint32_t strutureStride);
+	virtual shared_ptr<RHUnorderedAccessView> CreateTextureBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, PixelFormat format);
 
 	// Render target view
 	virtual shared_ptr<RHRenderView> CreateRenderTargetView2D(const shared_ptr<RHTexture>& texture, uint32_t arrayIndex, uint32_t level);

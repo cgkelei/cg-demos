@@ -22,35 +22,32 @@ public:
 	ID3D11ShaderResourceView* ShaderResourceViewD3D11;
 };
 
-class _D3D11Export D3D11BufferSRV : public D3D11ShaderResouceView
-{
-public:
-	D3D11BufferSRV(const shared_ptr<RHBuffer>& buffer);
-
-protected:
-	shared_ptr<RHBuffer> mBuffer;
-};
-
 class _D3D11Export D3D11TextureSRV : public D3D11ShaderResouceView
 {
 public:
 	D3D11TextureSRV(const shared_ptr<RHTexture>& texture);
 
-public:
+protected:
 	shared_ptr<RHTexture> mTexture;
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11StructuredBufferSRV : public D3D11BufferSRV
+class _D3D11Export D3D11StructuredBufferSRV : public D3D11ShaderResouceView
 {
 public:
-	D3D11StructuredBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount);
+	D3D11StructuredBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth);
+
+protected:
+	shared_ptr<RHBuffer> mBuffer;
 };
 
-class _D3D11Export D3D11TextureBufferSRV : public D3D11BufferSRV
+class _D3D11Export D3D11TextureBufferSRV : public D3D11ShaderResouceView
 {
 public:
-	D3D11TextureBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format);
+	D3D11TextureBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth, PixelFormat format);
+
+protected:
+	shared_ptr<RHBuffer> mBuffer;
 };
 
 // Texture SRV
@@ -118,15 +115,6 @@ public:
 	ID3D11UnorderedAccessView* UnorderedAccessViewD3D11;
 };
 
-class _D3D11Export D3D11BufferUAV : public D3D11UnorderedAccessView
-{
-public:
-	D3D11BufferUAV(const shared_ptr<RHBuffer>& buffer);
-
-protected:
-	shared_ptr<RHBuffer> mBuffer;
-};
-
 class _D3D11Export D3D11TextureUAV : public D3D11UnorderedAccessView
 {
 public:
@@ -137,16 +125,22 @@ protected:
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11TextureBufferUAV : public D3D11BufferUAV
+class _D3D11Export D3D11TextureBufferUAV : public D3D11UnorderedAccessView
 {
 public:
 	D3D11TextureBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format);
+
+protected:
+	shared_ptr<RHBuffer> mBuffer;
 };
 
-class _D3D11Export D3D11StructuredBufferUAV : public D3D11BufferUAV
+class _D3D11Export D3D11StructuredBufferUAV : public D3D11UnorderedAccessView
 {
 public:
 	D3D11StructuredBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount);
+
+protected:
+	shared_ptr<RHBuffer> mBuffer;
 };
 
 //////////////////////////////////////////////////////////////////////////

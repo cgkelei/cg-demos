@@ -17,28 +17,28 @@ public:
 protected:
 	GLuint mResourceOGL;
 	GLenum mTargetOGL;
+
+	// For buffer SRV, Offset and Size
+	GLuint mExtraParams[2];
 };
 
-class _OpenGLExport OpenGLBufferSRV : public OpenGLShaderResourceView
+class _OpenGLExport OpenGLTextureBufferSRV : public OpenGLShaderResourceView
 {
 public:
-	OpenGLBufferSRV(const shared_ptr<RHBuffer>& buffer) : mBuffer(buffer) {}
+	OpenGLTextureBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth, PixelFormat format);
+	~OpenGLTextureBufferSRV();
 
 protected:
 	shared_ptr<RHBuffer> mBuffer;
 };
 
-class _OpenGLExport OpenGLTextureBufferSRV : public OpenGLBufferSRV
+class _OpenGLExport OpenGLStructuredBufferSRV : public OpenGLShaderResourceView
 {
 public:
-	OpenGLTextureBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format);
-	~OpenGLTextureBufferSRV();
-};
+	OpenGLStructuredBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth, uint32_t strutureStride);
 
-class _OpenGLExport OpenGLStructuredBufferSRV : public OpenGLBufferSRV
-{
-public:
-	OpenGLStructuredBufferSRV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount);
+protected:
+	shared_ptr<RHBuffer> mBuffer;
 };
 
 class _OpenGLExport OpenGLTextureSRV : public OpenGLShaderResourceView
@@ -64,34 +64,27 @@ public:
 protected:
 	GLuint mResourceOGL;
 	GLenum mTargetOGL;
-
-	// For Texture and TBuffer UAV
-	GLenum mFormatOGL;
-	GLuint mLevel; 
-	GLuint mFirstLayer;
-	GLuint mNumLayers;
+	
+	GLuint mExtraParams[4];
 };
 
-class _OpenGLExport OpenGLBufferUAV : public OpenGLUnorderedAccessView
+class _OpenGLExport OpenGLTextureBufferUAV : public OpenGLUnorderedAccessView
 {
 public:
-	OpenGLBufferUAV(const shared_ptr<RHBuffer>& buffer) : mBuffer(buffer) {}
+	OpenGLTextureBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth, PixelFormat format);
+	~OpenGLTextureBufferUAV();
 
 protected:
 	shared_ptr<RHBuffer> mBuffer;
 };
 
-class _OpenGLExport OpenGLTextureBufferUAV : public OpenGLBufferUAV
+class _OpenGLExport OpenGLStructuredBufferUAV : public OpenGLUnorderedAccessView
 {
 public:
-	OpenGLTextureBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format);
-	~OpenGLTextureBufferUAV();
-};
+	OpenGLStructuredBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth, uint32_t strutureStride);
 
-class _OpenGLExport OpenGLStructuredBufferUAV : public OpenGLBufferUAV
-{
-public:
-	OpenGLStructuredBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount);
+protected:
+	shared_ptr<RHBuffer> mBuffer;
 };
 
 class _OpenGLExport OpenGLTextureUAV : public OpenGLUnorderedAccessView

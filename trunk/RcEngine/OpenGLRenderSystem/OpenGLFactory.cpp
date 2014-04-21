@@ -90,24 +90,24 @@ shared_ptr<RHTexture> OpenGLFactory::CreateTextureCube( uint32_t width, uint32_t
 		new OpenGLTextureCube(format, arraySize, numMipMaps, width, height, sampleCount, sampleQuality, accessHint, createFlags, initData) );
 }
 
-shared_ptr<RHShaderResourceView> OpenGLFactory::CreateTextureBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format )
+shared_ptr<RHShaderResourceView> OpenGLFactory::CreateTextureBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, PixelFormat format )
 {
-	return shared_ptr<RHShaderResourceView>( new OpenGLTextureBufferSRV(buffer, elementCount, format) );
+	return shared_ptr<RHShaderResourceView>( new OpenGLStructuredBufferSRV(buffer, elementOffset, elementCount, format) );
 }
 
-shared_ptr<RHShaderResourceView> OpenGLFactory::CreateStructuredBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount )
+shared_ptr<RHShaderResourceView> OpenGLFactory::CreateStructuredBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, uint32_t strutureStride )
 {
-	return shared_ptr<RHShaderResourceView>( new OpenGLStructuredBufferSRV(buffer, elementCount) );
+	return shared_ptr<RHShaderResourceView>( new OpenGLStructuredBufferSRV(buffer, elementOffset, elementCount, strutureStride) );
 }
 
-shared_ptr<RHUnorderedAccessView> OpenGLFactory::CreateStructuredBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount )
+shared_ptr<RHUnorderedAccessView> OpenGLFactory::CreateStructuredBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, uint32_t strutureStride )
 {
-	return shared_ptr<RHUnorderedAccessView>( new OpenGLStructuredBufferUAV(buffer, elementCount) );
+	return shared_ptr<RHUnorderedAccessView>( new OpenGLStructuredBufferUAV(buffer, elementOffset, elementCount, strutureStride) );
 }
 
-shared_ptr<RHUnorderedAccessView> OpenGLFactory::CreateTextureBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format )
+shared_ptr<RHUnorderedAccessView> OpenGLFactory::CreateTextureBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, PixelFormat format )
 {
-	return shared_ptr<RHUnorderedAccessView>( new OpenGLTextureBufferUAV(buffer, elementCount, format) );
+	return shared_ptr<RHUnorderedAccessView>( new OpenGLTextureBufferUAV(buffer, elementOffset, elementCount, format) );
 }
 
 shared_ptr<RHRenderView> OpenGLFactory::CreateRenderTargetView2D( const shared_ptr<RHTexture>& texture, uint32_t arrayIndex, uint32_t level )
