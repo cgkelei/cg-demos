@@ -7,6 +7,13 @@
 
 namespace RcEngine {
 
+enum OpenGLShaderParameterClass
+{
+	Shader_Param_Uniform = 0,
+	Shader_Param_SRV,
+	Shader_Param_UAV
+};
+
 class _OpenGLExport OpenGLMapping
 {
 public:
@@ -31,7 +38,7 @@ public:
 	// Reference glTexImage* function
 	static void Mapping(GLenum& outInternalformat, GLenum& outFormat, GLenum& outType, PixelFormat inPixelFormat);
 	static PixelFormat UnMapping( GLenum inInternalformat, GLenum inFormat, GLenum inType);
-	static EffectParameterType UnMapping(GLenum glType);
+	static void UnMapping(GLenum glType, EffectParameterType& paramType, OpenGLShaderParameterClass& paramClass);
 
 	/**
 	 * Return if the opengl type is interger.

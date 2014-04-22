@@ -876,44 +876,68 @@ PixelFormat OpenGLMapping::UnMapping( GLenum internalformat, GLenum format, GLen
 	}
 }
 
-EffectParameterType OpenGLMapping::UnMapping( GLenum glType )
+void OpenGLMapping::UnMapping( GLenum glType, EffectParameterType& paramType, OpenGLShaderParameterClass& paramClass )
 {
 	switch (glType)
 	{
-	case GL_FLOAT:			                   return EPT_Float;
-	case GL_FLOAT_VEC2:		                   return EPT_Float2;
-	case GL_FLOAT_VEC3:	                       return EPT_Float3;
-	case GL_FLOAT_VEC4:		                   return EPT_Float4;
-	case GL_UNSIGNED_INT:	                   return EPT_Uint;
-	case GL_UNSIGNED_INT_VEC2:				   return EPT_Uint2;
-	case GL_UNSIGNED_INT_VEC3:				   return EPT_Uint3;
-	case GL_UNSIGNED_INT_VEC4:				   return EPT_Uint4;
-	case GL_INT:							   return EPT_Int;
-	case GL_INT_VEC2:						   return EPT_Int2;
-	case GL_INT_VEC3:						   return EPT_Int3;
-	case GL_INT_VEC4:						   return EPT_Int4;
-	case GL_BOOL:							   return EPT_Boolean;
-	case GL_FLOAT_MAT2:						   return EPT_Matrix2x2;
-	case GL_FLOAT_MAT3:						   return EPT_Matrix3x3;
-	case GL_FLOAT_MAT4:						   return EPT_Matrix4x4;
-	case GL_SAMPLER_1D:						   //return EPT_Texture1D;
-	case GL_SAMPLER_1D_SHADOW:			       return EPT_Texture1D;
-	case GL_SAMPLER_2D:						   //return EPT_Texture2D;
-	case GL_SAMPLER_2D_SHADOW:				   return EPT_Texture2D;
-	case GL_SAMPLER_3D:						   return EPT_Texture3D;
-	case GL_SAMPLER_CUBE:					   //return EPT_TextureCUBE;
-	case GL_SAMPLER_CUBE_SHADOW:			   return EPT_TextureCUBE;
-	case GL_SAMPLER_1D_ARRAY:				   //return EPT_Texture1DArray;
-	case GL_SAMPLER_1D_ARRAY_SHADOW:		   return EPT_Texture1DArray;
+	case GL_FLOAT:			                   { paramClass = Shader_Param_Uniform; paramType = EPT_Float; }
+	case GL_FLOAT_VEC2:		                   { paramClass = Shader_Param_Uniform; paramType = EPT_Float2; }
+	case GL_FLOAT_VEC3:	                       { paramClass = Shader_Param_Uniform; paramType = EPT_Float3; }
+	case GL_FLOAT_VEC4:		                   { paramClass = Shader_Param_Uniform; paramType = EPT_Float4; }
+	case GL_UNSIGNED_INT:	                   { paramClass = Shader_Param_Uniform; paramType = EPT_Uint; }
+	case GL_UNSIGNED_INT_VEC2:				   { paramClass = Shader_Param_Uniform; paramType = EPT_Uint2; }
+	case GL_UNSIGNED_INT_VEC3:				   { paramClass = Shader_Param_Uniform; paramType = EPT_Uint3; }
+	case GL_UNSIGNED_INT_VEC4:				   { paramClass = Shader_Param_Uniform; paramType = EPT_Uint4; }
+	case GL_INT:							   { paramClass = Shader_Param_Uniform; paramType = EPT_Int; }
+	case GL_INT_VEC2:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Int2; }	   
+	case GL_INT_VEC3:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Int3; }
+	case GL_INT_VEC4:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Int4; }
+	case GL_BOOL:							   { paramClass = Shader_Param_Uniform; paramType = EPT_Boolean; }
+	case GL_FLOAT_MAT2:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Matrix2x2; }
+	case GL_FLOAT_MAT3:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Matrix3x3; }
+	case GL_FLOAT_MAT4:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Matrix4x4; } 
+
+	case GL_SAMPLER_1D:						   
+	case GL_INT_SAMPLER_1D:
+	case GL_UNSIGNED_INT_SAMPLER_1D:
+	case GL_SAMPLER_1D_SHADOW:			       { paramClass = Shader_Param_SRV; paramType = EPT_Texture1D; }
+
+	case GL_SAMPLER_2D:	
+	case GL_INT_SAMPLER_2D:
+	case GL_UNSIGNED_INT_SAMPLER_2D:
+	case GL_SAMPLER_2D_MULTISAMPLE:
+	case GL_SAMPLER_2D_SHADOW:				   { paramClass = Shader_Param_SRV; paramType = EPT_Texture2D; }
+
+	case GL_SAMPLER_3D:	
+	case GL_INT_SAMPLER_3D:
+	case GL_UNSIGNED_INT_SAMPLER_3D:           { paramClass = Shader_Param_SRV; paramType = EPT_Texture3D; }
+
+	case GL_SAMPLER_CUBE:					  
+	case GL_INT_SAMPLER_CUBE:
+	case GL_UNSIGNED_INT_SAMPLER_CUBE:
+	case GL_SAMPLER_CUBE_SHADOW:			   { paramClass = Shader_Param_SRV; paramType = EPT_TextureCube; }
+
+	case GL_SAMPLER_1D_ARRAY:				 
+	case GL_INT_SAMPLER_1D_ARRAY:
+	case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY:
+	case GL_SAMPLER_1D_ARRAY_SHADOW:		   { paramClass = Shader_Param_SRV; paramType = EPT_Texture1DArray; }
+
 	case GL_SAMPLER_2D_ARRAY:
-	case GL_SAMPLER_2D_ARRAY_SHADOW:		   return EPT_Texture2DArray;
-	case GL_SAMPLER_BUFFER:					   return EPT_TextureBuffer;
-	
-	case GL_IMAGE_1D:					       return EPT_Texture1D;
-	case GL_IMAGE_1D_ARRAY:					   return EPT_Texture1D;
-	case GL_IMAGE_2D:						   return EPT_Texture2D;
-	case GL_IMAGE_2D_ARRAY:					   return EPT_Texture2D;
-	case GL_IMAGE_3D:					       return EPT_Texture3D;
+	case GL_INT_SAMPLER_2D_ARRAY:
+	case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
+	case GL_SAMPLER_2D_MULTISAMPLE_ARRAY:
+	case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+	case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+	case GL_SAMPLER_2D_ARRAY_SHADOW:		   { paramClass = Shader_Param_SRV; paramType = EPT_Texture2DArray; }
+
+	case GL_SAMPLER_BUFFER:					   { paramClass = Shader_Param_SRV; paramType = EPT_TextureBuffer; }
+
+											   //case GL_IMAGE_1D:					       { paramClass = Shader_Param_UAV; return EPT_Texture1D; }
+											   //case GL_IMAGE_1D_ARRAY:					   { paramClass = Shader_Param_UAV; return EPT_Texture1DArray; }
+											   //case GL_IMAGE_2D:						   { paramClass = Shader_Param_UAV; return EPT_Texture2D; }
+											   //case GL_IMAGE_2D_ARRAY:					   { paramClass = Shader_Param_UAV; return EPT_Texture2DArray; }
+											   //case GL_IMAGE_3D:					       { paramClass = Shader_Param_UAV; return EPT_Texture3D; }
+											   //case GL_IMAGE_BUFFER:					   { paramClass = Shader_Param_UAV; return EPT_TextureBuffer; }
 
 	default:
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported Shader Parameter Type", 
