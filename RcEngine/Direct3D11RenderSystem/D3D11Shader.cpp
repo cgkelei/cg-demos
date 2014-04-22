@@ -13,8 +13,8 @@ using namespace RcEngine;
 class ShaderReflection
 {
 public:
-	ShaderReflection(ShaderType shaderType, void* bytecode, uint32_t size)
-		: mShaderType(shaderType),
+	ShaderReflection(D3D11Shader* shaderD3D11, void* bytecode, uint32_t size)
+		: mShaderD3D11(shaderD3D11),
 		  mReflectorD3D11(nullptr)
 	{
 		HRESULT hr;
@@ -109,27 +109,43 @@ public:
 					bool bTexArray;
 					D3D11Mapping::UnMapping(resBindDesc.Dimension, texType, bTexArray);
 
-					printf("Texture: %s binding=%d\n", resBindDesc.Name, resBindDesc.BindPoint);
+					SRVParam param;
+					param.Name = resBindDesc.Name;
+					param.Binding = resBindDesc.BindPoint;
+					mShaderD3D11->SRVParams.push_back(param);
 				}
 				break;
 			case D3D10_SIT_TBUFFER:
 				{
-					printf("TBuffer: %s binding=%d\n", resBindDesc.Name, resBindDesc.BindPoint);
-				}
-				break;
-			case D3D11_SIT_UAV_RWTYPED:
-				{
-					printf("UAV Buffer: %s binding=%d\n", resBindDesc.Name, resBindDesc.BindPoint);
+					SRVParam param;
+					param.Name = resBindDesc.Name;
+					param.Binding = resBindDesc.BindPoint;
+					mShaderD3D11->SRVParams.push_back(param);
 				}
 				break;
 			case D3D11_SIT_STRUCTURED:
 				{
-					printf("StructuredBuffer: %s binding=%d\n", resBindDesc.Name, resBindDesc.BindPoint);
+					SRVParam param;
+					param.Name = resBindDesc.Name;
+					param.Binding = resBindDesc.BindPoint;
+					mShaderD3D11->SRVParams.push_back(param);
 				}
 				break;
+			case D3D11_SIT_UAV_RWTYPED:
+				{
+					UAVParam param;
+					param.Name = resBindDesc.Name;
+					param.Binding = resBindDesc.BindPoint;
+					mShaderD3D11->UAVParams.push_back(param);
+				}
+				break;
+			
 			case D3D11_SIT_UAV_RWSTRUCTURED:
 				{
-					printf("UAV StructuredBuffer: %s binding=%d\n", resBindDesc.Name, resBindDesc.BindPoint);
+					UAVParam param;
+					param.Name = resBindDesc.Name;
+					param.Binding = resBindDesc.BindPoint;
+					mShaderD3D11->UAVParams.push_back(param);
 				}
 				break;
 			case D3D11_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
@@ -153,7 +169,7 @@ public:
 	}
 
 protected:
-	ShaderType mShaderType;
+	D3D11Shader* mShaderD3D11;
 
 	D3D11_SHADER_DESC mShaderDescD3D11; 
 	ID3D11ShaderReflection* mReflectorD3D11;
@@ -237,7 +253,7 @@ HRESULT CompileHLSL(const String& filename, const ShaderMacro* macros, uint32_t 
 namespace RcEngine {
 
 D3D11VertexShader::D3D11VertexShader()
-	: RHShader(ST_Vertex),
+	: D3D11Shader(ST_Vertex),
 	  ShaderD3D11(nullptr)
 {
 
@@ -292,7 +308,7 @@ bool D3D11VertexShader::LoadFromFile( const String& filename, const ShaderMacro*
 
 //////////////////////////////////////////////////////////////////////////
 D3D11HullShader::D3D11HullShader()
-	: RHShader(ST_Hull),
+	: D3D11Shader(ST_Hull),
 	  ShaderD3D11(nullptr)
 {
 
@@ -344,7 +360,7 @@ bool D3D11HullShader::LoadFromFile( const String& filename, const ShaderMacro* m
 
 //////////////////////////////////////////////////////////////////////////
 D3D11DomainShader::D3D11DomainShader()
-	: RHShader(ST_Domain),
+	: D3D11Shader(ST_Domain),
 	  ShaderD3D11(nullptr)
 {
 
@@ -396,7 +412,7 @@ bool D3D11DomainShader::LoadFromFile( const String& filename, const ShaderMacro*
 
 //////////////////////////////////////////////////////////////////////////
 D3D11GeometryShader::D3D11GeometryShader()
-	: RHShader(ST_Geomerty),
+	: D3D11Shader(ST_Geomerty),
 	  ShaderD3D11(nullptr)
 {
 
@@ -448,7 +464,7 @@ bool D3D11GeometryShader::LoadFromFile( const String& filename, const ShaderMacr
 
 //////////////////////////////////////////////////////////////////////////
 D3D11PixelShader::D3D11PixelShader()
-	: RHShader(ST_Pixel),
+	: D3D11Shader(ST_Pixel),
 	  ShaderD3D11(nullptr)
 {
 
@@ -491,7 +507,7 @@ bool D3D11PixelShader::LoadFromFile( const String& filename, const ShaderMacro* 
 		hr = deviceD3D11->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
 		//D3D11_VERRY(hr);
 	
-		ShaderReflection shaderReflection(ST_Pixel, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize());		
+		ShaderReflection shaderReflection(this, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize());		
 	}
 
 	if (shaderBlob)
@@ -502,7 +518,7 @@ bool D3D11PixelShader::LoadFromFile( const String& filename, const ShaderMacro* 
 
 //////////////////////////////////////////////////////////////////////////
 D3D11ComputeShader::D3D11ComputeShader()
-	: RHShader(ST_Compute),
+	: D3D11Shader(ST_Compute),
 	  ShaderD3D11(nullptr)
 {
 

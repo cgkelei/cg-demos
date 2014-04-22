@@ -37,9 +37,6 @@
     <Filter Include="Asset\Pipeline">
       <UniqueIdentifier>{301a2abe-beb2-4659-b24b-20fe6bb5d83c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Graphics\New">
-      <UniqueIdentifier>{a1f0f572-2957-4f60-ae78-0e48800aa6b4}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\CompileConfig.h">
@@ -117,27 +114,6 @@
     <ClInclude Include="Core\Loger.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\RHState.h">
-      <Filter>Graphics\New</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\RHResource.h">
-      <Filter>Graphics\New</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\RHFactory.h">
-      <Filter>Graphics\New</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\RHDevice.h">
-      <Filter>Graphics\New</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\RHFrameBuffer.h">
-      <Filter>Graphics\New</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\RHVertexDeclaration.h">
-      <Filter>Graphics\New</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\RHOperation.h">
-      <Filter>Graphics\New</Filter>
-    </ClInclude>
     <ClInclude Include="MainApp\Application.h">
       <Filter>MainApp</Filter>
     </ClInclude>
@@ -180,6 +156,33 @@
     <ClInclude Include="Core\XMLDom.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\RHVertexDeclaration.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RHDevice.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RHFactory.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RHFrameBuffer.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RHOperation.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RHResource.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RHState.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\EffectParameter.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Effect.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Exception.cpp">
@@ -211,27 +214,6 @@
     </ClCompile>
     <ClCompile Include="Core\Loger.cpp">
       <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\RHState.cpp">
-      <Filter>Graphics\New</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\RHResource.cpp">
-      <Filter>Graphics\New</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\RHFactory.cpp">
-      <Filter>Graphics\New</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\RHDevice.cpp">
-      <Filter>Graphics\New</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\RHFrameBuffer.cpp">
-      <Filter>Graphics\New</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\RHVertexDeclaration.cpp">
-      <Filter>Graphics\New</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\RHOperation.cpp">
-      <Filter>Graphics\New</Filter>
     </ClCompile>
     <ClCompile Include="MainApp\Application.cpp">
       <Filter>MainApp</Filter>
@@ -274,6 +256,33 @@
     </ClCompile>
     <ClCompile Include="Core\XMLDom.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\RHFactory.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\RHFrameBuffer.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\RHOperation.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\RHResource.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\RHState.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\RHVertexDeclaration.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\RHDevice.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Effect.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\EffectParameter.cpp">
+      <Filter>Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

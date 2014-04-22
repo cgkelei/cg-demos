@@ -46,8 +46,8 @@ RHShader::RHShader( ShaderType shaderType )
 
 }
 
-
-RHShaderPipeline::RHShaderPipeline()
+RHShaderPipeline::RHShaderPipeline( Effect& effect )
+	: mEffect(effect)
 {
 
 }

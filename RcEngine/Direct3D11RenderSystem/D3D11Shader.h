@@ -6,7 +6,48 @@
 
 namespace RcEngine {
 
-class _D3D11Export D3D11VertexShader : public RHShader
+struct SRVParam
+{
+	String Name;
+	uint32_t Binding;
+	RHShaderResourceView* pSRV;
+};
+
+struct UAVParam
+{
+	String Name;
+	uint32_t Binding;
+	RHShaderResourceView* pUAV;
+};
+
+struct GlobalParam
+{
+	String Name;
+};
+
+struct UniformBufferParam
+{
+	String Name;
+	uint32_t Binding;
+	RHBuffer* pBuffer;
+};
+
+class _D3D11Export D3D11Shader : public RHShader
+{
+public:
+	D3D11Shader(ShaderType type) : RHShader(type) {}
+	virtual ~D3D11Shader() {}
+
+public:
+	vector<SRVParam> SRVParams;
+	vector<UAVParam> UAVParams;
+	vector<GlobalParam> GlobalParams;
+	vector<UniformBufferParam> UniformBufferParams;
+};
+
+
+//////////////////////////////////////////////////////////////////////////
+class _D3D11Export D3D11VertexShader : public D3D11Shader
 {
 public:
 	D3D11VertexShader();
@@ -20,8 +61,7 @@ public:
 	std::vector<uint8_t> ShaderCode;
 };
 
-//////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11HullShader : public RHShader
+class _D3D11Export D3D11HullShader : public D3D11Shader
 {
 public:
 	D3D11HullShader();
@@ -35,7 +75,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11DomainShader : public RHShader
+class _D3D11Export D3D11DomainShader : public D3D11Shader
 {
 public:
 	D3D11DomainShader();
@@ -49,7 +89,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11GeometryShader : public RHShader
+class _D3D11Export D3D11GeometryShader : public D3D11Shader
 {
 public:
 	D3D11GeometryShader();
@@ -63,7 +103,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11PixelShader : public RHShader
+class _D3D11Export D3D11PixelShader : public D3D11Shader
 {
 public:
 	D3D11PixelShader();
@@ -77,7 +117,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11ComputeShader : public RHShader
+class _D3D11Export D3D11ComputeShader : public D3D11Shader
 {
 public:
 	D3D11ComputeShader();
@@ -101,8 +141,10 @@ public:
 	virtual void Unbind();
 
 protected:
-	//std::vector<std::function<void()>> mParameterBinds;
-};
+
+	std::vector<SRVParam> mPipeSRVs;
+	std::vector<UAVParam> mPipeUAVs;
+}; 
 
 }
 

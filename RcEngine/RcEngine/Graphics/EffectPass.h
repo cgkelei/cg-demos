@@ -3,40 +3,12 @@
 
 #include <Core/Prerequisites.h>
 #include <Math/ColorRGBA.h>
-#include <Graphics/EffectAnnotation.h>
 
 namespace RcEngine {
 
-
-class ShaderProgram;
+class RHShaderPipeline;
 class Effect;
 
-class _ApiExport EffectPass
-{
-	friend class Effect;
-
-public:
-	EffectPass();
-	~EffectPass();
-
-	const String& GetPassName() const	{ return mName; }
-
-	void BeginPass();
-	void EndPass();
-
-	EffectPass* Clone(Effect& effect);
-
-protected:
-	String mName;
-	bool mValid;
-	shared_ptr<ShaderProgram> mShaderProgram;
-	shared_ptr<BlendState> mBlendState;
-	shared_ptr<DepthStencilState> mDepthStencilState;
-	shared_ptr<RasterizerState> mRasterizerState;
-	uint16_t mFrontStencilRef, mBackStencilRef;
-	ColorRGBA mBlendColor;
-	uint32_t mSampleMask;
-};
 
 
 } // Namespace RcEngine

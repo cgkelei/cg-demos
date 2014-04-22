@@ -4,11 +4,12 @@
 #include <Core/Prerequisites.h>
 #include <Graphics/GraphicsCommon.h>
 #include <Resource/Resource.h>
+#include <Math/ColorRGBA.h>
 
 namespace RcEngine {	
 
 class EffectParameter;
-class EffectConstantBuffer;
+class EffectUniformBuffer;
 
 class _ApiExport Effect : public Resource
 {
@@ -26,15 +27,6 @@ public:
 	EffectTechnique* GetTechniqueByIndex(uint32_t index) const;
 
 	EffectParameter* GetParameterByName(const String& paraName) const;
-	
-	shared_ptr<Resource> Clone();
-
-public_internal:
-	/**
-	 * Only used by sub render system shader parameter set internal.
-	 */
-	EffectParameter* FetchShaderParameter(const String& name, EffectParameterType type, uint32_t elementSize);
-	EffectConstantBuffer* FetchConstantBuffer(const String& name, uint32_t bufferSize);
 
 protected:
 	void LoadImpl();
@@ -43,14 +35,68 @@ protected:
 public:
 	static shared_ptr<Resource> FactoryFunc(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 
+public_internal:
+	EffectParameter* FetchSRVParameter(const String& name, EffectParameterType effectType);
+	EffectParameter* FetchUAVParameter(const String& name, EffectParameterType effectType);
+	EffectParameter* FetchUniformParameter(const String& name, EffectParameterType effectType, uint32_t elementSize);
+	EffectUniformBuffer* FetchUniformBufferParameter(const String& name, uint32_t bufferSize);
+	
 protected:
 	String mEffectName;
 
 	EffectTechnique* mCurrTechnique;
 	vector<EffectTechnique*> mTechniques;
 	
-	std::vector<EffectConstantBuffer*> mConstantBuffers;
+	std::vector<EffectUniformBuffer*> mUniformBuffers;
 	std::map<String, EffectParameter*> mParameters;
+};
+
+class _ApiExport EffectTechnique 
+{
+	friend class Effect;
+
+public:
+	EffectTechnique(Effect& effect);
+	~EffectTechnique();
+
+	inline const String& GetTechniqueName() const				{ return mName; }
+	inline Effect& GetEffect()									{ return mEffect; }
+
+	inline vector<EffectPass*>& GetPasses()					    { return mPasses; }
+	inline const vector<EffectPass*>& GetPasses() const		    { return mPasses; }
+
+	EffectPass* GetPassByName(const String& name) const;
+	EffectPass* GetPassByIndex(uint32_t index) const;
+
+protected:
+	Effect& mEffect;
+
+	String mName;
+	bool mValid;
+	vector<EffectPass*> mPasses;
+};
+
+class _ApiExport EffectPass
+{
+	friend class Effect;
+
+public:
+	EffectPass();
+
+	inline const String& GetPassName() const	{ return mName; }
+
+	void BeginPass();
+	void EndPass();
+
+protected:
+	String mName;
+	uint16_t mFrontStencilRef, mBackStencilRef;
+	ColorRGBA mBlendColor;
+	uint32_t mSampleMask;
+	shared_ptr<RHBlendState> mBlendState;
+	shared_ptr<RHDepthStencilState> mDepthStencilState;
+	shared_ptr<RHRasterizerState> mRasterizerState;
+	shared_ptr<RHShaderPipeline> mShaderProgram;
 };
 
 

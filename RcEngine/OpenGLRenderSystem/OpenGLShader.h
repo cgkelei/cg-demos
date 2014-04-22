@@ -18,19 +18,24 @@ struct GlobalParam
 struct UniformBufferParam
 {
 	String Name;
+	GLint Location;
 	uint32_t BufferSize;
 };
 
 struct SRVParam
 {
 	String Name;
+	GLint Location;
 	GLuint Binding;
+	EffectParameterType Type;
 };
 
 struct UAVParam
 {
 	String Name;
+	GLint Location;
 	GLuint Binding;
+	EffectParameterType Type;
 };
 
 // Forward declaration
@@ -61,14 +66,22 @@ private:
 class _OpenGLExport OpenGLShaderPipeline : public RHShaderPipeline
 {
 public:
-	OpenGLShaderPipeline();
-	~OpenGLShaderPipeline();
+	OpenGLShaderPipeline(Effect& effect);
 
 	virtual void OnBind();
 	virtual void OnUnbind();
+	virtual void LinkPipeline();
 
-protected:
+private:
+	void AddUniformParamBind(GLuint shader, GLint location, EffectParameter* effectParam, GLsizei arrSize);
+	void AddSRVParamBind(EffectParameter* effectParam, GLuint binding);
+	void AddUAVParamBind(EffectParameter* effectParam, GLuint binding);
 
+	void AddShaderResourceBind(GLuint shader, GLint location, GLuint binding, bool shaderStorage);
+
+private:
+	std::map<String, GLuint> mBindingCache;
+	std::vector<std::function<void()>> mParameterBinds; 
 };
 
 

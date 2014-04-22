@@ -91,7 +91,7 @@ class _OpenGLExport OpenGLTextureUAV : public OpenGLUnorderedAccessView
 {
 public:
 	OpenGLTextureUAV(const shared_ptr<RHTexture>& texture, uint32_t mipSlice, uint32_t firstArraySlice, uint32_t arraySize);
-	virtual ~OpenGLTextureUAV();
+    ~OpenGLTextureUAV();
 
 protected:
 	shared_ptr<RHTexture> mTexture;
