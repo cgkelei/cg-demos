@@ -309,7 +309,7 @@ enum EffectParameterType
 	EPT_Texture1D,
 	EPT_Texture2D,
 	EPT_Texture3D,
-	EPT_TextureCUBE,
+	EPT_TextureCube,
 	EPT_Texture1DArray,
 	EPT_Texture2DArray,
 	EPT_Texture3DArray,

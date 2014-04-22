@@ -33,6 +33,9 @@ struct UAVParam
 	GLuint Binding;
 };
 
+// Forward declaration
+class OpenGLShaderReflection;
+class OpenGLShaderPipeline;
 
 class _OpenGLExport OpenGLShader : public RHShader
 {
@@ -44,13 +47,13 @@ public:
 	virtual bool LoadFromFile(const String& filename, const ShaderMacro* macros, uint32_t macroCount, const String& entryPoint = "");
 
 private:
-	void ShaderReflect();
+	friend class OpenGLShaderReflection;
+	friend class OpenGLShaderPipeline;
 
-private:
 	GLuint mShaderOGL;
 	
 	std::vector<SRVParam> mSRVParams;
-	std::vector<UAVParam> mSRVParams;
+	std::vector<UAVParam> mUAVParams;
 	std::vector<GlobalParam> mGlobalParams;
 	std::vector<UniformBufferParam> mUniformBuffers;
 };

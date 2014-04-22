@@ -64,6 +64,197 @@ inline bool LoadBinary(const char* filename, GLenum & format, std::vector<uint8_
 	return false;
 }
 
+class OpenGLShaderReflection
+{
+public:
+	OpenGLShaderReflection(OpenGLShader* shaderOGL)
+		: mShaderOGL(shaderOGL)
+	{
+		assert(mShaderOGL);
+		mShaderProgramID = mShaderOGL->mShaderOGL;
+	}
+
+	void RefectInputParameters()
+	{
+		GLint size, location, maxNameLen;
+		GLsizei nameLen;
+		GLenum type;
+
+		glGetProgramiv(mShaderProgramID, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &nameLen);
+		std::vector<GLchar> name(maxNameLen);
+
+		GLint numAttribsInProgram;
+		glGetProgramiv(mShaderProgramID, GL_ACTIVE_ATTRIBUTES, &numAttribsInProgram);
+		for (GLuint i = 0; i < GLuint(numAttribsInProgram); ++i) 
+		{
+			glGetActiveAttrib(mShaderProgramID, i, maxNameLen, &nameLen, &size, &type, &name[0]);
+
+
+		}
+	}
+
+	void ReflectUniformParameters()
+	{
+		GLint size, location, maxNameLen;
+		GLsizei nameLen;
+		GLenum type;
+	
+		glGetProgramiv(mShaderProgramID, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLen);
+		std::vector<GLchar> name(maxNameLen);
+	
+		// Active uniforms in each block
+		std::vector<std::vector<String>> blockVariableNames;
+
+		GLint numUniformsInProgram;
+		glGetProgramiv(mShaderProgramID, GL_ACTIVE_UNIFORMS, &numUniformsInProgram);
+		for (GLuint i = 0; i < GLuint(numUniformsInProgram); ++i)
+		{
+			glGetActiveUniform(mShaderProgramID, i, maxNameLen, &nameLen, &size, &type, &name[0]);
+		
+			/**
+			 * Hack:
+			 * OpenGL seems to treat const variable as active uniform with a modified name.
+			 * Don't retrieve it.
+			 */
+			 if (!isalpha(name[0]))
+				 continue;
+
+			if (size > 1 && nameLen > 3) // Check array type may contain []
+			{
+				// remove [] if exits
+				nameLen = std::distance(name.begin(), std::find(name.begin(), name.begin() + nameLen, '['));
+			}
+
+			// Variable name
+			std::string actualName(&name[0], nameLen);
+
+			// Get uniform block for this uniform
+			GLint blockIdx;
+			glGetActiveUniformsiv(mShaderProgramID, 1, &i, GL_UNIFORM_BLOCK_INDEX, &blockIdx);
+			if (blockIdx == GL_INVALID_INDEX) 
+			{
+				// Global uniform, SRV or UAV
+				OpenGLShaderParameterClass paramClass;
+				EffectParameterType paramType;
+				OpenGLMapping::UnMapping(type, paramType, paramClass);
+					
+				if (paramClass == Shader_Param_Uniform)
+				{
+					GlobalParam uniform;
+
+					uniform.Name = actualName;
+					uniform.Type = paramType;
+					uniform.ArraySize = size;
+					uniform.Location = glGetProgramResourceLocation(mShaderProgramID, GL_UNIFORM, &name[0]);
+
+					mShaderOGL->mGlobalParams.push_back(uniform);
+				}
+				else if (paramType == Shader_Param_SRV)
+				{
+					SRVParam srvParam;
+					srvParam.Name = actualName;
+
+					mShaderOGL->mSRVParams.push_back(srvParam);
+				}
+				else 
+				{
+					UAVParam uavParam;
+					uavParam.Name = actualName;
+					//uavParam.Binding = GL_BUFFER_BINDING
+
+					glGetProgramResourceIndex(mShaderProgramID, GL_BUFFER_VARIABLE,  )
+					glGetProgramResourceiv(mShaderProgramID, GL_BUFFER_BINDING, glGet)
+					mShaderOGL->mUAVParams.push_back(uavParam);
+				}
+
+			}
+			else
+			{
+				// Uniform block
+				if (blockVariableNames.size() < size_t(blockIdx + 1))
+				{
+					blockVariableNames.resize(blockIdx + 1);
+				}
+
+				blockVariableNames[blockIdx].push_back(actualName);
+			}
+		}
+
+		GLint numBlocks;
+		glGetProgramiv(mShaderProgramID, GL_ACTIVE_UNIFORM_BLOCKS, &numBlocks);
+		assert(blockVariableNames.size() == numBlocks);
+
+		if (numBlocks > 0)
+		{
+			GLint blockSize, numUniformInBlock;
+			std::vector<GLuint> indices;
+			std::vector<GLint> offset;
+			std::vector<GLint> types;
+			std::vector<GLint> arraySize;
+			std::vector<GLint> arrayStrides;
+			std::vector<GLint> matrixStrides;
+
+			for (GLuint i = 0; i < GLuint(blockVariableNames.size()); ++i)
+			{
+				glGetActiveUniformBlockiv(mShaderProgramID, i, GL_UNIFORM_BLOCK_NAME_LENGTH, &maxNameLen); 
+				name.resize(maxNameLen);
+
+				// Get uniform block name
+				glGetActiveUniformBlockName(mShaderProgramID, i, maxNameLen, &nameLen, &name[0]);
+
+				glGetActiveUniformBlockiv(mShaderProgramID, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &numUniformInBlock); 
+				assert(blockVariableNames[i].size() == numUniformInBlock);
+
+				glGetActiveUniformBlockiv(mShaderProgramID, i, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
+
+				//glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_BINDING, &blockBinding);
+				//glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, &uniformIndices);
+
+				indices.resize(numUniformInBlock);
+				offset.resize(numUniformInBlock);
+				types.resize(numUniformInBlock);
+				arraySize.resize(numUniformInBlock);
+				arrayStrides.resize(numUniformInBlock);
+				matrixStrides.resize(numUniformInBlock);
+
+				std::vector<const GLchar*> pBlockVariableNames(blockVariableNames[i].size());
+				for (size_t j = 0; j < pBlockVariableNames.size(); ++j)
+					pBlockVariableNames[j] = blockVariableNames[i][j].c_str();
+
+				glGetUniformIndices(mShaderProgramID, numUniformInBlock, &pBlockVariableNames[0], &indices[0]);
+				glGetActiveUniformsiv(mShaderProgramID, numUniformInBlock, &indices[0], GL_UNIFORM_OFFSET, &offset[0]);
+				glGetActiveUniformsiv(mShaderProgramID, numUniformInBlock, &indices[0], GL_UNIFORM_TYPE, &types[0]);
+				glGetActiveUniformsiv(mShaderProgramID, numUniformInBlock, &indices[0], GL_UNIFORM_SIZE, &arraySize[0]);
+				glGetActiveUniformsiv(mShaderProgramID, numUniformInBlock, &indices[0], GL_UNIFORM_ARRAY_STRIDE, &arrayStrides[0]);
+				glGetActiveUniformsiv(mShaderProgramID, numUniformInBlock, &indices[0], GL_UNIFORM_MATRIX_STRIDE, &matrixStrides[0]);
+
+				GLuint blockIdx = glGetUniformBlockIndex(mShaderOGL->mShaderOGL, &name[0]);
+
+				// Can specify binding slot in GLSL ?
+				glUniformBlockBinding(mShaderProgramID, blockIdx, i);
+
+				for (size_t j = 0; j < blockVariableNames[i].size(); ++j)
+				{
+					UniformParameter uniformBlockParameter;
+				
+					uniformBlockParameter.Name = blockVariableNames[i][j];
+					uniformBlockParameter.Location = -1;
+
+					uniformBlockParameter.Offset = offset[j];
+					uniformBlockParameter.ArraySize = arraySize[j];
+					uniformBlockParameter.Type = OpenGLMapping::UnMapping(types[j]);
+					uniformBlockParameter.MatrixStride = matrixStrides[j];
+					uniformBlockParameter.ArrayStride = arrayStrides[j];
+				}
+			}
+		}
+	}	
+
+private:
+	OpenGLShader* mShaderOGL;
+	GLuint mShaderProgramID;
+};
+
 //////////////////////////////////////////////////////////////////////////
 OpenGLShader::OpenGLShader( ShaderType shaderType )
 	: RHShader(shaderType),
@@ -166,139 +357,6 @@ bool OpenGLShader::LoadFromFile( const String& filename, const ShaderMacro* macr
 	return (success == GL_TRUE);
 }
 
-void OpenGLShader::ShaderReflect()
-{
-	GLint size, location, maxNameLen;
-	GLsizei nameLen;
-	GLenum type;
-	
-	// Get max character length for active uniform maxNameLen
-	glGetProgramiv(mShaderOGL, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLen);
-	std::vector<GLchar> name(maxNameLen);
-	
-	// Active uniforms in each block
-	std::vector<std::vector<String>> blockVariableNames;
-
-	GLint numUniformsInProgram;
-	glGetProgramiv(mShaderOGL, GL_ACTIVE_UNIFORMS, &numUniformsInProgram);
-	for (GLuint i = 0; i < GLuint(numUniformsInProgram); ++i)
-	{
-		glGetActiveUniform(mShaderOGL, i, maxNameLen, &nameLen, &size, &type, &name[0]);
-		
-		/**
-		 * Hack:
-		 * OpenGL seems to treat const variable as active uniform with a modified name.
-		 * Don't retrieve it.
-		 */
-		 if (!isalpha(name[0]))
-			 continue;
-
-		// Check array type
-		if (size > 1 && nameLen > 3) // must contain []
-		{
-			// Get variable name without []
-			nameLen = std::distance(name.begin(), std::find(name.begin(), name.begin() + nameLen, '['));
-		}
-
-		// Variable name
-		std::string actualName(&name[0], nameLen);
-
-		// Get uniform block for this uniform
-		GLint blockIdx;
-		glGetActiveUniformsiv(mShaderOGL, 1, &i, GL_UNIFORM_BLOCK_INDEX, &blockIdx);
-		if (blockIdx == GL_INVALID_INDEX) // Global uniform parameter
-		{
-			
-			GlobalParam uniform;
-
-			uniform.Name = actualName;
-			uniform.Type = OpenGLMapping::UnMapping(type);
-			uniform.ArraySize = size;
-			uniform.Location = glGetProgramResourceLocation(mShaderOGL, GL_UNIFORM, &name[0]);
-		}
-		else
-		{
-			// Uniform block
-			if (blockVariableNames.size() < size_t(blockIdx + 1))
-			{
-				blockVariableNames.resize(blockIdx + 1);
-			}
-
-			blockVariableNames[blockIdx].push_back(actualName);
-		}
-	}
-
-	GLint numBlocks;
-	glGetProgramiv(mShaderOGL, GL_ACTIVE_UNIFORM_BLOCKS, &numBlocks);
-	assert(blockVariableNames.size() == numBlocks);
-
-	if (numBlocks > 0)
-	{
-		GLint blockSize, numUniformInBlock;
-		std::vector<GLuint> indices;
-		std::vector<GLint> offset;
-		std::vector<GLint> types;
-		std::vector<GLint> arraySize;
-		std::vector<GLint> arrayStrides;
-		std::vector<GLint> matrixStrides;
-
-		for (GLuint i = 0; i < GLuint(blockVariableNames.size()); ++i)
-		{
-			glGetActiveUniformBlockiv(mShaderOGL, i, GL_UNIFORM_BLOCK_NAME_LENGTH, &maxNameLen); 
-			name.resize(maxNameLen);
-
-			// Get uniform block name
-			glGetActiveUniformBlockName(mShaderOGL, i, maxNameLen, &nameLen, &name[0]);
-
-			glGetActiveUniformBlockiv(mShaderOGL, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &numUniformInBlock); 
-			assert(blockVariableNames[i].size() == numUniformInBlock);
-
-			glGetActiveUniformBlockiv(mShaderOGL, i, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
-
-			//glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_BINDING, &blockBinding);
-			//glGetActiveUniformBlockiv(mOGLProgramObject, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, &uniformIndices);
-
-			indices.resize(numUniformInBlock);
-			offset.resize(numUniformInBlock);
-			types.resize(numUniformInBlock);
-			arraySize.resize(numUniformInBlock);
-			arrayStrides.resize(numUniformInBlock);
-			matrixStrides.resize(numUniformInBlock);
-
-			std::vector<const GLchar*> pBlockVariableNames(blockVariableNames[i].size());
-			for (size_t j = 0; j < pBlockVariableNames.size(); ++j)
-				pBlockVariableNames[j] = blockVariableNames[i][j].c_str();
-
-			glGetUniformIndices(mShaderOGL, numUniformInBlock, &pBlockVariableNames[0], &indices[0]);
-			glGetActiveUniformsiv(mShaderOGL, numUniformInBlock, &indices[0], GL_UNIFORM_OFFSET, &offset[0]);
-			glGetActiveUniformsiv(mShaderOGL, numUniformInBlock, &indices[0], GL_UNIFORM_TYPE, &types[0]);
-			glGetActiveUniformsiv(mShaderOGL, numUniformInBlock, &indices[0], GL_UNIFORM_SIZE, &arraySize[0]);
-			glGetActiveUniformsiv(mShaderOGL, numUniformInBlock, &indices[0], GL_UNIFORM_ARRAY_STRIDE, &arrayStrides[0]);
-			glGetActiveUniformsiv(mShaderOGL, numUniformInBlock, &indices[0], GL_UNIFORM_MATRIX_STRIDE, &matrixStrides[0]);
-
-			GLuint blockIdx = glGetUniformBlockIndex(mShaderOGL, &name[0]);
-
-			// Can specify binding slot in GLSL ?
-			glUniformBlockBinding(mShaderOGL, blockIdx, i);
-
-			for (size_t j = 0; j < blockVariableNames[i].size(); ++j)
-			{
-				UniformParameter uniformBlockParameter;
-				
-				uniformBlockParameter.Name = blockVariableNames[i][j];
-				uniformBlockParameter.Location = -1;
-
-				uniformBlockParameter.Offset = offset[j];
-				uniformBlockParameter.ArraySize = arraySize[j];
-				uniformBlockParameter.Type = OpenGLMapping::UnMapping(types[j]);
-				uniformBlockParameter.MatrixStride = matrixStrides[j];
-				uniformBlockParameter.ArrayStride = arrayStrides[j];
-			}
-		}
-	}
-	
-	OGL_ERROR_CHECK();
-}
 
 //////////////////////////////////////////////////////////////////////////
 //OpenGLShaderPipeline::OpenGLShaderPipeline( Effect& effect )
