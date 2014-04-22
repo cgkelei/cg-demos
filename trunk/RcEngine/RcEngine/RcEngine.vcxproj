@@ -24,6 +24,8 @@
     <ClInclude Include="Core\Utility.h" />
     <ClInclude Include="Core\Variant.h" />
     <ClInclude Include="Core\XMLDom.h" />
+    <ClInclude Include="Graphics\Effect.h" />
+    <ClInclude Include="Graphics\EffectParameter.h" />
     <ClInclude Include="Graphics\GraphicsCommon.h" />
     <ClInclude Include="Graphics\PixelFormat.h" />
     <ClInclude Include="Graphics\RHDevice.h" />
@@ -69,6 +71,8 @@
     <ClCompile Include="Core\Utility.cpp" />
     <ClCompile Include="Core\Variant.cpp" />
     <ClCompile Include="Core\XMLDom.cpp" />
+    <ClCompile Include="Graphics\Effect.cpp" />
+    <ClCompile Include="Graphics\EffectParameter.cpp" />
     <ClCompile Include="Graphics\PixelFormat.cpp" />
     <ClCompile Include="Graphics\RHDevice.cpp" />
     <ClCompile Include="Graphics\RHFactory.cpp" />

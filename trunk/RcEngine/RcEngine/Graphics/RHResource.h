@@ -151,17 +151,19 @@ protected:
 class _ApiExport RHShaderPipeline : public RHResouce
 {
 public:
-	RHShaderPipeline();
+	RHShaderPipeline(Effect& effect);
 	virtual~ RHShaderPipeline() {}
 
 	void AttachShader(const shared_ptr<RHShader>& shader);
 	void DetachShader(const shared_ptr<RHShader>& shader);
-
+	
+	virtual void LinkPipeline() = 0;
 	virtual void OnBind() = 0;
 	virtual void OnUnbind() = 0;
 
 protected:
-	shared_ptr<RHShader> mShaderStage[ST_Count];
+	Effect& mEffect;
+	shared_ptr<RHShader> mShaderStages[ST_Count];
 };
 
 }
