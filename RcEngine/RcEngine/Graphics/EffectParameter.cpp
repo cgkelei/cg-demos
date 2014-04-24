@@ -85,6 +85,11 @@ void EffectParameter::GetValue( weak_ptr<RHUnorderedAccessView>& value ) const
 
 }
 
+void EffectParameter::GetValue( weak_ptr<RHSamplerState>& value ) const
+{
+
+}
+
 void EffectParameter::SetValue( const bool& value )
 { ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::SetValue"); }
 
@@ -133,6 +138,11 @@ void EffectParameter::SetValue( const shared_ptr<RHUnorderedAccessView>& value )
 }
 
 void EffectParameter::SetValue( const shared_ptr<RHShaderResourceView>& value )
+{
+
+}
+
+void EffectParameter::SetValue( const shared_ptr<RHSamplerState>& value )
 {
 
 }

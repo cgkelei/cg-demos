@@ -73,7 +73,6 @@ public:
 	void ShaderRefect()
 	{
 		ReflectResource();
-		ResolveBindingPoint();
 	}
 
 private:
@@ -235,56 +234,6 @@ private:
 			{
 				ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "GLSL StructureBuffer must be postfix with SRV or UAV", "ReflectResource");
 			}
-		}
-	}
-
-	void ResolveBindingPoint()
-	{
-		// SRV
-		std::sort(mShaderOGL->mSRVParams.begin(), mShaderOGL->mSRVParams.end(), 
-			[&](const SRVParam& lhs, const SRVParam& rhs) { return lhs.Location < rhs.Location; } );
-		
-		for (GLint i = 0; i < GLint(mShaderOGL->mSRVParams.size()); ++i)
-		{
-			SRVParam& srvParam = mShaderOGL->mSRVParams[i];
-			if (srvParam.Type == EPT_StructureBuffer)
-			{
-				srvParam.Binding = i;
-				glShaderStorageBlockBinding(mShaderProgramID, srvParam.Location, srvParam.Binding);
-			}
-			else
-			{
-				srvParam.Binding = i;
-				glProgramUniform1i(mShaderProgramID, srvParam.Location, srvParam.Binding);
-			}
-		}
-
-		// UAV
-		std::sort(mShaderOGL->mUAVParams.begin(), mShaderOGL->mUAVParams.end(), 
-			[&](const UAVParam& lhs, const UAVParam& rhs) { return lhs.Location < rhs.Location; } );
-
-		for (GLint i = 0; i < GLint(mShaderOGL->mUAVParams.size()); ++i)
-		{
-			UAVParam& uavParam = mShaderOGL->mUAVParams[i];
-			if (uavParam.Type == EPT_StructureBuffer)
-			{
-				uavParam.Binding = i;
-				glShaderStorageBlockBinding(mShaderProgramID, uavParam.Location, uavParam.Binding);
-			}
-			else
-			{
-				uavParam.Binding = i;
-				glProgramUniform1i(mShaderProgramID, uavParam.Location, uavParam.Binding);
-			}
-		}
-
-		// Uniform Buffer
-		std::sort(mShaderOGL->mUniformBuffers.begin(), mShaderOGL->mUniformBuffers.end(), 
-			[&](const UniformBufferParam& lhs, const UniformBufferParam& rhs) { return lhs.Location < rhs.Location; } );
-		
-		for (GLuint i = 0; i < GLint(mShaderOGL->mUniformBuffers.size()); ++i)
-		{
-			glUniformBlockBinding(mShaderProgramID, mShaderOGL->mUniformBuffers[i].Location, i);
 		}
 	}
 

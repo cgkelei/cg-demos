@@ -86,14 +86,14 @@ shared_ptr<RHShader> D3D11Factory::CreateShader( ShaderType type )
 	}
 }
 
-shared_ptr<RHShaderResourceView> D3D11Factory::CreateStructuredBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount )
+shared_ptr<RHShaderResourceView> D3D11Factory::CreateStructuredBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, uint32_t strutureStride )
 {
-	return shared_ptr<RHShaderResourceView>( new D3D11StructuredBufferSRV(buffer, elementCount) );
+	return shared_ptr<RHShaderResourceView>( new D3D11StructuredBufferSRV(buffer, elementOffset, elementCount) );
 }
 
-shared_ptr<RHShaderResourceView> D3D11Factory::CreateTextureBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format )
+shared_ptr<RHShaderResourceView> D3D11Factory::CreateTextureBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, PixelFormat format )
 {
-	return shared_ptr<RHShaderResourceView>( new D3D11TextureBufferSRV(buffer, elementCount, format) );
+	return shared_ptr<RHShaderResourceView>( new D3D11TextureBufferSRV(buffer, elementOffset, elementCount, format) );
 }
 
 shared_ptr<RHShaderResourceView> D3D11Factory::CreateTexture1DSRV( const shared_ptr<RHTexture>& texture )
@@ -126,14 +126,14 @@ shared_ptr<RHShaderResourceView> D3D11Factory::CreateTextureCubeSRV( const share
 	return shared_ptr<RHShaderResourceView>( new D3D11TextureCubeSRV(texture, 0, texture->GetMipLevels(), 0, texture->GetTextureArraySize()) );
 }
 
-shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateStructuredBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount )
+shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateStructuredBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, uint32_t strutureStride )
 {
-	return shared_ptr<RHUnorderedAccessView>( new D3D11StructuredBufferUAV(buffer, elementCount) );
+	return shared_ptr<RHUnorderedAccessView>( new D3D11StructuredBufferUAV(buffer, elementOffset, elementCount) );
 }
 
-shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateTextureBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format )
+shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateTextureBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, PixelFormat format )
 {
-	return shared_ptr<RHUnorderedAccessView>( new D3D11TextureBufferUAV(buffer, elementCount, format) );
+	return shared_ptr<RHUnorderedAccessView>( new D3D11TextureBufferUAV(buffer, elementOffset, elementCount, format) );
 }
 
 shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateTexture1DUAV( const shared_ptr<RHTexture>& texture )

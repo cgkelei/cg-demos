@@ -884,10 +884,10 @@ void OpenGLMapping::UnMapping( GLenum glType, EffectParameterType& paramType, Op
 	case GL_FLOAT_VEC2:		                   { paramClass = Shader_Param_Uniform; paramType = EPT_Float2; }
 	case GL_FLOAT_VEC3:	                       { paramClass = Shader_Param_Uniform; paramType = EPT_Float3; }
 	case GL_FLOAT_VEC4:		                   { paramClass = Shader_Param_Uniform; paramType = EPT_Float4; }
-	case GL_UNSIGNED_INT:	                   { paramClass = Shader_Param_Uniform; paramType = EPT_Uint; }
-	case GL_UNSIGNED_INT_VEC2:				   { paramClass = Shader_Param_Uniform; paramType = EPT_Uint2; }
-	case GL_UNSIGNED_INT_VEC3:				   { paramClass = Shader_Param_Uniform; paramType = EPT_Uint3; }
-	case GL_UNSIGNED_INT_VEC4:				   { paramClass = Shader_Param_Uniform; paramType = EPT_Uint4; }
+	case GL_UNSIGNED_INT:	                   { paramClass = Shader_Param_Uniform; paramType = EPT_UInt; }
+	case GL_UNSIGNED_INT_VEC2:				   { paramClass = Shader_Param_Uniform; paramType = EPT_UInt2; }
+	case GL_UNSIGNED_INT_VEC3:				   { paramClass = Shader_Param_Uniform; paramType = EPT_UInt3; }
+	case GL_UNSIGNED_INT_VEC4:				   { paramClass = Shader_Param_Uniform; paramType = EPT_UInt4; }
 	case GL_INT:							   { paramClass = Shader_Param_Uniform; paramType = EPT_Int; }
 	case GL_INT_VEC2:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Int2; }	   
 	case GL_INT_VEC3:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Int3; }

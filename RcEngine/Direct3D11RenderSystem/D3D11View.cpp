@@ -356,7 +356,7 @@ D3D11TextureUAV::D3D11TextureUAV( const shared_ptr<RHTexture>& texture )
 }
 
 //////////////////////////////////////////////////////////////////////////
-D3D11TextureBufferUAV::D3D11TextureBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format )
+D3D11TextureBufferUAV::D3D11TextureBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, PixelFormat format )
 	: mBuffer(buffer)
 {
 	D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
@@ -364,7 +364,7 @@ D3D11TextureBufferUAV::D3D11TextureBufferUAV( const shared_ptr<RHBuffer>& buffer
 
 	desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 	desc.Format = D3D11Mapping::Mapping(format);
-	desc.Buffer.FirstElement = 0;
+	desc.Buffer.FirstElement = elementOffset;
 	desc.Buffer.NumElements = elementCount;
 	desc.Buffer.Flags = 0;
 
@@ -378,7 +378,7 @@ D3D11TextureBufferUAV::D3D11TextureBufferUAV( const shared_ptr<RHBuffer>& buffer
 }
 
 //////////////////////////////////////////////////////////////////////////
-D3D11StructuredBufferUAV::D3D11StructuredBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementCount )
+D3D11StructuredBufferUAV::D3D11StructuredBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount )
 	: mBuffer(buffer)
 {
 	D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
@@ -386,7 +386,7 @@ D3D11StructuredBufferUAV::D3D11StructuredBufferUAV( const shared_ptr<RHBuffer>& 
 
 	desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 	desc.Format = DXGI_FORMAT_UNKNOWN;
-	desc.Buffer.FirstElement = 0;
+	desc.Buffer.FirstElement = elementOffset;
 	desc.Buffer.NumElements = elementCount;
 	desc.Buffer.Flags = 0;
 

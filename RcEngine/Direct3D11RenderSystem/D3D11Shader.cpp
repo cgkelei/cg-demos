@@ -1,19 +1,142 @@
 #include "D3D11Shader.h"
 #include "D3D11Device.h"
+#include "D3D11State.h"
 #include "D3D11GraphicCommon.h"
+#include "D3D11View.h"
+#include <Graphics/EffectParameter.h>
+#include <Graphics/Effect.h>
 #include <Core/Loger.h>
 #include <Core/Exception.h>
 #include <Core/Utility.h>
 #include <fstream>
 
-namespace {
+namespace RcEngine {
 
-using namespace RcEngine;
+struct SRVBindHelper
+{
+	SRVBindHelper(EffectParameter* param, uint32_t binding, ShaderType shaderStage)
+		: Param(param), Binding(binding), ShaderStage(shaderStage) {}
 
-class ShaderReflection
+	void operator() ()
+	{
+		weak_ptr<RHShaderResourceView> srv;
+		Param->GetValue(srv);
+
+		if (auto spt = srv.lock())
+		{
+			ID3D11ShaderResourceView* srvD3D11 = static_cast_checked<D3D11ShaderResouceView*>(spt.get())->ShaderResourceViewD3D11;;
+			
+			ID3D11DeviceContext* deviceContext = gD3D11Device->DeviceContextD3D11;
+
+			switch (ShaderStage)
+			{
+			case ST_Vertex:
+				deviceContext->VSSetShaderResources(Binding, 1, &srvD3D11);
+				break;
+			case ST_Hull:
+				deviceContext->HSSetShaderResources(Binding, 1, &srvD3D11);
+				break;
+			case ST_Domain:
+				deviceContext->DSSetShaderResources(Binding, 1, &srvD3D11);
+				break;
+			case ST_Geomerty:
+				deviceContext->GSSetShaderResources(Binding, 1, &srvD3D11);
+				break;
+			case ST_Pixel:
+				deviceContext->PSSetShaderResources(Binding, 1, &srvD3D11);
+				break;
+			case ST_Compute:
+				deviceContext->CSSetShaderResources(Binding, 1, &srvD3D11);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+private:
+	EffectParameter* Param;
+	uint32_t Binding;
+	ShaderType ShaderStage;
+};
+
+struct UAVSRVBindHelper
+{
+	UAVSRVBindHelper(EffectParameter* param, uint32_t binding)
+		: Param(param), Binding(binding) {}
+
+	void operator() ()
+	{
+		weak_ptr<RHUnorderedAccessView> uav;
+		Param->GetValue(uav);
+
+		if (auto spt = uav.lock())
+		{
+			ID3D11UnorderedAccessView* uavD3D11 = static_cast_checked<D3D11UnorderedAccessView*>(spt.get())->UnorderedAccessViewD3D11;;
+
+			ID3D11DeviceContext* deviceContext = gD3D11Device->DeviceContextD3D11;
+			deviceContext->CSSetUnorderedAccessViews(Binding, 1, &uavD3D11, nullptr);
+		}
+	}
+
+private:
+	EffectParameter* Param;
+	uint32_t Binding;
+};
+
+struct SamplerBindHelper
+{
+	SamplerBindHelper(EffectParameter* param, uint32_t binding, ShaderType shaderStage)
+		: Param(param), Binding(binding), ShaderStage(shaderStage) {}
+
+	void operator() ()
+	{
+		weak_ptr<RHSamplerState> sampler;
+		Param->GetValue(sampler);
+
+		if (auto spt = sampler.lock())
+		{
+			ID3D11SamplerState* samplerStateD3D11 = static_cast_checked<D3D11SamplerState*>(spt.get())->StateD3D11;;
+			
+			ID3D11DeviceContext* deviceContext = gD3D11Device->DeviceContextD3D11;
+
+			switch (ShaderStage)
+			{
+			case ST_Vertex:
+				deviceContext->VSSetSamplers(Binding, 1, &samplerStateD3D11);
+				break;
+			case RcEngine::ST_Hull:
+				deviceContext->HSSetSamplers(Binding, 1, &samplerStateD3D11);
+				break;
+			case RcEngine::ST_Domain:
+				deviceContext->DSSetSamplers(Binding, 1, &samplerStateD3D11);
+				break;
+			case RcEngine::ST_Geomerty:
+				deviceContext->GSSetSamplers(Binding, 1, &samplerStateD3D11);
+				break;
+			case RcEngine::ST_Pixel:
+				deviceContext->PSSetSamplers(Binding, 1, &samplerStateD3D11);
+				break;
+			case RcEngine::ST_Compute:
+				deviceContext->CSSetSamplers(Binding, 1, &samplerStateD3D11);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+private:
+	EffectParameter* Param;
+	uint32_t Binding;
+	ShaderType ShaderStage;
+};
+
+
+class D3D11ShaderReflection
 {
 public:
-	ShaderReflection(D3D11Shader* shaderD3D11, void* bytecode, uint32_t size)
+	D3D11ShaderReflection(D3D11Shader* shaderD3D11, void* bytecode, uint32_t size)
 		: mShaderD3D11(shaderD3D11),
 		  mReflectorD3D11(nullptr)
 	{
@@ -23,10 +146,11 @@ public:
 
 		RefectInputParameters();
 		ReflectOutputParameters();
+		ReflectConstantBuffers();
 		RefectionBoundResources();
 	}
 	
-	~ShaderReflection()
+	~D3D11ShaderReflection()
 	{
 		SAFE_RELEASE(mReflectorD3D11);
 	}
@@ -66,19 +190,72 @@ public:
 
 			for ( UINT j = 0; j < bufferDesc.Variables; j++ ) 
 			{
-				// Get the variable description and store it 
 				ID3D11ShaderReflectionVariable* variableD3D11 = bufferD3D11->GetVariableByIndex( j ); 
 				
 				D3D11_SHADER_VARIABLE_DESC varDesc; 
 				variableD3D11->GetDesc( &varDesc ); 
 
-				// Get the variable type description and store it 
+				UniformParam param;
+				param.Name = varDesc.Name;
+				param.Offset = varDesc.StartOffset;
+				
+					// Get the variable type description and store it 
 				ID3D11ShaderReflectionType* varTypeD3D11 = variableD3D11->GetType(); 
 				
 				D3D11_SHADER_TYPE_DESC varTypeDesc; 
 				varTypeD3D11->GetDesc( &varTypeDesc ); 
 
-	
+				bool bArray = (varTypeDesc.Elements > 0);
+
+				switch (varTypeDesc.Class)
+				{
+				case D3D10_SVC_SCALAR:
+					{
+						switch (varTypeDesc.Type)
+						{
+						case D3D10_SVT_BOOL:	param.Type = EPT_Boolean; break;
+						case D3D10_SVT_INT:		param.Type = EPT_Int; break;
+						case D3D10_SVT_UINT:	param.Type = EPT_UInt; break;
+						case D3D10_SVT_FLOAT:	param.Type = EPT_Float; break;
+						default:
+							break;
+						}
+					}
+					break;
+				case D3D10_SVC_VECTOR:
+					{
+						switch (varTypeDesc.Type)
+						{
+						case D3D10_SVT_BOOL:	param.Type = EPT_Boolean; break;
+						case D3D10_SVT_INT:		param.Type = EffectParameterType(EPT_Int + varTypeDesc.Columns); break;
+						case D3D10_SVT_UINT:	param.Type = EffectParameterType(EPT_UInt + varTypeDesc.Columns);; break;
+						case D3D10_SVT_FLOAT:	param.Type = EffectParameterType(EPT_Float + varTypeDesc.Columns);; break;
+						default:
+							break;
+						}
+					}
+					break;
+				case D3D10_SVC_MATRIX_ROWS:
+				case D3D10_SVC_MATRIX_COLUMNS:
+					{
+						if (varTypeDesc.Rows == 4 && varTypeDesc.Columns == 4)
+							param.Type = EPT_Matrix4x4;
+						else if (varTypeDesc.Rows == 3 && varTypeDesc.Columns == 3)
+							param.Type = EPT_Matrix3x3;
+						else if (varTypeDesc.Rows == 2 && varTypeDesc.Columns == 2)
+							param.Type = EPT_Matrix2x2;
+						else 
+							assert(false);
+					}
+					break;
+				case D3D10_SVC_STRUCT:
+					{
+						assert(false);
+					}
+					break;
+				default:
+					break;
+				}
 			}
 		}
 	}
@@ -100,18 +277,20 @@ public:
 			case D3D10_SIT_SAMPLER:
 				{
 					bool bCompare = (resBindDesc.uFlags & D3D10_SIF_COMPARISON_SAMPLER);
-					printf("Sampler: %s cmp=%d binding=%d\n", resBindDesc.Name, bCompare, resBindDesc.BindPoint);
+					//printf("Sampler: %s cmp=%d binding=%d\n", resBindDesc.Name, bCompare, resBindDesc.BindPoint);
+
+					SamplerParam param;
+					param.Name = resBindDesc.Name;
+					param.Binding = resBindDesc.BindPoint;
+					mShaderD3D11->SamplerParams.push_back(param);
 				}
 				break;
 			case D3D10_SIT_TEXTURE:
 				{
-					TextureType texType;
-					bool bTexArray;
-					D3D11Mapping::UnMapping(resBindDesc.Dimension, texType, bTexArray);
-
 					SRVParam param;
 					param.Name = resBindDesc.Name;
 					param.Binding = resBindDesc.BindPoint;
+					D3D11Mapping::UnMapping(resBindDesc.Dimension, param.Type);
 					mShaderD3D11->SRVParams.push_back(param);
 				}
 				break;
@@ -120,14 +299,7 @@ public:
 					SRVParam param;
 					param.Name = resBindDesc.Name;
 					param.Binding = resBindDesc.BindPoint;
-					mShaderD3D11->SRVParams.push_back(param);
-				}
-				break;
-			case D3D11_SIT_STRUCTURED:
-				{
-					SRVParam param;
-					param.Name = resBindDesc.Name;
-					param.Binding = resBindDesc.BindPoint;
+					param.Type = EPT_TextureBuffer;
 					mShaderD3D11->SRVParams.push_back(param);
 				}
 				break;
@@ -136,20 +308,32 @@ public:
 					UAVParam param;
 					param.Name = resBindDesc.Name;
 					param.Binding = resBindDesc.BindPoint;
+					param.Type = EPT_TextureBuffer;
 					mShaderD3D11->UAVParams.push_back(param);
 				}
 				break;
-			
+			case D3D11_SIT_STRUCTURED:
+				{
+					SRVParam param;
+					param.Name = resBindDesc.Name;
+					param.Binding = resBindDesc.BindPoint;
+					param.Type = EPT_StructureBuffer;
+					mShaderD3D11->SRVParams.push_back(param);
+				}
+				break;
 			case D3D11_SIT_UAV_RWSTRUCTURED:
 				{
 					UAVParam param;
 					param.Name = resBindDesc.Name;
 					param.Binding = resBindDesc.BindPoint;
+					param.Type = EPT_StructureBuffer;
 					mShaderD3D11->UAVParams.push_back(param);
 				}
 				break;
+
 			case D3D11_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
 				{
+					assert(false);
 					printf("UAV Atomic StructuredBuffer: %s binding=%d\n", resBindDesc.Name, resBindDesc.BindPoint);
 				}
 				break;
@@ -157,11 +341,8 @@ public:
 			case D3D11_SIT_UAV_RWBYTEADDRESS:
 			case D3D11_SIT_UAV_APPEND_STRUCTURED:
 			case D3D11_SIT_UAV_CONSUME_STRUCTURED:
-				{
-
-				}
-				break;
 			default:
+				assert(false);
 				break;
 			}
 
@@ -246,11 +427,7 @@ HRESULT CompileHLSL(const String& filename, const ShaderMacro* macros, uint32_t 
 	return hr;
 }
 
-
-
-}
-
-namespace RcEngine {
+//////////////////////////////////////////////////////////////////////////
 
 D3D11VertexShader::D3D11VertexShader()
 	: D3D11Shader(ST_Vertex),
@@ -507,7 +684,7 @@ bool D3D11PixelShader::LoadFromFile( const String& filename, const ShaderMacro* 
 		hr = deviceD3D11->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
 		//D3D11_VERRY(hr);
 	
-		ShaderReflection shaderReflection(this, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize());		
+		D3D11ShaderReflection shaderReflection(this, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize());		
 	}
 
 	if (shaderBlob)
@@ -569,48 +746,90 @@ bool D3D11ComputeShader::LoadFromFile( const String& filename, const ShaderMacro
 }
 
 //////////////////////////////////////////////////////////////////////////
-D3D11ShaderProgram::D3D11ShaderProgram()
+D3D11ShaderPipeline::D3D11ShaderPipeline(Effect& effect)
+	: RHShaderPipeline(effect)
 {
 
 }
 
-void D3D11ShaderProgram::Bind()
+void D3D11ShaderPipeline::LinkPipeline()
+{
+	for (int i = 0; i < ST_Count; ++i)
+	{
+		if (mShaderStages[i])
+		{
+			D3D11Shader* shaderD3D11 = static_cast_checked<D3D11Shader*>(mShaderStages[i].get());
+
+			// Constant Buffer
+			
+
+
+
+
+			// Shader Resouce View
+			for (const auto& srvParam : shaderD3D11->SRVParams)
+			{
+				EffectParameter* effectParam = mEffect.FetchSRVParameter(srvParam.Name, srvParam.Type);
+				mParameterBinds.push_back( SRVBindHelper(effectParam, srvParam.Binding, shaderD3D11->GetShaderType()) );
+			}
+
+			for (const auto& samplerParam : shaderD3D11->SamplerParams)
+			{
+				EffectParameter* effectParam = mEffect.FetchSamplerParameter(samplerParam.Name);
+				mParameterBinds.push_back( SamplerBindHelper(effectParam, samplerParam.Binding, shaderD3D11->GetShaderType()) );
+			}
+		}
+	}
+
+	// Only Compute has UAV
+	if (mShaderStages[ST_Compute])
+	{
+		D3D11Shader* shaderD3D11 = static_cast_checked<D3D11Shader*>(mShaderStages[ST_Compute].get());
+		for (const auto& uavParam : shaderD3D11->UAVParams)
+		{
+			EffectParameter* effectParam = mEffect.FetchSRVParameter(uavParam.Name, uavParam.Type);
+			mParameterBinds.push_back( UAVSRVBindHelper(effectParam, uavParam.Binding) );
+		}
+	}
+}
+
+void D3D11ShaderPipeline::Bind()
 {
 	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
 
-	if (mShaderStage[ST_Vertex])
+	if (mShaderStages[ST_Vertex])
 	{
-		ID3D11VertexShader* shaderD3D11 = (static_cast<D3D11VertexShader*>(mShaderStage[ST_Vertex].get()))->ShaderD3D11;
+		ID3D11VertexShader* shaderD3D11 = (static_cast<D3D11VertexShader*>(mShaderStages[ST_Vertex].get()))->ShaderD3D11;
 		deviceContextD3D11->VSSetShader(shaderD3D11, nullptr, 0);
 	}
 
-	if (mShaderStage[ST_Hull])
+	if (mShaderStages[ST_Hull])
 	{
-		ID3D11HullShader* shaderD3D11 = (static_cast<D3D11HullShader*>(mShaderStage[ST_Hull].get()))->ShaderD3D11;
+		ID3D11HullShader* shaderD3D11 = (static_cast<D3D11HullShader*>(mShaderStages[ST_Hull].get()))->ShaderD3D11;
 		deviceContextD3D11->HSSetShader(shaderD3D11, nullptr, 0);
 	}
 
-	if (mShaderStage[ST_Domain])
+	if (mShaderStages[ST_Domain])
 	{
-		ID3D11DomainShader* shaderD3D11 = (static_cast<D3D11DomainShader*>(mShaderStage[ST_Domain].get()))->ShaderD3D11;
+		ID3D11DomainShader* shaderD3D11 = (static_cast<D3D11DomainShader*>(mShaderStages[ST_Domain].get()))->ShaderD3D11;
 		deviceContextD3D11->DSSetShader(shaderD3D11, nullptr, 0);
 	}
 
-	if (mShaderStage[ST_Geomerty])
+	if (mShaderStages[ST_Geomerty])
 	{
-		ID3D11GeometryShader* shaderD3D11 = (static_cast<D3D11GeometryShader*>(mShaderStage[ST_Geomerty].get()))->ShaderD3D11;
+		ID3D11GeometryShader* shaderD3D11 = (static_cast<D3D11GeometryShader*>(mShaderStages[ST_Geomerty].get()))->ShaderD3D11;
 		deviceContextD3D11->GSSetShader(shaderD3D11, nullptr, 0);
 	}
 
-	if (mShaderStage[ST_Pixel])
+	if (mShaderStages[ST_Pixel])
 	{
-		ID3D11PixelShader* shaderD3D11 = (static_cast<D3D11PixelShader*>(mShaderStage[ST_Pixel].get()))->ShaderD3D11;
+		ID3D11PixelShader* shaderD3D11 = (static_cast<D3D11PixelShader*>(mShaderStages[ST_Pixel].get()))->ShaderD3D11;
 		deviceContextD3D11->PSSetShader(shaderD3D11, nullptr, 0);
 	}
 
-	if (mShaderStage[ST_Compute])
+	if (mShaderStages[ST_Compute])
 	{
-		ID3D11ComputeShader* shaderD3D11 = (static_cast<D3D11ComputeShader*>(mShaderStage[ST_Compute].get()))->ShaderD3D11;
+		ID3D11ComputeShader* shaderD3D11 = (static_cast<D3D11ComputeShader*>(mShaderStages[ST_Compute].get()))->ShaderD3D11;
 		deviceContextD3D11->CSSetShader(shaderD3D11, nullptr, 0);
 
 	}
@@ -618,16 +837,16 @@ void D3D11ShaderProgram::Bind()
 	// Commit all shader resource
 }
 
-void D3D11ShaderProgram::Unbind()
+void D3D11ShaderPipeline::Unbind()
 {
 	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
 
-	if (mShaderStage[ST_Vertex])   deviceContextD3D11->VSSetShader(nullptr, nullptr, 0);
-	if (mShaderStage[ST_Hull])     deviceContextD3D11->HSSetShader(nullptr, nullptr, 0);
-	if (mShaderStage[ST_Domain])   deviceContextD3D11->DSSetShader(nullptr, nullptr, 0);
-	if (mShaderStage[ST_Geomerty]) deviceContextD3D11->GSSetShader(nullptr, nullptr, 0);
-	if (mShaderStage[ST_Pixel])    deviceContextD3D11->PSSetShader(nullptr, nullptr, 0);
-	if (mShaderStage[ST_Compute])  deviceContextD3D11->CSSetShader(nullptr, nullptr, 0);
+	if (mShaderStages[ST_Vertex])   deviceContextD3D11->VSSetShader(nullptr, nullptr, 0);
+	if (mShaderStages[ST_Hull])     deviceContextD3D11->HSSetShader(nullptr, nullptr, 0);
+	if (mShaderStages[ST_Domain])   deviceContextD3D11->DSSetShader(nullptr, nullptr, 0);
+	if (mShaderStages[ST_Geomerty]) deviceContextD3D11->GSSetShader(nullptr, nullptr, 0);
+	if (mShaderStages[ST_Pixel])    deviceContextD3D11->PSSetShader(nullptr, nullptr, 0);
+	if (mShaderStages[ST_Compute])  deviceContextD3D11->CSSetShader(nullptr, nullptr, 0);
 }
 
 

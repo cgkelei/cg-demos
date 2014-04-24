@@ -25,7 +25,7 @@ protected:
 	{
 		RHFactory* factory = Environment::GetSingleton().GetRHFactory();
 
-		String Directory = "E:/Engines/RcEngine/Media/Effect/HLSL/";
+		String Directory = "F:/RcEngine/Samples/FrameworkTest/";
 
 		auto ps = factory->LoadShaderFromFile(ST_Pixel, Directory + "RenderCascadeScene.hlsl", NULL, 0, "PSMain");
 
