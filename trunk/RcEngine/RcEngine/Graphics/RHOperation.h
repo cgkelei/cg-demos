@@ -23,21 +23,26 @@ public:
 
 
 public:
-	PrimitiveType mPrimitiveType;
-	vector< shared_ptr<RHBuffer> > mVertexStreams;
+	PrimitiveType PrimitiveType;
+	vector< shared_ptr<RHBuffer> > VertexStreams;
 
 	IndexBufferType IndexType;
-	shared_ptr<RHBuffer> mIndexBuffer;
+	shared_ptr<RHBuffer> IndexBuffer;
 	
-	shared_ptr<RHVertexDeclaration> mVertexDecl; 
+	shared_ptr<RHVertexDeclaration> VertexDecl; 
 
-	uint32_t mVertexStart;
-	uint32_t mVertexCount;
+	// Non-index mode
+	uint32_t VertexStart;
+	uint32_t VertexCount;
 
-	uint32_t mIndexStart;
-	uint32_t mIndexCount;
+	// Index mode 
+	uint32_t IndexStart;
+	uint32_t IndexCount;
 
-	uint32_t mNumInstances;
+	//int32_t BaseVertex; // indices[i] + basevertex
+
+	// Instance 
+	uint32_t NumInstances;
 };
 
 

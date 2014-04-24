@@ -11,11 +11,10 @@ class _OpenGLExport OpenGLVertexDeclaration : public RHVertexDeclaration
 public:
 	OpenGLVertexDeclaration(const RHVertexElement* element, uint32_t count);
 	~OpenGLVertexDeclaration();
-
-	/**
-	 * Return false for newly created VAO.
-	 */
-	bool GetOrGenVertexArrayOGL(GLuint& vao);
+	
+	inline GLuint GetVertexArrayOGL() const { return mVertexArrayOGL; }
+	
+	void CreateVertexArrayOGL(const RHOperation& operation, const RHShader& vertexShader);
 
 private:
 	GLuint mVertexArrayOGL;

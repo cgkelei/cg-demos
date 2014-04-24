@@ -42,11 +42,19 @@ struct _ApiExport RHVertexElement
 	RHVertexElement(uint32_t offset, VertexElementFormat theType, VertexElementUsage semantic, uint32_t index = 0);
 };
 
+struct _ApiExport RHVertexElementUtil
+{
+	static uint32_t GetElementComponentCount(const RHVertexElement& element);
+	static uint32_t GetElementSize(const RHVertexElement& element);
+};
+
 class _ApiExport RHVertexDeclaration 
 {
 public:
 	RHVertexDeclaration(const RHVertexElement* element, uint32_t count);
 	virtual ~RHVertexDeclaration() {}
+
+	uint32_t GetStreamStride(uint32_t streamSlot);
 
 public:
 	std::vector<RHVertexElement> mVertexElemets;

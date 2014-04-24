@@ -37,10 +37,10 @@ public:
 	
 	void BindFrameBuffer(const shared_ptr<RHFrameBuffer>& fb);
 	void BindShaderPipeline(const shared_ptr<RHShaderPipeline>& pipeline);
-	void Draw(const RHOperation& operation);
+	void Draw(const EffectTechnique* technique, const RHOperation& operation);
 
 protected:
-	virtual void DoDraw(const RHOperation& operation) = 0;
+	virtual void DoDraw(const EffectTechnique* technique, const RHOperation& operation) = 0;
 	virtual void SetViewport(const RHViewport& vp) = 0;
 
 protected:

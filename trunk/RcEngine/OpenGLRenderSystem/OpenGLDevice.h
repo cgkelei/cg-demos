@@ -44,15 +44,9 @@ public:
 	
 protected:
 
-	virtual void SetViewport(const RHViewport& vp);
-	/*void DoRender( EffectTechnique& tech, RenderOperation& operation);*/
-
-	void DoDraw(const RHOperation& operation);
+	void SetViewport(const RHViewport& vp);
+	void DoDraw(const EffectTechnique* technique, const RHOperation& operation);
 	
-	//void SetupShaderPipeline(const sha)
-	void SetupVertexArray(const RHOperation& operation);
-	void SetupIndexBuffer(const RHOperation& operation);
-
 private:
 	uint32_t mViewportTop, mViewportLeft, mViewportWidth, mViewportHeight;
 	shared_ptr<RHSamplerState> mCurrentSamplerStates[MaxSamplerCout];		

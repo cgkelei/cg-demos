@@ -1,7 +1,12 @@
 #include "D3D11Device.h"
 #include "D3D11State.h"
-#include "D3D11RenderWindow.h"
+#include "D3D11Buffer.h"
 #include "D3D11Factory.h"
+#include "D3D11RenderWindow.h"
+#include "D3D11VertexDeclaration.h"
+#include "D3D11GraphicCommon.h"
+#include <Graphics/RHOperation.h>
+#include <Graphics/Effect.h>
 #include <MainApp/Application.h>
 #include <Core/Exception.h>
 
@@ -110,11 +115,6 @@ void D3D11Device::SetViewport( const RHViewport& vp )
 	DeviceContextD3D11->RSSetViewports(1, &vpD3D11);
 }
 
-void D3D11Device::DoDraw( const RHOperation& operation )
-{
-
-}
-
 void D3D11Device::CreateRenderWindow()
 {
 	const ApplicationSettings& appSettings = Application::msApp->GetAppSettings();
@@ -173,6 +173,111 @@ void D3D11Device::ToggleFullscreen( bool fs )
 void D3D11Device::AdjustProjectionMatrix( float4x4& pOut )
 {
 
+}
+
+void D3D11Device::DoDraw( const EffectTechnique* technique, const RHOperation& operation )
+{
+	// Set up input layout
+	D3D11VertexDeclaration* vertexDeclD3D11 = static_cast_checked<D3D11VertexDeclaration*>(operation.VertexDecl.get());
+	if (vertexDeclD3D11->InputLayoutD3D11 == nullptr)
+	{
+		const RHShader& vertexShader = *(technique->GetPassByIndex(0)->GetShaderPipeline()->GetShader(ST_Vertex));
+		vertexDeclD3D11->CreateInputLayout(operation, vertexShader);
+	}
+	DeviceContextD3D11->IASetInputLayout(vertexDeclD3D11->InputLayoutD3D11);
+
+	// Set up vertex stream
+	if (operation.VertexStreams.size())
+	{
+		static ID3D11Buffer* vertexStreamsD3D11[8];
+		static uint32_t streamStride[8];
+
+		for (size_t i = 0; i < operation.VertexStreams.size(); ++i)
+		{
+			vertexStreamsD3D11[i] = static_cast_checked<D3D11Buffer*>(operation.VertexStreams[i].get())->BufferD3D11;
+			streamStride[i] = vertexDeclD3D11->GetStreamStride(i);
+		}
+
+		DeviceContextD3D11->IASetVertexBuffers(0, operation.VertexStreams.size(), vertexStreamsD3D11, streamStride, NULL);
+	}
+
+	// Set draw primitive mode
+	DeviceContextD3D11->IASetPrimitiveTopology( D3D11Mapping::Mapping(operation.PrimitiveType) );
+	if (operation.IndexBuffer)
+	{
+		ID3D11Buffer* indexBufferD3D11 = static_cast_checked<D3D11Buffer*>(operation.IndexBuffer.get())->BufferD3D11;
+
+		/**
+		 * StartIndexLocation and Index Buffer Offset is almost the same thing. 
+		 * The difference is that the offset is in bytes so you have to take the 
+		 * index size (16 bit vs 32 bit) into account. 
+		 */
+
+		//uint32_t indexOffset;
+		//DXGI_FORMAT indexFormatD3D11;
+		//if(operation.IndexType == IBT_Bit16)
+		//{
+		//	indexFormatD3D11 = DXGI_FORMAT_R16_UINT;
+		//	indexOffset += operation.IndexStart * 2;
+		//}
+		//else
+		//{
+		//	indexFormatD3D11 = DXGI_FORMAT_R32_UINT;
+		//	indexOffset += operation.IndexStart * 4;
+		//}
+		//DeviceContextD3D11->IASetIndexBuffer(indexBufferD3D11, indexFormatD3D11, indexOffset);
+
+		DXGI_FORMAT indexFormatD3D11 = (operation.IndexType == IBT_Bit16) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+		DeviceContextD3D11->IASetIndexBuffer(indexBufferD3D11, indexFormatD3D11, 0);
+
+		for (EffectPass* pass : technique->GetPasses())
+		{
+			pass->BeginPass();
+
+			if (operation.NumInstances <= 1)
+			{
+				DeviceContextD3D11->DrawIndexed(
+					operation.IndexCount, 
+					operation.IndexStart,
+					0 /*operation.BaseVertex*/);
+			}
+			else
+			{
+				DeviceContextD3D11->DrawIndexedInstanced(
+					operation.IndexCount, 
+					operation.NumInstances,
+					operation.IndexStart,
+					0 /*operation.BaseVertex*/,
+					0);
+			}
+
+			pass->EndPass();
+		}
+	}
+	else
+	{
+		for (EffectPass* pass : technique->GetPasses())
+		{
+			pass->BeginPass();
+
+			if (operation.NumInstances <= 1)
+			{
+				DeviceContextD3D11->Draw(
+					operation.VertexCount,
+					operation.VertexStart);
+			}
+			else
+			{
+				DeviceContextD3D11->DrawInstanced(
+					operation.VertexCount,
+					operation.NumInstances,
+					operation.VertexStart,
+					0);
+			}
+
+			pass->EndPass();
+		}
+	}
 }
 
 }

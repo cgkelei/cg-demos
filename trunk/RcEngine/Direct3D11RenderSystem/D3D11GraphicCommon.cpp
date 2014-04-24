@@ -354,6 +354,24 @@ DXGI_FORMAT D3D11Mapping::Mapping( VertexElementFormat format )
 	}
 }
 
+D3D10_PRIMITIVE_TOPOLOGY D3D11Mapping::Mapping( PrimitiveType primType )
+{
+	switch (primType)
+	{
+	case PT_Point_List:				return D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
+	case PT_Line_List:				return D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+	case PT_Line_List_Adj:			return D3D11_PRIMITIVE_TOPOLOGY_LINELIST_ADJ;
+	case PT_Line_Strip:				return D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP;
+	case PT_Line_Strip_Adj:			return D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ;
+	case PT_Triangle_List:			return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	case PT_Triangle_List_Adj:		return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
+	case PT_Triangle_Strip:			return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+	case PT_Triangle_Strip_Adj:		return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ;
+	default:
+		return D3D10_PRIMITIVE_TOPOLOGY(D3D11_PRIMITIVE_TOPOLOGY_1_CONTROL_POINT_PATCHLIST + primType - PT_Patch_Control_Point_1);
+	}
+}
+
 void D3D11Mapping::UnMapping( D3D10_SRV_DIMENSION dimension, EffectParameterType& oTexType )
 {
 	switch (dimension)

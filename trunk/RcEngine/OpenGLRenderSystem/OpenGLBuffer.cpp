@@ -16,11 +16,19 @@ OpenGLBuffer::OpenGLBuffer( uint32_t bufferSize, uint32_t accessHint, uint32_t f
 		   (GL_TEXTURE_BUFFER == target));
 
 	glGenBuffers(1, &mBufferOGL);
-	glBindBuffer(mBufferTarget, mBufferOGL);
-
 	GLenum bufferUsage = OpenGLMapping::Mapping(accessHint);
-	glBufferData(mBufferTarget, static_cast<GLsizeiptr>(bufferSize), initData ? initData->pData : nullptr, bufferUsage);
-	glBindBuffer(mBufferTarget, 0);
+
+	if (GLEW_EXT_direct_state_access)
+	{
+		glNamedBufferDataEXT(mBufferOGL, static_cast<GLsizeiptr>(bufferSize), initData ? initData->pData : nullptr, bufferUsage);
+	}
+	else
+	{
+		glBindBuffer(mBufferTarget, mBufferOGL);
+		glBufferData(mBufferTarget, static_cast<GLsizeiptr>(bufferSize), initData ? initData->pData : nullptr, bufferUsage);
+		glBindBuffer(mBufferTarget, 0);
+	}
+	//glNamedBufferStorageEXT()
 
 	OGL_ERROR_CHECK();
 }

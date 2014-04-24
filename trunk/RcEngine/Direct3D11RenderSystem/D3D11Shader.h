@@ -6,6 +6,12 @@
 
 namespace RcEngine {
 
+struct InputSignature
+{
+	String Semantic;
+	uint32_t SemanticIndex;
+};
+
 struct SRVParam
 {
 	String Name;
@@ -31,8 +37,9 @@ struct UniformParam
 struct UniformBufferParam
 {
 	String Name;
+	uint32_t BufferSize;
 	uint32_t Binding;
-	EffectParameterType Type;
+	vector<UniformParam> BufferVariables;
 };
 
 struct SamplerParam
@@ -71,7 +78,8 @@ public:
 
 public:
 	ID3D11VertexShader* ShaderD3D11;
-	std::vector<uint8_t> ShaderCode;
+	vector<uint8_t> ShaderCode;
+	vector<InputSignature> InputSignatures;
 };
 
 class _D3D11Export D3D11HullShader : public D3D11Shader

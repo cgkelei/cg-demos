@@ -13,7 +13,8 @@ public:
 	D3D11VertexDeclaration(const RHVertexElement* element, uint32_t count);
 	~D3D11VertexDeclaration(void);
 
-	void CreateInputLayoutD3D11(std::vector<uint8_t>& code);
+	void CreateInputLayout(const RHOperation& operation, const RHShader& vertexShader);
+
 public:
 
 	/**

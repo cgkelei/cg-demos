@@ -43,7 +43,7 @@ void RHDevice::BindFrameBuffer( const shared_ptr<RHFrameBuffer>& fb )
 	}
 }
 
-void RHDevice::Draw( const RHOperation& operation )
+void RHDevice::Draw( const EffectTechnique* technique, const RHOperation& operation )
 {
 
 }

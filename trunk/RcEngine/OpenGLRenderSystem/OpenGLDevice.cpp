@@ -8,12 +8,8 @@
 #include "OpenGLGraphicCommon.h"
 #include "OpenGLVertexDeclaration.h"
 #include <Graphics/RHState.h>
-//#include <Graphics/RenderOperation.h>
-//#include <Graphics/Material.h>
-//#include <Graphics/EffectTechnique.h>
-//#include <Graphics/Effect.h>
-//#include <Graphics/EffectPass.h>
 #include <Graphics/RHOperation.h>
+#include <Graphics/Effect.h>
 #include <MainApp/Application.h>
 #include <Core/Exception.h>
 #include <Math/MathUtil.h>
@@ -430,108 +426,105 @@ void OpenGLDevice::SetSamplerState( ShaderType stage, uint32_t unit, const share
 	}
 }
 
-void OpenGLDevice::SetupVertexArray( const RHOperation& operation )
+void OpenGLDevice::DoDraw( const EffectTechnique* technique, const RHOperation& operation )
 {
-	OpenGLVertexDeclaration* vertexDeclOGL = static_cast_checked<OpenGLVertexDeclaration*>(operation.mVertexDecl.get());
-
-	GLuint vertexArrayOGL;
-	bool bCreated = vertexDeclOGL->GetOrGenVertexArrayOGL(vertexArrayOGL);
-	glBindVertexArray(vertexArrayOGL);
-
-	if (!bCreated)
+	// Bind vertex buffer
+	OpenGLVertexDeclaration* vertexDeclOGL = static_cast_checked<OpenGLVertexDeclaration*>(operation.VertexDecl.get());
+	if (vertexDeclOGL->GetVertexArrayOGL() == 0)
 	{
-		std::vector<bool> slotBind(operation.mVertexStreams.size(), false);
-		for (GLuint attribIndex = 0; attribIndex < vertexDeclOGL->mVertexElemets.size(); ++attribIndex)
-		{
-			const RHVertexElement& attribute = vertexDeclOGL->mVertexElemets[attribIndex];
-
-			OpenGLBuffer* bufferOGL = static_cast_checked<OpenGLBuffer*>(operation.mVertexStreams[attribute.InputSlot].get());
-			glBindBuffer(GL_ARRAY_BUFFER, bufferOGL->GetBufferOGL());
-
-
-			/*uint16_t count = VertexElement::GetTypeCount(ve.Type);
-			GLenum type = OpenGLMapping::Mapping(ve.Type);
-			bool isNormalized = VertexElement::IsNormalized(ve.Type);
-			uint32_t offset = ve.Offset + op.VertexStart * vertexSize;*/
-
-			uint16_t count;
-			GLenum type;
-			bool isNormalized;
-			uint32_t offset;
-			uint32_t vertexSize;
-			
-			bool isMatchVertexShader = false;
-
-			if (isMatchVertexShader)
-			{
-				glEnableVertexAttribArray(attribIndex);
-
-				if (OpenGLMapping::IsIntegerType(type))
-					glVertexAttribIPointer(attribIndex, count, type, vertexSize, BUFFER_OFFSET(offset));	
-				else
-					glVertexAttribPointer(attribIndex, count, type, isNormalized, vertexSize, BUFFER_OFFSET(offset));	
-
-				if (attribute.InstanceStepRate > 0)
-					glVertexAttribDivisor(attribIndex, attribute.InstanceStepRate);
-			}
-			else 
-				glDisableVertexAttribArray(attribIndex);
-		}
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		// Get vertex shader of first pass, may need it to create VAO
+		const RHShader& vertexShader = *(technique->GetPassByIndex(0)->GetShaderPipeline()->GetShader(ST_Vertex));
+		vertexDeclOGL->CreateVertexArrayOGL(operation, vertexShader);
 	}
-}
+	glBindVertexArray(vertexDeclOGL->GetVertexArrayOGL());
 
-void OpenGLDevice::DoDraw(const RHOperation& operation)
-{
-	// Commit all shader parameter
-	glBindProgramPipeline(mProgramPipeline);
-	
-	SetupVertexArray(operation);
-
-	GLenum primitiveTypeOGL = OpenGLMapping::Mapping(operation.mPrimitiveType);
-	if (operation.mIndexBuffer)
+	// Bind index buffer
+	if (operation.IndexBuffer)
 	{
-		SetupIndexBuffer(operation);
+		OpenGLBuffer* bufferOGL = static_cast_checked<OpenGLBuffer*>(operation.IndexBuffer.get());
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferOGL->GetBufferOGL());
+	}
 
-		GLenum indexTypeOGL = GL_UNSIGNED_SHORT;
-		uint8_t* indexOffset = NULL;
+	// Draw primitive
+	GLenum primitiveTypeOGL = OpenGLMapping::Mapping(operation.PrimitiveType);
+	
+	// Tessellation
+	if (primitiveTypeOGL == GL_PATCHES)
+	{
+		assert(PT_Patch_Control_Point_1 <= operation.PrimitiveType && operation.PrimitiveType <= PT_Patch_Control_Point_32);
+		GLint numControlPoints = operation.PrimitiveType - PT_Patch_Control_Point_1;
+		glPatchParameteri(GL_PATCH_VERTICES, numControlPoints);
+	}
+
+	if (operation.IndexBuffer)
+	{
+		GLenum indexTypeOGL;
+		uint32_t indexOffset;
+
 		if(operation.IndexType == IBT_Bit16)
 		{
 			indexTypeOGL = GL_UNSIGNED_SHORT;
-			indexOffset += operation.mIndexStart * 2;
+			indexOffset = operation.IndexStart * 2;
 		}
 		else
 		{
 			indexTypeOGL = GL_UNSIGNED_INT;
-			indexOffset += operation.mIndexStart * 4;
+			indexOffset = operation.IndexStart * 4;
 		}
-	
-		//foreach pass 
+
+		for (EffectPass* pass : technique->GetPasses())
 		{
-			if (operation.mNumInstances <= 1)
-				glDrawElements(primitiveTypeOGL, operation.mIndexCount, indexTypeOGL, indexOffset);
+			pass->BeginPass();
+
+			glBindProgramPipeline(mProgramPipeline);
+			
+			if (operation.NumInstances <= 1)
+			{
+				glDrawElementsBaseVertex(
+					primitiveTypeOGL,
+					operation.IndexCount, 
+					indexTypeOGL,
+					BUFFER_OFFSET(indexOffset),
+					0 /*operation.BaseVertex*/);
+			}
 			else
-				glDrawElementsInstanced(primitiveTypeOGL, operation.mIndexCount, indexTypeOGL, indexOffset, operation.mNumInstances);
+			{
+				glDrawElementsInstancedBaseVertex(
+					primitiveTypeOGL, 
+					operation.IndexCount,
+					indexTypeOGL, 
+					BUFFER_OFFSET(indexOffset),
+					operation.NumInstances,
+					0 /*operation.BaseVertex*/);
+			}
+
+			pass->EndPass();
 		}
-		
 	}
 	else
 	{
-		//foreach pass 
+		for (EffectPass* pass : technique->GetPasses())
 		{
-			if (operation.mNumInstances <= 1)
-				glDrawArrays(primitiveTypeOGL, operation.mVertexStart, operation.mVertexCount);
+			pass->BeginPass();
+
+			glBindProgramPipeline(mProgramPipeline);
+
+			if (operation.NumInstances <= 1)
+			{
+				glDrawArrays(primitiveTypeOGL, operation.VertexStart, operation.VertexCount);
+			}
 			else
-				glDrawArraysInstanced(primitiveTypeOGL, operation.mVertexStart, operation.mVertexCount, operation.mNumInstances);
+			{
+				glDrawArraysInstanced(
+					primitiveTypeOGL,
+					operation.VertexStart,
+					operation.VertexCount,
+					operation.NumInstances);
+			}
+	
+			pass->EndPass();
 		}
 	}
 }
-
-void OpenGLDevice::SetupIndexBuffer( const RHOperation& operation )
-{
-
-}
-
 
 }

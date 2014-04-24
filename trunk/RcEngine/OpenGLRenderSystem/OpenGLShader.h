@@ -7,7 +7,14 @@
 
 namespace RcEngine {
 
-struct GlobalParam
+struct InputSignature
+{
+	GLenum Type;
+	GLint ArraySize; 
+	GLuint AttributeSlot;
+};
+
+struct UniformParam
 {
 	String Name;
 	GLint Location;
@@ -20,6 +27,7 @@ struct UniformBufferParam
 	String Name;
 	GLint Location;
 	uint32_t BufferSize;
+	vector<UniformParam> BufferVariables;
 };
 
 struct SRVParam
@@ -57,8 +65,9 @@ private:
 	
 	std::vector<SRVParam> mSRVParams;
 	std::vector<UAVParam> mUAVParams;
-	std::vector<GlobalParam> mGlobalParams;
+	std::vector<UniformParam> mGlobalParams;
 	std::vector<UniformBufferParam> mUniformBuffers;
+	std::vector<InputSignature> mInputSignatures;
 };
 
 class _OpenGLExport OpenGLShaderPipeline : public RHShaderPipeline
