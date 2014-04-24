@@ -111,6 +111,9 @@ class RHVertexDeclaration;
 class RHVertexDeclaration;
 class RHShaderPipeline;
 class RHOperation;
+class EffectParameter;
+class EffectTechnique;
+class EffectPass;
 
 class Stream;
 
@@ -126,10 +129,6 @@ class Effect;
 class Font;
 class SpriteBatch;
 class RenderQueue;
-class EffectParameter;
-class EffectTechnique;
-class EffectPass;
-class EffectAnnotation;
 class RenderOperation;
 class SimpleBox;
 class SceneManager;

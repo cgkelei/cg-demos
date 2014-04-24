@@ -52,18 +52,16 @@ GLenum OpenGLMapping::Mapping( PrimitiveType type )
 {
 	switch(type)
 	{
-	case PT_Point_List:
-		return GL_POINTS;
-	case PT_Line_List:
-		return GL_LINES;
-	case PT_Line_Strip:
-		return GL_LINE_STRIP;
-	case PT_Triangle_List:
-		return GL_TRIANGLES;
-	case PT_Triangle_Strip:
-		return GL_TRIANGLE_STRIP;
-	case PT_Triangle_Fan:
-		return GL_TRIANGLE_FAN;
+	case PT_Point_List:				return GL_POINTS;
+	case PT_Line_List:				return GL_LINES;
+	case PT_Line_Strip:				return GL_LINE_STRIP;
+	case PT_Line_List_Adj:			return GL_LINES_ADJACENCY;
+	case PT_Line_Strip_Adj:			return GL_LINE_STRIP_ADJACENCY;
+	case PT_Triangle_List:			return GL_TRIANGLES;
+	case PT_Triangle_Strip:			return GL_TRIANGLE_STRIP;
+	case PT_Triangle_List_Adj:		return GL_TRIANGLES_ADJACENCY;
+	case PT_Triangle_Strip_Adj:		return GL_TRIANGLE_STRIP_ADJACENCY;
+	default:						return GL_PATCHES;
 	}
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported PrimitiveType", "OpenGLGraphicCommon::Mapping");
 }

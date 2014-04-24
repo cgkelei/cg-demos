@@ -1,8 +1,9 @@
 #include "D3D11Shader.h"
 #include "D3D11Device.h"
 #include "D3D11State.h"
-#include "D3D11GraphicCommon.h"
+#include "D3D11Buffer.h"
 #include "D3D11View.h"
+#include "D3D11GraphicCommon.h"
 #include <Graphics/EffectParameter.h>
 #include <Graphics/Effect.h>
 #include <Core/Loger.h>
@@ -105,19 +106,19 @@ struct SamplerBindHelper
 			case ST_Vertex:
 				deviceContext->VSSetSamplers(Binding, 1, &samplerStateD3D11);
 				break;
-			case RcEngine::ST_Hull:
+			case ST_Hull:
 				deviceContext->HSSetSamplers(Binding, 1, &samplerStateD3D11);
 				break;
-			case RcEngine::ST_Domain:
+			case ST_Domain:
 				deviceContext->DSSetSamplers(Binding, 1, &samplerStateD3D11);
 				break;
-			case RcEngine::ST_Geomerty:
+			case ST_Geomerty:
 				deviceContext->GSSetSamplers(Binding, 1, &samplerStateD3D11);
 				break;
-			case RcEngine::ST_Pixel:
+			case ST_Pixel:
 				deviceContext->PSSetSamplers(Binding, 1, &samplerStateD3D11);
 				break;
-			case RcEngine::ST_Compute:
+			case ST_Compute:
 				deviceContext->CSSetSamplers(Binding, 1, &samplerStateD3D11);
 				break;
 			default:
@@ -132,6 +133,49 @@ private:
 	ShaderType ShaderStage;
 };
 
+struct UniformBindHelper
+{
+	UniformBindHelper(EffectUniformBuffer* buffer, uint32_t binding, ShaderType shaderStage)
+		: Buffer(buffer), Binding(binding), ShaderStage(shaderStage) {}
+
+	void operator() ()
+	{
+		// Update uniform buffer if changed
+		Buffer->UpdateBuffer();
+
+		ID3D11Buffer* bufferD3D11 = static_cast_checked<D3D11Buffer*>(Buffer->GetBuffer().get())->BufferD3D11;
+
+		ID3D11DeviceContext* deviceContext = gD3D11Device->DeviceContextD3D11;
+		switch (ShaderStage)
+		{
+		case ST_Vertex:
+			deviceContext->VSSetConstantBuffers(Binding, 1, &bufferD3D11);
+			break;
+		case ST_Hull:
+			deviceContext->HSSetConstantBuffers(Binding, 1, &bufferD3D11);
+			break;
+		case ST_Domain:
+			deviceContext->DSSetConstantBuffers(Binding, 1, &bufferD3D11);
+			break;
+		case ST_Geomerty:
+			deviceContext->GSSetConstantBuffers(Binding, 1, &bufferD3D11);
+			break;
+		case ST_Pixel:
+			deviceContext->PSSetConstantBuffers(Binding, 1, &bufferD3D11);
+			break;
+		case ST_Compute:
+			deviceContext->CSSetConstantBuffers(Binding, 1, &bufferD3D11);
+			break;
+		default:
+			break;
+		}
+	}
+
+private:
+	EffectUniformBuffer* Buffer;
+	uint32_t Binding;
+	ShaderType ShaderStage;
+};
 
 class D3D11ShaderReflection
 {
@@ -143,11 +187,6 @@ public:
 		HRESULT hr;
 		hr = D3DReflect( bytecode, size, IID_ID3D11ShaderReflection,  (void**) &mReflectorD3D11); 
 		mReflectorD3D11->GetDesc( &mShaderDescD3D11 );
-
-		RefectInputParameters();
-		ReflectOutputParameters();
-		ReflectConstantBuffers();
-		RefectionBoundResources();
 	}
 	
 	~D3D11ShaderReflection()
@@ -155,29 +194,34 @@ public:
 		SAFE_RELEASE(mReflectorD3D11);
 	}
 
+	void ReflectShader()
+	{
+		if (mShaderD3D11->GetShaderType() == ST_Vertex)
+			RefectInputParameters();
+
+		ReflectConstantBuffers();
+		RefectionBoundResources();
+	}
+
 	void RefectInputParameters()
 	{
+		D3D11VertexShader* vertexShaderD3D11 = static_cast_checked<D3D11VertexShader*>(mShaderD3D11);
 		for ( UINT i = 0; i < mShaderDescD3D11.InputParameters; i++ ) 
 		{ 
 			D3D11_SIGNATURE_PARAMETER_DESC inputParamDesc; 
 			mReflectorD3D11->GetInputParameterDesc( i, &inputParamDesc ); 
 
-			printf("Input Semantic: %s%d\n", inputParamDesc.SemanticName, inputParamDesc.SemanticIndex);
-		} 
-		
-	}
+			InputSignature signature;
+			signature.Semantic = inputParamDesc.SemanticName;
+			signature.SemanticIndex = inputParamDesc.SemanticIndex;
 
-	void ReflectOutputParameters()
-	{
-		for ( UINT i = 0; i < mShaderDescD3D11.OutputParameters; i++ ) 
-		{ 
-			D3D11_SIGNATURE_PARAMETER_DESC outputParamDesc; 
-			mReflectorD3D11->GetInputParameterDesc( i, &outputParamDesc ); 
+			vertexShaderD3D11->InputSignatures.push_back(signature);
 		} 
 	}
 
 	void ReflectConstantBuffers()
 	{
+		mShaderD3D11->UniformBufferParams.resize(mShaderDescD3D11.ConstantBuffers);
 		for ( UINT i = 0; i < mShaderDescD3D11.ConstantBuffers; i++ ) 
 		{
 			ID3D11ShaderReflectionConstantBuffer* bufferD3D11 = mReflectorD3D11->GetConstantBufferByIndex( i ); 
@@ -185,27 +229,36 @@ public:
 			D3D11_SHADER_BUFFER_DESC bufferDesc;
 			bufferD3D11->GetDesc(&bufferDesc);
 			
-			String bufferName = bufferDesc.Name;
-			uint32_t bufferSize = bufferDesc.Size; 
+			UniformBufferParam& uniformBufferParam = mShaderD3D11->UniformBufferParams[i];
 
+			uniformBufferParam.Name = bufferDesc.Name;
+			uniformBufferParam.BufferSize = bufferDesc.Size; 
+			uniformBufferParam.Binding = i;
+
+			if (uniformBufferParam.Name == "$Globals")
+			{
+				// Make a name unique to this shader, 
+				// Todo: Add a hash code of shader bytecode
+				uniformBufferParam.Name += std::to_string(mShaderDescD3D11.InstructionCount);
+			}
+
+			uniformBufferParam.BufferVariables.resize(bufferDesc.Variables);
 			for ( UINT j = 0; j < bufferDesc.Variables; j++ ) 
 			{
 				ID3D11ShaderReflectionVariable* variableD3D11 = bufferD3D11->GetVariableByIndex( j ); 
-				
-				D3D11_SHADER_VARIABLE_DESC varDesc; 
-				variableD3D11->GetDesc( &varDesc ); 
-
-				UniformParam param;
-				param.Name = varDesc.Name;
-				param.Offset = varDesc.StartOffset;
-				
-					// Get the variable type description and store it 
 				ID3D11ShaderReflectionType* varTypeD3D11 = variableD3D11->GetType(); 
-				
+
+				D3D11_SHADER_VARIABLE_DESC varDesc; 
 				D3D11_SHADER_TYPE_DESC varTypeDesc; 
+
+				variableD3D11->GetDesc( &varDesc ); 
 				varTypeD3D11->GetDesc( &varTypeDesc ); 
 
-				bool bArray = (varTypeDesc.Elements > 0);
+				UniformParam& param = uniformBufferParam.BufferVariables[j];
+
+				param.Name = varDesc.Name;
+				param.Offset = varDesc.StartOffset;
+				param.ArraySize = varTypeDesc.Elements;
 
 				switch (varTypeDesc.Class)
 				{
@@ -475,6 +528,9 @@ bool D3D11VertexShader::LoadFromFile( const String& filename, const ShaderMacro*
 
 		ShaderCode.resize(shaderBlob->GetBufferSize());
 		std::memcpy(&ShaderCode[0], shaderBlob->GetBufferPointer(), ShaderCode.size());
+
+		D3D11ShaderReflection shaderReflection(this, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize());	
+		shaderReflection.ReflectShader();
 	}
 
 	if (shaderBlob)
@@ -527,6 +583,9 @@ bool D3D11HullShader::LoadFromFile( const String& filename, const ShaderMacro* m
 		ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
 		hr = deviceD3D11->CreateHullShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
 		//D3D11_VERRY(hr);
+
+		D3D11ShaderReflection shaderReflection(this, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize());	
+		shaderReflection.ReflectShader();
 	}
 
 	if (shaderBlob)
@@ -579,6 +638,9 @@ bool D3D11DomainShader::LoadFromFile( const String& filename, const ShaderMacro*
 		ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
 		hr = deviceD3D11->CreateDomainShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
 		//D3D11_VERRY(hr);
+
+		D3D11ShaderReflection shaderReflection(this, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize());	
+		shaderReflection.ReflectShader();
 	}
 
 	if (shaderBlob)
@@ -631,6 +693,9 @@ bool D3D11GeometryShader::LoadFromFile( const String& filename, const ShaderMacr
 		ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
 		hr = deviceD3D11->CreateGeometryShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
 		//D3D11_VERRY(hr);
+
+		D3D11ShaderReflection shaderReflection(this, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize());	
+		shaderReflection.ReflectShader();
 	}
 
 	if (shaderBlob)
@@ -684,7 +749,8 @@ bool D3D11PixelShader::LoadFromFile( const String& filename, const ShaderMacro* 
 		hr = deviceD3D11->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
 		//D3D11_VERRY(hr);
 	
-		D3D11ShaderReflection shaderReflection(this, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize());		
+		D3D11ShaderReflection shaderReflection(this, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize());	
+		shaderReflection.ReflectShader();
 	}
 
 	if (shaderBlob)
@@ -737,6 +803,9 @@ bool D3D11ComputeShader::LoadFromFile( const String& filename, const ShaderMacro
 		ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
 		hr = deviceD3D11->CreateComputeShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &ShaderD3D11);
 		//D3D11_VERRY(hr);
+
+		D3D11ShaderReflection shaderReflection(this, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize());	
+		shaderReflection.ReflectShader();
 	}
 
 	if (shaderBlob)
@@ -761,12 +830,37 @@ void D3D11ShaderPipeline::LinkPipeline()
 			D3D11Shader* shaderD3D11 = static_cast_checked<D3D11Shader*>(mShaderStages[i].get());
 
 			// Constant Buffer
-			
+			for (const auto& uniformBufferParam : shaderD3D11->UniformBufferParams)
+			{
+				EffectUniformBuffer* uniformBuffer = mEffect.FetchUniformBufferParameter(uniformBufferParam.Name, uniformBufferParam.BufferSize);
+				
+				if (uniformBuffer->GetNumVariable() > 0)
+				{
+					// check buffer variables
+					assert(uniformBuffer->GetNumVariable() == uniformBufferParam.BufferVariables.size());
+					for (size_t i = 0; i < uniformBufferParam.BufferVariables.size(); ++i)
+					{
+						EffectParameter* variable = uniformBuffer->GetVariable(i);
+						if (variable->GetName() != uniformBufferParam.BufferVariables[i].Name ||
+							variable->GetParameterType() != uniformBufferParam.BufferVariables[i].Type ||
+							variable->GetElementSize() != uniformBufferParam.BufferVariables[i].ArraySize ||
+							variable->GetOffset() != uniformBufferParam.BufferVariables[i].Offset)
+						{
+							ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Error: Same uniform buffer with different variables!", "D3D11ShaderPipeline::LinkPipeline");
+						}
+					}
+				}
+				else
+				{
+					for (const auto& bufferVariable : uniformBufferParam.BufferVariables)
+					{
+						EffectParameter* variable = mEffect.FetchUniformParameter(bufferVariable.Name, bufferVariable.Type, bufferVariable.ArraySize);
+						uniformBuffer->AddVariable(variable, bufferVariable.Offset);
+					}
+				}
+			}
 
-
-
-
-			// Shader Resouce View
+			// Shader Resource View
 			for (const auto& srvParam : shaderD3D11->SRVParams)
 			{
 				EffectParameter* effectParam = mEffect.FetchSRVParameter(srvParam.Name, srvParam.Type);

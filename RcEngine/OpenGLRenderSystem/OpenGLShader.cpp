@@ -19,9 +19,9 @@ enum GLSLVersion
 };
 
 static String GLSLVersion[] = {
-	"#version 400\n",
-	"#version 410\n",
 	"#version 420\n",
+	"#version 430\n",
+	"#version 440\n",
 };
 
 const String& GetSupportedGLSLVersion() 
@@ -70,28 +70,36 @@ public:
 		mShaderProgramID = mShaderOGL->mShaderOGL;
 	}
 
-	void ShaderRefect()
+	void ReflectShader()
 	{
+		if (mShaderOGL->GetShaderType() == ST_Vertex)
+			RefectInputParameters();
+
 		ReflectResource();
 	}
 
 private:
 	void RefectInputParameters()
 	{
-		GLint size, location, maxNameLen;
-		GLsizei nameLen;
-		GLenum type;
+		enum { MaxNameLen = 256 };
+		GLchar name[MaxNameLen];
 
-		glGetProgramiv(mShaderProgramID, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &nameLen);
-		std::vector<GLchar> name(maxNameLen);
+		GLint size;
+		GLsizei actualLen;
+		GLenum type;		
 
 		GLint numAttribsInProgram;
 		glGetProgramiv(mShaderProgramID, GL_ACTIVE_ATTRIBUTES, &numAttribsInProgram);
 		for (GLuint i = 0; i < GLuint(numAttribsInProgram); ++i) 
 		{
-			glGetActiveAttrib(mShaderProgramID, i, maxNameLen, &nameLen, &size, &type, &name[0]);
+			glGetActiveAttrib(mShaderProgramID, i, MaxNameLen, &actualLen, &size, &type, name);
 
+			InputSignature attribute;
+			attribute.AttributeSlot = i;
+			attribute.Type = type;
+			attribute.ArraySize = size;
 
+			mShaderOGL->mInputSignatures.push_back(attribute);
 		}
 	}
 
@@ -100,7 +108,7 @@ private:
 		enum { MaxNameLen = 256 };
 		GLchar name[MaxNameLen];
 		
-		GLint location, arraySize, arrayStride, matrixStride, unifomOffset, blockSize;;
+		GLint arraySize, arrayStride, matrixStride, unifomOffset, blockSize;;
 		GLsizei actualNameLen;
 		GLenum type;
 
@@ -138,7 +146,7 @@ private:
 					
 				if (paramClass == Shader_Param_Uniform)
 				{
-					GlobalParam uniform;
+					UniformParam uniform;
 
 					uniform.Name = actualName;
 					uniform.Type = paramType;
@@ -191,17 +199,36 @@ private:
 			std::vector<GLuint> indices(numUniformInBlock);
 			glGetActiveUniformBlockiv(mShaderProgramID, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, (GLint*)&indices[0]);
 
+			UniformBufferParam uniformBufferParam;
+			uniformBufferParam.Name = String(name, actualNameLen);
+			uniformBufferParam.Location = i;
+
 			for (int k = 0; k < numUniformInBlock; ++k) 
 			{
 				glGetActiveUniform(mShaderProgramID, i, MaxNameLen, &actualNameLen, &arraySize, &type, name);	
 				glGetActiveUniformsiv(mShaderProgramID, 1, &indices[k], GL_UNIFORM_OFFSET, &unifomOffset);
 				glGetActiveUniformsiv(mShaderProgramID, 1, &indices[k], GL_UNIFORM_ARRAY_STRIDE, &arrayStride);
 				glGetActiveUniformsiv(mShaderProgramID, 1, &indices[k], GL_UNIFORM_MATRIX_STRIDE, &matrixStride);
+
+				// Check array type may contain []
+				if (arraySize > 1 && actualNameLen > 3) 
+				{
+					// remove [] if exits
+					actualNameLen = std::distance(name, std::find(name, name + actualNameLen, '['));
+				}
+
+				UniformParam bufferVariable;
+				bufferVariable.Name = String(name, actualNameLen);
+				bufferVariable.ArraySize = arraySize;
+				
+				OpenGLShaderParameterClass paramClass;
+				OpenGLMapping::UnMapping(type, bufferVariable.Type, paramClass);
+				assert(paramClass == Shader_Param_Uniform);
+
+				uniformBufferParam.BufferVariables.push_back(bufferVariable);
 			}
 
-			UniformBufferParam uniformBufferParam;
-			uniformBufferParam.Name = String(name, actualNameLen);
-			uniformBufferParam.Location = i;
+			mShaderOGL->mUniformBuffers.push_back(uniformBufferParam);
 		}
 
 		// Shader Storage Blocks
@@ -814,7 +841,7 @@ bool OpenGLShader::LoadFromFile( const String& filename, const ShaderMacro* macr
 	}
 
 	OpenGLShaderReflection shaderReflection(this);
-	shaderReflection.ShaderRefect();
+	shaderReflection.ReflectShader();
 
 	OGL_ERROR_CHECK();
 	return (success == GL_TRUE);
@@ -827,53 +854,6 @@ OpenGLShaderPipeline::OpenGLShaderPipeline(Effect& effect)
 	: RHShaderPipeline(effect)
 {
 
-}
-
-void OpenGLShaderPipeline::LinkPipeline()
-{
-	GLuint srvBinding = 0;
-	GLuint uavBinding = 0;
-
-	for (int i = 0; i < ST_Count; ++i)
-	{
-		if (mShaderStages[i])
-		{
-			OpenGLShader* shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Vertex].get()));
-
-			for (const GlobalParam& param : shaderOGL->mGlobalParams)
-			{
-				EffectParameter* uniformParam = mEffect.FetchUniformParameter(param.Name, param.Type, param.ArraySize);
-				AddUniformParamBind(shaderOGL->mShaderOGL, param.Location, uniformParam, param.ArraySize);
-			}
-
-			for (const SRVParam& param : shaderOGL->mSRVParams)
-			{
-				if (mBindingCache.find(param.Name) == mBindingCache.end())
-				{		
-					mBindingCache[param.Name] = srvBinding++;
-
-					EffectParameter* srvParam = mEffect.FetchSRVParameter(param.Name, param.Type);
-					AddSRVParamBind(srvParam, mBindingCache[param.Name]);
-
-				}
-
-				AddShaderResourceBind(shaderOGL->mShaderOGL, param.Location, mBindingCache[param.Name], param.Type == EPT_StructureBuffer);
-			}
-
-			for (const UAVParam& param : shaderOGL->mUAVParams)
-			{
-				if (mBindingCache.find(param.Name) == mBindingCache.end())
-				{
-					mBindingCache[param.Name] = uavBinding++;
-
-					EffectParameter* uavParam = mEffect.FetchUAVParameter(param.Name, param.Type);
-					AddUAVParamBind(uavParam, mBindingCache[param.Name]);
-				}
-
-				AddShaderResourceBind(shaderOGL->mShaderOGL, param.Location, mBindingCache[param.Name], param.Type == EPT_StructureBuffer);
-			}
-		}
-	}
 }
 
 void OpenGLShaderPipeline::OnBind()
@@ -929,6 +909,88 @@ void OpenGLShaderPipeline::OnUnbind()
 	if (mShaderStages[ST_Geomerty])	gOpenGLDevice->BindGeometryShader(0);
 	if (mShaderStages[ST_Pixel])	gOpenGLDevice->BindPixelShader(0);
 	if (mShaderStages[ST_Compute])	gOpenGLDevice->BindComputeShader(0);
+}
+
+void OpenGLShaderPipeline::LinkPipeline()
+{
+	GLuint srvBinding = 0;
+	GLuint uavBinding = 0;
+
+	for (int i = 0; i < ST_Count; ++i)
+	{
+		if (mShaderStages[i])
+		{
+			OpenGLShader* shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Vertex].get()));
+
+			// Global uniforms
+			for (const UniformParam& param : shaderOGL->mGlobalParams)
+			{
+				EffectParameter* uniformParam = mEffect.FetchUniformParameter(param.Name, param.Type, param.ArraySize);
+				AddUniformParamBind(shaderOGL->mShaderOGL, param.Location, uniformParam, param.ArraySize);
+			}
+
+			// Uniform buffers
+			for (const UniformBufferParam& param : shaderOGL->mUniformBuffers)
+			{
+				EffectUniformBuffer* uniformBuffer = mEffect.FetchUniformBufferParameter(param.Name, param.BufferSize);
+
+				if (uniformBuffer->GetNumVariable() > 0)
+				{
+					// check buffer variables
+					assert(uniformBuffer->GetNumVariable() == param.BufferVariables.size());
+					for (size_t i = 0; i < param.BufferVariables.size(); ++i)
+					{
+						EffectParameter* variable = uniformBuffer->GetVariable(i);
+						if (variable->GetName() != param.BufferVariables[i].Name ||
+							variable->GetParameterType() != param.BufferVariables[i].Type ||
+							variable->GetElementSize() != param.BufferVariables[i].ArraySize ||
+							variable->GetOffset() != param.BufferVariables[i].Location)
+						{
+							ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Error: Same uniform buffer with different variables!", "D3D11ShaderPipeline::LinkPipeline");
+						}
+					}
+				}
+				else
+				{
+					for (const auto& bufferVariable : param.BufferVariables)
+					{
+						EffectParameter* variable = mEffect.FetchUniformParameter(bufferVariable.Name, bufferVariable.Type, bufferVariable.ArraySize);
+						uniformBuffer->AddVariable(variable, bufferVariable.Location);
+					}
+				}
+			}
+
+			// Shader resource views
+			for (const SRVParam& param : shaderOGL->mSRVParams)
+			{
+				if (mBindingCache.find(param.Name) == mBindingCache.end())
+				{		
+					mBindingCache[param.Name] = srvBinding++;
+
+					EffectParameter* srvParam = mEffect.FetchSRVParameter(param.Name, param.Type);
+					AddSRVParamBind(srvParam, mBindingCache[param.Name]);
+
+				}
+
+				AddShaderResourceBind(shaderOGL->mShaderOGL, param.Location, mBindingCache[param.Name], param.Type == EPT_StructureBuffer);
+			}
+
+			// Unordered access views
+			for (const UAVParam& param : shaderOGL->mUAVParams)
+			{
+				if (mBindingCache.find(param.Name) == mBindingCache.end())
+				{
+					mBindingCache[param.Name] = uavBinding++;
+
+					EffectParameter* uavParam = mEffect.FetchUAVParameter(param.Name, param.Type);
+					AddUAVParamBind(uavParam, mBindingCache[param.Name]);
+				}
+
+				AddShaderResourceBind(shaderOGL->mShaderOGL, param.Location, mBindingCache[param.Name], param.Type == EPT_StructureBuffer);
+			}
+
+		}
+	}
 }
 
 void OpenGLShaderPipeline::AddUniformParamBind( GLuint shader, GLint location, EffectParameter* effectParam, GLsizei arrSize )

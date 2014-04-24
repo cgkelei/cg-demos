@@ -2,13 +2,12 @@
 #define Effect_h__
 
 #include <Core/Prerequisites.h>
-#include <Graphics/GraphicsCommon.h>
 #include <Resource/Resource.h>
 #include <Math/ColorRGBA.h>
+#include <Graphics/GraphicsCommon.h>
 
 namespace RcEngine {	
 
-class EffectParameter;
 class EffectUniformBuffer;
 
 class _ApiExport Effect : public Resource
@@ -84,7 +83,8 @@ class _ApiExport EffectPass
 public:
 	EffectPass();
 
-	inline const String& GetPassName() const	{ return mName; }
+	inline const String& GetPassName() const									{ return mName; }
+	inline const shared_ptr<RHShaderPipeline>& GetShaderPipeline() const		{ return mShaderProgram; }
 
 	void BeginPass();
 	void EndPass();

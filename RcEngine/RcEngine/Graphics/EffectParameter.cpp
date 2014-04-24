@@ -201,16 +201,16 @@ EffectUniformBuffer::~EffectUniformBuffer()
 	delete[] mBackingStore;
 }
 
-void EffectUniformBuffer::AddEffectParameter( EffectParameter* parameter, uint32_t offset )
+void EffectUniformBuffer::AddVariable( EffectParameter* parameter, uint32_t offset )
 {
 	std::vector<EffectParameter*>::iterator it;
-	it = std::find_if(mParameters.begin(), mParameters.end(), [&](const EffectParameter* param) {
+	it = std::find_if(mBufferVariable.begin(), mBufferVariable.end(), [&](const EffectParameter* param) {
 						return param == parameter; });
 	
-	if (it == mParameters.end())
+	if (it == mBufferVariable.end())
 	{
 		parameter->SetConstantBuffer(this, offset);
-		mParameters.push_back(parameter);
+		mBufferVariable.push_back(parameter);
 	}
 }
 

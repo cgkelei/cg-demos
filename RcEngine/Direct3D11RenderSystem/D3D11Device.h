@@ -25,8 +25,7 @@ public:
 
 protected:
 	void SetViewport(const RHViewport& vp);
-	void DoDraw(const RHOperation& operation);
-	//void DoRender( EffectTechnique& tech, RenderOperation& op );
+	void DoDraw(const EffectTechnique* technique, const RHOperation& operation);
 
 public:
 	ID3D11DeviceContext* DeviceContextD3D11;

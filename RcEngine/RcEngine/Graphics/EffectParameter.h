@@ -17,27 +17,29 @@ public:
 	EffectUniformBuffer(const String& name, uint32_t bufferSize);
 	~EffectUniformBuffer();
 
-	inline const String& GetName() const					{ return mName; }
-	inline uint32_t GetBufferSize() const					{ return mBufferSize; }
-	inline shared_ptr<RHBuffer> GetBuffer() const			{ return mUniformBuffer; }
+	inline const String& GetName() const							{ return mName; }
+	inline uint32_t GetBufferSize() const							{ return mBufferSize; }
+	inline shared_ptr<RHBuffer> GetBuffer() const					{ return mUniformBuffer; }
+	inline uint32_t GetNumVariable() const							{ return mBufferVariable.size(); }
+	inline EffectParameter* GetVariable(uint32_t index) const		{ return mBufferVariable.at(index); }
 	
-	inline void MakeDirty()									{ mDirty = true; }
-	inline void ClearDirty()								{ mDirty = false; }
-	inline void* GetRawData(uint32_t offset) const			{ return mBackingStore + offset; }
+	inline void MakeDirty()											{ mDirty = true; }
+	inline void ClearDirty()										{ mDirty = false; }
+	inline void* GetRawData(uint32_t offset) const					{ return mBackingStore + offset; }
 
 	void UpdateBuffer();
 	void SetRawValue(const void* pData, uint32_t offset, uint32_t count);
 	void GetRawValue(void *pData, uint32_t offset, uint32_t count);
 
 public_internal:
-	void AddEffectParameter(EffectParameter* parameter, uint32_t offset); 
+	void AddVariable(EffectParameter* parameter, uint32_t offset); 
 
 protected:
 	String mName;
 	uint8_t* mBackingStore;
 	uint32_t mBufferSize;
 	shared_ptr<RHBuffer> mUniformBuffer;
-	std::vector<EffectParameter*> mParameters;
+	std::vector<EffectParameter*> mBufferVariable;
 
 	bool mDirty;
 };
@@ -53,6 +55,7 @@ public:
 	inline uint32_t GetElementSize() const					{ return mElementSize; }
 	inline const String& GetName() const					{ return mParameterName; }
 	inline EffectParameterType GetParameterType() const		{ return mParameterType; }
+	inline uint32_t GetOffset() const						{ return mOffset; }
 
 	// Set and Get method, call the matched parameter type version, or will cause exception
 	virtual void GetValue(bool& value) const;

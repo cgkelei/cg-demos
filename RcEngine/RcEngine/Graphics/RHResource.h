@@ -154,6 +154,8 @@ public:
 	RHShaderPipeline(Effect& effect);
 	virtual~ RHShaderPipeline() {}
 
+	const shared_ptr<RHShader>& GetShader(ShaderType shaderStage) const { return mShaderStages[shaderStage]; }
+
 	void AttachShader(const shared_ptr<RHShader>& shader);
 	void DetachShader(const shared_ptr<RHShader>& shader);
 	
