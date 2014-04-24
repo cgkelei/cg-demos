@@ -128,7 +128,7 @@ protected:
 class _D3D11Export D3D11TextureBufferUAV : public D3D11UnorderedAccessView
 {
 public:
-	D3D11TextureBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount, PixelFormat format);
+	D3D11TextureBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, PixelFormat format);
 
 protected:
 	shared_ptr<RHBuffer> mBuffer;
@@ -137,7 +137,7 @@ protected:
 class _D3D11Export D3D11StructuredBufferUAV : public D3D11UnorderedAccessView
 {
 public:
-	D3D11StructuredBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementCount);
+	D3D11StructuredBufferUAV(const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount);
 
 protected:
 	shared_ptr<RHBuffer> mBuffer;

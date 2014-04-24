@@ -498,7 +498,7 @@ EffectParameter* Effect::FetchUAVParameter( const String& name, EffectParameterT
 
 			if (mParameters.find(name) == mParameters.end())
 			{
-				uavParam = new EffectParameterUAVParameter(name, effectType);
+				uavParam = new EffectUAVParameter(name, effectType);
 				mParameters[name] = uavParam;
 			}
 			else
@@ -623,6 +623,23 @@ EffectParameter* Effect::FetchUniformParameter( const String& name, EffectParame
 	mParameters[name] = uniformParam;
 
 	return uniformParam;
+}
+
+EffectParameter* Effect::FetchSamplerParameter( const String& name )
+{
+	EffectParameter* samplerParam;
+
+	if (mParameters.find(name) == mParameters.end())
+	{
+		samplerParam = new EffectSamplerParameter(name);
+		mParameters[name] = samplerParam;
+	}
+	else
+	{
+		samplerParam = mParameters[name];
+	}
+
+	return samplerParam;
 }
 
 EffectUniformBuffer* Effect::FetchUniformBufferParameter( const String& name, uint32_t bufferSize )

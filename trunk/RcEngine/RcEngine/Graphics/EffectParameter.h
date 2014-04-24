@@ -71,7 +71,8 @@ public:
 	virtual void GetValue(float4*& value) const;
 	virtual void GetValue(weak_ptr<RHShaderResourceView>& value) const;
 	virtual void GetValue(weak_ptr<RHUnorderedAccessView>& value) const;
-	
+	virtual	void GetValue(weak_ptr<RHSamplerState>& value) const;
+
 	virtual void SetValue(const bool& value);
 	virtual void SetValue(const bool* value, uint32_t count);
 	virtual void SetValue(const float& value);
@@ -87,7 +88,8 @@ public:
 	virtual void SetValue(const float4& value);
 	virtual void SetValue(const float4* value, uint32_t count);
 	virtual void SetValue(const shared_ptr<RHShaderResourceView>& value);
-	virtual void SetValue(const shared_ptr<RHUnorderedAccessView>& value);
+	virtual void SetValue(const shared_ptr<RHUnorderedAccessView>& value);  // Need to consider D3D11 Atomic Counter 
+	virtual void SetValue(const shared_ptr<RHSamplerState>& value);
 
 public_internal:
 	// Make constant buffer dirty
@@ -345,10 +347,10 @@ private:
 	weak_ptr<RHShaderResourceView> mSRV;
 };
 
-class _ApiExport EffectParameterUAVParameter : public EffectParameter
+class _ApiExport EffectUAVParameter : public EffectParameter
 {
 public:
-	EffectParameterUAVParameter(const String& name, EffectParameterType type)
+	EffectUAVParameter(const String& name, EffectParameterType type)
 		: EffectParameter(name, type) {}
 
 	void GetValue(weak_ptr<RHUnorderedAccessView>& value) const
@@ -367,6 +369,29 @@ public:
 
 private:
 	weak_ptr<RHUnorderedAccessView> mUAV;
+};
+
+class _ApiExport EffectSamplerParameter : public EffectParameter
+{
+public:
+	EffectSamplerParameter(const String& name) : EffectParameter(name, EPT_Sampler) {}
+
+	void GetValue(weak_ptr<RHSamplerState>& value) const
+	{
+		value = mSamplerState;
+	}
+
+	void SetValue(const shared_ptr<RHSamplerState>& value)
+	{
+		if (mSamplerState.lock() != value)
+		{
+			mSamplerState = value;
+			MakeDirty();
+		}
+	}
+
+private:
+	weak_ptr<RHSamplerState> mSamplerState;
 };
 
 } // Namespace RcEngine

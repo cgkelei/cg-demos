@@ -10,27 +10,37 @@ struct SRVParam
 {
 	String Name;
 	uint32_t Binding;
-	RHShaderResourceView* pSRV;
+	EffectParameterType Type;
 };
 
 struct UAVParam
 {
 	String Name;
 	uint32_t Binding;
-	RHShaderResourceView* pUAV;
+	EffectParameterType Type;
 };
 
-struct GlobalParam
+struct UniformParam
 {
 	String Name;
+	uint32_t Offset;
+	uint32_t ArraySize;
+	EffectParameterType Type;
 };
 
 struct UniformBufferParam
 {
 	String Name;
 	uint32_t Binding;
-	RHBuffer* pBuffer;
+	EffectParameterType Type;
 };
+
+struct SamplerParam
+{
+	String Name;
+	uint32_t Binding;
+};
+
 
 class _D3D11Export D3D11Shader : public RHShader
 {
@@ -41,8 +51,11 @@ public:
 public:
 	vector<SRVParam> SRVParams;
 	vector<UAVParam> UAVParams;
-	vector<GlobalParam> GlobalParams;
+	vector<SamplerParam> SamplerParams;
 	vector<UniformBufferParam> UniformBufferParams;
+
+	friend class D3D11ShaderReflection;
+	friend class D3D11ShaderPipeline;
 };
 
 
@@ -132,18 +145,17 @@ public:
 
 
 ////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11ShaderProgram : public RHShaderPipeline
+class _D3D11Export D3D11ShaderPipeline : public RHShaderPipeline
 {
 public:
-	D3D11ShaderProgram();
+	D3D11ShaderPipeline(Effect& effect);
 
+	virtual void LinkPipeline();
 	virtual void Bind();
 	virtual void Unbind();
 
 protected:
-
-	std::vector<SRVParam> mPipeSRVs;
-	std::vector<UAVParam> mPipeUAVs;
+	std::vector<std::function<void()>> mParameterBinds; 
 }; 
 
 }

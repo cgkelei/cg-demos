@@ -26,7 +26,6 @@ struct SRVParam
 {
 	String Name;
 	GLint Location;
-	GLuint Binding;
 	EffectParameterType Type;
 };
 
@@ -34,7 +33,6 @@ struct UAVParam
 {
 	String Name;
 	GLint Location;
-	GLuint Binding;
 	EffectParameterType Type;
 };
 

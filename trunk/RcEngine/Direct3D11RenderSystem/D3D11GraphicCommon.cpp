@@ -354,49 +354,44 @@ DXGI_FORMAT D3D11Mapping::Mapping( VertexElementFormat format )
 	}
 }
 
-void D3D11Mapping::UnMapping( D3D10_SRV_DIMENSION dimension, TextureType& oTexType, bool& oTexArray )
+void D3D11Mapping::UnMapping( D3D10_SRV_DIMENSION dimension, EffectParameterType& oTexType )
 {
 	switch (dimension)
 	{
 	case D3D10_SRV_DIMENSION_TEXTURE1D:
 		{
-			oTexType = TT_Texture1D;
-			oTexArray = false;
+			oTexType = EPT_Texture1D;
 		}
 		break;
 	case D3D10_SRV_DIMENSION_TEXTURE1DARRAY:
 		{
-			oTexType = TT_Texture1D;
-			oTexArray = true;
+			oTexType = EPT_Texture1DArray;
 		}
 		break;
 	case D3D10_SRV_DIMENSION_TEXTURE2D:
 	case D3D10_SRV_DIMENSION_TEXTURE2DMS:
 		{
-			oTexType = TT_Texture2D;
-			oTexArray = false;
+			oTexType = EPT_Texture2D;
 		}
 		break;
 	case D3D10_SRV_DIMENSION_TEXTURE2DARRAY:
 	case D3D10_SRV_DIMENSION_TEXTURE2DMSARRAY:
 		{
-			oTexType = TT_Texture2D;
-			oTexArray = true;
+			oTexType = EPT_Texture2DArray;
 		}
 		break;
 	case D3D10_SRV_DIMENSION_TEXTURE3D:
 		{
-			oTexType = TT_Texture3D;
-			oTexArray = false;
+			oTexType = EPT_Texture3D;
 		}
 		break;
 	case D3D10_SRV_DIMENSION_TEXTURECUBE:
 		{
-			oTexType = TT_TextureCube;
-			oTexArray = false;
+			oTexType = EPT_TextureCube;
 		}
 		break;
 	default:
+		assert(false);
 		break;
 	}
 }

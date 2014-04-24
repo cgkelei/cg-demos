@@ -38,6 +38,7 @@ public:
 public_internal:
 	EffectParameter* FetchSRVParameter(const String& name, EffectParameterType effectType);
 	EffectParameter* FetchUAVParameter(const String& name, EffectParameterType effectType);
+	EffectParameter* FetchSamplerParameter(const String& name);
 	EffectParameter* FetchUniformParameter(const String& name, EffectParameterType effectType, uint32_t elementSize);
 	EffectUniformBuffer* FetchUniformBufferParameter(const String& name, uint32_t bufferSize);
 	
