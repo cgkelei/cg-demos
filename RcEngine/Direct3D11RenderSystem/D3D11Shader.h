@@ -158,9 +158,9 @@ class _D3D11Export D3D11ShaderPipeline : public RHShaderPipeline
 public:
 	D3D11ShaderPipeline(Effect& effect);
 
-	virtual void LinkPipeline();
-	virtual void Bind();
-	virtual void Unbind();
+	virtual bool LinkPipeline();
+	virtual void OnBind();
+	virtual void OnUnbind();
 
 protected:
 	std::vector<std::function<void()>> mParameterBinds; 

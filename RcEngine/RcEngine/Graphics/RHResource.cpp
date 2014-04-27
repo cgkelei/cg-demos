@@ -52,4 +52,15 @@ RHShaderPipeline::RHShaderPipeline( Effect& effect )
 
 }
 
+void RHShaderPipeline::AttachShader( const shared_ptr<RHShader>& shader )
+{
+	assert(shader);
+	mShaderStages[shader->GetShaderType()] = shader;
+}
+
+void RHShaderPipeline::DetachShader( const shared_ptr<RHShader>& shader )
+{
+	mShaderStages[shader->GetShaderType()] = nullptr;
+}
+
 }
