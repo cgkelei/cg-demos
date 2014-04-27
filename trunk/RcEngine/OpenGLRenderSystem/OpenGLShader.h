@@ -77,7 +77,7 @@ public:
 
 	virtual void OnBind();
 	virtual void OnUnbind();
-	virtual void LinkPipeline();
+	virtual bool LinkPipeline();
 
 private:
 	void AddUniformParamBind(GLuint shader, GLint location, EffectParameter* effectParam, GLsizei arrSize);

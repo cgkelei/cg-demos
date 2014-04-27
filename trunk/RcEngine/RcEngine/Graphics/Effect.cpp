@@ -24,273 +24,273 @@ using namespace RcEngine;
 //	vector<String> Includes;
 //};
 
+
+bool StringToBool(const String& str)
+{
+	if (str == "true")
+		return true;
+	return false;
+}
+
+uint8_t ColorWriteMask(bool r, bool g, bool b, bool a)
+{
+	uint8_t mask = 0;
+	if (r)	mask |= CWM_Red;
+	if (g)	mask |= CWM_Green;
+	if (b)	mask |= CWM_Blue;
+	if (a)	mask |= CWM_Alpha;
+	return mask;
+}
+
+class StateDescDefs
+{
+private:
+	StateDescDefs()
+	{
+		mDefs.insert(std::make_pair("Never", CF_Never));
+		mDefs.insert(std::make_pair("Always",  CF_Always));
+		mDefs.insert(std::make_pair("Less", CF_Less));
+		mDefs.insert(std::make_pair("LessEqual", CF_LessEqual));
+		mDefs.insert(std::make_pair("Equal", CF_Equal));
+		mDefs.insert(std::make_pair("NotEqual", CF_NotEqual));
+		mDefs.insert(std::make_pair("GreaterEqual", CF_GreaterEqual));
+		mDefs.insert(std::make_pair("Greater", CF_Greater));
+
+		mDefs.insert(std::make_pair("Keep", SOP_Keep));
+		mDefs.insert(std::make_pair("Zero",  SOP_Zero));
+		mDefs.insert(std::make_pair("Replace", SOP_Replace));
+		mDefs.insert(std::make_pair("Incr", SOP_Incr));
+		mDefs.insert(std::make_pair("Decr", SOP_Decr));
+		mDefs.insert(std::make_pair("Invert", SOP_Invert));
+		mDefs.insert(std::make_pair("IncrWrap", SOP_Incr_Wrap));
+		mDefs.insert(std::make_pair("DecrWrap", SOP_Decr_Wrap));
+
+		mDefs.insert(std::make_pair("Solid", FM_Solid));
+		mDefs.insert(std::make_pair("WireFrame",  FM_WireFrame));
+
+		mDefs.insert(std::make_pair("None", CM_None));
+		mDefs.insert(std::make_pair("Front", CM_Front));
+		mDefs.insert(std::make_pair("Back", CM_Back));
+
+		mDefs.insert(std::make_pair("Add", BOP_Add));
+		mDefs.insert(std::make_pair("Sub", BOP_Sub));
+		mDefs.insert(std::make_pair("RevSub", BOP_Rev_Sub));
+		mDefs.insert(std::make_pair("Max", BOP_Max));
+		mDefs.insert(std::make_pair("Min", BOP_Min));
+
+		//mDefs.insert(std::make_pair("Zero",  ABF_Zero));
+		mDefs.insert(std::make_pair("One", ABF_One));
+		mDefs.insert(std::make_pair("SrcAlpha", ABF_Src_Alpha));
+		mDefs.insert(std::make_pair("InvSrcAlpha", ABF_Inv_Src_Alpha));
+		mDefs.insert(std::make_pair("DstAlpha", ABF_Dst_Alpha));
+		mDefs.insert(std::make_pair("InvDestAlpha", ABF_Inv_Dst_Alpha));
+		mDefs.insert(std::make_pair("SrcColor", ABF_Src_Color));
+		mDefs.insert(std::make_pair("DestColor", ABF_Dst_Color));
+		mDefs.insert(std::make_pair("InvSrcColor", ABF_Inv_Src_Color));
+		mDefs.insert(std::make_pair("InvDestColor", ABF_Inv_Dst_Color));
+		mDefs.insert(std::make_pair("SrcAlphaSat", ABF_Src_Alpha_Sat));
+	}
+
+public:
+	static StateDescDefs& GetInstance()
+	{
+		static StateDescDefs singleton;
+		return singleton;
+	}
+
+	uint32_t GetState(const String& str)
+	{
+		auto iter = mDefs.find(str);
+		if (iter != mDefs.end())
+		{
+			return iter->second;
+		}
+
+		return CF_Always;
+	}
+
+private:
+	unordered_map<String, uint32_t> mDefs;
+};
 //
-//bool StringToBool(const String& str)
-//{
-//	if (str == "true")
-//		return true;
-//	return false;
-//}
-//
-//uint8_t ColorWriteMask(bool r, bool g, bool b, bool a)
-//{
-//	uint8_t mask = 0;
-//	if (r)	mask |= CWM_Red;
-//	if (g)	mask |= CWM_Green;
-//	if (b)	mask |= CWM_Blue;
-//	if (a)	mask |= CWM_Alpha;
-//	return mask;
-//}
-//
-//class StateDescDefs
-//{
-//private:
-//	StateDescDefs()
-//	{
-//		mDefs.insert(std::make_pair("Never", CF_Never));
-//		mDefs.insert(std::make_pair("Always",  CF_Always));
-//		mDefs.insert(std::make_pair("Less", CF_Less));
-//		mDefs.insert(std::make_pair("LessEqual", CF_LessEqual));
-//		mDefs.insert(std::make_pair("Equal", CF_Equal));
-//		mDefs.insert(std::make_pair("NotEqual", CF_NotEqual));
-//		mDefs.insert(std::make_pair("GreaterEqual", CF_GreaterEqual));
-//		mDefs.insert(std::make_pair("Greater", CF_Greater));
-//
-//		mDefs.insert(std::make_pair("Keep", SOP_Keep));
-//		mDefs.insert(std::make_pair("Zero",  SOP_Zero));
-//		mDefs.insert(std::make_pair("Replace", SOP_Replace));
-//		mDefs.insert(std::make_pair("Incr", SOP_Incr));
-//		mDefs.insert(std::make_pair("Decr", SOP_Decr));
-//		mDefs.insert(std::make_pair("Invert", SOP_Invert));
-//		mDefs.insert(std::make_pair("IncrWrap", SOP_Incr_Wrap));
-//		mDefs.insert(std::make_pair("DecrWrap", SOP_Decr_Wrap));
-//
-//		mDefs.insert(std::make_pair("Solid", FM_Solid));
-//		mDefs.insert(std::make_pair("WireFrame",  FM_WireFrame));
-//
-//		mDefs.insert(std::make_pair("None", CM_None));
-//		mDefs.insert(std::make_pair("Front", CM_Front));
-//		mDefs.insert(std::make_pair("Back", CM_Back));
-//
-//		mDefs.insert(std::make_pair("Add", BOP_Add));
-//		mDefs.insert(std::make_pair("Sub", BOP_Sub));
-//		mDefs.insert(std::make_pair("RevSub", BOP_Rev_Sub));
-//		mDefs.insert(std::make_pair("Max", BOP_Max));
-//		mDefs.insert(std::make_pair("Min", BOP_Min));
-//
-//		//mDefs.insert(std::make_pair("Zero",  ABF_Zero));
-//		mDefs.insert(std::make_pair("One", ABF_One));
-//		mDefs.insert(std::make_pair("SrcAlpha", ABF_Src_Alpha));
-//		mDefs.insert(std::make_pair("InvSrcAlpha", ABF_Inv_Src_Alpha));
-//		mDefs.insert(std::make_pair("DstAlpha", ABF_Dst_Alpha));
-//		mDefs.insert(std::make_pair("InvDestAlpha", ABF_Inv_Dst_Alpha));
-//		mDefs.insert(std::make_pair("SrcColor", ABF_Src_Color));
-//		mDefs.insert(std::make_pair("DestColor", ABF_Dst_Color));
-//		mDefs.insert(std::make_pair("InvSrcColor", ABF_Inv_Src_Color));
-//		mDefs.insert(std::make_pair("InvDestColor", ABF_Inv_Dst_Color));
-//		mDefs.insert(std::make_pair("SrcAlphaSat", ABF_Src_Alpha_Sat));
-//	}
-//
-//public:
-//	static StateDescDefs& GetInstance()
-//	{
-//		static StateDescDefs singleton;
-//		return singleton;
-//	}
-//
-//	uint32_t GetState(const String& str)
-//	{
-//		auto iter = mDefs.find(str);
-//		if (iter != mDefs.end())
-//		{
-//			return iter->second;
-//		}
-//
-//		return CF_Always;
-//	}
-//
-//private:
-//	unordered_map<String, uint32_t> mDefs;
-//};
-//
-//void CollectRenderStates(XMLNodePtr passNode, DepthStencilStateDesc& dsDesc, BlendStateDesc& blendDesc, RasterizerStateDesc& rasDesc,
-//	ColorRGBA& blendFactor, uint32_t& sampleMask, uint16_t& frontStencilRef, uint16_t& backStencilRef)
-//{
-//	XMLNodePtr stateNode;
-//	for (stateNode = passNode->FirstNode("State");  stateNode; stateNode = stateNode->NextSibling("State"))
-//	{
-//		String name = stateNode->AttributeString("name", "");
-//		String value = stateNode->AttributeString("value", "");
-//
-//		if (name == "DepthEnable")
-//		{
-//			dsDesc.DepthEnable = StringToBool(value);
-//		}
-//		else if (name == "DepthWriteMask")
-//		{
-//			dsDesc.DepthWriteMask = StringToBool(value);
-//		}
-//		else if (name == "DepthFunc")
-//		{
-//			dsDesc.DepthFunc = (CompareFunction)StateDescDefs::GetInstance().GetState(value);
-//		}
-//		else if (name == "StencilEnable")
-//		{
-//			dsDesc.StencilEnable = StringToBool(value);
-//		}
-//		else if (name == "StencilReadMask")
-//		{
-//			dsDesc.StencilReadMask = LexicalCast<uint8_t>(value);
-//		}
-//		else if (name == "StencilWriteMask")
-//		{
-//			dsDesc.StencilWriteMask = LexicalCast<uint8_t>(value);
-//		}
-//		else if (name == "FrontStencilRef")
-//		{
-//			frontStencilRef = LexicalCast<uint16_t>(value);
-//		}
-//		else if (name == "BackStencilRef")
-//		{
-//			backStencilRef = LexicalCast<uint16_t>(value);
-//		}
-//		else if (name == "FrontStencilFailOp")
-//		{
-//			dsDesc.FrontStencilFailOp = (StencilOperation)StateDescDefs::GetInstance().GetState(value);
-//		}
-//		else if (name == "FrontStencilPassOp")
-//		{
-//			dsDesc.FrontStencilPassOp = (StencilOperation)StateDescDefs::GetInstance().GetState(value);
-//		}
-//		else if (name == "FrontStencilDepthFailOp")
-//		{
-//			dsDesc.FrontStencilDepthFailOp = (StencilOperation)StateDescDefs::GetInstance().GetState(value);
-//		}
-//		else if (name == "FrontStencilFunc")
-//		{
-//			dsDesc.FrontStencilFunc = (CompareFunction)StateDescDefs::GetInstance().GetState(value);
-//		}
-//		else if (name == "BackStencilFailOp")
-//		{
-//			dsDesc.BackStencilFailOp = (StencilOperation)StateDescDefs::GetInstance().GetState(value);
-//		}
-//		else if (name == "BackStencilPassOp")
-//		{
-//			dsDesc.BackStencilPassOp = (StencilOperation)StateDescDefs::GetInstance().GetState(value);
-//		}
-//		else if (name == "BackStencilDepthFailOp")
-//		{
-//			dsDesc.BackStencilDepthFailOp = (StencilOperation)StateDescDefs::GetInstance().GetState(value);
-//		}
-//		else if (name == "BackStencilFunc")
-//		{
-//			dsDesc.BackStencilFunc = (CompareFunction)StateDescDefs::GetInstance().GetState(value);
-//		}
-//		else if (name == "AlphaToCoverageEnable")
-//		{
-//			blendDesc.AlphaToCoverageEnable = StringToBool(value);
-//		}
-//		else if (name == "IndependentBlendEnable")
-//		{
-//			blendDesc.IndependentBlendEnable  = StringToBool(value);
-//		}
-//		else if (name == "BlendEnable")
-//		{
-//			uint32_t index = stateNode->AttributeUInt("index", 0);
-//			blendDesc.RenderTarget[index].BlendEnable = StringToBool(value);
-//		}
-//		else if (name == "SrcBlend")
-//		{	
-//			uint32_t index = stateNode->AttributeUInt("index", 0);
-//			blendDesc.RenderTarget[index].SrcBlend = (AlphaBlendFactor)StateDescDefs::GetInstance().GetState(value);
-//		}
-//		else if (name == "DestBlend")
-//		{
-//			uint32_t index = stateNode->AttributeUInt("index", 0);
-//			blendDesc.RenderTarget[index].DestBlend = (AlphaBlendFactor)StateDescDefs::GetInstance().GetState(value);
-//		}
-//		else if (name == "BlendOp")
-//		{
-//			uint32_t index = stateNode->AttributeUInt("index", 0);
-//			blendDesc.RenderTarget[index].BlendOp = (BlendOperation)StateDescDefs::GetInstance().GetState(value);
-//		}
-//		else if (name == "SrcBlendAlpha")
-//		{
-//			uint32_t index = stateNode->AttributeUInt("index", 0);
-//			blendDesc.RenderTarget[index].SrcBlendAlpha = (AlphaBlendFactor)StateDescDefs::GetInstance().GetState(value);
-//		}
-//		else if (name == "DestBlendAlpha")
-//		{
-//			uint32_t index = stateNode->AttributeUInt("index", 0);
-//			blendDesc.RenderTarget[index].DestBlendAlpha = (AlphaBlendFactor)StateDescDefs::GetInstance().GetState(value);
-//		}
-//		else if (name == "BlendOpAlpha")
-//		{
-//			uint32_t index = stateNode->AttributeUInt("index", 0);
-//			blendDesc.RenderTarget[index].BlendOpAlpha = (BlendOperation)StateDescDefs::GetInstance().GetState(value);
-//		}
-//		else if (name == "ColorWriteMask")
-//		{
-//			uint32_t index = stateNode->AttributeUInt("index", 0);
-//			bool rEnable = StringToBool( stateNode->AttributeString("r", "true") );
-//			bool gEnable = StringToBool( stateNode->AttributeString("g", "true") );
-//			bool bEnable = StringToBool( stateNode->AttributeString("b", "true") );
-//			bool aEnable = StringToBool( stateNode->AttributeString("a", "true") );
-//
-//			blendDesc.RenderTarget[index].ColorWriteMask = ColorWriteMask(rEnable, gEnable, bEnable, aEnable);
-//		}
-//		else if (name == "BlendFactor")
-//		{
-//			float r = stateNode->AttributeFloat("r", 0);
-//			float g = stateNode->AttributeFloat("g", 0);
-//			float b = stateNode->AttributeFloat("b", 0);
-//			float a = stateNode->AttributeFloat("a", 0);
-//			blendFactor = ColorRGBA(r,g,b,a);
-//		}
-//		else if (name == "SampleMask")
-//		{
-//			sampleMask = LexicalCast<uint32_t>(value);
-//		}
-//		else if (name == "FillMode")
-//		{
-//			rasDesc.PolygonFillMode = (FillMode)StateDescDefs::GetInstance().GetState(value);
-//		}
-//		else if (name == "CullMode")
-//		{
-//			rasDesc.PolygonCullMode = (CullMode)StateDescDefs::GetInstance().GetState(value);
-//		}
-//		else if (name == "FrontCounterClockwise")
-//		{
-//			rasDesc.FrontCounterClockwise = StringToBool(value);
-//		}
-//		else if (name == "DepthBias")
-//		{
-//			rasDesc.DepthBias = LexicalCast<float>(value);
-//		}
-//		else if (name == "SlopeScaledDepthBias")
-//		{
-//			rasDesc.SlopeScaledDepthBias = LexicalCast<float>(value);
-//		}
-//		else if (name == "DepthClipEnable")
-//		{
-//			rasDesc.DepthClipEnable = StringToBool(value);
-//		}
-//		else if (name == "ScissorEnable")
-//		{
-//			rasDesc.ScissorEnable = StringToBool(value);
-//		}
-//		else if (name == "MultisampleEnable")
-//		{
-//			rasDesc.MultisampleEnable = StringToBool(value);
-//		}
-//		else
-//		{
-//			ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, name + ": Unknown effect state!",
-//				"CollectRenderStates");
-//		}
-//	}
-//}
-//
+void CollectRenderStates(XMLNodePtr passNode, RHDepthStencilStateDesc& dsDesc, RHBlendStateDesc& blendDesc, RHRasterizerStateDesc& rasDesc,
+	ColorRGBA& blendFactor, uint32_t& sampleMask, uint16_t& frontStencilRef, uint16_t& backStencilRef)
+{
+	XMLNodePtr stateNode;
+	for (stateNode = passNode->FirstNode("State");  stateNode; stateNode = stateNode->NextSibling("State"))
+	{
+		String name = stateNode->AttributeString("name", "");
+		String value = stateNode->AttributeString("value", "");
+
+		if (name == "DepthEnable")
+		{
+			dsDesc.DepthEnable = StringToBool(value);
+		}
+		else if (name == "DepthWriteMask")
+		{
+			dsDesc.DepthWriteMask = StringToBool(value);
+		}
+		else if (name == "DepthFunc")
+		{
+			dsDesc.DepthFunc = (CompareFunction)StateDescDefs::GetInstance().GetState(value);
+		}
+		else if (name == "StencilEnable")
+		{
+			dsDesc.StencilEnable = StringToBool(value);
+		}
+		else if (name == "StencilReadMask")
+		{
+			dsDesc.StencilReadMask = LexicalCast<uint8_t>(value);
+		}
+		else if (name == "StencilWriteMask")
+		{
+			dsDesc.StencilWriteMask = LexicalCast<uint8_t>(value);
+		}
+		else if (name == "FrontStencilRef")
+		{
+			frontStencilRef = LexicalCast<uint16_t>(value);
+		}
+		else if (name == "BackStencilRef")
+		{
+			backStencilRef = LexicalCast<uint16_t>(value);
+		}
+		else if (name == "FrontStencilFailOp")
+		{
+			dsDesc.FrontStencilFailOp = (StencilOperation)StateDescDefs::GetInstance().GetState(value);
+		}
+		else if (name == "FrontStencilPassOp")
+		{
+			dsDesc.FrontStencilPassOp = (StencilOperation)StateDescDefs::GetInstance().GetState(value);
+		}
+		else if (name == "FrontStencilDepthFailOp")
+		{
+			dsDesc.FrontStencilDepthFailOp = (StencilOperation)StateDescDefs::GetInstance().GetState(value);
+		}
+		else if (name == "FrontStencilFunc")
+		{
+			dsDesc.FrontStencilFunc = (CompareFunction)StateDescDefs::GetInstance().GetState(value);
+		}
+		else if (name == "BackStencilFailOp")
+		{
+			dsDesc.BackStencilFailOp = (StencilOperation)StateDescDefs::GetInstance().GetState(value);
+		}
+		else if (name == "BackStencilPassOp")
+		{
+			dsDesc.BackStencilPassOp = (StencilOperation)StateDescDefs::GetInstance().GetState(value);
+		}
+		else if (name == "BackStencilDepthFailOp")
+		{
+			dsDesc.BackStencilDepthFailOp = (StencilOperation)StateDescDefs::GetInstance().GetState(value);
+		}
+		else if (name == "BackStencilFunc")
+		{
+			dsDesc.BackStencilFunc = (CompareFunction)StateDescDefs::GetInstance().GetState(value);
+		}
+		else if (name == "AlphaToCoverageEnable")
+		{
+			blendDesc.AlphaToCoverageEnable = StringToBool(value);
+		}
+		else if (name == "IndependentBlendEnable")
+		{
+			blendDesc.IndependentBlendEnable  = StringToBool(value);
+		}
+		else if (name == "BlendEnable")
+		{
+			uint32_t index = stateNode->AttributeUInt("index", 0);
+			blendDesc.RenderTarget[index].BlendEnable = StringToBool(value);
+		}
+		else if (name == "SrcBlend")
+		{	
+			uint32_t index = stateNode->AttributeUInt("index", 0);
+			blendDesc.RenderTarget[index].SrcBlend = (AlphaBlendFactor)StateDescDefs::GetInstance().GetState(value);
+		}
+		else if (name == "DestBlend")
+		{
+			uint32_t index = stateNode->AttributeUInt("index", 0);
+			blendDesc.RenderTarget[index].DestBlend = (AlphaBlendFactor)StateDescDefs::GetInstance().GetState(value);
+		}
+		else if (name == "BlendOp")
+		{
+			uint32_t index = stateNode->AttributeUInt("index", 0);
+			blendDesc.RenderTarget[index].BlendOp = (BlendOperation)StateDescDefs::GetInstance().GetState(value);
+		}
+		else if (name == "SrcBlendAlpha")
+		{
+			uint32_t index = stateNode->AttributeUInt("index", 0);
+			blendDesc.RenderTarget[index].SrcBlendAlpha = (AlphaBlendFactor)StateDescDefs::GetInstance().GetState(value);
+		}
+		else if (name == "DestBlendAlpha")
+		{
+			uint32_t index = stateNode->AttributeUInt("index", 0);
+			blendDesc.RenderTarget[index].DestBlendAlpha = (AlphaBlendFactor)StateDescDefs::GetInstance().GetState(value);
+		}
+		else if (name == "BlendOpAlpha")
+		{
+			uint32_t index = stateNode->AttributeUInt("index", 0);
+			blendDesc.RenderTarget[index].BlendOpAlpha = (BlendOperation)StateDescDefs::GetInstance().GetState(value);
+		}
+		else if (name == "ColorWriteMask")
+		{
+			uint32_t index = stateNode->AttributeUInt("index", 0);
+			bool rEnable = StringToBool( stateNode->AttributeString("r", "true") );
+			bool gEnable = StringToBool( stateNode->AttributeString("g", "true") );
+			bool bEnable = StringToBool( stateNode->AttributeString("b", "true") );
+			bool aEnable = StringToBool( stateNode->AttributeString("a", "true") );
+
+			blendDesc.RenderTarget[index].ColorWriteMask = ColorWriteMask(rEnable, gEnable, bEnable, aEnable);
+		}
+		else if (name == "BlendFactor")
+		{
+			float r = stateNode->AttributeFloat("r", 0);
+			float g = stateNode->AttributeFloat("g", 0);
+			float b = stateNode->AttributeFloat("b", 0);
+			float a = stateNode->AttributeFloat("a", 0);
+			blendFactor = ColorRGBA(r,g,b,a);
+		}
+		else if (name == "SampleMask")
+		{
+			sampleMask = LexicalCast<uint32_t>(value);
+		}
+		else if (name == "FillMode")
+		{
+			rasDesc.PolygonFillMode = (FillMode)StateDescDefs::GetInstance().GetState(value);
+		}
+		else if (name == "CullMode")
+		{
+			rasDesc.PolygonCullMode = (CullMode)StateDescDefs::GetInstance().GetState(value);
+		}
+		else if (name == "FrontCounterClockwise")
+		{
+			rasDesc.FrontCounterClockwise = StringToBool(value);
+		}
+		else if (name == "DepthBias")
+		{
+			rasDesc.DepthBias = LexicalCast<float>(value);
+		}
+		else if (name == "SlopeScaledDepthBias")
+		{
+			rasDesc.SlopeScaledDepthBias = LexicalCast<float>(value);
+		}
+		else if (name == "DepthClipEnable")
+		{
+			rasDesc.DepthClipEnable = StringToBool(value);
+		}
+		else if (name == "ScissorEnable")
+		{
+			rasDesc.ScissorEnable = StringToBool(value);
+		}
+		else if (name == "MultisampleEnable")
+		{
+			rasDesc.MultisampleEnable = StringToBool(value);
+		}
+		else
+		{
+			ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, name + ": Unknown effect state!",
+				"CollectRenderStates");
+		}
+	}
+}
+
 //inline ShaderType ParseShaderStage(const String& stage)
 //{
 //	if (stage == "Vertex")
@@ -356,24 +356,17 @@ using namespace RcEngine;
 //	return retVal;
 //}
 //
-//void CollectShaderMacro(const XMLNodePtr& node, std::vector<ShaderMacro>& shaderMacros)
-//{
-//	for (XMLNodePtr macroNode = node->FirstNode("Macro"); macroNode; macroNode = macroNode->NextSibling("Macro"))
-//	{
-//		String name = macroNode->Attribute("name")->ValueString();	
-//		String value = macroNode->AttributeString("value", "");
-//		shaderMacros.push_back(ShaderMacro(name, value));
-//	}
-//
-//	RenderDeviceType rdType = Context::GetSingleton().GetRenderDevice().GetRenderDeviceType();
-//
-//	// Deal with OpenGL and Direct3D texcoord Y reverse
-//	if (rdType == RD_Direct3D11)
-//	{
-//		shaderMacros.push_back(ShaderMacro("Direct3D", ""));
-//	}
-//}
-//
+void CollectShaderMacro(const XMLNodePtr& node, std::vector<ShaderMacro>& shaderMacros)
+{
+	for (XMLNodePtr macroNode = node->FirstNode("Macro"); macroNode; macroNode = macroNode->NextSibling("Macro"))
+	{
+		ShaderMacro macro;
+		macro.Name = macroNode->Attribute("name")->ValueString();	
+		macro.Definition = macroNode->AttributeString("value", "");
+		shaderMacros.push_back(macro);
+	}
+}
+
 }
 
 
@@ -656,86 +649,98 @@ EffectUniformBuffer* Effect::FetchUniformBufferParameter( const String& name, ui
 	return buffer;
 }
 
-//void Effect::LoadImpl()
-//{
-//	FileSystem& fileSystem = FileSystem::GetSingleton();
-//	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
-//
-//	// effect flags used to build shader macro
-//	vector<String> effectFlags;
-//
-//	//split the effect name to get effect file and flags
-//	std::istringstream iss(mResourceName); 
-//	do 
-//	{ 
-//		String sub; 
-//		iss >> sub; 
-//		if (!sub.empty())
-//			effectFlags.push_back(sub);	
-//	} while (iss); 
-//
-//	shared_ptr<Stream> effectStream = fileSystem.OpenStream(effectFlags[0], mGroup);
-//	Stream& source = *effectStream;	
-//
-//	XMLDoc doc;
-//	XMLNodePtr root = doc.Parse(source);
-//
-//	// effect name 
-//	mEffectName = root->AttributeString("name", "");
-//
-//	XMLNodePtr technqueNode;
-//	for (technqueNode = root->FirstNode("Technique");  technqueNode; technqueNode = technqueNode->NextSibling("Technique"))
-//	{
-//		EffectTechnique* technique = new EffectTechnique(*this);
-//	
-//		technique->mName = technqueNode->AttributeString("name", "");
-//	
-//		String filename, entryPoint;
-//		XMLNodePtr passNode, shaderNode;
-//		for (passNode = technqueNode->FirstNode("Pass");  passNode; passNode = passNode->NextSibling("Pass"))
-//		{
-//			EffectPass* pass = new EffectPass;
-//			pass->mName = passNode->AttributeString("name", "");
-//	
-//			DepthStencilStateDesc dsDesc;
-//			BlendStateDesc blendDesc;
-//			RasterizerStateDesc rasDesc;
-//	
-//			CollectRenderStates(passNode, dsDesc, blendDesc, rasDesc, pass->mBlendColor, pass->mSampleMask, pass->mFrontStencilRef, pass->mBackStencilRef);
-//	
-//			pass->mDepthStencilState = factory.CreateDepthStencilState(dsDesc);
-//			pass->mBlendState = factory.CreateBlendState(blendDesc);
-//			pass->mRasterizerState = factory.CreateRasterizerState(rasDesc);
-//
-//			static String shaderNodeNames[] = {"VertexShader", "HullShader", "DomainShader", "GeometryShader", "PixelShader", "ComputeShader"};
-//			for (int i = 0; i < 6; ++i)
-//			{
-//				shaderNode = passNode->FirstNode(shaderNodeNames[i]);
-//				if (shaderNode)
-//				{
-//					filename = shaderNode->AttributeString("name", "");
-//					entryPoint = shaderNode->AttributeString("entry", "");
-//
-//					std::vector<ShaderMacro> shaderMacros;
-//					CollectShaderMacro(shaderNode, shaderMacros);
-//
-//					for (size_t i = 1; i < effectFlags.size(); ++i)
-//					{
-//						shaderMacros.push_back(ShaderMacro(effectFlags[i], ""));
-//					}
-//
-//					shared_ptr<Shader> vertexShader = factory.CreateShader(ST_Vertex, filename, shaderMacros, entryPoint);
-//				}
-//			}
-//
-//
-//
-//		}
-//	}
-//	
-//
-//
-//}
+void Effect::LoadImpl()
+{
+	FileSystem& fileSystem = FileSystem::GetSingleton();
+	RHFactory* factory = Environment::GetSingleton().GetRHFactory();
+
+	// effect flags used to build shader macro
+	vector<String> effectFlags;
+
+	//split the effect name to get effect file and flags
+	StringStream iss(mResourceName); 
+	do 
+	{ 
+		String sub; 
+		iss >> sub; 
+		if (!sub.empty())
+			effectFlags.push_back(sub);	
+	} while (iss); 
+
+	shared_ptr<Stream> effectStream = fileSystem.OpenStream(effectFlags[0], mGroup);
+	Stream& source = *effectStream;	
+
+	XMLDoc doc;
+	XMLNodePtr root = doc.Parse(source);
+
+	// effect name 
+	mEffectName = root->AttributeString("name", "");
+
+	XMLNodePtr technqueNode, passNode, shaderNode;
+	for (technqueNode = root->FirstNode("Technique");  technqueNode; technqueNode = technqueNode->NextSibling("Technique"))
+	{
+		EffectTechnique* technique = new EffectTechnique(*this);
+	
+		technique->mName = technqueNode->AttributeString("name", "");
+	
+		String filename, entryPoint;
+		for (passNode = technqueNode->FirstNode("Pass");  passNode; passNode = passNode->NextSibling("Pass"))
+		{
+			EffectPass* pass = new EffectPass;
+			pass->mName = passNode->AttributeString("name", "");
+	
+			RHDepthStencilStateDesc dsDesc;
+			RHBlendStateDesc blendDesc;
+			RHRasterizerStateDesc rasDesc;
+	
+			CollectRenderStates(passNode, dsDesc, blendDesc, rasDesc, pass->mBlendColor, pass->mSampleMask, pass->mFrontStencilRef, pass->mBackStencilRef);
+	
+			pass->mDepthStencilState = factory->CreateDepthStencilState(dsDesc);
+			pass->mBlendState = factory->CreateBlendState(blendDesc);
+			pass->mRasterizerState = factory->CreateRasterizerState(rasDesc);
+			pass->mShaderPipeline = factory->CreateShaderPipeline(*this);
+
+			static const String ShaderNodeNames[] = {"VertexShader", "HullShader", "DomainShader", "GeometryShader", "PixelShader", "ComputeShader"};
+			for (uint32_t i = 0; i < ST_Count; ++i)
+			{
+				if (shaderNode = passNode->FirstNode(ShaderNodeNames[i]))
+				{
+					filename = shaderNode->AttributeString("file", "");
+					entryPoint = shaderNode->AttributeString("entry", "");
+
+					vector<ShaderMacro> shaderMacros;
+					CollectShaderMacro(shaderNode, shaderMacros);
+
+					for (size_t j = 1; j < effectFlags.size(); ++j)
+					{
+						ShaderMacro macro = { effectFlags[j], "" };
+						shaderMacros.push_back(macro);
+					}
+
+					pass->mShaderPipeline->AttachShader(
+						factory->LoadShaderFromFile(
+						ShaderType(ST_Vertex + i),
+						filename, 
+						shaderMacros.empty() ? nullptr : &shaderMacros[0],
+						shaderMacros.size(),
+						entryPoint) );
+				}
+			}
+
+			if (pass->mShaderPipeline->LinkPipeline() == false)
+			{
+				ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Effect error!", "Effect::LoadForm");
+			}
+			
+			technique->mPasses.push_back(pass);	
+		}
+
+		mTechniques.push_back(technique);
+	}
+	
+	mCurrTechnique = mTechniques.front();
+}
+
 
 //void Effect::LoadImpl()
 //{
@@ -929,13 +934,6 @@ shared_ptr<Resource> Effect::FactoryFunc( ResourceManager* creator, ResourceHand
 	return std::make_shared<Effect>(creator, handle, name, group);
 }
 
-void Effect::LoadImpl()
-{
-
-}
-
-
-
 //////////////////////////////////////////////////////////////////////////
 
 EffectTechnique::EffectTechnique(Effect& effect)
@@ -989,7 +987,7 @@ void EffectPass::BeginPass()
 	device->SetDepthStencilState(mDepthStencilState, mFrontStencilRef, mBackStencilRef);
 	device->SetBlendState(mBlendState, mBlendColor, mSampleMask);
 	device->SetRasterizerState(mRasterizerState);
-	device->BindShaderPipeline(mShaderProgram);
+	device->BindShaderPipeline(mShaderPipeline);
 }
 
 void EffectPass::EndPass()

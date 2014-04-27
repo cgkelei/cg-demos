@@ -911,7 +911,7 @@ void OpenGLShaderPipeline::OnUnbind()
 	if (mShaderStages[ST_Compute])	gOpenGLDevice->BindComputeShader(0);
 }
 
-void OpenGLShaderPipeline::LinkPipeline()
+bool OpenGLShaderPipeline::LinkPipeline()
 {
 	GLuint srvBinding = 0;
 	GLuint uavBinding = 0;
@@ -991,6 +991,8 @@ void OpenGLShaderPipeline::LinkPipeline()
 
 		}
 	}
+
+	return true;
 }
 
 void OpenGLShaderPipeline::AddUniformParamBind( GLuint shader, GLint location, EffectParameter* effectParam, GLsizei arrSize )

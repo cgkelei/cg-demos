@@ -84,7 +84,7 @@ public:
 	EffectPass();
 
 	inline const String& GetPassName() const									{ return mName; }
-	inline const shared_ptr<RHShaderPipeline>& GetShaderPipeline() const		{ return mShaderProgram; }
+	inline const shared_ptr<RHShaderPipeline>& GetShaderPipeline() const		{ return mShaderPipeline; }
 
 	void BeginPass();
 	void EndPass();
@@ -97,7 +97,7 @@ protected:
 	shared_ptr<RHBlendState> mBlendState;
 	shared_ptr<RHDepthStencilState> mDepthStencilState;
 	shared_ptr<RHRasterizerState> mRasterizerState;
-	shared_ptr<RHShaderPipeline> mShaderProgram;
+	shared_ptr<RHShaderPipeline> mShaderPipeline;
 };
 
 

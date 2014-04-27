@@ -821,7 +821,7 @@ D3D11ShaderPipeline::D3D11ShaderPipeline(Effect& effect)
 
 }
 
-void D3D11ShaderPipeline::LinkPipeline()
+bool D3D11ShaderPipeline::LinkPipeline()
 {
 	for (int i = 0; i < ST_Count; ++i)
 	{
@@ -885,9 +885,11 @@ void D3D11ShaderPipeline::LinkPipeline()
 			mParameterBinds.push_back( UAVSRVBindHelper(effectParam, uavParam.Binding) );
 		}
 	}
+
+	return true;
 }
 
-void D3D11ShaderPipeline::Bind()
+void D3D11ShaderPipeline::OnBind()
 {
 	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
 
@@ -931,7 +933,7 @@ void D3D11ShaderPipeline::Bind()
 	// Commit all shader resource
 }
 
-void D3D11ShaderPipeline::Unbind()
+void D3D11ShaderPipeline::OnUnbind()
 {
 	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
 

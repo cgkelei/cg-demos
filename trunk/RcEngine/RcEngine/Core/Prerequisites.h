@@ -61,14 +61,16 @@ typedef fastdelegate::FastDelegate3<uint32_t, int32_t, float> InputRangeHandler;
 
 
 //////////////////////////////////////////////////////////////////////////
-typedef std::string String;
-typedef std::wstring WString;
-
 using std::shared_ptr;
 using std::weak_ptr;
 using std::vector;
 using std::unordered_map;
 using std::unordered_set;
+
+typedef std::string String;
+typedef std::wstring WString;
+typedef std::basic_istringstream<String::value_type>  StringStream;
+typedef std::basic_istringstream<WString::value_type> WStringStream;
 
 /// Name / value parameter pair (first = name, second = value)
 typedef std::map<String, String> NameValuePairList;

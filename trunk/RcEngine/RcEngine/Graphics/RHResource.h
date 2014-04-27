@@ -159,7 +159,7 @@ public:
 	void AttachShader(const shared_ptr<RHShader>& shader);
 	void DetachShader(const shared_ptr<RHShader>& shader);
 	
-	virtual void LinkPipeline() = 0;
+	virtual bool LinkPipeline() = 0;
 	virtual void OnBind() = 0;
 	virtual void OnUnbind() = 0;
 

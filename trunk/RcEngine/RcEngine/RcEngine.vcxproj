@@ -96,6 +96,10 @@
     <ClCompile Include="Resource\ResourceManage.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Media\Effect\GLSL\DeferredLighting.glsl" />
+    <None Include="..\Media\Effect\GLSL\DeferredUtil.glsl" />
+    <None Include="..\Media\Effect\GLSL\LightingUtil.glsl" />
+    <None Include="..\Media\Effect\GLSL\Model.glsl" />
     <None Include="Math\BoundingBox.inl" />
     <None Include="Math\BoundingSphere.inl" />
     <None Include="Math\ColorRGBA.inl" />
@@ -109,18 +113,14 @@
     <None Include="Math\Vector.inl" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="..\Media\Effect\DeferredLighting.effect.xml">
-      <SubType>Designer</SubType>
-    </Xml>
-    <Xml Include="..\Media\Effect\DeferredReadUtill.include.xml" />
-    <Xml Include="..\Media\Effect\Font.effect.xml" />
-    <Xml Include="..\Media\Effect\LightingUtil.include.xml" />
-    <Xml Include="..\Media\Effect\Model.effect.xml" />
-    <Xml Include="..\Media\Effect\SimpleModel.effect.xml" />
-    <Xml Include="..\Media\Effect\Sky.effect.xml" />
-    <Xml Include="..\Media\Effect\Sprite.effect.xml" />
-    <Xml Include="..\Media\Pipiline\DeferredLighting.pipeline.xml" />
-    <Xml Include="..\Media\Pipiline\ForwardLighting.pipeline.xml" />
+    <Xml Include="..\Media\Effect\DeferredLighting.effect.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Media\Effect\HLSL\DeferredLighting.hlsl" />
+    <FxCompile Include="..\Media\Effect\HLSL\DeferredUtil.hlsl" />
+    <FxCompile Include="..\Media\Effect\HLSL\LightingUtil.hlsl" />
+    <FxCompile Include="..\Media\Effect\HLSL\MaterialTemplate.hlsl" />
+    <FxCompile Include="..\Media\Effect\HLSL\Model.hlsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8C5FC295-3DCE-4113-83C6-884D4F46DEF2}</ProjectGuid>

@@ -1,6 +1,7 @@
 #include <Graphics/RHFactory.h>
 #include <Graphics/RHResource.h>
 #include <Core/Environment.h>
+#include <Core/Utility.h>
 
 namespace RcEngine {
 
@@ -51,13 +52,25 @@ shared_ptr<RHDepthStencilState> RHFactory::CreateDepthStencilState( const RHDept
 
 shared_ptr<RHShader> RHFactory::LoadShaderFromFile( ShaderType shaderType, const String& filename, const ShaderMacro* macros, uint32_t macroCount, const String& entryPoint /*= ""*/ )
 {
-	//mShaderPool
-	shared_ptr<RHShader> shader = CreateShader(shaderType);
+	size_t shaderSeed = 0;
 
-	// Todo: load binary code if exits
-	shader->LoadFromFile(filename, macros, macroCount, entryPoint);
+	HashCombine(shaderSeed, filename);
+	HashCombine(shaderSeed, entryPoint);
+	for (uint32_t i = 0; i < macroCount; ++i)
+	{
+		HashCombine(shaderSeed, macros->Name);
+		HashCombine(shaderSeed, macros->Definition);
+	}
 
-	return shader;
+	if (mShaderPool.find(shaderSeed) == mShaderPool.end())
+	{
+		shared_ptr<RHShader> shader = CreateShader(shaderType);
+		shader->LoadFromFile(filename, macros, macroCount, entryPoint);
+
+		mShaderPool[shaderSeed] = shader;
+	}
+
+	return mShaderPool[shaderSeed];
 }
 
 }

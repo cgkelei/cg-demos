@@ -2,6 +2,9 @@
 #include <Graphics/RHFrameBuffer.h>
 #include <Graphics/RHDevice.h>
 #include <Graphics/RHFactory.h>
+#include <Resource/ResourceManager.h>
+#include <IO/FileSystem.h>
+#include <Graphics/Effect.h>
 #include <Core/Environment.h>
 
 using namespace RcEngine;
@@ -23,11 +26,13 @@ public:
 protected:
 	void Initialize()
 	{
+		ResourceManager& resMan = ResourceManager::GetSingleton();
+		FileSystem& fileSys = FileSystem::GetSingleton();
 		RHFactory* factory = Environment::GetSingleton().GetRHFactory();
 
-		auto ps = factory->LoadShaderFromFile(ST_Pixel, "E:/RenderCascadeScene.hlsl", NULL, 0, "PSMain");
-
-
+		String fullPath = fileSys.Locate("./HLSL/Model.hlsl");
+		
+		auto ps = factory->LoadShaderFromFile(ST_Pixel, fullPath, NULL, 0, "GBufferPSMain");
 	}
 
 

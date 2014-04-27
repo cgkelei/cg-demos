@@ -130,16 +130,6 @@ shared_ptr<RHShader> OpenGLFactory::CreateShader( ShaderType type )
 	return shared_ptr<RHShader>( new OpenGLShader(type) );
 }
 
-shared_ptr<RHShaderResourceView> OpenGLFactory::CreateTexture1DSRV( const shared_ptr<RHTexture>& texture )
-{
-	return shared_ptr<RHShaderResourceView>( new OpenGLTextureSRV(texture, 0, texture->GetMipLevels(), 0, texture->GetTextureArraySize()) );
-}
-
-shared_ptr<RHShaderResourceView> OpenGLFactory::CreateTexture2DSRV( const shared_ptr<RHTexture>& texture )
-{
-	return shared_ptr<RHShaderResourceView>( new OpenGLTextureSRV(texture, 0, texture->GetMipLevels(), 0, texture->GetTextureArraySize()) );
-}
-
 shared_ptr<RHShaderResourceView> OpenGLFactory::CreateTexture3DSRV( const shared_ptr<RHTexture>& texture )
 {
 	return shared_ptr<RHShaderResourceView>( new OpenGLTextureSRV(texture, 0, texture->GetMipLevels(), 0, texture->GetTextureArraySize()) );
@@ -160,19 +150,9 @@ shared_ptr<RHShaderResourceView> OpenGLFactory::CreateTexture2DSRV( const shared
 	return shared_ptr<RHShaderResourceView>( new OpenGLTextureSRV(texture, mostDetailedMip, mipLevels, firstArraySlice, arraySize) );
 }
 
-shared_ptr<RHUnorderedAccessView> OpenGLFactory::CreateTexture1DUAV( const shared_ptr<RHTexture>& texture )
-{
-	return shared_ptr<RHUnorderedAccessView>( new OpenGLTextureUAV(texture, 0, 0, texture->GetTextureArraySize() ) );
-}
-
 shared_ptr<RHUnorderedAccessView> OpenGLFactory::CreateTexture1DUAV( const shared_ptr<RHTexture>& texture, uint32_t level, uint32_t firstArraySlice, uint32_t arraySize )
 {
 	return shared_ptr<RHUnorderedAccessView>( new OpenGLTextureUAV(texture, level, firstArraySlice, arraySize ) );
-}
-
-shared_ptr<RHUnorderedAccessView> OpenGLFactory::CreateTexture2DUAV( const shared_ptr<RHTexture>& texture )
-{
-	return shared_ptr<RHUnorderedAccessView>( new OpenGLTextureUAV(texture, 0, 0, texture->GetTextureArraySize() ) );
 }
 
 shared_ptr<RHUnorderedAccessView> OpenGLFactory::CreateTexture2DUAV( const shared_ptr<RHTexture>& texture, uint32_t level, uint32_t firstArraySlice, uint32_t arraySize )
@@ -195,16 +175,16 @@ shared_ptr<RHVertexDeclaration> OpenGLFactory::CreateVertexDeclaration( RHVertex
 	return shared_ptr<RHVertexDeclaration>( new OpenGLVertexDeclaration(elems, count) );
 }
 
-//shared_ptr<ShaderProgram> OpenGLRenderFactory::CreateShaderProgram( Effect& effect )
-//{
-//	return std::make_shared<OpenGLShaderProgram>(effect);
-//}
-//
-//shared_ptr<FrameBuffer> OpenGLRenderFactory::CreateFrameBuffer( uint32_t width, uint32_t height )
-//{
-//	return std::make_shared<OpenGLFrameBuffer>(width, height, true);
-//}
-//
+shared_ptr<RHShaderPipeline> OpenGLFactory::CreateShaderPipeline( Effect& effect )
+{
+	return shared_ptr<RHShaderPipeline>( new OpenGLShaderPipeline(effect) );
+}
+
+shared_ptr<RHFrameBuffer> OpenGLFactory::CreateFrameBuffer( uint32_t width, uint32_t height )
+{
+	return std::make_shared<OpenGLFrameBuffer>(width, height);
+}
+
 //shared_ptr<Texture> OpenGLRenderFactory::CreateTextureFromFile( const std::string& texFileName, uint32_t accessHint )
 //{
 //	TextureType type;

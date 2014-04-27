@@ -1,5 +1,6 @@
 #include "D3D11Factory.h"
 #include "D3D11Buffer.h"
+#include "D3D11Device.h"
 #include "D3D11Texture.h"
 #include "D3D11FrameBuffer.h"
 #include "D3D11View.h"
@@ -86,6 +87,11 @@ shared_ptr<RHShader> D3D11Factory::CreateShader( ShaderType type )
 	}
 }
 
+shared_ptr<RHShaderPipeline> D3D11Factory::CreateShaderPipeline( Effect& effect )
+{
+	return shared_ptr<RHShaderPipeline>( new D3D11ShaderPipeline(effect) );
+}
+
 shared_ptr<RHShaderResourceView> D3D11Factory::CreateStructuredBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, uint32_t strutureStride )
 {
 	return shared_ptr<RHShaderResourceView>( new D3D11StructuredBufferSRV(buffer, elementOffset, elementCount) );
@@ -96,19 +102,9 @@ shared_ptr<RHShaderResourceView> D3D11Factory::CreateTextureBufferSRV( const sha
 	return shared_ptr<RHShaderResourceView>( new D3D11TextureBufferSRV(buffer, elementOffset, elementCount, format) );
 }
 
-shared_ptr<RHShaderResourceView> D3D11Factory::CreateTexture1DSRV( const shared_ptr<RHTexture>& texture )
-{
-	return shared_ptr<RHShaderResourceView>( new D3D11Texture1DSRV(texture, 0, texture->GetMipLevels(), 0, texture->GetTextureArraySize()) );
-}
-
 shared_ptr<RHShaderResourceView> D3D11Factory::CreateTexture1DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
 {
 	return shared_ptr<RHShaderResourceView>( new D3D11Texture1DSRV(texture, mostDetailedMip, mipLevels, firstArraySlice, arraySize) );
-}
-
-shared_ptr<RHShaderResourceView> D3D11Factory::CreateTexture2DSRV( const shared_ptr<RHTexture>& texture )
-{
-	return shared_ptr<RHShaderResourceView>( new D3D11Texture2DSRV(texture, 0, texture->GetMipLevels(), 0, texture->GetTextureArraySize()) );
 }
 
 shared_ptr<RHShaderResourceView> D3D11Factory::CreateTexture2DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
@@ -136,19 +132,9 @@ shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateTextureBufferUAV( const sh
 	return shared_ptr<RHUnorderedAccessView>( new D3D11TextureBufferUAV(buffer, elementOffset, elementCount, format) );
 }
 
-shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateTexture1DUAV( const shared_ptr<RHTexture>& texture )
-{
-	return shared_ptr<RHUnorderedAccessView>( new D3D11Texture1DUAV(texture, 0, 0, texture->GetTextureArraySize()) );
-}
-
 shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateTexture1DUAV( const shared_ptr<RHTexture>& texture, uint32_t level, uint32_t firstArraySlice, uint32_t arraySize )
 {
 	return shared_ptr<RHUnorderedAccessView>( new D3D11Texture1DUAV(texture, level, firstArraySlice, arraySize) );
-}
-
-shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateTexture2DUAV( const shared_ptr<RHTexture>& texture )
-{
-	return shared_ptr<RHUnorderedAccessView>( new D3D11Texture2DUAV(texture, 0, 0, texture->GetTextureArraySize()) );
 }
 
 shared_ptr<RHUnorderedAccessView> D3D11Factory::CreateTexture2DUAV( const shared_ptr<RHTexture>& texture, uint32_t level, uint32_t firstArraySlice, uint32_t arraySize )
@@ -206,9 +192,9 @@ shared_ptr<RHVertexDeclaration> D3D11Factory::CreateVertexDeclaration( RHVertexE
 	return shared_ptr<RHVertexDeclaration>( new D3D11VertexDeclaration(elems, count) );
 }
 
-
-
-
-
+shared_ptr<RHFrameBuffer> D3D11Factory::CreateFrameBuffer( uint32_t width, uint32_t height )
+{
+	return shared_ptr<RHFrameBuffer>( new D3D11FrameBuffer(width, height) );
+}
 
 }
