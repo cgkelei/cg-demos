@@ -1,26 +1,28 @@
 #include <Graphics/FrameBuffer.h>
-#include <Graphics/RenderView.h>
-#include <Graphics/RenderDevice.h>
-#include <Graphics/Camera.h>
-#include <Core/Context.h>
+#include <Graphics/GraphicsResource.h>
+#include <Core/Exception.h>
 
 namespace RcEngine {
 
-FrameBuffer::FrameBuffer(uint32_t width, uint32_t height,  bool offscreen /*= true*/ )
-	: mWidth(width), 
-	  mHeight(height), 
-	  mDepthStencilView(0),
-	  mDirty(true), 
-	  mIsDepthBuffered(false),
-	  mOffscreen(offscreen),
-	  mViewport(0, 0, width, height)
+//////////////////////////////////////////////////////////////////////////
+RenderView::RenderView( const shared_ptr<Texture>& texture )
+	: mTexture(texture)
 {
-	mCamera = std::make_shared<Camera>();
+
 }
 
-FrameBuffer::~FrameBuffer(void)
+//////////////////////////////////////////////////////////////////////////
+FrameBuffer::FrameBuffer( uint32_t width, uint32_t height )
+	: mWidth(width),
+	  mHeight(height),
+	  mDirty(true)
 {
-	
+
+}
+
+FrameBuffer::~FrameBuffer()
+{
+
 }
 
 void FrameBuffer::SetViewport( const Viewport& vp )
@@ -28,10 +30,11 @@ void FrameBuffer::SetViewport( const Viewport& vp )
 	if (mViewport != vp)
 	{
 		mViewport = vp;
+		mDirty = true;
 	}
 }
 
-shared_ptr<RenderView> FrameBuffer::GetAttachedView( Attachment att )
+shared_ptr<RenderView> FrameBuffer::GetRTV( Attachment att ) const
 {
 	switch(att)
 	{
@@ -41,13 +44,23 @@ shared_ptr<RenderView> FrameBuffer::GetAttachedView( Attachment att )
 	default:
 		uint32_t index = att - ATT_Color0;
 		if(mColorViews.size() < index + 1)
-			return NULL;
+		{
+			ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Try to get render target view which it not exit!", "RHFrameBuffer::GetRenderTargetView");
+		}
 		else
 			return mColorViews[index];
 	}
 }
 
-void FrameBuffer::Attach( Attachment att, const shared_ptr<RenderView>& view)
+shared_ptr<UnorderedAccessView> FrameBuffer::GetUAV( uint32_t index ) const
+{
+	if (index >= mUnorderedAccessViews.size())
+		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Try to get unordered access view which it not exit!", "RHFrameBuffer::GetUnorderedAccessView");
+	
+	return mUnorderedAccessViews[index];
+}
+
+void FrameBuffer::AttachRTV( Attachment att, const shared_ptr<RenderView>& view )
 {
 	switch(att)
 	{
@@ -55,11 +68,9 @@ void FrameBuffer::Attach( Attachment att, const shared_ptr<RenderView>& view)
 		{
 			if(mDepthStencilView)
 			{
-				Detach(ATT_DepthStencil);
+				DetachRTV(ATT_DepthStencil);
 			}
-			mIsDepthBuffered = true;
 			mDepthStencilView = view;
-			PixelFormatUtils::GetNumDepthStencilBits(view->GetFormat(), mDepthBits, mStencilBits);
 		}
 		break;
 	default:
@@ -68,45 +79,40 @@ void FrameBuffer::Attach( Attachment att, const shared_ptr<RenderView>& view)
 
 			// if it already has an render target attach it, detach if first. 
 			if(index < mColorViews.size() && mColorViews[index])
-			{
-				Detach(att);
-			}
+				DetachRTV(att);
 
-			if(mColorViews.size() < index + 1 )
-			{
+			if(mColorViews.size() < index + 1)
 				mColorViews.resize(index + 1);
-			}
 
 			mColorViews[index] = view;
-
-			// Frame buffer中所有的render target的大小都一样，以最小的一个作为参考
-			size_t minColorView = index;
-			for(size_t i = 0; i < mColorViews.size(); ++i)
-			{
-				if(mColorViews[i])
-				{
-					minColorView = i;
-					break;
-				}
-			}
-
-			if(minColorView == index && view)
-			{
-				mWidth = view->GetWidth();
-				mHeight = view->GetHeight();
-				mColorFormat = view->GetFormat();
-			}
 		}
 	}
 
 	if (view)
 		view->OnAttach(*this, att);
 
-	mActice = true;
 	mDirty = true;
 }
 
-void FrameBuffer::Detach( Attachment att )
+void FrameBuffer::AttachUAV( uint32_t index, const shared_ptr<UnorderedAccessView>& uav )
+{
+	if(mUnorderedAccessViews.size() < index + 1)
+		mUnorderedAccessViews.resize(index + 1);
+
+	mUnorderedAccessViews[index] = uav;
+	mDirty = true;
+}
+
+void FrameBuffer::DetachUAV( uint32_t index )
+{
+	if(mUnorderedAccessViews.size() < index + 1)
+		mUnorderedAccessViews.resize(index + 1);
+
+	mUnorderedAccessViews[index] = nullptr;
+	mDirty = true;
+}
+
+void FrameBuffer::DetachRTV( Attachment att )
 {
 	switch(att)
 	{
@@ -116,17 +122,12 @@ void FrameBuffer::Detach( Attachment att )
 			mDepthStencilView->OnDetach(*this, att);
 			mDepthStencilView = nullptr;
 		}
-
-		mIsDepthBuffered = false;
-		mDepthBits = 0;
-		mStencilBits = 0;
 		break;
 	default:
 		uint32_t index = att - ATT_Color0;
-		if(mColorViews.size() < index + 1 )
-		{
+
+		if(mColorViews.size() < index + 1)
 			mColorViews.resize(index + 1);
-		}
 
 		if(mColorViews[index])
 		{
@@ -135,22 +136,7 @@ void FrameBuffer::Detach( Attachment att )
 		}
 	}
 
-	mActice = true;
 	mDirty = true;
-}
-
-void FrameBuffer::OnBind()
-{
-	// Do Render API specify set
-	DoBind();
-	mDirty = false;
-}
-
-void FrameBuffer::OnUnbind()
-{
-	// Do Render API specify set
-	DoUnbind();
-	mDirty =  true;
 }
 
 void FrameBuffer::DetachAll()
@@ -159,34 +145,36 @@ void FrameBuffer::DetachAll()
 	{
 		if (mColorViews[i])
 		{
-			Detach((Attachment)(ATT_DepthStencil + i));
+			DetachRTV((Attachment)(ATT_DepthStencil + i));
 		}
 	}
 	mColorViews.clear();
 
 	if (mDepthStencilView)
-		Detach(ATT_DepthStencil);
+		DetachRTV(ATT_DepthStencil);
+
+	mUnorderedAccessViews.clear();
+
+	mDirty = true;
 }
 
 void FrameBuffer::Clear( uint32_t flags, const ColorRGBA& clr, float depth, uint32_t stencil )
 {
-	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
+	//RenderDevice& device = Context::GetSingleton().GetRenderDevice();
 
 	// frame buffer must binded before clear
-	shared_ptr<FrameBuffer> currentFrameBuffer = device.GetCurrentFrameBuffer();
-	assert( this == currentFrameBuffer.get());
+	//shared_ptr<FrameBuffer> currentFrameBuffer = device.GetCurrentFrameBuffer();
+	//assert( this == currentFrameBuffer.get());
 
 	if (flags & CF_Color)
 	{
 		for (size_t i = 0; i < mColorViews.size(); ++i)
 		{
 			if (mColorViews[i])
-			{
-				mColorViews[i]->ClearColor(clr);
-			}		
+				mColorViews[i]->ClearColor(clr);	
 		}
 	}
-	
+
 	if ( mDepthStencilView )
 	{
 		if ( (flags & CF_Stencil) && (flags & CF_Depth) )
@@ -198,10 +186,4 @@ void FrameBuffer::Clear( uint32_t flags, const ColorRGBA& clr, float depth, uint
 	}
 }
 
-bool FrameBuffer::CheckFramebufferStatus()
-{
-	return true;
 }
-
-
-} // Namespace RcEngine

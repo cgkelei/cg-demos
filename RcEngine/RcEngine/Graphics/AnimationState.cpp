@@ -5,7 +5,7 @@
 #include <Graphics/Skeleton.h>
 #include <Graphics/Mesh.h>
 #include <Input/InputSystem.h>
-#include <Core/Context.h>
+#include <Core/Environment.h>
 
 namespace RcEngine {
 

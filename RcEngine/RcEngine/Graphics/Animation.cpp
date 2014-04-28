@@ -6,7 +6,7 @@
 #include <Graphics/Mesh.h>
 #include <Scene/SceneManager.h>
 #include <IO/FileStream.h>
-#include <Core/Context.h>
+#include <Core/Environment.h>
 #include <Core/Exception.h>
 
 namespace RcEngine {
@@ -14,7 +14,7 @@ namespace RcEngine {
 AnimationPlayer::AnimationPlayer( )
 	: mCurrentClipState(nullptr)
 {
-	mController = Context::GetSingleton().GetSceneManager().GetAnimationController();
+	mController = Environment::GetSingleton().GetSceneManager()->GetAnimationController();
 }
 
 AnimationPlayer::~AnimationPlayer()

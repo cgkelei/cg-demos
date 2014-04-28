@@ -1,131 +1,93 @@
-#include "VertexDeclaration.h"
+#include <Graphics/RHVertexDeclaration.h>
+#include <Core/Exception.h>
 
 namespace RcEngine {
 
-
-VertexDeclaration::VertexDeclaration()
+VertexElement::VertexElement( uint32_t offset, VertexElementFormat theType, VertexElementUsage semantic, uint32_t index /*= 0*/ )
+	: Offset(offset),
+	  Type(theType),
+	  Usage(semantic),
+	  UsageIndex(index),
+	  InputSlot(0),
+	  InstanceStepRate(0)
 {
 
 }
 
-VertexDeclaration::VertexDeclaration( const std::vector<VertexElement>& elements )
+
+VertexDeclaration::VertexDeclaration( const VertexElement* element, uint32_t count )
 {
-	AssignVertexElements(elements.begin(), elements.end());
+	mVertexElemets.assign(element, element + count);
 }
 
-VertexDeclaration::VertexDeclaration( const VertexElement* elements, uint32_t count )
+uint32_t VertexDeclaration::GetStreamStride( uint32_t streamSlot )
 {
-	AssignVertexElements(elements, elements + count);
-}
-
-VertexDeclaration::~VertexDeclaration()
-{
-
-}
-
-const VertexElement* VertexDeclaration::FindElementBySemantic( VertexElementUsage usage, uint16_t index /*= 0*/ )
-{
-	for (const VertexElement& element : mElementList)
+	uint32_t stride = 0;
+	for (const VertexElement& element : mVertexElemets)
 	{
-		if (element.Usage == usage && element.UsageIndex == index)
-			return &element;
+		if (element.InputSlot == streamSlot)
+			stride += RHVertexElementUtil::GetElementSize(element);
 	}
 
-	return nullptr;
+	return stride;
 }
 
-uint32_t VertexDeclaration::GetVertexSize() const
-{
-	uint32_t size = 0;
-	for (const VertexElement& element : mElementList)
-		size += element.GetSize();
 
-	return size;
-}
-
-const VertexElement& VertexDeclaration::AddElement(uint32_t offset, VertexElementFormat theType, VertexElementUsage semantic, uint16_t index /*= 0*/ )
+uint32_t RHVertexElementUtil::GetElementComponentCount( const VertexElement& element )
 {
-	mElementList.push_back(
-		VertexElement(offset, theType, semantic, index)
-		);
-	return mElementList.back();
-}
-
-void VertexDeclaration::AddElement( const VertexElement& ve )
-{
-	mElementList.push_back(ve);
-}
-
-const VertexElement& VertexDeclaration::InsertElement( uint32_t atPosition, uint32_t offset, VertexElementFormat theType, VertexElementUsage semantic, uint16_t index /*= 0*/ )
-{
-	if ( atPosition >= static_cast<uint32_t>(mElementList.size()) )
+	switch(element.Type)
 	{
-		return AddElement(offset, theType, semantic, index);
+	case VEF_Float:
+	case VEF_Int:
+	case VEF_UInt:
+	case VEF_Bool:
+		return 1;
+
+	case VEF_Float2:
+	case VEF_Int2:
+	case VEF_UInt2:
+	case VEF_Bool2:
+		return 2;
+
+	case VEF_UInt3:
+	case VEF_Float3:
+	case VEF_Int3:
+	case VEF_Bool3:
+		return 3;
+
+	case VEF_Float4:
+	case VEF_Int4:
+	case VEF_Bool4:
+	case VEF_UInt4:
+		return 4;
+	}
+	ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid type",  "VertexElement::GetTypeCount");
+}
+
+uint32_t RHVertexElementUtil::GetElementSize( const VertexElement& element )
+{
+	switch(element.Type)
+	{
+	case VEF_Float:		return sizeof(float);
+	case VEF_Float2:    return sizeof(float)*2;
+	case VEF_Float3:    return sizeof(float)*3;
+	case VEF_Float4:    return sizeof(float)*4;
+	case VEF_Int:       return sizeof(int32_t);
+	case VEF_Int2:      return sizeof(int32_t)*2;
+	case VEF_Int3:      return sizeof(int32_t)*3;
+	case VEF_Int4:		return sizeof(int32_t)*4;
+	case VEF_UInt:		return sizeof(uint32_t);
+	case VEF_UInt2:		return sizeof(uint32_t)*2;
+	case VEF_UInt3:		return sizeof(uint32_t)*3;
+	case VEF_UInt4:		return sizeof(uint32_t)*4;
+	case VEF_Bool:		return sizeof(bool);
+	case VEF_Bool2:		return sizeof(bool)*2;
+	case VEF_Bool3:		return sizeof(bool)*3;
+	case VEF_Bool4:		return sizeof(bool)*4;
+	default:			break;
 	}
 
-	VertexElementList::iterator i = mElementList.begin();
-	for (uint32_t n = 0; n < atPosition; ++n)
-		++i;
-
-	i = mElementList.insert(i,  VertexElement( offset, theType, semantic, index));
-	return *i;
+	ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid type", "VertexElement::GetElementSize");
 }
 
-void VertexDeclaration::RemoveElement( uint32_t elemIndex )
-{
-	assert(elemIndex < static_cast<uint32_t>(mElementList.size()) && "Index out of bounds");
-	VertexElementList::iterator i = mElementList.begin();
-	for (uint32_t n = 0; n < elemIndex; ++n)
-		++i;
-	mElementList.erase(i);
 }
-
-void VertexDeclaration::RemoveElement( VertexElementUsage semantic, uint16_t index /*= 0*/ )
-{
-	VertexElementList::iterator i = mElementList.begin();
-	for( ; i!= mElementList.end(); ++i)
-	{
-		if(i->Usage == semantic && i->UsageIndex == index)
-		{
-			mElementList.erase(i);
-			return;
-		}
-	}
-}
-
-void VertexDeclaration::RemoveAllElements( void )
-{
-	mElementList.clear();
-}
-
-bool VertexDeclaration::VertexElementLess( const VertexElement& e1, const VertexElement& e2 )
-{
-	
-	// Use ordering of semantics to sort
-	if (e1.Usage < e2.Usage)
-	{
-		return true;
-	}
-	else if (e1.Usage == e2.Usage)
-	{
-		// Use index to sort
-		if (e1.UsageIndex < e2.UsageIndex)
-		{
-			return true;
-		}
-	}
-	
-	return false;
-}
-
-const VertexElementList& VertexDeclaration::GetElements( void ) const
-{
-	return mElementList;
-}
-
-void VertexDeclaration::Sort( void )
-{
-	std::sort(mElementList.begin(), mElementList.end(), VertexDeclaration::VertexElementLess);
-}
-
-} // Namespace RcEngine

@@ -1,14 +1,14 @@
-#include <Graphics/RHResource.h>
+#include <Graphics/GraphicsResource.h>
 
 namespace RcEngine {
 
-RHResouce::RHResouce()
+GraphicsResouce::GraphicsResouce()
 {
 
 }
 
 
-RHBuffer::RHBuffer( uint32_t bufferSize, uint32_t accessHint, uint32_t flags )
+GraphicsBuffer::GraphicsBuffer( uint32_t bufferSize, uint32_t accessHint, uint32_t flags )
 	: mBufferSize(bufferSize),
 	  mAccessHint(accessHint),
 	  mCreateFlags(flags)
@@ -16,7 +16,7 @@ RHBuffer::RHBuffer( uint32_t bufferSize, uint32_t accessHint, uint32_t flags )
 
 }
 
-RHTexture::RHTexture( TextureType type, PixelFormat format, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, uint32_t flags )
+Texture::Texture( TextureType type, PixelFormat format, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, uint32_t flags )
 	: mType(type),
 	  mFormat(format),
 	  mSampleCount(sampleQuality),
@@ -29,7 +29,7 @@ RHTexture::RHTexture( TextureType type, PixelFormat format, uint32_t numMipMaps,
 
 }
 
-uint32_t RHTexture::CalculateMipmapLevels( uint32_t n )
+uint32_t Texture::CalculateMipmapLevels( uint32_t n )
 {
 	//return int(ceil( log( float(_n) ) / log( 2.f ) )) + 1;
 	//return uint32_t(1.0 + floor(log(float(n)/log(2.f))));
@@ -40,25 +40,25 @@ uint32_t RHTexture::CalculateMipmapLevels( uint32_t n )
 }
 
 
-RHShader::RHShader( ShaderType shaderType )
+Shader::Shader( ShaderType shaderType )
 	: mShaderType(shaderType)
 {
 
 }
 
-RHShaderPipeline::RHShaderPipeline( Effect& effect )
+ShaderPipeline::ShaderPipeline( Effect& effect )
 	: mEffect(effect)
 {
 
 }
 
-void RHShaderPipeline::AttachShader( const shared_ptr<RHShader>& shader )
+void ShaderPipeline::AttachShader( const shared_ptr<Shader>& shader )
 {
 	assert(shader);
 	mShaderStages[shader->GetShaderType()] = shader;
 }
 
-void RHShaderPipeline::DetachShader( const shared_ptr<RHShader>& shader )
+void ShaderPipeline::DetachShader( const shared_ptr<Shader>& shader )
 {
 	mShaderStages[shader->GetShaderType()] = nullptr;
 }

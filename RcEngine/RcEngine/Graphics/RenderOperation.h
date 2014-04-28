@@ -1,4 +1,3 @@
-#pragma once
 #ifndef RenderOperation_h__
 #define RenderOperation_h__
 
@@ -7,67 +6,48 @@
 
 namespace RcEngine {
 
-
 class _ApiExport RenderOperation
 {
 public:
-	enum StreamType
-	{
-		ST_Geometry,
-		ST_Instance
-	};
-
-	struct StreamUnit
-	{
-		shared_ptr<GraphicsBuffer> Stream;
-		shared_ptr<VertexDeclaration> VertexDecl;
-		uint32_t Frequency;
-		StreamType Type;
-	};
-
-public:
-	RenderOperation(void);
+	RenderOperation();
 	~RenderOperation();
 
-	uint32_t GetStreamCount() const							{ return VertexStreams.size(); }
-	const StreamUnit& GetStreamUnit(uint32_t index) const	{ return VertexStreams[index]; }
+	void SetVertexBuffer(uint32_t streamUnit, shared_ptr<GraphicsBuffer> vertexBuffer);
+	void SetIndexBuffer(shared_ptr<GraphicsBuffer> indexBuffer, IndexBufferType indexType);
 	
-	void BindVertexStream(const shared_ptr<GraphicsBuffer>& buffer, const shared_ptr<VertexDeclaration>& vd,
-		StreamType type = ST_Geometry, uint32_t freq = 1);
-
-	/**
-	 * Set indices buffer and calculate indices count.
-	 */
-	void BindIndexStream(const shared_ptr<GraphicsBuffer>& buffer, IndexBufferType type);
-
-	/**
-	 * Set index range in IndexBuffer.
-	 */
-	void SetIndexRange(uint32_t indexStart, uint32_t indexCount);
+	// glDrawArrays, glDrawArraysInstanced
+	void SetIndexRange(uint32_t indexStart, uint32_t indexCount, uint32_t numInstance = 0);
 	
-	/**
-	 * No index buffer, set vertex range. Set VertexStart directly if need in VertexBuffer
-	 */
-	void SetVertexRange(uint32_t vertexStart, uint32_t vertexCount);
+	// glDrawElements, glDrawElementsInstanced
+	void SetVertexRange(uint32_t vertexStart, uint32_t vertexCount, uint32_t numInstance = 0);
+
 
 public:
 	PrimitiveType PrimitiveType;
+	vector< shared_ptr<GraphicsBuffer> > VertexStreams;
 
-	std::vector<StreamUnit> VertexStreams;
-
-	bool UseIndex;
-	shared_ptr<GraphicsBuffer> IndexBuffer;
 	IndexBufferType IndexType;
+	shared_ptr<GraphicsBuffer> IndexBuffer;
+	
+	shared_ptr<VertexDeclaration> VertexDecl; 
 
+	// Non-index mode
 	uint32_t VertexStart;
 	uint32_t VertexCount;
 
+	// Index mode 
 	uint32_t IndexStart;
 	uint32_t IndexCount;
+
+	//int32_t BaseVertex; // indices[i] + basevertex
+
+	// Instance 
+	uint32_t NumInstances;
 };
 
 
-} // Namespace RcEngine
+}
+
 
 
 #endif // RenderOperation_h__

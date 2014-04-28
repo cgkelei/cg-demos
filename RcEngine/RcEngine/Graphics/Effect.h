@@ -8,7 +8,7 @@
 
 namespace RcEngine {	
 
-class EffectUniformBuffer;
+class EffectConstantBuffer;
 
 class _ApiExport Effect : public Resource
 {
@@ -35,19 +35,27 @@ public:
 	static shared_ptr<Resource> FactoryFunc(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 
 public_internal:
+
+	// Get shader parameter, if not exits, create one
 	EffectParameter* FetchSRVParameter(const String& name, EffectParameterType effectType);
 	EffectParameter* FetchUAVParameter(const String& name, EffectParameterType effectType);
 	EffectParameter* FetchSamplerParameter(const String& name);
 	EffectParameter* FetchUniformParameter(const String& name, EffectParameterType effectType, uint32_t elementSize);
-	EffectUniformBuffer* FetchUniformBufferParameter(const String& name, uint32_t bufferSize);
+	EffectConstantBuffer* FetchConstantBuffer(const String& name, uint32_t bufferSize);
 	
+	// Create a new uniform buffer parameter 
+	EffectConstantBuffer* CreateConstantBuffer(const String& name, uint32_t bufferSize);
+
+	inline EffectConstantBuffer* GetConstantBuffer(uint32_t index) const      { return mConstantBuffers[index]; }
+	inline uint32_t GetNumConstantBuffers() const							{ return mConstantBuffers.size(); }
+
 protected:
 	String mEffectName;
 
 	EffectTechnique* mCurrTechnique;
 	vector<EffectTechnique*> mTechniques;
 	
-	std::vector<EffectUniformBuffer*> mUniformBuffers;
+	std::vector<EffectConstantBuffer*> mConstantBuffers;
 	std::map<String, EffectParameter*> mParameters;
 };
 
@@ -84,7 +92,7 @@ public:
 	EffectPass();
 
 	inline const String& GetPassName() const									{ return mName; }
-	inline const shared_ptr<RHShaderPipeline>& GetShaderPipeline() const		{ return mShaderPipeline; }
+	inline const shared_ptr<ShaderPipeline>& GetShaderPipeline() const		{ return mShaderPipeline; }
 
 	void BeginPass();
 	void EndPass();
@@ -94,10 +102,10 @@ protected:
 	uint16_t mFrontStencilRef, mBackStencilRef;
 	ColorRGBA mBlendColor;
 	uint32_t mSampleMask;
-	shared_ptr<RHBlendState> mBlendState;
-	shared_ptr<RHDepthStencilState> mDepthStencilState;
-	shared_ptr<RHRasterizerState> mRasterizerState;
-	shared_ptr<RHShaderPipeline> mShaderPipeline;
+	shared_ptr<BlendState> mBlendState;
+	shared_ptr<DepthStencilState> mDepthStencilState;
+	shared_ptr<RasterizerState> mRasterizerState;
+	shared_ptr<ShaderPipeline> mShaderPipeline;
 };
 
 

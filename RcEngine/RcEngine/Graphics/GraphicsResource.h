@@ -7,6 +7,8 @@
 
 namespace RcEngine {
 
+#define MAP_ALL_BUFFER 0xFFFFFFFF
+
 struct ElementInitData
 {
 	const void* pData;
@@ -21,35 +23,35 @@ struct ShaderMacro
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _ApiExport RHResouce
+class _ApiExport GraphicsResouce
 {
 public:
-	RHResouce();
-	virtual ~RHResouce() {}
+	GraphicsResouce();
+	virtual ~GraphicsResouce() {}
 
 private:
-	RHResouce( const RHResouce& );
-	RHResouce& operator= ( const RHResouce& );
+	GraphicsResouce( const GraphicsResouce& );
+	GraphicsResouce& operator= ( const GraphicsResouce& );
 };
 
-class _ApiExport RHShaderResourceView
+class _ApiExport ShaderResourceView
 {
 public:
-	virtual ~RHShaderResourceView() {}
+	virtual ~ShaderResourceView() {}
 };
 
-class _ApiExport RHUnorderedAccessView 
+class _ApiExport UnorderedAccessView 
 {
 public:
-	virtual ~RHUnorderedAccessView() {}
+	virtual ~UnorderedAccessView() {}
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _ApiExport RHBuffer : public RHResouce
+class _ApiExport GraphicsBuffer : public GraphicsResouce
 {
 public:
-	RHBuffer(uint32_t bufferSize, uint32_t accessHint, uint32_t flags);
-	virtual ~RHBuffer() {}
+	GraphicsBuffer(uint32_t bufferSize, uint32_t accessHint, uint32_t flags);
+	virtual ~GraphicsBuffer() {}
 
 	inline uint32_t	GetAccessHint() const   { return mAccessHint; }
 	inline uint32_t	GetBufferSize() const   { return mBufferSize; }
@@ -66,10 +68,10 @@ protected:
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _ApiExport RHTexture : public RHResouce
+class _ApiExport Texture : public GraphicsResouce
 {
 public:
-	RHTexture(
+	Texture(
 		TextureType type, 
 		PixelFormat format,
 		uint32_t numMipMaps,
@@ -77,7 +79,7 @@ public:
 		uint32_t sampleQuality,
 		uint32_t accessHint,
 		uint32_t flags);
-	virtual ~RHTexture() {}
+	virtual ~Texture() {}
 
 	inline uint32_t GetSampleCount() const				{ return mSampleCount; }
 	inline uint32_t GetSampleQuality() const			{ return mSampleQuality; }
@@ -115,7 +117,7 @@ public:
 	virtual void Unmap3D(uint32_t arrayIndex, uint32_t level) = 0;
 	virtual void UnmapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level) = 0;
 
-	virtual void CopyToTexture(RHTexture& destTexture) = 0;
+	virtual void CopyToTexture(Texture& destTexture) = 0;
 
 protected:
 	// Help function used to compute mipmap levels
@@ -130,14 +132,17 @@ protected:
 	uint32_t mWidth, mHeight, mDepth;
 	uint32_t mAccessHint;
 	uint32_t mCreateFlags;
+
+	// Default texture shader resource view
+	shared_ptr<ShaderResourceView> mTextureSRV;
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _ApiExport RHShader : public RHResouce
+class _ApiExport Shader : public GraphicsResouce
 {
 public:
-	RHShader(ShaderType shaderType);
-	virtual ~RHShader() {}
+	Shader(ShaderType shaderType);
+	virtual ~Shader() {}
 
 	inline ShaderType GetShaderType() const	{ return mShaderType; }
 
@@ -148,16 +153,16 @@ protected:
 	ShaderType mShaderType;
 };
 
-class _ApiExport RHShaderPipeline : public RHResouce
+class _ApiExport ShaderPipeline : public GraphicsResouce
 {
 public:
-	RHShaderPipeline(Effect& effect);
-	virtual~ RHShaderPipeline() {}
+	ShaderPipeline(Effect& effect);
+	virtual~ ShaderPipeline() {}
 
-	const shared_ptr<RHShader>& GetShader(ShaderType shaderStage) const { return mShaderStages[shaderStage]; }
+	const shared_ptr<Shader>& GetShader(ShaderType shaderStage) const { return mShaderStages[shaderStage]; }
 
-	void AttachShader(const shared_ptr<RHShader>& shader);
-	void DetachShader(const shared_ptr<RHShader>& shader);
+	void AttachShader(const shared_ptr<Shader>& shader);
+	void DetachShader(const shared_ptr<Shader>& shader);
 	
 	virtual bool LinkPipeline() = 0;
 	virtual void OnBind() = 0;
@@ -165,7 +170,7 @@ public:
 
 protected:
 	Effect& mEffect;
-	shared_ptr<RHShader> mShaderStages[ST_Count];
+	shared_ptr<Shader> mShaderStages[ST_Count];
 };
 
 }

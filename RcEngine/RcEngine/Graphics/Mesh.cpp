@@ -6,7 +6,7 @@
 #include <Graphics/AnimationState.h>
 #include <Graphics/Skeleton.h>
 #include <Graphics/MeshPart.h>
-#include <Core/Context.h>
+#include <Core/Environment.h>
 #include <Core/Exception.h>
 #include <Graphics/Animation.h>
 #include <IO/Stream.h>
@@ -34,7 +34,6 @@ void Mesh::LoadImpl()
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
 	FileSystem& fileSystem = FileSystem::GetSingleton();
-	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
 
 	String currMeshDirectory = PathUtil::GetParentPath(mResourceName);
 

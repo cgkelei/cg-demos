@@ -11,16 +11,16 @@ namespace RcEngine {
 
 typedef size_t TimeStamp;
 
-class _ApiExport EffectUniformBuffer
+class _ApiExport EffectConstantBuffer
 {
 public:
-	EffectUniformBuffer(const String& name, uint32_t bufferSize);
-	~EffectUniformBuffer();
+	EffectConstantBuffer(const String& name, uint32_t bufferSize);
+	~EffectConstantBuffer();
 
 	inline const String& GetName() const							{ return mName; }
 	inline uint32_t GetBufferSize() const							{ return mBufferSize; }
-	inline shared_ptr<RHBuffer> GetBuffer() const					{ return mUniformBuffer; }
-	inline uint32_t GetNumVariable() const							{ return mBufferVariable.size(); }
+	inline shared_ptr<GraphicsBuffer> GetBuffer() const					{ return mConstantBuffer; }
+	inline uint32_t GetNumVariables() const							{ return mBufferVariable.size(); }
 	inline EffectParameter* GetVariable(uint32_t index) const		{ return mBufferVariable.at(index); }
 	
 	inline void MakeDirty()											{ mDirty = true; }
@@ -38,7 +38,7 @@ protected:
 	String mName;
 	uint8_t* mBackingStore;
 	uint32_t mBufferSize;
-	shared_ptr<RHBuffer> mUniformBuffer;
+	shared_ptr<GraphicsBuffer> mConstantBuffer;
 	std::vector<EffectParameter*> mBufferVariable;
 
 	bool mDirty;
@@ -46,10 +46,10 @@ protected:
 
 class _ApiExport EffectParameter
 {
-	friend class EffectUniformBuffer;
+	friend class EffectConstantBuffer;
 
 public:
-	EffectParameter(const String& name, EffectParameterType type, EffectUniformBuffer* pUB = nullptr);
+	EffectParameter(const String& name, EffectParameterType type, EffectConstantBuffer* pCB = nullptr);
 	virtual ~EffectParameter(void);
 
 	inline uint32_t GetElementSize() const					{ return mElementSize; }
@@ -72,9 +72,9 @@ public:
 	virtual void GetValue(float3*& value) const;
 	virtual void GetValue(float4& value) const;
 	virtual void GetValue(float4*& value) const;
-	virtual void GetValue(weak_ptr<RHShaderResourceView>& value) const;
-	virtual void GetValue(weak_ptr<RHUnorderedAccessView>& value) const;
-	virtual	void GetValue(weak_ptr<RHSamplerState>& value) const;
+	virtual void GetValue(weak_ptr<ShaderResourceView>& value) const;
+	virtual void GetValue(weak_ptr<UnorderedAccessView>& value) const;
+	virtual	void GetValue(weak_ptr<SamplerState>& value) const;
 
 	virtual void SetValue(const bool& value);
 	virtual void SetValue(const bool* value, uint32_t count);
@@ -90,16 +90,16 @@ public:
 	virtual void SetValue(const float3* value, uint32_t count);
 	virtual void SetValue(const float4& value);
 	virtual void SetValue(const float4* value, uint32_t count);
-	virtual void SetValue(const shared_ptr<RHShaderResourceView>& value);
-	virtual void SetValue(const shared_ptr<RHUnorderedAccessView>& value);  // Need to consider D3D11 Atomic Counter 
-	virtual void SetValue(const shared_ptr<RHSamplerState>& value);
+	virtual void SetValue(const shared_ptr<ShaderResourceView>& value);
+	virtual void SetValue(const shared_ptr<UnorderedAccessView>& value);  // Need to consider D3D11 Atomic Counter 
+	virtual void SetValue(const shared_ptr<SamplerState>& value);
 
 public_internal:
 	// Make constant buffer dirty
 	inline TimeStamp GetTimeStamp() const					{ return mLastModifiedTime; }
 	
 	void MakeDirty();
-	void SetConstantBuffer(EffectUniformBuffer* cbuffer, uint32_t offset);	
+	void SetConstantBuffer(EffectConstantBuffer* cbuffer, uint32_t offset);	
 
 	virtual void SetArrayStride(uint32_t stride);
 	virtual void SetMatrixStride(uint32_t matStride);
@@ -114,16 +114,16 @@ protected:
 	TimeStamp mLastModifiedTime;
 
 	
-	uint32_t mElementSize;					// For non-array type, always 1.
+	uint32_t mElementSize;					// For non-array type, always 0.
 	uint32_t mOffset;						// Offset in parent constant buffer
-	EffectUniformBuffer* mUniformBuffer;    // Constant buffer this variable belong to
+	EffectConstantBuffer* mUniformBuffer;    // Constant buffer this variable belong to
 };
 
 template< typename T>
 class _ApiExport EffectParameterNumberic : public EffectParameter
 {
 public:
-	EffectParameterNumberic(const String& name, EffectParameterType type, EffectUniformBuffer* pCB = nullptr) 
+	EffectParameterNumberic(const String& name, EffectParameterType type, EffectConstantBuffer* pCB = nullptr) 
 		: EffectParameter(name, type, pCB) {}
 
 	void GetValue(T& value) const { value = mValue; }
@@ -151,8 +151,8 @@ template< typename T >
 class _ApiExport EffectParameterNumbericArray : public EffectParameter
 {
 public:
-	EffectParameterNumbericArray(const String& name, EffectParameterType type, uint32_t arrSize, EffectUniformBuffer* pUB = nullptr) 
-		: EffectParameter(name, type, pUB)
+	EffectParameterNumbericArray(const String& name, EffectParameterType type, uint32_t arrSize, EffectConstantBuffer* pCB = nullptr) 
+		: EffectParameter(name, type, pCB)
 	{  
 		mElementSize = arrSize;
 		mValue = new T[arrSize];
@@ -210,7 +210,7 @@ template<>
 class _ApiExport EffectParameterNumberic<float4x4> : public EffectParameter
 {
 public:
-	EffectParameterNumberic(const String& name, EffectParameterType type, EffectUniformBuffer* pCB = nullptr) 
+	EffectParameterNumberic(const String& name, EffectParameterType type, EffectConstantBuffer* pCB = nullptr) 
 		: EffectParameter(name, type, pCB) {}
 
 	virtual void SetMatrixStride(uint32_t stride)	 { mMatrixStride = stride; }
@@ -241,7 +241,7 @@ template<>
 class _ApiExport EffectParameterNumbericArray<float4x4> : public EffectParameter
 {
 public:
-	EffectParameterNumbericArray(const String& name, EffectParameterType type, uint32_t arrSize, EffectUniformBuffer* pCB = nullptr) 
+	EffectParameterNumbericArray(const String& name, EffectParameterType type, uint32_t arrSize, EffectConstantBuffer* pCB = nullptr) 
 		: EffectParameter(name, type, pCB)
 	{ 
 		mElementSize = arrSize;
@@ -332,12 +332,12 @@ public:
 	EffectSRVParameter(const String& name, EffectParameterType type)
 		: EffectParameter(name, type) {}
 
-	void GetValue(weak_ptr<RHShaderResourceView>& value) const
+	void GetValue(weak_ptr<ShaderResourceView>& value) const
 	{
 		value = mSRV;
 	}
 
-	void SetValue(const shared_ptr<RHShaderResourceView>& value)
+	void SetValue(const shared_ptr<ShaderResourceView>& value)
 	{
 		if (mSRV.lock() != value)
 		{
@@ -347,7 +347,7 @@ public:
 	}
 
 private:
-	weak_ptr<RHShaderResourceView> mSRV;
+	weak_ptr<ShaderResourceView> mSRV;
 };
 
 class _ApiExport EffectUAVParameter : public EffectParameter
@@ -356,12 +356,12 @@ public:
 	EffectUAVParameter(const String& name, EffectParameterType type)
 		: EffectParameter(name, type) {}
 
-	void GetValue(weak_ptr<RHUnorderedAccessView>& value) const
+	void GetValue(weak_ptr<UnorderedAccessView>& value) const
 	{
 		value = mUAV;
 	}
 
-	void SetValue(const shared_ptr<RHUnorderedAccessView>& value)
+	void SetValue(const shared_ptr<UnorderedAccessView>& value)
 	{
 		if (mUAV.lock() != value)
 		{
@@ -371,7 +371,7 @@ public:
 	}
 
 private:
-	weak_ptr<RHUnorderedAccessView> mUAV;
+	weak_ptr<UnorderedAccessView> mUAV;
 };
 
 class _ApiExport EffectSamplerParameter : public EffectParameter
@@ -379,12 +379,12 @@ class _ApiExport EffectSamplerParameter : public EffectParameter
 public:
 	EffectSamplerParameter(const String& name) : EffectParameter(name, EPT_Sampler) {}
 
-	void GetValue(weak_ptr<RHSamplerState>& value) const
+	void GetValue(weak_ptr<SamplerState>& value) const
 	{
 		value = mSamplerState;
 	}
 
-	void SetValue(const shared_ptr<RHSamplerState>& value)
+	void SetValue(const shared_ptr<SamplerState>& value)
 	{
 		if (mSamplerState.lock() != value)
 		{
@@ -394,7 +394,7 @@ public:
 	}
 
 private:
-	weak_ptr<RHSamplerState> mSamplerState;
+	weak_ptr<SamplerState> mSamplerState;
 };
 
 } // Namespace RcEngine

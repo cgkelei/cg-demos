@@ -4,8 +4,7 @@
 #include <Graphics/Material.h>
 #include <Graphics/Effect.h>
 #include <Graphics/FrameBuffer.h>
-#include <Graphics/Texture.h>
-#include <Graphics/GraphicBuffer.h>
+#include <Graphics/GraphicsResource.h>
 #include <Graphics/RenderFactory.h>
 #include <Graphics/RenderQueue.h>
 #include <Graphics/Font.h>
@@ -16,7 +15,7 @@
 #include <Scene/SceneNode.h>
 #include <Resource/ResourceManager.h>
 #include <Math/MathUtil.h>
-#include <Core/Context.h>
+#include <Core/Environment.h>
 #include <MainApp/Application.h>
 #include <MainApp/Window.h>
 
@@ -104,7 +103,7 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& de
 	Sprite* spriteEntity = nullptr;
 	if (mBatches.find(texture) == mBatches.end())
 	{
-		spriteEntity = Context::GetSingleton().GetSceneManager().CreateSprite(texture, 
+		spriteEntity = Environment::GetSingleton().GetSceneManager()->CreateSprite(texture, 
 			std::static_pointer_cast<Material>(mSpriteMaterial->Clone()));	
 		mBatches[texture] = spriteEntity;
 	}
@@ -247,26 +246,26 @@ void SpriteBatch::Flush()
 Sprite::Sprite()
 	: mDirty(true)
 {
-	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
+	//RenderFactory* factory = Environment::GetSingleton().GetRenderFactory();
 
-	// create index buffer 
-	mIndexBuffer = factory.CreateIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
+	//// create index buffer 
+	//mIndexBuffer = factory->CreateIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
 
-	// create vertex buffer
-	mVertexBuffer = factory.CreateVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
+	//// create vertex buffer
+	//mVertexBuffer = factory.CreateVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
 
-	// bind vertex stream
-	VertexElement elements[3] = 
-	{
-		VertexElement(0, VEF_Float3, VEU_Position, 0),
-		VertexElement(sizeof(float3), VEF_Float2, VEU_TextureCoordinate, 0),
-		VertexElement(sizeof(float3) + sizeof(float2), VEF_Float4, VEU_Color, 0)
-	};
+	//// bind vertex stream
+	//VertexElement elements[3] = 
+	//{
+	//	VertexElement(0, VEF_Float3, VEU_Position, 0),
+	//	VertexElement(sizeof(float3), VEF_Float2, VEU_TextureCoordinate, 0),
+	//	VertexElement(sizeof(float3) + sizeof(float2), VEF_Float4, VEU_Color, 0)
+	//};
 
-	mRenderOperation = std::make_shared<RenderOperation>();
-	mRenderOperation->PrimitiveType = PT_Triangle_List;
-	mRenderOperation->BindVertexStream(mVertexBuffer, factory.CreateVertexDeclaration(elements, 3));
-	mRenderOperation->BindIndexStream(mIndexBuffer, IBT_Bit16);
+	//mRenderOperation = std::make_shared<RenderOperation>();
+	//mRenderOperation->PrimitiveType = PT_Triangle_List;
+	//mRenderOperation->BindVertexStream(mVertexBuffer, factory.CreateVertexDeclaration(elements, 3));
+	//mRenderOperation->BindIndexStream(mIndexBuffer, IBT_Bit16);
 }
 
 Sprite::~Sprite()
@@ -278,7 +277,7 @@ void Sprite::OnRenderBegin()
 {
 	Renderable::OnRenderBegin();
 
-	auto frameBuffer = Context::GetSingleton().GetRenderDevice().GetCurrentFrameBuffer();
+	auto frameBuffer = Environment::GetSingleton().GetRenderDevice()->GetCurrentFrameBuffer();
 	auto w = frameBuffer->GetWidth();
 	auto h = frameBuffer->GetHeight();
 	mWindowSizeParam->SetValue(float2(float(frameBuffer->GetWidth()), float(frameBuffer->GetHeight())));
@@ -312,18 +311,18 @@ void Sprite::UpdateGeometryBuffers()
 			uint32_t vbSize = sizeof(SpriteVertex) * mVertices.size();
 			mVertexBuffer->ResizeBuffer(vbSize);
 
-			uint8_t* vbData = (uint8_t*)mVertexBuffer->Map(0, vbSize, BA_Read_Write);
+			uint8_t* vbData = (uint8_t*)mVertexBuffer->Map(0, vbSize, RMA_Write_Discard);
 			memcpy(vbData, (uint8_t*)&mVertices[0], vbSize);
 			mVertexBuffer->UnMap();
 
 			uint32_t ibSize = sizeof(uint16_t) * mInidces.size();
 			mIndexBuffer->ResizeBuffer(ibSize);
 
-			uint8_t* ibData = (uint8_t*)mIndexBuffer->Map(0, ibSize, BA_Read_Write);
+			uint8_t* ibData = (uint8_t*)mIndexBuffer->Map(0, ibSize, RMA_Write_Discard);
 			memcpy(ibData, (uint8_t*)&mInidces[0], ibSize);
 			mIndexBuffer->UnMap();
 
-			mRenderOperation->BindIndexStream(mIndexBuffer, IBT_Bit16);
+			mRenderOperation->SetIndexBuffer(mIndexBuffer, IBT_Bit16);
 		}
 
 		mDirty = false;

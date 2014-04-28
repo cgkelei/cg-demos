@@ -12,7 +12,7 @@
 #include <Graphics/RenderQueue.h>
 #include <Graphics/AnimationController.h>
 #include <Core/Exception.h>
-#include <Core/Context.h>
+#include <Core/Environment.h>
 #include <IO/FileStream.h>
 #include <IO/FileSystem.h>
 #include <Resource/ResourceManager.h>
@@ -25,7 +25,7 @@ namespace RcEngine {
 SceneManager::SceneManager()
 	: mSkyBox(nullptr) 
 {
-	Context::GetSingleton().SetSceneManager(this);
+	Environment::GetSingleton().mSceneManager = this;
 
 	// Register all known scene object types
 	RegisterType(SOT_Entity, "Entity Type", nullptr, nullptr, Entity::FactoryFunc);

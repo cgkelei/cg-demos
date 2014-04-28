@@ -1,106 +1,116 @@
-#ifndef FrameBuffer_h__
-#define FrameBuffer_h__
+#ifndef RHFrameBuffer_h__
+#define RHFrameBuffer_h__
 
 #include <Core/Prerequisites.h>
-#include <Graphics/PixelFormat.h>
 #include <Graphics/GraphicsCommon.h>
+#include <Graphics/PixelFormat.h>
 #include <Math/ColorRGBA.h>
 
 namespace RcEngine {
 
+/**
+ * No Multiple Viewports support.
+ */
 struct _ApiExport Viewport
 {
-public:
 	Viewport() {}
 	Viewport(uint32_t left, uint32_t top, uint32_t width, uint32_t height)
-		: Left(left), Top(top), Width(width), Height(height) {} 
+		: Left(left), Top(top), Width(width), Height(height) {}
 	
-	bool operator==( const Viewport& rhs ) const
+	friend bool operator != ( const Viewport& lhs, const Viewport& rhs )
 	{
-		return (Left == rhs.Left && Top == rhs.Top &&
-			    Width == rhs.Width && Height == rhs.Height);
-	}
-
-	bool operator!=( const Viewport& rhs ) const
-	{
-		return !((*this) == rhs);
+		return (lhs.Left != rhs.Left) || (lhs.Top != rhs.Top) || 
+			(lhs.Width != rhs.Width) || (lhs.Height != rhs.Height);
 	}
 
 	uint32_t Left, Top, Width, Height;
 };
 
+//////////////////////////////////////////////////////////////////////////
+class _ApiExport RenderView
+{
+public:
+	friend class FrameBuffer;
+
+public: 
+	RenderView(const shared_ptr<Texture>& texture);
+	virtual ~RenderView() {}
+	
+	virtual void ClearColor(const ColorRGBA& clr) = 0;
+	virtual void ClearDepth(float depth) = 0;
+	virtual void ClearStencil(uint32_t stencil) = 0;
+	virtual void ClearDepthStencil(float depth, uint32_t stencil) = 0;
+
+protected:
+	/**
+	 * Called when a render view is attached to a frame buffer.
+	 * Only called by frame buffer class;
+	 */
+	virtual void OnAttach(FrameBuffer& fb, Attachment attr) = 0;
+	virtual void OnDetach(FrameBuffer& fb, Attachment attr) = 0;
+
+protected:
+	shared_ptr<Texture> mTexture;  // Keep a reference of texture, keep it alive, never use it
+};
+
+//////////////////////////////////////////////////////////////////////////
 class _ApiExport FrameBuffer
 {
 public:
-	FrameBuffer(uint32_t width, uint32_t height, bool offscreen = true);
-	virtual ~FrameBuffer(void);
+	FrameBuffer(uint32_t width, uint32_t height);
+	virtual ~FrameBuffer();
 
-	bool IsActice() const					{ return mActice; }
-	void SetActice(bool state)				{ mActice = state; }
+	inline uint32_t GetWidth() const { return mWidth; }
+	inline uint32_t GetHeight() const { return mHeight; }
 
-	uint32_t GetWidth() const				{ return mWidth; }
-	uint32_t GetHeight() const				{ return mHeight; }
-	
+	inline bool IsDirty() const			{ return mDirty; }
+
+
 	void SetViewport(const Viewport& vp);
-	const Viewport&	GetViewport() const		{ return mViewport; }
+	inline const Viewport& GetViewport() const { return mViewport; }
 
-	PixelFormat GetColorFormat() const		{ return mColorFormat; }
-	uint32_t GetColorDepth() const			{ return mColorDepth; }
-	uint32_t GetDepthBits() const			{ return mDepthBits; }
-	uint32_t GetStencilBits() const			{ return mStencilBits;}
+	shared_ptr<RenderView> GetRTV(Attachment att) const;
+	shared_ptr<UnorderedAccessView> GetUAV(uint32_t index) const;
 
-	bool IsDepthBuffered() const			{ return mIsDepthBuffered; }
-	bool IsDirty() const					{ return mDirty; }
+	void AttachRTV(Attachment att, const shared_ptr<RenderView>& rtv);
+	void AttachUAV(uint32_t index, const shared_ptr<UnorderedAccessView>& uav);
 
-	const shared_ptr<Camera>& GetCamera() const		{ return mCamera; }
-	void SetCamera(const shared_ptr<Camera>& cam)	{ mCamera = cam; }
+	void DetachRTV(Attachment att);
+	void DetachUAV(uint32_t index);
 
-	shared_ptr<RenderView> GetAttachedView(Attachment att);
+	void DetachAll();
 
 	/**
 	 * Clear all render target of the frame buffer.
 	 * note that before do clear, you need to bind the frame buffer as current device 
-	 * frame buffer first, it is user's responsibity.
+	 * frame buffer first, it is user's responsibility.
 	 */
 	void Clear(uint32_t flags, const ColorRGBA& clr, float depth, uint32_t stencil);
 
 	virtual void SwapBuffers() = 0;
-	virtual void Resize(uint32_t width, uint32_t height) = 0;
-	virtual bool CheckFramebufferStatus();
-	
-	void Attach(Attachment att, const shared_ptr<RHRenderView>& view);
-	void Detach(Attachment att);
-	void DetachAll();
 
 	//Called when this frame buffer is binded
-	void OnBind();
-	void OnUnbind();
+	virtual void OnBind() = 0;
+	virtual void OnUnbind() = 0;
 
 protected:
-	virtual void DoBind() = 0;
-	virtual void DoUnbind() = 0;
-
-protected:
-	bool mActice;
 
 	uint32_t mWidth, mHeight;
 
-	PixelFormat mColorFormat;
-	bool mIsDepthBuffered;
-	uint32_t mDepthBits, mStencilBits;
-	uint32_t mColorDepth;
+	// Todo: add multiple viewports support
+	Viewport mViewport;
 
 	vector<shared_ptr<RenderView> > mColorViews;
 	shared_ptr<RenderView> mDepthStencilView;
 
-	Viewport mViewport;
-	shared_ptr<Camera> mCamera;
-
-	bool mOffscreen;
+	// Unordered access view, used in per-pixel list method, like OIT.
+	vector<shared_ptr<UnorderedAccessView>> mUnorderedAccessViews;
+	
 	bool mDirty;
+
+	//shared_ptr<Camera> mCamera;
 };
 
+}
 
-} // Namespace RcEngine
-
-#endif // FrameBuffer_h__
+#endif // RHFrameBuffer_h__

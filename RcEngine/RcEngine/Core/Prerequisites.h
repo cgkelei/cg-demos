@@ -98,21 +98,20 @@ shared_ptr<Ty> static_pointer_cast_checked(const shared_ptr<Other>& sp)
 
 namespace RcEngine {
 
-class RHRenderView;
-class RHFrameBuffer;
-class RHShaderResourceView;
-class RHUnorderedAccessView;
-class RHTexture;
-class RHBuffer;
-class RHDepthStencilState;
-class RHRasterizerState;
-class RHBlendState;
-class RHSamplerState;
-class RHShader;
-class RHVertexDeclaration;
-class RHVertexDeclaration;
-class RHShaderPipeline;
-class RHOperation;
+class RenderView;
+class FrameBuffer;
+class ShaderResourceView;
+class UnorderedAccessView;
+class Texture;
+class GraphicsBuffer;
+class DepthStencilState;
+class RasterizerState;
+class BlendState;
+class SamplerState;
+class Shader;
+class VertexDeclaration;
+class ShaderPipeline;
+class RenderOperation;
 class EffectParameter;
 class EffectTechnique;
 class EffectPass;
@@ -131,7 +130,6 @@ class Effect;
 class Font;
 class SpriteBatch;
 class RenderQueue;
-class RenderOperation;
 class SimpleBox;
 class SceneManager;
 class Node;

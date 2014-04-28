@@ -7,8 +7,8 @@
 namespace RcEngine{
 
 class Application;
-class RHDevice;
-class RHFactory;
+class RenderDevice;
+class RenderFactory;
 
 class _ApiExport Environment : public Singleton<Environment>
 {
@@ -19,19 +19,22 @@ public:
 	Environment();
 	~Environment();
 	
-	inline Application* GetApplication() const			{ assert(mApplication); return mApplication; }
-	inline RHDevice*    GetRHDevice() const				{ assert(mRHDevice); return mRHDevice; }
-	inline RHFactory*   GetRHFactory() const			{ assert(mRHFactory); return mRHFactory; }
+	inline Application*  GetApplication() const			{ assert(mApplication); return mApplication; }
+	inline RenderDevice*     GetRenderDevice() const			{ assert(mRenderDevice); return mRenderDevice; }
+	inline RenderFactory*    GetRenderFactory() const			{ assert(mRenderFactory); return mRenderFactory; }
+	inline SceneManager* GetSceneManager() const		{ assert(mRenderFactory); return mSceneManager; }
 
 private:
 
 	friend class Application;
-	friend class RHDevice;
-	friend class RHFactory;
+	friend class RenderDevice;
+	friend class RenderFactory;
+	friend class SceneManager;
 
 	Application* mApplication;
-	RHDevice* mRHDevice;
-	RHFactory* mRHFactory;
+	RenderDevice* mRenderDevice;
+	RenderFactory* mRenderFactory;
+	SceneManager* mSceneManager;
 };
 
 } // Namespace RcEngine

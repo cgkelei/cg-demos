@@ -1,13 +1,13 @@
 #include <Graphics/Sky.h>
 #include <Graphics/Material.h>
-#include <Graphics/GraphicBuffer.h>
+#include <Graphics/GraphicsResource.h>
 #include <Graphics/RenderDevice.h>
 #include <Graphics/RenderFactory.h>
 #include <Graphics/RenderOperation.h>
 #include <Graphics/VertexDeclaration.h>
 #include <Graphics/Material.h>
 #include <Resource/ResourceManager.h>
-#include <Core/Context.h>
+#include <Core/Environment.h>
 #include <IO/FileSystem.h>
 #include <Math/MathUtil.h>
 
@@ -316,7 +316,7 @@ namespace RcEngine {
 
 shared_ptr<RenderOperation> CreateCubeShape() 
 {
-	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
+	RenderFactory* factory = Environment::GetSingleton().GetRenderFactory();
 	
 	const int32_t vertexCount = 36;
 
@@ -324,12 +324,12 @@ shared_ptr<RenderOperation> CreateCubeShape()
 	vInitData.pData = nullptr;
 	vInitData.rowPitch = sizeof(float3) * vertexCount;
 	vInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> vertexBuffer = factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
+	shared_ptr<GraphicsBuffer> vertexBuffer = factory->CreateVertexBuffer(vInitData.rowPitch, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Vertex, &vInitData);
 
 	VertexElement vdsc[] = { VertexElement(0, VEF_Float3,  VEU_Position, 0),};
-	shared_ptr<VertexDeclaration> vertexDecl = factory.CreateVertexDeclaration(vdsc, 1);
+	shared_ptr<VertexDeclaration> vertexDecl = factory->CreateVertexDeclaration(vdsc, 1);
 
-	float3* pVertices = static_cast<float3*>(vertexBuffer->Map(0, -1, BA_Write_Only));
+	float3* pVertices = static_cast<float3*>(vertexBuffer->Map(0, MAP_ALL_BUFFER, RMA_Write_Discard));
 
 	// +X : Right
 	pVertices[0]	    	= float3(1.f,-1.f,-1.f);
@@ -383,8 +383,9 @@ shared_ptr<RenderOperation> CreateCubeShape()
 
 	shared_ptr<RenderOperation> mRenderOperation(new RenderOperation);
 	mRenderOperation->PrimitiveType = PT_Triangle_List;
-	mRenderOperation->BindVertexStream(vertexBuffer, vertexDecl);
+	mRenderOperation->SetVertexBuffer(0, vertexBuffer);
 	mRenderOperation->SetVertexRange(0, vertexCount);
+	mRenderOperation->VertexDecl = vertexDecl;
 
 	return mRenderOperation;
 }

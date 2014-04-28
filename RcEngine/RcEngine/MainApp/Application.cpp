@@ -6,6 +6,7 @@
 #include <Core/XMLDom.h>
 #include <Input/InputSystem.h>
 #include <Graphics/GraphicsCommon.h>
+#include <Graphics/Effect.h>
 #include <IO/FileSystem.h>
 #include <IO/FileStream.h>
 #include <Resource/ResourceManager.h>
@@ -33,16 +34,16 @@ Application::Application( const String& config )
 	//UIManager::Initialize();
 
 	// todo add sub scene manager
-	/*new SceneManager;
+	/*new SceneManager;*/
 
 	ResourceManager& resMan = ResourceManager::GetSingleton();
-	resMan.RegisterType(RT_Mesh, "Mesh", Mesh::FactoryFunc);
-	resMan.RegisterType(RT_Material, "Material", Material::FactoryFunc);
+	//resMan.RegisterType(RT_Mesh, "Mesh", Mesh::FactoryFunc);
+	//resMan.RegisterType(RT_Material, "Material", Material::FactoryFunc);
 	resMan.RegisterType(RT_Effect, "Effect", Effect::FactoryFunc);
-	resMan.RegisterType(RT_Animation, "Animation",AnimationClip::FactoryFunc);
-	resMan.RegisterType(RT_Texture, "Texture", TextureResource::FactoryFunc);
-	resMan.RegisterType(RT_Pipeline, "Pipeline", Pipeline::FactoryFunc);
-	resMan.RegisterType(RT_Font, "Font", Font::FactoryFunc);*/
+	//resMan.RegisterType(RT_Animation, "Animation",AnimationClip::FactoryFunc);
+	//resMan.RegisterType(RT_Texture, "Texture", TextureResource::FactoryFunc);
+	//resMan.RegisterType(RT_Pipeline, "Pipeline", Pipeline::FactoryFunc);
+	//resMan.RegisterType(RT_Font, "Font", Font::FactoryFunc);
 
 	LoadConfiguration();
 
