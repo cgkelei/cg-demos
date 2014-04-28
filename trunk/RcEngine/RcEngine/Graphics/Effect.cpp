@@ -1,8 +1,8 @@
 #include <Graphics/Effect.h>
 #include <Graphics/EffectParameter.h>
-#include <Graphics/RHDevice.h>
-#include <Graphics/RHFactory.h>
-#include <Graphics/RHResource.h>
+#include <Graphics/RenderDevice.h>
+#include <Graphics/RenderFactory.h>
+#include <Graphics/GraphicsResource.h>
 #include <Resource/ResourceManager.h>
 #include <Core/Exception.h>
 #include <Core/Utility.h>
@@ -113,7 +113,7 @@ private:
 	unordered_map<String, uint32_t> mDefs;
 };
 //
-void CollectRenderStates(XMLNodePtr passNode, RHDepthStencilStateDesc& dsDesc, RHBlendStateDesc& blendDesc, RHRasterizerStateDesc& rasDesc,
+void CollectRenderStates(XMLNodePtr passNode, DepthStencilStateDesc& dsDesc, BlendStateDesc& blendDesc, RasterizerStateDesc& rasDesc,
 	ColorRGBA& blendFactor, uint32_t& sampleMask, uint16_t& frontStencilRef, uint16_t& backStencilRef)
 {
 	XMLNodePtr stateNode;
@@ -386,7 +386,7 @@ Effect::~Effect()
 	for (auto iter = mTechniques.begin(); iter != mTechniques.end(); ++iter)
 		delete *iter;
 
-	for (auto iter = mUniformBuffers.begin(); iter != mUniformBuffers.end(); ++iter)
+	for (auto iter = mConstantBuffers.begin(); iter != mConstantBuffers.end(); ++iter)
 		delete *iter;
 }
 
@@ -635,16 +635,24 @@ EffectParameter* Effect::FetchSamplerParameter( const String& name )
 	return samplerParam;
 }
 
-EffectUniformBuffer* Effect::FetchUniformBufferParameter( const String& name, uint32_t bufferSize )
+EffectConstantBuffer* Effect::FetchConstantBuffer( const String& name, uint32_t bufferSize )
 {
-	for (EffectUniformBuffer* buffer : mUniformBuffers)
+	for (EffectConstantBuffer* buffer : mConstantBuffers)
 	{
 		if (buffer->GetName() == name && buffer->GetBufferSize() == bufferSize)
 			return buffer;
 	}
 
-	EffectUniformBuffer* buffer = new EffectUniformBuffer(name, bufferSize);
-	mUniformBuffers.push_back(buffer);
+	EffectConstantBuffer* buffer = new EffectConstantBuffer(name, bufferSize);
+	mConstantBuffers.push_back(buffer);
+
+	return buffer;
+}
+
+EffectConstantBuffer* Effect::CreateConstantBuffer( const String& name, uint32_t bufferSize )
+{
+	EffectConstantBuffer* buffer = new EffectConstantBuffer(name, bufferSize);
+	mConstantBuffers.push_back(buffer);
 
 	return buffer;
 }
@@ -652,7 +660,7 @@ EffectUniformBuffer* Effect::FetchUniformBufferParameter( const String& name, ui
 void Effect::LoadImpl()
 {
 	FileSystem& fileSystem = FileSystem::GetSingleton();
-	RHFactory* factory = Environment::GetSingleton().GetRHFactory();
+	RenderFactory* factory = Environment::GetSingleton().GetRenderFactory();
 
 	// effect flags used to build shader macro
 	vector<String> effectFlags;
@@ -689,9 +697,9 @@ void Effect::LoadImpl()
 			EffectPass* pass = new EffectPass;
 			pass->mName = passNode->AttributeString("name", "");
 	
-			RHDepthStencilStateDesc dsDesc;
-			RHBlendStateDesc blendDesc;
-			RHRasterizerStateDesc rasDesc;
+			DepthStencilStateDesc dsDesc;
+			BlendStateDesc blendDesc;
+			RasterizerStateDesc rasDesc;
 	
 			CollectRenderStates(passNode, dsDesc, blendDesc, rasDesc, pass->mBlendColor, pass->mSampleMask, pass->mFrontStencilRef, pass->mBackStencilRef);
 	
@@ -982,7 +990,7 @@ EffectPass::EffectPass( )
 
 void EffectPass::BeginPass()
 {
-	RHDevice* device = Environment::GetSingleton().GetRHDevice();
+	RenderDevice* device = Environment::GetSingleton().GetRenderDevice();
 
 	device->SetDepthStencilState(mDepthStencilState, mFrontStencilRef, mBackStencilRef);
 	device->SetBlendState(mBlendState, mBlendColor, mSampleMask);

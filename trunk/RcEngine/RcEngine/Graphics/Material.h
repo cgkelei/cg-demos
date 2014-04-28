@@ -66,7 +66,7 @@ protected:
 	String mMaterialName;
 	shared_ptr<Effect> mEffect;
 	unordered_map<String, shared_ptr<SamplerState> > mSamplerStates;
-	unordered_map<String, TextureLayer> mTextures;			
+	unordered_map<String, shared_ptr<Texture> > mTextures;			
 	vector<MaterialParameter*> mCachedEffectParams;
 
 	float3 mAmbient;

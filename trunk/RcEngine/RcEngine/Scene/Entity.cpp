@@ -13,7 +13,7 @@
 #include <Graphics/Animation.h>
 #include <Graphics/AnimationState.h>
 #include <Graphics/RenderQueue.h>
-#include <Core/Context.h>
+#include <Core/Environment.h>
 #include <Core/Exception.h>
 #include <IO/PathUtil.h>
 #include <Math/MathUtil.h>

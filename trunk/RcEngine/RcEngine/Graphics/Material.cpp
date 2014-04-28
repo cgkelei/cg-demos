@@ -3,15 +3,12 @@
 #include <Graphics/RenderFactory.h>
 #include <Graphics/FrameBuffer.h>
 #include <Graphics/Camera.h>
-#include <Graphics/Texture.h>
 #include <Graphics/Effect.h>
-#include <Graphics/EffectTechnique.h>
-#include <Graphics/DepthStencilState.h>
-#include <Graphics/SamplerState.h>
-#include <Graphics/BlendState.h>
-#include <Graphics/RasterizerState.h>
+#include <Graphics/GraphicsResource.h>
+#include <Graphics/TextureResource.h>
+#include <Graphics/RenderState.h>
 #include <Graphics/RenderQueue.h>
-#include <Core/Context.h>
+#include <Core/Environment.h>
 #include <Core/Exception.h>
 #include <Core/XMLDom.h>
 #include <Core/Utility.h>
@@ -221,7 +218,7 @@ void Material::SetTexture( const String& name, const shared_ptr<Texture>& textur
 {
 	if (mTextures.find(name) != mTextures.end())
 	{
-		mTextures[name].Texture = texture;
+		mTextures[name] = texture;
 		mEffect->GetParameterByName(name)->SetValue(mTextures[name]);
 	}
 	else
@@ -234,7 +231,7 @@ void Material::SetTexture( const String& name, const shared_ptr<Texture>& textur
 void Material::LoadImpl()
 {
 	FileSystem& fileSystem = FileSystem::GetSingleton();
-	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
+	RenderFactory* factory = Environment::GetSingleton().GetRenderFactory();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
 	shared_ptr<Stream> matStream = fileSystem.OpenStream(mResourceName, mGroup);
@@ -286,7 +283,7 @@ void Material::LoadImpl()
 		mEffect = std::static_pointer_cast<Effect>(effectProtype);
 	}	
 
-	for (XMLNodePtr samplerNode = root->FirstNode("Sampler"); samplerNode; samplerNode = samplerNode->NextSibling("Sampler"))
+	/*for (XMLNodePtr samplerNode = root->FirstNode("Sampler"); samplerNode; samplerNode = samplerNode->NextSibling("Sampler"))
 	{
 		SamplerStateDesc desc;
 		
@@ -357,7 +354,7 @@ void Material::LoadImpl()
 			}
 		}
 		mSamplerStates.insert( std::make_pair(samplerName, factory.CreateSamplerState(desc)) );
-	}
+	}*/
 
 	for (XMLNodePtr paramNode = root->FirstNode("Parameter"); paramNode; paramNode = paramNode->NextSibling("Parameter"))
 	{
@@ -384,20 +381,8 @@ void Material::LoadImpl()
 			parameter->Usage = EPU_Unknown;
 
 		// texture type
-		if (EPT_Texture1D <= parameter->Type && parameter->Type <= EPT_TextureCUBEArray)
+		if (EPT_Texture1D <= parameter->Type && parameter->Type <= EPT_TextureCubeArray)
 		{	
-			TextureLayer layer;
-
-			String stageValue = paramNode->Attribute("stage")->ValueString();
-			layer.Stage = (ShaderType)SamplerDefs::GetSingleton().GetSamplerState(stageValue);
-			layer.TexUnit = paramNode->Attribute("texUnit")->ValueUInt();
-
-			String samplerValue = paramNode->Attribute("sampler")->ValueString();
-			if (mSamplerStates.find(samplerValue) == mSamplerStates.end())
-				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Sampler: " + samplerValue + "doesn't exit", "Material::LoadFrom");
-
-			layer.Sampler = mSamplerStates[samplerValue];
-
 			String texFile = paramNode->AttributeString("value", "");
 			if (!texFile.empty())
 			{
@@ -413,20 +398,14 @@ void Material::LoadImpl()
 				{
 					textureRes = std::static_pointer_cast<TextureResource>(
 						resMan.GetResourceByName(RT_Texture, texFile, "General"));
-
-					textureRes->Load();
-					layer.Texture = textureRes->GetTexture();
 				}		
 
 				if (textureRes)
 				{
 					textureRes->Load();
-					layer.Texture = textureRes->GetTexture();				
+					SetTexture(paramName, textureRes->GetTexture());
 				}			
 			}
-
-			mTextures[parameter->Name] = layer;
-			SetTexture(paramName, layer.Texture);
 		}
 
 		// Material Color
@@ -499,8 +478,8 @@ void Material::SetCurrentTechnique( uint32_t index )
 
 void Material::ApplyMaterial( const float4x4& world )
 {
-	RenderDevice* renderDevice = Context::GetSingleton().GetRenderDevicePtr();
-	const shared_ptr<Camera>& camera = renderDevice->GetCurrentFrameBuffer()->GetCamera();
+	RenderDevice* renderDevice = Environment::GetSingleton().GetRenderDevice();
+	const shared_ptr<Camera> camera ;//= renderDevice->GetCurrentFrameBuffer()->GetCamera();
 
 	for(size_t i = 0; i < mCachedEffectParams.size(); ++i)
 	{

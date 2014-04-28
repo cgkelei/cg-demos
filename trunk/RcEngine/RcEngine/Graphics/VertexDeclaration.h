@@ -1,156 +1,66 @@
-#pragma once
-#ifndef _VertexDeclaration__H
-#define _VertexDeclaration__H
+#ifndef RHVertexDeclaration_h__
+#define RHVertexDeclaration_h__
 
-//  [8/16/2011 hustruan]
 #include <Core/Prerequisites.h>
-#include <Graphics/VertexElement.h>
+#include <Graphics/GraphicsCommon.h>
 
 namespace RcEngine {
 
-#define Max_Vertex_Streams 8
-
-typedef std::vector<VertexElement> VertexElementList;
-
-class  _ApiExport VertexDeclaration
+struct _ApiExport VertexElement
 {
-	static bool VertexElementLess(const VertexElement& e1, const VertexElement& e2);
-
-public:
-	VertexDeclaration();
-	VertexDeclaration(const std::vector<VertexElement>& elements);
-	VertexDeclaration(const VertexElement* elements, uint32_t count);
-	virtual ~VertexDeclaration();
+	/// <summary>
+	// The offset in the buffer that this element starts at
+	/// </summary>
+	uint32_t Offset;
 
 	/// <summary>
-	// Get the number of elements in the declaration
+	// The format of this vertex element.
 	/// </summary>
-	uint32_t GetElementCount(void) { return static_cast<uint32_t>(mElementList.size()); }
+	VertexElementFormat Type;
 
 	/// <summary>
-	// Gets read-only access to the list of vertex elements.
+	// The format of this vertex element.
 	/// </summary>
-	const VertexElementList& GetElements(void) const;
+	VertexElementUsage Usage;
 
 	/// <summary>
-	// Get a single element.
+	// Index of the item, only applicable for some elements like texture coordinate.
 	/// </summary>
-	const VertexElement& GetElement(uint32_t index)	{ return mElementList.at(index); }
-
+	uint32_t UsageIndex;
 
 	/// <summary>
-	// Gets the vertex size defined by this declaration for a given source. 
+	// An integer value that identifies the input stream. 
 	/// </summary>
-	virtual uint32_t GetVertexSize() const;
+	uint32_t InputSlot;
 
 	/// <summary>
-	// Finds a VertexElement with the given semantic, and index if there is more than
-	// one element with the same semantic.
-	/// <remark>
-	// If the element is not found, this method returns null.
-	/// </remark>
+	// The number of instances to draw using the same per-instance data before advancing in the buffer by one element
 	/// </summary>
-	virtual const VertexElement* FindElementBySemantic(VertexElementUsage sem, uint16_t index = 0);
+	uint32_t InstanceStepRate;
 
-	/// <summary>
-	// Adds a new VertexElement to this declaration.
-	/// <remark>
-	// This method adds a single element (positions, normals etc) to the end of the
-	// vertex declaration.
-	/// </remark>
-	/// </summary>
-	virtual const VertexElement& AddElement( uint32_t offset, VertexElementFormat theType,
-		VertexElementUsage semantic, uint16_t index = 0);
-
-
-	/// <summary>
-	// Adds a new VertexElement to this declaration.
-	/// <remark>
-	// This method adds a single element (positions, normals etc) to the end of the
-	// vertex declaration.
-	/// </remark>
-	/// </summary>
-	virtual void AddElement( const VertexElement& ve);
-
-	/// <summary>
-	// Inserts a new VertexElement at a given position in this declaration.
-	/// <remark>
-	//  This method adds a single element (positions, normals etc) at a given position in this
-	//  vertex declaration.
-	/// </remark>
-	/// </summary>
-	virtual const VertexElement& InsertElement(uint32_t atPosition,  uint32_t offset, VertexElementFormat theType,
-		VertexElementUsage semantic, uint16_t index = 0);
-
-	/// <summary>
-	// Remove the element at the given index from this declaration. 
-	/// </summary>
-	virtual void RemoveElement(uint32_t elemIndex);
-
-	/// <summary>
-	// Remove the element with the given semantic and usage index.
-	/// <remark>
-	//  In this case 'index' means the usage index for repeating elements such
-	//  as texture coordinates. For other elements this will always be 0 and does
-	//  not refer to the index in the vector.
-	/// </remark>
-	/// </summary>
-	virtual void RemoveElement(VertexElementUsage semantic, uint16_t index = 0);
-
-	/// <summary>
-	// Remove all elements. 
-	/// </summary>
-	virtual void RemoveAllElements(void);
-
-	/// <summary>
-	/// Sorts the elements in this list to be compatible with the maximum
-	/// number of rendering APIs / graphics cards.
-	/// </summary>
-	void Sort(void);
-
-	/// <summary>
-	// Compare two VertexDeclaration
-	/// </summary>
-	inline bool operator == (const VertexDeclaration& rhs) const
-	{
-		if (mElementList.size() != rhs.mElementList.size())
-			return false;
-
-		VertexElementList::const_iterator i, iend, rhsi, rhsiend;
-		iend = mElementList.end();
-		rhsiend = rhs.mElementList.end();
-		rhsi = rhs.mElementList.begin();
-		for (i = mElementList.begin(); i != iend && rhsi != rhsiend; ++i, ++rhsi)
-		{
-			if ( *i != *rhsi )
-				return false;
-		}
-
-		return true;
-	}
-
-	inline bool operator != (const VertexDeclaration& rhs) const
-	{
-		return !(*this == rhs);
-	}
-
-
-protected:
-
-	template <typename InputIterator >
-	void AssignVertexElements(InputIterator  first, InputIterator  last)
-	{
-		mElementList.assign(first, last);
-	}
-
-
-	/// <summary>
-	// Defines the list of vertex elements that makes up this declaration
-	/// </summary>
-	VertexElementList mElementList;
-
+	VertexElement() {}
+	VertexElement(uint32_t offset, VertexElementFormat theType, VertexElementUsage semantic, uint32_t index = 0);
 };
 
-} // Namespace RcEngine
+struct _ApiExport RHVertexElementUtil
+{
+	static uint32_t GetElementComponentCount(const VertexElement& element);
+	static uint32_t GetElementSize(const VertexElement& element);
+};
 
-#endif // _VertexDeclaration__H
+class _ApiExport VertexDeclaration 
+{
+public:
+	VertexDeclaration(const VertexElement* element, uint32_t count);
+	virtual ~VertexDeclaration() {}
+
+	uint32_t GetStreamStride(uint32_t streamSlot);
+
+public:
+	std::vector<VertexElement> mVertexElemets;
+};
+
+}
+
+
+#endif // RHVertexDeclaration_h__

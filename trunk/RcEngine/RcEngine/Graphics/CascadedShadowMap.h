@@ -13,6 +13,8 @@ namespace RcEngine {
 
 #define SHADOW_MAP_VSM
 
+class RenderDevice;
+
 class _ApiExport CascadedShadowMap
 {
 public:

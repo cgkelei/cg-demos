@@ -24,17 +24,27 @@
     <ClInclude Include="Core\Utility.h" />
     <ClInclude Include="Core\Variant.h" />
     <ClInclude Include="Core\XMLDom.h" />
+    <ClInclude Include="Graphics\Animation.h" />
+    <ClInclude Include="Graphics\AnimationClip.h" />
+    <ClInclude Include="Graphics\AnimationController.h" />
+    <ClInclude Include="Graphics\AnimationState.h" />
     <ClInclude Include="Graphics\Effect.h" />
     <ClInclude Include="Graphics\EffectParameter.h" />
     <ClInclude Include="Graphics\GraphicsCommon.h" />
+    <ClInclude Include="Graphics\Material.h" />
+    <ClInclude Include="Graphics\Mesh.h" />
+    <ClInclude Include="Graphics\MeshPart.h" />
     <ClInclude Include="Graphics\PixelFormat.h" />
-    <ClInclude Include="Graphics\RHDevice.h" />
-    <ClInclude Include="Graphics\RHFactory.h" />
-    <ClInclude Include="Graphics\RHOperation.h" />
-    <ClInclude Include="Graphics\RHResource.h" />
-    <ClInclude Include="Graphics\RHFrameBuffer.h" />
-    <ClInclude Include="Graphics\RHState.h" />
-    <ClInclude Include="Graphics\RHVertexDeclaration.h" />
+    <ClInclude Include="Graphics\Renderable.h" />
+    <ClInclude Include="Graphics\RenderFactory.h" />
+    <ClInclude Include="Graphics\RenderOperation.h" />
+    <ClInclude Include="Graphics\RenderQueue.h" />
+    <ClInclude Include="Graphics\RenderState.h" />
+    <ClInclude Include="Graphics\Skeleton.h" />
+    <ClInclude Include="Graphics\Sky.h" />
+    <ClInclude Include="Graphics\SpriteBatch.h" />
+    <ClInclude Include="Graphics\TextureResource.h" />
+    <ClInclude Include="Graphics\VertexDeclaration.h" />
     <ClInclude Include="Input\InputEvent.h" />
     <ClInclude Include="Input\InputSystem.h" />
     <ClInclude Include="IO\FileStream.h" />
@@ -59,6 +69,13 @@
     <ClInclude Include="Math\Vector.h" />
     <ClInclude Include="Resource\Resource.h" />
     <ClInclude Include="Resource\ResourceManager.h" />
+    <ClInclude Include="Scene\Entity.h" />
+    <ClInclude Include="Scene\Light.h" />
+    <ClInclude Include="Scene\Node.h" />
+    <ClInclude Include="Scene\SceneManager.h" />
+    <ClInclude Include="Scene\SceneNode.h" />
+    <ClInclude Include="Scene\SceneObject.h" />
+    <ClInclude Include="Scene\SubEntity.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Environment.cpp" />
@@ -71,16 +88,28 @@
     <ClCompile Include="Core\Utility.cpp" />
     <ClCompile Include="Core\Variant.cpp" />
     <ClCompile Include="Core\XMLDom.cpp" />
+    <ClCompile Include="Graphics\Animation.cpp" />
+    <ClCompile Include="Graphics\AnimationClip.cpp" />
+    <ClCompile Include="Graphics\AnimationController.cpp" />
+    <ClCompile Include="Graphics\AnimationState.cpp" />
     <ClCompile Include="Graphics\Effect.cpp" />
     <ClCompile Include="Graphics\EffectParameter.cpp" />
+    <ClCompile Include="Graphics\FrameBuffer.cpp" />
+    <ClCompile Include="Graphics\GraphicsResource.cpp" />
+    <ClCompile Include="Graphics\Material.cpp" />
+    <ClCompile Include="Graphics\Mesh.cpp" />
+    <ClCompile Include="Graphics\MeshPart.cpp" />
     <ClCompile Include="Graphics\PixelFormat.cpp" />
-    <ClCompile Include="Graphics\RHDevice.cpp" />
-    <ClCompile Include="Graphics\RHFactory.cpp" />
-    <ClCompile Include="Graphics\RHOperation.cpp" />
-    <ClCompile Include="Graphics\RHResource.cpp" />
-    <ClCompile Include="Graphics\RHFrameBuffer.cpp" />
-    <ClCompile Include="Graphics\RHState.cpp" />
-    <ClCompile Include="Graphics\RHVertexDeclaration.cpp" />
+    <ClCompile Include="Graphics\Renderable.cpp" />
+    <ClCompile Include="Graphics\RenderDevice.cpp" />
+    <ClCompile Include="Graphics\RenderFactory.cpp" />
+    <ClCompile Include="Graphics\RenderOperation.cpp" />
+    <ClCompile Include="Graphics\RenderQueue.cpp" />
+    <ClCompile Include="Graphics\RenderState.cpp" />
+    <ClCompile Include="Graphics\Skeleton.cpp" />
+    <ClCompile Include="Graphics\Sky.cpp" />
+    <ClCompile Include="Graphics\SpriteBatch.cpp" />
+    <ClCompile Include="Graphics\TextureResource.cpp" />
     <ClCompile Include="Input\InputSystem.cpp" />
     <ClCompile Include="IO\FileStream.cpp" />
     <ClCompile Include="IO\FileSystem.cpp" />
@@ -94,12 +123,20 @@
     <ClCompile Include="Math\ColorRGBA.cpp" />
     <ClCompile Include="Resource\Resource.cpp" />
     <ClCompile Include="Resource\ResourceManage.cpp" />
+    <ClCompile Include="Scene\Entity.cpp" />
+    <ClCompile Include="Scene\Light.cpp" />
+    <ClCompile Include="Scene\Node.cpp" />
+    <ClCompile Include="Scene\SceneManager.cpp" />
+    <ClCompile Include="Scene\SceneNode.cpp" />
+    <ClCompile Include="Scene\SceneObject.cpp" />
+    <ClCompile Include="Scene\SubEntity.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Media\Effect\GLSL\DeferredLighting.glsl" />
     <None Include="..\Media\Effect\GLSL\DeferredUtil.glsl" />
     <None Include="..\Media\Effect\GLSL\LightingUtil.glsl" />
     <None Include="..\Media\Effect\GLSL\Model.glsl" />
+    <None Include="..\Media\Effect\GLSL\ShadowUtil.glsl" />
     <None Include="Math\BoundingBox.inl" />
     <None Include="Math\BoundingSphere.inl" />
     <None Include="Math\ColorRGBA.inl" />
@@ -113,14 +150,27 @@
     <None Include="Math\Vector.inl" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="..\Media\Effect\DeferredLighting.effect.xml" />
+    <FxCompile Include="..\Media\Effect\HLSL\DeferredLighting.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\DeferredUtil.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\LightingUtil.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\MaterialTemplate.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\Model.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\ShadowUtil.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\Media\Effect\HLSL\DeferredLighting.hlsl" />
-    <FxCompile Include="..\Media\Effect\HLSL\DeferredUtil.hlsl" />
-    <FxCompile Include="..\Media\Effect\HLSL\LightingUtil.hlsl" />
-    <FxCompile Include="..\Media\Effect\HLSL\MaterialTemplate.hlsl" />
-    <FxCompile Include="..\Media\Effect\HLSL\Model.hlsl" />
+    <Xml Include="..\Media\Effect\HLSL\Model.effect.xml" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8C5FC295-3DCE-4113-83C6-884D4F46DEF2}</ProjectGuid>

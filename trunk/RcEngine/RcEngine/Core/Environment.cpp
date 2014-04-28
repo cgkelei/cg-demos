@@ -6,8 +6,8 @@ SINGLETON_DECL(Environment)
 
 Environment::Environment()
 	: mApplication(nullptr),
-	  mRHFactory(nullptr), 
-	  mRHDevice(nullptr)
+	  mRenderFactory(nullptr), 
+	  mRenderDevice(nullptr)
 {
 
 }

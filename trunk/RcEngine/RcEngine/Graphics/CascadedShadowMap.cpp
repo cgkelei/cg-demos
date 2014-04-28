@@ -2,10 +2,11 @@
 #include <Scene/SceneManager.h>
 #include <Scene/SceneNode.h>
 #include <Scene/Light.h>
-#include <Core/Context.h>
+#include <Core/Environment.h>
 #include <Graphics/RenderDevice.h>
 #include <Graphics/RenderFactory.h>
-#include <Graphics/Texture.h>
+#include <Graphics/GraphicsResource.h>
+#include <Graphics/VertexDeclaration.h>
 #include <Graphics/Effect.h>
 #include <Graphics/Camera.h>
 #include <Graphics/Material.h>
@@ -19,7 +20,7 @@ using namespace RcEngine;
 
 shared_ptr<RenderOperation> BuildFSQuadShape()
 {
-	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
+	RenderFactory* factory = Environment::GetSingleton().GetRenderFactory();
 
 	// Fullscreen polygon
 	float vertices[6] = {  // x, y, z
@@ -30,18 +31,19 @@ shared_ptr<RenderOperation> BuildFSQuadShape()
 	vInitData.pData = vertices;
 	vInitData.rowPitch = 6 * sizeof(float);
 	vInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> vertexBuffer= factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
+	shared_ptr<GraphicsBuffer> vertexBuffer= factory->CreateVertexBuffer(vInitData.rowPitch, EAH_GPU_Read, BufferCreate_Vertex, &vInitData);
 
 	VertexElement vdsc[] = {
 		VertexElement(0, VEF_Float2,  VEU_Position, 0),
 	};
-	shared_ptr<VertexDeclaration> vertexDecl = factory.CreateVertexDeclaration(vdsc, 1);
+	shared_ptr<VertexDeclaration> vertexDecl = factory->CreateVertexDeclaration(vdsc, 1);
 
 	shared_ptr<RenderOperation> mRenderOperation(new RenderOperation);
 
 	mRenderOperation->PrimitiveType = PT_Triangle_List;
-	mRenderOperation->BindVertexStream(vertexBuffer, vertexDecl);
+	mRenderOperation->SetVertexBuffer(0, vertexBuffer);
 	mRenderOperation->SetVertexRange(0, 3);
+	mRenderOperation->VertexDecl = vertexDecl;
 
 	return mRenderOperation;
 }
@@ -291,7 +293,7 @@ void CascadedShadowMap::UpdateShadowMapStorage( const Light& light )
 	{
 		mShadowFrameBuffer = factory->CreateFrameBuffer(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 		mShadowDepth = factory->CreateTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, PF_Depth32, 1, 1, 0, 0, accessHint, NULL);
-		mShadowFrameBuffer->Attach(ATT_DepthStencil, factory->CreateDepthStencilView(mShadowDepth, 0, 0));
+		mShadowFrameBuffer->AttachRTV(ATT_DepthStencil, factory->CreateDepthStencilView(mShadowDepth, 0, 0));
 	}
 	
 	if (light.GetLightType() == LT_DirectionalLight)

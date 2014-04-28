@@ -6,7 +6,6 @@
 #include <Graphics/MeshPart.h>
 #include <Graphics/RenderOperation.h>
 #include <Graphics/Material.h>
-#include <Core/Context.h>
 #include <Core/Exception.h>
 #include <Math/MathUtil.h>
 #include <Resource/ResourceManager.h>

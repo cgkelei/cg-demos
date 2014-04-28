@@ -1,13 +1,13 @@
 #include <Graphics/MeshPart.h>
 #include <Graphics/Mesh.h>
 #include <Graphics/Material.h>
-#include <Graphics/GraphicBuffer.h>
+#include <Graphics/GraphicsResource.h>
 #include <Graphics/VertexDeclaration.h>
 #include <Graphics/RenderFactory.h>
 #include <Graphics/RenderOperation.h>
 #include <IO/Stream.h>
 #include <IO/FileSystem.h>
-#include <Core/Context.h>
+#include <Core/Environment.h>
 #include <Core/Exception.h>
 
 #define InvalidMaterialID UINT32_MAX
@@ -66,12 +66,12 @@ void MeshPart::Load(  Stream& source )
 		elements[i].UsageIndex = source.ReadUShort();
 	}
 
-	RenderFactory& factory = Context::GetSingleton().GetRenderFactory();
+	RenderFactory* factory = Environment::GetSingleton().GetRenderFactory();
 
 	// create vertex declaration
-	mVertexDecl = factory.CreateVertexDeclaration(elements);
+	mVertexDecl = factory->CreateVertexDeclaration(&elements[0], elements.size());
 
-	if (vertexSize != mVertexDecl->GetVertexSize())
+	if (vertexSize != elements.size())
 	{
 		ENGINE_EXCEPT(Exception::ERR_RT_ASSERTION_FAILED, "Vertex size in model is not same \
 															as the vertex declaration", "MeshPart::Load");
@@ -84,9 +84,9 @@ void MeshPart::Load(  Stream& source )
 	vInitData.pData = NULL;
 	vInitData.rowPitch = vertexBufferSize;
 	vInitData.slicePitch = 0;
-	mVertexBuffer = factory.CreateVertexBuffer(BU_Static, 0, &vInitData);
+	mVertexBuffer = factory->CreateVertexBuffer(vertexBufferSize, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Vertex, &vInitData);
 
-	void* data = mVertexBuffer->Map(0, vertexBufferSize, BA_Write_Only);
+	void* data = mVertexBuffer->Map(0, vertexBufferSize, RMA_Write_Discard);
 	source.Read(data, vertexBufferSize);
 	mVertexBuffer->UnMap();
 
@@ -109,8 +109,8 @@ void MeshPart::Load(  Stream& source )
 	iInitData.pData = NULL;
 	iInitData.rowPitch = indexBufferSize;
 	iInitData.slicePitch = 0;
-	mIndexBuffer = factory.CreateIndexBuffer(BU_Static, 0, &iInitData);
-	data = mIndexBuffer->Map(0, indexBufferSize, BA_Write_Only);
+	mIndexBuffer = factory->CreateIndexBuffer(indexBufferSize, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Index, &iInitData);
+	data = mIndexBuffer->Map(0, indexBufferSize, RMA_Write_Discard);
 	source.Read(data, indexBufferSize);
 	mIndexBuffer->UnMap();
 
@@ -135,12 +135,13 @@ MeshPart::~MeshPart()
 void MeshPart::GetRenderOperation( RenderOperation& op, uint32_t lodIndex )
 {
 	op.PrimitiveType = PT_Triangle_List;
-	op.BindVertexStream(mVertexBuffer, mVertexDecl);
+	op.SetVertexBuffer(0, mVertexBuffer);
+	op.VertexDecl = mVertexDecl;
 
 	if (mIndexCount > 0)
 	{
 		// use indices buffer
-		op.BindIndexStream(mIndexBuffer, mIndexFormat);
+		op.SetIndexBuffer(mIndexBuffer, mIndexFormat);
 		op.SetIndexRange(mIndexStart, mIndexCount);
 		op.VertexStart = mVertexStart;
 	}

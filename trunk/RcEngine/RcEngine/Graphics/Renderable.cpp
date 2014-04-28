@@ -3,10 +3,9 @@
 #include <Graphics/RenderOperation.h>
 #include <Graphics/Material.h>
 #include <Graphics/Effect.h>
-#include <Graphics/EffectTechnique.h>
 #include <Graphics/EffectParameter.h>
-#include <Graphics/Texture.h>
-#include <Core/Context.h>
+#include <Graphics/GraphicsResource.h>
+#include <Core/Environment.h>
 
 namespace RcEngine {
 
@@ -28,12 +27,10 @@ EffectTechnique* Renderable::GetTechnique() const
 
 void Renderable::Render()
 {
-	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
-	shared_ptr<Material> mat = GetMaterial();
 	EffectTechnique* technique = GetTechnique();
 			
 	OnRenderBegin();
-	device.Render(*technique, *GetRenderOperation());
+	Environment::GetSingleton().GetRenderDevice()->Draw(technique, *GetRenderOperation());
 	OnRenderEnd();	
 }
 
