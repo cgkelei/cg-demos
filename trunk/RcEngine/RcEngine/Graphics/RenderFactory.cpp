@@ -4,6 +4,8 @@
 #include <IO/FileSystem.h>
 #include <Core/Environment.h>
 #include <Core/Utility.h>
+#include <Core/Exception.h>
+#include <gli/gli.hpp>
 
 namespace RcEngine {
 
@@ -26,7 +28,7 @@ shared_ptr<SamplerState> RenderFactory::CreateSamplerState( const SamplerStateDe
 {
 	if (mSamplerStatePool.find(desc) == mSamplerStatePool.end())
 	{
-		mSamplerStatePool[desc] = CreateSamplerState(desc);
+		mSamplerStatePool[desc] = CreateSamplerStateImpl(desc);
 	}
 
 	return mSamplerStatePool[desc];
@@ -88,8 +90,92 @@ shared_ptr<Shader> RenderFactory::LoadShaderFromFile( ShaderType shaderType, con
 
 shared_ptr<Texture> RenderFactory::LoadTextureFromFile( const String& filename )
 {
-	shared_ptr<Texture> tex;
-	return tex;
+	auto storage = gli::load_dds(filename.c_str());
+	auto dim = storage.dimensions(0);
+	
+	gli::storage::size_type numLayers = storage.layers();
+	gli::storage::size_type numLevels = storage.levels();
+	gli::storage::size_type numFaces = storage.faces();
+
+	if (numFaces > 1) assert(numFaces == 6);
+
+	uint32_t elementSize = numFaces > 1 ? (numFaces*numLevels*numLayers) : numLevels*numLayers;
+	std::vector<ElementInitData> imageData(elementSize);
+
+	PixelFormat format = PixelFormat((uint32_t)storage.format());
+
+	if (storage.faces() > 1)
+	{
+		if (storage.layers() > 1)
+		{
+			gli::textureCubeArray textureCubeArray(storage);
+		}
+		else
+		{
+			gli::textureCube textureCube(storage);
+		}
+
+		return CreateTextureCube(dim.x, dim.y, format, storage.layers(), storage.levels(), 0, 1, EAH_GPU_Read, TexCreate_ShaderResource, &imageData[0]);
+	}
+	else if (dim.x > 0 && dim.y > 0 && dim.z > 1)
+	{
+		gli::texture3D texture3D(storage);
+
+	}
+	else if (dim.x > 0 && dim.y > 0)
+	{
+		if (storage.layers() > 1)
+		{
+			gli::texture2DArray texture2DArray(storage);
+			/*for (gli::texture2DArray::size_type layer = 0; layer < texture2DArray.layers(); ++layer)
+			{
+			for(gli::texture2D::size_type level = 0; level < texture2DArray.levels(); ++level)
+			{
+			uint32_t index = layer*numLevels+level;
+			imageData[level].pData = texture2DArray[layer][level].data();
+			imageData[level].rowPitch = storage.layerSize(layer, layer, level, level);
+			imageData[level].slicePitch = 0;
+			}
+			}*/
+		}
+		else
+		{
+			gli::texture2D texture2D(storage);
+			for(gli::texture2D::size_type level = 0; level < numLevels; ++level)
+			{
+				imageData[level].pData = texture2D[level].data();
+				imageData[level].rowPitch = storage.levelSize(level) / dim.y;
+				imageData[level].slicePitch = 0;
+			}
+		}
+
+		return CreateTexture2D(dim.x, dim.y, format, numLayers, numLevels, 1, 0, EAH_GPU_Read, TexCreate_ShaderResource, &imageData[0]);
+	}
+	else if (dim.x > 0)
+	{
+		if (storage.layers() > 1)
+		{
+			gli::texture1DArray texture1DArray(storage);
+		}
+		else
+		{
+			gli::texture1D texture1D(storage);
+			for(gli::texture2D::size_type level = 0; level < texture1D.levels(); ++level)
+			{
+				imageData[level].pData = texture1D[level].data();
+				imageData[level].rowPitch = storage.levelSize(level);
+				imageData[level].slicePitch = 0;
+			}
+		}
+
+		return CreateTexture1D(dim.x, format, storage.layers(), storage.levels(), EAH_GPU_Read, TexCreate_ShaderResource, &imageData[0]);
+	}
+	else
+	{
+		assert(false);
+	}
+
+	ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Internal Error", "RenderFactory::LoadTextureFromFile");
 }
 
 }

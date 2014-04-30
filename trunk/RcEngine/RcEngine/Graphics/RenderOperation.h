@@ -10,10 +10,9 @@ class _ApiExport RenderOperation
 {
 public:
 	RenderOperation();
-	~RenderOperation();
 
-	void SetVertexBuffer(uint32_t streamUnit, shared_ptr<GraphicsBuffer> vertexBuffer);
-	void SetIndexBuffer(shared_ptr<GraphicsBuffer> indexBuffer, IndexBufferType indexType);
+	void BindVertexStream(uint32_t streamUnit, shared_ptr<GraphicsBuffer> vertexBuffer);
+	void BindIndexStream(shared_ptr<GraphicsBuffer> indexBuffer, IndexBufferType indexType);
 	
 	// glDrawArrays, glDrawArraysInstanced
 	void SetIndexRange(uint32_t indexStart, uint32_t indexCount, uint32_t numInstance = 0);

@@ -1,6 +1,7 @@
 #include "D3D11Texture.h"
 #include "D3D11GraphicCommon.h"
 #include "D3D11Device.h"
+#include "D3D11View.h"
 
 namespace RcEngine{
 
@@ -29,7 +30,7 @@ D3D11TextureCube::D3D11TextureCube( PixelFormat format, uint32_t arraySize, uint
 	if (mCreateFlags & TexCreate_GenerateMipmaps)
 	{
 		texDesc.MiscFlags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
-		mMipLevels = RHTexture::CalculateMipmapLevels((std::max)(width, height));
+		mMipLevels = Texture::CalculateMipmapLevels((std::max)(width, height));
 	}
 	else
 		mMipLevels = numMipMaps;
@@ -40,7 +41,7 @@ D3D11TextureCube::D3D11TextureCube( PixelFormat format, uint32_t arraySize, uint
 	//HRESULT hr = gD3D11Device->DeviceD3D11->CreateTexture2D( &texDesc, NULL, &TextureD3D11);
 	D3D11_VERRY(gD3D11Device->DeviceD3D11->CreateTexture2D( &texDesc, NULL, &TextureD3D11));
 
-	/*if (CreateFlags & TexCreate_ShaderResource)
+	if (mCreateFlags & TexCreate_ShaderResource)
 	{
 		D3D11_SHADER_RESOURCE_VIEW_DESC  viewDesc;
 		viewDesc.Format = texDesc.Format;
@@ -60,8 +61,13 @@ D3D11TextureCube::D3D11TextureCube( PixelFormat format, uint32_t arraySize, uint
 			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBEARRAY;
 		}
 
-		D3D11_VERRY(pd3dDevice->CreateShaderResourceView(TextureD3D11, &viewDesc, &ShaderResourceViewD3D11));
-	}*/
+		ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
+
+		ID3D11ShaderResourceView* srvD3D11;
+		HRESULT hr = deviceD3D11->CreateShaderResourceView(TextureD3D11, &viewDesc, &srvD3D11);
+
+		mTextureSRV = std::make_shared<D3D11TextureCubeSRV>(srvD3D11);
+	}
 }
 
 D3D11TextureCube::~D3D11TextureCube()

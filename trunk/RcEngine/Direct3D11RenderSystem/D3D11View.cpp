@@ -19,8 +19,7 @@ D3D11ShaderResouceView::~D3D11ShaderResouceView()
 
 
 //////////////////////////////////////////////////////////////////////////
-D3D11StructuredBufferSRV::D3D11StructuredBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth )
-	: mBuffer(buffer)
+D3D11StructuredBufferSRV::D3D11StructuredBufferSRV( const shared_ptr<GraphicsBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth )
 {
 	D3D11_SHADER_RESOURCE_VIEW_DESC desc;
 	ZeroMemory( &desc, sizeof(desc) );
@@ -35,8 +34,7 @@ D3D11StructuredBufferSRV::D3D11StructuredBufferSRV( const shared_ptr<RHBuffer>& 
 }
 
 //////////////////////////////////////////////////////////////////////////
-D3D11TextureBufferSRV::D3D11TextureBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth, PixelFormat format )
-	: mBuffer(buffer)
+D3D11TextureBufferSRV::D3D11TextureBufferSRV( const shared_ptr<GraphicsBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth, PixelFormat format )
 {
 	D3D11_SHADER_RESOURCE_VIEW_DESC desc;
 	ZeroMemory( &desc, sizeof(desc) );
@@ -53,15 +51,7 @@ D3D11TextureBufferSRV::D3D11TextureBufferSRV( const shared_ptr<RHBuffer>& buffer
 }
 
 //////////////////////////////////////////////////////////////////////////
-D3D11TextureSRV::D3D11TextureSRV( const shared_ptr<RHTexture>& texture )
-	: mTexture(texture)
-{
-
-}
-
-//////////////////////////////////////////////////////////////////////////
-D3D11Texture1DSRV::D3D11Texture1DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
-	: D3D11TextureSRV(texture)
+D3D11Texture1DSRV::D3D11Texture1DSRV( const shared_ptr<Texture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
 {
 	assert(mipLevels > 0 && arraySize > 0);
 
@@ -94,8 +84,7 @@ D3D11Texture1DSRV::D3D11Texture1DSRV( const shared_ptr<RHTexture>& texture, uint
 }
 
 //////////////////////////////////////////////////////////////////////////
-D3D11Texture2DSRV::D3D11Texture2DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
-	: D3D11TextureSRV(texture)
+D3D11Texture2DSRV::D3D11Texture2DSRV( const shared_ptr<Texture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
 {
 	assert(mipLevels > 0 && arraySize > 0);
 
@@ -143,9 +132,13 @@ D3D11Texture2DSRV::D3D11Texture2DSRV( const shared_ptr<RHTexture>& texture, uint
 	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
 }
 
+D3D11Texture2DSRV::D3D11Texture2DSRV( ID3D11ShaderResourceView* srvD3D11 )
+{
+	ShaderResourceViewD3D11 = srvD3D11;
+}
+
 //////////////////////////////////////////////////////////////////////////
-D3D11Texture3DSRV::D3D11Texture3DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels )
-	: D3D11TextureSRV(texture)
+D3D11Texture3DSRV::D3D11Texture3DSRV( const shared_ptr<Texture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels )
 {
 	uint32_t createFlags = texture->GetCreateFlags();
 	assert(createFlags & TexCreate_ShaderResource);
@@ -163,8 +156,7 @@ D3D11Texture3DSRV::D3D11Texture3DSRV( const shared_ptr<RHTexture>& texture, uint
 }
 
 //////////////////////////////////////////////////////////////////////////
-D3D11TextureCubeSRV::D3D11TextureCubeSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
-	: D3D11TextureSRV(texture)
+D3D11TextureCubeSRV::D3D11TextureCubeSRV( const shared_ptr<Texture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
 {
 	uint32_t createFlags = texture->GetCreateFlags();
 	assert(createFlags & TexCreate_ShaderResource);
@@ -200,10 +192,13 @@ D3D11TextureCubeSRV::D3D11TextureCubeSRV( const shared_ptr<RHTexture>& texture, 
 	}
 }
 
+D3D11TextureCubeSRV::D3D11TextureCubeSRV( ID3D11ShaderResourceView* srvD3D11 )
+{
+	ShaderResourceViewD3D11 = srvD3D11;
+}
 
 
-
-//bool CreateTexture1DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV )
+//bool CreateTexture1DSRV( const shared_ptr<Texture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV )
 //{
 //	assert(mipLevels > 0 && arraySize > 0);
 //
@@ -235,7 +230,7 @@ D3D11TextureCubeSRV::D3D11TextureCubeSRV( const shared_ptr<RHTexture>& texture, 
 //	return SUCCEEDED(hr);
 //}
 //
-//bool CreateTexture2DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV )
+//bool CreateTexture2DSRV( const shared_ptr<Texture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV )
 //{
 //	assert(mipLevels > 0 && arraySize > 0);
 //
@@ -283,7 +278,7 @@ D3D11TextureCubeSRV::D3D11TextureCubeSRV( const shared_ptr<RHTexture>& texture, 
 //	return SUCCEEDED(hr);
 //}
 //
-//bool CreateTexture3DSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV )
+//bool CreateTexture3DSRV( const shared_ptr<Texture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV )
 //{
 //	assert(mipLevels > 0);
 //
@@ -301,7 +296,7 @@ D3D11TextureCubeSRV::D3D11TextureCubeSRV( const shared_ptr<RHTexture>& texture, 
 //	return SUCCEEDED(hr);
 //}
 //
-//bool CreateTextureCubeSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV )
+//bool CreateTextureCubeSRV( const shared_ptr<Texture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize, ID3D11ShaderResourceView** pTextureSRV )
 //{
 //	assert(mipLevels > 0 && arraySize > 0);
 //
@@ -349,15 +344,7 @@ D3D11UnorderedAccessView::~D3D11UnorderedAccessView()
 
 
 //////////////////////////////////////////////////////////////////////////
-D3D11TextureUAV::D3D11TextureUAV( const shared_ptr<RHTexture>& texture )
-	: mTexture(texture)
-{
-
-}
-
-//////////////////////////////////////////////////////////////////////////
-D3D11TextureBufferUAV::D3D11TextureBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, PixelFormat format )
-	: mBuffer(buffer)
+D3D11TextureBufferUAV::D3D11TextureBufferUAV( const shared_ptr<GraphicsBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, PixelFormat format )
 {
 	D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
 	ZeroMemory( &desc, sizeof(desc) );
@@ -378,8 +365,7 @@ D3D11TextureBufferUAV::D3D11TextureBufferUAV( const shared_ptr<RHBuffer>& buffer
 }
 
 //////////////////////////////////////////////////////////////////////////
-D3D11StructuredBufferUAV::D3D11StructuredBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount )
-	: mBuffer(buffer)
+D3D11StructuredBufferUAV::D3D11StructuredBufferUAV( const shared_ptr<GraphicsBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount )
 {
 	D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
 	ZeroMemory( &desc, sizeof(desc) );
@@ -400,7 +386,7 @@ D3D11StructuredBufferUAV::D3D11StructuredBufferUAV( const shared_ptr<RHBuffer>& 
 }
 
 //////////////////////////////////////////////////////////////////////////
-//D3D11Texture2DUAV::D3D11Texture2DUAV( const shared_ptr<RHTexture>& texture, uint32_t level )
+//D3D11Texture2DUAV::D3D11Texture2DUAV( const shared_ptr<Texture>& texture, uint32_t level )
 //	: D3D11TextureUAV(texture)
 //{
 //	D3D11Texture2D* textureD3D11 = (static_cast<D3D11Texture2D*>(texture.get()));
@@ -419,8 +405,7 @@ D3D11StructuredBufferUAV::D3D11StructuredBufferUAV( const shared_ptr<RHBuffer>& 
 //	HRESULT hr = gD3D11Device->DeviceD3D11->CreateUnorderedAccessView(textureD3D11->TextureD3D11, &desc, &UnorderedAccessViewD3D11);
 //}
 
-D3D11Texture1DUAV::D3D11Texture1DUAV( const shared_ptr<RHTexture>& texture, uint32_t mipSlice, uint32_t firstArraySlice, uint32_t arraySize )
-	: D3D11TextureUAV(texture)
+D3D11Texture1DUAV::D3D11Texture1DUAV( const shared_ptr<Texture>& texture, uint32_t mipSlice, uint32_t firstArraySlice, uint32_t arraySize )
 {
 	uint32_t createFlags = texture->GetCreateFlags();
 	assert(createFlags & TexCreate_UAV);
@@ -449,8 +434,7 @@ D3D11Texture1DUAV::D3D11Texture1DUAV( const shared_ptr<RHTexture>& texture, uint
 }
 
 //////////////////////////////////////////////////////////////////////////
-D3D11Texture2DUAV::D3D11Texture2DUAV( const shared_ptr<RHTexture>& texture, uint32_t mipSlice, uint32_t firstArraySlice, uint32_t arraySize )
-	: D3D11TextureUAV(texture)
+D3D11Texture2DUAV::D3D11Texture2DUAV( const shared_ptr<Texture>& texture, uint32_t mipSlice, uint32_t firstArraySlice, uint32_t arraySize )
 {
 	uint32_t createFlags = texture->GetCreateFlags();
 	assert(createFlags & TexCreate_UAV);
@@ -480,7 +464,7 @@ D3D11Texture2DUAV::D3D11Texture2DUAV( const shared_ptr<RHTexture>& texture, uint
 }
 
 //////////////////////////////////////////////////////////////////////////
-//D3D11Texture3DUAV::D3D11Texture3DUAV( const shared_ptr<RHTexture>& texture, uint32_t mipSlice, uint32_t firstWSlice, uint32_t wSize )
+//D3D11Texture3DUAV::D3D11Texture3DUAV( const shared_ptr<Texture>& texture, uint32_t mipSlice, uint32_t firstWSlice, uint32_t wSize )
 //	: D3D11TextureUAV(texture)
 //{
 //	uint32_t createFlags = texture->GetCreateFlags();
@@ -497,7 +481,7 @@ D3D11Texture2DUAV::D3D11Texture2DUAV( const shared_ptr<RHTexture>& texture, uint
 //	HRESULT hr = gD3D11Device->DeviceD3D11->CreateUnorderedAccessView(textureD3D11->TextureD3D11, &viewDesc, &UnorderedAccessViewD3D11);
 //}
 
-//D3D11TextureCubeSRV::D3D11TextureCubeSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
+//D3D11TextureCubeSRV::D3D11TextureCubeSRV( const shared_ptr<Texture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
 //	: D3D11TextureSRV(texture)
 //{
 //	assert(mipLevels > 0 && arraySize > 0);

@@ -5,7 +5,7 @@
 namespace RcEngine {
 
 D3D11Buffer::D3D11Buffer( uint32_t bufferSize, uint32_t accessHint, uint32_t flags, uint32_t structSize, ElementInitData* initData )
-	: RHBuffer(bufferSize, accessHint, flags),
+	: GraphicsBuffer(bufferSize, accessHint, flags),
 	  BufferD3D11(nullptr)
 {
 	D3D11_BUFFER_DESC desc;

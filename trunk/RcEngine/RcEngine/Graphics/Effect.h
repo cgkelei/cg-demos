@@ -26,6 +26,7 @@ public:
 	EffectTechnique* GetTechniqueByIndex(uint32_t index) const;
 
 	EffectParameter* GetParameterByName(const String& paraName) const;
+	EffectParameter* GetParameterByUsage(EffectParameterUsage usage) const;
 
 protected:
 	void LoadImpl();
@@ -57,6 +58,8 @@ protected:
 	
 	std::vector<EffectConstantBuffer*> mConstantBuffers;
 	std::map<String, EffectParameter*> mParameters;
+
+	std::map<String, shared_ptr<SamplerState> > mSamplerStates;
 };
 
 class _ApiExport EffectTechnique 

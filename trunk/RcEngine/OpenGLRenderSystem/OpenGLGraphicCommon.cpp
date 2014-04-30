@@ -68,238 +68,168 @@ GLenum OpenGLMapping::Mapping( PrimitiveType type )
 
 void OpenGLMapping::Mapping( GLenum& outInternalformat, GLenum& outFormat, GLenum& outType, PixelFormat inPixelFormat )
 {
-	switch(inPixelFormat)
+	struct PixelFormatOGL
 	{
-	case PF_Luminance8:
-		outInternalformat = GL_LUMINANCE8;
-		outFormat = GL_LUMINANCE;
-		outType = GL_UNSIGNED_BYTE;
-		break;
+		GLenum InternalFormat;
+		GLenum Format;
+		GLenum Type;
+	};
 
-	case PF_Luminance16:
-		outInternalformat = GL_LUMINANCE16;
-		outFormat = GL_LUMINANCE;
-		outType = GL_UNSIGNED_SHORT;
-		break;
+	static const PixelFormatOGL formatOGL[PF_Count] = {
 
-	case PF_Alpha8:
-		outInternalformat = GL_ALPHA8;
-		outFormat = GL_ALPHA;
-		outType = GL_UNSIGNED_BYTE;
-		break;
+		{ 0,							0,						0 }, //PF_Unknown = 0,
 
-	case PF_A4L4:
-		outInternalformat = GL_LUMINANCE4_ALPHA4;
-		outFormat = GL_LUMINANCE_ALPHA;
-		outType = GL_UNSIGNED_BYTE;
-		break;
+		// unorm formats
+		{ GL_R8,						GL_RED,					GL_UNSIGNED_BYTE  }, //PF_R8_UNORM,
+		{ GL_RG8,						GL_RG,					GL_UNSIGNED_BYTE  }, //PF_RG8_UNORM,
+		{ GL_RGB8,						GL_RGB,					GL_UNSIGNED_BYTE  }, //PF_RGB8_UNORM,
+		{ GL_RGBA8,						GL_RGBA,				GL_UNSIGNED_BYTE  }, //PF_RGBA8_UNORM,
 
-	case PF_A8L8:
-		outInternalformat = GL_LUMINANCE8_ALPHA8;
-		outFormat = GL_LUMINANCE_ALPHA;
-		outType = GL_UNSIGNED_SHORT;
-		break;
+		{ GL_R16,						GL_RED,					GL_UNSIGNED_SHORT }, //PF_R16_UNORM,
+		{ GL_RG16,						GL_RG,					GL_UNSIGNED_SHORT  }, //PF_RG16_UNORM,
+		{ GL_RGB16,						GL_RGB,					GL_UNSIGNED_SHORT  }, //PF_RGB16_UNORM,
+		{ GL_RGBA16,					GL_RGBA,				GL_UNSIGNED_SHORT  }, //PF_RGBA16_UNORM,
 
-	case PF_R5G6B5:
-		outInternalformat = GL_RGB5;
-		outFormat = GL_RGB;
-		outType = GL_UNSIGNED_SHORT_5_6_5;
-		break;
-
-	case PF_B5G6R5:
-		outInternalformat = GL_RGB5;
-		outFormat = GL_BGR;
-		outType = GL_UNSIGNED_SHORT_5_6_5;
-		break;
-
-	case PF_A4R4G4B4:
-		outInternalformat = GL_RGBA4;
-		outFormat = GL_BGRA;
-		outType = GL_UNSIGNED_SHORT_4_4_4_4_REV;
-		break;
-
-	case PF_A1R5G5B5:
-		outInternalformat = GL_RGB5_A1;
-		outFormat = GL_BGRA;
-		outType = GL_UNSIGNED_SHORT_1_5_5_5_REV;
-		break;
-
-	case PF_R8G8B8:
-		outInternalformat = GL_RGB8;
-		outFormat = GL_BGR;
-		outType = GL_UNSIGNED_BYTE;
-		break;
-
-	case PF_B8G8R8:
-		outInternalformat = GL_RGB8;
-		outFormat = GL_RGB;
-		outType = GL_UNSIGNED_BYTE;
-		break;
-
-	case PF_A8R8G8B8:
-		outInternalformat = GL_RGBA8;
-		outFormat = GL_BGRA;
-		outType = GL_UNSIGNED_BYTE;
-		break;
-
-	case PF_A8B8G8R8: //
-		outInternalformat = GL_RGBA8;
-		outFormat = GL_RGBA;
-		outType = GL_UNSIGNED_BYTE;
-		break;
-
-	case PF_A2R10G10B10:
-		outInternalformat = GL_RGB10_A2;
-		outFormat = GL_BGRA;
-		outType = GL_UNSIGNED_INT_2_10_10_10_REV;
-		break;
-
-	case PF_A2B10G10R10:
-		outInternalformat = GL_RGB10_A2;
-		outFormat = GL_RGBA;
-		outType = GL_UNSIGNED_INT_2_10_10_10_REV;
-		break;
-
-	case PF_B16G16R16F:
-		outInternalformat = GL_RGB16F;
-		outFormat = GL_RGB;
-		outType = GL_HALF_FLOAT;
-		break;
-
-	case PF_A16B16G16R16F:
-		outInternalformat = GL_RGBA16F;
-		outFormat = GL_RGBA;
-		outType = GL_HALF_FLOAT;
-		break;
-
-	case PF_B32G32R32F:
-		outInternalformat = GL_RGB32F;
-		outFormat = GL_RGB;
-		outType = GL_FLOAT;
-		break;
-
-	case PF_A32B32G32R32F:
-		outInternalformat = GL_RGBA32F;
-		outFormat = GL_RGBA;
-		outType = GL_FLOAT;
-		break;
-
-	case PF_X8R8G8B8:
-		outInternalformat = GL_RGB8;
-		outFormat = GL_BGRA;
-		outType = GL_UNSIGNED_BYTE;
-		break;
-
-	case PF_X8B8G8R8:
-		outInternalformat = GL_RGB8;
-		outFormat = GL_RGBA;
-		outType = GL_UNSIGNED_BYTE;
-		break;
-
-		//////////////////////////////////////////////////////////////////////////
-	case PF_R8G8B8A8:
-		outInternalformat = GL_RGBA8;
-		outFormat = GL_RGBA;
-		outType = GL_UNSIGNED_BYTE;
-		break;
-
-	case PF_B8G8R8A8:
-		outInternalformat = GL_RGBA8;
-		outFormat = GL_BGRA;
-		outType = GL_UNSIGNED_BYTE;
-		break;
-
-		//////////////////////////////////////////////////////////////////////////
-
-	case PF_R3G3B2:
-		outInternalformat = GL_R3_G3_B2;
-		outFormat = GL_RGB;
-		outType = GL_UNSIGNED_BYTE_3_3_2;
-		break;
-
-	case PF_R16F:
-		outInternalformat = GL_R16F;
-		outFormat = GL_RED;
-		outType = GL_HALF_FLOAT;
-		break;
-
-	case PF_R32F:
-		outInternalformat = GL_R32F;
-		outFormat = GL_RED;
-		outType = GL_FLOAT;
-		break;
-
-	case PF_G16R16:
-		outInternalformat = GL_RG16;
-		outFormat = GL_RG;
-		outType = GL_UNSIGNED_SHORT;
-		break;
-
-	case PF_G16R16F:
-		outInternalformat = GL_RG16F;
-		outFormat = GL_RG;
-		outType = GL_HALF_FLOAT;
-		break;
-
-	case PF_G32R32F://
-		outInternalformat = GL_RG32F;
-		outFormat = GL_RG;
-		outType = GL_FLOAT;
-		break;
-
-	case PF_B16G16R16:
-		outInternalformat = GL_RGB16;
-		outFormat = GL_RGB;
-		outType = GL_UNSIGNED_SHORT;
-		break;
-
-	case PF_DXT1:
-		outInternalformat =  GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-		outFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-		outType = GL_UNSIGNED_BYTE;
-		break;
-
-	case PF_DXT3:
-		outInternalformat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-		outFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-		outType = GL_UNSIGNED_BYTE;
-		break;
-
-	case PF_DXT5:
-		outInternalformat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-		outFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-		outType = GL_UNSIGNED_BYTE;
-		break;
-
-	case PF_Depth16:
-		outInternalformat = GL_DEPTH_COMPONENT16;
-		outFormat = GL_DEPTH_COMPONENT;
-		outType = GL_UNSIGNED_SHORT;
-		break;
-
-	case PF_Depth24Stencil8:
-		if (GLEW_EXT_packed_depth_stencil)
-		{
-			outInternalformat = GL_DEPTH24_STENCIL8_EXT;
-			outFormat = GL_DEPTH_STENCIL_EXT;
-			outType = GL_UNSIGNED_INT_24_8_EXT;
-		}
-		else
-		{
-			ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported render texture:" + PixelFormatUtils::GetFormatName(PF_Depth24Stencil8), "OpenGLMapping::Mapping");
-		}
-		break;
-
-	case PF_Depth32://
-		outInternalformat = GL_DEPTH_COMPONENT32F;
-		outFormat = GL_DEPTH_COMPONENT;
-		outType = GL_FLOAT;
-		break;	
+		// snorm formats
+		{ GL_R8_SNORM,					GL_RED_SNORM,			GL_BYTE  }, //PF_RGBA8_SNORM,
+		{ GL_RG8_SNORM,					GL_RED_SNORM,			GL_BYTE  }, //PF_R8_SNORM,
+		{ GL_RGB8_SNORM,				GL_RED_SNORM,			GL_BYTE  }, //PF_RG8_SNORM,
+		{ GL_RGBA8_SNORM,				GL_RED_SNORM,			GL_BYTE  }, //PF_RGB8_SNORM,
+		
+		{ GL_R16_SNORM,					GL_RED,					GL_SHORT  }, //PF_R16_SNORM,
+		{ GL_RG16_SNORM,				GL_RG,					GL_SHORT  }, //PF_RG16_SNORM,
+		{ GL_RGB16_SNORM,				GL_RGB,					GL_SHORT  }, //PF_RGB16_SNORM,
+		{ GL_RGBA16_SNORM,				GL_RGBA,				GL_SHORT  }, //PF_RGBA16_SNORM,
 	
-	default:
-		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported Pixel Format!", 
-			"OpenGLMapping::Mapping( GLint& outInternalformat, GLenum& outFormat, GLenum& outType, PixelFormat inPixelFormat)");
-	}
+		// Unsigned integer formats
+		{ GL_R8UI,						GL_RED_INTEGER,			GL_UNSIGNED_BYTE  }, //PF_R8U,
+		{ GL_RG8UI,						GL_RG_INTEGER,			GL_UNSIGNED_BYTE  }, //PF_RG8U,
+		{ GL_RGB8UI,					GL_RGB_INTEGER,			GL_UNSIGNED_BYTE  }, //PF_RGB8U,
+		{ GL_RGBA8UI,					GL_RGBA_INTEGER,		GL_UNSIGNED_BYTE  }, //PF_RGBA8U,
+
+		{ GL_R16UI,						GL_RED_INTEGER,			GL_UNSIGNED_SHORT  }, //PF_R16U,
+		{ GL_RG16UI,					GL_RG_INTEGER,			GL_UNSIGNED_SHORT  }, //PF_RG16U,
+		{ GL_RGB16UI,					GL_RGB_INTEGER,			GL_UNSIGNED_SHORT  }, //PF_RGB16U,
+		{ GL_RGBA16UI,					GL_RGBA_INTEGER,		GL_UNSIGNED_SHORT  }, //PF_RGBA16U,
+
+		{ GL_R32UI,						GL_RED_INTEGER,			GL_UNSIGNED_INT  },  //PF_R32U,
+		{ GL_RG32UI,					GL_RG_INTEGER,			GL_UNSIGNED_INT  },  //PF_RG32U,
+		{ GL_RGB32UI,					GL_RGB_INTEGER,			GL_UNSIGNED_INT  },  //PF_RGB32U,
+		{ GL_RGBA32UI,					GL_RGBA_INTEGER,		GL_UNSIGNED_INT  },  //PF_RGBA32U,
+	
+		// Signed integer formats
+		{ GL_R8I,						GL_RED_INTEGER,			GL_BYTE  }, //PF_R8I,
+		{ GL_RG8I,						GL_RG_INTEGER,			GL_BYTE  }, //PF_RG8I,
+		{ GL_RGB8I,						GL_RGB_INTEGER,			GL_BYTE  }, //PF_RGB8I,
+		{ GL_RGBA8I,					GL_RGBA_INTEGER,		GL_BYTE  }, //PF_RGBA8I,
+	
+		{ GL_R16I,						GL_RED_INTEGER,			GL_SHORT  }, //PF_R16I,
+		{ GL_RG16I,						GL_RG_INTEGER,			GL_SHORT  }, //PF_RG16I,
+		{ GL_RGB16I,					GL_RGB_INTEGER,			GL_SHORT  }, //PF_RGB16I,
+		{ GL_RGBA16I,					GL_RGBA_INTEGER,		GL_SHORT  }, //PF_RGBA16I,
+	
+		{ GL_R32I,						GL_RED_INTEGER,			GL_INT  }, //PF_R32I,
+		{ GL_RG32I,						GL_RG_INTEGER,			GL_INT  }, //PF_RG32I,
+		{ GL_RGB32I,					GL_RGB_INTEGER,			GL_INT  }, //PF_RGB32I,
+		{ GL_RGBA32I,					GL_RGBA_INTEGER,		GL_INT  }, //PF_RGBA32I,
+	
+		// Floating formats
+		{ GL_R16F,						GL_RED,					GL_HALF_FLOAT  }, //PF_R16F,
+		{ GL_RG16F,						GL_RG,					GL_HALF_FLOAT  }, //PF_RG16F,
+		{ GL_RGB16F,					GL_RGB,					GL_HALF_FLOAT  }, //PF_RGB16F,
+		{ GL_RGBA16F,					GL_RGBA,				GL_HALF_FLOAT  }, //PF_RGBA16F,
+	
+		{ GL_R32F,						GL_RED,					GL_FLOAT  }, //PF_R32F,
+		{ GL_RG32F,						GL_RG,					GL_FLOAT  }, //PF_RG32F,
+		{ GL_RGB32F,					GL_RGB,					GL_FLOAT  }, //PF_RGB32F,
+		{ GL_RGBA32F,					GL_RGBA,				GL_FLOAT  }, //PF_RGBA32F,
+
+		// Packed formats
+		{ GL_RGB9_E5,					GL_RGB,					GL_UNSIGNED_INT_5_9_9_9_REV  }, //PF_RGB9E5,
+		{ GL_R11F_G11F_B10F,			GL_RGB,					GL_UNSIGNED_INT_10F_11F_11F_REV  }, //PF_RG11B10F,
+		{ GL_R3_G3_B2,					GL_RGB,					GL_UNSIGNED_BYTE_3_3_2  }, //PF_R3G3B2,
+		{ GL_RGB5,						GL_RGB,					GL_UNSIGNED_SHORT_5_6_5_REV  }, //PF_R5G6B5,
+		{ GL_RGB5_A1,					GL_RGBA,				GL_UNSIGNED_BYTE_3_3_2  }, //PF_RGB5A1,
+		{ GL_RGBA4,						GL_RGBA,				GL_UNSIGNED_SHORT_4_4_4_4  }, //PF_RGBA4,
+		{ GL_RGB10_A2,					GL_RGBA,				GL_UNSIGNED_INT_10_10_10_2  }, //PF_RGB10A2,
+		
+	
+		// Depth formats
+		{ GL_DEPTH_COMPONENT16,						GL_DEPTH_COMPONENT,					GL_UNSIGNED_SHORT  }, //PF_D16,
+		{ GL_DEPTH_COMPONENT24,						GL_DEPTH_COMPONENT,					GL_UNSIGNED_INT_24_8_EXT  }, //PF_D24X8,
+		{ GL_DEPTH24_STENCIL8,						GL_DEPTH_STENCIL,					GL_UNSIGNED_INT_24_8_EXT  }, //PF_D24S8,
+		{ GL_DEPTH_COMPONENT32,						GL_DEPTH_COMPONENT,					GL_FLOAT  }, //PF_D32F,
+		{ GL_DEPTH32F_STENCIL8,						GL_DEPTH_STENCIL,					GL_FLOAT  }, //PF_D32FS8X24,
+
+		// Compressed formats
+		{ GL_COMPRESSED_RGB_S3TC_DXT1_EXT,			GL_COMPRESSED_RGB_S3TC_DXT1_EXT,					0 }, //PF_RGB_DXT1,
+		{ GL_COMPRESSED_RGBA_S3TC_DXT1_EXT,			GL_COMPRESSED_RGBA_S3TC_DXT1_EXT,					0 }, //PF_RGBA_DXT1,
+		{ GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,			GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,					0 }, //PF_RGBA_DXT3,
+		{ GL_COMPRESSED_RGBA_S3TC_DXT5_EXT,			GL_COMPRESSED_RGBA_S3TC_DXT5_EXT,					0 }, //PF_RGBA_DXT5,
+		{ GL_COMPRESSED_RED_RGTC1,					GL_COMPRESSED_RED_RGTC1,							0 }, //PF_R_ATI1N_UNORM,
+		{ GL_COMPRESSED_SIGNED_RED_RGTC1,			GL_COMPRESSED_SIGNED_RED_RGTC1,						0 }, //PF_R_ATI1N_SNORM,
+		{ GL_COMPRESSED_RG_RGTC2,					GL_COMPRESSED_RG_RGTC2,								0 }, //PF_RG_ATI2N_UNORM,
+		{ GL_COMPRESSED_SIGNED_RG_RGTC2,			GL_COMPRESSED_SIGNED_RG_RGTC2,						0 }, //PF_RG_ATI2N_SNORM,
+		{ GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT,	GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT,				0 }, //PF_RGB_BP_UNSIGNED_FLOAT,
+		{ GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT,		GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT,				0 }, //PF_RGB_BP_SIGNED_FLOAT,
+		{ GL_COMPRESSED_RGBA_BPTC_UNORM,			GL_COMPRESSED_RGBA_BPTC_UNORM,						0 }, //PF_RGB_BP_UNORM,
+		
+		// Undefined
+		{ GL_INVALID_ENUM,							GL_RED,												0  }, //PF_RGB_PVRTC_4BPPV1,
+		{ GL_INVALID_ENUM,							GL_RED,												0  }, //PF_RGB_PVRTC_2BPPV1,
+		{ GL_INVALID_ENUM,							GL_RED,												0  }, //PF_RGBA_PVRTC_4BPPV1,
+		{ GL_INVALID_ENUM,							GL_RED,												0  }, //PF_RGBA_PVRTC_2BPPV1,
+		{ GL_INVALID_ENUM,							GL_RED,												0  }, //PF_ATC_RGB,
+		{ GL_INVALID_ENUM,							GL_RED,												0  }, //PF_ATC_RGBA_EXPLICIT_ALPHA,
+		{ GL_INVALID_ENUM,							GL_RED,												0  }, //PF_ATC_RGBA_INTERPOLATED_ALPHA,
+		{ GL_INVALID_ENUM,							GL_RED,												0  }, //PF_RGBA_ASTC_4x4,
+		{ GL_INVALID_ENUM,							GL_RED,												0  }, //PF_RGBA_ASTC_5x4,
+		{ GL_INVALID_ENUM,							GL_RED,												0  }, //PF_RGBA_ASTC_5x5,
+		{ GL_INVALID_ENUM,							GL_RED,												0  }, //PF_RGBA_ASTC_6x5,
+		{ GL_INVALID_ENUM,							GL_RED,												0 }, //PF_RGBA_ASTC_6x6,
+		{ GL_INVALID_ENUM,							GL_RED,												0 }, //PF_RGBA_ASTC_8x5,
+		{ GL_INVALID_ENUM,							GL_RED,												0 }, //PF_RGBA_ASTC_8x6,
+		{ GL_INVALID_ENUM,							GL_RED,												0 }, //PF_RGBA_ASTC_8x8,
+		{ GL_INVALID_ENUM,							GL_RED,												0 }, //PF_RGBA_ASTC_10x5,
+		{ GL_INVALID_ENUM,							GL_RED,												0 }, //PF_RGBA_ASTC_10x6,
+		{ GL_INVALID_ENUM,							GL_RED,												0 }, //PF_RGBA_ASTC_10x8,
+		{ GL_INVALID_ENUM,							GL_RED,												0 }, //PF_RGBA_ASTC_10x10,
+		{ GL_INVALID_ENUM,							GL_RED,												0 }, //PF_RGBA_ASTC_12x10,
+		{ GL_INVALID_ENUM,							GL_RED,												0 }, //PF_RGBA_ASTC_12x12,
+																					
+		// sRGB formats
+		{ GL_SRGB8,									GL_BGR,					GL_UNSIGNED_BYTE  }, //PF_SRGB8,
+		{ GL_SRGB8_ALPHA8,							GL_RGBA,				GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8,
+		{ GL_COMPRESSED_SRGB_S3TC_DXT1_EXT,			GL_RED,					0  }, //PF_SRGB_DXT1,
+		{ GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT,	GL_RED,					0  }, //PF_SRGB_ALPHA_DXT1,
+		{ GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT,	GL_RED,					0  }, //PF_SRGB_ALPHA_DXT3,
+		{ GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT,	GL_RED,					0  }, //PF_SRGB_ALPHA_DXT5,
+		{ GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM,		GL_RED,					0  }, //PF_SRGB_BP_UNORM,
+		
+		// Undefined
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB_PVRTC_2BPPV1,
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB_PVRTC_4BPPV1,
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB_ALPHA_PVRTC_2BPPV1,
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB_ALPHA_PVRTC_4BPPV1,
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8_ASTC_4x4,
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8_ASTC_5x4,
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8_ASTC_5x5,
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8_ASTC_6x5,
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8_ASTC_6x6,
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8_ASTC_8x5,
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8_ASTC_8x6,
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8_ASTC_8x8,
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8_ASTC_10x5,
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8_ASTC_10x6,
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8_ASTC_10x8,
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8_ASTC_10x10,
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8_ASTC_12x10,
+		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8_ASTC_12x12,
+	};
+	
+	outInternalformat = formatOGL[inPixelFormat].InternalFormat;
+	outFormat = formatOGL[inPixelFormat].Format;
+	outType = formatOGL[inPixelFormat].Type;
 }
 
 GLenum OpenGLMapping::Mapping( BlendOperation op )
@@ -562,363 +492,51 @@ GLenum OpenGLMapping::Mapping( uint32_t accessHint )
 	return usage;
 }
 
-PixelFormat OpenGLMapping::UnMapping( GLenum internalformat, GLenum format, GLenum type )
-{
-	switch(internalformat)
-	{
-	case GL_LUMINANCE8:
-		if(type == GL_UNSIGNED_BYTE)
-			return PF_Luminance8;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_LUMINANCE16:
-		if(type == GL_UNSIGNED_SHORT)
-			return PF_Luminance16;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_ALPHA8:
-		if(type == GL_UNSIGNED_BYTE)
-			return PF_Alpha8;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_LUMINANCE4_ALPHA4:
-		assert(format == GL_LUMINANCE_ALPHA);
-		if(type == GL_UNSIGNED_BYTE)
-			return PF_A4L4;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_LUMINANCE8_ALPHA8:
-		assert(format == GL_LUMINANCE_ALPHA);
-		if(type == GL_UNSIGNED_SHORT)
-			return PF_A8L8;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_RGB5:
-		assert(type == GL_UNSIGNED_SHORT_5_6_5);
-		if(format == GL_RGB)
-			return PF_R5G6B5;
-		else if(format == GL_BGR)
-			return PF_B5G6R5;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_RGBA4:
-		// assert(type == GL_UNSIGNED_SHORT_4_4_4_4_REV);
-		if(format == GL_BGRA)
-			return PF_A4R4G4B4;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_RGB5_A1:
-		// assert(type == GL_UNSIGNED_SHORT_1_5_5_5_REV);
-
-		if(format == GL_BGRA)
-			return PF_A1R5G5B5;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_RGB8: 
-		assert(type == GL_UNSIGNED_BYTE);
-
-		switch(format)
-		{
-		case GL_BGR:
-			return PF_R8G8B8;
-		case GL_RGB:
-			return PF_B8G8R8;
-		case GL_BGRA:
-			return PF_X8R8G8B8;
-		case GL_RGBA:
-			return PF_X8B8G8R8;
-		default:
-			// not supported
-			assert(false);
-			return PF_Unknown;	
-		}
-
-	case GL_RGBA8:
-		assert(type == GL_UNSIGNED_BYTE);
-		switch(format)
-		{
-		case GL_BGR:
-			return PF_X8R8G8B8;
-		case GL_RGB:
-			return PF_X8B8G8R8;
-		case GL_BGRA:
-			return PF_A8R8G8B8;
-		case GL_RGBA:
-			return PF_A8B8G8R8;
-		default:
-			// not supported
-			assert(false);
-			return PF_Unknown;	
-		}
-
-		//if(format == GL_BGRA)
-		//	return PF_A8R8G8B8;
-		//else if(format == GL_RGBA)
-		//	return PF_A8B8G8R8;
-		//else
-		//{
-		//	// not supported
-		//	assert(false);
-		//	return PF_Unknown;
-		//}
-
-	case PF_A2R10G10B10:
-		//assert(type == GL_UNSIGNED_INT_2_10_10_10_REV);
-		if(format == GL_BGRA)
-			return PF_A2R10G10B10;
-		else if(format == GL_RGBA)
-			return PF_A2B10G10R10;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_RGB16F:
-		assert(type == GL_HALF_FLOAT);
-		if(format == GL_RGB)
-			return PF_B16G16R16F;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-
-	case GL_RGBA16F:
-		assert(type == GL_HALF_FLOAT);
-		if(format == GL_RGBA)
-			return PF_A16B16G16R16F;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_RGB32F:
-		assert(type == GL_FLOAT);
-		if(format == GL_RGB)
-			return PF_B32G32R32F;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_RGBA32F:
-		assert(type == GL_FLOAT);
-		if(format == GL_RGBA)
-			return PF_A32B32G32R32F;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-		//////////////////////////////////////////////////////////////////////////
-
-		//case PF_R8G8B8A8:
-		//	outInternalformat = GL_RGBA8;
-		//	outFormat = GL_RGBA;
-		//	outType = GL_UNSIGNED_BYTE;
-		//	break;
-
-		//case PF_B8G8R8A8:
-		//	outInternalformat = GL_RGBA8;
-		//	outFormat = GL_BGRA;
-		//	outType = GL_UNSIGNED_BYTE;
-		//	break;
-
-		//////////////////////////////////////////////////////////////////////////
-
-	case GL_R3_G3_B2:
-		assert(type == GL_UNSIGNED_BYTE_3_3_2);
-		if(format == GL_RGB)
-			return PF_R3G3B2;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_LUMINANCE16F_ARB:
-		assert(type == GL_HALF_FLOAT);
-		if(format == GL_LUMINANCE)
-			return PF_R16F;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_LUMINANCE32F_ARB:
-		assert(type == GL_FLOAT);
-		if(format == GL_LUMINANCE)
-			return PF_R32F;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_LUMINANCE16_ALPHA16:
-		assert(type == GL_UNSIGNED_SHORT);
-		if(format == GL_LUMINANCE_ALPHA)
-			return PF_G16R16;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_LUMINANCE_ALPHA16F_ARB:
-		assert(type == GL_HALF_FLOAT);
-		if(format == GL_LUMINANCE_ALPHA)
-			return PF_G16R16F;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_LUMINANCE_ALPHA32F_ARB:
-		assert(type == GL_FLOAT);
-		if(format == GL_LUMINANCE_ALPHA)
-			return PF_G32R32F;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_RGB16:
-		assert(type == GL_UNSIGNED_SHORT);
-		if(format == GL_RGB)
-			return PF_B16G16R16;
-		else
-		{
-			// not supported
-			assert(false);
-			return PF_Unknown;
-		}
-
-	case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
-	case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
-	case GL_COMPRESSED_SRGB_S3TC_DXT1_EXT:
-	case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT:
-		return PF_DXT1;
-				
-	case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
-	case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT:
-		return PF_DXT3;
-
-	case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-	case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT:
-		return PF_DXT5;
-
-	default:
-		// not supported
-		assert(false);
-		return PF_Unknown;
-	}
-}
-
 void OpenGLMapping::UnMapping( GLenum glType, EffectParameterType& paramType, OpenGLShaderParameterClass& paramClass )
 {
 	switch (glType)
 	{
-	case GL_FLOAT:			                   { paramClass = Shader_Param_Uniform; paramType = EPT_Float; }
-	case GL_FLOAT_VEC2:		                   { paramClass = Shader_Param_Uniform; paramType = EPT_Float2; }
-	case GL_FLOAT_VEC3:	                       { paramClass = Shader_Param_Uniform; paramType = EPT_Float3; }
-	case GL_FLOAT_VEC4:		                   { paramClass = Shader_Param_Uniform; paramType = EPT_Float4; }
-	case GL_UNSIGNED_INT:	                   { paramClass = Shader_Param_Uniform; paramType = EPT_UInt; }
-	case GL_UNSIGNED_INT_VEC2:				   { paramClass = Shader_Param_Uniform; paramType = EPT_UInt2; }
-	case GL_UNSIGNED_INT_VEC3:				   { paramClass = Shader_Param_Uniform; paramType = EPT_UInt3; }
-	case GL_UNSIGNED_INT_VEC4:				   { paramClass = Shader_Param_Uniform; paramType = EPT_UInt4; }
-	case GL_INT:							   { paramClass = Shader_Param_Uniform; paramType = EPT_Int; }
-	case GL_INT_VEC2:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Int2; }	   
-	case GL_INT_VEC3:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Int3; }
-	case GL_INT_VEC4:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Int4; }
-	case GL_BOOL:							   { paramClass = Shader_Param_Uniform; paramType = EPT_Boolean; }
-	case GL_FLOAT_MAT2:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Matrix2x2; }
-	case GL_FLOAT_MAT3:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Matrix3x3; }
-	case GL_FLOAT_MAT4:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Matrix4x4; } 
+	case GL_FLOAT:			                   { paramClass = Shader_Param_Uniform; paramType = EPT_Float; } break;
+	case GL_FLOAT_VEC2:		                   { paramClass = Shader_Param_Uniform; paramType = EPT_Float2; } break;
+	case GL_FLOAT_VEC3:	                       { paramClass = Shader_Param_Uniform; paramType = EPT_Float3; } break;
+	case GL_FLOAT_VEC4:		                   { paramClass = Shader_Param_Uniform; paramType = EPT_Float4; } break;
+	case GL_UNSIGNED_INT:	                   { paramClass = Shader_Param_Uniform; paramType = EPT_UInt; } break;
+	case GL_UNSIGNED_INT_VEC2:				   { paramClass = Shader_Param_Uniform; paramType = EPT_UInt2; } break;
+	case GL_UNSIGNED_INT_VEC3:				   { paramClass = Shader_Param_Uniform; paramType = EPT_UInt3; } break;
+	case GL_UNSIGNED_INT_VEC4:				   { paramClass = Shader_Param_Uniform; paramType = EPT_UInt4; } break;
+	case GL_INT:							   { paramClass = Shader_Param_Uniform; paramType = EPT_Int; } break;
+	case GL_INT_VEC2:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Int2; }	break;   
+	case GL_INT_VEC3:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Int3; } break;
+	case GL_INT_VEC4:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Int4; } break;
+	case GL_BOOL:							   { paramClass = Shader_Param_Uniform; paramType = EPT_Boolean; } break;
+	case GL_FLOAT_MAT2:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Matrix2x2; } break;
+	case GL_FLOAT_MAT3:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Matrix3x3; } break;
+	case GL_FLOAT_MAT4:						   { paramClass = Shader_Param_Uniform; paramType = EPT_Matrix4x4; } break;
 
 	case GL_SAMPLER_1D:						   
 	case GL_INT_SAMPLER_1D:
 	case GL_UNSIGNED_INT_SAMPLER_1D:
-	case GL_SAMPLER_1D_SHADOW:			       { paramClass = Shader_Param_SRV; paramType = EPT_Texture1D; }
+	case GL_SAMPLER_1D_SHADOW:			       { paramClass = Shader_Param_SRV; paramType = EPT_Texture1D; } break;
 
 	case GL_SAMPLER_2D:	
 	case GL_INT_SAMPLER_2D:
 	case GL_UNSIGNED_INT_SAMPLER_2D:
 	case GL_SAMPLER_2D_MULTISAMPLE:
-	case GL_SAMPLER_2D_SHADOW:				   { paramClass = Shader_Param_SRV; paramType = EPT_Texture2D; }
+	case GL_SAMPLER_2D_SHADOW:				   { paramClass = Shader_Param_SRV; paramType = EPT_Texture2D; } break;
 
 	case GL_SAMPLER_3D:	
 	case GL_INT_SAMPLER_3D:
-	case GL_UNSIGNED_INT_SAMPLER_3D:           { paramClass = Shader_Param_SRV; paramType = EPT_Texture3D; }
+	case GL_UNSIGNED_INT_SAMPLER_3D:           { paramClass = Shader_Param_SRV; paramType = EPT_Texture3D; } break;
 
 	case GL_SAMPLER_CUBE:					  
 	case GL_INT_SAMPLER_CUBE:
 	case GL_UNSIGNED_INT_SAMPLER_CUBE:
-	case GL_SAMPLER_CUBE_SHADOW:			   { paramClass = Shader_Param_SRV; paramType = EPT_TextureCube; }
+	case GL_SAMPLER_CUBE_SHADOW:			   { paramClass = Shader_Param_SRV; paramType = EPT_TextureCube; } break;
 
 	case GL_SAMPLER_1D_ARRAY:				 
 	case GL_INT_SAMPLER_1D_ARRAY:
 	case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY:
-	case GL_SAMPLER_1D_ARRAY_SHADOW:		   { paramClass = Shader_Param_SRV; paramType = EPT_Texture1DArray; }
+	case GL_SAMPLER_1D_ARRAY_SHADOW:		   { paramClass = Shader_Param_SRV; paramType = EPT_Texture1DArray; } break;
 
 	case GL_SAMPLER_2D_ARRAY:
 	case GL_INT_SAMPLER_2D_ARRAY:
@@ -926,9 +544,9 @@ void OpenGLMapping::UnMapping( GLenum glType, EffectParameterType& paramType, Op
 	case GL_SAMPLER_2D_MULTISAMPLE_ARRAY:
 	case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
 	case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
-	case GL_SAMPLER_2D_ARRAY_SHADOW:		   { paramClass = Shader_Param_SRV; paramType = EPT_Texture2DArray; }
+	case GL_SAMPLER_2D_ARRAY_SHADOW:		   { paramClass = Shader_Param_SRV; paramType = EPT_Texture2DArray; } break;
 
-	case GL_SAMPLER_BUFFER:					   { paramClass = Shader_Param_SRV; paramType = EPT_TextureBuffer; }
+	case GL_SAMPLER_BUFFER:					   { paramClass = Shader_Param_SRV; paramType = EPT_TextureBuffer; } break;
 
 											   //case GL_IMAGE_1D:					       { paramClass = Shader_Param_UAV; return EPT_Texture1D; }
 											   //case GL_IMAGE_1D_ARRAY:					   { paramClass = Shader_Param_UAV; return EPT_Texture1DArray; }

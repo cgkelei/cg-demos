@@ -5,7 +5,7 @@
 namespace RcEngine {
 
 D3D11FrameBuffer::D3D11FrameBuffer( uint32_t width, uint32_t height )
-	: RHFrameBuffer(width, height)
+	:FrameBuffer(width, height)
 {
 
 }

@@ -55,6 +55,7 @@ public:
 	inline uint32_t GetElementSize() const					{ return mElementSize; }
 	inline const String& GetName() const					{ return mParameterName; }
 	inline EffectParameterType GetParameterType() const		{ return mParameterType; }
+	inline EffectParameterUsage GetParameterUsage() const	{ return mParameterUsage; }
 	inline uint32_t GetOffset() const						{ return mOffset; }
 
 	// Set and Get method, call the matched parameter type version, or will cause exception
@@ -109,14 +110,17 @@ protected:
 
 protected:
 	String mParameterName;
+
 	EffectParameterType mParameterType;
-	
+	EffectParameterUsage mParameterUsage;   // Used for shader parameter auto binding
+
 	TimeStamp mLastModifiedTime;
 
-	
 	uint32_t mElementSize;					// For non-array type, always 0.
 	uint32_t mOffset;						// Offset in parent constant buffer
-	EffectConstantBuffer* mUniformBuffer;    // Constant buffer this variable belong to
+	EffectConstantBuffer* mUniformBuffer;   // Constant buffer this variable belong to
+
+	friend class Effect;
 };
 
 template< typename T>

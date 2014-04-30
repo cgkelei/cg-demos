@@ -1,5 +1,6 @@
 #include "OpenGLTexture.h"
 #include "OpenGLGraphicCommon.h"
+#include "OpenGLView.h"
 #include <Core/Exception.h>
 
 namespace RcEngine {
@@ -8,7 +9,7 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 	: OpenGLTexture(TT_Texture2D, format, arraySize, numMipMaps, sampleCount, sampleQuality, accessHint, flags)
 {
 	// numMipMap == 0, will generate mipmap levels automatically
-	mMipLevels = (numMipMaps > 0) ? numMipMaps : RHTexture::CalculateMipmapLevels((std::max)(width, height));
+	mMipLevels = (numMipMaps > 0) ? numMipMaps : Texture::CalculateMipmapLevels((std::max)(width, height));
 	mWidth = width;
 	mHeight = height;
 
@@ -39,6 +40,11 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 		CreateWithImmutableStorage(initData);
 	else
 		CreateWithMutableStorage(initData);
+
+	if (mCreateFlags & TexCreate_ShaderResource)
+	{
+		mTextureSRV = std::make_shared<OpenGLTextureSRV>(mTextureOGL, mTextureTarget);
+	}
 }
 
 void OpenGLTexture2D::CreateWithImmutableStorage(ElementInitData* initData)
@@ -361,7 +367,7 @@ void OpenGLTexture2D::Unmap2D( uint32_t arrayIndex, uint32_t level )
 }
 
 
-void OpenGLTexture2D::CopyToTexture( RHTexture& destTexture )
+void OpenGLTexture2D::CopyToTexture( Texture& destTexture )
 {
 	/*assert(mFormat == destTexture.GetTextureFormat() && mType == destTexture.GetTextureType());
 	OpenGLTexture2D& destTextureOGL = *(static_cast<OpenGLTexture2D*>(&destTexture));

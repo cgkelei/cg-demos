@@ -6,8 +6,8 @@
 
 namespace RcEngine {
 
-D3D11DepthStencilView::D3D11DepthStencilView( const shared_ptr<RHTexture>& texture, uint32_t arrIndex, uint32_t level )
-	: RHRenderView(texture),
+D3D11DepthStencilView::D3D11DepthStencilView( const shared_ptr<Texture>& texture, uint32_t arrIndex, uint32_t level )
+	: RenderView(texture),
 	  DepthStencilViewD3D11(nullptr)
 {
 	uint32_t createFlags = texture->GetCreateFlags();

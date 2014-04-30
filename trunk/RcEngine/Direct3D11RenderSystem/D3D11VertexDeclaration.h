@@ -3,17 +3,17 @@
 #pragma once
 
 #include "D3D11Prerequisites.h"
-#include <Graphics/RHVertexDeclaration.h>
+#include <Graphics/VertexDeclaration.h>
 
 namespace RcEngine {
 
-class _D3D11Export D3D11VertexDeclaration : public RHVertexDeclaration
+class _D3D11Export D3D11VertexDeclaration : public VertexDeclaration
 {
 public:
-	D3D11VertexDeclaration(const RHVertexElement* element, uint32_t count);
+	D3D11VertexDeclaration(const VertexElement* element, uint32_t count);
 	~D3D11VertexDeclaration(void);
 
-	void CreateInputLayout(const RHOperation& operation, const RHShader& vertexShader);
+	void CreateInputLayout(const RenderOperation& operation, const Shader& vertexShader);
 
 public:
 

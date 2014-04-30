@@ -49,27 +49,27 @@ void RecordMessage( StringList& DestStringList, const char* strMessage )
 }
 
 
-void EngineLoger::EnableLogging( bool bEnable )
+void EngineLogger::EnableLogging( bool bEnable )
 {
 	gLoggingEnabled = bEnable;
 }
 
-void EngineLoger::SetLogLevel( uint32_t uLevel )
+void EngineLogger::SetLogLevel( uint32_t uLevel )
 {
 	gLogLevel = uLevel;
 }
 
-uint32_t EngineLoger::GetLogLevel()
+uint32_t EngineLogger::GetLogLevel()
 {
 	return gLogLevel;
 }
 
-void EngineLoger::AddListener( ILogListener* pListener )
+void EngineLogger::AddListener( ILogListener* pListener )
 {
 	 gListeners.push_back( pListener );
 }
 
-void EngineLoger::ClearListeners()
+void EngineLogger::ClearListeners()
 {
 	for (auto pListener : gListeners)
 		delete pListener;
@@ -77,7 +77,7 @@ void EngineLoger::ClearListeners()
 	gListeners.clear();
 }
 
-void EngineLoger::GenerateLogReport( bool bEchoWarningsAndErrors /*= TRUE */ )
+void EngineLogger::GenerateLogReport( bool bEchoWarningsAndErrors /*= TRUE */ )
 {
 	LogMsg( 0, "%d warning(s), %d error(s).", g_dwWarningCount, g_dwErrorCount );
 	if( !bEchoWarningsAndErrors )
@@ -100,7 +100,7 @@ void EngineLoger::GenerateLogReport( bool bEchoWarningsAndErrors /*= TRUE */ )
 	}
 }
 
-void EngineLoger::ResetCounters()
+void EngineLogger::ResetCounters()
 {
 	StringList::iterator iter = gWarningsList.begin();
 	StringList::iterator end = gWarningsList.end();
@@ -124,7 +124,7 @@ void EngineLoger::ResetCounters()
 	g_dwErrorCount = 0;
 }
 
-void EngineLoger::LogCommand( uint32_t dwCommand, VOID* pData /*= NULL */ )
+void EngineLogger::LogCommand( uint32_t dwCommand, VOID* pData /*= NULL */ )
 {
 	LogListenerList::iterator iter = gListeners.begin();
 	LogListenerList::iterator end = gListeners.end();
@@ -136,7 +136,7 @@ void EngineLoger::LogCommand( uint32_t dwCommand, VOID* pData /*= NULL */ )
 	}
 }
 
-void EngineLoger::LogError( const char* strFormat, ... )
+void EngineLogger::LogError( const char* strFormat, ... )
 {
 	if( !gLoggingEnabled )
 		return;
@@ -152,7 +152,7 @@ void EngineLoger::LogError( const char* strFormat, ... )
 	BroadcastMessage( 2, gStrBuf );
 }
 
-void EngineLoger::LogWarning( const char* strFormat, ... )
+void EngineLogger::LogWarning( const char* strFormat, ... )
 {
 	if( !gLoggingEnabled )
 		return;
@@ -168,7 +168,7 @@ void EngineLoger::LogWarning( const char* strFormat, ... )
 	BroadcastMessage( 1, gStrBuf );
 }
 
-void EngineLoger::LogMsg( uint32_t uImportance, const char* strFormat, ... )
+void EngineLogger::LogMsg( uint32_t uImportance, const char* strFormat, ... )
 {
 	if( !gLoggingEnabled || ( uImportance > gLogLevel ) )
 		return;

@@ -299,7 +299,7 @@ void Sprite::OnRenderBegin()
 
 void Sprite::SetProjectionMatrix( const float4x4& mat )
 {
-	mSpriteMaterial->GetCustomParameter("ProjMat")->SetValue(mat);
+	mSpriteMaterial->GetEffect()->GetParameterByName("ProjMat")->SetValue(mat);
 }
 
 void Sprite::UpdateGeometryBuffers()
@@ -322,7 +322,7 @@ void Sprite::UpdateGeometryBuffers()
 			memcpy(ibData, (uint8_t*)&mInidces[0], ibSize);
 			mIndexBuffer->UnMap();
 
-			mRenderOperation->SetIndexBuffer(mIndexBuffer, IBT_Bit16);
+			mRenderOperation->BindIndexStream(mIndexBuffer, IBT_Bit16);
 		}
 
 		mDirty = false;
@@ -358,8 +358,8 @@ void Sprite::SetSpriteContent( const shared_ptr<Texture>& tex, const shared_ptr<
 	mSpriteTexture = tex;
 	mSpriteMaterial = mat;
 
-	mSpriteMaterial->SetTexture("SpriteTexture", mSpriteTexture);
-	mWindowSizeParam = mSpriteMaterial->GetCustomParameter("WindowSize");
+	mSpriteMaterial->SetTexture("SpriteTexture", mSpriteTexture->GetShaderResourceView());
+	mWindowSizeParam = mSpriteMaterial->GetEffect()->GetParameterByName("WindowSize");
 }
 
 }

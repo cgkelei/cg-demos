@@ -28,9 +28,12 @@
     <ClInclude Include="Graphics\AnimationClip.h" />
     <ClInclude Include="Graphics\AnimationController.h" />
     <ClInclude Include="Graphics\AnimationState.h" />
+    <ClInclude Include="Graphics\Camera.h" />
     <ClInclude Include="Graphics\Effect.h" />
     <ClInclude Include="Graphics\EffectParameter.h" />
     <ClInclude Include="Graphics\GraphicsCommon.h" />
+    <ClInclude Include="Graphics\GraphicsResource.h" />
+    <ClInclude Include="Graphics\GraphicsScriptLoader.h" />
     <ClInclude Include="Graphics\Material.h" />
     <ClInclude Include="Graphics\Mesh.h" />
     <ClInclude Include="Graphics\MeshPart.h" />
@@ -92,10 +95,12 @@
     <ClCompile Include="Graphics\AnimationClip.cpp" />
     <ClCompile Include="Graphics\AnimationController.cpp" />
     <ClCompile Include="Graphics\AnimationState.cpp" />
+    <ClCompile Include="Graphics\Camera.cpp" />
     <ClCompile Include="Graphics\Effect.cpp" />
     <ClCompile Include="Graphics\EffectParameter.cpp" />
     <ClCompile Include="Graphics\FrameBuffer.cpp" />
     <ClCompile Include="Graphics\GraphicsResource.cpp" />
+    <ClCompile Include="Graphics\GraphicsScriptLoader.cpp" />
     <ClCompile Include="Graphics\Material.cpp" />
     <ClCompile Include="Graphics\Mesh.cpp" />
     <ClCompile Include="Graphics\MeshPart.cpp" />
@@ -110,6 +115,7 @@
     <ClCompile Include="Graphics\Sky.cpp" />
     <ClCompile Include="Graphics\SpriteBatch.cpp" />
     <ClCompile Include="Graphics\TextureResource.cpp" />
+    <ClCompile Include="Graphics\VertexDeclaration.cpp" />
     <ClCompile Include="Input\InputSystem.cpp" />
     <ClCompile Include="IO\FileStream.cpp" />
     <ClCompile Include="IO\FileSystem.cpp" />
@@ -134,6 +140,7 @@
   <ItemGroup>
     <None Include="..\Media\Effect\GLSL\DeferredLighting.glsl" />
     <None Include="..\Media\Effect\GLSL\DeferredUtil.glsl" />
+    <None Include="..\Media\Effect\GLSL\FSQuad.glsl" />
     <None Include="..\Media\Effect\GLSL\LightingUtil.glsl" />
     <None Include="..\Media\Effect\GLSL\Model.glsl" />
     <None Include="..\Media\Effect\GLSL\ShadowUtil.glsl" />
@@ -156,6 +163,9 @@
     <FxCompile Include="..\Media\Effect\HLSL\DeferredUtil.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\FSQuad.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="..\Media\Effect\HLSL\LightingUtil.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
@@ -170,6 +180,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="..\Media\Effect\FSQuad.effect.xml" />
     <Xml Include="..\Media\Effect\HLSL\Model.effect.xml" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -215,7 +226,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;BUILD_DLL;RcWindows;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>./;../3rdParty</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;../3rdParty;../3rdParty/gli-0.5.1.1/external/glm-0.9.5.1;../3rdParty/gli-0.5.1.1</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>

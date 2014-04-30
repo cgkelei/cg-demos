@@ -1,0 +1,53 @@
+<Effect name="ModelEffect">
+
+<!-- Effect parameter which has Semantic -->
+<AutoBinding name="WorldView" semantic="WorldViewMatrix" type="float4x4"/>
+<AutoBinding name="Projection" semantic="ProjectionMatrix" type="float4x4"/>
+<AutoBinding name="DiffuseMap" semantic="DiffuseMaterialMap" type="texture2d"/>
+<AutoBinding name="SpecularMap" semantic="SpecularMaterialMap" type="texture2d"/>
+<AutoBinding name="NormalMap" semantic="NormalMaterialMap" type="texture2d"/>
+  
+<AutoBinding name="DiffuseColor" semantic="DiffuseMaterialColor" type="float3"/>
+<AutoBinding name="SpecularColor" semantic="SpecularMaterialColor" type="float3"/>
+<AutoBinding name="Shininess" semantic="SpecularMaterialPower" type="float"/>
+  
+<!-- SamplerState will used in this Effect -->
+<Sampler name="LinearSampler">
+    <State name="Filter" value="Min_Mag_Mip_Linear"/>
+    <State name="AddressU" value="Wrap"/>
+    <State name="AddressV" value="Wrap"/>
+</Sampler>
+
+<!-- Effect techniques -->
+<Technique name="VSM">
+	<Pass name="p0">
+		<VertexShader file="Model" entry="ShadowMapVS"/>
+		<PixelShader file="Model" entry="ShadowMapVSM">
+		  <Macro name="VSM"/>
+		</PixelShader>
+	</Pass>
+</Technique>
+
+<!-- pission disc PCF-->
+<Technique name="PCF">
+	<Pass name="p0">
+    <VertexShader file="Model" entry="ShadowMapVS"/>
+	</Pass>
+</Technique>
+
+<Technique name="GBuffer">
+	<Pass name="p0">
+		<VertexShader file="Model" entry="GeneralVS"/>
+		<PixelShader file="Model" entry="GBufferPS"/>
+		<State name="StencilEnable" value="true"/>
+		<State name="FrontStencilRef" value="1"/>
+		<State name="FrontStencilFunc" value="Always"/>
+		<State name="FrontStencilFailOp" value="Keep"/>
+		<State name="FrontStencilDepthFailOp" value="Keep"/>
+		<State name="FrontStencilPassOp" value="Replace"/>
+	</Pass>
+</Technique>
+
+</Effect>
+	
+	

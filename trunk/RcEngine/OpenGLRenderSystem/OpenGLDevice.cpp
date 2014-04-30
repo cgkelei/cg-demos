@@ -7,8 +7,8 @@
 #include "OpenGLTexture.h"
 #include "OpenGLGraphicCommon.h"
 #include "OpenGLVertexDeclaration.h"
-#include <Graphics/RHState.h>
-#include <Graphics/RHOperation.h>
+#include <Graphics/RenderState.h>
+#include <Graphics/RenderOperation.h>
 #include <Graphics/Effect.h>
 #include <MainApp/Application.h>
 #include <Core/Exception.h>
@@ -54,15 +54,15 @@ void OpenGLDevice::CreateRenderWindow()
 		// Have depth buffer, attach it
 		mScreenFrameBuffer->AttachRTV(ATT_DepthStencil, std::make_shared<OpenGLScreenDepthStencilView>(appSettings.DepthStencilFormat));
 	}
-	mScreenFrameBuffer->SetViewport(RHViewport(0, 0, appSettings.Width, appSettings.Height));
+	mScreenFrameBuffer->SetViewport(Viewport(0, 0, appSettings.Width, appSettings.Height));
 	
 	// Bind as default
 	BindFrameBuffer(mScreenFrameBuffer);
 	
 	//Create default render state
-	mCurrentDepthStencilState = mRHFactory->CreateDepthStencilState(RHDepthStencilStateDesc());
-	mCurrentBlendState = mRHFactory->CreateBlendState(RHBlendStateDesc());
-	mCurrentRasterizerState = mRHFactory->CreateRasterizerState(RHRasterizerStateDesc());
+	mCurrentDepthStencilState = mRHFactory->CreateDepthStencilState(DepthStencilStateDesc());
+	mCurrentBlendState = mRHFactory->CreateBlendState(BlendStateDesc());
+	mCurrentRasterizerState = mRHFactory->CreateRasterizerState(RasterizerStateDesc());
 
 	// enable default render state
 	glEnable(GL_DEPTH_TEST);
@@ -123,7 +123,7 @@ void OpenGLDevice::AdjustProjectionMatrix( float4x4& pOut )
 	pOut =  pOut * scale * translate;
 }
 
-void OpenGLDevice::SetViewport( const RHViewport& vp )
+void OpenGLDevice::SetViewport( const Viewport& vp )
 {
 	if (vp.Left != mViewportLeft || vp.Top != mViewportTop || vp.Height !=mViewportHeight || vp.Width != mViewportWidth)
 	{
@@ -144,14 +144,14 @@ void OpenGLDevice::ToggleFullscreen( bool fs )
 }
 
 
-void OpenGLDevice::SetBlendState( const shared_ptr<RHBlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask )
+void OpenGLDevice::SetBlendState( const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask )
 {
 	OGL_ERROR_CHECK();
 
 	if( mCurrentBlendState != state )
 	{
-		const RHBlendStateDesc& currDesc = mCurrentBlendState->GetDesc();
-		const RHBlendStateDesc& stateDesc = state->GetDesc();
+		const BlendStateDesc& currDesc = mCurrentBlendState->GetDesc();
+		const BlendStateDesc& stateDesc = state->GetDesc();
 
 		if (currDesc.AlphaToCoverageEnable != stateDesc.AlphaToCoverageEnable)
 		{
@@ -261,14 +261,14 @@ void OpenGLDevice::SetBlendState( const shared_ptr<RHBlendState>& state, const C
 	OGL_ERROR_CHECK();
 }
 
-void OpenGLDevice::SetRasterizerState( const shared_ptr<RHRasterizerState>& state )
+void OpenGLDevice::SetRasterizerState( const shared_ptr<RasterizerState>& state )
 {
 	OGL_ERROR_CHECK();
 
 	if(mCurrentRasterizerState != state)
 	{
-		const RHRasterizerStateDesc& currDesc = mCurrentRasterizerState->GetDesc();
-		const RHRasterizerStateDesc& stateDesc = state->GetDesc();
+		const RasterizerStateDesc& currDesc = mCurrentRasterizerState->GetDesc();
+		const RasterizerStateDesc& stateDesc = state->GetDesc();
 
 		if (currDesc.PolygonFillMode != stateDesc.PolygonFillMode)
 		{
@@ -329,14 +329,14 @@ void OpenGLDevice::SetRasterizerState( const shared_ptr<RHRasterizerState>& stat
 	OGL_ERROR_CHECK();
 }
 
-void OpenGLDevice::SetDepthStencilState( const shared_ptr<RHDepthStencilState>& state, uint16_t frontStencilRef, uint16_t backStencilRef )
+void OpenGLDevice::SetDepthStencilState( const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef, uint16_t backStencilRef )
 {
 	OGL_ERROR_CHECK();
 
 	if ( mCurrentDepthStencilState != state || mCurrentFrontStencilRef != frontStencilRef || mCurrentBackStencilRef != backStencilRef )
 	{
-		const RHDepthStencilStateDesc& currDesc = mCurrentDepthStencilState->GetDesc();
-		const RHDepthStencilStateDesc& stateDesc = state->GetDesc();
+		const DepthStencilStateDesc& currDesc = mCurrentDepthStencilState->GetDesc();
+		const DepthStencilStateDesc& stateDesc = state->GetDesc();
 
 		if(currDesc.DepthEnable != stateDesc.DepthEnable)
 		{
@@ -413,7 +413,7 @@ void OpenGLDevice::SetDepthStencilState( const shared_ptr<RHDepthStencilState>& 
 	OGL_ERROR_CHECK();
 }
 
-void OpenGLDevice::SetSamplerState( ShaderType stage, uint32_t unit, const shared_ptr<RHSamplerState>& state )
+void OpenGLDevice::SetSamplerState( ShaderType stage, uint32_t unit, const shared_ptr<SamplerState>& state )
 {
 	if (mCurrentSamplerStates[unit] != state)
 	{
@@ -426,14 +426,14 @@ void OpenGLDevice::SetSamplerState( ShaderType stage, uint32_t unit, const share
 	}
 }
 
-void OpenGLDevice::DoDraw( const EffectTechnique* technique, const RHOperation& operation )
+void OpenGLDevice::DoDraw( const EffectTechnique* technique, const RenderOperation& operation )
 {
 	// Bind vertex buffer
 	OpenGLVertexDeclaration* vertexDeclOGL = static_cast_checked<OpenGLVertexDeclaration*>(operation.VertexDecl.get());
 	if (vertexDeclOGL->GetVertexArrayOGL() == 0)
 	{
 		// Get vertex shader of first pass, may need it to create VAO
-		const RHShader& vertexShader = *(technique->GetPassByIndex(0)->GetShaderPipeline()->GetShader(ST_Vertex));
+		const Shader& vertexShader = *(technique->GetPassByIndex(0)->GetShaderPipeline()->GetShader(ST_Vertex));
 		vertexDeclOGL->CreateVertexArrayOGL(operation, vertexShader);
 	}
 	glBindVertexArray(vertexDeclOGL->GetVertexArrayOGL());
@@ -476,8 +476,6 @@ void OpenGLDevice::DoDraw( const EffectTechnique* technique, const RHOperation& 
 		{
 			pass->BeginPass();
 
-			glBindProgramPipeline(mProgramPipeline);
-			
 			if (operation.NumInstances <= 1)
 			{
 				glDrawElementsBaseVertex(
@@ -506,8 +504,6 @@ void OpenGLDevice::DoDraw( const EffectTechnique* technique, const RHOperation& 
 		for (EffectPass* pass : technique->GetPasses())
 		{
 			pass->BeginPass();
-
-			glBindProgramPipeline(mProgramPipeline);
 
 			if (operation.NumInstances <= 1)
 			{

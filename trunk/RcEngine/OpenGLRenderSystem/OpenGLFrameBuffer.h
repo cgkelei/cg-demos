@@ -2,11 +2,11 @@
 #define OpenGLFrameBuffer_h__
 
 #include "OpenGLPrerequisites.h"
-#include <Graphics/RHFrameBuffer.h>
+#include <Graphics/FrameBuffer.h>
 
 namespace RcEngine {
 
-class _OpenGLExport OpenGLFrameBuffer : public RHFrameBuffer
+class _OpenGLExport OpenGLFrameBuffer : public FrameBuffer
 {
 public:
 	OpenGLFrameBuffer(uint32_t width, uint32_t height, bool offscreen = true);
@@ -25,10 +25,10 @@ protected:
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _OpenGLExport OpenGLRenderView : public RHRenderView
+class _OpenGLExport OpenGLRenderView : public RenderView
 {
 public:
-	OpenGLRenderView(const shared_ptr<RHTexture>& texture);
+	OpenGLRenderView(const shared_ptr<Texture>& texture);
 	virtual ~OpenGLRenderView();
 
 	virtual void ClearColor(const ColorRGBA& clr);
@@ -37,8 +37,8 @@ public:
 	virtual void ClearDepthStencil(float depth, uint32_t stencil);	
 
 protected:
-	virtual void OnAttach(RHFrameBuffer& fb, Attachment attr);
-	virtual void OnDetach(RHFrameBuffer& fb, Attachment attr);
+	virtual void OnAttach(FrameBuffer& fb, Attachment attr);
+	virtual void OnDetach(FrameBuffer& fb, Attachment attr);
 
 	void DoClear(GLbitfield flag, const ColorRGBA& clr, float depth, uint32_t stencil);
 
@@ -51,15 +51,15 @@ protected:
 class _OpenGLExport OpenGLDepthStencilView : public OpenGLRenderView
 {
 public:
-	OpenGLDepthStencilView(const shared_ptr<RHTexture>& texture, uint32_t arrIndex, uint32_t level);
+	OpenGLDepthStencilView(const shared_ptr<Texture>& texture, uint32_t arrIndex, uint32_t level);
 
 	void ClearDepth(float depth);
 	void ClearStencil(uint32_t stencil);
 	void ClearDepthStencil(float depth, uint32_t stencil);
 
 protected:
-	void OnAttach(RHFrameBuffer& fb, Attachment attr);
-	void OnDetach(RHFrameBuffer& fb, Attachment attr);
+	void OnAttach(FrameBuffer& fb, Attachment attr);
+	void OnDetach(FrameBuffer& fb, Attachment attr);
 
 private:
 	uint32_t mArrIndex;
@@ -76,8 +76,8 @@ public:
 	void ClearDepthStencil(float depth, uint32_t stencil);
 
 protected:
-	void OnAttach(RHFrameBuffer& fb, Attachment attr);
-	void OnDetach(RHFrameBuffer& fb, Attachment attr);
+	void OnAttach(FrameBuffer& fb, Attachment attr);
+	void OnDetach(FrameBuffer& fb, Attachment attr);
 
 private:
 	PixelFormat mFormat;
@@ -87,13 +87,13 @@ private:
 class _OpenGLExport OpenGLRenderTargetView2D : public OpenGLRenderView
 {
 public:
-	OpenGLRenderTargetView2D(const shared_ptr<RHTexture>& texture, uint32_t arrIndex, uint32_t level);
+	OpenGLRenderTargetView2D(const shared_ptr<Texture>& texture, uint32_t arrIndex, uint32_t level);
 
 	void ClearColor(const ColorRGBA& clr);
 
 protected:
-	void OnAttach(RHFrameBuffer& fb, Attachment attr);
-	void OnDetach(RHFrameBuffer& fb, Attachment attr);
+	void OnAttach(FrameBuffer& fb, Attachment attr);
+	void OnDetach(FrameBuffer& fb, Attachment attr);
 
 private:
 	uint32_t mArrIndex;
@@ -103,11 +103,11 @@ private:
 class _OpenGLExport OpenGLRenderTargetArrayView : public OpenGLRenderView
 {
 public:
-	OpenGLRenderTargetArrayView(const shared_ptr<RHTexture>& texture,  uint32_t level);
+	OpenGLRenderTargetArrayView(const shared_ptr<Texture>& texture,  uint32_t level);
 
 protected:
-	void OnAttach(RHFrameBuffer& fb, Attachment attr);
-	void OnDetach(RHFrameBuffer& fb, Attachment attr);
+	void OnAttach(FrameBuffer& fb, Attachment attr);
+	void OnDetach(FrameBuffer& fb, Attachment attr);
 
 protected:
 	uint32_t mLevel;
@@ -121,8 +121,8 @@ public:
 	void ClearColor(const ColorRGBA& clr);
 
 protected:
-	void OnAttach(RHFrameBuffer& fb, Attachment attr);
-	void OnDetach(RHFrameBuffer& fb, Attachment attr);
+	void OnAttach(FrameBuffer& fb, Attachment attr);
+	void OnDetach(FrameBuffer& fb, Attachment attr);
 };
 
 }

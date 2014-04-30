@@ -20,7 +20,7 @@ struct SRVBindHelper
 
 	void operator() ()
 	{
-		weak_ptr<RHShaderResourceView> srv;
+		weak_ptr<ShaderResourceView> srv;
 		Param->GetValue(srv);
 
 		if (auto spt = srv.lock())
@@ -68,7 +68,7 @@ struct UAVSRVBindHelper
 
 	void operator() ()
 	{
-		weak_ptr<RHUnorderedAccessView> uav;
+		weak_ptr<UnorderedAccessView> uav;
 		Param->GetValue(uav);
 
 		if (auto spt = uav.lock())
@@ -92,7 +92,7 @@ struct SamplerBindHelper
 
 	void operator() ()
 	{
-		weak_ptr<RHSamplerState> sampler;
+		weak_ptr<SamplerState> sampler;
 		Param->GetValue(sampler);
 
 		if (auto spt = sampler.lock())
@@ -135,7 +135,7 @@ private:
 
 struct UniformBindHelper
 {
-	UniformBindHelper(EffectUniformBuffer* buffer, uint32_t binding, ShaderType shaderStage)
+	UniformBindHelper(EffectConstantBuffer* buffer, uint32_t binding, ShaderType shaderStage)
 		: Buffer(buffer), Binding(binding), ShaderStage(shaderStage) {}
 
 	void operator() ()
@@ -172,7 +172,7 @@ struct UniformBindHelper
 	}
 
 private:
-	EffectUniformBuffer* Buffer;
+	EffectConstantBuffer* Buffer;
 	uint32_t Binding;
 	ShaderType ShaderStage;
 };
@@ -221,7 +221,7 @@ public:
 
 	void ReflectConstantBuffers()
 	{
-		mShaderD3D11->UniformBufferParams.resize(mShaderDescD3D11.ConstantBuffers);
+		mShaderD3D11->ConstantBufferParams.resize(mShaderDescD3D11.ConstantBuffers);
 		for ( UINT i = 0; i < mShaderDescD3D11.ConstantBuffers; i++ ) 
 		{
 			ID3D11ShaderReflectionConstantBuffer* bufferD3D11 = mReflectorD3D11->GetConstantBufferByIndex( i ); 
@@ -229,20 +229,13 @@ public:
 			D3D11_SHADER_BUFFER_DESC bufferDesc;
 			bufferD3D11->GetDesc(&bufferDesc);
 			
-			UniformBufferParam& uniformBufferParam = mShaderD3D11->UniformBufferParams[i];
+			ConstantBufferParam& cbufferParam = mShaderD3D11->ConstantBufferParams[i];
 
-			uniformBufferParam.Name = bufferDesc.Name;
-			uniformBufferParam.BufferSize = bufferDesc.Size; 
-			uniformBufferParam.Binding = i;
+			cbufferParam.Name = bufferDesc.Name;
+			cbufferParam.BufferSize = bufferDesc.Size; 
+			cbufferParam.Binding = i;
 
-			if (uniformBufferParam.Name == "$Globals")
-			{
-				// Make a name unique to this shader, 
-				// Todo: Add a hash code of shader bytecode
-				uniformBufferParam.Name += std::to_string(mShaderDescD3D11.InstructionCount);
-			}
-
-			uniformBufferParam.BufferVariables.resize(bufferDesc.Variables);
+			cbufferParam.BufferVariables.resize(bufferDesc.Variables);
 			for ( UINT j = 0; j < bufferDesc.Variables; j++ ) 
 			{
 				ID3D11ShaderReflectionVariable* variableD3D11 = bufferD3D11->GetVariableByIndex( j ); 
@@ -254,7 +247,7 @@ public:
 				variableD3D11->GetDesc( &varDesc ); 
 				varTypeD3D11->GetDesc( &varTypeDesc ); 
 
-				UniformParam& param = uniformBufferParam.BufferVariables[j];
+				UniformParam& param = cbufferParam.BufferVariables[j];
 
 				param.Name = varDesc.Name;
 				param.Offset = varDesc.StartOffset;
@@ -449,20 +442,17 @@ HRESULT CompileHLSL(const String& filename, const ShaderMacro* macros, uint32_t 
 	std::vector<D3D10_SHADER_MACRO> d3dMacro;
 	if (macros)
 	{
-		d3dMacro.resize(macroCount);
+		d3dMacro.resize(macroCount+1);
 		for (uint32_t i = 0; i < macroCount; ++i)
 		{
 			d3dMacro[i].Name = macros[i].Name.c_str();
 			d3dMacro[i].Definition = macros[i].Definition.c_str();
 		}
-
+		d3dMacro.back().Name = d3dMacro.back().Definition = nullptr;
 		pMacro = &d3dMacro[0];
 	}
 
-	// Convert to wchar
-	WString wfilename = StringToWString(filename);
-
-	hr = D3DCompileFromFile(wfilename.c_str(), pMacro, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint.c_str(), 
+	hr = D3DCompileFromFile(StringToWString(filename).c_str(), pMacro, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint.c_str(), 
 		shaderModel.c_str(), dwShaderFlags, 0,  ppBlobOut, &pErrorBlob);
 
 	if( FAILED(hr) )
@@ -816,7 +806,7 @@ bool D3D11ComputeShader::LoadFromFile( const String& filename, const ShaderMacro
 
 //////////////////////////////////////////////////////////////////////////
 D3D11ShaderPipeline::D3D11ShaderPipeline(Effect& effect)
-	: RHShaderPipeline(effect)
+	: ShaderPipeline(effect)
 {
 
 }
@@ -830,32 +820,67 @@ bool D3D11ShaderPipeline::LinkPipeline()
 			D3D11Shader* shaderD3D11 = static_cast_checked<D3D11Shader*>(mShaderStages[i].get());
 
 			// Constant Buffer
-			for (const auto& uniformBufferParam : shaderD3D11->UniformBufferParams)
+			for (const auto& cbufferParam : shaderD3D11->ConstantBufferParams)
 			{
-				EffectUniformBuffer* uniformBuffer = mEffect.FetchUniformBufferParameter(uniformBufferParam.Name, uniformBufferParam.BufferSize);
-				
-				if (uniformBuffer->GetNumVariable() > 0)
+				EffectConstantBuffer* constantBuffer;
+
+				// Fetch a constant buffer if not exits
+				if (cbufferParam.Name == "$Globals")
 				{
-					// check buffer variables
-					assert(uniformBuffer->GetNumVariable() == uniformBufferParam.BufferVariables.size());
-					for (size_t i = 0; i < uniformBufferParam.BufferVariables.size(); ++i)
+					bool found = false;
+
+					// Check to see if exits a same global uniform buffer
+					uint32_t numBuffers = mEffect.GetNumConstantBuffers();	
+					for (uint32_t j = 0; j < numBuffers && !found; ++j)
 					{
-						EffectParameter* variable = uniformBuffer->GetVariable(i);
-						if (variable->GetName() != uniformBufferParam.BufferVariables[i].Name ||
-							variable->GetParameterType() != uniformBufferParam.BufferVariables[i].Type ||
-							variable->GetElementSize() != uniformBufferParam.BufferVariables[i].ArraySize ||
-							variable->GetOffset() != uniformBufferParam.BufferVariables[i].Offset)
+						constantBuffer = mEffect.GetConstantBuffer(j);
+						found = (constantBuffer->GetName() == "$Globals" && 
+							     constantBuffer->GetBufferSize() == cbufferParam.BufferSize &&
+							     constantBuffer->GetNumVariables() == cbufferParam.BufferVariables.size());
+
+						for (size_t k = 0; found && (k < cbufferParam.BufferVariables.size()); ++k)
 						{
-							ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Error: Same uniform buffer with different variables!", "D3D11ShaderPipeline::LinkPipeline");
+							EffectParameter* variable = constantBuffer->GetVariable(k);
+							// Check every buffer variable
+							found &= (variable->GetName() == cbufferParam.BufferVariables[k].Name			    ||
+									  variable->GetParameterType() == cbufferParam.BufferVariables[k].Type	    ||
+								      variable->GetElementSize() == cbufferParam.BufferVariables[k].ArraySize   ||
+								      variable->GetOffset() == cbufferParam.BufferVariables[k].Offset);
 						}
+					}
+
+					if (!found)
+					{
+						// Create a new global CBuffer
+						constantBuffer = mEffect.CreateConstantBuffer(cbufferParam.Name, cbufferParam.BufferSize);
 					}
 				}
 				else
 				{
-					for (const auto& bufferVariable : uniformBufferParam.BufferVariables)
+					constantBuffer = mEffect.FetchConstantBuffer(cbufferParam.Name, cbufferParam.BufferSize);
+					if (constantBuffer->GetNumVariables() > 0)
+					{
+						assert(constantBuffer->GetNumVariables() == cbufferParam.BufferVariables.size());
+						for (size_t i = 0; i < cbufferParam.BufferVariables.size(); ++i)
+						{
+							EffectParameter* variable = constantBuffer->GetVariable(i);
+							if (variable->GetName() != cbufferParam.BufferVariables[i].Name ||
+								variable->GetParameterType() != cbufferParam.BufferVariables[i].Type ||
+								variable->GetElementSize() != cbufferParam.BufferVariables[i].ArraySize ||
+								variable->GetOffset() != cbufferParam.BufferVariables[i].Offset)
+							{
+								ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Error: Same uniform buffer with different variables!", "D3D11ShaderPipeline::LinkPipeline");
+							}
+						}
+					}
+				}
+				
+				if (constantBuffer->GetNumVariables() == 0)
+				{
+					for (const auto& bufferVariable : cbufferParam.BufferVariables)
 					{
 						EffectParameter* variable = mEffect.FetchUniformParameter(bufferVariable.Name, bufferVariable.Type, bufferVariable.ArraySize);
-						uniformBuffer->AddVariable(variable, bufferVariable.Offset);
+						constantBuffer->AddVariable(variable, bufferVariable.Offset);
 					}
 				}
 			}
@@ -931,6 +956,8 @@ void D3D11ShaderPipeline::OnBind()
 	}
 
 	// Commit all shader resource
+	for ( auto& paramBindCommit : mParameterBinds) 
+		paramBindCommit();
 }
 
 void D3D11ShaderPipeline::OnUnbind()

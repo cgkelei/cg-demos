@@ -2,19 +2,19 @@
 #define OpenGLVertexDeclaration_h__
 
 #include "OpenGLPrerequisites.h"
-#include <Graphics/RHVertexDeclaration.h>
+#include <Graphics/VertexDeclaration.h>
 
 namespace RcEngine {
 
-class _OpenGLExport OpenGLVertexDeclaration : public RHVertexDeclaration
+class _OpenGLExport OpenGLVertexDeclaration : public VertexDeclaration
 {
 public:
-	OpenGLVertexDeclaration(const RHVertexElement* element, uint32_t count);
+	OpenGLVertexDeclaration(const VertexElement* element, uint32_t count);
 	~OpenGLVertexDeclaration();
 	
 	inline GLuint GetVertexArrayOGL() const { return mVertexArrayOGL; }
 	
-	void CreateVertexArrayOGL(const RHOperation& operation, const RHShader& vertexShader);
+	void CreateVertexArrayOGL(const RenderOperation& operation, const Shader& vertexShader);
 
 private:
 	GLuint mVertexArrayOGL;

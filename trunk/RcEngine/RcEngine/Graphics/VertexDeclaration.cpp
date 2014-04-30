@@ -1,20 +1,20 @@
-#include <Graphics/RHVertexDeclaration.h>
+#include <Graphics/VertexDeclaration.h>
 #include <Core/Exception.h>
 
 namespace RcEngine {
 
 VertexElement::VertexElement( uint32_t offset, VertexElementFormat theType, VertexElementUsage semantic, uint32_t index /*= 0*/ )
 	: Offset(offset),
-	  Type(theType),
-	  Usage(semantic),
-	  UsageIndex(index),
-	  InputSlot(0),
-	  InstanceStepRate(0)
+      Type(theType),
+      Usage(semantic),
+      UsageIndex(index),
+      InputSlot(0),
+      InstanceStepRate(0)
 {
 
 }
 
-
+//////////////////////////////////////////////////////////////////////////
 VertexDeclaration::VertexDeclaration( const VertexElement* element, uint32_t count )
 {
 	mVertexElemets.assign(element, element + count);

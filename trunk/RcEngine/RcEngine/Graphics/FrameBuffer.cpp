@@ -1,6 +1,7 @@
 #include <Graphics/FrameBuffer.h>
 #include <Graphics/GraphicsResource.h>
 #include <Core/Exception.h>
+#include <Graphics/Camera.h>
 
 namespace RcEngine {
 
@@ -17,7 +18,7 @@ FrameBuffer::FrameBuffer( uint32_t width, uint32_t height )
 	  mHeight(height),
 	  mDirty(true)
 {
-
+	mCamera = std::make_shared<Camera>();
 }
 
 FrameBuffer::~FrameBuffer()

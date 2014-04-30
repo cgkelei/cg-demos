@@ -108,7 +108,7 @@ protected:
 	
 	bool mDirty;
 
-	//shared_ptr<Camera> mCamera;
+	shared_ptr<Camera> mCamera;
 };
 
 }

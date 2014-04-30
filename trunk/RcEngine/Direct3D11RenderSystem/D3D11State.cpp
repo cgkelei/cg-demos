@@ -4,8 +4,8 @@
 
 namespace RcEngine {
 
-D3D11DepthStencilState::D3D11DepthStencilState( const RHDepthStencilStateDesc& desc )
-	: RHDepthStencilState(desc),
+D3D11DepthStencilState::D3D11DepthStencilState( const DepthStencilStateDesc& desc )
+	: DepthStencilState(desc),
 	  StateD3D11(nullptr)
 {
 	CD3D11_DEPTH_STENCIL_DESC depthStencilDesc(D3D11_DEFAULT);
@@ -36,8 +36,8 @@ D3D11DepthStencilState::~D3D11DepthStencilState()
 }
 
 
-D3D11BlendState::D3D11BlendState( const RHBlendStateDesc& desc )
-	: RHBlendState(desc),
+D3D11BlendState::D3D11BlendState( const BlendStateDesc& desc )
+	: BlendState(desc),
 	  StateD3D11(nullptr)
 {
 	CD3D11_BLEND_DESC blendDesc(D3D11_DEFAULT);
@@ -66,8 +66,8 @@ D3D11BlendState::~D3D11BlendState()
 }
 
 
-D3D11RasterizerState::D3D11RasterizerState( const RHRasterizerStateDesc& desc )
-	: RHRasterizerState(desc),
+D3D11RasterizerState::D3D11RasterizerState( const RasterizerStateDesc& desc )
+	: RasterizerState(desc),
 	  StateD3D11(nullptr)
 {
 	CD3D11_RASTERIZER_DESC rasDesc(D3D11_DEFAULT);
@@ -91,8 +91,8 @@ D3D11RasterizerState::~D3D11RasterizerState()
 }
 
 
-D3D11SamplerState::D3D11SamplerState( const RHSamplerStateDesc& desc )
-	: RHSamplerState(desc),
+D3D11SamplerState::D3D11SamplerState( const SamplerStateDesc& desc )
+	: SamplerState(desc),
 	  StateD3D11(nullptr)
 {
 	CD3D11_SAMPLER_DESC samplerDesc(D3D11_DEFAULT);

@@ -1,17 +1,13 @@
-[Vertex=VSMain]
+[[Vertex=VSMain]]
 
 // Shader uniforms	
-layout(std140) uniform PerObject
-{
+uniform mat4 WorldView;	
+uniform mat4 Proj;
+
 #ifdef _Skinning
 	#define MaxNumBone 92
-	mat4 SkinMatrices[MaxNumBone];
+	uniform mat4 SkinMatrices[MaxNumBone];
 #endif	
-
-	mat4 WorldView;
-};
-	
-uniform mat4 Proj;
 
 // VS Inputs
 in vec3 iPos;
@@ -88,7 +84,7 @@ void main()
 }
 
 
-[FS=GBufferPSMain]
+[[Fragment=GBufferPSMain]]
 
 uniform sampler2D BestNormalFitMap;
 

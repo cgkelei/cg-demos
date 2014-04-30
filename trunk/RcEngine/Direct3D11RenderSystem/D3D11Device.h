@@ -2,14 +2,14 @@
 #define D3D11RenderDevice_h__
 
 #include "D3D11Prerequisites.h"
-#include <Graphics/RHDevice.h>
+#include <Graphics/RenderDevice.h>
 
 namespace RcEngine {
 
 class D3D11Device;
 extern D3D11Device* gD3D11Device;
 
-class _D3D11Export D3D11Device : public RHDevice
+class _D3D11Export D3D11Device : public RenderDevice
 {
 public:
 	D3D11Device();
@@ -18,14 +18,14 @@ public:
 	void CreateRenderWindow();
 	void ToggleFullscreen(bool fs);
 	void AdjustProjectionMatrix(float4x4& pOut);
-	void SetSamplerState(ShaderType stage, uint32_t unit, const shared_ptr<RHSamplerState>& state);
-	void SetBlendState(const shared_ptr<RHBlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask);
-	void SetRasterizerState(const shared_ptr<RHRasterizerState>& state);
-	void SetDepthStencilState(const shared_ptr<RHDepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0);
+	void SetSamplerState(ShaderType stage, uint32_t unit, const shared_ptr<SamplerState>& state);
+	void SetBlendState(const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask);
+	void SetRasterizerState(const shared_ptr<RasterizerState>& state);
+	void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0);
 
 protected:
-	void SetViewport(const RHViewport& vp);
-	void DoDraw(const EffectTechnique* technique, const RHOperation& operation);
+	void SetViewport(const Viewport& vp);
+	void DoDraw(const EffectTechnique* technique, const RenderOperation& operation);
 
 public:
 	ID3D11DeviceContext* DeviceContextD3D11;
@@ -33,7 +33,7 @@ public:
 	
 private:
 	typedef std::pair<ShaderType, uint32_t> SamplerSlot;
-	std::map<SamplerSlot, shared_ptr<RHSamplerState>> mCurrentSamplers;
+	std::map<SamplerSlot, shared_ptr<SamplerState>> mCurrentSamplers;
 };
 
 }

@@ -10,6 +10,7 @@
 #include <Graphics/Sky.h>
 #include <Graphics/SpriteBatch.h>
 #include <Graphics/RenderQueue.h>
+#include <Graphics/GraphicsResource.h>
 #include <Graphics/AnimationController.h>
 #include <Core/Exception.h>
 #include <Core/Environment.h>
@@ -206,7 +207,7 @@ void SceneManager::CreateSkyBox( const shared_ptr<Texture>& texture )
 {
 	SAFE_DELETE(mSkyBox);
 	mSkyBox = new SkyBox;
-	mSkyBox->GetMaterial()->SetTexture("EnvTex", texture);
+	mSkyBox->GetMaterial()->SetTexture("EnvTex", texture->GetShaderResourceView());
 }
 
 void SceneManager::UpdateSceneGraph( float delta )

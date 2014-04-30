@@ -2,11 +2,11 @@
 #define D3D11Texture_h__
 
 #include "D3D11Prerequisites.h"
-#include <Graphics/RHResource.h>
+#include <Graphics/GraphicsResource.h>
 
 namespace RcEngine {
 
-class _D3D11Export D3D11Texture : public RHTexture
+class _D3D11Export D3D11Texture : public Texture
 {
 public:
 	D3D11Texture(
@@ -43,7 +43,7 @@ public:
 	virtual void Unmap3D(uint32_t arrayIndex, uint32_t level);
 	virtual void UnmapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level);
 
-	virtual void CopyToTexture(RHTexture& destTexture);
+	virtual void CopyToTexture(Texture& destTexture);
 };
 
 class _D3D11Export D3D11Texture1D : public D3D11Texture

@@ -6,8 +6,10 @@
 #include <Graphics/EffectParameter.h>
 #include <Core/Exception.h>
 #include <Core/Loger.h>
+#include <Core/Utility.h>
 #include <fstream>
 #include <iterator>
+#include <regex>
 
 namespace RcEngine {
 
@@ -156,7 +158,7 @@ private:
 
 					mShaderOGL->mGlobalParams.push_back(uniform);
 				}
-				else if (paramType == Shader_Param_SRV)
+				else if (paramClass == Shader_Param_SRV)
 				{
 					// Texture or TBuffer
 					SRVParam srvParam;
@@ -269,6 +271,7 @@ private:
 	GLuint mShaderProgramID;
 };
 
+//////////////////////////////////////////////////////////////////////////
 template <typename T>
 struct ShaderParameterSetHelper {};
 
@@ -656,16 +659,16 @@ private:
 };
 
 template<>
-struct ShaderParameterSetHelper<RHShaderResourceView>
+struct ShaderParameterSetHelper<ShaderResourceView>
 {
 	ShaderParameterSetHelper(EffectParameter* param, GLuint binding)
-		: Param(Param), Binding(binding) {}
+		: Param(param), Binding(binding) {}
 
 	void operator() ()
 	{
 		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
-			weak_ptr<RHShaderResourceView> srv;
+			weak_ptr<ShaderResourceView> srv;
 			Param->GetValue(srv);
 
 			if (auto spt = srv.lock())
@@ -683,16 +686,16 @@ private:
 };
 
 template<>
-struct ShaderParameterSetHelper<RHUnorderedAccessView>
+struct ShaderParameterSetHelper<UnorderedAccessView>
 {
 	ShaderParameterSetHelper(EffectParameter* param, GLuint binding)
-		: Param(Param), Binding(binding) {}
+		: Param(param), Binding(binding) {}
 
 	void operator() ()
 	{
 		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
-			weak_ptr<RHUnorderedAccessView> uav;
+			weak_ptr<UnorderedAccessView> uav;
 			Param->GetValue(uav);
 
 			if (auto spt = uav.lock())
@@ -709,7 +712,27 @@ private:
 	TimeStamp UpdateTimeStamp;
 };
 
+template<>
+struct ShaderParameterSetHelper<SamplerState>
+{
+	ShaderParameterSetHelper(EffectParameter* param, GLuint binding)
+		: Param(param), Binding(binding) {}
 
+	void operator() ()
+	{
+		weak_ptr<SamplerState> sampler;
+		Param->GetValue(sampler);
+
+		if (auto spt = sampler.lock())
+		{
+			gOpenGLDevice->SetSamplerState(ST_Pixel /*Use used in OpenGL*/, Binding, spt);
+		}
+	}
+
+private:
+	GLuint Binding;
+	EffectParameter* Param;
+};
 
 struct ShaderTextureBinding
 {
@@ -745,7 +768,7 @@ private:
 
 //////////////////////////////////////////////////////////////////////////
 OpenGLShader::OpenGLShader( ShaderType shaderType )
-	: RHShader(shaderType),
+	: Shader(shaderType),
 	  mShaderOGL(0)
 {
 
@@ -786,7 +809,7 @@ bool OpenGLShader::LoadFromByteCode( const String& filename )
 		std::vector<char> compileOutput(length);
 		glGetProgramInfoLog(mShaderOGL, length, &length, &compileOutput[0]);
 
-		EngineLoger::LogError("GLSL %s compile failed\n\n%s\n\n", filename.c_str(), &compileOutput[0]);
+		EngineLogger::LogError("GLSL %s compile failed\n\n%s\n\n", filename.c_str(), &compileOutput[0]);
 	}
 
 	OGL_ERROR_CHECK();
@@ -795,24 +818,79 @@ bool OpenGLShader::LoadFromByteCode( const String& filename )
 
 bool OpenGLShader::LoadFromFile( const String& filename, const ShaderMacro* macros, uint32_t macroCount, const String& entryPoint /*= ""*/ )
 {
-	assert(GLEW_ARB_separate_shader_objects);
+	std::ifstream fileStream(filename);
+	std::string glslSource( (std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>() );
+
+	// Split into shader section
+	static const char* GLSLShaderToken[] = {
+		"[[Vertex=%s]]", "[[TessControl=%s]", "[[TessEval=%s]]", "[[Geometry=%s]]", "[[Fragment=%s]]", "[[Compute=%s]]" 
+	};
+
+	char delimiter[255];
+	std::sprintf(delimiter, GLSLShaderToken[mShaderType], entryPoint.c_str());	
 
 	String shaderSource;
 
-	for (uint32_t i = 0; i < macroCount; ++i)
-		shaderSource += "#define " + macros[i].Name + " " +  macros[i].Definition + "\r\n";
+	size_t tokenBegin = glslSource.find(delimiter);
+	if (tokenBegin != std::string::npos)
+	{
+		size_t tokenEnd = glslSource.find("]]", tokenBegin)+2; // Skip current one
+		size_t nextTokenEnd = glslSource.find("]]", tokenEnd);
 
-	// Add #line 1
-	//shaderSource += "#line 1";
+		if (nextTokenEnd != std::string::npos)
+		{
+			// Validate
+			size_t nextTokenBegin = glslSource.rfind("[[", nextTokenEnd);
 
-	// Load source code into string
-	std::ifstream fileStream(filename);
-	shaderSource.append((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
+			bool valid = false;
+			for (size_t i = nextTokenBegin; i < nextTokenEnd && !valid; ++i)
+				valid = (glslSource[i] == '=');
+
+			assert(valid == true);
+			while(isalpha(glslSource[tokenEnd]) == false) tokenEnd++;
+			shaderSource = glslSource.substr(tokenEnd, nextTokenBegin - tokenEnd);
+		}
+		else
+			shaderSource = glslSource.substr(tokenEnd);
+	}
+	else
+	{
+		// Error
+	}
+
+	// Parse all SamplerState
+	{
+		size_t token = shaderSource.find("#pragma");
+		while (token != std::string::npos)
+		{
+			token += 7; // skip #pragma
+			
+			std::string texture, samplerState;
+			size_t colonPos = shaderSource.find(':', token);
+			assert(colonPos != std::string::npos);
+
+			size_t s = token+1, e= colonPos - 1;
+			while(!isalpha(shaderSource[s])) s++;
+			while(!isalpha(shaderSource[e])) e--;
+			texture = shaderSource.substr(s, e - s + 1);	
+
+			s = colonPos+1;
+			while(!isalpha(shaderSource[s])) s++;
+			e = s;
+			while(isalpha(shaderSource[e])) e++;
+			samplerState = shaderSource.substr(s, e - s);	
+
+			mSamplerStates[texture] = samplerState;
+
+			token = shaderSource.find("#pragma", e);
+		}
+		
+	}
+
 
 	if (HasVersion(shaderSource))
 	{
 		char const* pSource = shaderSource.c_str();
-
 		mShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShaderType), 1, &pSource);
 	}
 	else
@@ -837,9 +915,10 @@ bool OpenGLShader::LoadFromFile( const String& filename, const ShaderMacro* macr
 		std::vector<char> compileOutput(length);
 		glGetProgramInfoLog(mShaderOGL, length, &length, &compileOutput[0]);
 
-		EngineLoger::LogError("GLSL %s compile failed\n\n%s\n\n", filename.c_str(), &compileOutput[0]);
+		fprintf(stderr, "GLSL %s compile failed\n\n%s\n\n", filename.c_str(), &compileOutput[0]);
+		//EngineLogger::LogError("GLSL %s compile failed\n\n%s\n\n", filename.c_str(), &compileOutput[0]);
 	}
-
+	
 	OpenGLShaderReflection shaderReflection(this);
 	shaderReflection.ReflectShader();
 
@@ -847,80 +926,44 @@ bool OpenGLShader::LoadFromFile( const String& filename, const ShaderMacro* macr
 	return (success == GL_TRUE);
 }
 
-
 //////////////////////////////////////////////////////////////////////////
 
 OpenGLShaderPipeline::OpenGLShaderPipeline(Effect& effect)
-	: RHShaderPipeline(effect)
+	: ShaderPipeline(effect)
 {
+	glGenProgramPipelines(1, &mPipelineOGL);
+}
 
+OpenGLShaderPipeline::~OpenGLShaderPipeline()
+{
+	glDeleteProgramPipelines(1, &mPipelineOGL);
 }
 
 void OpenGLShaderPipeline::OnBind()
 {
+	glBindProgramPipeline(mPipelineOGL);
+
 	// Commit all shader parameter
 	for (auto& paramBindFunc : mParameterBinds)
 		paramBindFunc();
-
-	if (mShaderStages[ST_Vertex])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Vertex].get()))->mShaderOGL;
-		gOpenGLDevice->BindVertexShader(shaderOGL);
-		// input layout
-	}
-
-	if (mShaderStages[ST_Hull])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Hull].get()))->mShaderOGL;
-		gOpenGLDevice->BindTessControlShader(shaderOGL);
-	}
-
-	if (mShaderStages[ST_Domain])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Domain].get()))->mShaderOGL;
-		gOpenGLDevice->BindTessEvalShader(shaderOGL);
-	}
-
-	if (mShaderStages[ST_Geomerty])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Geomerty].get()))->mShaderOGL;
-		gOpenGLDevice->BindGeometryShader(shaderOGL);
-	}
-
-	if (mShaderStages[ST_Pixel])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Pixel].get()))->mShaderOGL;
-		gOpenGLDevice->BindPixelShader(shaderOGL);
-	}
-
-	if (mShaderStages[ST_Compute])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Compute].get()))->mShaderOGL;
-		gOpenGLDevice->BindComputeShader(shaderOGL);
-	}
 }
 
 void OpenGLShaderPipeline::OnUnbind()
 {
-
-	if (mShaderStages[ST_Vertex])	gOpenGLDevice->BindVertexShader(0);
-	if (mShaderStages[ST_Hull])		gOpenGLDevice->BindTessControlShader(0);
-	if (mShaderStages[ST_Domain])	gOpenGLDevice->BindTessEvalShader(0);
-	if (mShaderStages[ST_Geomerty])	gOpenGLDevice->BindGeometryShader(0);
-	if (mShaderStages[ST_Pixel])	gOpenGLDevice->BindPixelShader(0);
-	if (mShaderStages[ST_Compute])	gOpenGLDevice->BindComputeShader(0);
+	//glBindProgramPipeline(0);
 }
 
 bool OpenGLShaderPipeline::LinkPipeline()
 {
 	GLuint srvBinding = 0;
 	GLuint uavBinding = 0;
+	std::map<String, GLuint> mBindingCache;
 
 	for (int i = 0; i < ST_Count; ++i)
 	{
 		if (mShaderStages[i])
 		{
-			OpenGLShader* shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Vertex].get()));
+			OpenGLShader* shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[i].get()));
 
 			// Global uniforms
 			for (const UniformParam& param : shaderOGL->mGlobalParams)
@@ -932,12 +975,12 @@ bool OpenGLShaderPipeline::LinkPipeline()
 			// Uniform buffers
 			for (const UniformBufferParam& param : shaderOGL->mUniformBuffers)
 			{
-				EffectUniformBuffer* uniformBuffer = mEffect.FetchUniformBufferParameter(param.Name, param.BufferSize);
+				EffectConstantBuffer* uniformBuffer = mEffect.FetchConstantBuffer(param.Name, param.BufferSize);
 
-				if (uniformBuffer->GetNumVariable() > 0)
+				if (uniformBuffer->GetNumVariables() > 0)
 				{
 					// check buffer variables
-					assert(uniformBuffer->GetNumVariable() == param.BufferVariables.size());
+					assert(uniformBuffer->GetNumVariables() == param.BufferVariables.size());
 					for (size_t i = 0; i < param.BufferVariables.size(); ++i)
 					{
 						EffectParameter* variable = uniformBuffer->GetVariable(i);
@@ -968,10 +1011,12 @@ bool OpenGLShaderPipeline::LinkPipeline()
 					mBindingCache[param.Name] = srvBinding++;
 
 					EffectParameter* srvParam = mEffect.FetchSRVParameter(param.Name, param.Type);
+					
+					// Bind texture to ActiveUnit
 					AddSRVParamBind(srvParam, mBindingCache[param.Name]);
-
 				}
 
+				// Set texture unit to shader program
 				AddShaderResourceBind(shaderOGL->mShaderOGL, param.Location, mBindingCache[param.Name], param.Type == EPT_StructureBuffer);
 			}
 
@@ -989,7 +1034,50 @@ bool OpenGLShaderPipeline::LinkPipeline()
 				AddShaderResourceBind(shaderOGL->mShaderOGL, param.Location, mBindingCache[param.Name], param.Type == EPT_StructureBuffer);
 			}
 
+			// SamplerState
+			for (auto& kv : shaderOGL->mSamplerStates)
+			{
+				EffectParameter* effectParam = mEffect.FetchSamplerParameter(kv.second);
+				mParameterBinds.push_back( ShaderParameterSetHelper<SamplerState>(effectParam, mBindingCache[kv.first]) );
+			}
 		}
+	}
+
+	// Link all stage into pipeline
+	if (mShaderStages[ST_Vertex])
+	{
+		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Vertex].get()))->mShaderOGL;
+		glUseProgramStages(mPipelineOGL, GL_VERTEX_SHADER_BIT, shaderOGL);
+	}
+
+	if (mShaderStages[ST_Hull])
+	{
+		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Hull].get()))->mShaderOGL;
+		glUseProgramStages(mPipelineOGL, GL_VERTEX_SHADER_BIT, shaderOGL);
+	}
+
+	if (mShaderStages[ST_Domain])
+	{
+		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Domain].get()))->mShaderOGL;
+		glUseProgramStages(mPipelineOGL, GL_TESS_CONTROL_SHADER_BIT, shaderOGL);
+	}
+
+	if (mShaderStages[ST_Geomerty])
+	{
+		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Geomerty].get()))->mShaderOGL;
+		glUseProgramStages(mPipelineOGL, GL_TESS_EVALUATION_SHADER_BIT, shaderOGL);
+	}
+
+	if (mShaderStages[ST_Pixel])
+	{
+		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Pixel].get()))->mShaderOGL;
+		glUseProgramStages(mPipelineOGL, GL_GEOMETRY_SHADER_BIT, shaderOGL);
+	}
+
+	if (mShaderStages[ST_Compute])
+	{
+		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Compute].get()))->mShaderOGL;
+		glUseProgramStages(mPipelineOGL, GL_COMPUTE_SHADER_BIT, shaderOGL);
 	}
 
 	return true;
@@ -1062,12 +1150,12 @@ void OpenGLShaderPipeline::AddUniformParamBind( GLuint shader, GLint location, E
 
 void OpenGLShaderPipeline::AddSRVParamBind( EffectParameter* effectParam, GLuint binding )
 {
-	mParameterBinds.push_back( ShaderParameterSetHelper<RHShaderResourceView>(effectParam, binding) );
+	mParameterBinds.push_back( ShaderParameterSetHelper<ShaderResourceView>(effectParam, binding) );
 }
 
 void OpenGLShaderPipeline::AddUAVParamBind( EffectParameter* effectParam, GLuint binding )
 {
-	mParameterBinds.push_back( ShaderParameterSetHelper<RHUnorderedAccessView>(effectParam, binding) );
+	mParameterBinds.push_back( ShaderParameterSetHelper<UnorderedAccessView>(effectParam, binding) );
 }
 
 void OpenGLShaderPipeline::AddShaderResourceBind( GLuint shader, GLint location, GLuint binding, bool shaderStorage )

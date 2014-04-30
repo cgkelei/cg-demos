@@ -1,38 +1,39 @@
-#define _NormalMap
-#define _DiffuseMap
-#define _SpecularMap
-
 #include "MaterialTemplate.hlsl"
 
-cbuffer PerObject
-{
-#ifdef _Skinning
-	#define MaxNumBone 92
-	float4x4 SkinMatrices[MaxNumBone];
-#endif	
-	float4x4 WorldView;
-};
-
+// Unifroms
+float4x4 WorldView;
 float4x4 Projection;
 
+#ifdef _Skinning
+	#define MaxNumBone 92
+	cbuffer SkinCB
+	{
+		float4x4 SkinMatrices[MaxNumBone];	
+	};
+#endif
+
+// Inputs
 struct VSInput 
 {
 	float3 Pos 		 	 : POSITION;
+
 #ifdef _Skinning
 	float4 BlendWeights  : BLENDWEIGHTS;
-	uint4 iBlendIndices  :  BLENDINDICES;
+	uint4  BlendIndices  : BLENDINDICES;
 #endif
+
 	float3 Normal		 : NORMAL;
 	float2 Tex			 : TEXCOORD0;
+
 #ifdef _NormalMap
 	float3 Tangent		 : TANGENT;
 	float3 Binormal      : BINORMAL;
 #endif
 };
 
+// Outputs
 struct VSOutput
 {
-	float4 PosHS : SV_POSITION;
 	float4 PosVS : TEXCOORD0;
 	float2 Tex   : TEXCOORD1;
 
@@ -41,10 +42,58 @@ struct VSOutput
 #else
 	float3 NormalVS 	   : TEXCOORD3;
 #endif 
+	
+	float4 PosCS : SV_POSITION;
 };
 
-//---------------------------------------------------------------
-VSOutput VSMain(VSInput input)
+//-------------------------------------------------------------------------------------
+void ShadowMapVS(VSInput input, 
+			#if defined(_AlphaTest)
+				 out float2 oTex   : TEXCOORD0,
+			#endif
+				 out float4 oPosCS : SV_POSITION)
+{
+#ifdef _Skinning
+	float4x4 SkinMatrix = SkinMatrices[input.BlendIndices[0]] * input.BlendWeights[0] +
+					      SkinMatrices[input.BlendIndices[1]] * input.BlendWeights[1] +
+					      SkinMatrices[input.BlendIndices[2]] * input.BlendWeights[2] +
+					      SkinMatrices[input.BlendIndices[3]] * input.BlendWeights[3];
+#endif
+
+	float4x4 wvp = mul(WorldView, Projection);
+
+#ifdef _Skinning
+	oPosCS = mul(float4(input.Pos, 1.0), mul(SkinMatrix, wvp));
+#else
+	oPosCS = mul(float4(input.Pos, 1.0), wvp);
+#endif
+	
+#if defined(_AlphaTest)
+	oTex = input.Tex;
+#endif
+}
+
+void ShadowMapVSM(
+			#if defined(_AlphaTest)
+				  in float2 iTex        : TEXCOORD0,
+			#endif
+				  in float4 FragCoord   : SV_POSITION,
+				  out float2 oFragDepth : SV_Target0)
+{
+#if defined(_AlphaTest)
+	float4 tap = DiffuseMap.Sample(LinearSampler, iTex);
+	if( tap.a < 0.01 ) discard;
+#endif
+
+	oFragDepth.x = FragCoord.z;
+	oFragDepth.y = FragCoord.z * FragCoord.z;
+	
+	//vec2 dxdy = float2(dFdx(FragCoord.z), dFdy(FragCoord.z));
+	//oFragDepth.y = FragCoord.z * FragCoord.z + 0.25 * dot(dxdy, dxdy);
+}
+
+//-------------------------------------------------------------------------------------
+VSOutput GeneralVS(VSInput input)
 {
 	VSOutput output = (VSOutput)0;
 
@@ -89,20 +138,15 @@ VSOutput VSMain(VSInput input)
 	output.NormalVS = normal;
 #endif
 		
-	output.PosHS = mul(output.PosVS, Projection);
+	output.PosCS = mul(output.PosVS, Projection);
 
 	return output;
 }
 
 //---------------------------------------------------------------
- float Luminance(in float3 color)
- {
-	return dot(color, float3(0.2126, 0.7152, 0.0722));
- }
-
-void GBufferPSMain(in VSOutput input,
-                   out float4 oFragColor0 : SV_Target0,
-				   out float4 oFragColor1 : SV_Target1 )
+void GBufferPS(in VSOutput input,
+               out float4 oFragColor0 : SV_Target0,
+			   out float4 oFragColor1 : SV_Target1 )
 {
 
 #ifdef _DiffuseMap
@@ -142,5 +186,5 @@ void GBufferPSMain(in VSOutput input,
 	//CompressUnsignedNormalToNormalsBuffer(normal);	
 	
 	oFragColor0 = float4(normal.xyz, shininess);
-	oFragColor1 = float4(albedo.rgb, Luminance(specular));	 // Specular luminance
+	oFragColor1 = float4(albedo.rgb, dot(specular, float3(0.2126, 0.7152, 0.0722)) );	 // Specular luminance
 }

@@ -2,7 +2,7 @@
 #define OpenGLShader_h__
 
 #include "OpenGLPrerequisites.h"
-#include <Graphics/RHResource.h>
+#include <Graphics/GraphicsResource.h>
 #include <Graphics/GraphicsCommon.h>
 
 namespace RcEngine {
@@ -48,7 +48,7 @@ struct UAVParam
 class OpenGLShaderReflection;
 class OpenGLShaderPipeline;
 
-class _OpenGLExport OpenGLShader : public RHShader
+class _OpenGLExport OpenGLShader : public Shader
 {
 public:
 	OpenGLShader(ShaderType shaderType);
@@ -68,12 +68,14 @@ private:
 	std::vector<UniformParam> mGlobalParams;
 	std::vector<UniformBufferParam> mUniformBuffers;
 	std::vector<InputSignature> mInputSignatures;
+	std::map<String, String> mSamplerStates;
 };
 
-class _OpenGLExport OpenGLShaderPipeline : public RHShaderPipeline
+class _OpenGLExport OpenGLShaderPipeline : public ShaderPipeline
 {
 public:
 	OpenGLShaderPipeline(Effect& effect);
+	virtual ~OpenGLShaderPipeline();
 
 	virtual void OnBind();
 	virtual void OnUnbind();
@@ -87,7 +89,7 @@ private:
 	void AddShaderResourceBind(GLuint shader, GLint location, GLuint binding, bool shaderStorage);
 
 private:
-	std::map<String, GLuint> mBindingCache;
+	GLuint mPipelineOGL;
 	std::vector<std::function<void()>> mParameterBinds; 
 };
 

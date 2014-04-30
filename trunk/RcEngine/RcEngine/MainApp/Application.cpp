@@ -10,6 +10,8 @@
 #include <IO/FileSystem.h>
 #include <IO/FileStream.h>
 #include <Resource/ResourceManager.h>
+#include <Graphics/TextureResource.h>
+#include <Graphics/AnimationClip.h>
 
 // C++ 11 thread
 #include <thread>
@@ -40,8 +42,8 @@ Application::Application( const String& config )
 	//resMan.RegisterType(RT_Mesh, "Mesh", Mesh::FactoryFunc);
 	//resMan.RegisterType(RT_Material, "Material", Material::FactoryFunc);
 	resMan.RegisterType(RT_Effect, "Effect", Effect::FactoryFunc);
-	//resMan.RegisterType(RT_Animation, "Animation",AnimationClip::FactoryFunc);
-	//resMan.RegisterType(RT_Texture, "Texture", TextureResource::FactoryFunc);
+	resMan.RegisterType(RT_Animation, "Animation",AnimationClip::FactoryFunc);
+	resMan.RegisterType(RT_Texture, "Texture", TextureResource::FactoryFunc);
 	//resMan.RegisterType(RT_Pipeline, "Pipeline", Pipeline::FactoryFunc);
 	//resMan.RegisterType(RT_Font, "Font", Font::FactoryFunc);
 
@@ -271,8 +273,8 @@ void Application::LoadConfiguration()
 	mAppSettings.Width = graphicNode->Attribute("Width")->ValueUInt();
 	mAppSettings.Height = graphicNode->Attribute("Height")->ValueUInt();
 	mAppSettings.Fullscreen = graphicNode->Attribute("FullScreen")->ValueInt() != 0;
-	mAppSettings.ColorFormat = PixelFormatUtils::GetPixelFormat(graphicNode->Attribute("ColorForamt")->ValueString());
-	mAppSettings.DepthStencilFormat = PixelFormatUtils::GetPixelFormat(graphicNode->Attribute("DepthStencilFormat")->ValueString());
+	mAppSettings.ColorFormat = PF_RGBA8_UNORM;
+	mAppSettings.DepthStencilFormat = PF_D24S8;
 
 	XMLNodePtr node;
 	

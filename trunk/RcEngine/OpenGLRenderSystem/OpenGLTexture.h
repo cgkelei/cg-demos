@@ -2,11 +2,11 @@
 #define OpenGLTexture_h__
 
 #include "OpenGLPrerequisites.h"
-#include <Graphics/RHResource.h>
+#include <Graphics/GraphicsResource.h>
 
 namespace RcEngine {
 
-class _OpenGLExport OpenGLTexture : public RHTexture
+class _OpenGLExport OpenGLTexture : public Texture
 {
 public:
 	OpenGLTexture(
@@ -45,7 +45,7 @@ public:
 	virtual void UnmapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level);
 
 	virtual void BuildMipMap();
-	virtual void CopyToTexture(RHTexture& destTexture);
+	virtual void CopyToTexture(Texture& destTexture);
 
 protected:
 
@@ -100,7 +100,7 @@ public:
 
 	virtual void Unmap2D(uint32_t arrayIndex, uint32_t level);
 
-	virtual void CopyToTexture(RHTexture& destTexture);
+	virtual void CopyToTexture(Texture& destTexture);
 
 private:
 	// use texture storage if supported

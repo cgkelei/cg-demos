@@ -5,7 +5,7 @@
 
 namespace RcEngine {
 
-OpenGLDepthStencilView::OpenGLDepthStencilView( const shared_ptr<RHTexture>& texture, uint32_t arrIndex, uint32_t level )
+OpenGLDepthStencilView::OpenGLDepthStencilView( const shared_ptr<Texture>& texture, uint32_t arrIndex, uint32_t level )
 	: OpenGLRenderView(texture),
 	  mArrIndex(arrIndex),
 	  mLevel(level)
@@ -15,7 +15,7 @@ OpenGLDepthStencilView::OpenGLDepthStencilView( const shared_ptr<RHTexture>& tex
 }
 
 
-void OpenGLDepthStencilView::OnAttach(RHFrameBuffer& fb, Attachment attr)
+void OpenGLDepthStencilView::OnAttach(FrameBuffer& fb, Attachment attr)
 {
 	assert(attr == ATT_DepthStencil);
 	OpenGLRenderView::OnAttach(fb, attr);
@@ -56,7 +56,7 @@ void OpenGLDepthStencilView::OnAttach(RHFrameBuffer& fb, Attachment attr)
 	OGL_ERROR_CHECK();
 }
 
-void OpenGLDepthStencilView::OnDetach(RHFrameBuffer& fb, Attachment attr)
+void OpenGLDepthStencilView::OnDetach(FrameBuffer& fb, Attachment attr)
 {
 	assert(attr == ATT_DepthStencil);
 	OpenGLRenderView::OnDetach(fb, attr);
@@ -114,7 +114,7 @@ OpenGLScreenDepthStencilView::OpenGLScreenDepthStencilView( PixelFormat fmt )
 
 }
 
-void OpenGLScreenDepthStencilView::OnAttach( RHFrameBuffer& fb, Attachment attr)
+void OpenGLScreenDepthStencilView::OnAttach( FrameBuffer& fb, Attachment attr)
 {
 	assert(attr == ATT_DepthStencil);
 	OpenGLRenderView::OnAttach(fb, attr);
@@ -126,7 +126,7 @@ void OpenGLScreenDepthStencilView::OnAttach( RHFrameBuffer& fb, Attachment attr)
 	}
 }
 
-void OpenGLScreenDepthStencilView::OnDetach( RHFrameBuffer& fb, Attachment attr )
+void OpenGLScreenDepthStencilView::OnDetach( FrameBuffer& fb, Attachment attr )
 {
 	OpenGLRenderView::OnDetach(fb, attr);
 	
