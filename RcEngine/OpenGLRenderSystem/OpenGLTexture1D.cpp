@@ -10,7 +10,7 @@ OpenGLTexture1D::OpenGLTexture1D( PixelFormat format, uint32_t arraySize, uint32
 	mTextureTarget = (mTextureArraySize > 1) ? GL_TEXTURE_1D_ARRAY : GL_TEXTURE_1D;
 
 	// numMipMap == 0, will generate mipmap levels automatically
-	mMipLevels = (numMipMaps > 0) ? numMipMaps : RHTexture::CalculateMipmapLevels(width);
+	mMipLevels = (numMipMaps > 0) ? numMipMaps : Texture::CalculateMipmapLevels(width);
 	mWidth = width;
 
 	GLenum internalFormat, externFormat, formatType;

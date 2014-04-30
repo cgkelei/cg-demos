@@ -20,8 +20,7 @@ void OpenGLShaderResourceView::BindSRV( GLuint unitOrBindingPoint )
 }
 
 //////////////////////////////////////////////////////////////////////////
-OpenGLTextureBufferSRV::OpenGLTextureBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth, PixelFormat format )
-	: mBuffer(buffer)
+OpenGLTextureBufferSRV::OpenGLTextureBufferSRV( const shared_ptr<GraphicsBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth, PixelFormat format )
 {
 	OpenGLBuffer* pTBO = static_cast<OpenGLBuffer*>(buffer.get());
 	assert(pTBO->GetBufferTarget() == GL_TEXTURE_BUFFER);
@@ -48,8 +47,7 @@ OpenGLTextureBufferSRV::~OpenGLTextureBufferSRV()
 }
 
 //////////////////////////////////////////////////////////////////////////
-OpenGLStructuredBufferSRV::OpenGLStructuredBufferSRV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth, uint32_t strutureStride)
-	: mBuffer(buffer)
+OpenGLStructuredBufferSRV::OpenGLStructuredBufferSRV( const shared_ptr<GraphicsBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth, uint32_t strutureStride)
 {
 	OpenGLBuffer* pSSBO = static_cast<OpenGLBuffer*>(buffer.get());
 	assert(pSSBO->GetBufferTarget() == GL_SHADER_STORAGE_BUFFER);
@@ -63,9 +61,8 @@ OpenGLStructuredBufferSRV::OpenGLStructuredBufferSRV( const shared_ptr<RHBuffer>
 }
 
 //////////////////////////////////////////////////////////////////////////
-OpenGLTextureSRV::OpenGLTextureSRV( const shared_ptr<RHTexture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
-	: mTexture(texture), 
-	  mNeedDelete(false)
+OpenGLTextureSRV::OpenGLTextureSRV( const shared_ptr<Texture>& texture, uint32_t mostDetailedMip, uint32_t mipLevels, uint32_t firstArraySlice, uint32_t arraySize )
+	  : mNeedDelete(false)
 {
 	assert(mipLevels > 0 && arraySize > 0);
 
@@ -152,6 +149,13 @@ OpenGLTextureSRV::OpenGLTextureSRV( const shared_ptr<RHTexture>& texture, uint32
 	}
 }
 
+OpenGLTextureSRV::OpenGLTextureSRV( GLuint textureOGL, GLenum targetOGL )
+	: mNeedDelete(false)
+{
+	mTargetOGL = targetOGL;
+	mResourceOGL = textureOGL;
+}
+
 OpenGLTextureSRV::~OpenGLTextureSRV()
 {
 	if (mNeedDelete)
@@ -179,8 +183,7 @@ void OpenGLUnorderedAccessView::BindUAV( GLuint unitOrBindingPoint )
 }
 
 //////////////////////////////////////////////////////////////////////////
-OpenGLTextureBufferUAV::OpenGLTextureBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth, PixelFormat format )
-	: mBuffer(buffer)
+OpenGLTextureBufferUAV::OpenGLTextureBufferUAV( const shared_ptr<GraphicsBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth, PixelFormat format )
 {
 	OpenGLBuffer* pTBO = static_cast<OpenGLBuffer*>(buffer.get());
 	assert(pTBO->GetBufferTarget() == GL_TEXTURE_BUFFER);
@@ -207,8 +210,7 @@ OpenGLTextureBufferUAV::~OpenGLTextureBufferUAV()
 }
 
 ////////////////////////////////////////////////////////////////////////
-OpenGLStructuredBufferUAV::OpenGLStructuredBufferUAV( const shared_ptr<RHBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth, uint32_t strutureStride )
-	: mBuffer(buffer)
+OpenGLStructuredBufferUAV::OpenGLStructuredBufferUAV( const shared_ptr<GraphicsBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth, uint32_t strutureStride )
 {
 	OpenGLBuffer* pSSBO = static_cast<OpenGLBuffer*>(buffer.get());
 	assert(pSSBO->GetBufferTarget() == GL_SHADER_STORAGE_BUFFER);
@@ -222,8 +224,7 @@ OpenGLStructuredBufferUAV::OpenGLStructuredBufferUAV( const shared_ptr<RHBuffer>
 }
 
 ////////////////////////////////////////////////////////////////////////
-OpenGLTextureUAV::OpenGLTextureUAV( const shared_ptr<RHTexture>& texture, uint32_t mipSlice, uint32_t firstArraySlice, uint32_t arraySize )
-	: mTexture(texture)
+OpenGLTextureUAV::OpenGLTextureUAV( const shared_ptr<Texture>& texture, uint32_t mipSlice, uint32_t firstArraySlice, uint32_t arraySize )
 {
 	mExtraParams[0] = mipSlice;
 	mExtraParams[1] = firstArraySlice;

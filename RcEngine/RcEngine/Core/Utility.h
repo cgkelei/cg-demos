@@ -99,6 +99,17 @@ inline void HashCombine(std::size_t& seed, const T& v)
 	seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
 }
 
+
+inline void Split(std::vector<String>& tokens, const String& text, char sep)
+{
+	size_t start = 0, end = 0;
+	while ((end = text.find(sep, start)) != String::npos) {
+		tokens.push_back(text.substr(start, end - start));
+		start = end + 1;
+	}
+	tokens.push_back(text.substr(start));
+}
+
 }
 
 #endif // _Utility__H

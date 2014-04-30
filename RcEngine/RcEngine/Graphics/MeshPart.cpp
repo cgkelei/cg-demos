@@ -135,13 +135,13 @@ MeshPart::~MeshPart()
 void MeshPart::GetRenderOperation( RenderOperation& op, uint32_t lodIndex )
 {
 	op.PrimitiveType = PT_Triangle_List;
-	op.SetVertexBuffer(0, mVertexBuffer);
+	op.BindVertexStream(0, mVertexBuffer);
 	op.VertexDecl = mVertexDecl;
 
 	if (mIndexCount > 0)
 	{
 		// use indices buffer
-		op.SetIndexBuffer(mIndexBuffer, mIndexFormat);
+		op.BindIndexStream(mIndexBuffer, mIndexFormat);
 		op.SetIndexRange(mIndexStart, mIndexCount);
 		op.VertexStart = mVertexStart;
 	}

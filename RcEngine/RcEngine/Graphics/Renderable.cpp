@@ -54,7 +54,7 @@ void Renderable::OnRenderBegin()
 		// Skin matrix
 		if (matCounts > 1)
 		{	
-			EffectParameter* skinMatricesParam = material->GetCustomParameter("SkinMatrices");
+			EffectParameter* skinMatricesParam = material->GetEffect()->GetParameterByName("SkinMatrices");
 			if (skinMatricesParam)
 			{
 				// delete last world matrix first

@@ -9,7 +9,7 @@ OpenGLTextureCube::OpenGLTextureCube( PixelFormat format, uint32_t arraySize, ui
 	: OpenGLTexture(TT_TextureCube, format, arraySize, numMipMaps, sampleCount, sampleQuality, accessHint, flags)
 {
 	assert(height == width);
-	mMipLevels = (numMipMaps > 0) ? numMipMaps : RHTexture::CalculateMipmapLevels(width);
+	mMipLevels = (numMipMaps > 0) ? numMipMaps : Texture::CalculateMipmapLevels(width);
 	mWidth = mHeight = width;
 
 	mTextureTarget = (mTextureArraySize > 1) ? GL_TEXTURE_CUBE_MAP_ARRAY : GL_TEXTURE_CUBE_MAP;

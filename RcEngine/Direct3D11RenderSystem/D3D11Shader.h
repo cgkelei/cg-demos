@@ -2,7 +2,7 @@
 #define D3D11Shader_h__
 
 #include "D3D11Prerequisites.h"
-#include <Graphics/RHResource.h>
+#include <Graphics/GraphicsResource.h>
 
 namespace RcEngine {
 
@@ -34,7 +34,7 @@ struct UniformParam
 	EffectParameterType Type;
 };
 
-struct UniformBufferParam
+struct ConstantBufferParam
 {
 	String Name;
 	uint32_t BufferSize;
@@ -49,17 +49,17 @@ struct SamplerParam
 };
 
 
-class _D3D11Export D3D11Shader : public RHShader
+class _D3D11Export D3D11Shader : public Shader
 {
 public:
-	D3D11Shader(ShaderType type) : RHShader(type) {}
+	D3D11Shader(ShaderType type) : Shader(type) {}
 	virtual ~D3D11Shader() {}
 
 public:
 	vector<SRVParam> SRVParams;
 	vector<UAVParam> UAVParams;
 	vector<SamplerParam> SamplerParams;
-	vector<UniformBufferParam> UniformBufferParams;
+	vector<ConstantBufferParam> ConstantBufferParams;
 
 	friend class D3D11ShaderReflection;
 	friend class D3D11ShaderPipeline;
@@ -153,7 +153,7 @@ public:
 
 
 ////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11ShaderPipeline : public RHShaderPipeline
+class _D3D11Export D3D11ShaderPipeline : public ShaderPipeline
 {
 public:
 	D3D11ShaderPipeline(Effect& effect);

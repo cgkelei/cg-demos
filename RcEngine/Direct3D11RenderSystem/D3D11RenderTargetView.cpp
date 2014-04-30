@@ -6,8 +6,8 @@
 
 namespace RcEngine {
 
-D3D11TargetView::D3D11TargetView( const shared_ptr<RHTexture>& texture )
-	: RHRenderView(texture),
+D3D11TargetView::D3D11TargetView( const shared_ptr<Texture>& texture )
+	: RenderView(texture),
 	  RenderTargetViewD3D11(nullptr)
 {
 
@@ -47,7 +47,7 @@ D3D11RenderTargetView2D::D3D11RenderTargetView2D( ID3D11RenderTargetView* rtv )
 	RenderTargetViewD3D11 = rtv;
 }
 
-D3D11RenderTargetView2D::D3D11RenderTargetView2D( const shared_ptr<RHTexture>& texture, uint32_t arrIndex, uint32_t level )
+D3D11RenderTargetView2D::D3D11RenderTargetView2D( const shared_ptr<Texture>& texture, uint32_t arrIndex, uint32_t level )
 	: D3D11TargetView(texture)
 {
 	assert(texture->GetCreateFlags() & TexCreate_RenderTarget);
@@ -93,7 +93,7 @@ D3D11RenderTargetView2D::D3D11RenderTargetView2D( const shared_ptr<RHTexture>& t
 	//D3D11_VERRY(g_pd3dDevice->CreateRenderTargetView(mTextureD3D11.GetTexture(), &viewDesc, &mRenderTargetView2D));
 }
 
-D3D11RenderTargetViewArray::D3D11RenderTargetViewArray( const shared_ptr<RHTexture>& texture, uint32_t level )
+D3D11RenderTargetViewArray::D3D11RenderTargetViewArray( const shared_ptr<Texture>& texture, uint32_t level )
 	: D3D11TargetView(texture)
 {
 	assert(texture->GetCreateFlags() & TexCreate_RenderTarget);

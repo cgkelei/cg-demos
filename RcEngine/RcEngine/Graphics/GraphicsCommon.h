@@ -463,17 +463,17 @@ enum EffectParameterUsage
 	/**
 	 * The diffuse texture of material, ColorRGBA format 
 	 */
-	EPU_Material_Diffuse_Texture,
+	EPU_Material_DiffuseMap,
 
 	/**
 	 * The specular texture component of material
 	 */
-	EPU_Material_Specular_Texture,
+	EPU_Material_SpecularMap,
 
 	/**
 	 * The normal component of material
 	 */
-	EPU_Material_Normal_Texture,
+	EPU_Material_NormalMap,
 
 	/**
 	 * The displacement texture component of material

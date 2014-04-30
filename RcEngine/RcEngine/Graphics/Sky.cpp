@@ -383,7 +383,7 @@ shared_ptr<RenderOperation> CreateCubeShape()
 
 	shared_ptr<RenderOperation> mRenderOperation(new RenderOperation);
 	mRenderOperation->PrimitiveType = PT_Triangle_List;
-	mRenderOperation->SetVertexBuffer(0, vertexBuffer);
+	mRenderOperation->BindVertexStream(0, vertexBuffer);
 	mRenderOperation->SetVertexRange(0, vertexCount);
 	mRenderOperation->VertexDecl = vertexDecl;
 

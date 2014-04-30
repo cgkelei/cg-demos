@@ -22,7 +22,8 @@ EffectParameter::EffectParameter( const String& name, EffectParameterType type, 
 	  mUniformBuffer(pCB),
 	  mElementSize(0),
 	  mOffset(0),
-	  mLastModifiedTime(0)
+	  mLastModifiedTime(0),
+	  mParameterUsage(EPU_Unknown)
 {
 
 }

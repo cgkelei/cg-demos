@@ -3,8 +3,8 @@
 
 namespace RcEngine {
 
-OpenGLSamplerState::OpenGLSamplerState( const RHSamplerStateDesc& desc )
-	: RHSamplerState(desc),
+OpenGLSamplerState::OpenGLSamplerState( const SamplerStateDesc& desc )
+	: SamplerState(desc),
 	  mSamplerOGL(0)
 {
 	glGenSamplers(1, &mSamplerOGL);

@@ -37,7 +37,7 @@ public:
 
 	// Reference glTexImage* function
 	static void Mapping(GLenum& outInternalformat, GLenum& outFormat, GLenum& outType, PixelFormat inPixelFormat);
-	static PixelFormat UnMapping( GLenum inInternalformat, GLenum inFormat, GLenum inType);
+	
 	static void UnMapping(GLenum glType, EffectParameterType& paramType, OpenGLShaderParameterClass& paramClass);
 
 	/**

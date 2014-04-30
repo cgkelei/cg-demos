@@ -12,7 +12,7 @@ OpenGLTexture3D::OpenGLTexture3D( PixelFormat format, uint32_t numMipMaps, uint3
 	mHeight = height;
 	mDepth = depth;
 
-	mMipLevels = (numMipMaps > 0) ? numMipMaps : RHTexture::CalculateMipmapLevels((std::max)(width, (std::max)(height, depth)));
+	mMipLevels = (numMipMaps > 0) ? numMipMaps : Texture::CalculateMipmapLevels((std::max)(width, (std::max)(height, depth)));
 
 	GLenum internalFormat, externFormat, formatType;
 	OpenGLMapping::Mapping(internalFormat, externFormat, formatType, mFormat);

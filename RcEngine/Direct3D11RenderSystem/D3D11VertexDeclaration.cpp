@@ -2,15 +2,14 @@
 #include "D3D11Device.h"
 #include "D3D11GraphicCommon.h"
 #include "D3D11Shader.h"
-#include <Graphics/RHVertexDeclaration.h>
 #include <Core/Exception.h>
 
 #define MAX_ATTRIBUTES 8
 
 namespace RcEngine {
 
-D3D11VertexDeclaration::D3D11VertexDeclaration( const RHVertexElement* element, uint32_t count )
-	: RHVertexDeclaration(element, count),
+D3D11VertexDeclaration::D3D11VertexDeclaration( const VertexElement* element, uint32_t count )
+	:VertexDeclaration(element, count),
 	  InputLayoutD3D11(nullptr)
 {
 }
@@ -20,8 +19,7 @@ D3D11VertexDeclaration::~D3D11VertexDeclaration(void)
 	SAFE_RELEASE(InputLayoutD3D11);
 }
 
-
-void D3D11VertexDeclaration::CreateInputLayout( const RHOperation& operation, const RHShader& vertexShader )
+void D3D11VertexDeclaration::CreateInputLayout( const RenderOperation& operation, const Shader& vertexShader )
 {
 	static D3D11_INPUT_ELEMENT_DESC layoutD3D11[MAX_ATTRIBUTES]; 
 
@@ -30,7 +28,7 @@ void D3D11VertexDeclaration::CreateInputLayout( const RHOperation& operation, co
 	assert(mVertexElemets.size() == vertexShaderD3D11->InputSignatures.size());
 	for (size_t i = 0; i < mVertexElemets.size(); ++i)
 	{
-		const RHVertexElement& element = mVertexElemets[i];
+		const VertexElement& element = mVertexElemets[i];
 		layoutD3D11[i].SemanticName = vertexShaderD3D11->InputSignatures[i].Semantic.c_str();
 		layoutD3D11[i].SemanticIndex = element.UsageIndex;
 		layoutD3D11[i].Format = D3D11Mapping::Mapping(element.Type);

@@ -37,21 +37,18 @@ public:
 	EffectTechnique* GetCurrentTechnique() const;
 	void SetCurrentTechnique(const String& techName);
 	void SetCurrentTechnique(uint32_t index);
-			
-	EffectParameter* GetCustomParameter(EffectParameterUsage usage) const;
-	EffectParameter* GetCustomParameter(const String& name) const;
 
 	void SetAmbientColor(const float3& ambient)		{ mAmbient = ambient; }
 	void SetDiffuseColor(const float3& diffuse)		{ mDiffuse = diffuse; }
 	void SetSpecularColor(const float3& specular)	{ mSpecular = specular; }
 	void SetSpecularPower(float power)				{ mPower = power; }
 
-	void SetTexture(const String& name, const shared_ptr<Texture>& texture);
+	void SetTexture(const String& name, const shared_ptr<ShaderResourceView>& textureSRV);
 
 	// Apply shader parameter before rendering, called by renderable
 	void ApplyMaterial(const float4x4& world = float4x4::Identity());
 
-	shared_ptr<Resource> Clone();
+	//shared_ptr<Resource> Clone();
 
 protected:
 
@@ -65,17 +62,19 @@ protected:
 	
 	String mMaterialName;
 	shared_ptr<Effect> mEffect;
-	unordered_map<String, shared_ptr<SamplerState> > mSamplerStates;
-	unordered_map<String, shared_ptr<Texture> > mTextures;			
-	vector<MaterialParameter*> mCachedEffectParams;
+		
+	uint32_t mQueueBucket;
 
 	float3 mAmbient;
 	float3 mDiffuse;
 	float3 mSpecular;
 	float3 mEmissive;
 	float mPower;
+	
+	vector<shared_ptr<Texture> > mMaterialTextureCopys;
+	unordered_map<String, shared_ptr<ShaderResourceView> > mTextureSRVs;		
 
-	uint32_t mQueueBucket;
+	vector<EffectParameter*> mAutoBindings;
 };
 
 

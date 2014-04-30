@@ -52,7 +52,7 @@ protected:
 
 };
 
-class _ApiExport EngineLoger
+class _ApiExport EngineLogger
 {
 public:
 	enum LogCommands

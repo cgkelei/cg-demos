@@ -1,5 +1,5 @@
 #include <Graphics/Camera.h>
-#include <Core/Context.h>
+#include <Core/Environment.h>
 #include <Graphics/RenderDevice.h>
 #include <Math/MathUtil.h>
 
@@ -42,7 +42,7 @@ void Camera::CreatePerspectiveFov( float fov, float aspect, float nearPlane, flo
 	mInvProjMatrix = mProjMatrix.Inverse();
 
 	mEngineProjMatrix = mProjMatrix;
-	Context::GetSingleton().GetRenderDevice().AdjustProjectionMatrix(mEngineProjMatrix);
+	Environment::GetSingleton().GetRenderDevice()->AdjustProjectionMatrix(mEngineProjMatrix);
 
 	mFrustumDirty = true;
 }
@@ -56,7 +56,7 @@ void Camera::CreateOrthoOffCenter( float left, float right, float bottom, float 
 	mInvProjMatrix = mProjMatrix.Inverse();
 
 	mEngineProjMatrix = mProjMatrix;
-	Context::GetSingleton().GetRenderDevice().AdjustProjectionMatrix(mEngineProjMatrix);
+	Environment::GetSingleton().GetRenderDevice()->AdjustProjectionMatrix(mEngineProjMatrix);
 	
 	mFrustumDirty = true;
 }

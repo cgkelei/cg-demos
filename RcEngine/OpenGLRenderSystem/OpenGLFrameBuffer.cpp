@@ -1,14 +1,14 @@
 #include "OpenGLFrameBuffer.h"
 #include "OpenGLDevice.h"
 #include "OpenGLView.h"
-#include <Graphics/RHState.h>
+#include <Graphics/RenderState.h>
 #include <Core/Exception.h>
 //#include <Core/Context.h>
 
 namespace RcEngine {
 
 OpenGLFrameBuffer::OpenGLFrameBuffer( uint32_t width, uint32_t height, bool offscreen /*= true*/ )
-	: RHFrameBuffer(width, height)
+	: FrameBuffer(width, height)
 {
 	if (offscreen)
 		glGenFramebuffers(1, &mFrameBufferOGL);
@@ -110,8 +110,8 @@ bool OpenGLFrameBuffer::CheckFramebufferStatus()
 }
 
 //////////////////////////////////////////////////////////////////////////
-OpenGLRenderView::OpenGLRenderView(const shared_ptr<RHTexture>& texture)
-	: RHRenderView(texture)
+OpenGLRenderView::OpenGLRenderView(const shared_ptr<Texture>& texture)
+	: RenderView(texture)
 {
 }
 
@@ -139,27 +139,27 @@ void OpenGLRenderView::ClearDepthStencil( float depth, uint32_t stencil )
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Shouldn't Go There", "OpenGLRenderView::ClearDepthStencil");
 }
 
-void OpenGLRenderView::OnAttach(RHFrameBuffer& fb, Attachment attr)
+void OpenGLRenderView::OnAttach(FrameBuffer& fb, Attachment attr)
 {
 	mFrameBufferOGL = (static_cast_checked<OpenGLFrameBuffer*>(&fb))->GetFrameBufferOGL();
 	mAttachment = attr;
 }
 
-void OpenGLRenderView::OnDetach(RHFrameBuffer& fb, Attachment attr)
+void OpenGLRenderView::OnDetach(FrameBuffer& fb, Attachment attr)
 {
 	assert(mAttachment = attr);
 }
 
 void OpenGLRenderView::DoClear( GLbitfield clearFlagOGL, const ColorRGBA& clr, float depth, uint32_t stencil )
 {
-	/*shared_ptr<RHFrameBuffer> currentFrameBuffer = device.GetCurrentFrameBuffer();
+	/*shared_ptr<FrameBuffer> currentFrameBuffer = device.GetCurrentFrameBuffer();
 	OpenGLFrameBuffer& frameBufferOGL= *static_cast_checked<OpenGLFrameBuffer*>(currentFrameBuffer.get());
 	assert(mFrameBufferOGL == frameBufferOGL.GetFrameBufferOGL());*/
 
 	assert(mFrameBufferOGL == gOpenGLDevice->GetCurrentFBO());
 
-	const RHDepthStencilStateDesc& currDepthStencilDesc = gOpenGLDevice->GetCurrentDepthStencilState()->GetDesc();
-	const RHBlendStateDesc& currBlendDesc = gOpenGLDevice->GetCurrentBlendState()->GetDesc();
+	const DepthStencilStateDesc& currDepthStencilDesc = gOpenGLDevice->GetCurrentDepthStencilState()->GetDesc();
+	const BlendStateDesc& currBlendDesc = gOpenGLDevice->GetCurrentBlendState()->GetDesc();
 
 	// mark all clear channel write mask true ,so we can clear it
 	if (clearFlagOGL & GL_COLOR_BUFFER_BIT)

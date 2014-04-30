@@ -5,7 +5,7 @@
 
 namespace RcEngine {
 
-OpenGLRenderTargetView2D::OpenGLRenderTargetView2D(const shared_ptr<RHTexture>& texture, uint32_t arrIndex, uint32_t level)
+OpenGLRenderTargetView2D::OpenGLRenderTargetView2D(const shared_ptr<Texture>& texture, uint32_t arrIndex, uint32_t level)
 	: OpenGLRenderView(texture),
 	  mArrIndex(arrIndex),
 	  mLevel(level)
@@ -19,7 +19,7 @@ void OpenGLRenderTargetView2D::ClearColor( const ColorRGBA& clr )
 	OGL_ERROR_CHECK();
 }
 
-void OpenGLRenderTargetView2D::OnAttach(RHFrameBuffer& fb, Attachment attr)
+void OpenGLRenderTargetView2D::OnAttach(FrameBuffer& fb, Attachment attr)
 {
 	OpenGLRenderView::OnAttach(fb, attr);
 
@@ -61,7 +61,7 @@ void OpenGLRenderTargetView2D::OnAttach(RHFrameBuffer& fb, Attachment attr)
 	OGL_ERROR_CHECK();
 }
 
-void OpenGLRenderTargetView2D::OnDetach(RHFrameBuffer& fb, Attachment attr)
+void OpenGLRenderTargetView2D::OnDetach(FrameBuffer& fb, Attachment attr)
 {
 	OpenGLRenderView::OnDetach(fb, attr);
 
@@ -101,14 +101,14 @@ void OpenGLRenderTargetView2D::OnDetach(RHFrameBuffer& fb, Attachment attr)
 }
 
 //////////////////////////////////////////////////////////////////////////
-OpenGLRenderTargetArrayView::OpenGLRenderTargetArrayView( const shared_ptr<RHTexture>& texture, uint32_t level )
+OpenGLRenderTargetArrayView::OpenGLRenderTargetArrayView( const shared_ptr<Texture>& texture, uint32_t level )
 	: OpenGLRenderView(texture),
 	  mLevel(level)
 {
 
 }
 
-void OpenGLRenderTargetArrayView::OnAttach( RHFrameBuffer& fb, Attachment attr )
+void OpenGLRenderTargetArrayView::OnAttach( FrameBuffer& fb, Attachment attr )
 {
 	OpenGLRenderView::OnAttach(fb, attr);
 
@@ -134,7 +134,7 @@ void OpenGLRenderTargetArrayView::OnAttach( RHFrameBuffer& fb, Attachment attr )
 	OGL_ERROR_CHECK();
 }
 
-void OpenGLRenderTargetArrayView::OnDetach( RHFrameBuffer& fb, Attachment attr )
+void OpenGLRenderTargetArrayView::OnDetach( FrameBuffer& fb, Attachment attr )
 {
 	OpenGLRenderView::OnDetach(fb, attr);
 
@@ -166,7 +166,7 @@ OpenGLScreenRenderTargetView2D::OpenGLScreenRenderTargetView2D()
 
 }
 
-void OpenGLScreenRenderTargetView2D::OnAttach(RHFrameBuffer& fb, Attachment attr)
+void OpenGLScreenRenderTargetView2D::OnAttach(FrameBuffer& fb, Attachment attr)
 {
 	assert(attr == ATT_Color0);
 	OpenGLRenderView::OnAttach(fb, attr);
@@ -178,7 +178,7 @@ void OpenGLScreenRenderTargetView2D::OnAttach(RHFrameBuffer& fb, Attachment attr
 	}
 }
 
-void OpenGLScreenRenderTargetView2D::OnDetach(RHFrameBuffer& fb, Attachment attr)
+void OpenGLScreenRenderTargetView2D::OnDetach(FrameBuffer& fb, Attachment attr)
 {
 	assert(attr == ATT_Color0);
 	OpenGLRenderView::OnDetach(fb, attr);

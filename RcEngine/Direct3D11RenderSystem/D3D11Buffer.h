@@ -3,11 +3,11 @@
 #pragma once
 
 #include "D3D11Prerequisites.h"
-#include <Graphics/RHResource.h>
+#include <Graphics/GraphicsResource.h>
 
 namespace RcEngine {
 
-class _D3D11Export D3D11Buffer : public RHBuffer
+class _D3D11Export D3D11Buffer : public GraphicsBuffer
 {
 public:
 	D3D11Buffer(uint32_t bufferSize, uint32_t accessHint, uint32_t flags, uint32_t structSize, ElementInitData* initData);

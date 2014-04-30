@@ -16,7 +16,7 @@ OpenGLRenderWindow::OpenGLRenderWindow( uint32_t width, uint32_t height )
 	mFullscreen = appSettings.Fullscreen;
 
 	uint32_t colorDepth, depthBits, stencilBits;
-	colorDepth = PixelFormatUtils::GetNumElemBits(appSettings.ColorFormat);
+	colorDepth = PixelFormatUtils::GetNumElemBytes(appSettings.ColorFormat) * 8;
 	PixelFormatUtils::GetNumDepthStencilBits(appSettings.DepthStencilFormat, depthBits, stencilBits);
 
 #ifdef RcWindows

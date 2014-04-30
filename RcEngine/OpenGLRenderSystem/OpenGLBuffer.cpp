@@ -5,7 +5,7 @@
 namespace RcEngine {
 
 OpenGLBuffer::OpenGLBuffer( uint32_t bufferSize, uint32_t accessHint, uint32_t flags, GLenum target, ElementInitData* initData )
-	: RHBuffer(bufferSize, accessHint, flags),
+	: GraphicsBuffer(bufferSize, accessHint, flags),
 	  mBufferOGL(0),
 	  mBufferTarget(target)
 {

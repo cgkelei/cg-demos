@@ -4,7 +4,7 @@
 namespace RcEngine {
 
 D3D11Texture::D3D11Texture( TextureType type, PixelFormat format, uint32_t arraySize, uint32_t numMipMaps, uint32_t sampleCount, uint32_t sampleQuality, uint32_t accessHint, uint32_t flags )
-	: RHTexture(type, format, numMipMaps, sampleCount, sampleQuality, accessHint, flags)
+	: Texture(type, format, numMipMaps, sampleCount, sampleQuality, accessHint, flags)
 {
 	mTextureArraySize = (std::max)(arraySize, 1U);
 }
@@ -55,7 +55,7 @@ void D3D11Texture::UnmapCube(uint32_t arrayIndex,   CubeMapFace face, uint32_t l
 	ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't be here!", "OpenGLTexture::UnmapCube");
 }
 
-void D3D11Texture::CopyToTexture( RHTexture& destTexture )
+void D3D11Texture::CopyToTexture( Texture& destTexture )
 {
 	ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't be here!", "OpenGLTexture::CopyToTexture");
 }

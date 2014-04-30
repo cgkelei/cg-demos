@@ -5,7 +5,7 @@
 #include "D3D11RenderWindow.h"
 #include "D3D11VertexDeclaration.h"
 #include "D3D11GraphicCommon.h"
-#include <Graphics/RHOperation.h>
+#include <Graphics/RenderOperation.h>
 #include <Graphics/Effect.h>
 #include <MainApp/Application.h>
 #include <Core/Exception.h>
@@ -28,7 +28,7 @@ D3D11Device::~D3D11Device()
 	SAFE_RELEASE(DeviceContextD3D11);
 }
 
-void D3D11Device::SetSamplerState( ShaderType stage, uint32_t unit, const shared_ptr<RHSamplerState>& state )
+void D3D11Device::SetSamplerState( ShaderType stage, uint32_t unit, const shared_ptr<SamplerState>& state )
 {
 	SamplerSlot samSlot(stage, unit);
 
@@ -71,7 +71,7 @@ void D3D11Device::SetSamplerState( ShaderType stage, uint32_t unit, const shared
 	}
 }
 
-void D3D11Device::SetBlendState( const shared_ptr<RHBlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask )
+void D3D11Device::SetBlendState( const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask )
 {
 	if (mCurrentBlendState != state || mCurrentBlendFactor != blendFactor || mCurrentSampleMask != sampleMask)
 	{
@@ -86,7 +86,7 @@ void D3D11Device::SetBlendState( const shared_ptr<RHBlendState>& state, const Co
 	}
 }
 
-void D3D11Device::SetRasterizerState( const shared_ptr<RHRasterizerState>& state )
+void D3D11Device::SetRasterizerState( const shared_ptr<RasterizerState>& state )
 {
 	if (mCurrentRasterizerState != state)
 	{
@@ -95,7 +95,7 @@ void D3D11Device::SetRasterizerState( const shared_ptr<RHRasterizerState>& state
 	}
 }
 
-void D3D11Device::SetDepthStencilState( const shared_ptr<RHDepthStencilState>& state, uint16_t frontStencilRef /*= 0*/, uint16_t backStencilRef /*= 0*/ )
+void D3D11Device::SetDepthStencilState( const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef /*= 0*/, uint16_t backStencilRef /*= 0*/ )
 {
 	if (mCurrentDepthStencilState != state || frontStencilRef != mCurrentFrontStencilRef || mCurrentBackStencilRef != mCurrentBackStencilRef)
 	{
@@ -109,7 +109,7 @@ void D3D11Device::SetDepthStencilState( const shared_ptr<RHDepthStencilState>& s
 	}
 }
 
-void D3D11Device::SetViewport( const RHViewport& vp )
+void D3D11Device::SetViewport( const Viewport& vp )
 {
 	CD3D11_VIEWPORT vpD3D11(float(vp.Left), float(vp.Top), float(vp.Width), float(vp.Height));
 	DeviceContextD3D11->RSSetViewports(1, &vpD3D11);
@@ -143,8 +143,8 @@ void D3D11Device::CreateRenderWindow()
 	if(PixelFormatUtils::IsDepth(appSettings.DepthStencilFormat))
 	{
 		// Have depth buffer, attach it
-		RHFactory* factory = gD3D11Device->GetFactory();
-		shared_ptr<RHTexture> depthStencilTexture = factory->CreateTexture2D(
+		RenderFactory* factory = gD3D11Device->GetRenderFactory();
+		shared_ptr<Texture> depthStencilTexture = factory->CreateTexture2D(
 			appSettings.Width, 
 			appSettings.Height,
 			appSettings.DepthStencilFormat, 
@@ -159,7 +159,7 @@ void D3D11Device::CreateRenderWindow()
 		d3d11RenderWindow->AttachRTV(ATT_DepthStencil, factory->CreateDepthStencilView(depthStencilTexture, 0, 0));
 	}
 
-	d3d11RenderWindow->SetViewport(RHViewport(0, 0, appSettings.Width, appSettings.Height));
+	d3d11RenderWindow->SetViewport(Viewport(0, 0, appSettings.Width, appSettings.Height));
 	BindFrameBuffer(d3d11RenderWindow);
 
 	mScreenFrameBuffer = d3d11RenderWindow;
@@ -175,13 +175,13 @@ void D3D11Device::AdjustProjectionMatrix( float4x4& pOut )
 
 }
 
-void D3D11Device::DoDraw( const EffectTechnique* technique, const RHOperation& operation )
+void D3D11Device::DoDraw( const EffectTechnique* technique, const RenderOperation& operation )
 {
 	// Set up input layout
 	D3D11VertexDeclaration* vertexDeclD3D11 = static_cast_checked<D3D11VertexDeclaration*>(operation.VertexDecl.get());
 	if (vertexDeclD3D11->InputLayoutD3D11 == nullptr)
 	{
-		const RHShader& vertexShader = *(technique->GetPassByIndex(0)->GetShaderPipeline()->GetShader(ST_Vertex));
+		const Shader& vertexShader = *(technique->GetPassByIndex(0)->GetShaderPipeline()->GetShader(ST_Vertex));
 		vertexDeclD3D11->CreateInputLayout(operation, vertexShader);
 	}
 	DeviceContextD3D11->IASetInputLayout(vertexDeclD3D11->InputLayoutD3D11);
@@ -191,6 +191,7 @@ void D3D11Device::DoDraw( const EffectTechnique* technique, const RHOperation& o
 	{
 		static ID3D11Buffer* vertexStreamsD3D11[8];
 		static uint32_t streamStride[8];
+		static uint32_t streamOffset[8] = {0};
 
 		for (size_t i = 0; i < operation.VertexStreams.size(); ++i)
 		{
@@ -198,7 +199,7 @@ void D3D11Device::DoDraw( const EffectTechnique* technique, const RHOperation& o
 			streamStride[i] = vertexDeclD3D11->GetStreamStride(i);
 		}
 
-		DeviceContextD3D11->IASetVertexBuffers(0, operation.VertexStreams.size(), vertexStreamsD3D11, streamStride, NULL);
+		DeviceContextD3D11->IASetVertexBuffers(0, operation.VertexStreams.size(), vertexStreamsD3D11, streamStride, streamOffset);
 	}
 
 	// Set draw primitive mode
@@ -259,6 +260,25 @@ void D3D11Device::DoDraw( const EffectTechnique* technique, const RHOperation& o
 		for (EffectPass* pass : technique->GetPasses())
 		{
 			pass->BeginPass();
+
+			D3D11_VIEWPORT viewport;
+			UINT numViewports = 1;
+			DeviceContextD3D11->RSGetViewports(&numViewports, &viewport);
+
+			D3D11_PRIMITIVE_TOPOLOGY priType;
+			DeviceContextD3D11->IAGetPrimitiveTopology(&priType);
+
+			ID3D11ShaderResourceView* srv;
+			DeviceContextD3D11->PSGetShaderResources(0, 1, &srv);
+
+			ID3D11Buffer *vb, *ib;
+			uint32_t stride, offset;
+			DXGI_FORMAT indexFormat;
+			DeviceContextD3D11->IAGetVertexBuffers(0, 1, &vb, &stride, &offset);
+			DeviceContextD3D11->IAGetIndexBuffer(&ib, &indexFormat, &offset);
+
+			ID3D11InputLayout* layout;
+			DeviceContextD3D11->IAGetInputLayout(&layout);
 
 			if (operation.NumInstances <= 1)
 			{

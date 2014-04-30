@@ -26,7 +26,7 @@ D3D11Texture1D::D3D11Texture1D( PixelFormat format, uint32_t arraySize, uint32_t
 	if (mCreateFlags & TexCreate_GenerateMipmaps)
 	{
 		texDesc.MiscFlags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
-		mMipLevels = RHTexture::CalculateMipmapLevels(mWidth);
+		mMipLevels = Texture::CalculateMipmapLevels(mWidth);
 	}
 	else
 		mMipLevels = numMipMaps;

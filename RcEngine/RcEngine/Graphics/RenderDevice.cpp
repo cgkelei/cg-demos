@@ -45,14 +45,15 @@ void RenderDevice::BindFrameBuffer( const shared_ptr<FrameBuffer>& fb )
 
 void RenderDevice::Draw( const EffectTechnique* technique, const RenderOperation& operation )
 {
-
+	DoDraw(technique, operation);
 }
 
 void RenderDevice::BindShaderPipeline( const shared_ptr<ShaderPipeline>& pipeline )
 {
 	if (mCurrentShaderPipeline != pipeline)
 	{
-		mCurrentShaderPipeline->OnUnbind();
+		if (mCurrentShaderPipeline)
+			mCurrentShaderPipeline->OnUnbind();
 		
 		mCurrentShaderPipeline = pipeline;
 		mCurrentShaderPipeline->OnBind();

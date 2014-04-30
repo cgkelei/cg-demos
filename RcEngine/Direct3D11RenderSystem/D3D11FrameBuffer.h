@@ -3,11 +3,11 @@
 #pragma once
 
 #include "D3D11Prerequisites.h"
-#include <Graphics/RHFrameBuffer.h>
+#include <Graphics/FrameBuffer.h>
 
 namespace RcEngine {
 
-class _D3D11Export D3D11FrameBuffer : public RHFrameBuffer
+class _D3D11Export D3D11FrameBuffer : public FrameBuffer
 {
 public:
 	D3D11FrameBuffer(uint32_t width, uint32_t height);
@@ -21,10 +21,10 @@ protected:
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11DepthStencilView : public RHRenderView
+class _D3D11Export D3D11DepthStencilView : public RenderView
 {
 public:
-	D3D11DepthStencilView(const shared_ptr<RHTexture>& texture, uint32_t arrIndex, uint32_t level);
+	D3D11DepthStencilView(const shared_ptr<Texture>& texture, uint32_t arrIndex, uint32_t level);
 	virtual ~D3D11DepthStencilView();
 
 	virtual void ClearColor(const ColorRGBA& clr);
@@ -33,18 +33,18 @@ public:
 	virtual void ClearDepthStencil(float depth, uint32_t stencil);
 
 protected:
-	virtual void OnAttach(RHFrameBuffer& fb, Attachment attr) {}
-	virtual void OnDetach(RHFrameBuffer& fb, Attachment attr) {}
+	virtual void OnAttach(FrameBuffer& fb, Attachment attr) {}
+	virtual void OnDetach(FrameBuffer& fb, Attachment attr) {}
 
 public:
 	ID3D11DepthStencilView* DepthStencilViewD3D11;
 };
 
 //////////////////////////////////////////////////////////////////////////
-class _D3D11Export D3D11TargetView : public RHRenderView
+class _D3D11Export D3D11TargetView : public RenderView
 {
 public:
-	D3D11TargetView(const shared_ptr<RHTexture>& texture);
+	D3D11TargetView(const shared_ptr<Texture>& texture);
 	virtual ~D3D11TargetView();
 
 	virtual void ClearColor(const ColorRGBA& clr);
@@ -53,8 +53,8 @@ public:
 	virtual void ClearDepthStencil(float depth, uint32_t stencil);
 
 protected:
-	virtual void OnAttach(RHFrameBuffer& fb, Attachment attr) {}
-	virtual void OnDetach(RHFrameBuffer& fb, Attachment attr) {}
+	virtual void OnAttach(FrameBuffer& fb, Attachment attr) {}
+	virtual void OnDetach(FrameBuffer& fb, Attachment attr) {}
 
 public:
 	ID3D11RenderTargetView* RenderTargetViewD3D11;
@@ -63,7 +63,7 @@ public:
 class _D3D11Export D3D11RenderTargetView2D : public D3D11TargetView
 {
 public:
-	D3D11RenderTargetView2D(const shared_ptr<RHTexture>& texture, uint32_t arrIndex, uint32_t level);
+	D3D11RenderTargetView2D(const shared_ptr<Texture>& texture, uint32_t arrIndex, uint32_t level);
 	
 	// For back depth buffer
 	D3D11RenderTargetView2D(ID3D11RenderTargetView* rtv);
@@ -72,7 +72,7 @@ public:
 class _D3D11Export D3D11RenderTargetViewArray : public D3D11TargetView
 {
 public:
-	D3D11RenderTargetViewArray(const shared_ptr<RHTexture>& texture, uint32_t level);
+	D3D11RenderTargetViewArray(const shared_ptr<Texture>& texture, uint32_t level);
 };
 
 }

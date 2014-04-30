@@ -1,5 +1,5 @@
-#ifndef RHResource_h__
-#define RHResource_h__
+#ifndef GraphicsResource_h__
+#define GraphicsResource_h__
 
 #include <Core/Prerequisites.h>
 #include <Graphics/GraphicsCommon.h>
@@ -34,6 +34,10 @@ private:
 	GraphicsResouce& operator= ( const GraphicsResouce& );
 };
 
+/** 
+ * Resource view will not keep a copy of underlying resource,
+ * Keep the underlying alive by yourself. 
+ */
 class _ApiExport ShaderResourceView
 {
 public:
@@ -89,6 +93,8 @@ public:
 	inline uint32_t GetMipLevels() const				{ return mMipLevels; }
 	inline uint32_t GetCreateFlags() const				{ return mCreateFlags; }
 
+	inline shared_ptr<ShaderResourceView> GetShaderResourceView() const { return mTextureSRV; }
+
 	// return the dimension of the texture, 0 for texture with no height or depth
 	inline uint32_t GetWidth(uint32_t level = 0) const		{ return mWidth >> level; }
 	inline uint32_t GetHeight(uint32_t level = 0) const		{ return mHeight >> level; }
@@ -133,7 +139,7 @@ protected:
 	uint32_t mAccessHint;
 	uint32_t mCreateFlags;
 
-	// Default texture shader resource view
+	// SRV for the entire resource, only created with TexCreate_ShaderResource flag
 	shared_ptr<ShaderResourceView> mTextureSRV;
 };
 
@@ -175,6 +181,4 @@ protected:
 
 }
 
-
-
-#endif // RHResource_h__
+#endif // GraphicsResource_h__

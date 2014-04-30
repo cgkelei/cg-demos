@@ -1,14 +1,14 @@
 #include "OpenGLVertexDeclaration.h"
 #include "OpenGLGraphicCommon.h"
 #include "OpenGLBuffer.h"
-#include <Graphics/RHOperation.h>
+#include <Graphics/RenderOperation.h>
 
 namespace RcEngine {
 
 #define BUFFER_OFFSET(offset) ((void *)(offset))
 
-OpenGLVertexDeclaration::OpenGLVertexDeclaration( const RHVertexElement* element, uint32_t count )
-	: RHVertexDeclaration(element, count),
+OpenGLVertexDeclaration::OpenGLVertexDeclaration( const VertexElement* element, uint32_t count )
+	: VertexDeclaration(element, count),
 	  mVertexArrayOGL(0)
 {
 
@@ -20,20 +20,26 @@ OpenGLVertexDeclaration::~OpenGLVertexDeclaration()
 		glDeleteVertexArrays(1, &mVertexArrayOGL);
 }
 
-void OpenGLVertexDeclaration::CreateVertexArrayOGL( const RHOperation& operation, const RHShader& vertexShader )
+void OpenGLVertexDeclaration::CreateVertexArrayOGL( const RenderOperation& operation, const Shader& vertexShader )
 {
 	glGenVertexArrays(1, &mVertexArrayOGL);
 	glBindVertexArray(mVertexArrayOGL);
 
 	OpenGLVertexDeclaration* vertexDeclOGL = static_cast_checked<OpenGLVertexDeclaration*>(operation.VertexDecl.get());
 
-	std::vector<bool> slotBind(operation.VertexStreams.size(), false);
+	GLuint vertexSlotBind = -1;
 	for (GLuint attribIndex = 0; attribIndex < vertexDeclOGL->mVertexElemets.size(); ++attribIndex)
 	{
-		const RHVertexElement& attribute = vertexDeclOGL->mVertexElemets[attribIndex];
+		const VertexElement& attribute = vertexDeclOGL->mVertexElemets[attribIndex];
 
-		OpenGLBuffer* bufferOGL = static_cast_checked<OpenGLBuffer*>(operation.VertexStreams[attribute.InputSlot].get());
-		glBindBuffer(GL_ARRAY_BUFFER, bufferOGL->GetBufferOGL());
+		// Bind vertex stream to slot
+		if (attribute.InputSlot != vertexSlotBind)
+		{
+			OpenGLBuffer* bufferOGL = static_cast_checked<OpenGLBuffer*>(operation.VertexStreams[attribute.InputSlot].get());
+			glBindBuffer(GL_ARRAY_BUFFER, bufferOGL->GetBufferOGL());
+
+			vertexSlotBind = attribute.InputSlot;
+		}
 
 		GLenum type = OpenGLMapping::Mapping(attribute.Type);
 		uint32_t size = RHVertexElementUtil::GetElementComponentCount(attribute);
