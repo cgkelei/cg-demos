@@ -1,17 +1,17 @@
 #include <MainApp/Application.h>
 #include <MainApp/Window.h>
+#include <Graphics/Effect.h>
+#include <Graphics/Material.h>
+#include <Graphics/TextureResource.h>
+#include <Graphics/AnimationClip.h>
+#include <Resource/ResourceManager.h>
 #include <Core/Environment.h>
 #include <Core/ModuleManager.h>
 #include <Core/Exception.h>
 #include <Core/XMLDom.h>
-#include <Input/InputSystem.h>
-#include <Graphics/GraphicsCommon.h>
-#include <Graphics/Effect.h>
 #include <IO/FileSystem.h>
 #include <IO/FileStream.h>
-#include <Resource/ResourceManager.h>
-#include <Graphics/TextureResource.h>
-#include <Graphics/AnimationClip.h>
+#include <Input/InputSystem.h>
 
 // C++ 11 thread
 #include <thread>
@@ -40,7 +40,7 @@ Application::Application( const String& config )
 
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 	//resMan.RegisterType(RT_Mesh, "Mesh", Mesh::FactoryFunc);
-	//resMan.RegisterType(RT_Material, "Material", Material::FactoryFunc);
+	resMan.RegisterType(RT_Material, "Material", Material::FactoryFunc);
 	resMan.RegisterType(RT_Effect, "Effect", Effect::FactoryFunc);
 	resMan.RegisterType(RT_Animation, "Animation",AnimationClip::FactoryFunc);
 	resMan.RegisterType(RT_Texture, "Texture", TextureResource::FactoryFunc);

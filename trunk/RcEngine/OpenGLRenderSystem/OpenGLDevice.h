@@ -2,8 +2,9 @@
 #ifndef OpenGLRenderDevice_h__
 #define OpenGLRenderDevice_h__
 
-#include "OpenGLGraphicCommon.h"
 #include <Graphics/RenderDevice.h>
+#include "OpenGLGraphicCommon.h"
+#include "OpenGLFrameBuffer.h"
 
 namespace RcEngine {
 
@@ -41,14 +42,17 @@ public:
 	void SetRasterizerState(const shared_ptr<RasterizerState>& state);
 	void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0);
 	void SetSamplerState(ShaderType stage, uint32_t unit, const shared_ptr<SamplerState>& state);
-	
+	void SetViewports(const std::vector<Viewport>& viewports);
+
 protected:
 
-	void SetViewport(const Viewport& vp);
 	void DoDraw(const EffectTechnique* technique, const RenderOperation& operation);
 	
 private:
-	uint32_t mViewportTop, mViewportLeft, mViewportWidth, mViewportHeight;
+	
+	// Only track the first view port
+	Viewport mCurrentViewport;
+
 	shared_ptr<SamplerState> mCurrentSamplerStates[MaxSamplerCout];		
 
 	// source and destination blit framebuffer

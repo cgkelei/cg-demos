@@ -492,7 +492,7 @@ GLenum OpenGLMapping::Mapping( uint32_t accessHint )
 	return usage;
 }
 
-void OpenGLMapping::UnMapping( GLenum glType, EffectParameterType& paramType, OpenGLShaderParameterClass& paramClass )
+void OpenGLMapping::UnMapping( GLenum glType, EffectParameterType& paramType, ShaderParameterClass& paramClass )
 {
 	switch (glType)
 	{
@@ -548,12 +548,12 @@ void OpenGLMapping::UnMapping( GLenum glType, EffectParameterType& paramType, Op
 
 	case GL_SAMPLER_BUFFER:					   { paramClass = Shader_Param_SRV; paramType = EPT_TextureBuffer; } break;
 
-											   //case GL_IMAGE_1D:					       { paramClass = Shader_Param_UAV; return EPT_Texture1D; }
-											   //case GL_IMAGE_1D_ARRAY:					   { paramClass = Shader_Param_UAV; return EPT_Texture1DArray; }
-											   //case GL_IMAGE_2D:						   { paramClass = Shader_Param_UAV; return EPT_Texture2D; }
-											   //case GL_IMAGE_2D_ARRAY:					   { paramClass = Shader_Param_UAV; return EPT_Texture2DArray; }
-											   //case GL_IMAGE_3D:					       { paramClass = Shader_Param_UAV; return EPT_Texture3D; }
-											   //case GL_IMAGE_BUFFER:					   { paramClass = Shader_Param_UAV; return EPT_TextureBuffer; }
+	case GL_IMAGE_1D:					       { paramClass = Shader_Param_UAV; paramType = EPT_Texture1D; } break;
+	case GL_IMAGE_1D_ARRAY:					   { paramClass = Shader_Param_UAV; paramType = EPT_Texture1DArray; } break;
+	case GL_IMAGE_2D:						   { paramClass = Shader_Param_UAV; paramType = EPT_Texture2D; } break;
+	case GL_IMAGE_2D_ARRAY:					   { paramClass = Shader_Param_UAV; paramType = EPT_Texture2DArray; } break;
+	case GL_IMAGE_3D:					       { paramClass = Shader_Param_UAV; paramType = EPT_Texture3D; } break;
+	case GL_IMAGE_BUFFER:					   { paramClass = Shader_Param_UAV; paramType = EPT_TextureBuffer; } break;
 
 	default:
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported Shader Parameter Type", 

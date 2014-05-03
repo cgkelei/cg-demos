@@ -124,6 +124,8 @@ void OpenGLRenderWindow::OnBind()
 	GLenum targets[] = { GL_BACK };
 	glDrawBuffers(1, &targets[0]);
 
+	gOpenGLDevice->SetViewports(mViewports);
+
 	OGL_ERROR_CHECK();
 }
 

@@ -40,6 +40,9 @@
     <Filter Include="Asset\GLSL">
       <UniqueIdentifier>{cfe7aaa9-f7d4-4178-a2b3-f251f49bfe64}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Asset\Material">
+      <UniqueIdentifier>{2f127fa8-5ee8-4f16-9313-c41678db02ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\CompileConfig.h">
@@ -466,6 +469,12 @@
     <None Include="..\Media\Effect\GLSL\FSQuad.glsl">
       <Filter>Asset\GLSL</Filter>
     </None>
+    <None Include="..\Media\Effect\GLSL\FullscreenTriangle.glsl">
+      <Filter>Asset\GLSL</Filter>
+    </None>
+    <None Include="..\Media\Effect\GLSL\ModelCommon.glsl">
+      <Filter>Asset\GLSL</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Media\Effect\HLSL\MaterialTemplate.hlsl">
@@ -489,12 +498,15 @@
     <FxCompile Include="..\Media\Effect\HLSL\FSQuad.hlsl">
       <Filter>Asset\HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\FullscreenTriangle.hlsl">
+      <Filter>Asset\HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="..\Media\Effect\HLSL\Model.effect.xml">
+    <Xml Include="..\Media\Effect\FSQuad.effect.xml">
       <Filter>Asset\Effect</Filter>
     </Xml>
-    <Xml Include="..\Media\Effect\FSQuad.effect.xml">
+    <Xml Include="..\Media\Effect\Model.effect.xml">
       <Filter>Asset\Effect</Filter>
     </Xml>
   </ItemGroup>

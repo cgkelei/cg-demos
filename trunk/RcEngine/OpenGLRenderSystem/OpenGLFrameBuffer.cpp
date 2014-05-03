@@ -52,13 +52,15 @@ void OpenGLFrameBuffer::OnBind()
 		}
 	}
 
-	mDirty = false;
+	// Set view ports
+	gOpenGLDevice->SetViewports(mViewports);
+
 	OGL_ERROR_CHECK();
 }
 
 void OpenGLFrameBuffer::OnUnbind()
 {
-	mDirty = true;
+
 }
 
 void OpenGLFrameBuffer::SwapBuffers()

@@ -141,8 +141,10 @@
     <None Include="..\Media\Effect\GLSL\DeferredLighting.glsl" />
     <None Include="..\Media\Effect\GLSL\DeferredUtil.glsl" />
     <None Include="..\Media\Effect\GLSL\FSQuad.glsl" />
+    <None Include="..\Media\Effect\GLSL\FullscreenTriangle.glsl" />
     <None Include="..\Media\Effect\GLSL\LightingUtil.glsl" />
     <None Include="..\Media\Effect\GLSL\Model.glsl" />
+    <None Include="..\Media\Effect\GLSL\ModelCommon.glsl" />
     <None Include="..\Media\Effect\GLSL\ShadowUtil.glsl" />
     <None Include="Math\BoundingBox.inl" />
     <None Include="Math\BoundingSphere.inl" />
@@ -166,6 +168,9 @@
     <FxCompile Include="..\Media\Effect\HLSL\FSQuad.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\FullscreenTriangle.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="..\Media\Effect\HLSL\LightingUtil.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
@@ -181,7 +186,7 @@
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\Media\Effect\FSQuad.effect.xml" />
-    <Xml Include="..\Media\Effect\HLSL\Model.effect.xml" />
+    <Xml Include="..\Media\Effect\Model.effect.xml" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8C5FC295-3DCE-4113-83C6-884D4F46DEF2}</ProjectGuid>

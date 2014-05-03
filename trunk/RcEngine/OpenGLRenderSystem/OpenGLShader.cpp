@@ -1,15 +1,12 @@
 #include "OpenGLShader.h"
 #include "OpenGLGraphicCommon.h"
-#include "OpenGLDevice.h"
-#include "OpenGLView.h"
-#include <Graphics/Effect.h>
-#include <Graphics/EffectParameter.h>
 #include <Core/Exception.h>
 #include <Core/Loger.h>
 #include <Core/Utility.h>
+#include <IO/PathUtil.h>
 #include <fstream>
 #include <iterator>
-#include <regex>
+#include <set>
 
 namespace RcEngine {
 
@@ -62,6 +59,243 @@ inline bool LoadBinary(const char* filename, GLenum & format, std::vector<uint8_
 	return false;
 }
 
+class GLSLScriptCompiler
+{
+public:
+	GLSLScriptCompiler(OpenGLShader* shader) : mShader(shader) {}
+
+	bool OpenGLCompile(const String& filename, const ShaderMacro* macros, uint32_t macroCount, const String& entryPoint)
+	{
+		std::ifstream fs(filename);
+		std::string glslScript( (std::istreambuf_iterator<char>(fs)), std::istreambuf_iterator<char>() );
+
+		size_t shaderSectionBegin, shaderSectionEnd;
+		FindShaderSectionRange(glslScript, mShader->mShaderType, entryPoint, shaderSectionBegin, shaderSectionEnd);
+
+		// Parse shader includes
+		bool hasInclude = false;
+
+		const char includeToken[] = "#include";
+		size_t includeBegin = glslScript.find(includeToken, shaderSectionBegin);
+		while (includeBegin != std::string::npos && includeBegin < shaderSectionEnd)
+		{
+			// Find include file 
+			size_t s = glslScript.find('\"', includeBegin);
+			size_t e = glslScript.find('\"', s + 1);
+
+			std::string includeName = glslScript.substr(s + 1, e-s-1);
+			if (msIncludes.find(includeName) == msIncludes.end())
+			{
+				std::string includeFile = PathUtil::GetParentPath(filename) + includeName;
+
+				std::ifstream fs(includeFile);
+				if (fs.is_open() == false)
+				{
+					ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, includeFile + " not founded!", "OpenGLCompile");
+				}
+
+				std::string includeScript( (std::istreambuf_iterator<char>(fs)), std::istreambuf_iterator<char>() ); 
+				glNamedStringARB(GL_SHADER_INCLUDE_ARB, includeName.length(), includeName.c_str(), includeScript.length(), includeScript.c_str());
+			}
+			
+			includeBegin = glslScript.find(includeToken, includeBegin + sizeof(includeToken)); // Skip current include
+			hasInclude = true;
+		}
+
+		// Find first real shader code line, exclude #version, #extension, #param
+		bool hasVersion = false;
+		uint32_t lineNum = 0;
+
+		size_t lineBeign = shaderSectionBegin;
+		size_t lineEnd = glslScript.find('\n', shaderSectionBegin);	
+		while (lineEnd < shaderSectionEnd && lineEnd != std::string::npos)
+		{
+			std::string line = glslScript.substr(lineBeign, lineEnd - lineBeign);
+			
+			if (line.empty())
+			{
+
+			}
+			else if (line.find("#version") != std::string::npos)
+			{
+				hasVersion = true;
+			}
+			else if (line.find("#error") != std::string::npos     || 
+					 line.find("#param") != std::string::npos     ||
+					 line.find("#extension") != std::string::npos)
+			{
+
+			}
+			else 
+				break;
+
+			++lineNum;
+
+			lineBeign = lineEnd+1;
+			lineEnd = glslScript.find('\n', lineBeign);	
+		}
+
+		std::string shaderSource;
+		
+		if (lineNum > 0)
+			shaderSource += glslScript.substr(shaderSectionBegin, lineBeign - shaderSectionBegin);
+
+		// Add include extension
+		if (hasInclude)
+			shaderSource += "#extension GL_ARB_shading_language_include : enable\n";
+	
+		// Add Macro
+		if (macros)
+		{
+			for (uint32_t i = 0; i < macroCount; ++i)
+			{
+				shaderSource += "#define " + macros[i].Name + " " + macros[i].Definition + "\n";
+			}
+		}
+
+		// Add #line
+#ifdef _DEBUG
+		size_t lineNum0 = std::count(glslScript.begin(), glslScript.begin() + shaderSectionBegin, '\n');
+		lineNum += lineNum0 + 1;
+		
+		static char lineBuffer[100];
+		std::sprintf(lineBuffer, "#line %d\n", lineNum);
+		shaderSource += lineBuffer;
+#endif
+		// Add real code
+		shaderSource += glslScript.substr(lineBeign, shaderSectionEnd - lineBeign);
+
+		if (hasVersion)
+		{
+			char const* pSource = shaderSource.c_str();
+			mShader->mShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShader->mShaderType), 1, &pSource);
+		}
+		else
+		{
+			const char* pSource[2];
+
+			const String& latestVersion = GetSupportedGLSLVersion();
+			pSource[0] = latestVersion.c_str();
+			pSource[1] = shaderSource.c_str();
+
+			mShader->mShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShader->mShaderType), 2, pSource);
+		}	
+
+		int success;
+		glGetProgramiv(mShader->mShaderOGL, GL_LINK_STATUS, &success);
+
+		if (success != GL_TRUE)
+		{
+			int length;
+			glGetProgramiv(mShader->mShaderOGL, GL_INFO_LOG_LENGTH, &length);
+
+			std::vector<char> compileOutput(length);
+			glGetProgramInfoLog(mShader->mShaderOGL, length, &length, &compileOutput[0]);
+
+			fprintf(stderr, "GLSL %s %s compile failed\n\n%s\n\n", filename.c_str(), entryPoint.c_str(), &compileOutput[0]);
+			//EngineLogger::LogError("GLSL %s compile failed\n\n%s\n\n", filename.c_str(), &compileOutput[0]);
+
+			std::ofstream ofs("E:/" + entryPoint + ".glsl");
+			ofs << shaderSource;
+			ofs.close();
+		}
+
+		return (success == GL_TRUE);
+	} 
+
+	void ParseSamplerState(const std::string& shaderSource)
+	{
+		// Parse all SamplerState
+		size_t token = shaderSource.find("#pragma");
+		while (token != std::string::npos)
+		{
+			token += 7; // skip #pragma
+
+			std::string texture, samplerState;
+			size_t colonPos = shaderSource.find(':', token);
+			assert(colonPos != std::string::npos);
+
+			size_t s = token+1, e= colonPos - 1;
+			while(!isalpha(shaderSource[s])) s++;
+			while(!isalpha(shaderSource[e])) e--;
+			texture = shaderSource.substr(s, e - s + 1);	
+
+			s = colonPos+1;
+			while(!isalpha(shaderSource[s])) s++;
+			e = s;
+			while(isalpha(shaderSource[e])) e++;
+			samplerState = shaderSource.substr(s, e - s);	
+
+			mShader->mSamplerStates[texture] = samplerState;
+
+			token = shaderSource.find("#pragma", e);
+		}
+	}
+
+	void FindShaderSectionRange(const String& glslScript, ShaderType shaderStage, const String& entryPoint, size_t& oSectionBegin, size_t& oSectionEnd)
+	{
+		// find shader section of entry point
+		static const char* GLSLShaderToken[] = {
+			"[[Vertex=%s]]", "[[TessControl=%s]", "[[TessEval=%s]]", "[[Geometry=%s]]", "[[Fragment=%s]]", "[[Compute=%s]]" 
+		};
+
+		// Split into shader section
+		char delimiter[255];
+		std::sprintf(delimiter, GLSLShaderToken[shaderStage], entryPoint.c_str());	
+
+		size_t tokenBegin = glslScript.find(delimiter);
+		if (tokenBegin != std::string::npos)
+		{
+			// Find the range of this shader section
+
+			size_t tokenEnd = glslScript.find('\n', tokenBegin)+1; 
+			size_t nextTokenEnd = glslScript.find("]]", tokenEnd);
+
+			if (nextTokenEnd != std::string::npos)
+			{
+				// Validate
+				size_t nextTokenBegin = glslScript.rfind("[[", nextTokenEnd);
+
+				// Check whether exits = in nextToken
+				bool valid = false;
+				for (size_t i = nextTokenBegin; i < nextTokenEnd && !valid; ++i)
+					valid = (glslScript[i] == '=');
+
+				assert(valid == true);
+				oSectionBegin = tokenEnd;
+				oSectionEnd = nextTokenBegin;
+			}
+			else
+			{
+				oSectionBegin = tokenEnd;
+				oSectionEnd = glslScript.length();
+			}
+		}
+		else
+		{
+			if (glslScript.find("[[") == std::string::npos)
+			{
+				// No shader stage token, use the whole content as this shader stage
+				oSectionBegin = 0;
+				oSectionEnd = glslScript.length();
+			}
+			else
+			{
+				// Error: exits other shader section, but can't find this shader stage
+				std::cerr << "Shader " + entryPoint + " not found!" << std::endl;
+				ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Shader " + entryPoint + " not found!", "OpenGLShader::LoadFromFile");
+			}
+		}
+	}
+
+private:
+	OpenGLShader* mShader;
+	
+	static std::set<std::string> msIncludes;
+};
+
+std::set<std::string> GLSLScriptCompiler::msIncludes;
+
 class OpenGLShaderReflection
 {
 public:
@@ -95,13 +329,16 @@ private:
 		for (GLuint i = 0; i < GLuint(numAttribsInProgram); ++i) 
 		{
 			glGetActiveAttrib(mShaderProgramID, i, MaxNameLen, &actualLen, &size, &type, name);
+			// exclude GLSL system attribute
+			if ( strstr(name, "gl_") == NULL )
+			{
+				InputSignature attribute;
+				attribute.AttributeSlot = i;
+				attribute.Type = type;
+				attribute.ArraySize = size;
 
-			InputSignature attribute;
-			attribute.AttributeSlot = i;
-			attribute.Type = type;
-			attribute.ArraySize = size;
-
-			mShaderOGL->mInputSignatures.push_back(attribute);
+				mShaderOGL->mInputSignatures.push_back(attribute);
+			}
 		}
 	}
 
@@ -137,12 +374,12 @@ private:
 			String actualName(&name[0], actualNameLen);
 
 			// Get uniform block for this uniform
-			GLint blockIdx;
+			GLint blockIdx, globalBlockIdx = -1;
 			glGetActiveUniformsiv(mShaderProgramID, 1, &i, GL_UNIFORM_BLOCK_INDEX, &blockIdx);
 			if (blockIdx == GL_INVALID_INDEX) 
 			{
 				// Global uniform, SRV or UAV
-				OpenGLShaderParameterClass paramClass;
+				ShaderParameterClass paramClass;
 				EffectParameterType paramType;
 				OpenGLMapping::UnMapping(type, paramType, paramClass);
 					
@@ -152,33 +389,33 @@ private:
 
 					uniform.Name = actualName;
 					uniform.Type = paramType;
-					uniform.ArraySize = arraySize;
+					uniform.ArraySize = (arraySize <= 1) ? 0 : arraySize;
 					uniform.Location = i;
 					assert( i == glGetProgramResourceLocation(mShaderProgramID, GL_UNIFORM, &name[0]) );
 
-					mShaderOGL->mGlobalParams.push_back(uniform);
-				}
-				else if (paramClass == Shader_Param_SRV)
-				{
-					// Texture or TBuffer
-					SRVParam srvParam;
-					srvParam.Name = actualName;
-					srvParam.Type = paramType;
-					srvParam.Location = i;
-					assert( i == glGetProgramResourceLocation(mShaderProgramID, GL_UNIFORM, &name[0]) );
+					if (globalBlockIdx == -1)
+					{
+						// Add global uniform block
+						UniformBuffer globalUniformBlock;
+						globalBlockIdx = mShaderOGL->mUniformBuffers.size();
+						mShaderOGL->mUniformBuffers.resize(globalBlockIdx+1);
+						mShaderOGL->mUniformBuffers.back().Location = -1;
+					}
 
-					mShaderOGL->mSRVParams.push_back(srvParam);
+					mShaderOGL->mUniformBuffers[globalBlockIdx].BufferVariables.push_back(uniform);
 				}
 				else 
 				{
-					// Image or ImageBuffer
-					UAVParam uavParam;
-					uavParam.Name = actualName;
-					uavParam.Type = paramType;
-					uavParam.Location = i;
+					// SRV: Texture or TBuffer 
+					// UAV: Image or ImageBuffer
+					ResouceViewParam viewParam;
+					viewParam.Name = actualName;
+					viewParam.Type = paramType;
+					viewParam.ViewClass = paramClass;
+					viewParam.Location = i;
 					assert( i == glGetProgramResourceLocation(mShaderProgramID, GL_UNIFORM, &name[0]) );
 
-					mShaderOGL->mUAVParams.push_back(uavParam);
+					mShaderOGL->mBoundResources.push_back(viewParam);
 				}
 			}
 		}
@@ -201,7 +438,7 @@ private:
 			std::vector<GLuint> indices(numUniformInBlock);
 			glGetActiveUniformBlockiv(mShaderProgramID, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, (GLint*)&indices[0]);
 
-			UniformBufferParam uniformBufferParam;
+			UniformBuffer uniformBufferParam;
 			uniformBufferParam.Name = String(name, actualNameLen);
 			uniformBufferParam.Location = i;
 
@@ -212,6 +449,9 @@ private:
 				glGetActiveUniformsiv(mShaderProgramID, 1, &indices[k], GL_UNIFORM_ARRAY_STRIDE, &arrayStride);
 				glGetActiveUniformsiv(mShaderProgramID, 1, &indices[k], GL_UNIFORM_MATRIX_STRIDE, &matrixStride);
 
+				if (matrixStride > 0)
+					assert(matrixStride == sizeof(float) * 4); // Only support float4x4 matrix
+
 				// Check array type may contain []
 				if (arraySize > 1 && actualNameLen > 3) 
 				{
@@ -221,9 +461,9 @@ private:
 
 				UniformParam bufferVariable;
 				bufferVariable.Name = String(name, actualNameLen);
-				bufferVariable.ArraySize = arraySize;
-				
-				OpenGLShaderParameterClass paramClass;
+				bufferVariable.ArraySize = (arraySize <= 1) ? 0 : arraySize;
+
+				ShaderParameterClass paramClass;
 				OpenGLMapping::UnMapping(type, bufferVariable.Type, paramClass);
 				assert(paramClass == Shader_Param_Uniform);
 
@@ -243,21 +483,23 @@ private:
 			String actualName(name, actualNameLen);
 			if (actualName.find("SRV") != String::npos)
 			{
-				SRVParam srvParam;
+				ResouceViewParam srvParam;
 				srvParam.Name = actualName.substr(0, actualName.find("SRV"));
 				srvParam.Type = EPT_StructureBuffer;
+				srvParam.ViewClass = Shader_Param_SRV;
 				srvParam.Location = i;
 
-				mShaderOGL->mSRVParams.push_back(srvParam);
+				mShaderOGL->mBoundResources.push_back(srvParam);
 			}
 			else if (actualName.find("UAV") != String::npos)
 			{
-				UAVParam uavParam;
+				ResouceViewParam uavParam;
 				uavParam.Name = actualName.substr(0, actualName.find("UAV"));
 				uavParam.Type = EPT_StructureBuffer;
+				uavParam.ViewClass = Shader_Param_UAV;
 				uavParam.Location = i;
 
-				mShaderOGL->mUAVParams.push_back(uavParam);
+				mShaderOGL->mBoundResources.push_back(uavParam);
 			}
 			else
 			{
@@ -272,506 +514,10 @@ private:
 };
 
 //////////////////////////////////////////////////////////////////////////
-template <typename T>
-struct ShaderParameterSetHelper {};
-
-template<>
-struct ShaderParameterSetHelper<bool>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0) {}
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			UpdateTimeStamp = Param->GetTimeStamp();
-
-			bool value;  Param->GetValue(value);
-			glProgramUniform1i(ShaderOGL, Location, value);
-		} 
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template<>
-struct ShaderParameterSetHelper<bool*>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param, GLsizei count)
-		: ShaderOGL(shaderID), Location(Location), Param(param), UpdateTimeStamp(0), Count(count) {}
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			UpdateTimeStamp = Param->GetTimeStamp();
-
-			assert(Param->GetElementSize() == Count);
-
-			bool* pValue;
-			Param->GetValue(pValue);
-
-			vector<GLint> temp(Count);
-			for (GLsizei i = 0; i < Count; ++i)
-				temp[i] = pValue[i];
-
-			glProgramUniform1iv(ShaderOGL, Location, Count, &temp[0]);
-		} 
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	GLsizei Count;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<int32_t>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0)  { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			UpdateTimeStamp = Param->GetTimeStamp();
-
-			int32_t value;  Param->GetValue(value);
-			glProgramUniform1i(ShaderOGL, Location, value);
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<int32_t*>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param, GLsizei count)
-		: ShaderOGL(shaderID), Location(location), Param(param), Count(count), UpdateTimeStamp(0) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			int32_t* pValue;
-			Param->GetValue(pValue);
-
-			assert(Count == Param->GetElementSize());
-			glProgramUniform1iv(ShaderOGL, Location, Count, pValue);
-
-			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	GLsizei Count;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float value; Param->GetValue(value);
-			glProgramUniform1f(ShaderOGL, Location, value);
-
-			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float*>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param, GLsizei count)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0), Count(count) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float* pValue;
-			Param->GetValue(pValue);
-
-			assert(Count == Param->GetElementSize());
-			glProgramUniform1fv(ShaderOGL, Location, Count, pValue);
-
-			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	GLsizei Count;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float2>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float2 value; Param->GetValue(value);
-			glProgramUniform2f(ShaderOGL, Location, value.X(), value.Y());
-
-			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float2*>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param, GLsizei count)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0), Count(count) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float2* pValue;
-			Param->GetValue(pValue);
-
-			assert(Count == Param->GetElementSize());
-			glProgramUniform2fv(ShaderOGL, Location, Count,  reinterpret_cast<float*>(pValue));
-
-			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	GLsizei Count;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float3>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float3 value; Param->GetValue(value);
-			glProgramUniform3f(ShaderOGL, Location, value[0], value[1], value[2]);
-
-			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float3*>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param, GLsizei count)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0), Count(count) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float3* pValue;
-			Param->GetValue(pValue);
-
-			assert(Count == Param->GetElementSize());
-			glProgramUniform3fv(ShaderOGL, Location, Count,  reinterpret_cast<float*>(pValue));
-
-			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	GLsizei Count;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float4>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float4 value; Param->GetValue(value);
-			glProgramUniform4f(ShaderOGL, Location, value[0], value[1], value[2], value[3]);
-
-			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float4*>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param, GLsizei count)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0), Count(count) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float4* pValue;
-			Param->GetValue(pValue);
-
-			assert(Count == Param->GetElementSize());
-			glProgramUniform4fv(ShaderOGL, Location, Count,  reinterpret_cast<float*>(pValue));
-
-			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	GLsizei Count;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-
-template <>
-struct ShaderParameterSetHelper<float4x4>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float4x4 value; 
-			Param->GetValue(value);
-
-			// we know that glsl matrix is column major, so we need transpose out matrix.
-			glProgramUniformMatrix4fv(ShaderOGL, Location, 1, true, &value[0]);
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float4x4*>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param, GLsizei count)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0), Count(count) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float4x4* pValue;
-			Param->GetValue(pValue);
-
-			assert(Count == Param->GetElementSize());
-			glProgramUniformMatrix4fv(ShaderOGL, Location, Count, true, reinterpret_cast<float*>(pValue));
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	GLsizei Count;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template<>
-struct ShaderParameterSetHelper<ShaderResourceView>
-{
-	ShaderParameterSetHelper(EffectParameter* param, GLuint binding)
-		: Param(param), Binding(binding) {}
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			weak_ptr<ShaderResourceView> srv;
-			Param->GetValue(srv);
-
-			if (auto spt = srv.lock())
-			{
-				OpenGLShaderResourceView* srvOGL = static_cast_checked<OpenGLShaderResourceView*>(spt.get());
-				srvOGL->BindSRV(Binding);
-			}
-		}
-	}
-
-private:
-	GLuint Binding;
-	EffectParameter* Param;
-	TimeStamp UpdateTimeStamp;
-};
-
-template<>
-struct ShaderParameterSetHelper<UnorderedAccessView>
-{
-	ShaderParameterSetHelper(EffectParameter* param, GLuint binding)
-		: Param(param), Binding(binding) {}
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			weak_ptr<UnorderedAccessView> uav;
-			Param->GetValue(uav);
-
-			if (auto spt = uav.lock())
-			{
-				OpenGLUnorderedAccessView* srvOGL = static_cast_checked<OpenGLUnorderedAccessView*>(spt.get());
-				srvOGL->BindUAV(Binding);
-			}
-		}
-	}
-
-private:
-	GLuint Binding;
-	EffectParameter* Param;
-	TimeStamp UpdateTimeStamp;
-};
-
-template<>
-struct ShaderParameterSetHelper<SamplerState>
-{
-	ShaderParameterSetHelper(EffectParameter* param, GLuint binding)
-		: Param(param), Binding(binding) {}
-
-	void operator() ()
-	{
-		weak_ptr<SamplerState> sampler;
-		Param->GetValue(sampler);
-
-		if (auto spt = sampler.lock())
-		{
-			gOpenGLDevice->SetSamplerState(ST_Pixel /*Use used in OpenGL*/, Binding, spt);
-		}
-	}
-
-private:
-	GLuint Binding;
-	EffectParameter* Param;
-};
-
-struct ShaderTextureBinding
-{
-	ShaderTextureBinding(GLuint shaderID, GLint location, GLuint binding)
-		: ShaderOGL(shaderID), Location(location), Binding(binding) {}
-	
-	void operator() ()
-	{
-		glProgramUniform1i(ShaderOGL, Location, Binding);
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLuint Binding;
-	GLuint Location;
-};
-
-struct ShaderStorageBinding
-{
-	ShaderStorageBinding(GLuint shaderID, GLint location, GLuint binding)
-		: ShaderOGL(shaderID), Location(location), Binding(binding) {}
-
-	void operator() ()
-	{
-		glShaderStorageBlockBinding(ShaderOGL, Location, Binding);
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLuint Binding;
-	GLuint Location;
-};
-
-//////////////////////////////////////////////////////////////////////////
 OpenGLShader::OpenGLShader( ShaderType shaderType )
 	: Shader(shaderType),
 	  mShaderOGL(0)
 {
-
 }
 
 OpenGLShader::~OpenGLShader()
@@ -818,358 +564,107 @@ bool OpenGLShader::LoadFromByteCode( const String& filename )
 
 bool OpenGLShader::LoadFromFile( const String& filename, const ShaderMacro* macros, uint32_t macroCount, const String& entryPoint /*= ""*/ )
 {
-	std::ifstream fileStream(filename);
-	std::string glslSource( (std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>() );
+	//std::ifstream fileStream(filename);
+	//std::string glslSource( (std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>() );
 
-	// Split into shader section
-	static const char* GLSLShaderToken[] = {
-		"[[Vertex=%s]]", "[[TessControl=%s]", "[[TessEval=%s]]", "[[Geometry=%s]]", "[[Fragment=%s]]", "[[Compute=%s]]" 
-	};
+	//// Split into shader section
+	//static const char* GLSLShaderToken[] = {
+	//	"[[Vertex=%s]]", "[[TessControl=%s]", "[[TessEval=%s]]", "[[Geometry=%s]]", "[[Fragment=%s]]", "[[Compute=%s]]" 
+	//};
 
-	char delimiter[255];
-	std::sprintf(delimiter, GLSLShaderToken[mShaderType], entryPoint.c_str());	
+	//char delimiter[255];
+	//std::sprintf(delimiter, GLSLShaderToken[mShaderType], entryPoint.c_str());	
 
-	String shaderSource;
+	//String shaderSource;
 
-	size_t tokenBegin = glslSource.find(delimiter);
-	if (tokenBegin != std::string::npos)
+	//size_t tokenBegin = glslSource.find(delimiter);
+	//if (tokenBegin != std::string::npos)
+	//{
+	//	size_t tokenEnd = glslSource.find("]]", tokenBegin)+2; // Skip current one
+	//	size_t nextTokenEnd = glslSource.find("]]", tokenEnd);
+
+	//	if (nextTokenEnd != std::string::npos)
+	//	{
+	//		// Validate
+	//		size_t nextTokenBegin = glslSource.rfind("[[", nextTokenEnd);
+
+	//		bool valid = false;
+	//		for (size_t i = nextTokenBegin; i < nextTokenEnd && !valid; ++i)
+	//			valid = (glslSource[i] == '=');
+
+	//		assert(valid == true);
+	//		while(isalpha(glslSource[tokenEnd]) == false) tokenEnd++;
+	//		shaderSource = glslSource.substr(tokenEnd, nextTokenBegin - tokenEnd);
+	//	}
+	//	else
+	//		shaderSource = glslSource.substr(tokenEnd);
+	//}
+	//else
+	//{
+	//	tokenBegin = glslSource.find("[[");
+	//	if (tokenBegin == std::string::npos)
+	//	{
+	//		shaderSource = glslSource;
+	//	}
+	//	else
+	//		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Shader " + entryPoint + " not found!", "OpenGLShader::LoadFromFile");
+	//}
+
+	//// Parse all SamplerState
+	//{
+	//	size_t token = shaderSource.find("#pragma");
+	//	while (token != std::string::npos)
+	//	{
+	//		token += 7; // skip #pragma
+	//		
+	//		std::string texture, samplerState;
+	//		size_t colonPos = shaderSource.find(':', token);
+	//		assert(colonPos != std::string::npos);
+
+	//		size_t s = token+1, e= colonPos - 1;
+	//		while(!isalpha(shaderSource[s])) s++;
+	//		while(!isalpha(shaderSource[e])) e--;
+	//		texture = shaderSource.substr(s, e - s + 1);	
+
+	//		s = colonPos+1;
+	//		while(!isalpha(shaderSource[s])) s++;
+	//		e = s;
+	//		while(isalpha(shaderSource[e])) e++;
+	//		samplerState = shaderSource.substr(s, e - s);	
+
+	//		mSamplerStates[texture] = samplerState;
+
+	//		token = shaderSource.find("#pragma", e);
+	//	}
+	//	
+	//}
+
+	//if (HasVersion(shaderSource))
+	//{
+	//	char const* pSource = shaderSource.c_str();
+	//	mShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShaderType), 1, &pSource);
+	//}
+	//else
+	//{
+	//	const char* pSource[2];
+
+	//	const String& latestVersion = GetSupportedGLSLVersion();
+	//	pSource[0] = latestVersion.c_str();
+	//	pSource[1] = shaderSource.c_str();
+
+	//	mShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShaderType), 2, pSource);
+	//}
+
+	GLSLScriptCompiler compiler(this);
+	if ( compiler.OpenGLCompile(filename, macros, macroCount, entryPoint) )
 	{
-		size_t tokenEnd = glslSource.find("]]", tokenBegin)+2; // Skip current one
-		size_t nextTokenEnd = glslSource.find("]]", tokenEnd);
-
-		if (nextTokenEnd != std::string::npos)
-		{
-			// Validate
-			size_t nextTokenBegin = glslSource.rfind("[[", nextTokenEnd);
-
-			bool valid = false;
-			for (size_t i = nextTokenBegin; i < nextTokenEnd && !valid; ++i)
-				valid = (glslSource[i] == '=');
-
-			assert(valid == true);
-			while(isalpha(glslSource[tokenEnd]) == false) tokenEnd++;
-			shaderSource = glslSource.substr(tokenEnd, nextTokenBegin - tokenEnd);
-		}
-		else
-			shaderSource = glslSource.substr(tokenEnd);
-	}
-	else
-	{
-		// Error
-	}
-
-	// Parse all SamplerState
-	{
-		size_t token = shaderSource.find("#pragma");
-		while (token != std::string::npos)
-		{
-			token += 7; // skip #pragma
-			
-			std::string texture, samplerState;
-			size_t colonPos = shaderSource.find(':', token);
-			assert(colonPos != std::string::npos);
-
-			size_t s = token+1, e= colonPos - 1;
-			while(!isalpha(shaderSource[s])) s++;
-			while(!isalpha(shaderSource[e])) e--;
-			texture = shaderSource.substr(s, e - s + 1);	
-
-			s = colonPos+1;
-			while(!isalpha(shaderSource[s])) s++;
-			e = s;
-			while(isalpha(shaderSource[e])) e++;
-			samplerState = shaderSource.substr(s, e - s);	
-
-			mSamplerStates[texture] = samplerState;
-
-			token = shaderSource.find("#pragma", e);
-		}
-		
-	}
-
-
-	if (HasVersion(shaderSource))
-	{
-		char const* pSource = shaderSource.c_str();
-		mShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShaderType), 1, &pSource);
-	}
-	else
-	{
-		const char* pSource[2];
-
-		const String& latestVersion = GetSupportedGLSLVersion();
-		pSource[0] = latestVersion.c_str();
-		pSource[1] = shaderSource.c_str();
-
-		mShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShaderType), 2, pSource);
-	}
-
-	int success;
-	glGetProgramiv(mShaderOGL, GL_LINK_STATUS, &success);
-
-	if (success != GL_TRUE)
-	{
-		int length;
-		glGetProgramiv(mShaderOGL, GL_INFO_LOG_LENGTH, &length);
-
-		std::vector<char> compileOutput(length);
-		glGetProgramInfoLog(mShaderOGL, length, &length, &compileOutput[0]);
-
-		fprintf(stderr, "GLSL %s compile failed\n\n%s\n\n", filename.c_str(), &compileOutput[0]);
-		//EngineLogger::LogError("GLSL %s compile failed\n\n%s\n\n", filename.c_str(), &compileOutput[0]);
+		OpenGLShaderReflection shaderReflection(this);
+		shaderReflection.ReflectShader();
+		OGL_ERROR_CHECK();
 	}
 	
-	OpenGLShaderReflection shaderReflection(this);
-	shaderReflection.ReflectShader();
-
-	OGL_ERROR_CHECK();
-	return (success == GL_TRUE);
-}
-
-//////////////////////////////////////////////////////////////////////////
-
-OpenGLShaderPipeline::OpenGLShaderPipeline(Effect& effect)
-	: ShaderPipeline(effect)
-{
-	glGenProgramPipelines(1, &mPipelineOGL);
-}
-
-OpenGLShaderPipeline::~OpenGLShaderPipeline()
-{
-	glDeleteProgramPipelines(1, &mPipelineOGL);
-}
-
-void OpenGLShaderPipeline::OnBind()
-{
-	glBindProgramPipeline(mPipelineOGL);
-
-	// Commit all shader parameter
-	for (auto& paramBindFunc : mParameterBinds)
-		paramBindFunc();
-}
-
-void OpenGLShaderPipeline::OnUnbind()
-{
-	//glBindProgramPipeline(0);
-}
-
-bool OpenGLShaderPipeline::LinkPipeline()
-{
-	GLuint srvBinding = 0;
-	GLuint uavBinding = 0;
-	std::map<String, GLuint> mBindingCache;
-
-	for (int i = 0; i < ST_Count; ++i)
-	{
-		if (mShaderStages[i])
-		{
-			OpenGLShader* shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[i].get()));
-
-			// Global uniforms
-			for (const UniformParam& param : shaderOGL->mGlobalParams)
-			{
-				EffectParameter* uniformParam = mEffect.FetchUniformParameter(param.Name, param.Type, param.ArraySize);
-				AddUniformParamBind(shaderOGL->mShaderOGL, param.Location, uniformParam, param.ArraySize);
-			}
-
-			// Uniform buffers
-			for (const UniformBufferParam& param : shaderOGL->mUniformBuffers)
-			{
-				EffectConstantBuffer* uniformBuffer = mEffect.FetchConstantBuffer(param.Name, param.BufferSize);
-
-				if (uniformBuffer->GetNumVariables() > 0)
-				{
-					// check buffer variables
-					assert(uniformBuffer->GetNumVariables() == param.BufferVariables.size());
-					for (size_t i = 0; i < param.BufferVariables.size(); ++i)
-					{
-						EffectParameter* variable = uniformBuffer->GetVariable(i);
-						if (variable->GetName() != param.BufferVariables[i].Name ||
-							variable->GetParameterType() != param.BufferVariables[i].Type ||
-							variable->GetElementSize() != param.BufferVariables[i].ArraySize ||
-							variable->GetOffset() != param.BufferVariables[i].Location)
-						{
-							ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Error: Same uniform buffer with different variables!", "D3D11ShaderPipeline::LinkPipeline");
-						}
-					}
-				}
-				else
-				{
-					for (const auto& bufferVariable : param.BufferVariables)
-					{
-						EffectParameter* variable = mEffect.FetchUniformParameter(bufferVariable.Name, bufferVariable.Type, bufferVariable.ArraySize);
-						uniformBuffer->AddVariable(variable, bufferVariable.Location);
-					}
-				}
-			}
-
-			// Shader resource views
-			for (const SRVParam& param : shaderOGL->mSRVParams)
-			{
-				if (mBindingCache.find(param.Name) == mBindingCache.end())
-				{		
-					mBindingCache[param.Name] = srvBinding++;
-
-					EffectParameter* srvParam = mEffect.FetchSRVParameter(param.Name, param.Type);
-					
-					// Bind texture to ActiveUnit
-					AddSRVParamBind(srvParam, mBindingCache[param.Name]);
-				}
-
-				// Set texture unit to shader program
-				AddShaderResourceBind(shaderOGL->mShaderOGL, param.Location, mBindingCache[param.Name], param.Type == EPT_StructureBuffer);
-			}
-
-			// Unordered access views
-			for (const UAVParam& param : shaderOGL->mUAVParams)
-			{
-				if (mBindingCache.find(param.Name) == mBindingCache.end())
-				{
-					mBindingCache[param.Name] = uavBinding++;
-
-					EffectParameter* uavParam = mEffect.FetchUAVParameter(param.Name, param.Type);
-					AddUAVParamBind(uavParam, mBindingCache[param.Name]);
-				}
-
-				AddShaderResourceBind(shaderOGL->mShaderOGL, param.Location, mBindingCache[param.Name], param.Type == EPT_StructureBuffer);
-			}
-
-			// SamplerState
-			for (auto& kv : shaderOGL->mSamplerStates)
-			{
-				EffectParameter* effectParam = mEffect.FetchSamplerParameter(kv.second);
-				mParameterBinds.push_back( ShaderParameterSetHelper<SamplerState>(effectParam, mBindingCache[kv.first]) );
-			}
-		}
-	}
-
-	// Link all stage into pipeline
-	if (mShaderStages[ST_Vertex])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Vertex].get()))->mShaderOGL;
-		glUseProgramStages(mPipelineOGL, GL_VERTEX_SHADER_BIT, shaderOGL);
-	}
-
-	if (mShaderStages[ST_Hull])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Hull].get()))->mShaderOGL;
-		glUseProgramStages(mPipelineOGL, GL_VERTEX_SHADER_BIT, shaderOGL);
-	}
-
-	if (mShaderStages[ST_Domain])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Domain].get()))->mShaderOGL;
-		glUseProgramStages(mPipelineOGL, GL_TESS_CONTROL_SHADER_BIT, shaderOGL);
-	}
-
-	if (mShaderStages[ST_Geomerty])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Geomerty].get()))->mShaderOGL;
-		glUseProgramStages(mPipelineOGL, GL_TESS_EVALUATION_SHADER_BIT, shaderOGL);
-	}
-
-	if (mShaderStages[ST_Pixel])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Pixel].get()))->mShaderOGL;
-		glUseProgramStages(mPipelineOGL, GL_GEOMETRY_SHADER_BIT, shaderOGL);
-	}
-
-	if (mShaderStages[ST_Compute])
-	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Compute].get()))->mShaderOGL;
-		glUseProgramStages(mPipelineOGL, GL_COMPUTE_SHADER_BIT, shaderOGL);
-	}
-
 	return true;
 }
-
-void OpenGLShaderPipeline::AddUniformParamBind( GLuint shader, GLint location, EffectParameter* effectParam, GLsizei arrSize )
-{
-	switch(effectParam->GetParameterType())
-	{
-	case EPT_Boolean:
-		{
-			if (arrSize > 1)
-				mParameterBinds.push_back( ShaderParameterSetHelper<bool*>(shader, location, effectParam, arrSize) );
-			else 
-				mParameterBinds.push_back( ShaderParameterSetHelper<bool>(shader, location, effectParam) );
-		}
-		break;
-	case EPT_Int:
-		{
-			if (arrSize > 1)
-				mParameterBinds.push_back( ShaderParameterSetHelper<int32_t*>(shader, location, effectParam, arrSize) );
-			else 
-				mParameterBinds.push_back( ShaderParameterSetHelper<int32_t>(shader, location, effectParam) );
-		}
-		break;
-	case EPT_Float:
-		{
-			if (arrSize > 1)
-				mParameterBinds.push_back( ShaderParameterSetHelper<float*>(shader, location, effectParam, arrSize) );
-			else 
-				mParameterBinds.push_back( ShaderParameterSetHelper<float>(shader, location, effectParam) );
-		}
-		break;
-	case EPT_Float2:
-		{
-			if (arrSize > 1)
-				mParameterBinds.push_back( ShaderParameterSetHelper<float2*>(shader, location, effectParam, arrSize) );
-			else 
-				mParameterBinds.push_back( ShaderParameterSetHelper<float2>(shader, location, effectParam) );	
-		}
-		break;
-	case EPT_Float3:
-		{
-			if (arrSize > 1)
-				mParameterBinds.push_back( ShaderParameterSetHelper<float3*>(shader, location, effectParam, arrSize) );
-			else 
-				mParameterBinds.push_back( ShaderParameterSetHelper<float3>(shader, location, effectParam) );	
-		}
-		break;
-	case EPT_Float4:
-		{
-			if (arrSize > 1)
-				mParameterBinds.push_back( ShaderParameterSetHelper<float4*>(shader, location, effectParam, arrSize) );
-			else 
-				mParameterBinds.push_back( ShaderParameterSetHelper<float4>(shader, location, effectParam) );		
-		}
-		break;
-	case EPT_Matrix4x4:
-		{
-			if (arrSize > 1)
-				mParameterBinds.push_back( ShaderParameterSetHelper<float4x4*>(shader, location, effectParam, arrSize) );
-			else 
-				mParameterBinds.push_back( ShaderParameterSetHelper<float4x4>(shader, location, effectParam) );		
-		}
-		break;
-	default:
-		assert(false);
-	}
-}
-
-void OpenGLShaderPipeline::AddSRVParamBind( EffectParameter* effectParam, GLuint binding )
-{
-	mParameterBinds.push_back( ShaderParameterSetHelper<ShaderResourceView>(effectParam, binding) );
-}
-
-void OpenGLShaderPipeline::AddUAVParamBind( EffectParameter* effectParam, GLuint binding )
-{
-	mParameterBinds.push_back( ShaderParameterSetHelper<UnorderedAccessView>(effectParam, binding) );
-}
-
-void OpenGLShaderPipeline::AddShaderResourceBind( GLuint shader, GLint location, GLuint binding, bool shaderStorage )
-{
-	if (shaderStorage)
-	{
-		mParameterBinds.push_back( ShaderStorageBinding(shader, location, binding) );
-	}
-	else
-	{
-		mParameterBinds.push_back( ShaderTextureBinding(shader, location, binding) );
-	}
-}
-
 
 
 }

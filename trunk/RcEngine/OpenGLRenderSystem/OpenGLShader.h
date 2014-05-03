@@ -19,10 +19,11 @@ struct UniformParam
 	String Name;
 	GLint Location;
 	GLuint ArraySize;
+	GLuint ArrayStride;
 	EffectParameterType Type;
 };
 
-struct UniformBufferParam
+struct UniformBuffer
 {
 	String Name;
 	GLint Location;
@@ -30,18 +31,12 @@ struct UniformBufferParam
 	vector<UniformParam> BufferVariables;
 };
 
-struct SRVParam
+struct ResouceViewParam
 {
 	String Name;
 	GLint Location;
 	EffectParameterType Type;
-};
-
-struct UAVParam
-{
-	String Name;
-	GLint Location;
-	EffectParameterType Type;
+	ShaderParameterClass ViewClass;
 };
 
 // Forward declaration
@@ -60,13 +55,12 @@ public:
 private:
 	friend class OpenGLShaderReflection;
 	friend class OpenGLShaderPipeline;
+	friend class GLSLScriptCompiler;
 
 	GLuint mShaderOGL;
 	
-	std::vector<SRVParam> mSRVParams;
-	std::vector<UAVParam> mUAVParams;
-	std::vector<UniformParam> mGlobalParams;
-	std::vector<UniformBufferParam> mUniformBuffers;
+	std::vector<ResouceViewParam> mBoundResources;
+	std::vector<UniformBuffer> mUniformBuffers;
 	std::vector<InputSignature> mInputSignatures;
 	std::map<String, String> mSamplerStates;
 };
@@ -83,8 +77,8 @@ public:
 
 private:
 	void AddUniformParamBind(GLuint shader, GLint location, EffectParameter* effectParam, GLsizei arrSize);
-	void AddSRVParamBind(EffectParameter* effectParam, GLuint binding);
-	void AddUAVParamBind(EffectParameter* effectParam, GLuint binding);
+	void AddSRVResouceBind(EffectParameter* effectParam, GLuint binding);
+	void AddUAVResourceBind(EffectParameter* effectParam, GLuint binding);
 
 	void AddShaderResourceBind(GLuint shader, GLint location, GLuint binding, bool shaderStorage);
 

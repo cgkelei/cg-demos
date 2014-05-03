@@ -22,9 +22,9 @@ public:
 	void SetBlendState(const shared_ptr<BlendState>& state, const ColorRGBA& blendFactor, uint32_t sampleMask);
 	void SetRasterizerState(const shared_ptr<RasterizerState>& state);
 	void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0);
+	void SetViewports(const std::vector<Viewport>& vp);
 
 protected:
-	void SetViewport(const Viewport& vp);
 	void DoDraw(const EffectTechnique* technique, const RenderOperation& operation);
 
 public:

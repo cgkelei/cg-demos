@@ -25,7 +25,7 @@ public:
 	
 	inline void MakeDirty()											{ mDirty = true; }
 	inline void ClearDirty()										{ mDirty = false; }
-	inline void* GetRawData(uint32_t offset) const					{ return mBackingStore + offset; }
+	inline uint8_t* GetRawData(uint32_t offset) const				{ return mBackingStore + offset; }
 
 	void UpdateBuffer();
 	void SetRawValue(const void* pData, uint32_t offset, uint32_t count);
@@ -180,14 +180,15 @@ public:
 	void SetValue(const T* value, uint32_t count)
 	{
 		assert(count <= mElementSize);
-		if (memcmp(value, mValue, sizeof(T) * count) != 0)
+		
+		//if (memcmp(value, mValue, sizeof(T) * count) != 0)
 		{
 			memcpy(mValue, value, sizeof(T) * count);
 			
 			// Update data in constant buffer
 			if (mUniformBuffer)
 			{
-				uint8_t* pData = static_cast<uint8_t*>( mUniformBuffer->GetRawData(mOffset) );
+				uint8_t* pData = mUniformBuffer->GetRawData(mOffset);
 
 				if (mArrayStrides == sizeof(T))
 					memcpy(pData, mValue, sizeof(T) * count);
@@ -264,7 +265,8 @@ public:
 	virtual void SetValue(const float4x4* value, uint32_t count)
 	{
 		assert(count <= mElementSize);
-		if (memcmp(value, mValue, sizeof(float4x4) * count) != 0)
+
+		//if (memcmp(value, mValue, sizeof(float4x4) * count) != 0)
 		{
 			// OpenGL global uniform, OpenGLAPI will handle it
 			memcpy(mValue, value, sizeof(float4x4) * count);

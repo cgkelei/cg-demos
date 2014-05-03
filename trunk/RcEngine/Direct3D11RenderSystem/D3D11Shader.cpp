@@ -211,11 +211,18 @@ public:
 			D3D11_SIGNATURE_PARAMETER_DESC inputParamDesc; 
 			mReflectorD3D11->GetInputParameterDesc( i, &inputParamDesc ); 
 
-			InputSignature signature;
-			signature.Semantic = inputParamDesc.SemanticName;
-			signature.SemanticIndex = inputParamDesc.SemanticIndex;
+			if (inputParamDesc.SystemValueType == D3D10_NAME_UNDEFINED)
+			{
+				InputSignature signature;
+				signature.Semantic = inputParamDesc.SemanticName;
+				signature.SemanticIndex = inputParamDesc.SemanticIndex;
 
-			vertexShaderD3D11->InputSignatures.push_back(signature);
+				vertexShaderD3D11->InputSignatures.push_back(signature);
+			}
+			else
+			{
+				// System semantic, do not add to vertex input signature
+			}
 		} 
 	}
 
@@ -229,7 +236,7 @@ public:
 			D3D11_SHADER_BUFFER_DESC bufferDesc;
 			bufferD3D11->GetDesc(&bufferDesc);
 			
-			ConstantBufferParam& cbufferParam = mShaderD3D11->ConstantBufferParams[i];
+			ConstantBuffer& cbufferParam = mShaderD3D11->ConstantBufferParams[i];
 
 			cbufferParam.Name = bufferDesc.Name;
 			cbufferParam.BufferSize = bufferDesc.Size; 
@@ -325,55 +332,62 @@ public:
 					bool bCompare = (resBindDesc.uFlags & D3D10_SIF_COMPARISON_SAMPLER);
 					//printf("Sampler: %s cmp=%d binding=%d\n", resBindDesc.Name, bCompare, resBindDesc.BindPoint);
 
-					SamplerParam param;
+					ResourceInputParam param;
 					param.Name = resBindDesc.Name;
 					param.Binding = resBindDesc.BindPoint;
-					mShaderD3D11->SamplerParams.push_back(param);
+					param.Type = EPT_Sampler;
+					param.Class = Shader_Param_Sampler;
+					mShaderD3D11->ResourceInputParams.push_back(param);
 				}
 				break;
-			case D3D10_SIT_TEXTURE:
+			case D3D10_SIT_TEXTURE:  // Missing TextureUAV
 				{
-					SRVParam param;
+					ResourceInputParam param;
 					param.Name = resBindDesc.Name;
 					param.Binding = resBindDesc.BindPoint;
+					param.Class = Shader_Param_SRV;
 					D3D11Mapping::UnMapping(resBindDesc.Dimension, param.Type);
-					mShaderD3D11->SRVParams.push_back(param);
+					mShaderD3D11->ResourceInputParams.push_back(param);
 				}
 				break;
 			case D3D10_SIT_TBUFFER:
 				{
-					SRVParam param;
+					ResourceInputParam param;
 					param.Name = resBindDesc.Name;
 					param.Binding = resBindDesc.BindPoint;
 					param.Type = EPT_TextureBuffer;
-					mShaderD3D11->SRVParams.push_back(param);
+					param.Class = Shader_Param_SRV;
+					mShaderD3D11->ResourceInputParams.push_back(param);
 				}
 				break;
 			case D3D11_SIT_UAV_RWTYPED:
 				{
-					UAVParam param;
+					ResourceInputParam param;
 					param.Name = resBindDesc.Name;
 					param.Binding = resBindDesc.BindPoint;
 					param.Type = EPT_TextureBuffer;
-					mShaderD3D11->UAVParams.push_back(param);
+					param.Class = Shader_Param_UAV;
+					mShaderD3D11->ResourceInputParams.push_back(param);
 				}
 				break;
 			case D3D11_SIT_STRUCTURED:
 				{
-					SRVParam param;
+					ResourceInputParam param;
 					param.Name = resBindDesc.Name;
 					param.Binding = resBindDesc.BindPoint;
 					param.Type = EPT_StructureBuffer;
-					mShaderD3D11->SRVParams.push_back(param);
+					param.Class = Shader_Param_SRV;
+					mShaderD3D11->ResourceInputParams.push_back(param);
 				}
 				break;
 			case D3D11_SIT_UAV_RWSTRUCTURED:
 				{
-					UAVParam param;
+					ResourceInputParam param;
 					param.Name = resBindDesc.Name;
 					param.Binding = resBindDesc.BindPoint;
 					param.Type = EPT_StructureBuffer;
-					mShaderD3D11->UAVParams.push_back(param);
+					param.Class = Shader_Param_UAV;
+					mShaderD3D11->ResourceInputParams.push_back(param);
 				}
 				break;
 
@@ -464,7 +478,7 @@ HRESULT CompileHLSL(const String& filename, const ShaderMacro* macros, uint32_t 
 			pErrorBlob->Release();
 		}
 		else
-			EngineLoger::LogError("HLSL shader compile failed!");
+			EngineLogger::LogError("HLSL shader compile failed!");
 	}
 
 	return hr;
@@ -498,7 +512,7 @@ bool D3D11VertexShader::LoadFromByteCode( const String& filename )
 	HRESULT hr = deviceD3D11->CreateVertexShader(&ShaderCode[0], ShaderCode.size(), nullptr, &ShaderD3D11);
 	if (FAILED(hr))
 	{
-		EngineLoger::LogError("HLSL Vertex Shader %s compile failed\n", filename.c_str());
+		EngineLogger::LogError("HLSL Vertex Shader %s compile failed\n", filename.c_str());
 		return false;
 	}
 	
@@ -556,7 +570,7 @@ bool D3D11HullShader::LoadFromByteCode( const String& filename )
 	HRESULT hr = deviceD3D11->CreateHullShader(&byteCode[0], byteCode.size(), nullptr, &ShaderD3D11);
 	if (FAILED(hr))
 	{
-		EngineLoger::LogError("HLSL Hull Shader %s compile failed\n", filename.c_str());
+		EngineLogger::LogError("HLSL Hull Shader %s compile failed\n", filename.c_str());
 		return false;
 	}
 
@@ -611,7 +625,7 @@ bool D3D11DomainShader::LoadFromByteCode( const String& filename )
 	HRESULT hr = deviceD3D11->CreateDomainShader(&byteCode[0], byteCode.size(), nullptr, &ShaderD3D11);
 	if (FAILED(hr))
 	{
-		EngineLoger::LogError("HLSL Hull Shader %s compile failed\n", filename.c_str());
+		EngineLogger::LogError("HLSL Hull Shader %s compile failed\n", filename.c_str());
 		return false;
 	}
 
@@ -666,7 +680,7 @@ bool D3D11GeometryShader::LoadFromByteCode( const String& filename )
 	HRESULT hr = deviceD3D11->CreateGeometryShader(&byteCode[0], byteCode.size(), nullptr, &ShaderD3D11);
 	if (FAILED(hr))
 	{
-		EngineLoger::LogError("HLSL Hull Shader %s compile failed\n", filename.c_str());
+		EngineLogger::LogError("HLSL Hull Shader %s compile failed\n", filename.c_str());
 		return false;
 	}
 
@@ -721,7 +735,7 @@ bool D3D11PixelShader::LoadFromByteCode( const String& filename )
 	HRESULT hr = deviceD3D11->CreatePixelShader(&byteCode[0], byteCode.size(), nullptr, &ShaderD3D11);
 	if (FAILED(hr))
 	{
-		EngineLoger::LogError("HLSL Hull Shader %s compile failed\n", filename.c_str());
+		EngineLogger::LogError("HLSL Hull Shader %s compile failed\n", filename.c_str());
 		return false;
 	}
 
@@ -776,7 +790,7 @@ bool D3D11ComputeShader::LoadFromByteCode( const String& filename )
 	HRESULT hr = deviceD3D11->CreateComputeShader(&byteCode[0], byteCode.size(), nullptr, &ShaderD3D11);
 	if (FAILED(hr))
 	{
-		EngineLoger::LogError("HLSL Hull Shader %s compile failed\n", filename.c_str());
+		EngineLogger::LogError("HLSL Hull Shader %s compile failed\n", filename.c_str());
 		return false;
 	}
 
@@ -881,33 +895,43 @@ bool D3D11ShaderPipeline::LinkPipeline()
 					{
 						EffectParameter* variable = mEffect.FetchUniformParameter(bufferVariable.Name, bufferVariable.Type, bufferVariable.ArraySize);
 						constantBuffer->AddVariable(variable, bufferVariable.Offset);
+
+						if (bufferVariable.ArraySize > 1)
+							variable->SetArrayStride(sizeof(float) * 4); // always float4
 					}
 				}
 			}
 
-			// Shader Resource View
-			for (const auto& srvParam : shaderD3D11->SRVParams)
+			for (const auto& param : shaderD3D11->ResourceInputParams)
 			{
-				EffectParameter* effectParam = mEffect.FetchSRVParameter(srvParam.Name, srvParam.Type);
-				mParameterBinds.push_back( SRVBindHelper(effectParam, srvParam.Binding, shaderD3D11->GetShaderType()) );
+				switch (param.Class)
+				{
+				case Shader_Param_SRV:
+					{
+						EffectParameter* effectParam = mEffect.FetchSRVParameter(param.Name, param.Type);
+						mParameterBinds.push_back( SRVBindHelper(effectParam, param.Binding, shaderD3D11->GetShaderType()) );
+					}
+					break;
+				case Shader_Param_UAV:
+					{
+						// Only Compute has UAV
+						if (mShaderStages[i]->GetShaderType() == ST_Compute)
+						{
+							EffectParameter* effectParam = mEffect.FetchSRVParameter(param.Name, param.Type);
+							mParameterBinds.push_back( UAVSRVBindHelper(effectParam, param.Binding) );
+						}
+					}
+					break;
+				case Shader_Param_Sampler:
+					{
+						EffectParameter* effectParam = mEffect.FetchSamplerParameter(param.Name);
+						mParameterBinds.push_back( SamplerBindHelper(effectParam, param.Binding, shaderD3D11->GetShaderType()) );
+					}
+					break;
+				default:
+					break;
+				}
 			}
-
-			for (const auto& samplerParam : shaderD3D11->SamplerParams)
-			{
-				EffectParameter* effectParam = mEffect.FetchSamplerParameter(samplerParam.Name);
-				mParameterBinds.push_back( SamplerBindHelper(effectParam, samplerParam.Binding, shaderD3D11->GetShaderType()) );
-			}
-		}
-	}
-
-	// Only Compute has UAV
-	if (mShaderStages[ST_Compute])
-	{
-		D3D11Shader* shaderD3D11 = static_cast_checked<D3D11Shader*>(mShaderStages[ST_Compute].get());
-		for (const auto& uavParam : shaderD3D11->UAVParams)
-		{
-			EffectParameter* effectParam = mEffect.FetchSRVParameter(uavParam.Name, uavParam.Type);
-			mParameterBinds.push_back( UAVSRVBindHelper(effectParam, uavParam.Binding) );
 		}
 	}
 

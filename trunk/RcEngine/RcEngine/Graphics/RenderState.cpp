@@ -82,7 +82,7 @@ SamplerStateDesc::SamplerStateDesc()
 	  MaxLOD(FLT_MAX),
 	  MaxAnisotropy(16),
 	  ComparisonFunc(CF_Never),
-	  BindStage(ST_Pixel),
+	  //BindStage(ST_Pixel),
 	  CompareSampler(false)
 {
 
@@ -94,3 +94,5 @@ bool operator< (const SamplerStateDesc& lhs, const SamplerStateDesc& rhs)
 }
 
 }
+
+

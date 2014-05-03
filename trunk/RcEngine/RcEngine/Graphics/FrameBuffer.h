@@ -8,22 +8,19 @@
 
 namespace RcEngine {
 
-/**
- * No Multiple Viewports support.
- */
 struct _ApiExport Viewport
 {
 	Viewport() {}
-	Viewport(uint32_t left, uint32_t top, uint32_t width, uint32_t height)
+	Viewport(float left, float top, float width, float height)
 		: Left(left), Top(top), Width(width), Height(height) {}
 	
 	friend bool operator != ( const Viewport& lhs, const Viewport& rhs )
 	{
 		return (lhs.Left != rhs.Left) || (lhs.Top != rhs.Top) || 
-			(lhs.Width != rhs.Width) || (lhs.Height != rhs.Height);
+			   (lhs.Width != rhs.Width) || (lhs.Height != rhs.Height);
 	}
 
-	uint32_t Left, Top, Width, Height;
+	float Left, Top, Width, Height;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -63,16 +60,14 @@ public:
 	inline uint32_t GetWidth() const { return mWidth; }
 	inline uint32_t GetHeight() const { return mHeight; }
 
-	inline bool IsDirty() const			{ return mDirty; }
-
-
 	void SetViewport(const Viewport& vp);
-	inline const Viewport& GetViewport() const { return mViewport; }
+	void SetViewport(uint32_t index, const Viewport& vp); 
+	inline const vector<Viewport>& GetViewports() const { return mViewports; }
 
 	shared_ptr<RenderView> GetRTV(Attachment att) const;
 	shared_ptr<UnorderedAccessView> GetUAV(uint32_t index) const;
 
-	void AttachRTV(Attachment att, const shared_ptr<RenderView>& rtv);
+	void AttachRTV(Attachment attchment, const shared_ptr<RenderView>& rtv);
 	void AttachUAV(uint32_t index, const shared_ptr<UnorderedAccessView>& uav);
 
 	void DetachRTV(Attachment att);
@@ -82,7 +77,7 @@ public:
 
 	/**
 	 * Clear all render target of the frame buffer.
-	 * note that before do clear, you need to bind the frame buffer as current device 
+	 * Note that before do clear, you need to bind the frame buffer as current device 
 	 * frame buffer first, it is user's responsibility.
 	 */
 	void Clear(uint32_t flags, const ColorRGBA& clr, float depth, uint32_t stencil);
@@ -97,16 +92,13 @@ protected:
 
 	uint32_t mWidth, mHeight;
 
-	// Todo: add multiple viewports support
-	Viewport mViewport;
+	vector<Viewport> mViewports;
 
 	vector<shared_ptr<RenderView> > mColorViews;
 	shared_ptr<RenderView> mDepthStencilView;
 
 	// Unordered access view, used in per-pixel list method, like OIT.
 	vector<shared_ptr<UnorderedAccessView>> mUnorderedAccessViews;
-	
-	bool mDirty;
 
 	shared_ptr<Camera> mCamera;
 };

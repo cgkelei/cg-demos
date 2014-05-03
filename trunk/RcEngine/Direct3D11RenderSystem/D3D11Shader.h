@@ -12,18 +12,12 @@ struct InputSignature
 	uint32_t SemanticIndex;
 };
 
-struct SRVParam
+struct ResourceInputParam
 {
 	String Name;
 	uint32_t Binding;
 	EffectParameterType Type;
-};
-
-struct UAVParam
-{
-	String Name;
-	uint32_t Binding;
-	EffectParameterType Type;
+	ShaderParameterClass Class;
 };
 
 struct UniformParam
@@ -34,20 +28,13 @@ struct UniformParam
 	EffectParameterType Type;
 };
 
-struct ConstantBufferParam
+struct ConstantBuffer
 {
 	String Name;
 	uint32_t BufferSize;
 	uint32_t Binding;
 	vector<UniformParam> BufferVariables;
 };
-
-struct SamplerParam
-{
-	String Name;
-	uint32_t Binding;
-};
-
 
 class _D3D11Export D3D11Shader : public Shader
 {
@@ -56,10 +43,8 @@ public:
 	virtual ~D3D11Shader() {}
 
 public:
-	vector<SRVParam> SRVParams;
-	vector<UAVParam> UAVParams;
-	vector<SamplerParam> SamplerParams;
-	vector<ConstantBufferParam> ConstantBufferParams;
+	vector<ResourceInputParam> ResourceInputParams;
+	vector<ConstantBuffer> ConstantBufferParams;
 
 	friend class D3D11ShaderReflection;
 	friend class D3D11ShaderPipeline;
