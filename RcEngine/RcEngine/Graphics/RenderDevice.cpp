@@ -34,13 +34,7 @@ void RenderDevice::BindFrameBuffer( const shared_ptr<FrameBuffer>& fb )
 		mCurrentFrameBuffer = fb;
 	}
 	
-	if(mCurrentFrameBuffer->IsDirty())
-	{
-		// update FBO info
-		mCurrentFrameBuffer->OnBind();
-
-		SetViewport(mCurrentFrameBuffer->GetViewport());
-	}
+	mCurrentFrameBuffer->OnBind();
 }
 
 void RenderDevice::Draw( const EffectTechnique* technique, const RenderOperation& operation )

@@ -10,7 +10,7 @@
   <!-- Effect techniques -->
   <Technique name="FSQuad">
     <Pass name="p0">
-      <VertexShader file="FSQuad" entry="VSMain"/>
+      <VertexShader file="FullscreenTriangle" entry="FullscreenTriangleVS"/>
       <PixelShader file="FSQuad" entry="PSMain"/>
     </Pass>
   </Technique>

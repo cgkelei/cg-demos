@@ -1,7 +1,6 @@
 #include "OpenGLDevice.h"
 #include "OpenGLFactory.h"
 #include "OpenGLBuffer.h"
-#include "OpenGLFrameBuffer.h"
 #include "OpenGLRenderWindow.h"
 #include "OpenGLSamplerState.h"
 #include "OpenGLTexture.h"
@@ -22,11 +21,7 @@ namespace RcEngine {
 OpenGLDevice* gOpenGLDevice = NULL;
 
 OpenGLDevice::OpenGLDevice()
-	: mViewportTop(0), 
-	  mViewportLeft(0),
-	  mViewportWidth(0),
-	  mViewportHeight(0),
-	  mCurrentFBO(0)
+	: mCurrentFBO(0)
 {
 	gOpenGLDevice = this;
 	mBlitFBO[0] = mBlitFBO[1] = 0; 
@@ -54,7 +49,7 @@ void OpenGLDevice::CreateRenderWindow()
 		// Have depth buffer, attach it
 		mScreenFrameBuffer->AttachRTV(ATT_DepthStencil, std::make_shared<OpenGLScreenDepthStencilView>(appSettings.DepthStencilFormat));
 	}
-	mScreenFrameBuffer->SetViewport(Viewport(0, 0, appSettings.Width, appSettings.Height));
+	mScreenFrameBuffer->SetViewport(Viewport(0, 0, float(appSettings.Width), float(appSettings.Height)));
 	
 	// Bind as default
 	BindFrameBuffer(mScreenFrameBuffer);
@@ -123,15 +118,31 @@ void OpenGLDevice::AdjustProjectionMatrix( float4x4& pOut )
 	pOut =  pOut * scale * translate;
 }
 
-void OpenGLDevice::SetViewport( const Viewport& vp )
+void OpenGLDevice::SetViewports( const std::vector<Viewport>& vps )
 {
-	if (vp.Left != mViewportLeft || vp.Top != mViewportTop || vp.Height !=mViewportHeight || vp.Width != mViewportWidth)
+	size_t numViewports = vps.size();
+	if (numViewports == 1)
 	{
-		glViewport(vp.Left, vp.Top, vp.Width, vp.Height);
-		mViewportLeft = vp.Left;
-		mViewportTop = vp.Top;
-		mViewportHeight = vp.Height;
-		mViewportWidth = vp.Width;
+		if (mCurrentViewport != vps[0])
+		{
+			mCurrentViewport = vps[0];
+
+			if (GLEW_ARB_viewport_array)
+				glViewportIndexedf(0, vps[0].Left, vps[0].Top, vps[0].Width, vps[0].Height);
+			else 
+			{
+				glViewport(
+					static_cast<GLuint>(vps[0].Left),
+					static_cast<GLuint>(vps[0].Top),
+					static_cast<GLuint>(vps[0].Width),
+					static_cast<GLuint>(vps[0].Height));
+			}
+		}
+	}
+	else 
+	{
+		assert(GLEW_ARB_viewport_array);
+		glViewportArrayv(0, numViewports, &vps[0].Left);
 	}
 
 	OGL_ERROR_CHECK();
@@ -428,15 +439,23 @@ void OpenGLDevice::SetSamplerState( ShaderType stage, uint32_t unit, const share
 
 void OpenGLDevice::DoDraw( const EffectTechnique* technique, const RenderOperation& operation )
 {
-	// Bind vertex buffer
-	OpenGLVertexDeclaration* vertexDeclOGL = static_cast_checked<OpenGLVertexDeclaration*>(operation.VertexDecl.get());
-	if (vertexDeclOGL->GetVertexArrayOGL() == 0)
+	if (!operation.VertexDecl)
 	{
-		// Get vertex shader of first pass, may need it to create VAO
-		const Shader& vertexShader = *(technique->GetPassByIndex(0)->GetShaderPipeline()->GetShader(ST_Vertex));
-		vertexDeclOGL->CreateVertexArrayOGL(operation, vertexShader);
+		// Not use VertexBuffer, like FullScreenTrangle
+		glBindVertexArray(0);
 	}
-	glBindVertexArray(vertexDeclOGL->GetVertexArrayOGL());
+	else
+	{
+		// Bind vertex buffer
+		OpenGLVertexDeclaration* vertexDeclOGL = static_cast_checked<OpenGLVertexDeclaration*>(operation.VertexDecl.get());
+		if (vertexDeclOGL->GetVertexArrayOGL() == 0)
+		{
+			// Get vertex shader of first pass, may need it to create VAO
+			const Shader& vertexShader = *(technique->GetPassByIndex(0)->GetShaderPipeline()->GetShader(ST_Vertex));
+			vertexDeclOGL->CreateVertexArrayOGL(operation, vertexShader);
+		}
+		glBindVertexArray(vertexDeclOGL->GetVertexArrayOGL());
+	}
 
 	// Bind index buffer
 	if (operation.IndexBuffer)

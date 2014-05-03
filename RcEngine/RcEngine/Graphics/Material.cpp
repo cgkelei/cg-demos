@@ -145,7 +145,6 @@ void Material::LoadImpl()
 	
 	// load effect
 	mEffect = std::static_pointer_cast<Effect>( resMan.GetResourceByName(RT_Effect, effectName, effectResGroup) );
-	mEffect->Load();
 
 	for (XMLNodePtr paramNode = root->FirstNode("Parameter"); paramNode; paramNode = paramNode->NextSibling("Parameter"))
 	{

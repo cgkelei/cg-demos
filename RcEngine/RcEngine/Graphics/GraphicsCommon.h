@@ -355,31 +355,12 @@ enum EffectParameterType
 	EPT_Count
 };
 
-/// <summary>
-/// Defines the class of an effect parameter.
-/// </summary>
-enum EffectParameterClass 
+enum ShaderParameterClass
 {
-	/// <summary>
-	/// Parameter is a scalar value.
-	/// </summary>
-	EPC_Scalar,
-	/// <summary>
-	/// Parameter is a vector value.
-	/// </summary>
-	EPC_Vector,
-	/// <summary>
-	/// Parameter is a matrix value.
-	/// </summary>
-	EPC_Matrix,
-	/// <summary>
-	/// Parameter is either a texture, string, or other resource type.
-	/// </summary>
-	EPC_Object,
-	/// <summary>
-	/// Parameter is a struct.
-	/// </summary>
-	EPC_Struct
+	Shader_Param_Uniform = 0,
+	Shader_Param_SRV,
+	Shader_Param_UAV,
+	Shader_Param_Sampler,
 };
 
 enum EffectParameterUsage

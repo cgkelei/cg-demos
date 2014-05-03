@@ -109,10 +109,32 @@ void D3D11Device::SetDepthStencilState( const shared_ptr<DepthStencilState>& sta
 	}
 }
 
-void D3D11Device::SetViewport( const Viewport& vp )
+void D3D11Device::SetViewports( const std::vector<Viewport>& vps )
 {
-	CD3D11_VIEWPORT vpD3D11(float(vp.Left), float(vp.Top), float(vp.Width), float(vp.Height));
-	DeviceContextD3D11->RSSetViewports(1, &vpD3D11);
+	static CD3D11_VIEWPORT vpD3D11[4];
+
+	size_t numViewports = vps.size();
+
+	// Only check first one
+	if (numViewports == 1)
+	{
+		if (vpD3D11[0].TopLeftX != vps[0].Left     || 
+			vpD3D11[0].TopLeftY != vps[0].Top      || 
+			vpD3D11[0].Width    != vps[0].Width    || 
+			vpD3D11[0].Height   != vps[0].Height)
+		{
+			vpD3D11[0] = CD3D11_VIEWPORT(vps[0].Left, vps[0].Top, vps[0].Width, vps[0].Height);
+			DeviceContextD3D11->RSSetViewports(numViewports, vpD3D11);
+		}
+	}
+	else
+	{
+		assert(numViewports <= 4);
+		for (size_t i = 0; i < vps.size(); ++i)
+			vpD3D11[i] =  CD3D11_VIEWPORT(vps[i].Left, vps[i].Top, vps[i].Width, vps[i].Height);
+
+		DeviceContextD3D11->RSSetViewports(numViewports, vpD3D11);
+	}
 }
 
 void D3D11Device::CreateRenderWindow()
@@ -159,7 +181,7 @@ void D3D11Device::CreateRenderWindow()
 		d3d11RenderWindow->AttachRTV(ATT_DepthStencil, factory->CreateDepthStencilView(depthStencilTexture, 0, 0));
 	}
 
-	d3d11RenderWindow->SetViewport(Viewport(0, 0, appSettings.Width, appSettings.Height));
+	d3d11RenderWindow->SetViewport(Viewport(0.f, 0.f, float(appSettings.Width), float(appSettings.Height)));
 	BindFrameBuffer(d3d11RenderWindow);
 
 	mScreenFrameBuffer = d3d11RenderWindow;
@@ -178,14 +200,22 @@ void D3D11Device::AdjustProjectionMatrix( float4x4& pOut )
 void D3D11Device::DoDraw( const EffectTechnique* technique, const RenderOperation& operation )
 {
 	// Set up input layout
-	D3D11VertexDeclaration* vertexDeclD3D11 = static_cast_checked<D3D11VertexDeclaration*>(operation.VertexDecl.get());
-	if (vertexDeclD3D11->InputLayoutD3D11 == nullptr)
+	if (!operation.VertexDecl)
 	{
-		const Shader& vertexShader = *(technique->GetPassByIndex(0)->GetShaderPipeline()->GetShader(ST_Vertex));
-		vertexDeclD3D11->CreateInputLayout(operation, vertexShader);
+		// Not use input layout
+		DeviceContextD3D11->IASetInputLayout(nullptr);
 	}
-	DeviceContextD3D11->IASetInputLayout(vertexDeclD3D11->InputLayoutD3D11);
-
+	else
+	{
+		D3D11VertexDeclaration* vertexDeclD3D11 = static_cast_checked<D3D11VertexDeclaration*>(operation.VertexDecl.get());
+		if (vertexDeclD3D11->InputLayoutD3D11 == nullptr)
+		{
+			const Shader& vertexShader = *(technique->GetPassByIndex(0)->GetShaderPipeline()->GetShader(ST_Vertex));
+			vertexDeclD3D11->CreateInputLayout(operation, vertexShader);
+		}
+		DeviceContextD3D11->IASetInputLayout(vertexDeclD3D11->InputLayoutD3D11);
+	}
+	
 	// Set up vertex stream
 	if (operation.VertexStreams.size())
 	{
@@ -196,7 +226,7 @@ void D3D11Device::DoDraw( const EffectTechnique* technique, const RenderOperatio
 		for (size_t i = 0; i < operation.VertexStreams.size(); ++i)
 		{
 			vertexStreamsD3D11[i] = static_cast_checked<D3D11Buffer*>(operation.VertexStreams[i].get())->BufferD3D11;
-			streamStride[i] = vertexDeclD3D11->GetStreamStride(i);
+			streamStride[i] = operation.VertexDecl->GetStreamStride(i);
 		}
 
 		DeviceContextD3D11->IASetVertexBuffers(0, operation.VertexStreams.size(), vertexStreamsD3D11, streamStride, streamOffset);
@@ -260,25 +290,6 @@ void D3D11Device::DoDraw( const EffectTechnique* technique, const RenderOperatio
 		for (EffectPass* pass : technique->GetPasses())
 		{
 			pass->BeginPass();
-
-			D3D11_VIEWPORT viewport;
-			UINT numViewports = 1;
-			DeviceContextD3D11->RSGetViewports(&numViewports, &viewport);
-
-			D3D11_PRIMITIVE_TOPOLOGY priType;
-			DeviceContextD3D11->IAGetPrimitiveTopology(&priType);
-
-			ID3D11ShaderResourceView* srv;
-			DeviceContextD3D11->PSGetShaderResources(0, 1, &srv);
-
-			ID3D11Buffer *vb, *ib;
-			uint32_t stride, offset;
-			DXGI_FORMAT indexFormat;
-			DeviceContextD3D11->IAGetVertexBuffers(0, 1, &vb, &stride, &offset);
-			DeviceContextD3D11->IAGetIndexBuffer(&ib, &indexFormat, &offset);
-
-			ID3D11InputLayout* layout;
-			DeviceContextD3D11->IAGetInputLayout(&layout);
 
 			if (operation.NumInstances <= 1)
 			{

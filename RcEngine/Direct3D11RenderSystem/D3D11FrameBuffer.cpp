@@ -52,12 +52,12 @@ void D3D11FrameBuffer::OnBind()
 		deviceContextD3D11->OMSetRenderTargets(rtvD3D11.size(), pRTVD3D11, dsvD3D11);
 	}
 
-	mDirty = false;
+	// Set viewports
+	gD3D11Device->SetViewports(mViewports);
 }
 
 void D3D11FrameBuffer::OnUnbind()
 {
-	mDirty = true;
 }
 
 

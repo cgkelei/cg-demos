@@ -20,12 +20,12 @@ public:
 	virtual ~RenderDevice(void);
 
 	inline bool Fullscreen() const												    { return mIsFullscreen; }
-	inline RenderFactory* GetRenderFactory() const									        { return mRHFactory; }
+	inline RenderFactory* GetRenderFactory() const									{ return mRHFactory; }
 																  
 	inline shared_ptr<FrameBuffer> GetCurrentFrameBuffer() const					{ return mCurrentFrameBuffer; }
-	inline shared_ptr<FrameBuffer> GetScreenFrameBuffer() const					{ return mScreenFrameBuffer; }
+	inline shared_ptr<FrameBuffer> GetScreenFrameBuffer() const					    { return mScreenFrameBuffer; }
 	inline shared_ptr<DepthStencilState> GetCurrentDepthStencilState() const	    { return mCurrentDepthStencilState; }
-	inline shared_ptr<BlendState> GetCurrentBlendState() const					{ return mCurrentBlendState; }
+	inline shared_ptr<BlendState> GetCurrentBlendState() const					    { return mCurrentBlendState; }
 
 	virtual void ToggleFullscreen(bool fs) = 0;
 	virtual void AdjustProjectionMatrix(float4x4& pOut) = 0;
@@ -41,7 +41,6 @@ public:
 
 protected:
 	virtual void DoDraw(const EffectTechnique* technique, const RenderOperation& operation) = 0;
-	virtual void SetViewport(const Viewport& vp) = 0;
 
 protected:
 	RenderFactory* mRHFactory;

@@ -1,29 +1,48 @@
-[[Vertex=VSMain]]
+[[Vertex=ShadowMapVS]]
+#include "/ModelCommon.glsl"
+
+uniform mat4 WorldView;	
+uniform mat4 Projection;
+
+#ifdef _AlphaTest
+	out vec2 oTex;
+#endif
+
+out gl_PerVertex
+{
+    vec4 gl_Position;
+};
+
+void main()
+{
+#ifdef _Skinning
+	mat4 Skin = CalculateSkinMatrix();
+	gl_Position = vec4(iPos, 1.0) * Skin * WorldView * Projection;
+#else
+	gl_Position = vec4(iPos, 1.0) * WorldView * Projection;
+#endif
+
+#ifdef _AlphaTest
+	oTex = iTex;
+#endif
+}
+
+[[Fragment=ShadowMapVSM]]
+
+out vec2 oFragDepth;
+
+void main()
+{
+	oFragDepth.x = gl_FragCoord.z;
+	oFragDepth.y = gl_FragCoord.z * gl_FragCoord.z;
+}
+
+[[Vertex=GeneralVS]]
+#include "/ModelCommon.glsl"
 
 // Shader uniforms	
 uniform mat4 WorldView;	
-uniform mat4 Proj;
-
-#ifdef _Skinning
-	#define MaxNumBone 92
-	uniform mat4 SkinMatrices[MaxNumBone];
-#endif	
-
-// VS Inputs
-in vec3 iPos;
-
-#ifdef _Skinning
-	in vec4 iBlendWeights;
-	in uvec4 iBlendIndices;
-#endif
-
-in vec3 iNormal;
-in vec2 iTex;
-
-#ifdef _NormalMap
-	in vec3 iTangent;
-	in vec3 iBinormal;
-#endif
+uniform mat4 Projection;
 
 // VS Outputs
 out vec4 oPosVS;
@@ -35,28 +54,26 @@ out vec2 oTex;
 	out vec3 oNormalVS;
 #endif
 
+out gl_PerVertex
+{
+    vec4 gl_Position;
+};
+
 void main()
 {
 #ifdef _Skinning
-	mat4 SkinMatrix = SkinMatrices[iBlendIndices[0]] * iBlendWeights[0] +
-					  SkinMatrices[iBlendIndices[1]] * iBlendWeights[1] +
-					  SkinMatrices[iBlendIndices[2]] * iBlendWeights[2] +
-					  SkinMatrices[iBlendIndices[3]] * iBlendWeights[3];
-#endif
-	
-	// calculate position in view space:
-#ifdef _Skinning
-	mat4 SkinWorldView = SkinMatrix * WorldView;
-	oPosVS = vec4(iPos, 1.0)* SkinWorldView;
-#else
-	oPosVS = vec4(iPos, 1.0) * WorldView;
-#endif
 
-	// calculate view space normal.
-#ifdef _Skinning
+	mat4 Skin = CalculateSkinMatrix();
+	mat4 SkinWorldView = Skin * WorldView;
+	
+	oPosVS = vec4(iPos, 1.0)* SkinWorldView;
 	vec3 normal = normalize(iNormal * mat3(SkinWorldView));
+
 #else
+
+	oPosVS = vec4(iPos, 1.0) * WorldView;
 	vec3 normal = normalize(iNormal * mat3(WorldView));
+
 #endif
 
 	// calculate tangent and binormal.
@@ -79,14 +96,11 @@ void main()
 #endif
 	
 	// texcoord
-	oTex = vec2(iTex.x, 1.0 - iTex.y);
-	gl_Position = oPosVS * Proj;
+	oTex = iTex;
+	gl_Position = oPosVS * Projection;
 }
 
-
-[[Fragment=GBufferPSMain]]
-
-uniform sampler2D BestNormalFitMap;
+[[Fragment=GBufferPS]]
 
 // PS Inputs
 in vec4 oPosVS;
@@ -102,39 +116,6 @@ in vec2 oTex;
 out vec4 FragColor0; // Normal + shininess
 out vec4 FragColor1; // Diffuse + Specular
 	
-// Best normal fit	
-void CompressUnsignedNormalToNormalsBuffer(inout vec3 vNormal)
-{
-  // renormalize (needed if any blending or interpolation happened before)
-  vNormal.rgb = normalize(vNormal.rgb);
-  // get unsigned normal for cubemap lookup (note the full float precision is required)
-  vec3 vNormalUns = abs(vNormal.rgb);
-  // get the main axis for cubemap lookup
-  float maxNAbs = max(vNormalUns.z, max(vNormalUns.x, vNormalUns.y));
-  // get texture coordinates in a collapsed cubemap
-  vec2 vTexCoord = vNormalUns.z<maxNAbs?(vNormalUns.y<maxNAbs?vNormalUns.yz:vNormalUns.xz):vNormalUns.xy;
-  vTexCoord = vTexCoord.x < vTexCoord.y ? vTexCoord.yx : vTexCoord.xy;
-  vTexCoord.y /= vTexCoord.x;
-  
-#ifndef Direct3D	
-	vTexCoord.y = 1.0 - vTexCoord.y;
-#endif
-  
-  // fit normal into the edge of unit cube
-  vNormal.rgb /= maxNAbs;
-  // look-up fitting length and scale the normal to get the best fit
-  float fFittingScale = texture2D(BestNormalFitMap, vTexCoord).a;
-  // scale the normal to get the best fit
-  vNormal.rgb *= fFittingScale;
-  // squeeze back to unsigned
-  vNormal.rgb = vNormal.rgb * .5 + .5;
-}
-
- float Luminance(in vec3 color)
- {
-	return dot(color, vec3(0.2126, 0.7152, 0.0722));
- }
-
 void main() 
 {	
 	// diffuse material
@@ -172,8 +153,7 @@ void main()
 #endif	
 	
 	normal = normal * 0.5 + 0.5;
-	//CompressUnsignedNormalToNormalsBuffer(normal);	
 	
 	FragColor0 = vec4(normal.xyz, shininess);
-	FragColor1 = vec4(albedo.rgb, Luminance(specular));	 // Specular luminance
+	FragColor1 = vec4(albedo.rgb,  dot(specular, vec3(0.2126, 0.7152, 0.0722)));	 // Specular luminance
 }

@@ -157,8 +157,6 @@ void OpenGLRenderTargetArrayView::OnDetach( FrameBuffer& fb, Attachment attr )
 	OGL_ERROR_CHECK();
 }
 
-
-
 //////////////////////////////////////////////////////////////////////////
 OpenGLScreenRenderTargetView2D::OpenGLScreenRenderTargetView2D()
 	: OpenGLRenderView(nullptr)
