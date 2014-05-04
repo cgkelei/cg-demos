@@ -7,11 +7,14 @@
 #include <Graphics/GraphicsResource.h>
 #include <Graphics/RenderOperation.h>
 #include <Graphics/Material.h>
-#include <Resource/ResourceManager.h>
+#include <Graphics/Effect.h>
 #include <Graphics/Effect.h>
 #include <Graphics/EffectParameter.h>
+#include <Resource/ResourceManager.h>
+#include <Scene/SceneManager.h>
+#include <Scene/Entity.h>
+#include <Scene/SceneNode.h>
 #include <IO/FileSystem.h>
-#include <Graphics/Effect.h>
 #include <Core/Environment.h>
 
 using namespace RcEngine;
@@ -35,12 +38,21 @@ protected:
 	{
 		ResourceManager& resMan = ResourceManager::GetSingleton();
 		FileSystem& fileSys = FileSystem::GetSingleton();
+
 		RenderFactory* factory = Environment::GetSingleton().GetRenderFactory();
+		SceneManager* sceneMan = Environment::GetSingleton().GetSceneManager();
 
 		mFSQuadEffect = static_pointer_cast_checked<Effect>(
 			resMan.GetResourceByName(RT_Effect, "FSQuad.effect.xml", "General") );
 
-		resMan.GetResourceByName(RT_Effect, "Model.effect.xml", "General");
+		//resMan.GetResourceByName(RT_Effect, "Model.effect.xml", "General");
+
+		auto entity = sceneMan->CreateEntity("Nanosuit", "./Nanosuit/Nanosuit.mesh",  "Custom");
+		auto sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Nanosuit");
+		sceneNode->SetScale(float3(2,2,2));
+		sceneNode->SetPosition(float3(-50,0,0));
+		sceneNode->AttachObject(entity);
+		auto b = entity->GetWorldBoundingBox();
 
 		auto textureRes = static_pointer_cast_checked<TextureResource>(
 			resMan.GetResourceByName(RT_Texture, "Sword_2H_Frostmourne_D_01_Glow.dds", "General") );

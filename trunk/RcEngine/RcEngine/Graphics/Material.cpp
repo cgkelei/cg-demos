@@ -89,16 +89,16 @@ Material::~Material(void)
 
 void Material::SetTexture( const String& name, const shared_ptr<ShaderResourceView>& textureSRV )
 {
-	if (mTextureSRVs.find(name) != mTextureSRVs.end())
-	{
-		mTextureSRVs[name] = textureSRV;
-		mEffect->GetParameterByName(name)->SetValue(textureSRV);
-	}
-	else
+	mTextureSRVs[name] = textureSRV;
+
+	EffectParameter* effectParam = mEffect->GetParameterByName(name);
+	if (effectParam == nullptr)
 	{
 		String errMsg = "Texture " + name + " not exit in Effect" + mEffect->GetResourceName();
 		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, errMsg, "Material::SetTexture");
 	}
+
+	effectParam->SetValue(textureSRV);
 }
 
 void Material::LoadImpl()

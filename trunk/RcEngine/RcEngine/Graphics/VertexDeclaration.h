@@ -42,7 +42,7 @@ struct _ApiExport VertexElement
 	VertexElement(uint32_t offset, VertexElementFormat theType, VertexElementUsage semantic, uint32_t index = 0);
 };
 
-struct _ApiExport RHVertexElementUtil
+struct _ApiExport VertexElementUtil
 {
 	static uint32_t GetElementComponentCount(const VertexElement& element);
 	static uint32_t GetElementSize(const VertexElement& element);
@@ -55,6 +55,7 @@ public:
 	virtual ~VertexDeclaration() {}
 
 	uint32_t GetStreamStride(uint32_t streamSlot);
+	uint32_t GetVertexSize() const;
 
 public:
 	std::vector<VertexElement> mVertexElemets;

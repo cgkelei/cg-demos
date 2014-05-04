@@ -26,14 +26,23 @@ uint32_t VertexDeclaration::GetStreamStride( uint32_t streamSlot )
 	for (const VertexElement& element : mVertexElemets)
 	{
 		if (element.InputSlot == streamSlot)
-			stride += RHVertexElementUtil::GetElementSize(element);
+			stride += VertexElementUtil::GetElementSize(element);
 	}
 
 	return stride;
 }
 
+uint32_t VertexDeclaration::GetVertexSize() const
+{
+	uint32_t size = 0;
+	for (const VertexElement& element : mVertexElemets)
+		size += VertexElementUtil::GetElementSize(element);
 
-uint32_t RHVertexElementUtil::GetElementComponentCount( const VertexElement& element )
+	return size;
+}
+
+
+uint32_t VertexElementUtil::GetElementComponentCount( const VertexElement& element )
 {
 	switch(element.Type)
 	{
@@ -64,7 +73,7 @@ uint32_t RHVertexElementUtil::GetElementComponentCount( const VertexElement& ele
 	ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid type",  "VertexElement::GetTypeCount");
 }
 
-uint32_t RHVertexElementUtil::GetElementSize( const VertexElement& element )
+uint32_t VertexElementUtil::GetElementSize( const VertexElement& element )
 {
 	switch(element.Type)
 	{

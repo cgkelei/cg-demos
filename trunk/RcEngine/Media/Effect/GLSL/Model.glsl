@@ -1,5 +1,6 @@
 [[Vertex=ShadowMapVS]]
-#include "/ModelCommon.glsl"
+
+#include "/ModelVertexFactory.glsl"
 
 uniform mat4 WorldView;	
 uniform mat4 Projection;
@@ -8,8 +9,7 @@ uniform mat4 Projection;
 	out vec2 oTex;
 #endif
 
-out gl_PerVertex
-{
+out gl_PerVertex {
     vec4 gl_Position;
 };
 
@@ -29,7 +29,7 @@ void main()
 
 [[Fragment=ShadowMapVSM]]
 
-out vec2 oFragDepth;
+layout(location = 0) out vec2 oFragDepth;
 
 void main()
 {
@@ -38,7 +38,8 @@ void main()
 }
 
 [[Vertex=GeneralVS]]
-#include "/ModelCommon.glsl"
+
+#include "/ModelVertexFactory.glsl"
 
 // Shader uniforms	
 uniform mat4 WorldView;	
@@ -54,8 +55,7 @@ out vec2 oTex;
 	out vec3 oNormalVS;
 #endif
 
-out gl_PerVertex
-{
+out gl_PerVertex {
     vec4 gl_Position;
 };
 
@@ -102,6 +102,8 @@ void main()
 
 [[Fragment=GBufferPS]]
 
+#include "/ModelMaterialFactory.glsl"
+
 // PS Inputs
 in vec4 oPosVS;
 in vec2 oTex;
@@ -113,8 +115,8 @@ in vec2 oTex;
 #endif
 
 // PS Outputs
-out vec4 FragColor0; // Normal + shininess
-out vec4 FragColor1; // Diffuse + Specular
+layout(location = 0) out vec4 oFragColor0; // Normal + Shininess
+layout(location = 1) out vec4 oFragColor1; // Diffuse + Specular
 	
 void main() 
 {	
@@ -154,6 +156,6 @@ void main()
 	
 	normal = normal * 0.5 + 0.5;
 	
-	FragColor0 = vec4(normal.xyz, shininess);
-	FragColor1 = vec4(albedo.rgb,  dot(specular, vec3(0.2126, 0.7152, 0.0722)));	 // Specular luminance
+	oFragColor0 = vec4(normal.xyz, shininess);
+	oFragColor1 = vec4(albedo.rgb,  dot(specular, vec3(0.2126, 0.7152, 0.0722)));	 // Specular luminance
 }

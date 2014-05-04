@@ -42,7 +42,7 @@ void OpenGLVertexDeclaration::CreateVertexArrayOGL( const RenderOperation& opera
 		}
 
 		GLenum type = OpenGLMapping::Mapping(attribute.Type);
-		uint32_t size = RHVertexElementUtil::GetElementComponentCount(attribute);
+		uint32_t size = VertexElementUtil::GetElementComponentCount(attribute);
 		uint32_t stride =  vertexDeclOGL->GetStreamStride(attribute.InputSlot);
 		uint32_t offset = attribute.Offset + operation.IndexStart * stride;
 			
