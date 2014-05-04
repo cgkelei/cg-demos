@@ -71,7 +71,7 @@ void MeshPart::Load(  Stream& source )
 	// create vertex declaration
 	mVertexDecl = factory->CreateVertexDeclaration(&elements[0], elements.size());
 
-	if (vertexSize != elements.size())
+	if (vertexSize != mVertexDecl->GetVertexSize())
 	{
 		ENGINE_EXCEPT(Exception::ERR_RT_ASSERTION_FAILED, "Vertex size in model is not same \
 															as the vertex declaration", "MeshPart::Load");

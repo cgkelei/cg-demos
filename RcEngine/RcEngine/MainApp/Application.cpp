@@ -4,6 +4,7 @@
 #include <Graphics/Material.h>
 #include <Graphics/TextureResource.h>
 #include <Graphics/AnimationClip.h>
+#include <Graphics/Mesh.h>
 #include <Resource/ResourceManager.h>
 #include <Core/Environment.h>
 #include <Core/ModuleManager.h>
@@ -12,6 +13,7 @@
 #include <IO/FileSystem.h>
 #include <IO/FileStream.h>
 #include <Input/InputSystem.h>
+#include <Scene/SceneManager.h>
 
 // C++ 11 thread
 #include <thread>
@@ -36,10 +38,10 @@ Application::Application( const String& config )
 	//UIManager::Initialize();
 
 	// todo add sub scene manager
-	/*new SceneManager;*/
+	new SceneManager;
 
 	ResourceManager& resMan = ResourceManager::GetSingleton();
-	//resMan.RegisterType(RT_Mesh, "Mesh", Mesh::FactoryFunc);
+	resMan.RegisterType(RT_Mesh, "Mesh", Mesh::FactoryFunc);
 	resMan.RegisterType(RT_Material, "Material", Material::FactoryFunc);
 	resMan.RegisterType(RT_Effect, "Effect", Effect::FactoryFunc);
 	resMan.RegisterType(RT_Animation, "Animation",AnimationClip::FactoryFunc);

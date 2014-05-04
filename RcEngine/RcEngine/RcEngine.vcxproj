@@ -143,6 +143,8 @@
     <None Include="..\Media\Effect\GLSL\FSQuad.glsl" />
     <None Include="..\Media\Effect\GLSL\FullscreenTriangle.glsl" />
     <None Include="..\Media\Effect\GLSL\LightingUtil.glsl" />
+    <None Include="..\Media\Effect\GLSL\ModelMaterialFactory.glsl" />
+    <None Include="..\Media\Effect\GLSL\ModelVertexFactory.glsl" />
     <None Include="..\Media\Effect\GLSL\Model.glsl" />
     <None Include="..\Media\Effect\GLSL\ModelCommon.glsl" />
     <None Include="..\Media\Effect\GLSL\ShadowUtil.glsl" />
@@ -187,6 +189,7 @@
   <ItemGroup>
     <Xml Include="..\Media\Effect\FSQuad.effect.xml" />
     <Xml Include="..\Media\Effect\Model.effect.xml" />
+    <Xml Include="..\Media\Material\Model.material.xml" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8C5FC295-3DCE-4113-83C6-884D4F46DEF2}</ProjectGuid>

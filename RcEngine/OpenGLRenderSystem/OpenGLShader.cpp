@@ -96,6 +96,9 @@ public:
 
 				std::string includeScript( (std::istreambuf_iterator<char>(fs)), std::istreambuf_iterator<char>() ); 
 				glNamedStringARB(GL_SHADER_INCLUDE_ARB, includeName.length(), includeName.c_str(), includeScript.length(), includeScript.c_str());
+			
+				// Parse sampler state
+				ParseSamplerState(includeScript);
 			}
 			
 			includeBegin = glslScript.find(includeToken, includeBegin + sizeof(includeToken)); // Skip current include
@@ -136,6 +139,10 @@ public:
 		}
 
 		std::string shaderSource;
+
+		// Add version if not exits
+		if (!hasVersion)
+			shaderSource += GetSupportedGLSLVersion() + "\n";
 		
 		if (lineNum > 0)
 			shaderSource += glslScript.substr(shaderSectionBegin, lineBeign - shaderSectionBegin);
@@ -165,24 +172,12 @@ public:
 		// Add real code
 		shaderSource += glslScript.substr(lineBeign, shaderSectionEnd - lineBeign);
 
-		if (hasVersion)
-		{
-			char const* pSource = shaderSource.c_str();
-			mShader->mShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShader->mShaderType), 1, &pSource);
-		}
-		else
-		{
-			const char* pSource[2];
-
-			const String& latestVersion = GetSupportedGLSLVersion();
-			pSource[0] = latestVersion.c_str();
-			pSource[1] = shaderSource.c_str();
-
-			mShader->mShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShader->mShaderType), 2, pSource);
-		}	
+		char const* pSource = shaderSource.c_str();
+		mShader->mShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShader->mShaderType), 1, &pSource);
 
 		int success;
 		glGetProgramiv(mShader->mShaderOGL, GL_LINK_STATUS, &success);
+		ParseSamplerState(shaderSource);
 
 		if (success != GL_TRUE)
 		{
@@ -654,7 +649,7 @@ bool OpenGLShader::LoadFromFile( const String& filename, const ShaderMacro* macr
 
 	//	mShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShaderType), 2, pSource);
 	//}
-
+	OGL_ERROR_CHECK();
 	GLSLScriptCompiler compiler(this);
 	if ( compiler.OpenGLCompile(filename, macros, macroCount, entryPoint) )
 	{
