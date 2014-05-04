@@ -144,7 +144,7 @@ shared_ptr<Texture> RenderFactory::LoadTextureFromFile( const String& filename )
 			for(gli::texture2D::size_type level = 0; level < numLevels; ++level)
 			{
 				imageData[level].pData = texture2D[level].data();
-				imageData[level].rowPitch = storage.levelSize(level) / dim.y;
+				imageData[level].rowPitch = storage.levelSize(level) / dim.y; // texture line pitch
 				imageData[level].slicePitch = 0;
 			}
 		}

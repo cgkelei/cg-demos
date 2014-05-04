@@ -1,4 +1,4 @@
-	
+
 #define MAX_CASCADE_COUNT 4
 	
 uniform sampler2DArray CascadeShadowTex;	

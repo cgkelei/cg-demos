@@ -105,17 +105,15 @@ void OpenGLTexture2D::CreateWithImmutableStorage(ElementInitData* initData)
 				uint32_t levelHeight = GetHeight(level);
 				if (PixelFormatUtils::IsCompressed(mFormat))
 				{
-					int blockSize = (internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16; 
+					int blockSize = (internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT || internalFormat == GL_COMPRESSED_RGB_S3TC_DXT1_EXT) ? 8 : 16; 
 					uint32_t imageSize = ((levelWidth+3)/4)*((levelHeight+3)/4)*blockSize; 
-
-					auto s = initData[level].rowPitch * levelHeight;
 
 					glCompressedTexSubImage2D(mTextureTarget,
 						static_cast<GLint>(level), 0, 0,
 						static_cast<GLsizei>(levelWidth),
 						static_cast<GLsizei>(levelHeight),
 						externFormat,
-						s,//static_cast<GLsizei>(imageSize),
+						static_cast<GLsizei>(imageSize),
 						initData[level].pData);
 
 					OGL_ERROR_CHECK();

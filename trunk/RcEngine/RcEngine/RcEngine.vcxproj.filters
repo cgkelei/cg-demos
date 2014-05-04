@@ -518,5 +518,8 @@
     <Xml Include="..\Media\Material\Model.material.xml">
       <Filter>Asset\Material</Filter>
     </Xml>
+    <Xml Include="..\Media\Effect\DeferredLighting.effect.xml">
+      <Filter>Asset\Effect</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

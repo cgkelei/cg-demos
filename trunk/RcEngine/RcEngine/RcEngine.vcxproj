@@ -187,6 +187,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="..\Media\Effect\DeferredLighting.effect.xml" />
     <Xml Include="..\Media\Effect\FSQuad.effect.xml" />
     <Xml Include="..\Media\Effect\Model.effect.xml" />
     <Xml Include="..\Media\Material\Model.material.xml" />
