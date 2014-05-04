@@ -385,8 +385,7 @@ private:
 					uniform.Name = actualName;
 					uniform.Type = paramType;
 					uniform.ArraySize = (arraySize <= 1) ? 0 : arraySize;
-					uniform.Location = i;
-					assert( i == glGetProgramResourceLocation(mShaderProgramID, GL_UNIFORM, &name[0]) );
+					uniform.Location = glGetProgramResourceLocation(mShaderProgramID, GL_UNIFORM, actualName.c_str());
 
 					if (globalBlockIdx == -1)
 					{
@@ -407,8 +406,7 @@ private:
 					viewParam.Name = actualName;
 					viewParam.Type = paramType;
 					viewParam.ViewClass = paramClass;
-					viewParam.Location = i;
-					assert( i == glGetProgramResourceLocation(mShaderProgramID, GL_UNIFORM, &name[0]) );
+					viewParam.Location = glGetProgramResourceLocation(mShaderProgramID, GL_UNIFORM, actualName.c_str());
 
 					mShaderOGL->mBoundResources.push_back(viewParam);
 				}

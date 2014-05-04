@@ -66,9 +66,23 @@ D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t
 		{
 			for (uint32_t level = 0; level < numMipMaps; ++level)
 			{
+				uint32_t levelWidth = GetWidth(level);
+				uint32_t levelHeight = GetHeight(level);
+				
 				uint32_t index = arrayIdx*numMipMaps+level;
+				
 				subResourceData[index].pSysMem = initData[index].pData;
-				subResourceData[index].SysMemPitch = initData[index].rowPitch;
+				subResourceData[index].SysMemSlicePitch = 0;
+
+				if (PixelFormatUtils::IsCompressed(format))
+				{
+					uint32_t blockSize = (texDesc.Format == DXGI_FORMAT_BC1_UNORM ? 8 : 16);
+					subResourceData[index].SysMemPitch = blockSize * ((levelWidth+3)/4);
+				}
+				else
+				{
+					subResourceData[index].SysMemPitch = initData[index].rowPitch;
+				}
 			}
 		}
 

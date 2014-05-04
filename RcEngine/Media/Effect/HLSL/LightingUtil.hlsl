@@ -1,3 +1,6 @@
+#ifndef LightingUtil_h__
+#define LightingUtil_h__
+
 float SpotLighting(const float3 L, const float3 lightDir, const float2 cosCone)
 {
 	// calc the cos angle between lightdir and litpoint dir
@@ -44,3 +47,5 @@ float3 CalculateAmbiemtFresnel(in float3 specularColor, in float3 N, in float3 V
 {
 	return specularColor + (1.0 - specularColor) * pow(1.0 - saturate(dot(N, V)), 5.0); 
 }
+
+#endif

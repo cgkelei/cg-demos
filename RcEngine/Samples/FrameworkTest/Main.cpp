@@ -45,17 +45,24 @@ protected:
 		mFSQuadEffect = static_pointer_cast_checked<Effect>(
 			resMan.GetResourceByName(RT_Effect, "FSQuad.effect.xml", "General") );
 
-		//resMan.GetResourceByName(RT_Effect, "Model.effect.xml", "General");
+		resMan.GetResourceByName(RT_Effect, "DeferredLighting.effect.xml", "General");
 
-		auto entity = sceneMan->CreateEntity("Nanosuit", "./Nanosuit/Nanosuit.mesh",  "Custom");
-		auto sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Nanosuit");
-		sceneNode->SetScale(float3(2,2,2));
-		sceneNode->SetPosition(float3(-50,0,0));
-		sceneNode->AttachObject(entity);
-		auto b = entity->GetWorldBoundingBox();
+		Entity* sponzaEntity = sceneMan->CreateEntity("Sponza", "Sponza.mesh",  "Custom");
+		SceneNode* sponzaNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Sponza");
+		sponzaNode->SetPosition(float3(0, 0, 0));
+		sponzaNode->SetScale(0.45f);
+		sponzaNode->AttachObject(sponzaEntity);
 
+		//auto entity = sceneMan->CreateEntity("Nanosuit", "./Nanosuit/Nanosuit.mesh",  "Custom");
+		//auto sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Nanosuit");
+		//sceneNode->SetScale(float3(2,2,2));
+		//sceneNode->SetPosition(float3(-50,0,0));
+		//sceneNode->AttachObject(entity);
+		//auto b = entity->GetWorldBoundingBox();
+
+		bool b = FileSystem::GetSingleton().FileExits("../Media/Mesh/Sponza/sponza_column_a_diff.dds");
 		auto textureRes = static_pointer_cast_checked<TextureResource>(
-			resMan.GetResourceByName(RT_Texture, "Sword_2H_Frostmourne_D_01_Glow.dds", "General") );
+			resMan.GetResourceByName(RT_Texture, "spnza_bricks_a_diff.dds", "Custom") );
 		mTexture = textureRes->GetTexture();
 	}
 

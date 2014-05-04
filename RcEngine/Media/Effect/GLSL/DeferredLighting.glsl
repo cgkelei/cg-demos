@@ -41,8 +41,8 @@ void main()
 
 #extension GL_EXT_texture_array : enable
 
-#include "/LightingUtil.glsl"
 #include "/ShadowUtil.glsl"
+#include "/LightingUtil.glsl"
 #include "/DeferredUtil.glsl"
 	
 uniform vec2 CameraNearFar;
@@ -61,7 +61,7 @@ uniform sampler2D DepthBuffer;
 in vec2 oTex;
 in vec3 oViewRay;
 
-out vec4 oFragColor;
+layout(location = 0) out vec4 oFragColor;
 
 const vec4 vCascadeColorsMultiplier[4] = vec4[4]
 (
@@ -74,12 +74,14 @@ const vec4 vCascadeColorsMultiplier[4] = vec4[4]
 void main()
 {
 	vec4 final = vec4(0.0);
+
 	ivec2 sampleIndex = ivec2(gl_FragCoord.xy);
 
 	// Convert non-linear depth to view space linear depth
-	float linearDepth = LinearizeDepth( texelFetch(DepthBuffer, sampleIndex, 0).x, CameraNearFar.x, CameraNearFar.y );
+	float linearDepth = LinearizeDepth( texelFetch(DepthBuffer, sampleIndex, 0).x, CameraNearFar.xy );
+	
 	// View space lit position
-	vec3 positionVS = PositionVSFromDepth(oViewRay, linearDepth);
+	vec3 positionVS = oViewRay * (linearDepth / oViewRay.z);
 	
 	vec4 visibility = vec4(1.0);
 	if (ShadowEnabled)
@@ -136,24 +138,24 @@ uniform sampler2D DepthBuffer;
 in vec3 oTex;
 in vec3 oViewRay;
 
-out vec4 oFragColor;
+layout(location = 0) out vec4 oFragColor;
 
 void main()
 {
 	vec4 final = vec4(0.0);
 
-	vec2 tex = oTex.xy / oTex.z;
-	tex = tex * 0.5 + 0.5;
-	
+	ivec2 sampleIndex = ivec2(gl_FragCoord.xy);
+
 	// Convert non-linear depth to view space linear depth
-	float linearDepth = LinearizeDepth( texture2D(DepthBuffer, tex).x, CameraNearFar.x, CameraNearFar.y );
+	float linearDepth = LinearizeDepth( texelFetch(DepthBuffer, sampleIndex, 0).x, CameraNearFar.xy );
+	
 	// View space lit position
-	vec3 positionVS = PositionVSFromDepth(oViewRay, linearDepth);
+	vec3 positionVS = oViewRay * (linearDepth / oViewRay.z);
 	
 	vec3 L = normalize(LightPosVS.xyz - positionVS);
 	
 	// Fetch GBuffer
-	vec4 tap0 = texture2D(GBuffer0, tex);
+	vec4 tap0 = texelFetch(GBuffer0, sampleIndex, 0);
 
 	// Decode view space normal
 	vec3 N = normalize(tap0.xyz * 2.0 - 1.0); 
@@ -179,9 +181,9 @@ void main()
 
 [[Fragment=SpotLightingPS]]
 
+#include "/DeferredUtil.glsl"
 #include "/LightingUtil.glsl"
 #include "/ShadowUtil.glsl"
-#include "/DeferredUtil.glsl"
 
 uniform vec4 LightPosVS;		// w dimension is spot light inner cone cos angle
 uniform vec4 LightDirVS;		// w dimension is spot light outer cone cos angle
@@ -196,30 +198,29 @@ uniform mat4 InvView;			// Inv view matrix of current camera
   
 uniform bool ShadowEnabled; 
   
-in vec3 oTex;
 in vec3 oViewRay;
 
-out vec4 oFragColor;
+layout(location = 0) out vec4 oFragColor;
 
 void main()
 {
 	vec4 final = vec4(0.0);
 
-	vec2 tex = oTex.xy / oTex.z;
-	tex = tex * 0.5 + 0.5;
+	ivec2 sampleIndex = ivec2(gl_FragCoord.xy);
 
 	// Convert non-linear depth to view space linear depth
-	float linearDepth = LinearizeDepth( texture2D(DepthBuffer, tex).x, CameraNearFar.x, CameraNearFar.y );
-	// View space lit position
-	vec3 positionVS = PositionVSFromDepth(oViewRay, linearDepth);
+	float linearDepth = LinearizeDepth( texelFetch(DepthBuffer, sampleIndex, 0).x, CameraNearFar.xy );
 	
+	// View space lit position
+	vec3 positionVS = oViewRay * (linearDepth / oViewRay.z);
+
 	float spot = SpotLighting(LightPosVS.xyz, LightDirVS.xyz, vec2(LightPosVS.w, LightDirVS.w), positionVS);
 	if(spot > 0.0)
 	{
 		vec3 L = normalize(LightPosVS.xyz - positionVS);
 		
 		// Fetch GBuffer
-		vec4 tap0 = texture2D(GBuffer0, tex);
+		vec4 tap0 = texelFetch(GBuffer0, sampleIndex, 0);
 
 		// Decode view space normal
 		vec3 N = normalize(tap0.xyz * 2.0 - 1.0); 
@@ -241,6 +242,7 @@ void main()
 			final = vec4(diffuse, Luminance(specular));
 		}
 		
+		// Eval Possion-disc random shadow map
 		float visibility = 1.0;
 		if (ShadowEnabled)
 			visibility = EvalCascadeShadow(vec4(positionVS, 1.0) * InvView);
@@ -250,3 +252,50 @@ void main()
 		
 	oFragColor = final; 
 }	
+
+[[Fragment=SpotLightingPS]]
+
+#include "/DeferredUtil.glsl"
+#include "/LightingUtil.glsl"
+
+uniform sampler2D GBuffer0;           // Normal + Shininess
+uniform sampler2D GBuffer1 ;
+uniform sampler2D LightAccumulateBuffer;
+
+in vec3 oViewRay;
+
+layout(location = 0) out vec4 oFragColor;
+
+// Deferred shading pass
+void main()
+{
+	vec3 final = vec3(0, 0, 0);
+
+	ivec2 sampleIndex = ivec2(gl_FragCoord.xy);
+
+	// Fetch GBuffer
+	vec4 tap0 = texelFetch( GBuffer0, sampleIndex, 0 );
+	vec4 tap1 = texelFetch( GBuffer1, sampleIndex, 0 );
+	
+	// Decode view space normal
+	vec3 N = normalize(tap0.rgb * 2.0 - 1.0); 
+	vec3 V = normalize(-oViewRay);
+
+	// Get Diffuse Albedo and Specular
+	vec3 diffuseAlbedo = tap1.rgb;
+	vec3 specularAlbedo = tap1.aaa;
+	float specularPower = tap0.a * 256.0;
+
+	vec4 lightColor = texelFetch(LightAccumulateBuffer, sampleIndex, 0 );
+	                    
+	vec3 diffueLight = lightColor.rgb;
+	vec3 specularLight = lightColor.a / (Luminance(diffueLight) + 1e-6) * diffueLight;
+
+	// Approximate fresnel by N and V
+	vec3 fresnelTerm = CalculateAmbiemtFresnel(specularAlbedo, N, V);
+	
+	final =  diffueLight * diffuseAlbedo + ((specularPower + 2.0) / 8.0) * fresnelTerm * specularLight;
+	final = final + vec3(0.1, 0.1, 0.1) * diffuseAlbedo;
+
+	oFragColor = vec4(final, 1.0);
+}

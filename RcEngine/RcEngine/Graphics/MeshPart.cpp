@@ -80,11 +80,7 @@ void MeshPart::Load(  Stream& source )
 	uint32_t vertexBufferSize = vertexSize * vertexCount;
 
 	// create vertex buffer
-	ElementInitData vInitData;
-	vInitData.pData = NULL;
-	vInitData.rowPitch = vertexBufferSize;
-	vInitData.slicePitch = 0;
-	mVertexBuffer = factory->CreateVertexBuffer(vertexBufferSize, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Vertex, &vInitData);
+	mVertexBuffer = factory->CreateVertexBuffer(vertexBufferSize, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Vertex, nullptr);
 
 	void* data = mVertexBuffer->Map(0, vertexBufferSize, RMA_Write_Discard);
 	source.Read(data, vertexBufferSize);
