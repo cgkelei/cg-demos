@@ -265,12 +265,13 @@ enum VertexElementUsage
 
 enum CubeMapFace
 {
-	CMF_PositiveX,
+	CMF_PositiveX = 0,
 	CMF_NegativeX,
 	CMF_PositiveY,
 	CMF_NegativeY,
 	CMF_PositiveZ,
 	CMF_NegativeZ,
+	CMF_Count,
 };
 
 enum PrimitiveType

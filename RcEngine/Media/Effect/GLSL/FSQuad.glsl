@@ -28,4 +28,5 @@ out vec4 oFragColor;
 void main()
 {
 	oFragColor = texture(ColorMap, oTex);
+	oFragColor.r = 1.0;
 }

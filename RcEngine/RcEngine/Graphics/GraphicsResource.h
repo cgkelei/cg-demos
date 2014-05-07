@@ -95,10 +95,9 @@ public:
 
 	inline shared_ptr<ShaderResourceView> GetShaderResourceView() const { return mTextureSRV; }
 
-	// return the dimension of the texture, 0 for texture with no height or depth
-	inline uint32_t GetWidth(uint32_t level = 0) const		{ return mWidth >> level; }
-	inline uint32_t GetHeight(uint32_t level = 0) const		{ return mHeight >> level; }
-	inline uint32_t GetDepth(uint32_t level = 0) const		{ return mDepth >> level; }
+	inline uint32_t GetWidth() const		{ return mWidth; }
+	inline uint32_t GetHeight() const		{ return mHeight; }
+	inline uint32_t GetDepth() const		{ return mDepth; }
 
 	virtual void BuildMipMap() = 0;
 

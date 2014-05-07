@@ -56,14 +56,10 @@ void Entity::Initialize()
 	{
 		shared_ptr<MeshPart> meshPart = mMesh->GetMeshPart(i);
 		
-		String matResName = meshDirectory + meshPart->GetMaterialName();
-
-		shared_ptr<Material> material = std::static_pointer_cast<Material>(
-			ResourceManager::GetSingleton().GetResourceByName(RT_Material, matResName, meshGroup));
-		material->Load();
-
 		SubEntity* subEnt = new SubEntity(this, meshPart);
-		subEnt->SetMaterial(material);
+
+		String matResName = meshDirectory + meshPart->GetMaterialName();
+		subEnt->SetMaterial( ResourceManager::GetSingleton().GetResourceByName<Material>(RT_Material, matResName, meshGroup) );
 
 		mSubEntityList.push_back( subEnt );
 	}
@@ -270,7 +266,7 @@ BoneFollower* Entity::AttachObjectToBone( const String &boneName, SceneObject* s
 {
 	if (!HasSkeleton())
 	{
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "This entity's mesh has no skeleton to attach object to.",
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "This entity's mesh has no skeleton to attach object to.",
 			"Entity::attachObjectToBone");
 	}
 
@@ -283,7 +279,7 @@ BoneFollower* Entity::AttachObjectToBone( const String &boneName, SceneObject* s
 
 	if(sceneObj->IsAttached())
 	{
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Object already attached to a sceneNode or a Bone",
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Object already attached to a sceneNode or a Bone",
 			"Entity::attachObjectToBone");
 	}
 
@@ -291,7 +287,7 @@ BoneFollower* Entity::AttachObjectToBone( const String &boneName, SceneObject* s
 
 	if (!pBone)
 	{
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Cannot locate bone named " + boneName,
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Cannot locate bone named " + boneName,
 			"Entity::attachObjectToBone");
 	}
 
@@ -331,7 +327,7 @@ SceneObject* Entity::FactoryFunc( const String& name, const NameValuePairList* p
 		}
 	}
 	else
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Create entity failed.", "Entity::FactoryFunc");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Create entity failed.", "Entity::FactoryFunc");
 
 	return new Entity(name, pMesh);
 }

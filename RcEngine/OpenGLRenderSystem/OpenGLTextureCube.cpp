@@ -92,7 +92,7 @@ void OpenGLTextureCube::CreateWithMutableStorage( ElementInitData* initData )
 		{
 			for (uint32_t level = 0; level < mMipLevels; ++level)
 			{
-				uint32_t levelSize= GetWidth(level);
+				uint32_t levelSize= (std::max)(1U, mWidth >> level);
 
 				if (PixelFormatUtils::IsCompressed(mFormat))
 				{

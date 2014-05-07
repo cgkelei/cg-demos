@@ -26,9 +26,9 @@ OpenGLTexture3D::OpenGLTexture3D( PixelFormat format, uint32_t numMipMaps, uint3
 
 	for (uint32_t level = 0; level < mMipLevels; ++ level)
 	{
-		uint32_t levelWidth = GetWidth(level);
-		uint32_t levelHeight = GetHeight(level);
-		uint32_t levelDepth = GetDepth(level);
+		uint32_t levelWidth = (std::max)(1U, mWidth >> level);
+		uint32_t levelHeight = (std::max)(1U, mHeight >> level);
+		uint32_t levelDepth = (std::max)(1U, mDepth >> level);
 
 		if (PixelFormatUtils::IsCompressed(mFormat))
 		{

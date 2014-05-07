@@ -249,6 +249,18 @@
     <ClInclude Include="Graphics\GraphicsScriptLoader.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\CascadedShadowMap.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RenderPath.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\CameraController1.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Image.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Exception.cpp">
@@ -416,6 +428,18 @@
     <ClCompile Include="Graphics\GraphicsScriptLoader.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\CascadedShadowMap.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\CameraController1.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\RenderPath.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Image.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Math\BoundingBox.inl">
@@ -481,11 +505,17 @@
     <None Include="..\Media\Effect\GLSL\ModelMaterialFactory.glsl">
       <Filter>Asset\GLSL</Filter>
     </None>
+    <None Include="..\Media\Effect\GLSL\ShadowMapGen.glsl">
+      <Filter>Asset\GLSL</Filter>
+    </None>
+    <None Include="..\Media\Effect\GLSL\ForwardLighting.glsl">
+      <Filter>Asset\GLSL</Filter>
+    </None>
+    <None Include="..\Media\Effect\GLSL\GBuffer.glsl">
+      <Filter>Asset\GLSL</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\Media\Effect\HLSL\MaterialTemplate.hlsl">
-      <Filter>Asset\HLSL</Filter>
-    </FxCompile>
     <FxCompile Include="..\Media\Effect\HLSL\Model.hlsl">
       <Filter>Asset\HLSL</Filter>
     </FxCompile>
@@ -507,6 +537,27 @@
     <FxCompile Include="..\Media\Effect\HLSL\FullscreenTriangle.hlsl">
       <Filter>Asset\HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\ModelMaterialFactory.hlsl">
+      <Filter>Asset\HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\ForwardLighting.hlsl">
+      <Filter>Asset\HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\ModelVertexFactory.hlsl">
+      <Filter>Asset\HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\PSSM.hlsl">
+      <Filter>Asset\HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\RenderCascadeScene.hlsl">
+      <Filter>Asset\HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\ShadowMapGen.hlsl">
+      <Filter>Asset\HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\GBuffer.hlsl">
+      <Filter>Asset\HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\Media\Effect\FSQuad.effect.xml">
@@ -519,6 +570,9 @@
       <Filter>Asset\Material</Filter>
     </Xml>
     <Xml Include="..\Media\Effect\DeferredLighting.effect.xml">
+      <Filter>Asset\Effect</Filter>
+    </Xml>
+    <Xml Include="..\Media\Effect\AlphaTest.effect.xml">
       <Filter>Asset\Effect</Filter>
     </Xml>
   </ItemGroup>

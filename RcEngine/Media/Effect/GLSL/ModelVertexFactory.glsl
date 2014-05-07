@@ -1,5 +1,3 @@
-#ifndef ModelVertexFactory_h__
-#define ModelVertexFactory_h__
 
 // Make sure that attribe location match VertexStream
 #define POSISTION 0
@@ -47,5 +45,3 @@ layout (location = TEXCOORD) in vec2 iTex;
 	}
 
 #endif	
-
-#endif // ModelVertexFactory_h__

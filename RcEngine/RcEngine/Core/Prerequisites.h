@@ -79,7 +79,11 @@ typedef std::map<String, String> NameValuePairList;
 #define public_internal public
 #define SAFE_DELETE(p) if(p) { delete p; p = NULL;}
 
-// for normal pointer 
+// Compile time type-safe array size
+template <typename T, int N> char(&dim_helper(T(&)[N]))[N];
+#define ARRAY_SIZE(x) (sizeof(dim_helper(x)))
+
+// For normal pointer 
 template<class Type, class SourceType>
 Type static_cast_checked(SourceType* item)
 {
@@ -87,7 +91,7 @@ Type static_cast_checked(SourceType* item)
 	return static_cast<Type>(item);
 }
 
-// for shared_ptr
+// For shared_ptr
 template <class Ty, class Other>
 shared_ptr<Ty> static_pointer_cast_checked(const shared_ptr<Other>& sp)
 {

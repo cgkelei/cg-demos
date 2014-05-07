@@ -31,8 +31,6 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 	
 	glGenTextures(1, &mTextureOGL);
 	glBindTexture(mTextureTarget, mTextureOGL);
-	glTexParameteri(mTextureTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(mTextureTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(mTextureTarget, GL_TEXTURE_MAX_LEVEL, mMipLevels - 1);
 
 	// Use texture storage to init, faster
@@ -62,12 +60,14 @@ void OpenGLTexture2D::CreateWithImmutableStorage(ElementInitData* initData)
 			{
 				for (uint32_t level = 0; level < mMipLevels; ++ level)
 				{
-					uint32_t levelWidth = GetWidth(level);
-					uint32_t levelHeight = GetHeight(level);
+					uint32_t levelWidth = (std::max)(1U, mWidth >> level);
+					uint32_t levelHeight = (std::max)(1U, mHeight >> level);
+
 					if (PixelFormatUtils::IsCompressed(mFormat))
 					{
 						int blockSize = (internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16; 
 						uint32_t imageSize = ((levelWidth+3)/4)*((levelHeight+3)/4)*blockSize; 
+						
 						glCompressedTexSubImage3D(mTextureTarget,
 							static_cast<GLint>(level),
 							0, 0, static_cast<GLint>(arrIndex),
@@ -101,8 +101,9 @@ void OpenGLTexture2D::CreateWithImmutableStorage(ElementInitData* initData)
 		{
 			for (uint32_t level = 0; level < mMipLevels; ++ level)
 			{
-				uint32_t levelWidth = GetWidth(level);
-				uint32_t levelHeight = GetHeight(level);
+				uint32_t levelWidth = (std::max)(1U, mWidth >> level);
+				uint32_t levelHeight = (std::max)(1U, mHeight >> level);
+
 				if (PixelFormatUtils::IsCompressed(mFormat))
 				{
 					int blockSize = (internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT || internalFormat == GL_COMPRESSED_RGB_S3TC_DXT1_EXT) ? 8 : 16; 
@@ -145,8 +146,8 @@ void OpenGLTexture2D::CreateWithMutableStorage(ElementInitData* initData)
 	{
 		for (uint32_t level = 0; level < mMipLevels; ++ level)
 		{
-			uint32_t levelWidth = GetWidth(level);
-			uint32_t levelHeight = GetHeight(level);
+			uint32_t levelWidth = (std::max)(1U, mWidth >> level);
+			uint32_t levelHeight = (std::max)(1U, mHeight >> level);
 
 			if (PixelFormatUtils::IsCompressed(mFormat))
 			{

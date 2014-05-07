@@ -547,8 +547,8 @@ bool OpenGLShaderPipeline::LinkPipeline()
 				{
 					for (const auto& globalUniform : uniformBlock.BufferVariables)
 					{
-						EffectParameter* uniform = mEffect.FetchUniformParameter(globalUniform.Name, globalUniform.Type, globalUniform.ArraySize);
-						AddUniformParamBind(shaderOGL->mShaderOGL, uniformBlock.Location, uniform, globalUniform.ArraySize);
+						EffectParameter* effectParam = mEffect.FetchUniformParameter(globalUniform.Name, globalUniform.Type, globalUniform.ArraySize);
+						AddUniformParamBind(shaderOGL->mShaderOGL, globalUniform.Location, effectParam, globalUniform.ArraySize);
 					}
 				}
 				else
@@ -664,6 +664,7 @@ bool OpenGLShaderPipeline::LinkPipeline()
 
 	return true;
 }
+
 
 void OpenGLShaderPipeline::AddUniformParamBind( GLuint shader, GLint location, EffectParameter* effectParam, GLsizei arrSize )
 {

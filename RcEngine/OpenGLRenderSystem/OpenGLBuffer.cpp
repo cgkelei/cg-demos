@@ -57,33 +57,21 @@ void OpenGLBuffer::ResizeBuffer( uint32_t size )
 void* OpenGLBuffer::Map( uint32_t offset, uint32_t length, ResourceMapAccess mapType )
 {
 	void* pMapBuffer = NULL;
-
-	GLbitfield access;
-
-	switch(mapType)
+	
+	if (length == MAP_ALL_BUFFER)
+		length = mBufferSize - offset;
+	else
 	{
-	case RMA_Read_Only:
-		access = GL_MAP_READ_BIT;
-		break;
-	case RMA_Write_Only:
-		access = GL_MAP_WRITE_BIT;
-		break;
-	case RMA_Write_Discard:
-		access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT;
-	default:
-		access = GL_MAP_WRITE_BIT;
-		break;
+		// check range
+		if (offset + length > mBufferSize)
+			ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Out of range!", "OpenGLBuffer::Map");
 	}
-
-	if (offset + length > mBufferSize)
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Out of range!", "OpenGLBuffer::Map");
-
+	
 	glBindBuffer(mBufferTarget, mBufferOGL);
-	pMapBuffer = glMapBufferRange(mBufferTarget, offset, length, access);
+	pMapBuffer = glMapBufferRange(mBufferTarget, offset, length, OpenGLMapping::Mapping(mapType));
 	glBindBuffer(mBufferTarget, 0);
 
 	OGL_ERROR_CHECK();
-
 	return pMapBuffer;
 }
 

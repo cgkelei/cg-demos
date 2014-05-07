@@ -16,7 +16,7 @@
 <Parameter name="SpecularColor" semantic="SpecularMaterialColor" type="float3" value="0.5 0.5 0.5"/>
 <Parameter name="Shininess" semantic="SpecularMaterialPower" type="float" value="65.986"/>
 <Parameter name="BestNormalFitMap" sampler="BNFSampler" stage="PixelShader" texUnit="3" type="texture2d" value="BestFitNormal.dds"/>
-<Effect name="ModelUBO.effect.xml">
+<Effect name="Model.effect.xml">
 <Flag name="_DiffuseMap"/>
 <Flag name="_Skinning"/>
 </Effect>

@@ -10,6 +10,7 @@
 namespace RcEngine {
 
 class CascadedShadowMap;
+class RenderDevice;
 
 class _ApiExport RenderPath
 {
@@ -101,8 +102,10 @@ protected:
 	shared_ptr<FrameBuffer> mHDRFB;
 
 	shared_ptr<Material> mDeferedMaterial;
-	shared_ptr<Material> mDebugViewMaterial;
-	shared_ptr<Material> mDebugLightMaterial;
+	//shared_ptr<Material> mDebugViewMaterial;
+	//shared_ptr<Material> mDebugLightMaterial;
+
+	shared_ptr<Effect> mDeferredEffect;
 
 	CascadedShadowMap* mShadowMan;
 

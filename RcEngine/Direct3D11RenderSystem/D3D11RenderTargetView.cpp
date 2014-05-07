@@ -88,9 +88,9 @@ D3D11RenderTargetView2D::D3D11RenderTargetView2D( const shared_ptr<Texture>& tex
 		}
 	}
 
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
 	ID3D11Texture2D* textureD3D11 = (static_cast_checked<D3D11Texture2D*>(texture.get()))->TextureD3D11;
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateRenderTargetView(textureD3D11, &viewDesc, &RenderTargetViewD3D11);
-	//D3D11_VERRY(g_pd3dDevice->CreateRenderTargetView(mTextureD3D11.GetTexture(), &viewDesc, &mRenderTargetView2D));
+	D3D11_VERRY( deviceD3D11->CreateRenderTargetView(textureD3D11, &viewDesc, &RenderTargetViewD3D11) );
 }
 
 D3D11RenderTargetViewArray::D3D11RenderTargetViewArray( const shared_ptr<Texture>& texture, uint32_t level )
@@ -117,8 +117,9 @@ D3D11RenderTargetViewArray::D3D11RenderTargetViewArray( const shared_ptr<Texture
 		viewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
 	}
 
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
 	ID3D11Texture2D* textureD3D11 = (static_cast_checked<D3D11Texture2D*>(texture.get()))->TextureD3D11;
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateRenderTargetView(textureD3D11, &viewDesc, &RenderTargetViewD3D11);
+	D3D11_VERRY( deviceD3D11->CreateRenderTargetView(textureD3D11, &viewDesc, &RenderTargetViewD3D11) );
 }
 
 

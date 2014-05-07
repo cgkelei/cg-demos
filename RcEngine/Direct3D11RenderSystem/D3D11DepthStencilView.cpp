@@ -47,14 +47,9 @@ D3D11DepthStencilView::D3D11DepthStencilView( const shared_ptr<Texture>& texture
 		}
 	}
 
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
 	ID3D11Texture2D* textureD3D11 = (static_cast<D3D11Texture2D*>(texture.get()))->TextureD3D11;
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateDepthStencilView(textureD3D11, &descDSV, &DepthStencilViewD3D11);
-	
-	if (FAILED(hr))
-	{
-		// Error
-		assert(false);
-	}
+	D3D11_VERRY( deviceD3D11->CreateDepthStencilView(textureD3D11, &descDSV, &DepthStencilViewD3D11) );
 }
 
 D3D11DepthStencilView::~D3D11DepthStencilView()

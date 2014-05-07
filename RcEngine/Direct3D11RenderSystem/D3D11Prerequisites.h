@@ -3,7 +3,7 @@
 
 #include <d3d11.h>
 #include <D3Dcompiler.h>
-
+#include <comdef.h>
 
 //////////////////////////////////////////////////////////////////////////
 #ifndef BUILD_STATIC
@@ -34,9 +34,21 @@
 //#endif
 //#endif
 
-#define D3D11_VERRY(x) { HRESULT hr = (x); }
-#define D3D11_VERRY_RETRUN(x)   { HRESULT hr = (x); if( FAILED(hr) ) { return hr; } }
 
+#if defined(DEBUG) || defined(_DEBUG)
+	#ifndef D3D11_VERRY
+	#define D3D11_VERRY(x)							\
+	{												\
+		HRESULT hr = (x);							\
+		if (FAILED(hr))								\
+		{											\
+			fprintf(stderr, "File:%s\nLine:%d\nCalling:%s\n\n", __FILE__, __LINE__, __FUNCTION__); \
+		}	\
+	}
+	#endif 
+#else
+#define V_RETURN(x) {(x);}
+#endif
 
 #ifndef SAFE_RELEASE
 #define SAFE_RELEASE(p)      { if (p) { (p)->Release(); (p)=NULL; } }

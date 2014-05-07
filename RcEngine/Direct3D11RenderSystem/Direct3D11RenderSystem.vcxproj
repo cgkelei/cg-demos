@@ -72,7 +72,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;D3D11ENGINEDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;D3D11ENGINEDLL_EXPORTS;RcWindows;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>../RcEngine;../3rdParty</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -81,6 +81,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>../Release</AdditionalLibraryDirectories>
+      <AdditionalDependencies>D3D11.lib;D3DCompiler.lib;dxguid.lib;RcEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -111,6 +112,7 @@
     <ClCompile Include="D3D11RenderTargetView.cpp" />
     <ClCompile Include="D3D11RenderWindow.cpp" />
     <ClCompile Include="D3D11Shader.cpp" />
+    <ClCompile Include="D3D11ShaderPipeline.cpp" />
     <ClCompile Include="D3D11State.cpp" />
     <ClCompile Include="D3D11Texture.cpp" />
     <ClCompile Include="D3D11Texture1D.cpp" />

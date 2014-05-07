@@ -66,33 +66,32 @@ D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t
 		{
 			for (uint32_t level = 0; level < numMipMaps; ++level)
 			{
-				uint32_t levelWidth = GetWidth(level);
-				uint32_t levelHeight = GetHeight(level);
-				
-				uint32_t index = arrayIdx*numMipMaps+level;
+				uint32_t index = arrayIdx * numMipMaps + level;
 				
 				subResourceData[index].pSysMem = initData[index].pData;
+				subResourceData[index].SysMemPitch = initData[index].rowPitch;
 				subResourceData[index].SysMemSlicePitch = 0;
 
-				if (PixelFormatUtils::IsCompressed(format))
+				//uint32_t levelWidth = (std::max)(1U, mWidth >> level);
+				//uint32_t levelHeight = (std::max)(1U, mHeight >> level);
+				/*if (PixelFormatUtils::IsCompressed(format))
 				{
-					uint32_t blockSize = (texDesc.Format == DXGI_FORMAT_BC1_UNORM ? 8 : 16);
-					subResourceData[index].SysMemPitch = blockSize * ((levelWidth+3)/4);
+				uint32_t blockSize = (texDesc.Format == DXGI_FORMAT_BC1_UNORM ? 8 : 16);
+				subResourceData[index].SysMemPitch = blockSize * ((levelWidth+3)/4);
+				assert(initData[index].rowPitch == subResourceData[index].SysMemPitch);
 				}
 				else
 				{
-					subResourceData[index].SysMemPitch = initData[index].rowPitch;
-				}
+				subResourceData[index].SysMemPitch = initData[index].rowPitch;
+				}*/
 			}
 		}
 
-		HRESULT hr = deviceD3D11->CreateTexture2D( &texDesc, &subResourceData[0], &TextureD3D11);
-		//D3D11_VERRY(gD3D11Device->DeviceD3D11->CreateTexture2D( &texDesc, &subResourceData[0], &TextureD3D11));
+		D3D11_VERRY( deviceD3D11->CreateTexture2D( &texDesc, &subResourceData[0], &TextureD3D11) );
 	}
 	else 
 	{
-		HRESULT hr = deviceD3D11->CreateTexture2D( &texDesc, NULL, &TextureD3D11);
-		//D3D11_VERRY(gD3D11Device->DeviceD3D11->CreateTexture2D( &texDesc, NULL, &TextureD3D11));
+		D3D11_VERRY( deviceD3D11->CreateTexture2D( &texDesc, NULL, &TextureD3D11) );
 	}
 	
 	// Create shader resource view
@@ -133,7 +132,7 @@ D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t
 		}
 		
 		ID3D11ShaderResourceView* srvD3D11;
-		HRESULT hr = deviceD3D11->CreateShaderResourceView(TextureD3D11, &viewDesc, &srvD3D11);
+		D3D11_VERRY( deviceD3D11->CreateShaderResourceView(TextureD3D11, &viewDesc, &srvD3D11) );
 
 		mTextureSRV = std::make_shared<D3D11Texture2DSRV>(srvD3D11);
 	}

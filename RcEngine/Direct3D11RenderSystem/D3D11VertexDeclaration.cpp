@@ -40,12 +40,13 @@ void D3D11VertexDeclaration::CreateInputLayout( const RenderOperation& operation
 
 	// Todo: cache InputLayoutD3D11
 
-	HRESULT hr;
-	hr = gD3D11Device->DeviceD3D11->CreateInputLayout( layoutD3D11, mVertexElemets.size(), &vertexShaderD3D11->ShaderCode[0], vertexShaderD3D11->ShaderCode.size(), &InputLayoutD3D11 );
+
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
+	HRESULT hr = deviceD3D11->CreateInputLayout( layoutD3D11, mVertexElemets.size(), &vertexShaderD3D11->ShaderCode[0], vertexShaderD3D11->ShaderCode.size(), &InputLayoutD3D11 );
 
 	if (FAILED(hr))
 	{
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Error: Vertex Input Signature Not Match!", "D3D11VertexDeclaration::CreateInputLayout");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Error: Vertex Input Signature Not Match!", "D3D11VertexDeclaration::CreateInputLayout");
 	}
 }
 

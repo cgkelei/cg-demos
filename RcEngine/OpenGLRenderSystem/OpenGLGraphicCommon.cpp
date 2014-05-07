@@ -48,6 +48,28 @@ GLenum OpenGLMapping::Mapping( VertexElementFormat format )
 	ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported vertex format", "OpenGLGraphicCommon::Mapping");
 }
 
+void OpenGLMapping::UnMapping( GLenum glType, VertexElementFormat& oFormat )
+{
+	switch (glType)
+	{
+	case GL_FLOAT:					oFormat = VEF_Float; break;
+	case GL_FLOAT_VEC2:				oFormat = VEF_Float2; break;
+	case GL_FLOAT_VEC3:				oFormat = VEF_Float3; break;
+	case GL_FLOAT_VEC4:				oFormat = VEF_Float4; break;
+	case GL_INT:					oFormat = VEF_Int; break;
+	case GL_INT_VEC2:				oFormat = VEF_Int2; break;
+	case GL_INT_VEC3:				oFormat = VEF_Int3; break;
+	case GL_INT_VEC4:				oFormat = VEF_Int4; break;
+	case GL_UNSIGNED_INT:			oFormat = VEF_UInt; break;
+	case GL_UNSIGNED_INT_VEC2:		oFormat = VEF_UInt2; break;
+	case GL_UNSIGNED_INT_VEC3:		oFormat = VEF_UInt3; break;
+	case GL_UNSIGNED_INT_VEC4:		oFormat = VEF_UInt4; break;
+	default:
+		break;
+	}
+}
+
+
 GLenum OpenGLMapping::Mapping( PrimitiveType type )
 {
 	switch(type)
@@ -83,7 +105,11 @@ void OpenGLMapping::Mapping( GLenum& outInternalformat, GLenum& outFormat, GLenu
 		{ GL_R8,						GL_RED,					GL_UNSIGNED_BYTE  }, //PF_R8_UNORM,
 		{ GL_RG8,						GL_RG,					GL_UNSIGNED_BYTE  }, //PF_RG8_UNORM,
 		{ GL_RGB8,						GL_RGB,					GL_UNSIGNED_BYTE  }, //PF_RGB8_UNORM,
+		{ GL_RGB8,						GL_BGR,					GL_UNSIGNED_BYTE  }, //PF_BGR8_UNORM,
 		{ GL_RGBA8,						GL_RGBA,				GL_UNSIGNED_BYTE  }, //PF_RGBA8_UNORM,
+		{ GL_RGBA8,						GL_BGRA,				GL_UNSIGNED_BYTE  }, //PF_BGRA8_UNORM,
+		{ GL_RGBA8,						GL_RGBA,				GL_UNSIGNED_BYTE  }, //PF_RGBX8_UNORM,
+		{ GL_RGBA8,						GL_BGRA,				GL_UNSIGNED_BYTE  }, //PF_BGRX8_UNORM,
 
 		{ GL_R16,						GL_RED,					GL_UNSIGNED_SHORT }, //PF_R16_UNORM,
 		{ GL_RG16,						GL_RG,					GL_UNSIGNED_SHORT  }, //PF_RG16_UNORM,
@@ -148,8 +174,8 @@ void OpenGLMapping::Mapping( GLenum& outInternalformat, GLenum& outFormat, GLenu
 		{ GL_RGB9_E5,					GL_RGB,					GL_UNSIGNED_INT_5_9_9_9_REV  }, //PF_RGB9E5,
 		{ GL_R11F_G11F_B10F,			GL_RGB,					GL_UNSIGNED_INT_10F_11F_11F_REV  }, //PF_RG11B10F,
 		{ GL_R3_G3_B2,					GL_RGB,					GL_UNSIGNED_BYTE_3_3_2  }, //PF_R3G3B2,
-		{ GL_RGB5,						GL_RGB,					GL_UNSIGNED_SHORT_5_6_5_REV  }, //PF_R5G6B5,
-		{ GL_RGB5_A1,					GL_RGBA,				GL_UNSIGNED_BYTE_3_3_2  }, //PF_RGB5A1,
+		{ GL_RGB5,						GL_BGR,					GL_UNSIGNED_SHORT_5_6_5  }, //PF_B5G6R5,
+		{ GL_RGB5_A1,					GL_BGRA,				GL_UNSIGNED_BYTE_3_3_2  }, //PF_BGR5A1,
 		{ GL_RGBA4,						GL_RGBA,				GL_UNSIGNED_SHORT_4_4_4_4  }, //PF_RGBA4,
 		{ GL_RGB10_A2,					GL_RGBA,				GL_UNSIGNED_INT_10_10_10_2  }, //PF_RGB10A2,
 		
@@ -196,10 +222,14 @@ void OpenGLMapping::Mapping( GLenum& outInternalformat, GLenum& outFormat, GLenu
 		{ GL_INVALID_ENUM,							GL_RED,												0 }, //PF_RGBA_ASTC_10x10,
 		{ GL_INVALID_ENUM,							GL_RED,												0 }, //PF_RGBA_ASTC_12x10,
 		{ GL_INVALID_ENUM,							GL_RED,												0 }, //PF_RGBA_ASTC_12x12,
-																					
+					
 		// sRGB formats
-		{ GL_SRGB8,									GL_BGR,					GL_UNSIGNED_BYTE  }, //PF_SRGB8,
-		{ GL_SRGB8_ALPHA8,							GL_RGBA,				GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8,
+		{ GL_SRGB8,									GL_RGB,					GL_UNSIGNED_BYTE  }, //PF_SRGB8,
+		{ GL_SRGB8,									GL_BGR,					GL_UNSIGNED_BYTE  }, //PF_SBGR8_UNORM,
+		{ GL_SRGB8_ALPHA8,							GL_RGBA,				GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8_UNORM,
+		{ GL_SRGB8_ALPHA8,							GL_BGRA,				GL_UNSIGNED_BYTE  }, //PF_SBGR8_ALPHA8_UNORM,
+		{ GL_SRGB8_ALPHA8,							GL_RGBA,				GL_UNSIGNED_BYTE  }, //PF_SRGBX8_UNORM,
+		{ GL_SRGB8_ALPHA8,							GL_BGRA,				GL_UNSIGNED_BYTE  }, //PF_SBGRX8_UNORM,
 		{ GL_COMPRESSED_SRGB_S3TC_DXT1_EXT,			GL_RED,					0  }, //PF_SRGB_DXT1,
 		{ GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT,	GL_RED,					0  }, //PF_SRGB_ALPHA_DXT1,
 		{ GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT,	GL_RED,					0  }, //PF_SRGB_ALPHA_DXT3,
@@ -226,6 +256,8 @@ void OpenGLMapping::Mapping( GLenum& outInternalformat, GLenum& outFormat, GLenu
 		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8_ASTC_12x10,
 		{ GL_INVALID_ENUM,									GL_RED,					GL_UNSIGNED_BYTE  }, //PF_SRGB8_ALPHA8_ASTC_12x12,
 	};
+
+	static_assert( ARRAY_SIZE(formatOGL) == PF_Count, "OpenGL Internal Format not match with PixelFormat" );
 	
 	outInternalformat = formatOGL[inPixelFormat].InternalFormat;
 	outFormat = formatOGL[inPixelFormat].Format;
@@ -463,7 +495,7 @@ GLenum OpenGLMapping::Mapping( ShaderType type )
 	case ST_Compute:
 		return GL_COMPUTE_SHADER;
 	default:
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid ShaderType", "OpenGLMapping::Mapping");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid ShaderType", "OpenGLMapping::Mapping");
 	}
 }
 
@@ -486,10 +518,23 @@ GLenum OpenGLMapping::Mapping( uint32_t accessHint )
 	}
 	else
 	{
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid access hint", "D3D11Mapping::MapUsage");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid access hint", "D3D11Mapping::MapUsage");
 	}
 
 	return usage;
+}
+
+GLbitfield OpenGLMapping::Mapping( ResourceMapAccess mapType )
+{
+	switch(mapType)
+	{
+	case RMA_Read_Only:		return GL_MAP_READ_BIT;
+	case RMA_Write_Only:	return GL_MAP_WRITE_BIT;
+	case RMA_Write_Discard: return GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT;
+	default:
+		return GL_MAP_WRITE_BIT;
+		break;
+	}
 }
 
 void OpenGLMapping::UnMapping( GLenum glType, EffectParameterType& paramType, ShaderParameterClass& paramClass )
@@ -560,6 +605,7 @@ void OpenGLMapping::UnMapping( GLenum glType, EffectParameterType& paramType, Sh
 			"OpenGLMapping::UnMapping");
 	}
 }
+
 
 bool OpenGLMapping::IsIntegerType( GLenum type )
 {

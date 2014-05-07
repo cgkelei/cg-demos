@@ -85,7 +85,7 @@ void Application::RunGame()
 
 void Application::Tick()
 {
-	/*SceneManager& sceneMan = Environment::GetSingleton().GetSceneManager();*/
+	SceneManager* sceneMan = Environment::GetSingleton().GetSceneManager();
 	InputSystem& inputSystem = InputSystem::GetSingleton();
 
 	if (!mActice)
@@ -114,7 +114,7 @@ void Application::Tick()
 	Update(deltaTime);
 	
 	// update scene graph
-	//sceneMan.UpdateSceneGraph(deltaTime);
+	sceneMan->UpdateSceneGraph(deltaTime);
 
 	// Update UI
 	//UIManager::GetSingleton().Update(deltaTime);
@@ -204,7 +204,6 @@ void Application::Window_UserResized()
 	{
 		//Environment::GetSingleton().GetRHDevice()->Resize(width, height);	
 		//UIManager::GetSingleton().OnWindowResize(width, height);
-		//Context::GetSingleton().GetInputSystem().Resize(width, height);
 
 		WindowResize(width, height);
 	}	

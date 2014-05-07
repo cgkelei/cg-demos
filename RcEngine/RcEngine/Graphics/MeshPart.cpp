@@ -105,7 +105,7 @@ void MeshPart::Load(  Stream& source )
 	iInitData.pData = NULL;
 	iInitData.rowPitch = indexBufferSize;
 	iInitData.slicePitch = 0;
-	mIndexBuffer = factory->CreateIndexBuffer(indexBufferSize, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Index, &iInitData);
+	mIndexBuffer = factory->CreateIndexBuffer(indexBufferSize, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Index, nullptr);
 	data = mIndexBuffer->Map(0, indexBufferSize, RMA_Write_Discard);
 	source.Read(data, indexBufferSize);
 	mIndexBuffer->UnMap();

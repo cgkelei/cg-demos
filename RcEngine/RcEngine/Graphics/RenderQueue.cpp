@@ -66,7 +66,7 @@ void RenderQueue::AddRenderBucket( Bucket bucket )
 {
 	if (mRenderBuckets.find(bucket) != mRenderBuckets.end())
 	{
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Render bucket already exits!",  "RenderQueue::AddRenderBucket");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Render bucket already exits!",  "RenderQueue::AddRenderBucket");
 	}
 
 	mRenderBuckets.insert(std::make_pair(bucket, new RenderBucket()));

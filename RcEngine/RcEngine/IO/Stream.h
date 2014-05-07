@@ -18,11 +18,11 @@ public:
 	/// Set position from the beginning of the stream.
 	virtual uint32_t Seek(uint32_t position) = 0;
 	/// Return current position.
-	uint32_t GetPosition() const { return mPosition; }
+	inline uint32_t GetPosition() const { return mPosition; }
 	/// Return size.
-	uint32_t GetSize() const { return mSize; }
+	inline uint32_t GetSize() const { return mSize; }
 	/// Return whether the end of stream has been reached.
-	bool IsEof() const { return mPosition >= mSize; }
+	inline bool IsEof() const { return mPosition >= mSize; }
 
 	/// Closes the current stream and releases any resources associated with the current stream.
 	virtual void Close() = 0;

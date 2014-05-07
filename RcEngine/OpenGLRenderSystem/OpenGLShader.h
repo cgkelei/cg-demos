@@ -9,7 +9,10 @@ namespace RcEngine {
 
 struct InputSignature
 {
-	GLenum Type;
+#ifdef _DEBUG
+	String Name;
+#endif
+	VertexElementFormat Format;
 	GLint ArraySize; 
 	GLuint AttributeSlot;
 };

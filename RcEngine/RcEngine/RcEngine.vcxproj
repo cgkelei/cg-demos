@@ -29,11 +29,14 @@
     <ClInclude Include="Graphics\AnimationController.h" />
     <ClInclude Include="Graphics\AnimationState.h" />
     <ClInclude Include="Graphics\Camera.h" />
+    <ClInclude Include="Graphics\CameraController1.h" />
+    <ClInclude Include="Graphics\CascadedShadowMap.h" />
     <ClInclude Include="Graphics\Effect.h" />
     <ClInclude Include="Graphics\EffectParameter.h" />
     <ClInclude Include="Graphics\GraphicsCommon.h" />
     <ClInclude Include="Graphics\GraphicsResource.h" />
     <ClInclude Include="Graphics\GraphicsScriptLoader.h" />
+    <ClInclude Include="Graphics\Image.h" />
     <ClInclude Include="Graphics\Material.h" />
     <ClInclude Include="Graphics\Mesh.h" />
     <ClInclude Include="Graphics\MeshPart.h" />
@@ -41,6 +44,7 @@
     <ClInclude Include="Graphics\Renderable.h" />
     <ClInclude Include="Graphics\RenderFactory.h" />
     <ClInclude Include="Graphics\RenderOperation.h" />
+    <ClInclude Include="Graphics\RenderPath.h" />
     <ClInclude Include="Graphics\RenderQueue.h" />
     <ClInclude Include="Graphics\RenderState.h" />
     <ClInclude Include="Graphics\Skeleton.h" />
@@ -96,11 +100,14 @@
     <ClCompile Include="Graphics\AnimationController.cpp" />
     <ClCompile Include="Graphics\AnimationState.cpp" />
     <ClCompile Include="Graphics\Camera.cpp" />
+    <ClCompile Include="Graphics\CameraController1.cpp" />
+    <ClCompile Include="Graphics\CascadedShadowMap.cpp" />
     <ClCompile Include="Graphics\Effect.cpp" />
     <ClCompile Include="Graphics\EffectParameter.cpp" />
     <ClCompile Include="Graphics\FrameBuffer.cpp" />
     <ClCompile Include="Graphics\GraphicsResource.cpp" />
     <ClCompile Include="Graphics\GraphicsScriptLoader.cpp" />
+    <ClCompile Include="Graphics\Image.cpp" />
     <ClCompile Include="Graphics\Material.cpp" />
     <ClCompile Include="Graphics\Mesh.cpp" />
     <ClCompile Include="Graphics\MeshPart.cpp" />
@@ -109,6 +116,7 @@
     <ClCompile Include="Graphics\RenderDevice.cpp" />
     <ClCompile Include="Graphics\RenderFactory.cpp" />
     <ClCompile Include="Graphics\RenderOperation.cpp" />
+    <ClCompile Include="Graphics\RenderPath.cpp" />
     <ClCompile Include="Graphics\RenderQueue.cpp" />
     <ClCompile Include="Graphics\RenderState.cpp" />
     <ClCompile Include="Graphics\Skeleton.cpp" />
@@ -140,13 +148,16 @@
   <ItemGroup>
     <None Include="..\Media\Effect\GLSL\DeferredLighting.glsl" />
     <None Include="..\Media\Effect\GLSL\DeferredUtil.glsl" />
+    <None Include="..\Media\Effect\GLSL\ForwardLighting.glsl" />
     <None Include="..\Media\Effect\GLSL\FSQuad.glsl" />
     <None Include="..\Media\Effect\GLSL\FullscreenTriangle.glsl" />
+    <None Include="..\Media\Effect\GLSL\GBuffer.glsl" />
     <None Include="..\Media\Effect\GLSL\LightingUtil.glsl" />
     <None Include="..\Media\Effect\GLSL\ModelMaterialFactory.glsl" />
     <None Include="..\Media\Effect\GLSL\ModelVertexFactory.glsl" />
     <None Include="..\Media\Effect\GLSL\Model.glsl" />
     <None Include="..\Media\Effect\GLSL\ModelCommon.glsl" />
+    <None Include="..\Media\Effect\GLSL\ShadowMapGen.glsl" />
     <None Include="..\Media\Effect\GLSL\ShadowUtil.glsl" />
     <None Include="Math\BoundingBox.inl" />
     <None Include="Math\BoundingSphere.inl" />
@@ -163,30 +174,63 @@
   <ItemGroup>
     <FxCompile Include="..\Media\Effect\HLSL\DeferredLighting.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="..\Media\Effect\HLSL\DeferredUtil.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\ForwardLighting.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="..\Media\Effect\HLSL\FSQuad.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="..\Media\Effect\HLSL\FullscreenTriangle.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\GBuffer.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="..\Media\Effect\HLSL\LightingUtil.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="..\Media\Effect\HLSL\MaterialTemplate.hlsl">
+    <FxCompile Include="..\Media\Effect\HLSL\ModelMaterialFactory.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="..\Media\Effect\HLSL\Model.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\ModelVertexFactory.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\PSSM.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\RenderCascadeScene.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\ShadowMapGen.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="..\Media\Effect\HLSL\ShadowUtil.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="..\Media\Effect\AlphaTest.effect.xml" />
     <Xml Include="..\Media\Effect\DeferredLighting.effect.xml" />
     <Xml Include="..\Media\Effect\FSQuad.effect.xml" />
     <Xml Include="..\Media\Effect\Model.effect.xml" />
@@ -255,7 +299,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;BUILD_DLL;RcWindows;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>./;../3rdParty</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;../3rdParty;../3rdParty/gli-0.5.1.1/external/glm-0.9.5.1;../3rdParty/gli-0.5.1.1</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>

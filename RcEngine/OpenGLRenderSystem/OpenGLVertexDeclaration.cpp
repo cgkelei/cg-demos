@@ -44,7 +44,7 @@ void OpenGLVertexDeclaration::CreateVertexArrayOGL( const RenderOperation& opera
 		GLenum type = OpenGLMapping::Mapping(attribute.Type);
 		uint32_t size = VertexElementUtil::GetElementComponentCount(attribute);
 		uint32_t stride =  vertexDeclOGL->GetStreamStride(attribute.InputSlot);
-		uint32_t offset = attribute.Offset + operation.IndexStart * stride;
+		uint32_t offset = attribute.Offset;
 			
 		bool isMatchVertexShader = true;
 		
@@ -63,6 +63,8 @@ void OpenGLVertexDeclaration::CreateVertexArrayOGL( const RenderOperation& opera
 		else 
 			glDisableVertexAttribArray(attribIndex);
 	}
+
+	glBindVertexArray(0);
 }
 
 }
