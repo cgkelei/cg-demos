@@ -1,5 +1,3 @@
-#ifndef ModelMaterialFactory_h__
-#define ModelMaterialFactory_h__
 
 // Model material input
 #ifdef _DiffuseMap
@@ -28,4 +26,39 @@
 	#pragma NormalMap : MaterialSampler 
 #endif
 
-#endif // ModelMaterialFactory_h__
+// Material definition
+struct Material
+{
+	vec3 DiffuseAlbedo;
+	vec3 SpecularAlbedo;
+	float Shininess;
+};
+
+void GetMaterial(in vec2 iTex, out Material oMaterial)
+{
+	// diffuse material
+#ifdef _DiffuseMap
+	vec4 diffuseTap = texture2D(DiffuseMap, iTex);
+	#ifdef _AlphaTest
+		if( diffuseTap.a < 0.01 ) discard;
+	#endif	
+	oMaterial.DiffuseAlbedo = diffuseTap.rgb;
+#else
+	oMaterial.DiffuseAlbedo = DiffuseColor;
+#endif
+
+	// specular material
+#ifdef _SpecularMap
+	vec4 specularTap = texture2D(SpecularMap, iTex);
+	//vec3 specular = specularTap.rgb;
+	oMaterial.SpecularAlbedo = specularTap.rrr;
+	#ifdef _GlossyMap
+		oMaterial.Shininess = specularTap.a * 255;
+	#else 
+		oMaterial.Shininess = Shininess;
+	#endif
+#else
+	oMaterial.SpecularAlbedo = SpecularColor;
+	oMaterial.Shininess = Shininess;
+#endif
+}

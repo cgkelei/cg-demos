@@ -344,7 +344,7 @@ shared_ptr<FrameBuffer> OpenGLFactory::CreateFrameBuffer( uint32_t width, uint32
 //			if (textureArrayType != type || textureWidth != imageWidth ||
 //				textureHeight != imageHeight || textureMipMaps != numMipmaps || textureFormat != format)
 //			{
-//				ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Texture array must created with the same texture type",
+//				ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Texture array must created with the same texture type",
 //					"OpenGLRenderFactory::CreateTextureFromFile");
 //			}
 //		}

@@ -70,7 +70,7 @@ uint32_t VertexElementUtil::GetElementComponentCount( const VertexElement& eleme
 	case VEF_UInt4:
 		return 4;
 	}
-	ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid type",  "VertexElement::GetTypeCount");
+	ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid type",  "VertexElement::GetTypeCount");
 }
 
 uint32_t VertexElementUtil::GetElementSize( const VertexElement& element )
@@ -96,7 +96,7 @@ uint32_t VertexElementUtil::GetElementSize( const VertexElement& element )
 	default:			break;
 	}
 
-	ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid type", "VertexElement::GetElementSize");
+	ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid type", "VertexElement::GetElementSize");
 }
 
 }

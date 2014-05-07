@@ -1,6 +1,5 @@
 #include "Graphics/CameraController1.h"
 #include "Graphics/Camera.h"
-#include "Core/Context.h"
 #include "MainApp/Application.h"
 #include "Math/MathUtil.h"
 
@@ -51,7 +50,7 @@ void FPSCameraControler::SetMoveInertia( bool enable, float totalTime /*= 0.25f*
 void FPSCameraControler::UpdateInput( bool keyboardInput, bool mouseInput, bool resetCursorAfterMove )
 {
 	InputSystem& inputSys = InputSystem::GetSingleton();
-	Window* mainWindow = Context::GetSingleton().GetApplication().GetMainWindow();
+	Window* mainWindow = Application::msApp->GetMainWindow();
 
 	mKeybordDirection = float3::Zero();
 	if (keyboardInput)

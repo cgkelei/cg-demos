@@ -218,7 +218,7 @@ void PixelFormatUtils::GetNumDepthStencilBits( PixelFormat format, uint32_t& dep
 	case PF_D32F:		{ depth = 32; stencil = 0; } break;
 	case PF_D32FS8X24:  { depth = 32; stencil = 8; } break;
 	default:
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid depth format!", "PixelFormatUtils::GetNumDepthStencilBits");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid depth format!", "PixelFormatUtils::GetNumDepthStencilBits");
 	}
 }
 

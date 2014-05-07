@@ -201,29 +201,36 @@ public:
 	void ParseSamplerState(const std::string& shaderSource)
 	{
 		// Parse all SamplerState
-		size_t token = shaderSource.find("#pragma");
+		const char SamplerToken[] = "#pragma";
+
+		std::string texture, samplerState, line;
+
+		size_t token = shaderSource.find(SamplerToken);
 		while (token != std::string::npos)
 		{
-			token += 7; // skip #pragma
+			token += sizeof(SamplerToken); // skip #pragma
 
-			std::string texture, samplerState;
-			size_t colonPos = shaderSource.find(':', token);
-			assert(colonPos != std::string::npos);
+			size_t lineBreak = shaderSource.find('\n', token);
+			line = shaderSource.substr(token, lineBreak - token);
+			
+			size_t colonPos = line.find(':');
+			if (colonPos != std::string::npos)
+			{
+				size_t s = 0, e = colonPos - 1;
+				while(!isalpha(line[s])) s++;
+				while(!isalpha(line[e])) e--;
+				texture = line.substr(s, e - s + 1);	
 
-			size_t s = token+1, e= colonPos - 1;
-			while(!isalpha(shaderSource[s])) s++;
-			while(!isalpha(shaderSource[e])) e--;
-			texture = shaderSource.substr(s, e - s + 1);	
+				s = colonPos+1;
+				while(!isalpha(line[s])) s++;
+				e = s;
+				while(isalpha(line[e])) e++;
+				samplerState = line.substr(s, e - s);	
 
-			s = colonPos+1;
-			while(!isalpha(shaderSource[s])) s++;
-			e = s;
-			while(isalpha(shaderSource[e])) e++;
-			samplerState = shaderSource.substr(s, e - s);	
+				mShader->mSamplerStates[texture] = samplerState;
+			}
 
-			mShader->mSamplerStates[texture] = samplerState;
-
-			token = shaderSource.find("#pragma", e);
+			token = shaderSource.find("#pragma", token);
 		}
 	}
 
@@ -328,13 +335,20 @@ private:
 			if ( strstr(name, "gl_") == NULL )
 			{
 				InputSignature attribute;
-				attribute.AttributeSlot = i;
-				attribute.Type = type;
+#ifdef _DEBUG
+				attribute.Name = name;
+#endif
+				attribute.AttributeSlot = glGetAttribLocation(mShaderProgramID, name);
+				OpenGLMapping::UnMapping(type, attribute.Format);
 				attribute.ArraySize = size;
 
 				mShaderOGL->mInputSignatures.push_back(attribute);
 			}
 		}
+
+		std::sort(mShaderOGL->mInputSignatures.begin(), mShaderOGL->mInputSignatures.end(), [&](const InputSignature& lhs, const InputSignature& rhs) {
+					return lhs.AttributeSlot < rhs.AttributeSlot;	
+				});
 	}
 
 	void ReflectResource()
@@ -346,7 +360,7 @@ private:
 		GLsizei actualNameLen;
 		GLenum type;
 
-		GLint numUniforms;
+		GLint numUniforms, globalBlockIdx = -1;
 		glGetProgramiv(mShaderProgramID, GL_ACTIVE_UNIFORMS, &numUniforms);
 		for (GLuint i = 0; i < GLuint(numUniforms); ++i)
 		{
@@ -369,7 +383,7 @@ private:
 			String actualName(&name[0], actualNameLen);
 
 			// Get uniform block for this uniform
-			GLint blockIdx, globalBlockIdx = -1;
+			GLint blockIdx;
 			glGetActiveUniformsiv(mShaderProgramID, 1, &i, GL_UNIFORM_BLOCK_INDEX, &blockIdx);
 			if (blockIdx == GL_INVALID_INDEX) 
 			{
@@ -496,7 +510,7 @@ private:
 			}
 			else
 			{
-				ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "GLSL StructureBuffer must be postfix with SRV or UAV", "ReflectResource");
+				ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "GLSL StructureBuffer must be postfix with SRV or UAV", "ReflectResource");
 			}
 		}
 	}

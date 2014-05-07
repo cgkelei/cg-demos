@@ -28,7 +28,7 @@ void D3D11Mapping::Mapping( uint32_t accessHint, D3D11_USAGE& usage, UINT& CPUAc
 	}
 	else
 	{
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid access hint", "D3D11Mapping::MapUsage");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid access hint", "D3D11Mapping::MapUsage");
 	}
 }
 
@@ -38,15 +38,19 @@ DXGI_FORMAT D3D11Mapping::Mapping( PixelFormat inPixelFormat )
 
 		DXGI_FORMAT_UNKNOWN, //PF_Unknown = 0,
 
-		// unorm formats
+		// unsigned normalized formats
 		DXGI_FORMAT_R8_UNORM,//PF_R8_UNORM,
 		DXGI_FORMAT_R8G8_UNORM,//PF_RG8_UNORM,
-		DXGI_FORMAT_B8G8R8X8_UNORM,//PF_RGB8_UNORM,
+		DXGI_FORMAT_UNKNOWN, //PF_RGB8_UNORM,
+		DXGI_FORMAT_UNKNOWN, //PF_BGR8_UNORM,
 		DXGI_FORMAT_R8G8B8A8_UNORM,//PF_RGBA8_UNORM,
+		DXGI_FORMAT_B8G8R8A8_UNORM,//PF_BGRA8_UNORM,
+		DXGI_FORMAT_UNKNOWN, //PF_RGBX8_UNORM,
+		DXGI_FORMAT_B8G8R8X8_UNORM,//PF_BGRX8_UNORM,
 
 		DXGI_FORMAT_R16_UNORM,//PF_R16_UNORM,
 		DXGI_FORMAT_R16G16_UNORM,//PF_RG16_UNORM,
-		DXGI_FORMAT_B8G8R8X8_TYPELESS,//PF_RGB16_UNORM,
+		DXGI_FORMAT_UNKNOWN,//PF_RGB16_UNORM,
 		DXGI_FORMAT_R16G16B16A16_UNORM,//PF_RGBA16_UNORM,
 
 		// snorm formats
@@ -107,7 +111,7 @@ DXGI_FORMAT D3D11Mapping::Mapping( PixelFormat inPixelFormat )
 		DXGI_FORMAT_R9G9B9E5_SHAREDEXP,//PF_RGB9E5,
 		DXGI_FORMAT_R11G11B10_FLOAT,//PF_RG11B10F,
 		DXGI_FORMAT_UNKNOWN,//PF_R3G3B2,
-		DXGI_FORMAT_B5G6R5_UNORM,//PF_R5G6B5,
+		DXGI_FORMAT_B5G6R5_UNORM,//PF_B5G6R5,
 		DXGI_FORMAT_B5G5R5A1_UNORM,//PF_RGB5A1,
 		DXGI_FORMAT_UNKNOWN,//PF_RGBA4,
 		DXGI_FORMAT_R10G10B10A2_UNORM,//PF_RGB10A2,
@@ -152,10 +156,14 @@ DXGI_FORMAT D3D11Mapping::Mapping( PixelFormat inPixelFormat )
 		DXGI_FORMAT_UNKNOWN,//PF_RGBA_ASTC_10x10,
 		DXGI_FORMAT_UNKNOWN,//PF_RGBA_ASTC_12x10,
 		DXGI_FORMAT_UNKNOWN,//PF_RGBA_ASTC_12x12,
-	
+
 		// sRGB formats
-		DXGI_FORMAT_B8G8R8X8_UNORM_SRGB,//PF_SRGB8,
-		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,//PF_SRGB8_ALPHA8,
+		DXGI_FORMAT_UNKNOWN,//PF_SRGB8_UNORM,
+		DXGI_FORMAT_UNKNOWN,//PF_SBGR8_UNORM,
+		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,//PF_SRGB8_ALPHA8_UNORM,
+		DXGI_FORMAT_B8G8R8A8_UNORM_SRGB,//PF_SBGR8_ALPHA8_UNORM,
+		DXGI_FORMAT_UNKNOWN,//PF_SRGBX8_UNORM,
+		DXGI_FORMAT_B8G8R8X8_UNORM_SRGB,//PF_SBGRX8_UNORM,
 		DXGI_FORMAT_BC1_UNORM_SRGB,//PF_SRGB_DXT1,
 		DXGI_FORMAT_BC1_UNORM_SRGB,//PF_SRGB_ALPHA_DXT1,
 		DXGI_FORMAT_BC2_UNORM_SRGB,//PF_SRGB_ALPHA_DXT3,
@@ -181,6 +189,12 @@ DXGI_FORMAT D3D11Mapping::Mapping( PixelFormat inPixelFormat )
 		DXGI_FORMAT_UNKNOWN,//PF_SRGB8_ALPHA8_ASTC_12x12,
 	};
 
+	int count = sizeof(d3d11Format) / sizeof(d3d11Format[0]);
+	assert(count == PF_Count);
+
+	if (d3d11Format[inPixelFormat] == DXGI_FORMAT_UNKNOWN)
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Unsupported format in D3D11", "D3D11Mapping::Mapping");
+
 	return d3d11Format[inPixelFormat];
 }
 
@@ -205,7 +219,7 @@ D3D11_COMPARISON_FUNC D3D11Mapping::Mapping( CompareFunction cmpFunc )
 	case CF_Greater:
 		return D3D11_COMPARISON_GREATER;
 	default:
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid CompareFunction", "D3D11Mapping::Mapping");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid CompareFunction", "D3D11Mapping::Mapping");
 	}
 }
 
@@ -230,7 +244,7 @@ D3D11_STENCIL_OP D3D11Mapping::Mapping( StencilOperation sop )
 	case SOP_Decr_Wrap:
 		return D3D11_STENCIL_OP_DECR_SAT;
 	default:
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid StencilOperation", "D3D11Mapping::Mapping");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid StencilOperation", "D3D11Mapping::Mapping");
 	}
 }
 
@@ -249,7 +263,7 @@ D3D11_BLEND_OP D3D11Mapping::Mapping( BlendOperation bop )
 	case BOP_Max:
 		return D3D11_BLEND_OP_MAX;
 	default:
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid BlendOperation", "D3D11Mapping::Mapping");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid BlendOperation", "D3D11Mapping::Mapping");
 	}
 }
 
@@ -284,7 +298,7 @@ D3D11_BLEND D3D11Mapping::Mapping( AlphaBlendFactor blend )
 	case ABF_Inv_Blend_Factor:
 		return D3D11_BLEND_INV_BLEND_FACTOR;
 	default:
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid Blend", "D3D11Mapping::Mapping");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid Blend", "D3D11Mapping::Mapping");
 	}
 }
 
@@ -299,7 +313,7 @@ D3D11_CULL_MODE D3D11Mapping::Mapping( CullMode mode )
 	case CM_Back:
 		return D3D11_CULL_BACK;
 	default:
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid CullMode", "D3D11Mapping::Mapping");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid CullMode", "D3D11Mapping::Mapping");
 	}
 }
 
@@ -312,7 +326,7 @@ D3D11_FILL_MODE D3D11Mapping::Mapping( FillMode mode )
 	case FM_WireFrame:
 		return D3D11_FILL_WIREFRAME;
 	default:
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid FillMode", "D3D11Mapping::Mapping");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid FillMode", "D3D11Mapping::Mapping");
 	}
 }
 
@@ -331,7 +345,7 @@ D3D11_TEXTURE_ADDRESS_MODE D3D11Mapping::Mapping( TextureAddressMode mode )
 	case TAM_Mirror_Once:
 		return D3D11_TEXTURE_ADDRESS_MIRROR_ONCE;
 	default:
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid TextureAddressMode", "D3D11Mapping::Mapping");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid TextureAddressMode", "D3D11Mapping::Mapping");
 	}
 }
 
@@ -358,7 +372,7 @@ D3D11_FILTER D3D11Mapping::Mapping( TextureFilter filter, bool compare /*= false
 	case TF_Anisotropic:
 		return compare ? D3D11_FILTER_COMPARISON_ANISOTROPIC : D3D11_FILTER_ANISOTROPIC;
 	default:
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid TextureFilter", "D3D11Mapping::Mapping");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid TextureFilter", "D3D11Mapping::Mapping");
 	}
 }
 
@@ -406,7 +420,7 @@ DXGI_FORMAT D3D11Mapping::Mapping( VertexElementFormat format )
 	case VEF_UInt3: return DXGI_FORMAT_R32G32B32_UINT;
 	case VEF_UInt4: return DXGI_FORMAT_R32G32B32A32_UINT;
 	default:
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid VertexElementFormat", "D3D11Mapping::Mapping");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid VertexElementFormat", "D3D11Mapping::Mapping");
 	}
 }
 
@@ -426,6 +440,21 @@ D3D10_PRIMITIVE_TOPOLOGY D3D11Mapping::Mapping( PrimitiveType primType )
 	default:
 		return D3D10_PRIMITIVE_TOPOLOGY(D3D11_PRIMITIVE_TOPOLOGY_1_CONTROL_POINT_PATCHLIST + primType - PT_Patch_Control_Point_1);
 	}
+}
+
+D3D11_MAP D3D11Mapping::Mapping( ResourceMapAccess map )
+{
+	switch (map)
+	{
+	case RMA_Read_Only:				return D3D11_MAP_READ;
+	case RMA_Write_Only:			return D3D11_MAP_WRITE ;
+	case RMA_Read_Write:			return D3D11_MAP_READ_WRITE ;
+	case RMA_Write_Discard:			return D3D11_MAP_WRITE_DISCARD;
+	case RMA_Write_NO_Overwrite:	return D3D11_MAP_WRITE_NO_OVERWRITE;
+	}
+
+	assert(false);
+	return D3D11_MAP_WRITE_DISCARD;
 }
 
 void D3D11Mapping::UnMapping( D3D10_SRV_DIMENSION dimension, EffectParameterType& oTexType )

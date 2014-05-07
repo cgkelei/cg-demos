@@ -22,6 +22,7 @@ public:
 	static GLenum Mapping(StencilOperation sop);
 	static GLenum Mapping(TextureAddressMode mode);
 	static GLenum Mapping(ShaderType type);
+	static GLbitfield Mapping(ResourceMapAccess access);
 
 	// OpenGL usage
 	static GLenum Mapping(uint32_t accessHint);
@@ -32,6 +33,7 @@ public:
 	static void Mapping(GLenum& outInternalformat, GLenum& outFormat, GLenum& outType, PixelFormat inPixelFormat);
 	
 	static void UnMapping(GLenum glType, EffectParameterType& paramType, ShaderParameterClass& paramClass);
+	static void UnMapping(GLenum glType, VertexElementFormat& oFormat);
 
 	/**
 	 * Return if the opengl type is interger.

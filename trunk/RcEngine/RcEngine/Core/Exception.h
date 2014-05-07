@@ -19,7 +19,7 @@ public:
 	{
 		ERR_CANNOT_WRITE_TO_FILE, 	
 		ERR_INVALID_STATE,	
-		ERR_INVALIDPARAMS, 	
+		ERR_INVALID_PARAMS, 	
 		ERR_RENDERINGAPI_ERROR,
 		ERR_DUPLICATE_ITEM, 	
 		ERR_ITEM_NOT_FOUND, 	
@@ -186,7 +186,7 @@ public:
 	}
 
 	static InvalidParametersException Create(
-		ExceptionCodeType<Exception::ERR_INVALIDPARAMS> code, 
+		ExceptionCodeType<Exception::ERR_INVALID_PARAMS> code, 
 		const std::string& desc, 
 		const std::string& src, const char* file, long line)
 	{

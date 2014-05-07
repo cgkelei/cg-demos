@@ -24,6 +24,7 @@ public:
 	static D3D11_FILTER Mapping(TextureFilter filter, bool compare = false);
 	static uint32_t Mapping(uint32_t bufferCreateFlags); 
 	static D3D10_PRIMITIVE_TOPOLOGY Mapping(PrimitiveType primType); 
+	static D3D11_MAP Mapping(ResourceMapAccess map); 
 	static void UnMapping(D3D10_SRV_DIMENSION dimension, EffectParameterType& oTexType);
 
 };

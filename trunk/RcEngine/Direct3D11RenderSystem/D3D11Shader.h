@@ -36,15 +36,27 @@ struct ConstantBuffer
 	vector<UniformParam> BufferVariables;
 };
 
+// Forward declaration
+class EffectConstantBuffer;
+
+//////////////////////////////////////////////////////////////////////////
 class _D3D11Export D3D11Shader : public Shader
 {
 public:
-	D3D11Shader(ShaderType type) : Shader(type) {}
-	virtual ~D3D11Shader() {}
+	D3D11Shader(ShaderType type);
+	virtual ~D3D11Shader();
 
+	/**
+	 * Only called when shader has global uniform.
+	 */
+	void CreateGlobalConstantBuffer(uint32_t bufferSize);
+	
 public:
 	vector<ResourceInputParam> ResourceInputParams;
 	vector<ConstantBuffer> ConstantBufferParams;
+	
+	// Global constant buffer with name "$Globals", keep it as a state of separate shader 
+	EffectConstantBuffer* GlobalCBuffer;
 
 	friend class D3D11ShaderReflection;
 	friend class D3D11ShaderPipeline;
@@ -67,6 +79,7 @@ public:
 	vector<InputSignature> InputSignatures;
 };
 
+//////////////////////////////////////////////////////////////////////////
 class _D3D11Export D3D11HullShader : public D3D11Shader
 {
 public:
@@ -146,6 +159,9 @@ public:
 	virtual bool LinkPipeline();
 	virtual void OnBind();
 	virtual void OnUnbind();
+
+private:
+	void AddGlobalUniformBind(EffectConstantBuffer* cbuffer, EffectParameter* effectParam, uint32_t offset, uint32_t arrSize);
 
 protected:
 	std::vector<std::function<void()>> mParameterBinds; 

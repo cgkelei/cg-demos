@@ -10,6 +10,8 @@
 #include <Graphics/Effect.h>
 #include <Graphics/Effect.h>
 #include <Graphics/EffectParameter.h>
+#include <Graphics/Camera.h>
+#include <Graphics/CameraController1.h>
 #include <Resource/ResourceManager.h>
 #include <Scene/SceneManager.h>
 #include <Scene/Entity.h>
@@ -39,68 +41,33 @@ protected:
 		ResourceManager& resMan = ResourceManager::GetSingleton();
 		FileSystem& fileSys = FileSystem::GetSingleton();
 
+		RenderDevice* device = Environment::GetSingleton().GetRenderDevice();
 		RenderFactory* factory = Environment::GetSingleton().GetRenderFactory();
 		SceneManager* sceneMan = Environment::GetSingleton().GetSceneManager();
 
 		mFSQuadEffect = static_pointer_cast_checked<Effect>(
 			resMan.GetResourceByName(RT_Effect, "FSQuad.effect.xml", "General") );
 
-		resMan.GetResourceByName(RT_Effect, "DeferredLighting.effect.xml", "General");
+		mCamera = device->GetScreenFrameBuffer()->GetCamera();
 
-		Entity* sponzaEntity = sceneMan->CreateEntity("Sponza", "Sponza.mesh",  "Custom");
-		SceneNode* sponzaNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Sponza");
-		sponzaNode->SetPosition(float3(0, 0, 0));
-		sponzaNode->SetScale(0.45f);
-		sponzaNode->AttachObject(sponzaEntity);
+		mCamera->CreateLookAt(float3(-137.0, 97.3, 82.0), float3(-136.5, 96.8, 81.3), float3(0.3, 0.9, -0.4));
+		mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 1000.0f );
 
-		//auto entity = sceneMan->CreateEntity("Nanosuit", "./Nanosuit/Nanosuit.mesh",  "Custom");
-		//auto sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Nanosuit");
-		//sceneNode->SetScale(float3(2,2,2));
-		//sceneNode->SetPosition(float3(-50,0,0));
-		//sceneNode->AttachObject(entity);
-		//auto b = entity->GetWorldBoundingBox();
-
-		bool b = FileSystem::GetSingleton().FileExits("../Media/Mesh/Sponza/sponza_column_a_diff.dds");
-		auto textureRes = static_pointer_cast_checked<TextureResource>(
-			resMan.GetResourceByName(RT_Texture, "spnza_bricks_a_diff.dds", "Custom") );
-		mTexture = textureRes->GetTexture();
+		mCameraControler = new RcEngine::Test::FPSCameraControler;
+		mCameraControler->AttachCamera(*mCamera);
+		mCameraControler->SetMoveSpeed(100.0f);
+		mCameraControler->SetMoveInertia(true);
 	}
 
 
 	void LoadContent()
 	{
-		//float4 vertices[] = { 
-		//	float4(-1,  1, 0, 0),
-		//	float4( 1,  1, 1, 0),
-		//	float4(-1, -1, 0, 1),
-		//	float4( 1, -1, 1, 1)
-		//};
-
-		//RenderFactory* factory = Environment::GetSingleton().GetRenderFactory();
-
-		//ElementInitData initData;
-		//initData.pData = vertices;
-		//initData.rowPitch = sizeof(vertices);
-		//auto vb = factory->CreateVertexBuffer(sizeof(vertices), EAH_GPU_Read, BufferCreate_Vertex, &initData);
-		//mFSQuad.BindVertexStream(0, vb);
-
-		//VertexElement ves[] = {
-		//	VertexElement(0, VEF_Float2, VEU_Position),
-		//	VertexElement(sizeof(float2), VEF_Float2, VEU_TextureCoordinate)
-		//};
-		//mFSQuad.VertexDecl = factory->CreateVertexDeclaration(ves, 2);
-
-		//mFSQuad.PrimitiveType = PT_Triangle_Strip;
-		//mFSQuad.SetVertexRange(0, 4);
-
 		mFSQuad.PrimitiveType = PT_Triangle_List;
 		mFSQuad.SetVertexRange(0, 3);
 
-		FileSystem& fileSys = FileSystem::GetSingleton();
 		ResourceManager& resMan = ResourceManager::GetSingleton();
-
-		//shared_ptr<Material> material = resMan.GetResourceByName<Material>(RT_Material, "Model.material.xml", "Custom");
-			
+		auto textureRes = resMan.GetResourceByName<TextureResource>(RT_Texture, "./Geo/sand_diffuse.dds", "Custom");
+		mTexture = textureRes->GetTexture();
 	}
 
 	void UnloadContent()
@@ -110,7 +77,7 @@ protected:
 
 	void Update(float deltaTime)
 	{
-
+		mCameraControler->Update(deltaTime);
 	}
 
 	void Render()
@@ -120,7 +87,7 @@ protected:
 		shared_ptr<FrameBuffer> screenFrameBuffer = device->GetScreenFrameBuffer();
 
 		device->BindFrameBuffer(screenFrameBuffer);
-		screenFrameBuffer->Clear(CF_Color | CF_Depth, ColorRGBA(1, 0, 0, 1), 1.0f, 0);
+		screenFrameBuffer->Clear(CF_Color | CF_Depth, ColorRGBA(0, 0, 0, 1), 1.0f, 0);
 
 		auto effectParam = mFSQuadEffect->GetParameterByName("ColorMap");
 		effectParam->SetValue(mTexture->GetShaderResourceView());
@@ -146,6 +113,8 @@ protected:
 	shared_ptr<Effect> mFSQuadEffect;
 	shared_ptr<Texture> mTexture;
 	RenderOperation mFSQuad;
+	shared_ptr<Camera> mCamera;
+	Test::FPSCameraControler* mCameraControler;
 };
 
 

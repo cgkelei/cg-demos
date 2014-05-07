@@ -1,6 +1,7 @@
 #include "D3D11Buffer.h"
 #include "D3D11GraphicCommon.h"
 #include "D3D11Device.h"
+#include <Core/Exception.h>
 
 namespace RcEngine {
 
@@ -72,12 +73,29 @@ D3D11Buffer::~D3D11Buffer(void)
 
 void* D3D11Buffer::Map( uint32_t offset, uint32_t length, ResourceMapAccess options )
 {
-	return NULL;
+	if (length == MAP_ALL_BUFFER)
+	{
+		assert(offset < mBufferSize);
+		length = mBufferSize - offset;
+	}
+	else
+	{
+		if (offset + length > mBufferSize)
+			ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Out of range!", "D3D11Buffer::Map");
+	}
+
+	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
+	
+	D3D11_MAPPED_SUBRESOURCE mappedD3D11;
+	HRESULT hr = deviceContextD3D11->Map(BufferD3D11, 0, D3D11Mapping::Mapping(options), 0, &mappedD3D11);
+
+	return (uint8_t*)mappedD3D11.pData + offset;
 }
 
 void D3D11Buffer::UnMap()
 {
-
+	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
+	deviceContextD3D11->Unmap(BufferD3D11, 0);
 }
 
 void D3D11Buffer::ResizeBuffer( uint32_t size )

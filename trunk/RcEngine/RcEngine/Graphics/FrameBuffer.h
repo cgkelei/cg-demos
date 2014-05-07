@@ -60,6 +60,9 @@ public:
 	inline uint32_t GetWidth() const { return mWidth; }
 	inline uint32_t GetHeight() const { return mHeight; }
 
+	const shared_ptr<Camera>& GetCamera() const     { return mCamera; }
+	void SetCamera(const shared_ptr<Camera>& cam)   { mCamera = cam; }
+
 	void SetViewport(const Viewport& vp);
 	void SetViewport(uint32_t index, const Viewport& vp); 
 	inline const vector<Viewport>& GetViewports() const { return mViewports; }
@@ -75,6 +78,8 @@ public:
 
 	void DetachAll();
 
+	void Resize(uint32_t width, uint32_t height);
+
 	/**
 	 * Clear all render target of the frame buffer.
 	 * Note that before do clear, you need to bind the frame buffer as current device 
@@ -82,11 +87,11 @@ public:
 	 */
 	void Clear(uint32_t flags, const ColorRGBA& clr, float depth, uint32_t stencil);
 
-	virtual void SwapBuffers() = 0;
-
 	//Called when this frame buffer is binded
 	virtual void OnBind() = 0;
 	virtual void OnUnbind() = 0;
+	
+	virtual void SwapBuffers() = 0;
 
 protected:
 

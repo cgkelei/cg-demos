@@ -38,7 +38,7 @@ struct _ApiExport VertexElement
 	/// </summary>
 	uint32_t InstanceStepRate;
 
-	VertexElement() {}
+	VertexElement() : InputSlot(0), InstanceStepRate(0) {}
 	VertexElement(uint32_t offset, VertexElementFormat theType, VertexElementUsage semantic, uint32_t index = 0);
 };
 
@@ -56,6 +56,8 @@ public:
 
 	uint32_t GetStreamStride(uint32_t streamSlot);
 	uint32_t GetVertexSize() const;
+
+	const std::vector<VertexElement>& GetVertexElements() const { return mVertexElemets; }
 
 public:
 	std::vector<VertexElement> mVertexElemets;

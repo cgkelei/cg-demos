@@ -33,7 +33,7 @@ OpenGLTexture1D::OpenGLTexture1D( PixelFormat format, uint32_t arraySize, uint32
 	{
 		for (uint32_t level = 0; level < mMipLevels; ++ level)
 		{
-			uint32_t levelWidth = GetWidth(level);
+			uint32_t levelWidth = (std::max)(1U, mWidth >> level);
 
 			if (PixelFormatUtils::IsCompressed(mFormat))
 			{

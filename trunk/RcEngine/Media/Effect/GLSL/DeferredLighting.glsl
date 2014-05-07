@@ -41,9 +41,9 @@ void main()
 
 #extension GL_EXT_texture_array : enable
 
-#include "/ShadowUtil.glsl"
-#include "/LightingUtil.glsl"
 #include "/DeferredUtil.glsl"
+#include "/LightingUtil.glsl"
+#include "/PSSM.glsl"
 	
 uniform vec2 CameraNearFar;
 
@@ -183,7 +183,6 @@ void main()
 
 #include "/DeferredUtil.glsl"
 #include "/LightingUtil.glsl"
-#include "/ShadowUtil.glsl"
 
 uniform vec4 LightPosVS;		// w dimension is spot light inner cone cos angle
 uniform vec4 LightDirVS;		// w dimension is spot light outer cone cos angle
@@ -243,17 +242,17 @@ void main()
 		}
 		
 		// Eval Possion-disc random shadow map
-		float visibility = 1.0;
-		if (ShadowEnabled)
-			visibility = EvalCascadeShadow(vec4(positionVS, 1.0) * InvView);
+		//float visibility = 1.0;
+		//if (ShadowEnabled)
+		//	visibility = EvalCascadeShadow(vec4(positionVS, 1.0) * InvView);
 	
-		final *= visibility;
+		//final *= visibility;
 	}
 		
 	oFragColor = final; 
 }	
 
-[[Fragment=SpotLightingPS]]
+[[Fragment=DeferredShadingPS]]
 
 #include "/DeferredUtil.glsl"
 #include "/LightingUtil.glsl"
@@ -286,7 +285,7 @@ void main()
 	vec3 specularAlbedo = tap1.aaa;
 	float specularPower = tap0.a * 256.0;
 
-	vec4 lightColor = texelFetch(LightAccumulateBuffer, sampleIndex, 0 );
+	vec4 lightColor = texelFetch( LightAccumulateBuffer, sampleIndex, 0 );
 	                    
 	vec3 diffueLight = lightColor.rgb;
 	vec3 specularLight = lightColor.a / (Luminance(diffueLight) + 1e-6) * diffueLight;

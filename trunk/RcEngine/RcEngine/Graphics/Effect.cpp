@@ -436,7 +436,7 @@ void Effect::LoadImpl()
 				{
 					uint32_t value = stateNode->Attribute("value")->ValueUInt();
 					if (value < 1 || value > 16)
-						ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "MaxAnisotropy range invalid, only[1, 16] supported!",  "Material::LoadImpl");
+						ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "MaxAnisotropy range invalid, only[1, 16] supported!",  "Material::LoadImpl");
 					desc.MaxAnisotropy = value;
 				}
 				else if (stateName == "MinLOD")

@@ -65,7 +65,7 @@ void D3D11Device::SetSamplerState( ShaderType stage, uint32_t unit, const shared
 			DeviceContextD3D11->CSSetSamplers(unit, 1, &samplerStateD3D11);
 			break;
 		default:
-			ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid SamplerState", "D3D11RenderDevice::SetSamplerState");
+			ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid SamplerState", "D3D11RenderDevice::SetSamplerState");
 			break;
 		}
 	}

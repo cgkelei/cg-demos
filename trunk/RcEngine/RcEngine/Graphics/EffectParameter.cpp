@@ -233,7 +233,7 @@ void EffectConstantBuffer::SetRawValue( const void* pData, uint32_t offset, uint
 		((offset + count) > mBufferSize))
 	{
 		// overflow of some kind
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid range specified", "EffectConstantBuffer::SetRawValue");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid range specified", "EffectConstantBuffer::SetRawValue");
 	}
 #endif
 
@@ -249,7 +249,7 @@ void EffectConstantBuffer::GetRawValue( void *pData, uint32_t offset, uint32_t c
 		((offset + count) > mBufferSize))
 	{
 		// overflow of some kind
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Invalid range specified", "EffectConstantBuffer::GetRawValue");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid range specified", "EffectConstantBuffer::GetRawValue");
 	}
 #endif
 

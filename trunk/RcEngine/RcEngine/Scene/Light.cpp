@@ -78,7 +78,7 @@ void Light::SetSpotAngle( float innerAngleRadian, float outerAngleRadian, float 
 {
 	if (mLightType != LT_SpotLight)
 	{
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "SetSpotInnerAngle is only valid for spotlights.", "Light::SetSpotInnerAngle");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "SetSpotInnerAngle is only valid for spotlights.", "Light::SetSpotInnerAngle");
 	}
 
 	mSpotInnerAngle = innerAngleRadian;
@@ -90,7 +90,7 @@ void Light::SetSpotInnerAngle( float innerAngleRadian )
 {
 	if (mLightType != LT_SpotLight)
 	{
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "SetSpotInnerAngle is only valid for spotlights.", "Light::SetSpotInnerAngle");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "SetSpotInnerAngle is only valid for spotlights.", "Light::SetSpotInnerAngle");
 	}
 
 	mSpotInnerAngle = innerAngleRadian;
@@ -100,7 +100,7 @@ void Light::SetSpotOuterAngle( float outerAngleRadian )
 {
 	if (mLightType != LT_SpotLight)
 	{
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "SetSpotOuterAngle is only valid for spotlights.", "Light::SetSpotOuterAngle");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "SetSpotOuterAngle is only valid for spotlights.", "Light::SetSpotOuterAngle");
 	}
 
 	mSpotOuterAngle = outerAngleRadian;
@@ -110,7 +110,7 @@ void Light::SetSpotFalloff( float exponent )
 {
 	if (mLightType != LT_SpotLight)
 	{
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "SetSpotFalloff is only valid for spotlights.", "Light::SetSpotFalloff");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "SetSpotFalloff is only valid for spotlights.", "Light::SetSpotFalloff");
 	}
 
 	mSpotFalloff = exponent;
@@ -165,7 +165,7 @@ SceneObject* Light::FactoryFunc( const String& name, const NameValuePairList* pa
 			return new Light(name, LT_DirectionalLight);
 	}
 	
-	ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Unsupported Light Type!", "Light::FactoryFunc");
+	ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Unsupported Light Type!", "Light::FactoryFunc");
 }
 
 

@@ -95,8 +95,8 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const Rectanglef& de
 	if (color.A() <= 0)
 		return;
 
-	uint32_t texWidth = texture->GetWidth(0);
-	uint32_t texHeight = texture->GetHeight(0);
+	uint32_t texWidth = texture->GetWidth();
+	uint32_t texHeight = texture->GetHeight();
 
 	IntRect srcRect = src ? (*src) : IntRect(0, 0, texWidth, texHeight);
 
@@ -179,7 +179,7 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const float2& positi
 
 void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const float2& position, const IntRect* sourceRectangle, const ColorRGBA& color, float layerDepth /*= 0.0f*/  )
 {
-	Rectanglef destination(position.X(), position.Y(), (float)texture->GetWidth(0), (float)texture->GetHeight(0));
+	Rectanglef destination(position.X(), position.Y(), (float)texture->GetWidth(), (float)texture->GetHeight());
 	Draw(texture, destination, sourceRectangle, color, 0.0f, float2::Zero(), layerDepth);
 }
 
@@ -203,8 +203,8 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const float2& positi
 	}
 	else
 	{
-		width = (int32_t)(texture->GetWidth(0) * scale);
-		height = (int32_t)(texture->GetHeight(0) * scale);
+		width = (int32_t)(texture->GetWidth() * scale);
+		height = (int32_t)(texture->GetHeight() * scale);
 	}
 
     Rectanglef destination = Rectanglef(position.X(), position.Y(), (float)width, (float)height);
@@ -221,8 +221,8 @@ void SpriteBatch::Draw( const shared_ptr<Texture>& texture, const float2& positi
 	}
 	else
 	{
-		width = (int32_t)(texture->GetWidth(0) * scale.X());
-		height = (int32_t)(texture->GetHeight(0) * scale.Y());
+		width = (int32_t)(texture->GetWidth() * scale.X());
+		height = (int32_t)(texture->GetHeight() * scale.Y());
 	}
 
 	Rectanglef destination = Rectanglef(position.X(), position.Y(), (float)width, (float)height);

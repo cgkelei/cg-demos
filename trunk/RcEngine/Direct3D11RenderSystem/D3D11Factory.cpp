@@ -83,7 +83,7 @@ shared_ptr<Shader> D3D11Factory::CreateShader( ShaderType type )
 	case ST_Pixel:		return shared_ptr<Shader>( new D3D11PixelShader() );
 	case ST_Compute:	return shared_ptr<Shader>( new D3D11ComputeShader() );
 	default:
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Undefined shader type", "D3D11Factory::CreateShader");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Undefined shader type", "D3D11Factory::CreateShader");
 	}
 }
 

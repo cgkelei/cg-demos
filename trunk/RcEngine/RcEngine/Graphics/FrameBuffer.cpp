@@ -50,7 +50,7 @@ shared_ptr<RenderView> FrameBuffer::GetRTV( Attachment att ) const
 		uint32_t index = att - ATT_Color0;
 		if(mColorViews.size() < index + 1)
 		{
-			ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Try to get render target view which it not exit!", "RHFrameBuffer::GetRenderTargetView");
+			ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Try to get render target view which it not exit!", "RHFrameBuffer::GetRenderTargetView");
 		}
 		else
 			return mColorViews[index];
@@ -60,7 +60,7 @@ shared_ptr<RenderView> FrameBuffer::GetRTV( Attachment att ) const
 shared_ptr<UnorderedAccessView> FrameBuffer::GetUAV( uint32_t index ) const
 {
 	if (index >= mUnorderedAccessViews.size())
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Try to get unordered access view which it not exit!", "RHFrameBuffer::GetUnorderedAccessView");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Try to get unordered access view which it not exit!", "RHFrameBuffer::GetUnorderedAccessView");
 	
 	return mUnorderedAccessViews[index];
 }
@@ -181,6 +181,12 @@ void FrameBuffer::Clear( uint32_t flags, const ColorRGBA& clr, float depth, uint
 		else if (flags & CF_Stencil)
 			mDepthStencilView->ClearStencil(stencil);
 	}
+}
+
+void FrameBuffer::Resize( uint32_t width, uint32_t height )
+{
+	mWidth = width;
+	mHeight = height;
 }
 
 }

@@ -45,7 +45,7 @@ void SceneNode::AttachObject( SceneObject* obj )
 {
 	if (obj->IsAttached())
 	{
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS,  "Object already attached to a SceneNode", "SceneNode::attachObject");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS,  "Object already attached to a SceneNode", "SceneNode::attachObject");
 	}
 
 	mAttachedObjects.push_back(obj);

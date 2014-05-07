@@ -37,7 +37,7 @@ uint32_t GetRenderQueueBucket(const String& str)
 	else if (str == "Opaque")
 		return RenderQueue::BucketTransparent;
 	else 
-		ENGINE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Undefined Queue Bucket", "GetQueueBucket");
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Undefined Queue Bucket", "GetQueueBucket");
 }
 
 }
@@ -152,7 +152,10 @@ void Material::LoadImpl()
 		{
 			String semantic = sematicAttrib->ValueString();
 			EffectParameter* effectParam = mEffect->GetParameterByUsage(Internal::EffectParamsUsageDefs::GetInstance().GetUsageType(semantic));
-		
+			
+			if (effectParam == nullptr)
+				continue;
+
 			// texture type
 			if (EPT_Texture1D <= effectParam->GetParameterType() && effectParam->GetParameterType() <= EPT_TextureCubeArray)
 			{	
@@ -165,11 +168,7 @@ void Material::LoadImpl()
 					if (fileSystem.Exits(texturePath, mGroup) == false)
 						resGroup = "General";
 
-					shared_ptr<TextureResource> textureRes = std::static_pointer_cast<TextureResource>(
-						resMan.GetResourceByName(RT_Texture, texturePath, mGroup) );
-					
-					textureRes->Load();
-
+					shared_ptr<TextureResource> textureRes = resMan.GetResourceByName<TextureResource>(RT_Texture, texturePath, mGroup);
 					mMaterialTextureCopys.push_back(textureRes->GetTexture());
 					SetTexture(effectParam->GetName(), textureRes->GetTexture()->GetShaderResourceView());		
 				}
@@ -252,7 +251,7 @@ void Material::SetCurrentTechnique( uint32_t index )
 void Material::ApplyMaterial( const float4x4& world )
 {
 	RenderDevice* renderDevice = Environment::GetSingleton().GetRenderDevice();
-	const shared_ptr<Camera> camera ;//= renderDevice->GetCurrentFrameBuffer()->GetCamera();
+	const shared_ptr<Camera> camera = renderDevice->GetCurrentFrameBuffer()->GetCamera();
 
 	for (auto effectParam : mAutoBindings)
 	{

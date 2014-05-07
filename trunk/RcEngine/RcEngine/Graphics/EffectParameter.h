@@ -19,7 +19,7 @@ public:
 
 	inline const String& GetName() const							{ return mName; }
 	inline uint32_t GetBufferSize() const							{ return mBufferSize; }
-	inline shared_ptr<GraphicsBuffer> GetBuffer() const					{ return mConstantBuffer; }
+	inline shared_ptr<GraphicsBuffer> GetBuffer() const				{ return mConstantBuffer; }
 	inline uint32_t GetNumVariables() const							{ return mBufferVariable.size(); }
 	inline EffectParameter* GetVariable(uint32_t index) const		{ return mBufferVariable.at(index); }
 	

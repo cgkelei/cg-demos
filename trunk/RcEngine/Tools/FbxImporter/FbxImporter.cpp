@@ -7,6 +7,7 @@
 #include <IO/FileStream.h>
 #include <IO/PathUtil.h>
 #include <set>
+#include <fstream>
 
 #include "ExportLog.h"
 
@@ -96,7 +97,7 @@ shared_ptr<VertexDeclaration> GetVertexDeclaration(uint32_t vertexFlag)
 		offset += 12;
 	}
 
-	return std::make_shared<VertexDeclaration>(elements);
+	return std::make_shared<VertexDeclaration>(&elements[0], elements.size());
 }
 
 void CorrectName(String& matName)
@@ -1481,10 +1482,11 @@ void FbxProcesser::BuildAndSaveBinary( )
 			stream.WriteUInt(meshPart.Vertices.size());
 			stream.WriteUInt(vertexSize);
 
+			const std::vector<VertexElement>& elements = vertexDecl->GetVertexElements();
+
 			// write vertex declaration, elements count
-			stream.WriteUInt(vertexDecl->GetElementCount());
-			
-			const std::vector<VertexElement>& elements = vertexDecl->GetElements();
+			stream.WriteUInt(elements.size());
+					
 			for (auto iter = elements.begin(); iter != elements.end(); ++iter)
 			{
 				const VertexElement& ve = *iter;
@@ -1825,7 +1827,7 @@ void FbxProcesser::MergeSubMeshWithSameMaterial()
 				// Must have same material
 				canMerge = (subMesh->MaterialName == testMesh->MaterialName); 
 				canMerge &= (subMesh->Indices.size() + testMesh->Indices.size() < UINT_MAX);
-				canMerge &= (subMesh->VertexDecl == testMesh->VertexDecl);
+				canMerge &= (subMesh->VertexDecl.size() == testMesh->VertexDecl.size());
 
 				if (canMerge)
 				{
@@ -1890,10 +1892,10 @@ int main()
 	g_ExportSettings.AxisSystem = Axis_OpenGL;
 	g_ExportSettings.MergeWithSameMaterial = false;
 
-	if (fbxProcesser.LoadScene("E:/Engines/RcEngine/Media/Mesh/Dude/dude.fbx"))
+	if (fbxProcesser.LoadScene("E:/Engines/RcEngine/Media/Mesh/NanosuitUBO/Nanosuit.FBX"))
 	{
 		fbxProcesser.ProcessScene();
-		//fbxProcesser.BuildAndSaveXML();
+		fbxProcesser.BuildAndSaveXML();
 		fbxProcesser.BuildAndSaveBinary();
 		fbxProcesser.ExportMaterial();
 	}
