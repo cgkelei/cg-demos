@@ -1,5 +1,4 @@
 <Effect name="DeferredLightingEffect">
-  
   <Technique name="DirectionalLighting">
     <Pass name="p0">
       <VertexShader file="DeferredLighting" entry="DeferedVS">
@@ -124,7 +123,7 @@
       <VertexShader file="DeferredLighting" entry="DeferedVS">
         <Macro name="DIRLIGHT"/>
       </VertexShader>
-      <PixelShader file="DeferredLighting" entry="DeferredShadingPS">
+      <PixelShader file="DeferredLighting" entry="SpotLightingPS">
         <Macro name="DIRLIGHT"/>
       </PixelShader>
       <State name="DepthEnable" value="false"/>
@@ -139,6 +138,4 @@
       <State name="FrontStencilRef" value="0"/>
     </Pass>
   </Technique>
-
 </Effect>
-  

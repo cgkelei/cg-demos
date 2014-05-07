@@ -47,16 +47,6 @@ protected:
 
 		mFSQuadEffect = static_pointer_cast_checked<Effect>(
 			resMan.GetResourceByName(RT_Effect, "FSQuad.effect.xml", "General") );
-
-		mCamera = device->GetScreenFrameBuffer()->GetCamera();
-
-		mCamera->CreateLookAt(float3(-137.0, 97.3, 82.0), float3(-136.5, 96.8, 81.3), float3(0.3, 0.9, -0.4));
-		mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 1000.0f );
-
-		mCameraControler = new RcEngine::Test::FPSCameraControler;
-		mCameraControler->AttachCamera(*mCamera);
-		mCameraControler->SetMoveSpeed(100.0f);
-		mCameraControler->SetMoveInertia(true);
 	}
 
 
@@ -66,7 +56,7 @@ protected:
 		mFSQuad.SetVertexRange(0, 3);
 
 		ResourceManager& resMan = ResourceManager::GetSingleton();
-		auto textureRes = resMan.GetResourceByName<TextureResource>(RT_Texture, "./Geo/sand_diffuse.dds", "Custom");
+		auto textureRes = resMan.GetResourceByName<TextureResource>(RT_Texture, "background.dds", "Custom");
 		mTexture = textureRes->GetTexture();
 	}
 
@@ -77,7 +67,7 @@ protected:
 
 	void Update(float deltaTime)
 	{
-		mCameraControler->Update(deltaTime);
+
 	}
 
 	void Render()
@@ -113,8 +103,6 @@ protected:
 	shared_ptr<Effect> mFSQuadEffect;
 	shared_ptr<Texture> mTexture;
 	RenderOperation mFSQuad;
-	shared_ptr<Camera> mCamera;
-	Test::FPSCameraControler* mCameraControler;
 };
 
 
