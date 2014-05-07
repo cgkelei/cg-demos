@@ -34,7 +34,7 @@ struct PixelFormatDescription
 static const PixelFormatDescription& GetPixelFormatDescription(PixelFormat format)
 {
 
-	static const PixelFormatDescription Desc[PF_Count] = {
+	static const PixelFormatDescription PixelFormatDesc[] = {
 		
 		{ 0, 0, 0 },
 
@@ -42,7 +42,11 @@ static const PixelFormatDescription& GetPixelFormatDescription(PixelFormat forma
 		{ 1, 1, 0 },					// PF_R8_UNORM
 		{ 2, 2, 0 },					// PF_RG8_UNORM
 		{ 3, 3, 0 },					// PF_RGB8_UNORM
+		{ 3, 3, 0 },					// PF_BGR8_UNORM
 		{ 4, 4, PFF_HasAlpha },			// PF_RGBA8_UNORM
+		{ 4, 4, PFF_HasAlpha },			// PF_RGBA8_UNORM
+		{ 4, 4, 0 },					// PF_RGBX8_UNORM
+		{ 4, 4, 0 },					// PF_BGRX8_UNORM
 
 		{ 2, 1, 0 },					// PF_R16_UNORM	
 		{ 4, 2, 0 },					// PF_RG16_UNORM
@@ -156,12 +160,16 @@ static const PixelFormatDescription& GetPixelFormatDescription(PixelFormat forma
 		{ 8, 4, PFF_Compressed },
 
 		// sRGB formats
-		{ 3, 3, PFF_sRGB },					//PF_SRGB8,
-		{ 4, 4, PFF_sRGB },					//PF_SRGB8_ALPHA8,
+		{ 3, 3, PFF_sRGB },					//PF_SRGB8_UNORM,
+		{ 3, 3, PFF_sRGB },					//PF_SBGR8_UNORM,
+		{ 4, 4, PFF_sRGB | PFF_HasAlpha },	//PF_SRGB8_ALPHA8_UNORM,
+		{ 4, 4, PFF_sRGB | PFF_HasAlpha},	//PF_SBGR8_ALPHA8_UNORM,
+		{ 4, 4, PFF_sRGB },					//PF_SRGBX8_UNORM,
+		{ 4, 4, PFF_sRGB },					//PF_SBGRX8_UNORM,
 		{ 3, 3, PFF_sRGB },					//PF_SRGB_DXT1,
-		{ 3, 4, PFF_sRGB },					//PF_SRGB_ALPHA_DXT1,
-		{ 3, 4, PFF_sRGB },					//PF_SRGB_ALPHA_DXT3,
-		{ 3, 4, PFF_sRGB },					//PF_SRGB_ALPHA_DXT5,
+		{ 3, 4, PFF_sRGB | PFF_HasAlpha },	//PF_SRGB_ALPHA_DXT1,
+		{ 3, 4, PFF_sRGB | PFF_HasAlpha },	//PF_SRGB_ALPHA_DXT3,
+		{ 3, 4, PFF_sRGB | PFF_HasAlpha },	//PF_SRGB_ALPHA_DXT5,
 				
 		{ 3, 3, PFF_sRGB },					//PF_SRGB_BP_UNORM,
 		{ 3, 3, PFF_sRGB },					//PF_SRGB_PVRTC_2BPPV1,
@@ -184,7 +192,8 @@ static const PixelFormatDescription& GetPixelFormatDescription(PixelFormat forma
 		{ 3, 3, PFF_sRGB },					//PF_SRGB8_ALPHA8_ASTC_12x12,
 	};
 
-	return Desc[format];
+	static_assert(ARRAY_SIZE(PixelFormatDesc) == PF_Count, "PixelFormatDesc not match PixelFormat");
+	return PixelFormatDesc[format];
 }
 
 
