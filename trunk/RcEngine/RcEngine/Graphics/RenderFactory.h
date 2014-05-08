@@ -90,6 +90,7 @@ public:
 	
 	// Utility function
 	shared_ptr<Texture> LoadTextureFromFile(const String& filename);
+	void SaveTextureToFile(const String& filename, const shared_ptr<Texture>& texture);
 
 	shared_ptr<Shader> LoadShaderFromFile(
 		ShaderType shaderType, 

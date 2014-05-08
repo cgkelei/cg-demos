@@ -13,7 +13,7 @@ public:
 	Image();
 	~Image();
 
-	bool LoadFromDDS(const String& filename);
+	bool LoadImageFromDDS(const String& filename);
 
 	inline uint32_t GetWidth() const		{ assert(mValid); return mWidth; }
 	inline uint32_t GetHeight() const		{ assert(mValid); return mHeight; }
@@ -33,6 +33,7 @@ public:
 
 private:
 	void Clear();
+	bool CopyImageFromTexture(const shared_ptr<Texture>& texture);
 
 private:
 
@@ -48,13 +49,15 @@ private:
 
 	struct SurfaceInfo
 	{
-		uint8_t* pData;
+		void* pData;
 		uint32_t RowPitch;
 		uint32_t SlicePitch;
 	};
 	std::vector<SurfaceInfo> mSurfaces;
 	
 	bool mValid;
+
+	friend class RenderFactory;
 };
 
 }

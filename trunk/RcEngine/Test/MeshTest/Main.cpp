@@ -55,8 +55,10 @@ protected:
 
 		mCamera = device->GetScreenFrameBuffer()->GetCamera();
 
-		mForwardPath = std::make_shared<ForwardPath>();
-		mForwardPath->OnGraphicsInit();
+		//mRenderPath = std::make_shared<ForwardPath>();
+		
+		mRenderPath = std::make_shared<DeferredPath>();
+		mRenderPath->OnGraphicsInit();
 
 		/*Light* spotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
 		spotLight->SetDirection(float3(0, -1.5, -1));
@@ -86,29 +88,29 @@ protected:
 		Entity* entity;
 		SceneNode* sceneNode;
 
-		mCamera->CreateLookAt(float3(213.4, 405.5, -30.5),  float3(214.3, 405.1, -30.6), float3(0.4, 0.9, -0.0));
-		mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 3000.0f );
+		//mCamera->CreateLookAt(float3(213.4, 405.5, -30.5),  float3(214.3, 405.1, -30.6), float3(0.4, 0.9, -0.0));
+		//mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 3000.0f );
 
-		Entity* sponzaEntity = sceneMan->CreateEntity("Sponza", "Sponza.mesh",  "Custom");
-		SceneNode* sponzaNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Sponza");
-		sponzaNode->SetPosition(float3(0, 0, 0));
-		sponzaNode->SetScale(0.45f);
-		sponzaNode->AttachObject(sponzaEntity);
+		//Entity* sponzaEntity = sceneMan->CreateEntity("Sponza", "Sponza.mesh",  "Custom");
+		//SceneNode* sponzaNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Sponza");
+		//sponzaNode->SetPosition(float3(0, 0, 0));
+		//sponzaNode->SetScale(0.45f);
+		//sponzaNode->AttachObject(sponzaEntity);
 
-		//mCamera->CreateLookAt(float3(-137.0, 97.3, 82.0), float3(-136.5, 96.8, 81.3), float3(0.3, 0.9, -0.4));
-		//mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 1000.0f );
+		mCamera->CreateLookAt(float3(-137.0, 97.3, 82.0), float3(-136.5, 96.8, 81.3), float3(0.3, 0.9, -0.4));
+		mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 1000.0f );
 
-		//entity = sceneMan->CreateEntity("Ground", "./Geo/Ground.mesh",  "Custom");
-		//sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Ground");
-		//sceneNode->SetScale(float3(2.5,2.5,2.5));
-		//sceneNode->SetPosition(float3(0, 0, 0));
-		//sceneNode->AttachObject(entity);
+		entity = sceneMan->CreateEntity("Ground", "./Geo/Ground.mesh",  "Custom");
+		sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Ground");
+		sceneNode->SetScale(float3(2.5,2.5,2.5));
+		sceneNode->SetPosition(float3(0, 0, 0));
+		sceneNode->AttachObject(entity);
 
-		//entity = sceneMan->CreateEntity("Nanosuit", "./Nanosuit/Nanosuit.mesh",  "Custom");
-		//sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Nanosuit");
-		//sceneNode->SetScale(float3(2,2,2));
-		//sceneNode->SetPosition(float3(-50,0,0));
-		//sceneNode->AttachObject(entity);
+		entity = sceneMan->CreateEntity("Nanosuit", "./Nanosuit/Nanosuit.mesh",  "Custom");
+		sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Nanosuit");
+		sceneNode->SetScale(float3(2,2,2));
+		sceneNode->SetPosition(float3(-50,0,0));
+		sceneNode->AttachObject(entity);
 
 		//entity = sceneMan->CreateEntity("Dude", "./Dude/dude.mesh",  "Custom");
 		//sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Dude");
@@ -143,7 +145,7 @@ protected:
 		RenderDevice* device = Environment::GetSingleton().GetRenderDevice();
 		SceneManager* sceneMan = Environment::GetSingleton().GetSceneManager();
 
-		mForwardPath->RenderScene();
+		mRenderPath->RenderScene();
 
 		device->BindFrameBuffer(device->GetScreenFrameBuffer());
 		device->GetScreenFrameBuffer()->SwapBuffers();
@@ -156,7 +158,7 @@ protected:
 
 	void WindowResize(uint32_t width, uint32_t height)
 	{
-		mForwardPath->OnWindowResize(width, height);
+		mRenderPath->OnWindowResize(width, height);
 	}
 
 protected:
@@ -166,7 +168,8 @@ protected:
 	shared_ptr<Texture> mTexture;
 	RenderOperation mFSQuad;
 	shared_ptr<Camera> mCamera;
-	shared_ptr<ForwardPath> mForwardPath;
+	
+	shared_ptr<RenderPath> mRenderPath;
 
 	Test::FPSCameraControler* mCameraControler;
 };

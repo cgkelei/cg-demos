@@ -127,6 +127,7 @@ public:
 protected:
 	// Help function used to compute mipmap levels
 	static uint32_t CalculateMipmapLevels( uint32_t n );
+	static uint32_t CalculateLevelSize(uint32_t s, uint32_t level);
 
 protected:
 	TextureType mType;

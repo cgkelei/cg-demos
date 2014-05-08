@@ -32,6 +32,9 @@ protected:
 	shared_ptr<RenderOperation> mFSQuadShape;
 };
 
+/**
+ * Multiple pass forward shading.
+ */
 class _ApiExport ForwardPath : public RenderPath
 {
 public:
@@ -54,6 +57,9 @@ public:
 	shared_ptr<RenderView> mDepthStencilView;
 };
 
+/**
+ * Stencil-Optimized light pre-pass deferred rendering.
+ */
 class _ApiExport DeferredPath : public RenderPath
 {
 public:
@@ -64,7 +70,7 @@ public:
 	virtual void OnWindowResize(uint32_t width, uint32_t height);
 	virtual void RenderScene();
 
-	shared_ptr<Effect> GetDeferredEffect() const; 
+	shared_ptr<Effect> GetDeferredEffect() const { return mDeferredEffect; } 
 	CascadedShadowMap* GetShadowManager() const  { return mShadowMan; }
 
 protected:
@@ -80,6 +86,10 @@ protected:
 	void DrawPointLightShape(Light* light, const String& tech);
 
 protected:
+
+	shared_ptr<Effect> mDeferredEffect;
+
+	CascadedShadowMap* mShadowMan;
 
 	// Normal + Specular Shininess,  Albedo + Specular Intensity
 	shared_ptr<Texture> mGBuffer[2];
@@ -101,20 +111,22 @@ protected:
 	shared_ptr<FrameBuffer> mLightAccumulateFB;
 	shared_ptr<FrameBuffer> mHDRFB;
 
-	shared_ptr<Material> mDeferedMaterial;
-	//shared_ptr<Material> mDebugViewMaterial;
-	//shared_ptr<Material> mDebugLightMaterial;
-
-	shared_ptr<Effect> mDeferredEffect;
-
-	CascadedShadowMap* mShadowMan;
-
 	shared_ptr<RenderOperation> mSpotLightShape;
 	shared_ptr<RenderOperation> mPointLightShape;
 
 public:
 	bool mVisualLights;
 	bool mVisualLightsWireframe;
+};
+
+class _ApiExport TileBasedDeferredPath
+{
+
+};
+
+class _ApiExport TileBasedForwardPath
+{
+
 };
 
 }
