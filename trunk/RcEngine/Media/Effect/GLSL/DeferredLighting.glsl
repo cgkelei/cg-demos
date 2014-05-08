@@ -34,7 +34,6 @@ void main()
 	
 	gl_Position = viewPos * Projection;
 #endif
-
 }
 
 [[Fragment=DirectionalLightingPS]]

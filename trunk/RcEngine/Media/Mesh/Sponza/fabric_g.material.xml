@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Material>
+<Material name="fabric_g">
 <Sampler name="BNFSampler">
 <State name="Filter" value="Min_Mag_Mip_Point"/>
 <State name="AddressU" value="Clamp"/>

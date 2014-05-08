@@ -18,6 +18,9 @@
 #include <Scene/SceneNode.h>
 #include <IO/FileSystem.h>
 #include <Core/Environment.h>
+#include <nvImage/include/nvImage.h>
+
+#pragma comment(lib, "nvImaged.lib")
 
 using namespace RcEngine;
 
@@ -56,8 +59,16 @@ protected:
 		mFSQuad.SetVertexRange(0, 3);
 
 		ResourceManager& resMan = ResourceManager::GetSingleton();
-		auto textureRes = resMan.GetResourceByName<TextureResource>(RT_Texture, "background.dds", "Custom");
+		auto textureRes = resMan.GetResourceByName<TextureResource>(RT_Texture, "sponza_thorn_diff.dds", "Custom");
 		mTexture = textureRes->GetTexture();
+
+		FileSystem& fileSys = FileSystem::GetSingleton();
+		auto path = fileSys.Locate("background.dds", "Custom");
+
+		nv::Image img;
+		bool b = img.loadImageFromFile(path.c_str());
+		auto v = img.getInternalFormat();
+		v = 1;
 	}
 
 	void UnloadContent()
@@ -77,7 +88,7 @@ protected:
 		shared_ptr<FrameBuffer> screenFrameBuffer = device->GetScreenFrameBuffer();
 
 		device->BindFrameBuffer(screenFrameBuffer);
-		screenFrameBuffer->Clear(CF_Color | CF_Depth, ColorRGBA(0, 0, 0, 1), 1.0f, 0);
+		screenFrameBuffer->Clear(CF_Color | CF_Depth, ColorRGBA(1, 0, 0, 1), 1.0f, 0);
 
 		auto effectParam = mFSQuadEffect->GetParameterByName("ColorMap");
 		effectParam->SetValue(mTexture->GetShaderResourceView());

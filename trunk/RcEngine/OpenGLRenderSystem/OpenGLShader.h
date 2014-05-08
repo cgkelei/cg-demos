@@ -74,6 +74,8 @@ public:
 	OpenGLShaderPipeline(Effect& effect);
 	virtual ~OpenGLShaderPipeline();
 
+	inline GLuint GetPipelineOGL() const { return mPipelineOGL; }
+
 	virtual void OnBind();
 	virtual void OnUnbind();
 	virtual bool LinkPipeline();

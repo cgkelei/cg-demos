@@ -164,7 +164,7 @@ public:
 	ShaderPipeline(Effect& effect);
 	virtual~ ShaderPipeline() {}
 
-	const shared_ptr<Shader>& GetShader(ShaderType shaderStage) const { return mShaderStages[shaderStage]; }
+	inline shared_ptr<Shader> GetShader(ShaderType shaderStage) const { return mShaderStages[shaderStage]; }
 
 	void AttachShader(const shared_ptr<Shader>& shader);
 	void DetachShader(const shared_ptr<Shader>& shader);

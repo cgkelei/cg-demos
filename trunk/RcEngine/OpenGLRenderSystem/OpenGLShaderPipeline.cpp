@@ -516,8 +516,6 @@ OpenGLShaderPipeline::~OpenGLShaderPipeline()
 
 void OpenGLShaderPipeline::OnBind()
 {
-	glBindProgramPipeline(mPipelineOGL);
-
 	// Commit all shader parameter
 	for (auto& paramBindFunc : mParameterBinds)
 		paramBindFunc();
@@ -664,7 +662,6 @@ bool OpenGLShaderPipeline::LinkPipeline()
 
 	return true;
 }
-
 
 void OpenGLShaderPipeline::AddUniformParamBind( GLuint shader, GLint location, EffectParameter* effectParam, GLsizei arrSize )
 {

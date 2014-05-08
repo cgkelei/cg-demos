@@ -72,7 +72,7 @@ public:
 
 	void AttachRTV(Attachment attchment, const shared_ptr<RenderView>& rtv);
 	void AttachUAV(uint32_t index, const shared_ptr<UnorderedAccessView>& uav);
-
+	
 	void DetachRTV(Attachment att);
 	void DetachUAV(uint32_t index);
 
@@ -86,12 +86,13 @@ public:
 	 * frame buffer first, it is user's responsibility.
 	 */
 	void Clear(uint32_t flags, const ColorRGBA& clr, float depth, uint32_t stencil);
+	
+	virtual void SwapBuffers() = 0;
 
+protected:
 	//Called when this frame buffer is binded
 	virtual void OnBind() = 0;
 	virtual void OnUnbind() = 0;
-	
-	virtual void SwapBuffers() = 0;
 
 protected:
 
@@ -106,6 +107,8 @@ protected:
 	vector<shared_ptr<UnorderedAccessView>> mUnorderedAccessViews;
 
 	shared_ptr<Camera> mCamera;
+
+	friend class RenderDevice;
 };
 
 }

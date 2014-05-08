@@ -394,45 +394,6 @@ bool D3D11ShaderPipeline::LinkPipeline()
 
 void D3D11ShaderPipeline::OnBind()
 {
-	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
-
-	if (mShaderStages[ST_Vertex])
-	{
-		ID3D11VertexShader* shaderD3D11 = (static_cast<D3D11VertexShader*>(mShaderStages[ST_Vertex].get()))->ShaderD3D11;
-		deviceContextD3D11->VSSetShader(shaderD3D11, nullptr, 0);
-	}
-
-	if (mShaderStages[ST_Hull])
-	{
-		ID3D11HullShader* shaderD3D11 = (static_cast<D3D11HullShader*>(mShaderStages[ST_Hull].get()))->ShaderD3D11;
-		deviceContextD3D11->HSSetShader(shaderD3D11, nullptr, 0);
-	}
-
-	if (mShaderStages[ST_Domain])
-	{
-		ID3D11DomainShader* shaderD3D11 = (static_cast<D3D11DomainShader*>(mShaderStages[ST_Domain].get()))->ShaderD3D11;
-		deviceContextD3D11->DSSetShader(shaderD3D11, nullptr, 0);
-	}
-
-	if (mShaderStages[ST_Geomerty])
-	{
-		ID3D11GeometryShader* shaderD3D11 = (static_cast<D3D11GeometryShader*>(mShaderStages[ST_Geomerty].get()))->ShaderD3D11;
-		deviceContextD3D11->GSSetShader(shaderD3D11, nullptr, 0);
-	}
-
-	if (mShaderStages[ST_Pixel])
-	{
-		ID3D11PixelShader* shaderD3D11 = (static_cast<D3D11PixelShader*>(mShaderStages[ST_Pixel].get()))->ShaderD3D11;
-		deviceContextD3D11->PSSetShader(shaderD3D11, nullptr, 0);
-	}
-
-	if (mShaderStages[ST_Compute])
-	{
-		ID3D11ComputeShader* shaderD3D11 = (static_cast<D3D11ComputeShader*>(mShaderStages[ST_Compute].get()))->ShaderD3D11;
-		deviceContextD3D11->CSSetShader(shaderD3D11, nullptr, 0);
-
-	}
-
 	// Commit all shader resource
 	for ( auto& paramBindCommit : mParameterBinds) 
 		paramBindCommit();

@@ -38,11 +38,16 @@ void main()
     vec3 final = vec3(0);   
     float NdotL = dot(L, N);
     if (NdotL > 0.0)
-    {
+    {	
 		float normTerm = (material.Shininess + 2.0) / 8.0;
         float fresnel = CalculateFresnel(material.SpecularAlbedo, L, H);
+
+		// Diffuse + Specular
         final = (material.DiffuseAlbedo + normTerm * CalculateSpecular(N, H, material.Shininess) * fresnel) * LightColor * NdotL;
-    }
-    
-    oFragColor = vec4(final, 1.0);
+	}
+
+	// Ambient
+	final += material.DiffuseAlbedo * 0.15;
+
+    oFragColor = vec4(material.DiffuseAlbedo, final.r);
 }

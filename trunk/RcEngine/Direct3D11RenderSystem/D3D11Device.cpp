@@ -5,6 +5,7 @@
 #include "D3D11RenderWindow.h"
 #include "D3D11VertexDeclaration.h"
 #include "D3D11GraphicCommon.h"
+#include "D3D11Shader.h"
 #include <Graphics/RenderOperation.h>
 #include <Graphics/Effect.h>
 #include <MainApp/Application.h>
@@ -197,6 +198,49 @@ void D3D11Device::AdjustProjectionMatrix( float4x4& pOut )
 
 }
 
+void D3D11Device::DoBindShaderPipeline( const shared_ptr<ShaderPipeline>& pipeline )
+{
+	shared_ptr<Shader> shaderStage;
+	
+	D3D11ShaderPipeline* pipelineD3D11 = static_cast_checked<D3D11ShaderPipeline*>(pipeline.get());
+
+	if ( shaderStage = pipelineD3D11->GetShader(ST_Vertex) )
+	{
+		ID3D11VertexShader* shaderD3D11 = (static_cast<D3D11VertexShader*>(shaderStage.get()))->ShaderD3D11;
+		DeviceContextD3D11->VSSetShader(shaderD3D11, nullptr, 0);
+	}
+
+	if ( shaderStage = pipelineD3D11->GetShader(ST_Hull) )
+	{
+		ID3D11HullShader* shaderD3D11 = (static_cast<D3D11HullShader*>(shaderStage.get()))->ShaderD3D11;
+		DeviceContextD3D11->HSSetShader(shaderD3D11, nullptr, 0);
+	}
+
+	if ( shaderStage = pipelineD3D11->GetShader(ST_Domain) )
+	{
+		ID3D11DomainShader* shaderD3D11 = (static_cast<D3D11DomainShader*>(shaderStage.get()))->ShaderD3D11;
+		DeviceContextD3D11->DSSetShader(shaderD3D11, nullptr, 0);
+	}
+
+	if ( shaderStage = pipelineD3D11->GetShader(ST_Geomerty) )
+	{
+		ID3D11GeometryShader* shaderD3D11 = (static_cast<D3D11GeometryShader*>(shaderStage.get()))->ShaderD3D11;
+		DeviceContextD3D11->GSSetShader(shaderD3D11, nullptr, 0);
+	}
+
+	if ( shaderStage = pipelineD3D11->GetShader(ST_Pixel) )
+	{
+		ID3D11PixelShader* shaderD3D11 = (static_cast<D3D11PixelShader*>(shaderStage.get()))->ShaderD3D11;
+		DeviceContextD3D11->PSSetShader(shaderD3D11, nullptr, 0);
+	}
+
+	if ( shaderStage = pipelineD3D11->GetShader(ST_Compute) )
+	{
+		ID3D11ComputeShader* shaderD3D11 = (static_cast<D3D11ComputeShader*>(shaderStage.get()))->ShaderD3D11;
+		DeviceContextD3D11->CSSetShader(shaderD3D11, nullptr, 0);
+	}
+}
+
 void D3D11Device::DoDraw( const EffectTechnique* technique, const RenderOperation& operation )
 {
 	// Set up input layout
@@ -310,5 +354,7 @@ void D3D11Device::DoDraw( const EffectTechnique* technique, const RenderOperatio
 		}
 	}
 }
+
+
 
 }
