@@ -196,7 +196,7 @@ RenderPath::RenderPath()
 
 void RenderPath::OnGraphicsInit()
 {
-	//mFSQuadShape = BuildFSQuadShape();
+	
 }
 
 void RenderPath::DrawFSQuad( const shared_ptr<Material>& material, const String& tech )
@@ -314,18 +314,6 @@ void DeferredPath::OnGraphicsInit()
 	// Load deferred lighting effect
 	mDeferredEffect = resMan.GetResourceByName<Effect>(RT_Effect, "DeferredLighting.effect.xml", "General");
 
-	/*mDeferedMaterial = std::static_pointer_cast<Material>( 
-		resMan.GetResourceByName(RT_Material, "Lighting.material.xml", "General"));
-	mDeferedMaterial->Load();*/
-
-	//mDebugViewMaterial = std::static_pointer_cast<Material>( 
-	//	resMan.GetResourceByName(RT_Material, "DebugView.material.xml", "General"));
-	//mDeferedMaterial->Load();
-
-	//mDebugLightMaterial = std::static_pointer_cast<Material>( 
-	//	resMan.GetResourceByName(RT_Material, "LightShape.material.xml", "General"));
-	//mDebugLightMaterial->Load();
-
 	// Init GBuffer
 	mGBufferFB = factory->CreateFrameBuffer(windowWidth, windowHeight);
 	mGBufferFB->SetViewport(Viewport(0.0f, 0.f, float(windowWidth), float(windowHeight)));
@@ -380,7 +368,7 @@ void DeferredPath::OnGraphicsInit()
 	mHDRFB->SetCamera(viewCamera);
 
 	// Init shadow manager
-	mShadowMan = new CascadedShadowMap(mDevice);
+	//mShadowMan = new CascadedShadowMap(mDevice);
 }
 
 void DeferredPath::OnWindowResize( uint32_t windowWidth, uint32_t windowHeight )
@@ -437,11 +425,6 @@ void DeferredPath::OnWindowResize( uint32_t windowWidth, uint32_t windowHeight )
 	mDepthStencilViewReadOnly = factory->CreateDepthStencilView(mDepthStencilBuffer, 0, 0);
 	mHDRFB->AttachRTV(ATT_DepthStencil, mDepthStencilViewReadOnly);
 	mHDRFB->AttachRTV(ATT_Color0, mHDRBufferRTV);
-}
-
-shared_ptr<Effect> DeferredPath::GetDeferredEffect() const
-{
-	return mDeferedMaterial->GetEffect();
 }
 
 void DeferredPath::RenderScene()
@@ -544,10 +527,10 @@ void DeferredPath::GenereateGBuffer()
 		renderItem.Renderable->Render();
 	}
 
-	if ( InputSystem::GetSingleton().MouseButtonPress(MS_MiddleButton) )
+	//if ( InputSystem::GetSingleton().MouseButtonPress(MS_MiddleButton) )
 	{
-		//mDevice->GetRenderFactory()->SaveTexture2D("E:/GBuffer0.tga", mGBuffer[0], 0, 0);
-		//mDevice->GetRenderFactory()->SaveTexture2D("E:/GBuffer1.tga", mGBuffer[1], 0, 0);
+		mDevice->GetRenderFactory()->SaveTextureToFile("E:/GBuffer0.tga", mGBuffer[0]);
+		mDevice->GetRenderFactory()->SaveTextureToFile("E:/GBuffer1.tga", mGBuffer[1]);
 	}
 }
 
@@ -614,11 +597,11 @@ void DeferredPath::DeferredShading()
 		item.Renderable->Render();
 
 	// Do deferred lighting shading pass
-	mDeferedMaterial->SetTexture("GBuffer0", mGBuffer[0]->GetShaderResourceView());
-	mDeferedMaterial->SetTexture("GBuffer1", mGBuffer[1]->GetShaderResourceView());
-	mDeferedMaterial->SetTexture("LightAccumulateBuffer", mLightAccumulateBuffer->GetShaderResourceView());
+	mDeferredEffect->GetParameterByName("GBuffer0")->SetValue(mGBuffer[0]->GetShaderResourceView());
+	mDeferredEffect->GetParameterByName("GBuffer1")->SetValue(mGBuffer[0]->GetShaderResourceView());
+	mDeferredEffect->GetParameterByName("LightAccumulateBuffer")->SetValue(mLightAccumulateBuffer->GetShaderResourceView());	
 
-	DrawFSQuad(mDeferedMaterial, "Shading");
+	//DrawFSQuad(mDeferedMaterial, "Shading");
 }
 
 void DeferredPath::DrawDirectionalLightShape( Light* light, const String& tech )
@@ -655,7 +638,7 @@ void DeferredPath::DrawDirectionalLightShape( Light* light, const String& tech )
 	}
 
 	String techName = "Directional" + tech;
-	DrawFSQuad(mDeferedMaterial, techName);
+	//DrawFSQuad(mDeferedMaterial, techName);
 }
 
 void DeferredPath::DrawSpotLightShape( Light* light, const String& tech )
@@ -698,23 +681,18 @@ void DeferredPath::DrawSpotLightShape( Light* light, const String& tech )
 	mDeferredEffect->GetParameterByName("ShadowEnabled")->SetValue(bCastShadow);
 
 	if (bCastShadow)
-	{
-		/*TextureLayer shadewTexLayer;
-		shadewTexLayer.Sampler = mShadowMan->mPCFSampleState;
-		shadewTexLayer.Stage = ST_Pixel;
-		shadewTexLayer.Texture = mShadowMan->mShadowDepth;
-		shadewTexLayer.TexUnit = 5; */
-		
+	{		
 		mDeferredEffect->GetParameterByName("ShadowTex")->SetValue(mShadowMan->mShadowDepth->GetShaderResourceView());
 		mDeferredEffect->GetParameterByName("ShadowViewProj")->SetValue(mShadowMan->mShadowView);
 		if (mDeferredEffect->GetParameterByName("PCFRadius"))
 			mDeferredEffect->GetParameterByName("PCFRadius")->SetValue(5.7f / float(SHADOW_MAP_SIZE));
 	}
 
-	String techName = "Spot" + tech;
-	mDeferedMaterial->ApplyMaterial(worldMatrix);
-	mDeferedMaterial->SetCurrentTechnique("Spot" + tech);
-	mDevice->Draw(mDeferedMaterial->GetCurrentTechnique(), *mSpotLightShape);
+	const String SpotTechName = "Spot" + tech;
+	
+	mDeferredEffect->GetParameterByUsage(EPU_WorldMatrix)->SetValue(worldMatrix);
+	mDeferredEffect->SetCurrentTechnique(SpotTechName);
+	mDevice->Draw(mDeferredEffect->GetCurrentTechnique(), *mSpotLightShape);
 }
 
 void DeferredPath::DrawPointLightShape(Light* light, const String& tech )
@@ -727,7 +705,7 @@ void DeferredPath::DrawPointLightShape(Light* light, const String& tech )
 	mDeferredEffect->GetParameterByUsage(EPU_Light_Color)->SetValue(lightColor);
 
 	float2 camNearFar(currCamera.GetNearPlane(), currCamera.GetFarPlane());
-	mDeferedMaterial->GetEffect()->GetParameterByName("CameraNearFar")->SetValue(camNearFar);
+	mDeferredEffect->GetParameterByName("CameraNearFar")->SetValue(camNearFar);
 
 	const float3& worldPos = light->GetDerivedPosition();
 	float4 lightPos(worldPos[0], worldPos[1], worldPos[2], 1.0f);
@@ -737,13 +715,15 @@ void DeferredPath::DrawPointLightShape(Light* light, const String& tech )
 	mDeferredEffect->GetParameterByUsage(EPU_Light_Attenuation)->SetValue(light->GetAttenuation());
 
 	float4x4 worldMatrix(lightRadius,  0.0f,		  0.0f,		    0.0f,
-		0.0f,         lightRadius,   0.0f,		    0.0f,
-		0.0f,         0.0f,          lightRadius,  0.0f,
-		worldPos.X(), worldPos.Y(),  worldPos.Z(), 1.0f);
+						 0.0f,         lightRadius,   0.0f,		    0.0f,
+						 0.0f,         0.0f,          lightRadius,  0.0f,
+						 worldPos.X(), worldPos.Y(),  worldPos.Z(), 1.0f);
 
-	mDeferedMaterial->ApplyMaterial(worldMatrix);
-	mDeferedMaterial->SetCurrentTechnique("Point" + tech);
-	mDevice->Draw(mDeferedMaterial->GetCurrentTechnique(), *mPointLightShape);
+	const String PointTechName = "Point" + tech;
+
+	mDeferredEffect->GetParameterByUsage(EPU_WorldMatrix)->SetValue(worldMatrix);
+	mDeferredEffect->SetCurrentTechnique(PointTechName);
+	mDevice->Draw(mDeferredEffect->GetCurrentTechnique(), *mPointLightShape);
 }
 
 }

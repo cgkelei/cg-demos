@@ -24,7 +24,8 @@ Texture::Texture( TextureType type, PixelFormat format, uint32_t numMipMaps, uin
 	  mMipLevels(numMipMaps),
 	  mAccessHint(accessHint),
 	  mCreateFlags(flags),
-	  mTextureArraySize(1)
+	  mTextureArraySize(1),
+	  mDepth(1)
 {
 
 }
@@ -39,7 +40,12 @@ uint32_t Texture::CalculateMipmapLevels( uint32_t n )
 	return levels;
 }
 
+uint32_t Texture::CalculateLevelSize( uint32_t s, uint32_t level )
+{
+	return std::max(1U, s >> level);
+}
 
+//////////////////////////////////////////////////////////////////////////
 Shader::Shader( ShaderType shaderType )
 	: mShaderType(shaderType)
 {

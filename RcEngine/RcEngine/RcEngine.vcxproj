@@ -102,6 +102,7 @@
     <ClCompile Include="Graphics\Camera.cpp" />
     <ClCompile Include="Graphics\CameraController1.cpp" />
     <ClCompile Include="Graphics\CascadedShadowMap.cpp" />
+    <ClCompile Include="Graphics\DDSImage.cpp" />
     <ClCompile Include="Graphics\Effect.cpp" />
     <ClCompile Include="Graphics\EffectParameter.cpp" />
     <ClCompile Include="Graphics\FrameBuffer.cpp" />

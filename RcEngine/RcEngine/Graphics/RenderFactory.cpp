@@ -181,7 +181,7 @@ shared_ptr<Shader> RenderFactory::LoadShaderFromFile( ShaderType shaderType, con
 shared_ptr<Texture> RenderFactory::LoadTextureFromFile( const String& filename )
 {
 	Image image;
-	if (image.LoadFromDDS(filename.c_str()) == false)
+	if (image.LoadImageFromDDS(filename.c_str()) == false)
 		ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, filename + " not found!", "RenderFactory::LoadTextureFromFile");
 
 	uint32_t numLayers = image.GetLayers();
@@ -244,6 +244,13 @@ shared_ptr<Texture> RenderFactory::LoadTextureFromFile( const String& filename )
 	}
 
 	ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Internal Error", "RenderFactory::LoadTextureFromFile");
+}
+
+void RenderFactory::SaveTextureToFile( const String& filename, const shared_ptr<Texture>& texture )
+{
+	Image img;
+	img.CopyImageFromTexture(texture);
+	img.SaveImageToDDS(filename);
 }
 
 

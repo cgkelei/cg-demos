@@ -13,8 +13,7 @@ uniform mat4 InvProj;
 
 out vec3 oViewRay;
 
-out gl_PerVertex
-{
+out gl_PerVertex {
     vec4 gl_Position;
 };
 
