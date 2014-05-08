@@ -115,6 +115,7 @@ void Material::LoadImpl()
 
 	// material name 
 	mMaterialName = root->AttributeString("name", "");
+	mMaterialName = mResourceName;
 
 	// effect first
 	XMLNodePtr effectNode = root->FirstNode("Effect");
@@ -331,7 +332,7 @@ void Material::ApplyMaterial( const float4x4& world )
 		case EPU_Material_SpecularMap:
 		case EPU_Material_NormalMap:
 			{
-				//effectParam->SetValue(mTextures[param->Name]);
+				effectParam->SetValue(mTextureSRVs[effectParam->GetName()]);
 			}
 			break;
 		default:

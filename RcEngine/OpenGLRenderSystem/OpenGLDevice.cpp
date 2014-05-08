@@ -6,6 +6,7 @@
 #include "OpenGLTexture.h"
 #include "OpenGLGraphicCommon.h"
 #include "OpenGLVertexDeclaration.h"
+#include "OpenGLShader.h"
 #include <Graphics/RenderState.h>
 #include <Graphics/RenderOperation.h>
 #include <Graphics/Effect.h>
@@ -435,6 +436,12 @@ void OpenGLDevice::SetSamplerState( ShaderType stage, uint32_t unit, const share
 
 		OGL_ERROR_CHECK();
 	}
+}
+
+void OpenGLDevice::DoBindShaderPipeline( const shared_ptr<ShaderPipeline>& pipeline )
+{
+	GLuint pipelineOGL = static_cast_checked<OpenGLShaderPipeline*>(pipeline.get())->GetPipelineOGL();
+	glBindProgramPipeline(pipelineOGL);
 }
 
 void OpenGLDevice::DoDraw( const EffectTechnique* technique, const RenderOperation& operation )

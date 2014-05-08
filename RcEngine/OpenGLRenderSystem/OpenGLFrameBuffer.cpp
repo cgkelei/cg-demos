@@ -27,27 +27,35 @@ void OpenGLFrameBuffer::OnBind()
 {
 	gOpenGLDevice->BindFBO(mFrameBufferOGL);
 
-	if (mFrameBufferOGL != 0 && mColorViews.size())
+	if (mFrameBufferOGL == 0)
 	{
-		assert(GL_FRAMEBUFFER_COMPLETE == glCheckFramebufferStatus(GL_FRAMEBUFFER));
-
-		std::vector<GLenum> targets(mColorViews.size());
-		for (size_t i = 0; i < mColorViews.size(); ++ i)
-		{
-			if (mColorViews[i])
-				targets[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i);
-		}
-		glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
+		GLenum targets[] = { GL_BACK };
+		glDrawBuffers(1, &targets[0]);
 	}
-
-	if (mUnorderedAccessViews.size())
+	else
 	{
-		for (size_t i = 0; i < mUnorderedAccessViews.size(); ++i)
+		if (mFrameBufferOGL != 0 && mColorViews.size())
 		{
-			if (mUnorderedAccessViews[i])
+			assert(GL_FRAMEBUFFER_COMPLETE == glCheckFramebufferStatus(GL_FRAMEBUFFER));
+
+			std::vector<GLenum> targets(mColorViews.size());
+			for (size_t i = 0; i < mColorViews.size(); ++ i)
 			{
-				OpenGLUnorderedAccessView* pOpenGLUAV = static_cast_checked<OpenGLUnorderedAccessView*>(mUnorderedAccessViews[i].get());
-				pOpenGLUAV->BindUAV(i);
+				if (mColorViews[i])
+					targets[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i);
+			}
+			glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
+		}
+
+		if (mUnorderedAccessViews.size())
+		{
+			for (size_t i = 0; i < mUnorderedAccessViews.size(); ++i)
+			{
+				if (mUnorderedAccessViews[i])
+				{
+					OpenGLUnorderedAccessView* pOpenGLUAV = static_cast_checked<OpenGLUnorderedAccessView*>(mUnorderedAccessViews[i].get());
+					pOpenGLUAV->BindUAV(i);
+				}
 			}
 		}
 	}

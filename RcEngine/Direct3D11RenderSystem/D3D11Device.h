@@ -25,6 +25,7 @@ public:
 	void SetViewports(const std::vector<Viewport>& vp);
 
 protected:
+	void DoBindShaderPipeline(const shared_ptr<ShaderPipeline>& pipeline);
 	void DoDraw(const EffectTechnique* technique, const RenderOperation& operation);
 
 public:

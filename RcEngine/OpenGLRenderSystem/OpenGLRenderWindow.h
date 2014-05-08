@@ -16,9 +16,6 @@ public:
 	bool Fullscreen() const;
 	void SwapBuffers();
 
-	void OnBind();
-	void OnUnbind();
-
 private:
 	bool mFullscreen;
 	std::string mDescription;

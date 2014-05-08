@@ -34,6 +34,7 @@ void DirectionalLightingPS(in VSOutput input,
         final = (material.DiffuseAlbedo + normTerm * CalculateSpecular(N, H, material.Shininess) * fresnel) * LightColor * NdotL;
     }
     
-	oFragColor = float4(material.DiffuseAlbedo, final.r);
-   // oFragColor = float4(final, 1.0);
+	// Ambient 
+	final += material.DiffuseAlbedo * 0.15;
+    oFragColor = float4(material.DiffuseAlbedo, final.r);
 }

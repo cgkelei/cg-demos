@@ -117,23 +117,6 @@ bool OpenGLRenderWindow::Fullscreen() const
 	return false;
 }
 
-void OpenGLRenderWindow::OnBind()
-{
-	gOpenGLDevice->BindFBO(0);
-
-	GLenum targets[] = { GL_BACK };
-	glDrawBuffers(1, &targets[0]);
-
-	gOpenGLDevice->SetViewports(mViewports);
-
-	OGL_ERROR_CHECK();
-}
-
-void OpenGLRenderWindow::OnUnbind()
-{
-
-}
-
 void OpenGLRenderWindow::SwapBuffers()
 {
 #ifdef RcWindows

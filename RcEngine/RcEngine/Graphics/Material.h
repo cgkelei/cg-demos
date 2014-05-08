@@ -29,7 +29,7 @@ public:
 	Material(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 	virtual ~Material(void);
 
-	const String& GetName() const						{ return mResourceName; }
+	const String& GetName() const						{ return mMaterialName; }
 	uint32_t GetQueueBucket() const						{ return mQueueBucket; }
 
 	shared_ptr<Effect> GetEffect() const				{ return mEffect; }

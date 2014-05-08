@@ -487,16 +487,10 @@
     <None Include="..\Media\Effect\GLSL\Model.glsl">
       <Filter>Asset\GLSL</Filter>
     </None>
-    <None Include="..\Media\Effect\GLSL\ShadowUtil.glsl">
-      <Filter>Asset\GLSL</Filter>
-    </None>
     <None Include="..\Media\Effect\GLSL\FSQuad.glsl">
       <Filter>Asset\GLSL</Filter>
     </None>
     <None Include="..\Media\Effect\GLSL\FullscreenTriangle.glsl">
-      <Filter>Asset\GLSL</Filter>
-    </None>
-    <None Include="..\Media\Effect\GLSL\ModelCommon.glsl">
       <Filter>Asset\GLSL</Filter>
     </None>
     <None Include="..\Media\Effect\GLSL\ModelVertexFactory.glsl">
@@ -526,9 +520,6 @@
       <Filter>Asset\HLSL</Filter>
     </FxCompile>
     <FxCompile Include="..\Media\Effect\HLSL\LightingUtil.hlsl">
-      <Filter>Asset\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Media\Effect\HLSL\ShadowUtil.hlsl">
       <Filter>Asset\HLSL</Filter>
     </FxCompile>
     <FxCompile Include="..\Media\Effect\HLSL\FSQuad.hlsl">

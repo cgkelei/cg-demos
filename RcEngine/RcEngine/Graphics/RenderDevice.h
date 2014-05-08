@@ -41,6 +41,7 @@ public:
 
 protected:
 	virtual void DoDraw(const EffectTechnique* technique, const RenderOperation& operation) = 0;
+	virtual void DoBindShaderPipeline(const shared_ptr<ShaderPipeline>& pipeline) = 0;
 
 protected:
 	RenderFactory* mRHFactory;

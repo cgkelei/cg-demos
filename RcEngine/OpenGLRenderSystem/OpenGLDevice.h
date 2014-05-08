@@ -27,14 +27,6 @@ public:
 	inline GLuint GetCurrentFBO() const { return mCurrentFBO; }
 	void BindFBO(GLuint fbo); 
 
-	// Bind shader to pipeline stage
-	//void BindVertexShader(GLuint shaderOGL)			{ glUseProgramStages(mProgramPipeline, GL_VERTEX_SHADER_BIT, shaderOGL); }
-	//void BindTessControlShader(GLuint shaderOGL)    { glUseProgramStages(mProgramPipeline, GL_TESS_CONTROL_SHADER_BIT, shaderOGL); }
-	//void BindTessEvalShader(GLuint shaderOGL)       { glUseProgramStages(mProgramPipeline, GL_TESS_EVALUATION_SHADER_BIT, shaderOGL); }
-	//void BindGeometryShader(GLuint shaderOGL)       { glUseProgramStages(mProgramPipeline, GL_GEOMETRY_SHADER_BIT, shaderOGL); }
-	//void BindPixelShader(GLuint shaderOGL)          { glUseProgramStages(mProgramPipeline, GL_FRAGMENT_SHADER_BIT, shaderOGL); }
-	//void BindComputeShader(GLuint shaderOGL)        { glUseProgramStages(mProgramPipeline, GL_COMPUTE_SHADER_BIT, shaderOGL); }
-
 	void ToggleFullscreen(bool fs);
 	void AdjustProjectionMatrix(float4x4& pOut);
 
@@ -46,8 +38,9 @@ public:
 
 protected:
 
+	void DoBindShaderPipeline(const shared_ptr<ShaderPipeline>& pipeline);
 	void DoDraw(const EffectTechnique* technique, const RenderOperation& operation);
-	
+
 private:
 	
 	// Only track the first view port
