@@ -60,7 +60,7 @@ public:
 	inline uint32_t GetWidth() const { return mWidth; }
 	inline uint32_t GetHeight() const { return mHeight; }
 
-	const shared_ptr<Camera>& GetCamera() const     { return mCamera; }
+	inline shared_ptr<Camera> GetCamera() const     { return mCamera; }
 	void SetCamera(const shared_ptr<Camera>& cam)   { mCamera = cam; }
 
 	void SetViewport(const Viewport& vp);

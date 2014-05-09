@@ -25,7 +25,7 @@ void Camera::CreateLookAt( const float3& eyePos, const float3& lookat, const flo
 
 	mViewVec = Normalize(mLookAt - mPosition);
 	mViewMatrix = CreateLookAtMatrixLH(mPosition, mLookAt, mUpVec);
-	mInvViewMatrix = mViewMatrix.Inverse();
+	mEngineViewProjMatrix = mViewMatrix * mEngineProjMatrix;
 
 	mUpVec = float3(mViewMatrix.M12, mViewMatrix.M22, mViewMatrix.M32);
 	mFrustumDirty = true;
@@ -39,7 +39,6 @@ void Camera::CreatePerspectiveFov( float fov, float aspect, float nearPlane, flo
 	mFarPlane = farPlane;
 
 	mProjMatrix = CreatePerspectiveFovLH(mFieldOfView, mAspect, mNearPlane, mFarPlane);
-	mInvProjMatrix = mProjMatrix.Inverse();
 
 	mEngineProjMatrix = mProjMatrix;
 	Environment::GetSingleton().GetRenderDevice()->AdjustProjectionMatrix(mEngineProjMatrix);
@@ -53,7 +52,6 @@ void Camera::CreateOrthoOffCenter( float left, float right, float bottom, float 
 	mFarPlane = farPlane;
 
 	mProjMatrix = CreateOrthoOffCenterLH(left, right, bottom, top, nearPlane, farPlane);
-	mInvProjMatrix = mProjMatrix.Inverse();
 
 	mEngineProjMatrix = mProjMatrix;
 	Environment::GetSingleton().GetRenderDevice()->AdjustProjectionMatrix(mEngineProjMatrix);

@@ -14,6 +14,7 @@ public:
 	~Image();
 
 	bool LoadImageFromDDS(const String& filename);
+	void SaveImageToFile(const String& filename);
 
 	inline uint32_t GetWidth() const		{ assert(mValid); return mWidth; }
 	inline uint32_t GetHeight() const		{ assert(mValid); return mHeight; }

@@ -27,6 +27,8 @@ public:
 
 	EffectParameter* GetParameterByName(const String& paraName) const;
 	EffectParameter* GetParameterByUsage(EffectParameterUsage usage) const;
+	
+	const std::map<String, EffectParameter*>& GetParameters() const			{ return mParameters; }
 
 protected:
 	void LoadImpl();

@@ -1,8 +1,8 @@
 #include "ModelVertexFactory.hlsl"
 
 // Unifroms
-float4x4 WorldView;
-float4x4 Projection;
+float4x4 World;
+float4x4 ViewProj;
 
 //-------------------------------------------------------------------------------------
 VSOutput ModelVS(VSInput input)
@@ -12,40 +12,40 @@ VSOutput ModelVS(VSInput input)
 	// calculate position in view space:
 #ifdef _Skinning
 	float4x4 Skin = CalculateSkinMatrix(input.BlendWeights, input.BlendIndices);
-	float4x4 SkinWorldView = Skin * WorldView;
-	output.PosVS = mul( float4(input.Pos, 1.0), SkinWorldView );
+	float4x4 SkinWorld = Skin * World;
+	output.PosWS = mul( float4(input.Pos, 1.0), SkinWorld );
 #else
-	output.PosVS = mul( float4(input.Pos, 1.0), WorldView );
+	output.PosWS = mul( float4(input.Pos, 1.0), World );
 #endif
 
 	// calculate view space normal.
 #ifdef _Skinning
-	float3 normal = normalize( mul(input.Normal, (float3x3)SkinWorldView) );
+	float3 normal = normalize( mul(input.Normal, (float3x3)SkinWorld) );
 #else
-	float3 normal = normalize( mul(input.Normal, (float3x3)WorldView) );
+	float3 normal = normalize( mul(input.Normal, (float3x3)World) );
 #endif
 
 	// calculate tangent and binormal.
 #ifdef _NormalMap
 	#ifdef _Skinning
-		float3 tangent = normalize( mul(input.Tangent, (float3x3)SkinWorldView) );
-		float3 binormal = normalize( mul(input.Binormal, (float3x3)SkinWorldView) );
+		float3 tangent = normalize( mul(input.Tangent, (float3x3)SkinWorld) );
+		float3 binormal = normalize( mul(input.Binormal, (float3x3)SkinWorld) );
 	#else
-		float3 tangent = normalize( mul(input.Tangent, (float3x3)WorldView) );
-		float3 binormal = normalize( mul(input.Binormal, (float3x3)WorldView) );
+		float3 tangent = normalize( mul(input.Tangent, (float3x3)World) );
+		float3 binormal = normalize( mul(input.Binormal, (float3x3)World) );
 	#endif
 
 	// actualy this is a world to tangent matrix, because we always use V * Mat.
-	output.TangentToView = float3x3( tangent, binormal, normal);
+	output.TangentToWorld = float3x3( tangent, binormal, normal);
 
 	// transpose to get tangent to world matrix
-	 //output.TangentToView = transpose(output.TangentToView);
+	 //output.TangentToWorld = transpose(output.TangentToWorld);
 #else
-	output.NormalVS = normal;
+	output.NormalWS = normal;
 #endif
 	
 	output.Tex = input.Tex;
-	output.PosCS = mul(output.PosVS, Projection);
+	output.PosCS = mul(output.PosWS, ViewProj);
 
 	return output;
 }

@@ -250,7 +250,7 @@ void RenderFactory::SaveTextureToFile( const String& filename, const shared_ptr<
 {
 	Image img;
 	img.CopyImageFromTexture(texture);
-	img.SaveImageToDDS(filename);
+	img.SaveImageToFile(filename);
 }
 
 

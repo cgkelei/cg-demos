@@ -1,6 +1,8 @@
 #include <Graphics/Image.h>
-#include <Graphics/GraphicsScriptLoader.h>
+#include <Graphics/GraphicsResource.h>
+#include <MainApp/Application.h>
 #include <Core/Exception.h>
+#include <fstream>
 
 namespace RcEngine {
 
@@ -111,6 +113,7 @@ bool Image::CopyImageFromTexture( const shared_ptr<Texture>& texture )
 			uint8_t* ppEndBits = pSrcBits + totalSize;
 
 			uint32_t rowPitch;
+			void* pLevelData;
 
 			for (uint32_t layer = 0; layer < mLayers; ++layer)
 			{
@@ -118,15 +121,16 @@ bool Image::CopyImageFromTexture( const shared_ptr<Texture>& texture )
 				{
 					uint32_t levelWidth = (std::max)(1U, mWidth>>level) ;
 					uint32_t levelHeight = (std::max)(1U, mHeight>>level);
-
-					void* pLevelData = pSrcBits;
+	
 					texture->Map2D(layer, level, RMA_Read_Only, 0, 0, levelWidth, levelHeight, pLevelData, rowPitch);
-
-					// Advance 
-					pSrcBits += levelHeight * rowPitch; 
+					memcpy(pSrcBits, pLevelData, levelHeight * rowPitch);
+					texture->Unmap2D(layer, level);
 
 					SurfaceInfo surface = { pSrcBits, rowPitch, 0 };
 					mSurfaces.push_back(surface);
+
+					// Advance 
+					pSrcBits += levelHeight * rowPitch; 
 				}
 			}
 
@@ -140,7 +144,208 @@ bool Image::CopyImageFromTexture( const shared_ptr<Texture>& texture )
 		break;
 	}
 
+	
 	return true;
+}
+
+namespace {
+
+union Pixel32
+{
+	Pixel32() : integer(0) { }
+	Pixel32(uint8_t bi, uint8_t gi, uint8_t ri, uint8_t ai = 255)
+	{
+		b = bi;
+		g = gi;
+		r = ri;
+		a = ai;
+	}
+
+	uint8_t integer;
+
+	struct
+	{
+#ifdef BIG_ENDIAN
+		uint8_t a, r, g, b;
+#else // BIG_ENDIAN
+		uint8_t b, g, r, a;
+#endif // BIG_ENDIAN
+	};
+};
+
+// TGA Header struct to make it simple to dump a TGA to disc.
+#if defined(_MSC_VER) || defined(__GNUC__)
+	#pragma pack(push, 1)
+	#pragma pack(1)               // Dont pad the following struct.
+#endif
+
+struct TGAHeader
+{
+	uint8_t   idLength,           // Length of optional identification sequence.
+		paletteType,        // Is a palette present? (1=yes)
+		imageType;          // Image data type (0=none, 1=indexed, 2=rgb,
+	// 3=grey, +8=rle packed).
+	uint16_t  firstPaletteEntry,  // First palette index, if present.
+		numPaletteEntries;  // Number of palette entries, if present.
+	uint8_t   paletteBits;        // Number of bits per palette entry.
+	uint16_t  x,                  // Horiz. pixel coord. of lower left of image.
+		y,                  // Vert. pixel coord. of lower left of image.
+		width,              // Image width in pixels.
+		height;             // Image height in pixels.
+	uint8_t   depth,              // Image color depth (bits per pixel).
+		descriptor;         // Image attribute flags.
+};
+
+#if defined(_MSC_VER) || defined(__GNUC__)
+#pragma pack(pop)
+#endif
+
+bool WriteTGA(const std::string &filename, const Pixel32 *pxl, uint16_t width, uint16_t height)
+{
+	std::ofstream file(filename.c_str(), std::ios::binary);
+	if (file)
+	{
+		TGAHeader header;
+		memset(&header, 0, sizeof(TGAHeader));
+		header.imageType  = 2;
+		header.width = width;
+		header.height = height;
+		header.depth = 32;
+		header.descriptor = 0x20;
+
+		file.write((const char *)&header, sizeof(TGAHeader));
+		file.write((const char *)pxl, sizeof(Pixel32) * width * height);
+
+		return true;
+	}
+	return false;
+}
+
+int WritePfm(const char *fn, int resX, int resY, int channels, const float* data)
+{
+	if(channels!=1&&channels!=3&&channels!=4)
+	{
+		return -2;
+	}
+	FILE* f;
+	errno_t err=fopen_s(&f,fn,"wb");
+	if(err!=0) return -1;
+	const char* indicator;	
+	switch(channels)
+	{
+	case 1:
+		indicator="Pf";
+		break;
+	case 3:
+		indicator="PF";
+		break;
+	case 4:
+		indicator="P4";
+		break;
+	default:
+		break;
+	}
+	fprintf_s(f,"%s\n%d %d\n%f\n",indicator,resX,resY,-1.f);		
+	int written=fwrite(data,sizeof(float)*channels,resX*resY,f);
+	if(written!=resX*resY)
+	{
+		fclose(f);
+		return -3;
+	}
+	fclose(f);
+	return 0;
+}
+
+
+}
+
+void Image::SaveImageToFile( const String& filename )
+{
+	if (mFormat == PF_RGBA8_UNORM)
+	{
+		uint8_t* pixel = (uint8_t*)mSurfaces.front().pData;
+		uint32_t w = mWidth, h = mHeight;
+
+		vector<Pixel32> imageData(w*h);
+		
+		if (Application::msApp->GetAppSettings().RHDeviceType != RD_Direct3D11)
+		{
+			for (uint32_t j = 0; j < h; j++)
+				for(uint32_t i = 0; i < w; i ++)
+				{
+					uint8_t r = pixel[((h-j-1) * w + i)*4 + 0];
+					uint8_t g = pixel[((h-j-1) * w + i)*4 + 1];
+					uint8_t b = pixel[((h-j-1) * w + i)*4 + 2];
+					uint8_t a = pixel[((h-j-1) * w + i)*4 + 3];
+
+					imageData[j*w+i].r = r;
+					imageData[j*w+i].g = g;
+					imageData[j*w+i].b = b;
+					imageData[j*w+i].a = a;
+				}
+		}
+		else
+		{
+			for (uint32_t j = 0; j < h; j++)
+				for(uint32_t i = 0; i < w; i ++)
+				{
+					uint8_t r = pixel[(j * w + i)*4 + 0];
+					uint8_t g = pixel[(j * w + i)*4 + 1];
+					uint8_t b = pixel[(j * w + i)*4 + 2];
+					uint8_t a = pixel[(j * w + i)*4 + 3];
+
+					imageData[j*w+i].r = r;
+					imageData[j*w+i].g = g;
+					imageData[j*w+i].b = b;
+					imageData[j*w+i].a = a;
+				}
+		}
+		
+		WriteTGA(filename.c_str(), &imageData[0], w, h);
+	}
+	else if (mFormat == PF_RGBA32F)
+	{		
+		float* pixel = (float*)mSurfaces.front().pData;
+
+		uint32_t w = mWidth, h = mHeight;
+
+		vector<float> temp;
+		temp.resize(w * h * 3);
+		float* imageData = &temp[0];
+
+		if (Application::msApp->GetAppSettings().RHDeviceType == RD_Direct3D11)
+		{
+			for (uint32_t j = 0; j < h; j++)
+				for(uint32_t i = 0; i < w; i ++)
+				{
+					float r = pixel[((h-j-1) * w + i)*4 + 0];
+					float g = pixel[((h-j-1) * w + i)*4 + 1];
+					float b = pixel[((h-j-1) * w + i)*4 + 2];
+					float a = pixel[((h-j-1) * w + i)*4 + 3];
+
+					*imageData++ = r;
+					*imageData++ = g;
+					*imageData++ = b;
+				}
+		}
+		else
+		{
+			for (uint32_t j = 0; j < h; j++)
+				for(uint32_t i = 0; i < w; i ++)
+				{
+					float r = pixel[(j * w + i)*4 + 0];
+					float g = pixel[(j * w + i)*4 +1];
+					float b = pixel[(j * w + i)*4 +2];
+					float a = pixel[(j * w + i)*4 +3];
+
+					*imageData++ = r;
+					*imageData++ = g;
+					*imageData++ = b;
+				}
+		}
+
+		WritePfm(filename.c_str(), w, h, 3, &temp[0]);
+	}
 }
 
 

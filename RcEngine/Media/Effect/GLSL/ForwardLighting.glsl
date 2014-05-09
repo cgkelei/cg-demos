@@ -3,17 +3,18 @@
 #include "/ModelMaterialFactory.glsl"
 #include "/LightingUtil.glsl"
 
-uniform vec4 LightDirVS;
+uniform vec4 LightDir;
 uniform vec3 LightColor;
+uniform vec3 CameraOrigin;
 
 // shader input
-in vec4 oPosVS;
+in vec4 oPosWS;
 in vec2 oTex;
 
 #ifdef _NormalMap
-	in mat3 oTangentToView;
+	in mat3 oTangentToWorld;
 #else
-    in vec3 oNormalVS;
+	in vec3 oNormalWS;
 #endif
 
 layout(location = 0) out vec4 oFragColor;
@@ -22,17 +23,17 @@ void main()
 {
 	Material material;
 	GetMaterial(oTex, material);
-        
+     
     // normal map
 #ifdef _NormalMap
     vec3 N = texture2D( NormalMap, oTex ).rgb * 2.0 - 1.0;
-    N = normalize(N * oTangentToView);
+    N = normalize(N * oTangentToWorld);
 #else
-    vec3 N = normalize(oNormalVS);
+    vec3 N = normalize(oNormalWS);
 #endif          
         
-    vec3 L = normalize(-LightDirVS.xyz);
-    vec3 V = normalize(-oPosVS.xyz);
+    vec3 L = normalize(-LightDir.xyz);
+    vec3 V = normalize(CameraOrigin - oPosWS.xyz);
     vec3 H = normalize(V + L);
                           
     vec3 final = vec3(0);   
@@ -49,5 +50,5 @@ void main()
 	// Ambient
 	final += material.DiffuseAlbedo * 0.15;
 
-    oFragColor = vec4(material.DiffuseAlbedo, final.r);
+    oFragColor = vec4(final, 1.0);
 }

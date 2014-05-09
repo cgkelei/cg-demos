@@ -157,7 +157,7 @@ void OpenGLRenderView::OnAttach(FrameBuffer& fb, Attachment attr)
 
 void OpenGLRenderView::OnDetach(FrameBuffer& fb, Attachment attr)
 {
-	assert(mAttachment = attr);
+	assert(mAttachment == attr);
 }
 
 void OpenGLRenderView::DoClear( GLbitfield clearFlagOGL, const ColorRGBA& clr, float depth, uint32_t stencil )

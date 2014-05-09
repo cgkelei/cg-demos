@@ -1,6 +1,7 @@
 #include "OpenGLTexture.h"
 #include "OpenGLGraphicCommon.h"
 #include "OpenGLView.h"
+#include "OpenGLDevice.h"
 #include <Core/Exception.h>
 
 namespace RcEngine {
@@ -348,35 +349,34 @@ void OpenGLTexture2D::Unmap2D( uint32_t arrayIndex, uint32_t level )
 
 void OpenGLTexture2D::CopyToTexture( Texture& destTexture )
 {
-	/*assert(mFormat == destTexture.GetTextureFormat() && mType == destTexture.GetTextureType());
+	assert(mFormat == destTexture.GetTextureFormat() && mType == destTexture.GetTextureType());
 	OpenGLTexture2D& destTextureOGL = *(static_cast<OpenGLTexture2D*>(&destTexture));
 
 	for (uint32_t arrIndex = 0; arrIndex < mTextureArraySize; ++arrIndex)
 	{
 		for (uint32_t level = 0; level < mMipLevels; ++level)
 		{
-			uint32_t levelWidth = GetWidth(level);
-			uint32_t levelHeight = GetHeight(level);
+			uint32_t levelWidth = CalculateLevelSize(mWidth, level);
+			uint32_t levelHeight = CalculateLevelSize(mHeight, level);
 
-			GLuint srtTex = TextureOGL;
-			GLuint dstTex = destTextureOGL.TextureOGL;
+			GLuint srtTex = mTextureOGL;
+			GLuint dstTex = destTextureOGL.mTextureOGL;
 
-			GLenum srcTarget = TextureTarget;
-			GLenum dstTarget = destTextureOGL.TextureTarget;
+			GLenum srcTarget = mTextureTarget;
+			GLenum dstTarget = destTextureOGL.mTextureTarget;
 
 			if (GLEW_ARB_copy_image)
 			{
 				glCopyImageSubData(srtTex, srcTarget, level, 0, 0, arrIndex,
-							       dstTex, dstTarget, level, 0, 0, arrIndex, 
-								   levelWidth, levelHeight, 1);
+					dstTex, dstTarget, level, 0, 0, arrIndex, 
+					levelWidth, levelHeight, 1);
 			}
 			else
 			{
-				GLuint oldFBO = OpenGLFrameBuffer::GetFBO();
+				GLuint oldFBO = gOpenGLDevice->GetCurrentFBO();
 				{
 					GLuint srcFBO, dstFBO;
-					OpenGLDevice* deviceOGL = static_cast<OpenGLDevice*>(Context::GetSingleton().GetRenderDevicePtr());
-					deviceOGL->GetBlitFBO(srcFBO, dstFBO);
+					gOpenGLDevice->GetBlitFBO(srcFBO, dstFBO);
 
 					GLenum attachment, bufferBit;
 					bool depth = PixelFormatUtils::IsDepth(GetTextureFormat());
@@ -419,12 +419,12 @@ void OpenGLTexture2D::CopyToTexture( Texture& destTexture )
 
 					glBlitFramebuffer(0, 0, levelWidth, levelHeight, 0, 0, levelWidth, levelHeight, bufferBit, GL_NEAREST);
 				}
-				OpenGLFrameBuffer::BindFBO(oldFBO);
+				gOpenGLDevice->BindFBO(oldFBO);
 			}
 		}
 	}
 
-	OGL_ERROR_CHECK();*/
+	OGL_ERROR_CHECK();
 }
 
 

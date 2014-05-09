@@ -4,7 +4,9 @@
 #include <Core/Prerequisites.h>
 #include <Graphics/PixelFormat.h>
 #include <Graphics/GraphicsCommon.h>
+#include <Graphics/RenderOperation.h>
 #include <Math/ColorRGBA.h>
+#include <Math/Matrix.h>
 #include <Resource/Resource.h>
 
 namespace RcEngine {
@@ -18,7 +20,7 @@ public:
 	RenderPath();
 	virtual ~RenderPath() {}
 
-	virtual void OnGraphicsInit();
+	virtual void OnGraphicsInit(const shared_ptr<Camera>& camera);
 	virtual void OnWindowResize(uint32_t width, uint32_t height) {}
 	virtual void RenderScene() {}
 
@@ -29,7 +31,7 @@ protected:
 protected:
 	RenderDevice* mDevice;
 	SceneManager* mSceneMan;
-	shared_ptr<RenderOperation> mFSQuadShape;
+	shared_ptr<Camera> mCamera;
 };
 
 /**
@@ -41,7 +43,7 @@ public:
 	ForwardPath();
 	virtual ~ForwardPath() {}
 
-	virtual void OnGraphicsInit();
+	virtual void OnGraphicsInit(const shared_ptr<Camera>& camera);
 	virtual void OnWindowResize(uint32_t width, uint32_t height);
 	virtual void RenderScene();
 
@@ -66,7 +68,7 @@ public:
 	DeferredPath();
 	virtual ~DeferredPath() {}
 
-	virtual void OnGraphicsInit();
+	virtual void OnGraphicsInit(const shared_ptr<Camera>& camera);
 	virtual void OnWindowResize(uint32_t width, uint32_t height);
 	virtual void RenderScene();
 
@@ -111,8 +113,12 @@ protected:
 	shared_ptr<FrameBuffer> mLightAccumulateFB;
 	shared_ptr<FrameBuffer> mHDRFB;
 
-	shared_ptr<RenderOperation> mSpotLightShape;
-	shared_ptr<RenderOperation> mPointLightShape;
+	RenderOperation mSpotLightShape;
+	RenderOperation mPointLightShape;
+	RenderOperation mFullscreenTrangle;
+
+	float4x4 mInvViewProj;
+	float4x4 mViewProj;
 
 public:
 	bool mVisualLights;

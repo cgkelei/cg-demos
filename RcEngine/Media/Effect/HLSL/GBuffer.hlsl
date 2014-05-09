@@ -11,9 +11,9 @@ void GBufferPS(in VSOutput input,
 	// normal map
 #ifdef _NormalMap
 	float3 normal = NormalMap.Sample(MaterialSampler , input.Tex ).rgb * 2.0 - 1.0;
-	normal = normalize( mul(normal, input.TangentToView) );
+	normal = normalize( mul(normal, input.TangentToWorld) );
 #else
-	float3 normal = normalize(input.NormalVS);
+	float3 normal = normalize(input.NormalWS);
 #endif	
 	
 	normal = normal * 0.5 + 0.5;
