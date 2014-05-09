@@ -19,13 +19,13 @@ struct VSInput
 // Outputs
 struct VSOutput
 {
-	float4 PosVS : TEXCOORD0;
+	float4 PosWS : TEXCOORD0;
 	float2 Tex   : TEXCOORD1;
 
 #ifdef _NormalMap
-	float3x3 TangentToView : TEXCOORD3;
+	float3x3 TangentToWorld : TEXCOORD3;
 #else
-	float3 NormalVS 	   : TEXCOORD3;
+	float3 NormalWS 	    : TEXCOORD3;
 #endif 
 	
 	float4 PosCS : SV_POSITION;

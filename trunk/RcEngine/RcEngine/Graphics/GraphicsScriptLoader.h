@@ -190,6 +190,7 @@ public:
 		mDefs.insert(std::make_pair("LightFalloff", EPU_Light_Attenuation));
 		mDefs.insert(std::make_pair("LightDirection", EPU_Light_Dir));
 		mDefs.insert(std::make_pair("LightPosition", EPU_Light_Position));
+		mDefs.insert(std::make_pair("CameraPosition", EPU_Camera_Position));
 	}
 
 	static EffectParamsUsageDefs& GetInstance()

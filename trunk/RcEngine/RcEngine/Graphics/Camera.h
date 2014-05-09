@@ -12,21 +12,18 @@ public:
 	Camera(void);
 	~Camera(void);
 
-	const float3& GetPosition() const			{ return mPosition; }
-	const float3& GetLookAt() const				{ return mLookAt; }
-	const float3& GetUp() const					{ return mUpVec; }
-	const float3& GetView() const				{ return mViewVec; }
-	float3 GetRight() const						{ return Normalize(Cross(mUpVec, mViewVec)); }
-	float  GetFov() const						{ return mFieldOfView; }
-	float  GetAspect() const					{ return mAspect; }
-	float  GetNearPlane() const					{ return mNearPlane; }
-	float  GetFarPlane() const					{ return mFarPlane; }
-	
-	const float4x4& GetViewMatrix() const	    { return mViewMatrix; }
-	const float4x4& GetInvViewMatrix() const	{ return mInvViewMatrix; }
+	const float3& GetPosition() const				{ return mPosition; }
+	const float3& GetLookAt() const					{ return mLookAt; }
+	const float3& GetUp() const						{ return mUpVec; }
+	const float3& GetView() const					{ return mViewVec; }
+	float3 GetRight() const							{ return Normalize(Cross(mUpVec, mViewVec)); }
+	float  GetFov() const							{ return mFieldOfView; }
+	float  GetAspect() const						{ return mAspect; }
+	float  GetNearPlane() const						{ return mNearPlane; }
+	float  GetFarPlane() const						{ return mFarPlane; }
 
-	const float4x4& GetProjMatrix() const		{ return mProjMatrix; }
-	const float4x4& GetInvProjMatrix() const	{ return mInvProjMatrix;}
+	const float4x4& GetViewMatrix() const			{ return mViewMatrix; }
+	const float4x4& GetProjMatrix() const			{ return mProjMatrix; }
 
 	const Frustumf& GetFrustum() const;
 
@@ -39,6 +36,7 @@ public:
 
 public_internal:
 	const float4x4& GetEngineProjMatrix() const			{ return mEngineProjMatrix; }
+	const float4x4& GetEngineViewProjMatrix() const     { return mEngineViewProjMatrix; }
 
 private:
 	float3 mPosition;
@@ -54,9 +52,6 @@ private:
 	float4x4 mViewMatrix;
 	float4x4 mProjMatrix;
 	
-	float4x4 mInvProjMatrix;
-	float4x4 mInvViewMatrix;
-	
 	/**
 	 * Note:
 	 * OpenGL viewport transform map z [-1, 1] to [0, 1].
@@ -67,6 +62,7 @@ private:
 	 */
 	  
 	float4x4 mEngineProjMatrix;
+	float4x4 mEngineViewProjMatrix;
 
 	mutable Frustumf mFrustum;
 	mutable bool mFrustumDirty;

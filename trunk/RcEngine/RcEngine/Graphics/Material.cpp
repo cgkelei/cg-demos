@@ -211,9 +211,15 @@ void Material::LoadImpl()
 			default:
 				break;
 			}
-
-			mAutoBindings.push_back(effectParam);
 		}
+	}
+
+	// Capture all auto-binding shader parameter
+	for (auto& kv : mEffect->GetParameters())
+	{
+		EffectParameter* effectParam = kv.second;
+		if (effectParam->GetParameterUsage() != EPU_Unknown)
+			mAutoBindings.push_back(effectParam);
 	}
 
 	// Parse render queue bucket
@@ -280,12 +286,12 @@ void Material::ApplyMaterial( const float4x4& world )
 			break;
 		case EPU_ViewProjectionMatrix:
 			{
-				effectParam->SetValue(camera->GetViewMatrix() * camera->GetEngineProjMatrix());
+				effectParam->SetValue(camera->GetEngineViewProjMatrix());
 			}			
 			break;	
 		case EPU_WorldViewProjection:
 			{
-				effectParam->SetValue(world * camera->GetViewMatrix() * camera->GetEngineProjMatrix());
+				effectParam->SetValue(world * camera->GetEngineViewProjMatrix());
 			}			
 			break;
 		case EPU_WorldInverseTranspose:
@@ -298,7 +304,7 @@ void Material::ApplyMaterial( const float4x4& world )
 				effectParam->SetValue(world.Inverse());
 			}
 			break;
-		case EPU_ViewMatrixInverse:
+		/*case EPU_ViewMatrixInverse:
 			{
 				effectParam->SetValue(camera->GetInvViewMatrix());
 			}
@@ -307,7 +313,7 @@ void Material::ApplyMaterial( const float4x4& world )
 			{
 				effectParam->SetValue(camera->GetInvProjMatrix());
 			}
-			break;
+			break;*/
 		case EPU_Material_Ambient_Color:
 			{
 				effectParam->SetValue(mAmbient);
@@ -333,6 +339,11 @@ void Material::ApplyMaterial( const float4x4& world )
 		case EPU_Material_NormalMap:
 			{
 				effectParam->SetValue(mTextureSRVs[effectParam->GetName()]);
+			}
+			break;
+		case EPU_Camera_Position:
+			{
+				effectParam->SetValue(camera->GetPosition());
 			}
 			break;
 		default:

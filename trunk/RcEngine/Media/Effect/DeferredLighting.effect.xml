@@ -1,12 +1,19 @@
 <Effect name="DeferredLightingEffect">
+  
+  <AutoBinding name="LightDir" semantic="LightDirection" type="float4"/>
+  <AutoBinding name="LightPos" semantic="LightPosition" type="float4"/>
+  <AutoBinding name="LightColor" semantic="LightColor" type="float3"/>
+  <AutoBinding name="LightFalloff" semantic="LightFalloff" type="float3"/>
+  <AutoBinding name="LightFalloff" semantic="LightFalloff" type="float3"/>      
+  
+  <AutoBinding name="WorldView" semantic="WorldViewProjectionMatrix" type="float4x4"/>
+  <AutoBinding name="InvViewProj" semantic="ProjectionMatrix" type="float4x4"/>
+  
+    
   <Technique name="DirectionalLighting">
     <Pass name="p0">
-      <VertexShader file="DeferredLighting" entry="DeferedVS">
-        <Macro name="DIRLIGHT"/>
-      </VertexShader>
-      <PixelShader file="DeferredLighting" entry="DirectionalLightingPS">
-        <Macro name="DIRLIGHT"/>
-      </PixelShader>
+      <VertexShader file="DeferredLighting" entry="DirectionalVSMain"/>
+      <PixelShader file="DeferredLighting" entry="DirectionalPSMain"/>
 
       <!-- Only compute lighting in non-background region -->
       <State name="StencilEnable" value="true"/>
@@ -30,9 +37,7 @@
 
   <Technique name="PointLighting">
     <Pass name="p0">
-      <VertexShader file="DeferredLighting" entry="DeferedVS">
-        <Macro name="POINTLIGHT"/>
-      </VertexShader>
+      <VertexShader file="DeferredLighting" entry="LightVolumeVSMain"/>
       <State name="ColorWriteMask" index="0" r="false" g="false" b="false" a="false"/>
       <State name="DepthEnable" value="true"/>
       <State name="DepthWriteMask" value="false"/>
@@ -49,10 +54,8 @@
       <State name="CullMode" value="None"/>
     </Pass>
     <Pass name="p1">
-      <VertexShader file="DeferredLighting" entry="DeferedVS">
-        <Macro name="POINTLIGHT"/>
-      </VertexShader>
-      <PixelShader file="DeferredLighting" entry="PointLightingPS"/>
+      <VertexShader file="DeferredLighting" entry="LightVolumeVSMain"/>
+      <PixelShader file="DeferredLighting" entry="PointLightingPSMain"/>
       <State name="DepthEnable" value="false"/>
       <State name="DepthWriteMask" value="false"/>
       <State name="DepthFunc" value="LessEqual"/>
@@ -75,7 +78,7 @@
 
   <Technique name="SpotLighting">
     <Pass name="p0">
-      <VertexShader file="DeferredLighting" entry="DeferedVS">
+      <VertexShader file="DeferredLighting" entry="LightVolumeVSMain">
         <Macro name="SPOTLIGHT"/>
       </VertexShader>
       <State name="ColorWriteMask" index="0" r="false" g="false" b="false" a="false"/>
@@ -94,10 +97,10 @@
       <State name="CullMode" value="None"/>
     </Pass>
     <Pass name="p1">
-      <VertexShader file="DeferredLighting" entry="DeferedVS">
+      <VertexShader file="DeferredLighting" entry="LightVolumeVSMain">
         <Macro name="SPOTLIGHT"/>
       </VertexShader>
-      <PixelShader file="DeferredLighting" entry="SpotLightingPS"/>
+      <PixelShader file="DeferredLighting" entry="SpotLightingPSMain"/>
       <State name="DepthEnable" value="false"/>
       <State name="DepthWriteMask" value="false"/>
       <State name="DepthFunc" value="LessEqual"/>
@@ -120,12 +123,8 @@
 
   <Technique name="Shading">
     <Pass name="p0">
-      <VertexShader file="DeferredLighting" entry="DeferedVS">
-        <Macro name="DIRLIGHT"/>
-      </VertexShader>
-      <PixelShader file="DeferredLighting" entry="SpotLightingPS">
-        <Macro name="DIRLIGHT"/>
-      </PixelShader>
+      <VertexShader file="DeferredLighting" entry="DirectionalVSMain"/>
+      <PixelShader file="DeferredLighting" entry="DeferredShadingPSMain"/>
       <State name="DepthEnable" value="false"/>
       <State name="DepthWriteMask" value="false"/>
 

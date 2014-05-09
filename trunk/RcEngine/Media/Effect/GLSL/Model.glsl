@@ -3,17 +3,17 @@
 #include "/ModelVertexFactory.glsl"
 
 // Shader uniforms	
-uniform mat4 WorldView;	
-uniform mat4 Projection;
+uniform mat4 World;	
+uniform mat4 ViewProj;
 
 // VS Outputs
-out vec4 oPosVS;
+out vec4 oPosWS;
 out vec2 oTex;
 
 #ifdef _NormalMap
-	out mat3 oTangentToView;
+	out mat3 oTangentToWorld;
 #else
-	out vec3 oNormalVS;
+	out vec3 oNormalWS;
 #endif
 
 out gl_PerVertex {
@@ -25,38 +25,38 @@ void main()
 #ifdef _Skinning
 
 	mat4 Skin = CalculateSkinMatrix();
-	mat4 SkinWorldView = Skin * WorldView;
+	mat4 SkinWorld = Skin * World;
 	
-	oPosVS = vec4(iPos, 1.0)* SkinWorldView;
-	vec3 normal = normalize(iNormal * mat3(SkinWorldView));
+	oPosWS = vec4(iPos, 1.0)* SkinWorld;
+	vec3 normal = normalize(iNormal * mat3(SkinWorld));
 
 #else
 
-	oPosVS = vec4(iPos, 1.0) * WorldView;
-	vec3 normal = normalize(iNormal * mat3(WorldView));
+	oPosWS = vec4(iPos, 1.0) * World;
+	vec3 normal = normalize(iNormal * mat3(World));
 
 #endif
 
 	// calculate tangent and binormal.
 #ifdef _NormalMap
 	#ifdef _Skinning
-		vec3 tangent = normalize(iTangent * mat3(SkinWorldView));
-		vec3 binormal = normalize(iBinormal * mat3(SkinWorldView));
+		vec3 tangent = normalize(iTangent * mat3(SkinWorld));
+		vec3 binormal = normalize(iBinormal * mat3(SkinWorld));
 	#else
-		vec3 tangent = normalize(iTangent * mat3(WorldView));
-		vec3 binormal = normalize(iBinormal * mat3(WorldView));
+		vec3 tangent = normalize(iTangent * mat3(World));
+		vec3 binormal = normalize(iBinormal * mat3(World));
 	#endif
 
 	// actualy this is a world to tangent matrix, because we always use V * Mat.
-	oTangentToView = mat3( tangent, binormal, normal);
+	oTangentToWorld = mat3( tangent, binormal, normal);
 
 	// transpose to get tangent to world matrix
-	oTangentToView = transpose(oTangentToView);
+	oTangentToWorld = transpose(oTangentToWorld);
 #else
-	oNormalVS = normal;
+	oNormalWS = normal;
 #endif
 	
 	// texcoord
 	oTex = iTex;
-	gl_Position = oPosVS * Projection;
+	gl_Position = oPosWS * ViewProj;
 }

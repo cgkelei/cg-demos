@@ -18,7 +18,6 @@ FrameBuffer::FrameBuffer( uint32_t width, uint32_t height )
 	  mHeight(height)
 {
 	mViewports.push_back(Viewport(0.f, 0.f, float(width), float(height)));
-	mCamera = std::make_shared<Camera>();
 }
 
 FrameBuffer::~FrameBuffer()

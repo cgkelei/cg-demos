@@ -3,13 +3,13 @@
 #include "/ModelMaterialFactory.glsl"
 
 // PS Inputs
-in vec4 oPosVS;
+in vec4 oPosWS;
 in vec2 oTex;
 
 #ifdef _NormalMap
-	in mat3 oTangentToView;
+	in mat3 oTangentToWorld;
 #else
-	in vec3 oNormalVS;
+	in vec3 oNormalWS;
 #endif
 
 // PS Outputs
@@ -24,9 +24,9 @@ void main()
 	// normal map
 #ifdef _NormalMap
 	vec3 normal = texture2D( NormalMap, oTex ).rgb * 2.0 - 1.0;
-	normal = normalize(normal * oTangentToView);
+	normal = normalize(normal * oTangentToWorld);
 #else
-	vec3 normal = normalize(oNormalVS);
+	vec3 normal = normalize(oNormalWS);
 #endif	
 	
 	normal = normal * 0.5 + 0.5;

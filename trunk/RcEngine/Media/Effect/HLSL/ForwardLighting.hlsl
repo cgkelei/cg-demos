@@ -3,8 +3,8 @@
 #include "LightingUtil.hlsl"
 
 float3 LightColor;
-float4 LightDirVS;
-
+float4 LightDir;
+float3 CameraOrigin;
 
 void DirectionalLightingPS(in VSOutput input,
 						   out float4 oFragColor : SV_Target0 ) 
@@ -15,14 +15,13 @@ void DirectionalLightingPS(in VSOutput input,
 	// normal map
 #ifdef _NormalMap
 	float3 N = NormalMap.Sample(MaterialSampler, input.Tex).rgb * 2.0 - 1.0;
-	N = normalize( mul(N, input.TangentToView) );
-	N = normalize(input.TangentToView[2]);
+	N = normalize( mul(N, input.TangentToWorld) );
 #else
-	float3 N = normalize(input.NormalVS);
+	float3 N = normalize(input.NormalWS);
 #endif	      
         
-    float3 L = normalize(-LightDirVS.xyz);
-    float3 V = normalize(-input.PosVS.xyz);
+    float3 L = normalize(-LightDir.xyz);
+    float3 V = normalize(CameraOrigin - input.PosWS.xyz);
     float3 H = normalize(V + L);
                           
     float3 final = 0;   
@@ -36,5 +35,5 @@ void DirectionalLightingPS(in VSOutput input,
     
 	// Ambient 
 	final += material.DiffuseAlbedo * 0.15;
-    oFragColor = float4(material.DiffuseAlbedo, final.r);
+    oFragColor = float4(final, 1.0);
 }

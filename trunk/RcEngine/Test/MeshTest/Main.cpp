@@ -53,23 +53,12 @@ protected:
 		RenderFactory* factory = Environment::GetSingleton().GetRenderFactory();
 		SceneManager* sceneMan = Environment::GetSingleton().GetSceneManager();
 
-		mCamera = device->GetScreenFrameBuffer()->GetCamera();
+		mCamera = std::make_shared<Camera>();
 
-		//mRenderPath = std::make_shared<ForwardPath>();
+		mRenderPath = std::make_shared<ForwardPath>();
 		
-		mRenderPath = std::make_shared<DeferredPath>();
-		mRenderPath->OnGraphicsInit();
-
-		/*Light* spotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
-		spotLight->SetDirection(float3(0, -1.5, -1));
-		spotLight->SetLightColor(float3(1, 1, 1));
-		spotLight->SetRange(300.0);
-		spotLight->SetPosition(float3(0.0f, 150.0f, 100.0f));
-		spotLight->SetAttenuation(1.0f, 0.0f);
-		spotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(60));
-		spotLight->SetCastShadow(true);
-		spotLight->SetSpotlightNearClip(10);
-		sceneMan.GetRootSceneNode()->AttachObject(spotLight);*/
+		//mRenderPath = std::make_shared<DeferredPath>();
+		mRenderPath->OnGraphicsInit(mCamera);
 	}
 
 
@@ -128,6 +117,79 @@ protected:
 		mCameraControler->AttachCamera(*mCamera);
 		mCameraControler->SetMoveSpeed(100.0f);
 		mCameraControler->SetMoveInertia(true);
+
+		// Set as default camera
+		auto screenFB = Environment::GetSingleton().GetRenderDevice()->GetScreenFrameBuffer();
+		screenFB->SetCamera(mCamera);
+
+		SetupLights();
+	}
+
+	void SetupLights()
+	{
+		SceneManager& sceneMan = *Environment::GetSingleton().GetSceneManager();
+
+		Light* mDirLight = sceneMan.CreateLight("Sun", LT_DirectionalLight);
+		mDirLight->SetDirection(float3(0, -8, -1));
+		mDirLight->SetLightColor(float3(1, 1, 1));
+		mDirLight->SetCastShadow(false);
+		sceneMan.GetRootSceneNode()->AttachObject(mDirLight);
+
+		Light* spotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
+		spotLight->SetDirection(float3(0, -1.5, -1));
+		spotLight->SetLightColor(float3(1, 0, 1));
+		spotLight->SetRange(300.0);
+		spotLight->SetPosition(float3(0.0f, 150.0f, 100.0f));
+		spotLight->SetAttenuation(1.0f, 0.0f);
+		spotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(60));
+		spotLight->SetCastShadow(false);
+		spotLight->SetSpotlightNearClip(10);
+		sceneMan.GetRootSceneNode()->AttachObject(spotLight);
+
+		//mPointLight = sceneMan.CreateLight("Point", LT_PointLight);
+		//mPointLight->SetLightColor(float3(1, 1, 0));
+		//mPointLight->SetRange(80.0f);
+		//mPointLight->SetAttenuation(1.0f, 0.0f);
+		//mPointLight->SetPosition(float3(550, 81, -18));
+		//sceneMan.GetRootSceneNode()->AttachObject(mPointLight);
+
+		//mSpotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
+		//mSpotLight->SetLightColor(float3(0, 1, 0));
+		//mSpotLight->SetRange(250.0f);
+		//mSpotLight->SetPosition(float3(-442, 80, -16));
+		//mSpotLight->SetDirection(float3(-1, 0, 0));
+		//mSpotLight->SetAttenuation(1.0f, 0.0f);
+		//mSpotLight->SetSpotAngle(Mathf::ToRadian(30), Mathf::ToRadian(40));
+		//sceneMan.GetRootSceneNode()->AttachObject(mSpotLight);
+
+
+		//{
+		//	float3 direction = Normalize(float3(-111.5f, 398.1f, 3.6f) - float3(-111.1, 380.1, 73.4));
+		//	for (int i = 0; i < 4; ++i)
+		//	{
+		//		Light* spotLight = sceneMan.CreateLight("Spot" + std::to_string(i), LT_SpotLight);
+		//		spotLight->SetLightColor(float3(1, 1, 0));
+		//		spotLight->SetRange(150);
+		//		spotLight->SetPosition(float3(-278.2f + i * 166.5f, 398.1f, 3.6f));
+		//		spotLight->SetDirection(direction);
+		//		spotLight->SetAttenuation(1.0f, 0.0f);
+		//		spotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(40));
+		//		sceneMan.GetRootSceneNode()->AttachObject(spotLight);
+		//	}
+
+		//	direction = Normalize(float3(-111.5f, 398.1f, 35.7f) - float3(-111.1, 380.1, -111.3));
+		//	for (int i = 0; i < 4; ++i)
+		//	{
+		//		Light* spotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
+		//		spotLight->SetLightColor(float3(0, 1, 1));
+		//		spotLight->SetRange(150);
+		//		spotLight->SetPosition(float3(-278.2f + i * 166.5f, 398.1f, -35.7f));
+		//		spotLight->SetDirection(direction);
+		//		spotLight->SetAttenuation(1.0f, 0.0f);
+		//		spotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(40));
+		//		sceneMan.GetRootSceneNode()->AttachObject(spotLight);
+		//	}
+		//}
 	}
 
 	void UnloadContent()
@@ -146,9 +208,6 @@ protected:
 		SceneManager* sceneMan = Environment::GetSingleton().GetSceneManager();
 
 		mRenderPath->RenderScene();
-
-		device->BindFrameBuffer(device->GetScreenFrameBuffer());
-		device->GetScreenFrameBuffer()->SwapBuffers();
 	}
 
 	void CalculateFrameRate()
