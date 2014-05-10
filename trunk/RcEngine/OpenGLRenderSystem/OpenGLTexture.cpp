@@ -23,22 +23,22 @@ OpenGLTexture::~OpenGLTexture(void)
 	glDeleteRenderbuffers(1, &mTextureOGL);	
 }
 
-void OpenGLTexture::Map1D(uint32_t arrayIndex,  uint32_t level, ResourceMapAccess tma, uint32_t xOffset, uint32_t width, void*& data )
+void* OpenGLTexture::Map1D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess mapType )
 {
 	ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't be here!", "OpenGLTexture::Map1D");
 }
 
-void OpenGLTexture::Map2D(uint32_t arrayIndex,  uint32_t level, ResourceMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height, void*& data, uint32_t& rowPitch )
+void* OpenGLTexture::Map2D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess mapType, uint32_t& rowPitch )
 {
 	ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't be here!", "OpenGLTexture::Map2D");
 }
 
-void OpenGLTexture::Map3D(uint32_t arrayIndex,  uint32_t level, ResourceMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t zOffset, uint32_t width, uint32_t height, uint32_t depth, void*& data, uint32_t& rowPitch, uint32_t& slicePitch )
+void* OpenGLTexture::Map3D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess mapType, uint32_t& rowPitch, uint32_t& slicePitch )
 {
 	ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't be here!", "OpenGLTexture::Map3D");
 }
 
-void OpenGLTexture::MapCube(uint32_t arrayIndex,  CubeMapFace face, uint32_t level, ResourceMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height, void*& data, uint32_t& rowPitch )
+void* OpenGLTexture::MapCube( uint32_t arrayIndex, CubeMapFace face, uint32_t level, ResourceMapAccess mapType, uint32_t& rowPitch )
 {
 	ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't be here!", "OpenGLTexture::MapCube");
 }
@@ -80,8 +80,6 @@ void OpenGLTexture::BuildMipMap()
 		ENGINE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, "Unsupported!", "OpenGLTexture::BuildMipMap");
 	}
 }
-
-
 
 }
 

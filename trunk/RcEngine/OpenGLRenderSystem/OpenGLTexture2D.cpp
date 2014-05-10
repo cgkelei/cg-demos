@@ -206,81 +206,73 @@ void OpenGLTexture2D::CreateWithMutableStorage(ElementInitData* initData)
 	}
 }
 
-void OpenGLTexture2D::Map2D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height, void*& data, uint32_t& rowPitch )
+void* OpenGLTexture2D::Map2D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess mapType, uint32_t& rowPitch )
 {
 	if ( (mAccessHint & (EAH_CPU_Read | EAH_CPU_Write)) == 0 )
 		ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Map only work with CPU side access!", "OpenGLTexture2D::Map2D");
-
-	mTextureMapAccess = tma;
+	
+	void* pMappedData;
+	mTextureMapAccess = mapType;
 
 	GLenum internalFormat, externFormat, formatType;
 	OpenGLMapping::Mapping(internalFormat, externFormat, formatType, mFormat);
-	uint32_t texelSize = PixelFormatUtils::GetNumElemBytes(mFormat);
-
+	
+	uint32_t imageSize;
 	uint32_t levelWidth = CalculateLevelSize(mWidth, level);
 	uint32_t levelHeight = CalculateLevelSize(mHeight, level);
-	
-	// Compute image size
-	uint32_t imageSize = levelWidth * levelHeight * texelSize;
-	rowPitch = levelWidth * texelSize; 
 
-	int blockSize = 0;
+	// Compute image size
 	if (PixelFormatUtils::IsCompressed(mFormat))
 	{
-		blockSize = (internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16; 
-		imageSize = ((width+3)/4)*((height+3)/4)*blockSize; 
+		uint32_t blockSize = (internalFormat == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16; 
+		imageSize = ((levelWidth+3)/4)*((levelWidth+3)/4)*blockSize; 	
+	}
+	else
+	{
+		uint32_t texelSize = PixelFormatUtils::GetNumElemBytes(mFormat);
+		imageSize = levelWidth * levelHeight * texelSize;
 	}
 
-	assert(mPixelBufferID);
+	rowPitch = imageSize / levelHeight;
 
-	uint8_t* p;
-	switch(tma)
+	assert(mPixelBufferID);
+	GLbitfield mapUsage = OpenGLMapping::Mapping(mapType);
+	GLenum bufferUsage = (mapType == RMA_Read_Only) ? GL_STREAM_READ : GL_STREAM_DRAW;
+
+	switch(mapType)
 	{
 	case RMA_Read_Only:
 	case RMA_Read_Write:
 		{
-			if (mPixelBufferID != 0) 
-			{
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
-				glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, mPixelBufferID);
-				glBufferData(GL_PIXEL_PACK_BUFFER_ARB, imageSize, NULL, GL_STREAM_DRAW);
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+			glBindBuffer(GL_PIXEL_PACK_BUFFER, mPixelBufferID);
+			glBufferData(GL_PIXEL_PACK_BUFFER, imageSize, NULL, bufferUsage);
+			
+			glBindTexture(mTextureTarget, mTextureOGL);
+			if (PixelFormatUtils::IsCompressed(mFormat))
+				glGetCompressedTexImage(mTextureTarget, level, NULL);
+			else
+				glGetTexImage(mTextureTarget, level, externFormat, formatType, NULL);
 
-				glBindTexture(mTextureTarget, mTextureOGL);
-
-				if (PixelFormatUtils::IsCompressed(mFormat))
-				{
-					glGetCompressedTexImage(mTextureTarget, level, NULL);
-					p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY));
-				}
-				else
-				{
-					glGetTexImage(mTextureTarget, level, externFormat, formatType, NULL);
-					p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY));
-				}
-			}
+			pMappedData =  glMapBufferRange(GL_PIXEL_PACK_BUFFER, 0, imageSize, mapUsage);
 		}
 		break;
-
 	case RMA_Write_Only:
+	case RMA_Write_Discard:
+	case RMA_Write_No_Overwrite:
 		{
-			if (mPixelBufferID != 0) 
-			{
-				glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, mPixelBufferID);
-				glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, imageSize, NULL, GL_STREAM_DRAW);
-				p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY));
-			}
+			glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, mPixelBufferID);
+			glBufferData(GL_PIXEL_UNPACK_BUFFER, imageSize, NULL, GL_STREAM_DRAW);
+
+			pMappedData =  glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, imageSize, mapUsage);
 		}
 		break;
-
 	default:
 		assert(false);
 	}
 
-	if (PixelFormatUtils::IsCompressed(mFormat))
-		data = p + (yOffset / 4) * rowPitch + (xOffset / 4 * blockSize);
-	else
-		data = p + (yOffset * levelWidth + xOffset) * texelSize;
+	return pMappedData;
 }
 
 void OpenGLTexture2D::Unmap2D( uint32_t arrayIndex, uint32_t level )
@@ -291,18 +283,16 @@ void OpenGLTexture2D::Unmap2D( uint32_t arrayIndex, uint32_t level )
 	uint32_t levelWidth = CalculateLevelSize(mWidth, level);
 	uint32_t levelHeight = CalculateLevelSize(mHeight, level);
 
+	assert(mPixelBufferID != 0);
 	switch(mTextureMapAccess)
 	{
 	case RMA_Read_Only:
 		{
-			if (mPixelBufferID != 0) 
-			{
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
-				glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, mPixelBufferID);
-				glUnmapBuffer(GL_PIXEL_PACK_BUFFER_ARB);
-			}
-			break;
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+			glBindBuffer(GL_PIXEL_PACK_BUFFER, mPixelBufferID);
+			glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 		}
+		break;
 
 	case RMA_Write_Only:
 	case RMA_Read_Write:
@@ -320,28 +310,23 @@ void OpenGLTexture2D::Unmap2D( uint32_t arrayIndex, uint32_t level )
 
 			glBindTexture(mTextureTarget, mTextureOGL);
 
-			uint8_t* p;
-			if (mPixelBufferID != 0) 
-			{
-				glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, mPixelBufferID);
-				glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB);
-				p = NULL;
-			}
+			glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, mPixelBufferID);
+			glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 			if (PixelFormatUtils::IsCompressed(mFormat))
 			{
 				if (mTextureArraySize > 1)
-					glCompressedTexSubImage3D(mTextureTarget, level, 0, 0, arrayIndex,levelWidth, levelHeight, 1, externFormat, imageSize, p);
+					glCompressedTexSubImage3D(mTextureTarget, level, 0, 0, arrayIndex,levelWidth, levelHeight, 1, externFormat, imageSize, NULL);
 				else
-					glCompressedTexSubImage2D(mTextureTarget, level, 0, 0, levelWidth, levelHeight, externFormat, imageSize, p);
+					glCompressedTexSubImage2D(mTextureTarget, level, 0, 0, levelWidth, levelHeight, externFormat, imageSize, NULL);
 			}
 			else
 			{
 				if (mTextureArraySize > 1)
-					glTexSubImage3D(mTextureTarget, level, 0, 0, arrayIndex, levelWidth, levelHeight, 1, externFormat, formatType, p);
+					glTexSubImage3D(mTextureTarget, level, 0, 0, arrayIndex, levelWidth, levelHeight, 1, externFormat, formatType, NULL);
 				else
-					glTexSubImage2D(mTextureTarget, level, 0, 0, levelWidth, levelHeight, externFormat, formatType, p);
+					glTexSubImage2D(mTextureTarget, level, 0, 0, levelWidth, levelHeight, externFormat, formatType, NULL);
 			}
 		}
 	}

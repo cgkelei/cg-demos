@@ -55,9 +55,9 @@ protected:
 
 		mCamera = std::make_shared<Camera>();
 
-		mRenderPath = std::make_shared<ForwardPath>();
+		//mRenderPath = std::make_shared<ForwardPath>();
 		
-		//mRenderPath = std::make_shared<DeferredPath>();
+		mRenderPath = std::make_shared<DeferredPath>();
 		mRenderPath->OnGraphicsInit(mCamera);
 	}
 

@@ -122,7 +122,7 @@ bool Image::CopyImageFromTexture( const shared_ptr<Texture>& texture )
 					uint32_t levelWidth = (std::max)(1U, mWidth>>level) ;
 					uint32_t levelHeight = (std::max)(1U, mHeight>>level);
 	
-					texture->Map2D(layer, level, RMA_Read_Only, 0, 0, levelWidth, levelHeight, pLevelData, rowPitch);
+					pLevelData = texture->Map2D(layer, level, RMA_Read_Only, rowPitch);
 					memcpy(pSrcBits, pLevelData, levelHeight * rowPitch);
 					texture->Unmap2D(layer, level);
 

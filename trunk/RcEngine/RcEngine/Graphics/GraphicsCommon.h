@@ -46,7 +46,7 @@ enum ResourceMapAccess
 	RMA_Write_Only,
 	RMA_Read_Write,
 	RMA_Write_Discard,
-	RMA_Write_NO_Overwrite
+	RMA_Write_No_Overwrite
 };
 
 enum IndexBufferType

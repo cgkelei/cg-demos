@@ -143,9 +143,44 @@ D3D11Texture2D::~D3D11Texture2D()
 	SAFE_RELEASE(TextureD3D11);
 }
 
-void D3D11Texture2D::Map2D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height, void*& data, uint32_t& rowPitch )
+void* D3D11Texture2D::Map2D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess mapType, uint32_t& rowPitch )
 {
+	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
 
+	ID3D11Resource* resourceMapD3D11;
+
+	if (mapType  == RMA_Read_Only || mapType == RMA_Read_Write)
+	{
+		if (!mStagingTextureD3D11)
+		{
+			// Create staging texture if not created.
+			D3D11_TEXTURE2D_DESC texDesc;
+			TextureD3D11->GetDesc(&texDesc);
+
+			texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+			if (mapType == RMA_Read_Write)
+				texDesc.CPUAccessFlags |= D3D11_CPU_ACCESS_WRITE;
+
+			texDesc.BindFlags = 0;
+			texDesc.Usage = D3D11_USAGE_STAGING;
+
+			ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
+			D3D11_VERRY( deviceD3D11->CreateTexture2D( &texDesc, NULL, (ID3D11Texture2D**)&mStagingTextureD3D11) );
+		}
+
+		resourceMapD3D11 = mStagingTextureD3D11;
+	}
+	else
+	{
+		resourceMapD3D11 = TextureD3D11;
+	}
+
+	D3D11_MAPPED_SUBRESOURCE mapped;
+	uint32_t subResource = arrayIndex * mMipLevels + level;
+	deviceContextD3D11->Map(resourceMapD3D11, subResource, D3D11Mapping::Mapping(mapType), 0, &mapped);
+
+	rowPitch = mapped.RowPitch;
+	return mapped.pData;
 }
 
 void D3D11Texture2D::Unmap2D( uint32_t arrayIndex, uint32_t level )

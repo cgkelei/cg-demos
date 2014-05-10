@@ -542,12 +542,12 @@ void DeferredPath::DeferredLighting()
 
 	mViewProj = mCamera->GetEngineViewProjMatrix();
 	if (Application::msApp->GetAppSettings().RHDeviceType == RD_Direct3D11)
-	{
+    {
 		mInvViewProj = MatrixInverse(mViewProj);
 	}
 	else
 	{
-		auto view = mCamera->GetViewMatrix();
+		const float4x4& view = mCamera->GetViewMatrix();
 		mInvViewProj = MatrixInverse(view * proj);
 	}
 
@@ -558,18 +558,9 @@ void DeferredPath::DeferredLighting()
 	mDepthStencilBuffer->CopyToTexture(*mDepthStencilBufferLight);
 
 	// Set all common effect parameters;
-	EffectParameter* effectParam;
-	{
-		effectParam = mDeferredEffect->GetParameterByName("InvViewProj");
-		effectParam->SetValue(mInvViewProj);
+	mDeferredEffect->GetParameterByName("InvViewProj")->SetValue(mInvViewProj);
+	mDeferredEffect->GetParameterByName("CameraOrigin")->SetValue(mCamera->GetPosition());
 
-		effectParam = mDeferredEffect->GetParameterByName("CameraOrigin");
-		effectParam->SetValue(mCamera->GetPosition());
-
-		//effectParam = mDeferredEffect->GetParameterByName("ProjRatio");
-		//effectParam->SetValue(float2(proj.M33, proj.M43));
-	}
-	
 	const String& tech = "Lighting";
  	bool stencilZFail = false;
 	for (Light* light : mSceneMan->GetSceneLights())
