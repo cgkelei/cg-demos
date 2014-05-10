@@ -533,9 +533,11 @@ GLbitfield OpenGLMapping::Mapping( ResourceMapAccess mapType )
 {
 	switch(mapType)
 	{
-	case RMA_Read_Only:		return GL_MAP_READ_BIT;
-	case RMA_Write_Only:	return GL_MAP_WRITE_BIT;
-	case RMA_Write_Discard: return GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT;
+	case RMA_Read_Only:			 return GL_MAP_READ_BIT;
+	case RMA_Write_Only:		 return GL_MAP_WRITE_BIT;
+	case RMA_Read_Write:		 return GL_MAP_READ_BIT | GL_MAP_WRITE_BIT;
+	case RMA_Write_Discard:		 return GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT;
+	case RMA_Write_No_Overwrite: return GL_MAP_WRITE_BIT;
 	default:
 		return GL_MAP_WRITE_BIT;
 		break;

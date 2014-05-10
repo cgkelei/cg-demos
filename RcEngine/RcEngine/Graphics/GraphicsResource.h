@@ -101,21 +101,10 @@ public:
 
 	virtual void BuildMipMap() = 0;
 
-	virtual void Map1D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess mapType,
-		uint32_t xOffset, uint32_t width, void*& data) = 0;
-
-	virtual void Map2D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess mapType,
-		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
-		void*& data, uint32_t& rowPitch) = 0;
-
-	virtual void Map3D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess mapType,
-		uint32_t xOffset, uint32_t yOffset, uint32_t zOffset,
-		uint32_t width, uint32_t height, uint32_t depth,
-		void*& data, uint32_t& rowPitch, uint32_t& slicePitch) = 0;
-
-	virtual void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, ResourceMapAccess mapType,
-		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
-		void*& data, uint32_t& rowPitch) = 0;
+	virtual void* Map1D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess mapType) = 0;
+	virtual void* Map2D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess mapType, uint32_t& rowPitch) = 0;
+	virtual void* Map3D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess mapType, uint32_t& rowPitch, uint32_t& slicePitch) = 0;
+	virtual void* MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, ResourceMapAccess mapType, uint32_t& rowPitch) = 0;
 
 	virtual void Unmap1D(uint32_t arrayIndex, uint32_t level) = 0;
 	virtual void Unmap2D(uint32_t arrayIndex, uint32_t level) = 0;

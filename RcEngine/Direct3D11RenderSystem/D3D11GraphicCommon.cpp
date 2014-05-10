@@ -450,7 +450,7 @@ D3D11_MAP D3D11Mapping::Mapping( ResourceMapAccess map )
 	case RMA_Write_Only:			return D3D11_MAP_WRITE ;
 	case RMA_Read_Write:			return D3D11_MAP_READ_WRITE ;
 	case RMA_Write_Discard:			return D3D11_MAP_WRITE_DISCARD;
-	case RMA_Write_NO_Overwrite:	return D3D11_MAP_WRITE_NO_OVERWRITE;
+	case RMA_Write_No_Overwrite:	return D3D11_MAP_WRITE_NO_OVERWRITE;
 	}
 
 	assert(false);

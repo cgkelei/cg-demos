@@ -89,9 +89,9 @@ D3D11Texture1D::~D3D11Texture1D()
 	SAFE_RELEASE(TextureD3D11);
 }
 
-void D3D11Texture1D::Map1D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma, uint32_t xOffset, uint32_t width, void*& data )
+void* D3D11Texture1D::Map1D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess mapType )
 {
-
+	return 0;
 }
 
 void D3D11Texture1D::Unmap1D( uint32_t arrayIndex, uint32_t level )
