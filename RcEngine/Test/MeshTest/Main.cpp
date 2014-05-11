@@ -25,7 +25,7 @@
 #include <Scene/Light.h>
 #include <Math/MathUtil.h>
 #include <Graphics/Image.h>
-
+#include <Core/Profiler.h>
 
 using namespace RcEngine;
 
@@ -56,9 +56,14 @@ protected:
 		mCamera = std::make_shared<Camera>();
 
 		//mRenderPath = std::make_shared<ForwardPath>();
-		
 		mRenderPath = std::make_shared<DeferredPath>();
-		mRenderPath->OnGraphicsInit(mCamera);
+
+		{
+			ENGINE_CPU_AUTO_PROFIER("Load Deferrd Path");
+			mRenderPath->OnGraphicsInit(mCamera);
+		}
+
+		ENGINE_DUMP_PROFILERS();
 	}
 
 
@@ -89,17 +94,26 @@ protected:
 		mCamera->CreateLookAt(float3(-137.0, 97.3, 82.0), float3(-136.5, 96.8, 81.3), float3(0.3, 0.9, -0.4));
 		mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 1000.0f );
 
-		entity = sceneMan->CreateEntity("Ground", "./Geo/Ground.mesh",  "Custom");
-		sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Ground");
-		sceneNode->SetScale(float3(2.5,2.5,2.5));
-		sceneNode->SetPosition(float3(0, 0, 0));
-		sceneNode->AttachObject(entity);
+		{
+			ENGINE_CPU_AUTO_PROFIER("Load Model");
 
-		entity = sceneMan->CreateEntity("Nanosuit", "./Nanosuit/Nanosuit.mesh",  "Custom");
-		sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Nanosuit");
-		sceneNode->SetScale(float3(2,2,2));
-		sceneNode->SetPosition(float3(-50,0,0));
-		sceneNode->AttachObject(entity);
+			entity = sceneMan->CreateEntity("Ground", "./Geo/Ground.mesh",  "Custom");
+			sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Ground");
+			sceneNode->SetScale(float3(2.5,2.5,2.5));
+			sceneNode->SetPosition(float3(0, 0, 0));
+			sceneNode->AttachObject(entity);
+
+			entity = sceneMan->CreateEntity("Nanosuit", "./Nanosuit/Nanosuit.mesh",  "Custom");
+			sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Nanosuit");
+			sceneNode->SetScale(float3(2,2,2));
+			sceneNode->SetPosition(float3(-50,0,0));
+			sceneNode->AttachObject(entity);
+		}
+
+		ENGINE_DUMP_PROFILERS();
+
+		//ENGINE_PUSH_CPU_PROFIER("test");
+		//ENGINE_DUMP_PROFILERS();
 
 		//entity = sceneMan->CreateEntity("Dude", "./Dude/dude.mesh",  "Custom");
 		//sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Dude");

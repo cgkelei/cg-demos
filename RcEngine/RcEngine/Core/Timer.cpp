@@ -5,33 +5,28 @@ namespace RcEngine {
 
 
 #if defined(RcWindows)
-	int64_t __freq;
-	int64_t __time_at_init;
+	static double __micro_second_per_count;
+	static __int64 __time_at_init;
 
 	void InitSystemClock()
 	{
-		LARGE_INTEGER freq;
-		QueryPerformanceFrequency(&freq);
-		__freq = freq.QuadPart;
+		__int64 countsPerSec;
+		QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
+		__micro_second_per_count = 1000.0 / (double)countsPerSec;
 
-		LARGE_INTEGER now;
-		QueryPerformanceCounter(&now);
-		__time_at_init = now.QuadPart;
+		QueryPerformanceCounter((LARGE_INTEGER*)&__time_at_init);
 	}
 
 	void ShutSystemClock() {}
 
-	uint64_t GetTimeNS()
+	double GetTimeMS()
 	{
-		LARGE_INTEGER now;
-		QueryPerformanceCounter(&now);
-		static const uint64_t factor = 1000000000;
-		return (uint64_t)( factor*(now.QuadPart-__time_at_init) / __freq );
-		return 0;
+		__int64 now;
+		QueryPerformanceCounter((LARGE_INTEGER*)&now);
+		return (now-__time_at_init) * __micro_second_per_count;
 	}
 #endif
 
-		
 
 Timer::Timer()
 	: mSecondsPerCount(0.0), mDeltaTime(-1.0), mBaseTime(0),
