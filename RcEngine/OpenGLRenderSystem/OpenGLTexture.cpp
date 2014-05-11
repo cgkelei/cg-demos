@@ -35,12 +35,12 @@ void* OpenGLTexture::Map2D( uint32_t arrayIndex, uint32_t level, ResourceMapAcce
 
 void* OpenGLTexture::Map3D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess mapType, uint32_t& rowPitch, uint32_t& slicePitch )
 {
-	ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't be here!", "OpenGLTexture::Map3D");
+	ENGINE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, "Shoudn't be here!", "OpenGLTexture::Map3D");
 }
 
 void* OpenGLTexture::MapCube( uint32_t arrayIndex, CubeMapFace face, uint32_t level, ResourceMapAccess mapType, uint32_t& rowPitch )
 {
-	ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't be here!", "OpenGLTexture::MapCube");
+	ENGINE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, "Shoudn't be here!", "OpenGLTexture::MapCube");
 }
 
 void OpenGLTexture::Unmap1D(uint32_t arrayIndex,   uint32_t level )
@@ -55,12 +55,12 @@ void OpenGLTexture::Unmap2D(uint32_t arrayIndex,  uint32_t level )
 
 void OpenGLTexture::Unmap3D(uint32_t arrayIndex,  uint32_t level )
 {
-	ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't be here!", "OpenGLTexture::Unmap3D");
+	ENGINE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, "Shoudn't be here!", "OpenGLTexture::Unmap3D");
 }
 
 void OpenGLTexture::UnmapCube(uint32_t arrayIndex,   CubeMapFace face, uint32_t level )
 {
-	ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't be here!", "OpenGLTexture::UnmapCube");
+	ENGINE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, "Shoudn't be here!", "OpenGLTexture::UnmapCube");
 }
 
 void OpenGLTexture::CopyToTexture( Texture& destTexture )

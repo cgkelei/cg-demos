@@ -5,6 +5,14 @@
 
 namespace RcEngine {
 
+void InitSystemClock();
+void ShutSystemClock();
+
+uint64_t GetTimeNS();
+
+/** 
+ * Game Timer
+ */
 class _ApiExport Timer
 {
 public:
@@ -30,6 +38,9 @@ private:
 
 	bool mStopped;
 };
+
+
+
 
 } // Namespace RcEngine
 

@@ -144,16 +144,15 @@ void OpenGLTextureCube::CreateWithMutableStorage( ElementInitData* initData )
 	}
 }
 
-void OpenGLTextureCube::MapCube( uint32_t arrayIndex, CubeMapFace face, uint32_t level, ResourceMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height, void*& data, uint32_t& rowPitch )
-{
-
-}
-
-
-void OpenGLTextureCube::UnmapCube( uint32_t arrayIndex, CubeMapFace face, uint32_t level )
-{
-
-}
+//void OpenGLTextureCube::MapCube( uint32_t arrayIndex, CubeMapFace face, uint32_t level, ResourceMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height, void*& data, uint32_t& rowPitch )
+//{
+//
+//}
+//
+//void OpenGLTextureCube::UnmapCube( uint32_t arrayIndex, CubeMapFace face, uint32_t level )
+//{
+//
+//}
 
 }
 

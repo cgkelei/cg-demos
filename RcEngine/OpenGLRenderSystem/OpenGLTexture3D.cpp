@@ -45,15 +45,15 @@ OpenGLTexture3D::OpenGLTexture3D( PixelFormat format, uint32_t numMipMaps, uint3
 }
 
 
-void OpenGLTexture3D::Map3D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t zOffset, uint32_t width, uint32_t height, uint32_t depth, void*& data, uint32_t& rowPitch, uint32_t& slicePitch )
-{
-
-}
-
-void OpenGLTexture3D::Unmap3D( uint32_t arrayIndex, uint32_t level )
-{
-
-}
+//void OpenGLTexture3D::Map3D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma, uint32_t xOffset, uint32_t yOffset, uint32_t zOffset, uint32_t width, uint32_t height, uint32_t depth, void*& data, uint32_t& rowPitch, uint32_t& slicePitch )
+//{
+//	
+//}
+//
+//void OpenGLTexture3D::Unmap3D( uint32_t arrayIndex, uint32_t level )
+//{
+//
+//}
 
 }
 
