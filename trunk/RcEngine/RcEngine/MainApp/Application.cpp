@@ -35,6 +35,9 @@ Application::Application( const String& config )
 	FileSystem::Initialize();
 	ResourceManager::Initialize();
 	
+	// Init System Clock
+	InitSystemClock();
+
 	//UIManager::Initialize();
 
 	// todo add sub scene manager

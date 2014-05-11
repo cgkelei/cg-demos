@@ -8,7 +8,7 @@ namespace RcEngine {
 void InitSystemClock();
 void ShutSystemClock();
 
-uint64_t GetTimeNS();
+double GetTimeMS();
 
 /** 
  * Game Timer

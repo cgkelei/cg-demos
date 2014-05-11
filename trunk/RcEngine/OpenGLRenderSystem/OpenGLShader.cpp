@@ -3,6 +3,7 @@
 #include <Core/Exception.h>
 #include <Core/Loger.h>
 #include <Core/Utility.h>
+#include <Core/Profiler.h>
 #include <IO/PathUtil.h>
 #include <fstream>
 #include <iterator>
@@ -66,6 +67,8 @@ public:
 
 	bool OpenGLCompile(const String& filename, const ShaderMacro* macros, uint32_t macroCount, const String& entryPoint)
 	{
+		ENGINE_PUSH_CPU_PROFIER("Buld GLSL");
+
 		std::ifstream fs(filename);
 		std::string glslScript( (std::istreambuf_iterator<char>(fs)), std::istreambuf_iterator<char>() );
 
@@ -171,14 +174,16 @@ public:
 #endif
 		// Add real code
 		shaderSource += glslScript.substr(lineBeign, shaderSectionEnd - lineBeign);
+		
+		ENGINE_POP_CPU_PROFIER("Buld GLSL");
 
+		ENGINE_PUSH_CPU_PROFIER("Compile GLSL");
 		char const* pSource = shaderSource.c_str();
 		mShader->mShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShader->mShaderType), 1, &pSource);
+		ENGINE_POP_CPU_PROFIER("Compile GLSL");
 
 		int success;
 		glGetProgramiv(mShader->mShaderOGL, GL_LINK_STATUS, &success);
-		ParseSamplerState(shaderSource);
-
 		if (success != GL_TRUE)
 		{
 			int length;
@@ -194,12 +199,16 @@ public:
 			ofs << shaderSource;
 			ofs.close();
 		}
+	
+		ParseSamplerState(shaderSource);
 
 		return (success == GL_TRUE);
 	} 
 
 	void ParseSamplerState(const std::string& shaderSource)
 	{
+		ENGINE_CPU_AUTO_PROFIER("Parse SampleState");
+
 		// Parse all SamplerState
 		const char SamplerToken[] = "#pragma";
 

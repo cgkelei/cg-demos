@@ -2,62 +2,58 @@
 #define Profiler_h__
 
 #include <Core/Prerequisites.h>
-#include <thread>
-#include <mutex>
 
 namespace RcEngine {
 
-#define MAX_NUM_MARKERS_PER_FRAME 20
-#define NUM_RECORDED_FRAMES       3
-#define NUM_MARKERS_PER_THREAD    (MAX_NUM_MARKERS_PER_FRAME * NUM_RECORDED_FRAMES)
+#define INVALID_TIME	((uint64_t)(-1))
+#define MAX_PROFILERS   (200)
+
+struct _ApiExport ProfilerSample
+{
+	const char* SampleName;
+	
+	size_t SampleIndex;
+	size_t ParentSampleIndex;
+
+	uint32_t CallStackDepth;
+
+	double TotalTime;
+	double TotalChildTime;
+	uint32_t CallCount;
+
+	double StartTime;
+
+	ProfilerSample()
+		: TotalTime(0), CallCount(0)
+	{
+
+	}
+};
 
 class _ApiExport ProfilerManager
 {
-private:
-
-	struct Marker
-	{
-		const char* Name;
-		
-		uint32_t Frame;	
-
-		// Start and End time, in nanoseconds,
-		uint64_t Start, End;
-	};
-	
-	typedef Marker CpuMarker;
-
-	struct CpuThreadInfo
-	{
-		std::thread::id ThreadID;	
-
-		size_t CurrWriteIndex;
-		size_t CurrReadIndex;
-		size_t NumPushedMakers;
-
-		CpuMarker Markers[NUM_MARKERS_PER_THREAD];
-		
-		void Init(const std::thread::id& id)
-		{
-			ThreadID = id;
-			CurrWriteIndex = CurrReadIndex = NumPushedMakers = 0;
-		}
-	};
-
 public:
 	ProfilerManager();
 	~ProfilerManager();
 
-private:
-	void PushCpuMarker(const char* name);
-	void PopCpuMaker();
+	void ProfilerStart(const char* name);
+	void ProfilerEnd();
+
+	void ResetProfiler(const char* name);
+	void ResetAll();
+
+	void Output();
 
 private:
-	CpuThreadInfo& FetchCpuThreadProfiler();
+	ProfilerSample mSamples[MAX_PROFILERS];
 
-private:
-	std::mutex mMutex;
-	std::vector<CpuThreadInfo> mCpuThreadInfos;
+	size_t mLastOpenedSample;
+
+	uint32_t mCurrNumSamples;
+	uint32_t mCallStackDepth;
+
+	double mFrameBeginTime;
+	double mFrameEndTime;
 
 	volatile uint32_t mCurrFrame;		// Global frame counter
 
@@ -65,16 +61,20 @@ private:
 	friend struct GpuAutoProfiler;
 };
 
-extern ProfilerManager gProfilerManager;
+ _ApiExport extern ProfilerManager gProfilerManager;
 
 struct _ApiExport CpuAutoProfiler
 {
-	CpuAutoProfiler(const char* name) { gProfilerManager.PushCpuMarker(name); }
-	~CpuAutoProfiler()				  { gProfilerManager.PopCpuMaker(); }
+	CpuAutoProfiler(const char* name);
+	~CpuAutoProfiler();
+
+	uint64_t StartTime;
 };
 
-#define ENGINE_CPU_PROFIER(name) CpuAutoProfiler _cpu_profiler(name)
-//#define ENGINE_GPU_PROFIER(name)
+#define ENGINE_CPU_AUTO_PROFIER(name) CpuAutoProfiler _cpu_profiler(name)
+#define ENGINE_PUSH_CPU_PROFIER(name) gProfilerManager.ProfilerStart(name)
+#define ENGINE_POP_CPU_PROFIER(name)  gProfilerManager.ProfilerEnd()
+#define ENGINE_DUMP_PROFILERS()		  gProfilerManager.Output()
 }
 
 
