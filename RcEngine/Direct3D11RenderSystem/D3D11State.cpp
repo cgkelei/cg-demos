@@ -13,8 +13,8 @@ D3D11DepthStencilState::D3D11DepthStencilState( const DepthStencilStateDesc& des
 	depthStencilDesc.DepthEnable = mDesc.DepthEnable;
 	depthStencilDesc.StencilEnable = mDesc.StencilEnable;
 	depthStencilDesc.DepthWriteMask = mDesc.DepthWriteMask ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
-	depthStencilDesc.StencilReadMask = mDesc.StencilReadMask;
-	depthStencilDesc.StencilWriteMask = mDesc.DepthWriteMask;
+	depthStencilDesc.StencilReadMask =  static_cast<UINT8>(mDesc.StencilReadMask);
+	depthStencilDesc.StencilWriteMask = static_cast<UINT8>(mDesc.StencilWriteMask);
 	depthStencilDesc.DepthFunc = D3D11Mapping::Mapping(mDesc.DepthFunc);
 
 	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11Mapping::Mapping(mDesc.FrontStencilDepthFailOp);

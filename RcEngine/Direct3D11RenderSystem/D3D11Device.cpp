@@ -2,6 +2,7 @@
 #include "D3D11State.h"
 #include "D3D11Buffer.h"
 #include "D3D11Factory.h"
+#include "D3D11Texture.h"
 #include "D3D11RenderWindow.h"
 #include "D3D11VertexDeclaration.h"
 #include "D3D11GraphicCommon.h"
@@ -167,17 +168,8 @@ void D3D11Device::CreateRenderWindow()
 	{
 		// Have depth buffer, attach it
 		RenderFactory* factory = gD3D11Device->GetRenderFactory();
-		shared_ptr<Texture> depthStencilTexture = factory->CreateTexture2D(
-			appSettings.Width, 
-			appSettings.Height,
-			appSettings.DepthStencilFormat, 
-			1, 
-			1, 
-			appSettings.SampleCount, 
-			appSettings.SampleQuality,
-			EAH_GPU_Read | EAH_GPU_Write,
-			TexCreate_DepthStencilTarget,
-			nullptr);
+		shared_ptr<Texture> depthStencilTexture( new D3D11Texture2D(appSettings.DepthStencilFormat,
+					appSettings.Width,  appSettings.Height,  appSettings.SampleCount, appSettings.SampleQuality));
 
 		d3d11RenderWindow->AttachRTV(ATT_DepthStencil, factory->CreateDepthStencilView(depthStencilTexture, 0, 0));
 	}

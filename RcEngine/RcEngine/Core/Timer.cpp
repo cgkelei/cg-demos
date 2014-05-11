@@ -3,29 +3,55 @@
 
 namespace RcEngine {
 
+double SystemClock::SecondsPerCount;
+int64_t SystemClock::StartTime;
 
-#if defined(RcWindows)
-	static double __micro_second_per_count;
-	static __int64 __time_at_init;
+void SystemClock::InitClock()
+{
+	LARGE_INTEGER frequency;
+	QueryPerformanceFrequency(&frequency);
+	SecondsPerCount = 1.0 / double(frequency.QuadPart);
 
-	void InitSystemClock()
-	{
-		__int64 countsPerSec;
-		QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
-		__micro_second_per_count = 1000.0 / (double)countsPerSec;
+	QueryPerformanceCounter((LARGE_INTEGER*)&StartTime);
+}
 
-		QueryPerformanceCounter((LARGE_INTEGER*)&__time_at_init);
-	}
+void SystemClock::ShutClock()
+{
 
-	void ShutSystemClock() {}
+}
 
-	double GetTimeMS()
-	{
-		__int64 now;
-		QueryPerformanceCounter((LARGE_INTEGER*)&now);
-		return (now-__time_at_init) * __micro_second_per_count;
-	}
-#endif
+uint64_t SystemClock::Now()
+{
+	int64_t now; 
+	QueryPerformanceCounter((LARGE_INTEGER*)&now);
+	return uint64_t(now - StartTime);
+}
+
+
+
+
+//#if defined(RcWindows)
+//	static double __micro_second_per_count;
+//	static __int64 __time_at_init;
+//
+//	void InitSystemClock()
+//	{
+//		__int64 countsPerSec;
+//		QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
+//		__micro_second_per_count = 1000.0 / (double)countsPerSec;
+//
+//		QueryPerformanceCounter((LARGE_INTEGER*)&__time_at_init);
+//	}
+//
+//	void ShutSystemClock() {}
+//
+//	double GetTimeMS()
+//	{
+//		__int64 now;
+//		QueryPerformanceCounter((LARGE_INTEGER*)&now);
+//		return (now-__time_at_init) * __micro_second_per_count;
+//	}
+//#endif
 
 
 Timer::Timer()
@@ -121,6 +147,7 @@ void Timer::Start()
 		mStopped = false;
 	}
 }
+
 
 
 

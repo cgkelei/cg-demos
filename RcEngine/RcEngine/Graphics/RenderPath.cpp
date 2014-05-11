@@ -44,17 +44,11 @@ void BuildPointLightShape(RenderOperation& oOperation)
 	int32_t vertexCount = (nRings + 1) * (nSegments+1);
 	int32_t indicesCount =  6 * nRings * (nSegments + 1);
 
-	ElementInitData vInitData;
-	vInitData.pData = nullptr;
-	vInitData.rowPitch = 3 * vertexCount * sizeof(float);
-	vInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> vertexBuffer= factory->CreateVertexBuffer(vInitData.rowPitch, EAH_GPU_Read | EAH_GPU_Write, BufferCreate_Vertex, &vInitData);
+	uint32_t vbSize = 3 * vertexCount * sizeof(float);
+	shared_ptr<GraphicsBuffer> vertexBuffer= factory->CreateVertexBuffer(vbSize, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Vertex, nullptr);
 
-	ElementInitData iInitData;
-	iInitData.pData = nullptr;
-	iInitData.rowPitch = indicesCount * sizeof(unsigned short);
-	iInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> indexBuffer = factory->CreateIndexBuffer(iInitData.rowPitch, EAH_GPU_Read | EAH_GPU_Write, BufferCreate_Index, &iInitData);
+	uint32_t ibSize = indicesCount * sizeof(unsigned short);
+	shared_ptr<GraphicsBuffer> indexBuffer = factory->CreateIndexBuffer(ibSize, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Index, nullptr);
 
 	float* pVertex = static_cast<float*>(vertexBuffer->Map(0, MAP_ALL_BUFFER, RMA_Write_Discard));
 	unsigned short* pIndices = static_cast<unsigned short*>(indexBuffer->Map(0, MAP_ALL_BUFFER, RMA_Write_Discard));
@@ -115,17 +109,11 @@ void BuildSpotLightShape(RenderOperation& oOperation)
 	uint16_t vertexCount = nCapSegments+1;
 	uint16_t indicesCount = (nCapSegments+nCapSegments-2)*3;
 
-	ElementInitData vInitData;
-	vInitData.pData = nullptr;
-	vInitData.rowPitch = 3 * vertexCount * sizeof(float);
-	vInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> vertexBuffer= factory->CreateVertexBuffer(vInitData.rowPitch, EAH_GPU_Read | EAH_GPU_Write, BufferCreate_Index, &vInitData);
+	uint32_t vbSize = 3 * vertexCount * sizeof(float);
+	shared_ptr<GraphicsBuffer> vertexBuffer= factory->CreateVertexBuffer(vbSize, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Index, nullptr);
 
-	ElementInitData iInitData;
-	iInitData.pData = nullptr;
-	iInitData.rowPitch = indicesCount * sizeof(uint16_t);
-	iInitData.slicePitch = 0;
-	shared_ptr<GraphicsBuffer> indexBuffer = factory->CreateIndexBuffer(iInitData.rowPitch, EAH_GPU_Read | EAH_GPU_Write, BufferCreate_Index, &iInitData);
+	uint32_t ibSize = indicesCount * sizeof(uint16_t);
+	shared_ptr<GraphicsBuffer> indexBuffer = factory->CreateIndexBuffer(ibSize, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Index,nullptr);
 
 	float* pVertex = static_cast<float*>(vertexBuffer->Map(0, MAP_ALL_BUFFER, RMA_Write_Discard));
 	uint16_t* pIndices = static_cast<uint16_t*>(indexBuffer->Map(0, MAP_ALL_BUFFER, RMA_Write_Discard));
@@ -310,16 +298,17 @@ void DeferredPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 	mGBufferFB->SetViewport(Viewport(0.0f, 0.f, float(windowWidth), float(windowHeight)));
 
 #ifdef _DEBUG
-	uint32_t acessHint = EAH_GPU_Write | EAH_GPU_Read | EAH_CPU_Read;
+	uint32_t acessHint = EAH_GPU_Write | EAH_GPU_Read;
 #else
 	uint32_t acessHint = EAH_GPU_Write | EAH_GPU_Read;
 #endif
 
-	uint32_t createFlags = TexCreate_ShaderResource | TexCreate_RenderTarget;
+	uint32_t rtCreateFlag = TexCreate_ShaderResource | TexCreate_RenderTarget;
+	uint32_t dsCreateFlag = TexCreate_ShaderResource | TexCreate_DepthStencilTarget;
 
-	mGBuffer[0] = factory->CreateTexture2D(windowWidth, windowHeight, PF_RGBA8_UNORM, 1, 1, 1, 0, acessHint, createFlags, NULL);
-	mGBuffer[1] = factory->CreateTexture2D(windowWidth, windowHeight, PF_RGBA8_UNORM, 1, 1, 1, 0, acessHint, createFlags, NULL);
-	mDepthStencilBuffer = factory->CreateTexture2D(windowWidth, windowHeight, PF_D24S8, 1, 1, 1, 0, acessHint, createFlags, NULL);
+	mGBuffer[0] = factory->CreateTexture2D(windowWidth, windowHeight, PF_RGBA8_UNORM, 1, 1, 1, 0, acessHint, rtCreateFlag, NULL);
+	mGBuffer[1] = factory->CreateTexture2D(windowWidth, windowHeight, PF_RGBA8_UNORM, 1, 1, 1, 0, acessHint, rtCreateFlag, NULL);
+	mDepthStencilBuffer = factory->CreateTexture2D(windowWidth, windowHeight, PF_D24S8, 1, 1, 1, 0, acessHint, dsCreateFlag, NULL);
 
 	mGBufferRTV[0] = factory->CreateRenderTargetView2D(mGBuffer[0], 0, 0);
 	mGBufferRTV[1] = factory->CreateRenderTargetView2D(mGBuffer[1], 0, 0);
@@ -333,8 +322,8 @@ void DeferredPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 	mLightAccumulateFB = factory->CreateFrameBuffer(windowWidth, windowHeight);
 	mLightAccumulateFB->SetViewport(Viewport(0.0f, 0.f, float(windowWidth), float(windowHeight)));
 
-	mLightAccumulateBuffer = factory->CreateTexture2D(windowWidth, windowHeight, PF_RGBA32F, 1, 1, 0, 0, acessHint, createFlags, NULL);
-	mDepthStencilBufferLight = factory->CreateTexture2D(windowWidth, windowHeight, PF_D24S8, 1, 1, 0, 0, acessHint, createFlags, NULL);
+	mLightAccumulateBuffer = factory->CreateTexture2D(windowWidth, windowHeight, PF_RGBA32F, 1, 1, 1, 0, acessHint, rtCreateFlag, NULL);
+	mDepthStencilBufferLight = factory->CreateTexture2D(windowWidth, windowHeight, PF_D24S8, 1, 1, 1, 0, acessHint, dsCreateFlag, NULL);
 
 	mLightAccumulateRTV = factory->CreateRenderTargetView2D(mLightAccumulateBuffer, 0, 0);
 	mDepthStencilBufferLightView = factory->CreateDepthStencilView(mDepthStencilBufferLight, 0, 0);
@@ -346,7 +335,7 @@ void DeferredPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 	mHDRFB = factory->CreateFrameBuffer(windowWidth, windowHeight);
 	mHDRFB->SetViewport(Viewport(0.0f, 0.f, float(windowWidth), float(windowHeight)));
 
-	mHDRBuffer = factory->CreateTexture2D(windowWidth, windowHeight, PF_RGBA32F, 1, 1, 0, 0, acessHint, createFlags, NULL);
+	mHDRBuffer = factory->CreateTexture2D(windowWidth, windowHeight, PF_RGBA32F, 1, 1, 1, 0, acessHint, rtCreateFlag, NULL);
 	mHDRBufferRTV = factory->CreateRenderTargetView2D(mHDRBuffer, 0, 0);
 	mHDRFB->AttachRTV(ATT_Color0, mHDRBufferRTV);
 

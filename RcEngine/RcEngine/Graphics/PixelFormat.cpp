@@ -118,7 +118,6 @@ static const PixelFormatDescription& GetPixelFormatDescription(PixelFormat forma
 
 		// Depth formats
 		{ 2, 1, PFF_Depth },			// PF_D16
-		{ 4, 1, PFF_Depth },			// PF_D24X8
 		{ 4, 2, PFF_Depth },			// PF_D24S8
 		{ 4, 1, PFF_Depth },			// PF_D32F
 		{ 8, 2, PFF_Depth },			// PF_D32FS8X24
@@ -222,7 +221,6 @@ void PixelFormatUtils::GetNumDepthStencilBits( PixelFormat format, uint32_t& dep
 	switch (format)
 	{
 	case PF_D16:		{ depth = 16; stencil = 0; } break;
-	case PF_D24X8:		{ depth = 24; stencil = 0; } break;
 	case PF_D24S8:		{ depth = 24; stencil = 8; } break;
 	case PF_D32F:		{ depth = 32; stencil = 0; } break;
 	case PF_D32FS8X24:  { depth = 32; stencil = 8; } break;

@@ -1,3 +1,5 @@
+#ifndef ModelMaterialFactory_GLSL__
+#define ModelMaterialFactory_GLSL__
 
 // Model material input
 #ifdef _DiffuseMap
@@ -62,3 +64,5 @@ void GetMaterial(in vec2 iTex, out Material oMaterial)
 	oMaterial.Shininess = Shininess;
 #endif
 }
+
+#endif // ModelMaterialFactory_GLSL__

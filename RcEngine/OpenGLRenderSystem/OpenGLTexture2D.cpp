@@ -14,13 +14,6 @@ OpenGLTexture2D::OpenGLTexture2D( PixelFormat format, uint32_t arraySize, uint32
 	mWidth = width;
 	mHeight = height;
 
-	// Only CPU side access can use Map
-	bool cpuSideAccess = (accessHint & (EAH_CPU_Read | EAH_CPU_Write)) != 0;
-	if ( cpuSideAccess && GLEW_ARB_pixel_buffer_object)
-	{
-		glGenBuffers(1, &mPixelBufferID);
-	}
-
 	// OpenGL Texture target type
 	if (sampleCount <= 1)
 		mTextureTarget = (mTextureArraySize > 1) ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D;
@@ -208,9 +201,6 @@ void OpenGLTexture2D::CreateWithMutableStorage(ElementInitData* initData)
 
 void* OpenGLTexture2D::Map2D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess mapType, uint32_t& rowPitch )
 {
-	if ( (mAccessHint & (EAH_CPU_Read | EAH_CPU_Write)) == 0 )
-		ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Map only work with CPU side access!", "OpenGLTexture2D::Map2D");
-	
 	void* pMappedData;
 	mTextureMapAccess = mapType;
 
@@ -235,9 +225,12 @@ void* OpenGLTexture2D::Map2D( uint32_t arrayIndex, uint32_t level, ResourceMapAc
 
 	rowPitch = imageSize / levelHeight;
 
-	assert(mPixelBufferID);
 	GLbitfield mapUsage = OpenGLMapping::Mapping(mapType);
 	GLenum bufferUsage = (mapType == RMA_Read_Only) ? GL_STREAM_READ : GL_STREAM_DRAW;
+
+	assert(GLEW_ARB_pixel_buffer_object);
+	if (!mPixelBufferID)
+		glGenBuffers(1, &mPixelBufferID);
 
 	switch(mapType)
 	{
@@ -277,9 +270,6 @@ void* OpenGLTexture2D::Map2D( uint32_t arrayIndex, uint32_t level, ResourceMapAc
 
 void OpenGLTexture2D::Unmap2D( uint32_t arrayIndex, uint32_t level )
 {
-	if ( (mAccessHint & (EAH_CPU_Read | EAH_CPU_Write)) == 0 )
-		ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Map only work with CPU side access!", "OpenGLTexture2D::Unmap2D");
-
 	uint32_t levelWidth = CalculateLevelSize(mWidth, level);
 	uint32_t levelHeight = CalculateLevelSize(mHeight, level);
 

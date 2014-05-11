@@ -59,7 +59,7 @@ float4 LightVolumeVSMain(in float3 iPos		   : POSITION,
 
 //---------------------------------------------------------------------
 // Deferred Directional Light
-void DirectionalLightingPS(
+void DirectionalPSMain(
 	in float3 iViewRay	  : TEXCOORD1,
 	in float4 iFragCoord  : SV_Position,
 	out float4 oFragColor : SV_Target0 )
@@ -177,7 +177,7 @@ void SpotLightingPSMain(
 
 //--------------------------------------------------------
 // Final Shading Pass
-float4 DeferredShadingPS(
+void DeferredShadingPSMain(
 	in float3 iViewRay	  : TEXCOORD1,
 	in float4 iFragCoord  : SV_Position,
 	out float4 oFragColor : SV_Target0 )

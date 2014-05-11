@@ -5,6 +5,7 @@
 #include <Core/Environment.h>
 #include <Core/Utility.h>
 #include <Core/Exception.h>
+#include <Core/Profiler.h>
 #include <Graphics/Image.h>
 
 namespace RcEngine {
@@ -80,6 +81,7 @@ shared_ptr<Shader> RenderFactory::LoadShaderFromFile( ShaderType shaderType, con
 			shaderFile = "GLSL/" + filename + ".glsl";
 		}
 
+		//ENGINE_CPU_AUTO_PROFIER("Load Shader");
 		shader->LoadFromFile(FileSystem::GetSingleton().Locate(shaderFile), macros, macroCount, entryPoint);
 
 		mShaderPool[shaderSeed] = shader;

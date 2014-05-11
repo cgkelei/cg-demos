@@ -118,7 +118,6 @@ DXGI_FORMAT D3D11Mapping::Mapping( PixelFormat inPixelFormat )
 	
 		// Depth formats
 		DXGI_FORMAT_D16_UNORM,//PF_D16,
-		DXGI_FORMAT_UNKNOWN,//PF_D24X8,
 		DXGI_FORMAT_D24_UNORM_S8_UINT,//PF_D24S8,
 		DXGI_FORMAT_D32_FLOAT,//PF_D32F,
 		DXGI_FORMAT_D32_FLOAT_S8X24_UINT,//PF_D32FS8X24,
@@ -497,6 +496,50 @@ void D3D11Mapping::UnMapping( D3D10_SRV_DIMENSION dimension, EffectParameterType
 		assert(false);
 		break;
 	}
+}
+
+DXGI_FORMAT D3D11Mapping::GetDepthTextureFormat( PixelFormat inPixelFormat )
+{
+
+	//DepthStencilBuffer: DXGI_FORMAT_R16_TYPELESS (instead of typical DXGI_FORMAT_D16_UNORM)
+	//DepthStencilBufferView: DXGI_FORMAT_R16_FLOAT
+
+	//DepthStencilBuffer: DXGI_FORMAT_R32_TYPELESS (instead of typical DXGI_FORMAT_D32_FLOAT)
+	//DepthStencilBufferView: DXGI_FORMAT_R32_FLOAT
+
+	//DepthStencilBuffer: DXGI_FORMAT_R24G8_TYPELESS (instead of typical DXGI_FORMAT_D24_UNORM_S8_UINT)
+	//DepthStencilBufferView: DXGI_FORMAT_R24_UNORM_X8_TYPELESS
+
+	//DepthStencilBuffer: DXGI_FORMAT_R32G8X24_TYPELESS (instead of typical DXGI_FORMAT_D32_FLOAT_S8X24_UINT)
+	//DepthStencilBufferView: DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS
+
+
+	switch (inPixelFormat)
+	{
+	case PF_D16:		return DXGI_FORMAT_R16_TYPELESS;
+	case PF_D24S8:		return DXGI_FORMAT_R24G8_TYPELESS;
+	case PF_D32F:		return DXGI_FORMAT_R32_TYPELESS;
+	case PF_D32FS8X24:  return DXGI_FORMAT_R32G8X24_TYPELESS;
+	default:
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid Depth Format", "D3D11Mapping::GetDepthTextureFormat");
+	}
+
+	return DXGI_FORMAT_UNKNOWN;
+}
+
+DXGI_FORMAT D3D11Mapping::GetDepthShaderResourceFormat( PixelFormat inPixelFormat )
+{
+	switch (inPixelFormat)
+	{
+	case PF_D16:		return DXGI_FORMAT_R16_FLOAT;
+	case PF_D24S8:		return DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	case PF_D32F:		return DXGI_FORMAT_R32_FLOAT;
+	case PF_D32FS8X24:  return DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS;
+	default:
+		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid Depth Format", "D3D11Mapping::GetDepthShaderResourceFormat");
+	} 
+
+	return DXGI_FORMAT_UNKNOWN;
 }
 
 

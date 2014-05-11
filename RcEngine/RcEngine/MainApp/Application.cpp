@@ -36,7 +36,7 @@ Application::Application( const String& config )
 	ResourceManager::Initialize();
 	
 	// Init System Clock
-	InitSystemClock();
+	SystemClock::InitClock();
 
 	//UIManager::Initialize();
 

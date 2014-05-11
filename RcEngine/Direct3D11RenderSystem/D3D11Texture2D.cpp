@@ -20,15 +20,21 @@ D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t
 	texDesc.ArraySize = arraySize;
 	texDesc.SampleDesc.Quality = sampleQuality;
 	texDesc.SampleDesc.Count = sampleCount;
-	texDesc.Format = D3D11Mapping::Mapping(format);
-	
+	texDesc.BindFlags = 0;
+	texDesc.MiscFlags = 0;
+
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
 	texDesc.CPUAccessFlags = 0;
 	D3D11Mapping::Mapping(accessHint, texDesc.Usage, texDesc.CPUAccessFlags);
 
-	texDesc.BindFlags = 0;
-	texDesc.MiscFlags = 0;
-	
+	if (mCreateFlags & TexCreate_DepthStencilTarget)
+	{
+		texDesc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
+		texDesc.Format = D3D11Mapping::GetDepthTextureFormat(format);
+	}
+	else
+		texDesc.Format = D3D11Mapping::Mapping(format);
+
 	// Generate mipmaps if enable
 	if (mCreateFlags & TexCreate_GenerateMipmaps)
 	{
@@ -52,8 +58,6 @@ D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t
 
 	if (mCreateFlags & TexCreate_RenderTarget)
 		texDesc.BindFlags |= D3D11_BIND_RENDER_TARGET;
-	else if (mCreateFlags & TexCreate_DepthStencilTarget)
-		texDesc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
 
 	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
 
@@ -98,7 +102,14 @@ D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t
 	if (mCreateFlags & TexCreate_ShaderResource)
 	{
 		D3D11_SHADER_RESOURCE_VIEW_DESC  viewDesc;
-		viewDesc.Format = texDesc.Format;
+
+		if (mCreateFlags & TexCreate_DepthStencilTarget)
+		{
+			// Use depth shader resource format
+			viewDesc.Format = D3D11Mapping::GetDepthShaderResourceFormat(format);
+		}
+		else
+			viewDesc.Format = texDesc.Format;
 
 		if (mTextureArraySize <= 1)
 		{
@@ -137,6 +148,29 @@ D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t
 		mTextureSRV = std::make_shared<D3D11Texture2DSRV>(srvD3D11);
 	}
 }
+
+D3D11Texture2D::D3D11Texture2D(PixelFormat format,uint32_t width, uint32_t height, uint32_t sampleCount, uint32_t sampleQuality)
+	: D3D11Texture(TT_Texture2D, format, 1, 1, sampleCount, sampleQuality, EAH_GPU_Read | EAH_GPU_Write, TexCreate_DepthStencilTarget)
+{
+	D3D11_TEXTURE2D_DESC descDepth;
+	ZeroMemory( &descDepth, sizeof(descDepth) );
+	descDepth.Width = width;
+	descDepth.Height = height;
+	descDepth.MipLevels = 1;
+	descDepth.ArraySize = 1;
+	descDepth.Format = D3D11Mapping::Mapping(format);
+	descDepth.SampleDesc.Count = sampleCount;
+	descDepth.SampleDesc.Quality = sampleQuality;
+	descDepth.Usage = D3D11_USAGE_DEFAULT;
+	descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	descDepth.CPUAccessFlags = 0;
+	descDepth.MiscFlags = 0;
+
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
+	D3D11_VERRY( deviceD3D11->CreateTexture2D( &descDepth, NULL, &TextureD3D11 ) );
+}
+
+
 
 D3D11Texture2D::~D3D11Texture2D()
 {
@@ -205,6 +239,7 @@ void D3D11Texture2D::Unmap2D( uint32_t arrayIndex, uint32_t level )
 	{
 		deviceContextD3D11->Unmap(TextureD3D11, subResource);
 	}
+
 }
 
 
