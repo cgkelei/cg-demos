@@ -261,6 +261,9 @@
     <ClInclude Include="Graphics\Image.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Profiler.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Exception.cpp">
@@ -442,6 +445,9 @@
     </ClCompile>
     <ClCompile Include="Graphics\DDSImage.cpp">
       <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Profiler.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

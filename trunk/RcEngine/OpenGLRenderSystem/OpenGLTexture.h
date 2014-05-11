@@ -108,12 +108,12 @@ public:
 		uint32_t flags,
 		ElementInitData* initData);
 
-	virtual void Map3D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma,
-		uint32_t xOffset, uint32_t yOffset, uint32_t zOffset,
-		uint32_t width, uint32_t height, uint32_t depth,
-		void*& data, uint32_t& rowPitch, uint32_t& slicePitch);
+	//virtual void Map3D(uint32_t arrayIndex, uint32_t level, ResourceMapAccess tma,
+	//	uint32_t xOffset, uint32_t yOffset, uint32_t zOffset,
+	//	uint32_t width, uint32_t height, uint32_t depth,
+	//	void*& data, uint32_t& rowPitch, uint32_t& slicePitch);
 
-	virtual void Unmap3D(uint32_t arrayIndex, uint32_t level);
+	//virtual void Unmap3D(uint32_t arrayIndex, uint32_t level);
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -132,11 +132,11 @@ public:
 		uint32_t flags,
 		ElementInitData* initData);
 
-	virtual void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, ResourceMapAccess tma,
-		uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
-		void*& data, uint32_t& rowPitch);
+	//virtual void MapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level, ResourceMapAccess tma,
+	//	uint32_t xOffset, uint32_t yOffset, uint32_t width, uint32_t height,
+	//	void*& data, uint32_t& rowPitch);
 
-	virtual void UnmapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level);
+	//virtual void UnmapCube(uint32_t arrayIndex, CubeMapFace face, uint32_t level);
 
 private:
 	// use texture storage if supported

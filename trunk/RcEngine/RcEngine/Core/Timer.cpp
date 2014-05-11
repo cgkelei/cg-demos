@@ -3,6 +3,36 @@
 
 namespace RcEngine {
 
+
+#if defined(RcWindows)
+	int64_t __freq;
+	int64_t __time_at_init;
+
+	void InitSystemClock()
+	{
+		LARGE_INTEGER freq;
+		QueryPerformanceFrequency(&freq);
+		__freq = freq.QuadPart;
+
+		LARGE_INTEGER now;
+		QueryPerformanceCounter(&now);
+		__time_at_init = now.QuadPart;
+	}
+
+	void ShutSystemClock() {}
+
+	uint64_t GetTimeNS()
+	{
+		LARGE_INTEGER now;
+		QueryPerformanceCounter(&now);
+		static const uint64_t factor = 1000000000;
+		return (uint64_t)( factor*(now.QuadPart-__time_at_init) / __freq );
+		return 0;
+	}
+#endif
+
+		
+
 Timer::Timer()
 	: mSecondsPerCount(0.0), mDeltaTime(-1.0), mBaseTime(0),
 	mPausedTime(0), mPrevTime(0), mCurrTime(0), mStopped(false)
@@ -96,5 +126,7 @@ void Timer::Start()
 		mStopped = false;
 	}
 }
+
+
 
 } // Namespace RcEngine

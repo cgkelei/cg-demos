@@ -18,6 +18,7 @@
     <ClInclude Include="Core\Loger.h" />
     <ClInclude Include="Core\ModuleManager.h" />
     <ClInclude Include="Core\Prerequisites.h" />
+    <ClInclude Include="Core\Profiler.h" />
     <ClInclude Include="Core\Singleton.h" />
     <ClInclude Include="Core\StringHash.h" />
     <ClInclude Include="Core\Timer.h" />
@@ -90,6 +91,7 @@
     <ClCompile Include="Core\IModule.cpp" />
     <ClCompile Include="Core\Loger.cpp" />
     <ClCompile Include="Core\ModuleManager.cpp" />
+    <ClCompile Include="Core\Profiler.cpp" />
     <ClCompile Include="Core\StringHash.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="Core\Utility.cpp" />

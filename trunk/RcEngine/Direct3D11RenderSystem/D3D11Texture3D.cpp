@@ -15,14 +15,14 @@ D3D11Texture3D::~D3D11Texture3D()
 	SAFE_RELEASE(TextureD3D11);
 }
 
-void* D3D11Texture3D::Map3D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess mapType, uint32_t& rowPitch, uint32_t& slicePitch )
-{
-	return 0;
-}
-void D3D11Texture3D::Unmap3D( uint32_t arrayIndex, uint32_t level )
-{
-
-}
+//void* D3D11Texture3D::Map3D( uint32_t arrayIndex, uint32_t level, ResourceMapAccess mapType, uint32_t& rowPitch, uint32_t& slicePitch )
+//{
+//	return 0;
+//}
+//void D3D11Texture3D::Unmap3D( uint32_t arrayIndex, uint32_t level )
+//{
+//
+//}
 
 
 
