@@ -1,4 +1,5 @@
 #include "D3D11Texture.h"
+#include "D3D11Device.h"
 #include <Core/Exception.h>
 
 namespace RcEngine {
@@ -58,7 +59,35 @@ void D3D11Texture::UnmapCube(uint32_t arrayIndex,   CubeMapFace face, uint32_t l
 
 void D3D11Texture::CopyToTexture( Texture& destTexture )
 {
-	ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't be here!", "OpenGLTexture::CopyToTexture");
+	ID3D11DeviceContext* deviceContext = gD3D11Device->DeviceContextD3D11;
+	
+	ID3D11Resource* destResourceD3D11;
+	ID3D11Resource* srcResourceD3D11;
+
+	assert(mFormat == destTexture.GetTextureFormat() && mTextureArraySize == destTexture.GetTextureArraySize() && 
+		  mMipLevels == destTexture.GetMipLevels());
+
+	switch (destTexture.GetTextureType())
+	{
+	case TT_Texture1D:
+		{
+			assert(mType == TT_Texture1D && mWidth == destTexture.GetWidth());
+			destResourceD3D11 = static_cast_checked<D3D11Texture1D*>(&destTexture)->TextureD3D11;
+			srcResourceD3D11 = static_cast_checked<D3D11Texture1D*>(this)->TextureD3D11;
+		}
+		break;
+	case TT_Texture2D:
+		{
+			assert(mType == TT_Texture2D && mWidth == destTexture.GetWidth() && mHeight == destTexture.GetHeight());
+			destResourceD3D11 = static_cast_checked<D3D11Texture2D*>(&destTexture)->TextureD3D11;
+			srcResourceD3D11 = static_cast_checked<D3D11Texture2D*>(this)->TextureD3D11;
+		}
+		break;
+	default:
+		ENGINE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, "Unsupported texture type copy!", "D3D11Texture::CopyToTexture");
+	}
+	
+	deviceContext->CopyResource(destResourceD3D11, srcResourceD3D11);
 }
 
 }

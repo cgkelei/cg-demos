@@ -19,9 +19,9 @@ enum GLSLVersion
 };
 
 static String GLSLVersion[] = {
-	"#version 420\n",
-	"#version 430\n",
-	"#version 440\n",
+	"#version 420",
+	"#version 430",
+	"#version 440",
 };
 
 const String& GetSupportedGLSLVersion() 
@@ -40,6 +40,44 @@ bool HasVersion(const String& source)
 {
 	return source.find("#version") != std::string::npos;
 }
+
+bool HasSpecialToken(const std::string& line, std::string& oToken)
+{
+	size_t s = line.find('#');
+	if (s == std::string::npos)
+		return false;
+
+	size_t e = s+1;
+	while(isalpha(line[e])) e++;
+
+	oToken = line.substr(s, e - s);
+	return true;
+}
+
+bool HasSamplerState(const std::string& line, std::string& oSamplerState, std::string& oTexture)
+{
+	bool hasSamplerState = false;
+
+	size_t colonPos = line.find(':');
+	if (colonPos != std::string::npos)
+	{
+		size_t s = 0, e = colonPos - 1;
+		while(!isalpha(line[s])) s++;
+		while(!isalpha(line[e])) e--;
+		oTexture = line.substr(s, e - s + 1);	
+
+		s = colonPos+1;
+		while(!isalpha(line[s])) s++;
+		e = s;
+		while(isalpha(line[e])) e++;
+		oSamplerState = line.substr(s, e - s);	
+
+		hasSamplerState = true;
+	}
+
+	return hasSamplerState;
+}
+
 
 inline bool LoadBinary(const char* filename, GLenum & format, std::vector<uint8_t>& bytecode)
 {
@@ -60,6 +98,68 @@ inline bool LoadBinary(const char* filename, GLenum & format, std::vector<uint8_
 	return false;
 }
 
+//////////////////////////////////////////////////////////////////////////
+class GLSLInclude
+{
+public:
+	GLSLInclude() {}
+
+	void LoadInclude(const std::string& parentGLSLPath, const std::string& includeName)
+	{
+		std::string includeFile = PathUtil::GetParentPath(parentGLSLPath) + includeName;
+
+		std::ifstream fs(includeFile);
+		if (fs.is_open() == false)
+		{
+			ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, includeFile + " not founded!", "OpenGLCompile");
+		}
+
+		std::string includeScript( (std::istreambuf_iterator<char>(fs)), std::istreambuf_iterator<char>() ); 
+		glNamedStringARB(GL_SHADER_INCLUDE_ARB, includeName.length(), includeName.c_str(), includeScript.length(), includeScript.c_str());
+
+		std::string line, token, samplerState, texture;
+
+		size_t lineBeign = 0;
+		size_t lineEnd = includeScript.find('\n');	
+		while (lineEnd < std::string::npos)
+		{
+			line = includeScript.substr(lineBeign, lineEnd - lineBeign);
+			if ( HasSpecialToken(line, token) )
+			{
+				if ( token == "#pragma" && HasSamplerState(line, samplerState, texture) )
+				{
+					SamplerStates.push_back(make_pair(samplerState, texture));
+				}
+			}
+
+			lineBeign = lineEnd+1;
+			lineEnd = includeScript.find('\n', lineBeign);	
+		}
+	}
+
+	static const GLSLInclude& FetchGLSLInclude(const std::string& parentGLSLPath, const std::string& includeName)
+	{
+		auto it = msCachedIncludes.find(includeName);
+		if (it == msCachedIncludes.end())
+		{
+			it = msCachedIncludes.insert(make_pair(includeName, GLSLInclude())).first;
+			it->second.LoadInclude(parentGLSLPath, includeName);
+		}
+
+		return it->second;
+	}
+
+public:
+	typedef std::pair<std::string, std::string> SamplerState;
+	std::vector<SamplerState> SamplerStates;
+
+private:
+	static std::map<std::string, GLSLInclude> msCachedIncludes;
+};
+
+std::map<std::string, GLSLInclude> GLSLInclude::msCachedIncludes;
+
+//////////////////////////////////////////////////////////////////////////
 class GLSLScriptCompiler
 {
 public:
@@ -67,7 +167,7 @@ public:
 
 	bool OpenGLCompile(const String& filename, const ShaderMacro* macros, uint32_t macroCount, const String& entryPoint)
 	{
-		ENGINE_PUSH_CPU_PROFIER("Buld GLSL");
+		//ENGINE_PUSH_CPU_PROFIER("Buld GLSL");
 
 		std::ifstream fs(filename);
 		std::string glslScript( (std::istreambuf_iterator<char>(fs)), std::istreambuf_iterator<char>() );
@@ -75,80 +175,66 @@ public:
 		size_t shaderSectionBegin, shaderSectionEnd;
 		FindShaderSectionRange(glslScript, mShader->mShaderType, entryPoint, shaderSectionBegin, shaderSectionEnd);
 
-		// Parse shader includes
-		bool hasInclude = false;
-
-		const char includeToken[] = "#include";
-		size_t includeBegin = glslScript.find(includeToken, shaderSectionBegin);
-		while (includeBegin != std::string::npos && includeBegin < shaderSectionEnd)
-		{
-			// Find include file 
-			size_t s = glslScript.find('\"', includeBegin);
-			size_t e = glslScript.find('\"', s + 1);
-
-			std::string includeName = glslScript.substr(s + 1, e-s-1);
-			if (msIncludes.find(includeName) == msIncludes.end())
-			{
-				std::string includeFile = PathUtil::GetParentPath(filename) + includeName;
-
-				std::ifstream fs(includeFile);
-				if (fs.is_open() == false)
-				{
-					ENGINE_EXCEPT(Exception::ERR_FILE_NOT_FOUND, includeFile + " not founded!", "OpenGLCompile");
-				}
-
-				std::string includeScript( (std::istreambuf_iterator<char>(fs)), std::istreambuf_iterator<char>() ); 
-				glNamedStringARB(GL_SHADER_INCLUDE_ARB, includeName.length(), includeName.c_str(), includeScript.length(), includeScript.c_str());
-			
-				// Parse sampler state
-				ParseSamplerState(includeScript);
-			}
-			
-			includeBegin = glslScript.find(includeToken, includeBegin + sizeof(includeToken)); // Skip current include
-			hasInclude = true;
-		}
-
-		// Find first real shader code line, exclude #version, #extension, #param
 		bool hasVersion = false;
+		bool hasInclude = false;
+		
 		uint32_t lineNum = 0;
+		std::string line, token, samplerState, texture, version;
 
 		size_t lineBeign = shaderSectionBegin;
 		size_t lineEnd = glslScript.find('\n', shaderSectionBegin);	
 		while (lineEnd < shaderSectionEnd && lineEnd != std::string::npos)
 		{
-			std::string line = glslScript.substr(lineBeign, lineEnd - lineBeign);
+			line = glslScript.substr(lineBeign, lineEnd - lineBeign);
+
+			if (line.size())
+			{
+				if ( HasSpecialToken(line, token) )
+				{
+					if (token == "#version")
+					{
+						version = line;
+						hasVersion = true;
+						shaderSectionBegin = lineEnd+1;
+					}
+					else if (token == "#include")
+					{
+						// Find include file 
+						size_t s = line.find('\"');
+						size_t e = line.find('\"', s + 1);
+
+						std::string includeName = line.substr(s + 1, e-s-1);
+
+						const GLSLInclude& glslInclude = GLSLInclude::FetchGLSLInclude(filename, includeName);
+						for (const auto& v : glslInclude.SamplerStates)
+						{
+							mShader->mSamplerStates[v.second] = v.first;
+						}
+
+						hasInclude = true;
+					}
+					else if (token == "#pragma")
+					{
+						if ( HasSamplerState(line, samplerState, texture) )
+						{
+							mShader->mSamplerStates[texture] = samplerState;
+						}
+					}
+				}
+			}
 			
-			if (line.empty())
-			{
-
-			}
-			else if (line.find("#version") != std::string::npos)
-			{
-				hasVersion = true;
-			}
-			else if (line.find("#error") != std::string::npos     || 
-					 line.find("#param") != std::string::npos     ||
-					 line.find("#extension") != std::string::npos)
-			{
-
-			}
-			else 
-				break;
-
 			++lineNum;
-
 			lineBeign = lineEnd+1;
 			lineEnd = glslScript.find('\n', lineBeign);	
 		}
 
 		std::string shaderSource;
 
-		// Add version if not exits
+		// Add version 
 		if (!hasVersion)
-			shaderSource += GetSupportedGLSLVersion() + "\n";
-		
-		if (lineNum > 0)
-			shaderSource += glslScript.substr(shaderSectionBegin, lineBeign - shaderSectionBegin);
+			version = GetSupportedGLSLVersion();
+
+		shaderSource += version + '\n';
 
 		// Add include extension
 		if (hasInclude)
@@ -172,15 +258,15 @@ public:
 		std::sprintf(lineBuffer, "#line %d\n", lineNum);
 		shaderSource += lineBuffer;
 #endif
-		// Add real code
-		shaderSource += glslScript.substr(lineBeign, shaderSectionEnd - lineBeign);
 		
-		ENGINE_POP_CPU_PROFIER("Buld GLSL");
+		shaderSource += glslScript.substr(shaderSectionBegin, shaderSectionEnd - shaderSectionBegin);
+		
+		//ENGINE_POP_CPU_PROFIER("Buld GLSL");
 
-		ENGINE_PUSH_CPU_PROFIER("Compile GLSL");
+		//ENGINE_PUSH_CPU_PROFIER("Compile GLSL");
 		char const* pSource = shaderSource.c_str();
 		mShader->mShaderOGL = glCreateShaderProgramv(OpenGLMapping::Mapping(mShader->mShaderType), 1, &pSource);
-		ENGINE_POP_CPU_PROFIER("Compile GLSL");
+		//ENGINE_POP_CPU_PROFIER("Compile GLSL");
 
 		int success;
 		glGetProgramiv(mShader->mShaderOGL, GL_LINK_STATUS, &success);
@@ -199,49 +285,10 @@ public:
 			ofs << shaderSource;
 			ofs.close();
 		}
-	
-		ParseSamplerState(shaderSource);
+
 
 		return (success == GL_TRUE);
 	} 
-
-	void ParseSamplerState(const std::string& shaderSource)
-	{
-		ENGINE_CPU_AUTO_PROFIER("Parse SampleState");
-
-		// Parse all SamplerState
-		const char SamplerToken[] = "#pragma";
-
-		std::string texture, samplerState, line;
-
-		size_t token = shaderSource.find(SamplerToken);
-		while (token != std::string::npos)
-		{
-			token += sizeof(SamplerToken); // skip #pragma
-
-			size_t lineBreak = shaderSource.find('\n', token);
-			line = shaderSource.substr(token, lineBreak - token);
-			
-			size_t colonPos = line.find(':');
-			if (colonPos != std::string::npos)
-			{
-				size_t s = 0, e = colonPos - 1;
-				while(!isalpha(line[s])) s++;
-				while(!isalpha(line[e])) e--;
-				texture = line.substr(s, e - s + 1);	
-
-				s = colonPos+1;
-				while(!isalpha(line[s])) s++;
-				e = s;
-				while(isalpha(line[e])) e++;
-				samplerState = line.substr(s, e - s);	
-
-				mShader->mSamplerStates[texture] = samplerState;
-			}
-
-			token = shaderSource.find("#pragma", token);
-		}
-	}
 
 	void FindShaderSectionRange(const String& glslScript, ShaderType shaderStage, const String& entryPoint, size_t& oSectionBegin, size_t& oSectionEnd)
 	{
@@ -301,11 +348,7 @@ public:
 
 private:
 	OpenGLShader* mShader;
-	
-	static std::set<std::string> msIncludes;
 };
-
-std::set<std::string> GLSLScriptCompiler::msIncludes;
 
 class OpenGLShaderReflection
 {

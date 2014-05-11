@@ -55,17 +55,10 @@ protected:
 
 		mCamera = std::make_shared<Camera>();
 
-		//mRenderPath = std::make_shared<ForwardPath>();
-		mRenderPath = std::make_shared<DeferredPath>();
-
-		{
-			ENGINE_CPU_AUTO_PROFIER("Load Deferrd Path");
-			mRenderPath->OnGraphicsInit(mCamera);
-		}
-
-		ENGINE_DUMP_PROFILERS();
+		//mRenderPath = std::make_shared<DeferredPath>();
+		mRenderPath = std::make_shared<ForwardPath>();
+		mRenderPath->OnGraphicsInit(mCamera);
 	}
-
 
 	void LoadContent()
 	{
@@ -94,21 +87,30 @@ protected:
 		mCamera->CreateLookAt(float3(-137.0, 97.3, 82.0), float3(-136.5, 96.8, 81.3), float3(0.3, 0.9, -0.4));
 		mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 1000.0f );
 
-		{
-			ENGINE_CPU_AUTO_PROFIER("Load Model");
 
-			entity = sceneMan->CreateEntity("Ground", "./Geo/Ground.mesh",  "Custom");
-			sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Ground");
-			sceneNode->SetScale(float3(2.5,2.5,2.5));
-			sceneNode->SetPosition(float3(0, 0, 0));
-			sceneNode->AttachObject(entity);
+		std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
+		start = std::chrono::high_resolution_clock::now();
 
-			entity = sceneMan->CreateEntity("Nanosuit", "./Nanosuit/Nanosuit.mesh",  "Custom");
-			sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Nanosuit");
-			sceneNode->SetScale(float3(2,2,2));
-			sceneNode->SetPosition(float3(-50,0,0));
-			sceneNode->AttachObject(entity);
-		}
+		ENGINE_PUSH_CPU_PROFIER("Load Texture");
+
+		entity = sceneMan->CreateEntity("Ground", "./Geo/Ground.mesh",  "Custom");
+		sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Ground");
+		sceneNode->SetScale(float3(2.5,2.5,2.5));
+		sceneNode->SetPosition(float3(0, 0, 0));
+		sceneNode->AttachObject(entity);
+
+		entity = sceneMan->CreateEntity("Nanosuit", "./Nanosuit/Nanosuit.mesh",  "Custom");
+		sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Nanosuit");
+		sceneNode->SetScale(float3(2,2,2));
+		sceneNode->SetPosition(float3(-50,0,0));
+		sceneNode->AttachObject(entity);
+
+		ENGINE_POP_CPU_PROFIER("Load Texture");
+		end = std::chrono::high_resolution_clock::now();
+
+		std::chrono::duration<double> elapsed_seconds = end-start;
+		std::time_t end_time = std::chrono::high_resolution_clock::to_time_t(end);
+		std::cout << "finished computation at " << std::ctime(&end_time) << "elapsed time: " << elapsed_seconds.count() << "s\n";
 
 		ENGINE_DUMP_PROFILERS();
 

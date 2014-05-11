@@ -75,6 +75,9 @@ public:
 		uint32_t flag,
 		ElementInitData* initData);
 
+	// For Back Depth Buffer
+	D3D11Texture2D(PixelFormat format,uint32_t width, uint32_t height, uint32_t sampleCount, uint32_t sampleQuality);
+
 	~D3D11Texture2D();
 
 	ID3D11Texture2D* GetTexture() const { return TextureD3D11; }

@@ -65,7 +65,7 @@ class _D3D11Export D3D11RenderTargetView2D : public D3D11TargetView
 public:
 	D3D11RenderTargetView2D(const shared_ptr<Texture>& texture, uint32_t arrIndex, uint32_t level);
 	
-	// For back depth buffer
+	// For back color buffer
 	D3D11RenderTargetView2D(ID3D11RenderTargetView* rtv);
 };
 

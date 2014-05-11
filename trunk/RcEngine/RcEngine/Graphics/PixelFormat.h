@@ -95,7 +95,6 @@ enum PixelFormat
 
 	// Depth formats
 	PF_D16,
-	PF_D24X8,
 	PF_D24S8,
 	PF_D32F,
 	PF_D32FS8X24,

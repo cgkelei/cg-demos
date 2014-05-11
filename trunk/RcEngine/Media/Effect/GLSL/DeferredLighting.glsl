@@ -1,5 +1,5 @@
 [[Vertex=DirectionalVSMain]]
-
+#version 330
 uniform mat4 InvViewProj;
 
 out gl_PerVertex {
@@ -20,7 +20,7 @@ void main()
 
 [[Vertex=LightVolumeVSMain]]
 
-uniform mat4 ViewProj;
+uniform mat4 WorldViewProj;
 
 layout(location = 0) in vec3 iPos;
 
@@ -33,7 +33,7 @@ out vec4 oPosCS;
 
 void main()
 {
-	gl_Position = vec4(iPos, 1.0) * ViewProj;
+	gl_Position = vec4(iPos, 1.0) * WorldViewProj;
 	oPosCS = gl_Position;
 }
 

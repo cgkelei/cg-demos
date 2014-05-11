@@ -25,8 +25,12 @@ public:
 	static uint32_t Mapping(uint32_t bufferCreateFlags); 
 	static D3D10_PRIMITIVE_TOPOLOGY Mapping(PrimitiveType primType); 
 	static D3D11_MAP Mapping(ResourceMapAccess map); 
-	static void UnMapping(D3D10_SRV_DIMENSION dimension, EffectParameterType& oTexType);
 
+	static DXGI_FORMAT GetDepthTextureFormat(PixelFormat inPixelFormat);
+	static DXGI_FORMAT GetDepthShaderResourceFormat(PixelFormat inPixelFormat);
+
+
+	static void UnMapping(D3D10_SRV_DIMENSION dimension, EffectParameterType& oTexType);
 };
 
 }

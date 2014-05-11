@@ -67,7 +67,7 @@ void ProfilerManager::ProfilerStart( const char* name )
 		mSamples[index].TotalTime = 0;
 		mSamples[index].TotalChildTime = 0;
 
-		mSamples[index].StartTime = GetTimeMS();
+		mSamples[index].StartTime = SystemClock::Now();
 	
 		if (mSamples[index].ParentSampleIndex == INVALID_INDEX)
 		{
@@ -75,14 +75,12 @@ void ProfilerManager::ProfilerStart( const char* name )
 			mFrameBeginTime = mSamples[index].StartTime;
 		}
 	}
-
-	printf("%s begin\n", name);
 }
 
 void ProfilerManager::ProfilerEnd( )
 {
-	double endTime = GetTimeMS();
-	double elapsedTime = endTime - mSamples[mLastOpenedSample].StartTime;
+	uint64_t endTime = SystemClock::Now();
+	uint64_t elapsedTime = endTime - mSamples[mLastOpenedSample].StartTime;
 
 	if (mSamples[mLastOpenedSample].ParentSampleIndex != INVALID_INDEX)
 	{
@@ -94,8 +92,6 @@ void ProfilerManager::ProfilerEnd( )
 		// Root End
 		mFrameEndTime = endTime;
 	}
-
-	printf("%s End\n", mSamples[mLastOpenedSample].SampleName);
 
 	mSamples[mLastOpenedSample].TotalTime += elapsedTime;
 	mLastOpenedSample = mSamples[mLastOpenedSample].ParentSampleIndex;
@@ -118,41 +114,14 @@ void ProfilerManager::Output()
 
 	for (uint32_t i = 0; i < mCurrNumSamples; ++i)
 	{
-		double sampleTime, percentage;
-		//calculate the time spend on the sample itself (excluding children)
-		
-		sampleTime = double(mSamples[i].TotalTime - mSamples[i].TotalChildTime) / 1000;
-		//percentage = ( double(sampleTime) / double(mFrameEndTime - mFrameBeginTime) ) * 100.0f;
 
-		////add it to the sample's values
-		//float totalPc;
-		//totalPc=samples[i].averagePc*samples[i].dataCount;
-		//totalPc+=percentage; samples[i].dataCount++;
-		//samples[i].averagePc=totalPc/samples[i].dataCount;
-		//if((samples[i].minPc==-1)||(percentage<samples[i].minPc))samples[i].minPc=percentage;
-		//if((samples[i].maxPc==-1)||(percentage>samples[i].maxPc))samples[i].maxPc=percentage;
-
-		////output these values
-		//outputHandler->Sample(samples[i].minPc,
-		//	samples[i].averagePc,
-		//	samples[i].maxPc,
-		//	samples[i].callCount,
-		//	samples[i].name,
-		//	samples[i].parentCount);
-
-		char namebuf[256], indentedName[256];
-		char avg[16], min[16], max[16], num[16];
-
-		/*	sprintf(avg, "%3.1f", fAvg);
-		sprintf(min, "%3.1f", fMin);
-		sprintf(max, "%3.1f", fMax);
-		sprintf(num, "%3d",   mSamples[i].CallCount);*/
+		char namebuf[256];
 
 		for (uint32_t indent = 0; indent < mSamples[i].CallStackDepth; ++indent)
-		namebuf[indent] = ' ';
+			namebuf[indent] = ' ';
 
 		strcpy(namebuf + mSamples[i].CallStackDepth, mSamples[i].SampleName);
-		printf("time=%f, childTime=%f, call=%d, %s\n", mSamples[i].TotalTime, mSamples[i].TotalChildTime, mSamples[i].CallCount, namebuf);
+		printf("time=%f, childTime=%f, call=%d, %s\n", SystemClock::ToSeconds(mSamples[i].TotalTime), SystemClock::ToSeconds(mSamples[i].TotalChildTime), mSamples[i].CallCount, namebuf);
 
 		//reset the sample for next time
 		mSamples[i].CallCount = 0;

@@ -47,7 +47,6 @@ D3D11Buffer::D3D11Buffer( uint32_t bufferSize, uint32_t accessHint, uint32_t fla
 		}
 	}
 
-	HRESULT hr;
 	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
 	if (initData)
 	{
@@ -55,14 +54,13 @@ D3D11Buffer::D3D11Buffer( uint32_t bufferSize, uint32_t accessHint, uint32_t fla
 		subData.pSysMem = initData->pData;
 		subData.SysMemPitch = initData->rowPitch;
 
-		hr = deviceD3D11->CreateBuffer( &desc, &subData, &BufferD3D11 );
+		D3D11_VERRY( deviceD3D11->CreateBuffer( &desc, &subData, &BufferD3D11 ) );
 	}
 	else 
 	{
-		hr = deviceD3D11->CreateBuffer( &desc, NULL, &BufferD3D11 );
+		D3D11_VERRY( deviceD3D11->CreateBuffer( &desc, NULL, &BufferD3D11 ) );
 	}
 	
-	assert(SUCCEEDED(hr));
 }
 
 
@@ -87,7 +85,7 @@ void* D3D11Buffer::Map( uint32_t offset, uint32_t length, ResourceMapAccess opti
 	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
 	
 	D3D11_MAPPED_SUBRESOURCE mappedD3D11;
-	HRESULT hr = deviceContextD3D11->Map(BufferD3D11, 0, D3D11Mapping::Mapping(options), 0, &mappedD3D11);
+	D3D11_VERRY( deviceContextD3D11->Map(BufferD3D11, 0, D3D11Mapping::Mapping(options), 0, &mappedD3D11) );
 
 	return (uint8_t*)mappedD3D11.pData + offset;
 }

@@ -5,10 +5,20 @@
 
 namespace RcEngine {
 
-void InitSystemClock();
-void ShutSystemClock();
+class _ApiExport SystemClock
+{
+public:
+	static void InitClock();
+	static void ShutClock();
 
-double GetTimeMS();
+	static uint64_t Now();
+	static inline double ToSeconds(uint64_t timeCounts) { return timeCounts * SecondsPerCount; }
+
+private:
+	static int64_t StartTime;
+	static double SecondsPerCount;
+};
+
 
 /** 
  * Game Timer

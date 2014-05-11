@@ -8,6 +8,9 @@ namespace RcEngine {
 #define INVALID_TIME	((uint64_t)(-1))
 #define MAX_PROFILERS   (200)
 
+class ProfilerManager;
+ _ApiExport extern ProfilerManager gProfilerManager;
+
 struct _ApiExport ProfilerSample
 {
 	const char* SampleName;
@@ -15,13 +18,12 @@ struct _ApiExport ProfilerSample
 	size_t SampleIndex;
 	size_t ParentSampleIndex;
 
-	uint32_t CallStackDepth;
+	uint64_t StartTime;
+	uint64_t TotalTime;
+	uint64_t TotalChildTime;
 
-	double TotalTime;
-	double TotalChildTime;
 	uint32_t CallCount;
-
-	double StartTime;
+	uint32_t CallStackDepth;
 
 	ProfilerSample()
 		: TotalTime(0), CallCount(0)
@@ -52,8 +54,8 @@ private:
 	uint32_t mCurrNumSamples;
 	uint32_t mCallStackDepth;
 
-	double mFrameBeginTime;
-	double mFrameEndTime;
+	uint64_t mFrameBeginTime;
+	uint64_t mFrameEndTime;
 
 	volatile uint32_t mCurrFrame;		// Global frame counter
 
@@ -61,14 +63,10 @@ private:
 	friend struct GpuAutoProfiler;
 };
 
- _ApiExport extern ProfilerManager gProfilerManager;
-
 struct _ApiExport CpuAutoProfiler
 {
 	CpuAutoProfiler(const char* name);
 	~CpuAutoProfiler();
-
-	uint64_t StartTime;
 };
 
 #define ENGINE_CPU_AUTO_PROFIER(name) CpuAutoProfiler _cpu_profiler(name)
