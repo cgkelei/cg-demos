@@ -9,9 +9,6 @@ namespace RcEngine {
 class _ApiExport FileSystem : public Singleton<FileSystem>  
 {
 public:
-	SINGLETON_DECL_HEADER(FileSystem);
-
-public:
 	FileSystem();
 	~FileSystem();
 

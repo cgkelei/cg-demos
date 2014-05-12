@@ -160,6 +160,7 @@
     <None Include="..\Media\Effect\GLSL\ModelVertexFactory.glsl" />
     <None Include="..\Media\Effect\GLSL\Model.glsl" />
     <None Include="..\Media\Effect\GLSL\ShadowMapGen.glsl" />
+    <None Include="..\Media\Effect\GLSL\ToneMap.glsl" />
     <None Include="Math\BoundingBox.inl" />
     <None Include="Math\BoundingSphere.inl" />
     <None Include="Math\ColorRGBA.inl" />
@@ -230,6 +231,7 @@
     <Xml Include="..\Media\Effect\AlphaTest.effect.xml" />
     <Xml Include="..\Media\Effect\DeferredLighting.effect.xml" />
     <Xml Include="..\Media\Effect\FSQuad.effect.xml" />
+    <Xml Include="..\Media\Effect\HDRToneMap.effect.xml" />
     <Xml Include="..\Media\Effect\Model.effect.xml" />
     <Xml Include="..\Media\Material\Model.material.xml" />
   </ItemGroup>

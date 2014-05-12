@@ -9,6 +9,7 @@
 #include <Core/Environment.h>
 #include <Core/ModuleManager.h>
 #include <Core/Exception.h>
+#include <Core/Profiler.h>
 #include <Core/XMLDom.h>
 #include <IO/FileSystem.h>
 #include <IO/FileStream.h>
@@ -34,6 +35,7 @@ Application::Application( const String& config )
 	ModuleManager::Initialize();
 	FileSystem::Initialize();
 	ResourceManager::Initialize();
+	ProfilerManager::Initialize();
 	
 	// Init System Clock
 	SystemClock::InitClock();

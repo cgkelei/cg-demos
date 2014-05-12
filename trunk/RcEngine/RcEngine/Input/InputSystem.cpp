@@ -5,8 +5,6 @@
 
 namespace RcEngine{
 
-SINGLETON_DECL(InputSystem)
-		
 InputSystem::InputSystem()
 	: mMouseMove(0, 0), 
 	  mMousePos(0, 0),

@@ -292,6 +292,12 @@ void DeferredPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 
 	// Load deferred lighting effect
 	mDeferredEffect = resMan.GetResourceByName<Effect>(RT_Effect, "DeferredLighting.effect.xml", "General");
+	mToneMapEffect = resMan.GetResourceByName<Effect>(RT_Effect, "HDRToneMap.effect.xml", "General");
+
+	mDirLightTech = mDeferredEffect->GetTechniqueByName("DirectionalLighting");
+	mPointLightTech = mDeferredEffect->GetTechniqueByName("PointLighting");
+	mSpotLightTech = mDeferredEffect->GetTechniqueByName("SpotLighting");
+	mShadingTech = mDeferredEffect->GetTechniqueByName("Shading");
 
 	// Init GBuffer
 	mGBufferFB = factory->CreateFrameBuffer(windowWidth, windowHeight);
@@ -357,6 +363,8 @@ void DeferredPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 	mDeferredEffect->GetParameterByName("GBuffer1")->SetValue(mGBuffer[1]->GetShaderResourceView());
 	mDeferredEffect->GetParameterByName("DepthBuffer")->SetValue(mDepthStencilBuffer->GetShaderResourceView());
 	mDeferredEffect->GetParameterByName("LightAccumulateBuffer")->SetValue(mLightAccumulateBuffer->GetShaderResourceView());	
+
+	mToneMapEffect->GetParameterByName("HDRBuffer")->SetValue(mHDRBuffer->GetShaderResourceView());	
 }
 
 void DeferredPath::OnWindowResize( uint32_t windowWidth, uint32_t windowHeight )
@@ -421,16 +429,11 @@ void DeferredPath::RenderScene()
 	GenereateGBuffer();
 	DeferredLighting();
 	DeferredShading();
+	PostProcess();
 	
 	//shared_ptr<FrameBuffer> screenFB = mDevice->GetScreenFrameBuffer();
 	//mDevice->BindFrameBuffer(screenFB);
 	//screenFB->Clear(CF_Color | CF_Depth, ColorRGBA::Black, 1.0, 0);
-
-	//mDebugViewMaterial->SetTexture("InputTex", mHDRBuffer->GetShaderResourceView());
-
-	////DebugViewMaterial->SetTexture("InputTex", mLightAccumulateBuffer);
-	//DrawFSQuad(mDebugViewMaterial, "ViewRGB");
-	//DrawOverlays();
 
 	/*mDeferedMaterial->SetTexture("DepthBuffer", mDepthStencilBuffer);
 	DrawFSQuad(mDeferedMaterial, "CopyDepth");*/
@@ -512,11 +515,11 @@ void DeferredPath::GenereateGBuffer()
 		renderItem.Renderable->Render();
 	}
 
-	if ( InputSystem::GetSingleton().MouseButtonPress(MS_MiddleButton) )
-	{
-		mDevice->GetRenderFactory()->SaveTextureToFile("E:/GBuffer0.tga", mGBuffer[0]);
-		mDevice->GetRenderFactory()->SaveTextureToFile("E:/GBuffer1.tga", mGBuffer[1]);
-	}
+	//if ( InputSystem::GetSingleton().MouseButtonPress(MS_MiddleButton) )
+	//{
+	//	mDevice->GetRenderFactory()->SaveTextureToFile("E:/GBuffer0.tga", mGBuffer[0]);
+	//	mDevice->GetRenderFactory()->SaveTextureToFile("E:/GBuffer1.tga", mGBuffer[1]);
+	//}
 }
 
 void DeferredPath::ComputeSSAO()
@@ -550,7 +553,6 @@ void DeferredPath::DeferredLighting()
 	mDeferredEffect->GetParameterByName("InvViewProj")->SetValue(mInvViewProj);
 	mDeferredEffect->GetParameterByName("CameraOrigin")->SetValue(mCamera->GetPosition());
 
-	const String& tech = "Lighting";
  	bool stencilZFail = false;
 	for (Light* light : mSceneMan->GetSceneLights())
 	{
@@ -558,7 +560,7 @@ void DeferredPath::DeferredLighting()
 		
 		if (lightType == LT_DirectionalLight)
 		{
-			DrawDirectionalLightShape(light, tech);
+			DrawDirectionalLightShape(light);
 		}
 		else 
 		{
@@ -569,21 +571,17 @@ void DeferredPath::DeferredLighting()
 			}	
 
 			if (lightType == LT_SpotLight)
-				DrawSpotLightShape(light, tech);
+				DrawSpotLightShape(light);
 			else if (lightType == LT_PointLight)
-				DrawPointLightShape(light, tech);
+				DrawPointLightShape(light);
 		}
 	}
 }
 
 void DeferredPath::DeferredShading()
 {
-	//mDevice->BindFrameBuffer(mHDRFB);
-	//mHDRBufferRTV->ClearColor(ColorRGBA(0, 0, 0, 0));
-
-	auto screenFB = mDevice->GetScreenFrameBuffer();
-	mDevice->BindFrameBuffer(screenFB);
-	screenFB->Clear(CF_Color | CF_Depth, ColorRGBA(1, 0, 0, 1), 1.0, 0);
+	mDevice->BindFrameBuffer(mHDRFB);
+	mHDRBufferRTV->ClearColor(ColorRGBA(0, 0, 0, 0));
 	
 	// Draw Sky box first
 	mSceneMan->UpdateBackgroundQueue(*(mGBufferFB->GetCamera()));
@@ -591,15 +589,28 @@ void DeferredPath::DeferredShading()
 	for (RenderQueueItem& item : bkgBucket)
 		item.Renderable->Render();
 
-	EffectTechnique* shadingTech = mDeferredEffect->GetTechniqueByName("Shading");
-	mDevice->Draw(shadingTech, mFullscreenTrangle);
+	mDevice->Draw(mShadingTech, mFullscreenTrangle);
 
-	screenFB->SwapBuffers();
-	//mDevice->GetRenderFactory()->SaveTextureToFile("E:/Light.pfm", mLightAccumulateBuffer);
-	//mDevice->GetRenderFactory()->SaveTextureToFile("E:/HDRBuffer.pfm", mHDRBuffer);
+	//if ( InputSystem::GetSingleton().MouseButtonPress(MS_MiddleButton) )
+	//{
+	//	mDevice->GetRenderFactory()->SaveTextureToFile("E:/Light.pfm", mLightAccumulateBuffer);
+	//	mDevice->GetRenderFactory()->SaveTextureToFile("E:/HDRBuffer.pfm", mHDRBuffer);
+	//}
 }
 
-void DeferredPath::DrawDirectionalLightShape( Light* light, const String& tech )
+void DeferredPath::PostProcess()
+{
+	shared_ptr<FrameBuffer> screenFB = mDevice->GetScreenFrameBuffer();
+	mDevice->BindFrameBuffer(screenFB);
+	screenFB->Clear(CF_Color | CF_Depth, ColorRGBA::Black, 1.0, 0);
+
+	EffectTechnique* toneMapTech = mToneMapEffect->GetTechniqueByName("ToneMap");
+	mDevice->Draw(toneMapTech, mFullscreenTrangle);
+
+	screenFB->SwapBuffers();
+}
+
+void DeferredPath::DrawDirectionalLightShape( Light* light )
 {
 	bool bCastShadow = light->GetCastShadow();
 	if (bCastShadow)
@@ -627,11 +638,10 @@ void DeferredPath::DrawDirectionalLightShape( Light* light, const String& tech )
 	//	//effect->GetParameterByName("CascadeBlendArea")->SetValue(mCascadedShadowMap->mCascadeBlendArea);
 	//}
 
-	String techName = "Directional" + tech;
-	mDevice->Draw(mDeferredEffect->GetCurrentTechnique(), mFullscreenTrangle);
+	mDevice->Draw(mDirLightTech, mFullscreenTrangle);
 }
 
-void DeferredPath::DrawSpotLightShape( Light* light, const String& tech )
+void DeferredPath::DrawSpotLightShape( Light* light )
 {
 	bool bCastShadow = light->GetCastShadow();
 	if (bCastShadow)
@@ -675,12 +685,11 @@ void DeferredPath::DrawSpotLightShape( Light* light, const String& tech )
 	mDeferredEffect->GetParameterByName("PCFRadius")->SetValue(5.7f / float(SHADOW_MAP_SIZE));
 	}*/
 
-	const String SpotTechName = "Spot" + tech;
-	mDeferredEffect->SetCurrentTechnique(SpotTechName);
-	mDevice->Draw(mDeferredEffect->GetCurrentTechnique(), mSpotLightShape);
+
+	mDevice->Draw(mSpotLightTech, mSpotLightShape);
 }
 
-void DeferredPath::DrawPointLightShape(Light* light, const String& tech )
+void DeferredPath::DrawPointLightShape(Light* light )
 {
 	const Camera& currCamera = *(mDevice->GetCurrentFrameBuffer()->GetCamera());
 	const float4x4& View = currCamera.GetViewMatrix();
@@ -705,9 +714,7 @@ void DeferredPath::DrawPointLightShape(Light* light, const String& tech )
 	float4x4 worldViewProj = worldMatrix * mViewProj;
 	mDeferredEffect->GetParameterByName("WorldViewProj")->SetValue(worldViewProj);
 
-	const String PointTechName = "Point" + tech;
-	mDeferredEffect->SetCurrentTechnique(PointTechName);
-	mDevice->Draw(mDeferredEffect->GetCurrentTechnique(), mPointLightShape);
+	mDevice->Draw(mPointLightTech, mPointLightShape);
 }
 
 }

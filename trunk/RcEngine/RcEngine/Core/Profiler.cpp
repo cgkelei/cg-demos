@@ -6,17 +6,15 @@
 
 namespace RcEngine {
 
-ProfilerManager gProfilerManager;
-
 //////////////////////////////////////////////////////////////////////////
 CpuAutoProfiler::CpuAutoProfiler( const char* name )
 {
-	gProfilerManager.ProfilerStart(name);
+	ProfilerManager::GetSingleton().ProfilerStart(name);
 }
 
 CpuAutoProfiler::~CpuAutoProfiler()
 {
-	gProfilerManager.ProfilerEnd();
+	ProfilerManager::GetSingleton().ProfilerEnd();
 }
 
 //////////////////////////////////////////////////////////////////////////

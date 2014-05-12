@@ -2,8 +2,6 @@
 
 namespace RcEngine{
 
-SINGLETON_DECL(Environment)
-
 Environment::Environment()
 	: mApplication(nullptr),
 	  mRenderFactory(nullptr), 
