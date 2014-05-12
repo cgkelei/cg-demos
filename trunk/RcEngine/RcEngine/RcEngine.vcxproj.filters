@@ -264,6 +264,9 @@
     <ClInclude Include="Core\Profiler.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\DebugRenderer.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Exception.cpp">
@@ -449,6 +452,9 @@
     <ClCompile Include="Core\Profiler.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\DebugRenderer.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Math\BoundingBox.inl">
@@ -520,6 +526,9 @@
     <None Include="..\Media\Effect\GLSL\ToneMap.glsl">
       <Filter>Asset\GLSL</Filter>
     </None>
+    <None Include="..\Media\Effect\GLSL\DebugView.glsl">
+      <Filter>Asset\GLSL</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Media\Effect\HLSL\Model.hlsl">
@@ -561,6 +570,12 @@
     <FxCompile Include="..\Media\Effect\HLSL\GBuffer.hlsl">
       <Filter>Asset\HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\ToneMap.hlsl">
+      <Filter>Asset\HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\DebugView.hlsl">
+      <Filter>Asset\HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\Media\Effect\FSQuad.effect.xml">
@@ -579,6 +594,9 @@
       <Filter>Asset\Effect</Filter>
     </Xml>
     <Xml Include="..\Media\Effect\HDRToneMap.effect.xml">
+      <Filter>Asset\Effect</Filter>
+    </Xml>
+    <Xml Include="..\Media\Effect\DebugView.effect.xml">
       <Filter>Asset\Effect</Filter>
     </Xml>
   </ItemGroup>

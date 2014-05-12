@@ -256,6 +256,15 @@ int WritePfm(const char *fn, int resX, int resY, int channels, const float* data
 	return 0;
 }
 
+float Float16ToFloat( uint16_t fltInt16 )
+{
+	uint32_t fltInt32    =  ((fltInt16 & 0x8000) << 16);
+	fltInt32        |= ((fltInt16 & 0x7fff) << 13) + 0x38000000;
+
+	float fRet;
+	memcpy( &fRet, &fltInt32, sizeof( float ) );
+	return fRet;
+}
 
 }
 
@@ -345,6 +354,90 @@ void Image::SaveImageToFile( const String& filename )
 		}
 
 		WritePfm(filename.c_str(), w, h, 3, &temp[0]);
+	}
+	else if (mFormat == PF_RGBA16F)
+	{
+		uint16_t* pixel = (uint16_t*)mSurfaces.front().pData;
+
+		uint32_t w = mWidth, h = mHeight;
+
+		vector<float> temp;
+		temp.resize(w * h * 3);
+		float* imageData = &temp[0];
+
+		if (Application::msApp->GetAppSettings().RHDeviceType == RD_Direct3D11)
+		{
+			for (uint32_t j = 0; j < h; j++)
+				for(uint32_t i = 0; i < w; i ++)
+				{
+					uint16_t r = pixel[((h-j-1) * w + i)*4 + 0];
+					uint16_t g = pixel[((h-j-1) * w + i)*4 + 1];
+					uint16_t b = pixel[((h-j-1) * w + i)*4 + 2];
+					uint16_t a = pixel[((h-j-1) * w + i)*4 + 3];
+
+					*imageData++ = Float16ToFloat(r);
+					*imageData++ = Float16ToFloat(g);
+					*imageData++ = Float16ToFloat(b);
+				}
+		}
+		else
+		{
+			for (uint32_t j = 0; j < h; j++)
+				for(uint32_t i = 0; i < w; i ++)
+				{
+					uint16_t r = pixel[(j * w + i)*4 + 0];
+					uint16_t g = pixel[(j * w + i)*4 +1];
+					uint16_t b = pixel[(j * w + i)*4 +2];
+					uint16_t a = pixel[(j * w + i)*4 +3];
+
+					*imageData++ = Float16ToFloat(r);
+					*imageData++ = Float16ToFloat(g);
+					*imageData++ = Float16ToFloat(b);
+				}
+		}
+
+		WritePfm(filename.c_str(), w, h, 3, &temp[0]);
+	}
+	else if (mFormat == PF_D24S8)
+	{
+		uint32_t* pixel = (uint32_t*)mSurfaces.front().pData;
+
+		uint32_t w = mWidth, h = mHeight;
+
+		vector<float> temp;
+		temp.resize(w * h);
+		float* imageData = &temp[0];
+
+		if (Application::msApp->GetAppSettings().RHDeviceType == RD_Direct3D11)
+		{
+			for (uint32_t j = 0; j < h; j++)
+				for(uint32_t i = 0; i < w; i ++)
+				{
+					uint32_t color = pixel[(h-j-1) * w + i];
+
+					// Extract 24 depth bits
+					float depth = static_cast<float>(color & 0x00FFFFFF); 
+					depth /= 16777216.0f; // divide bei 2^24
+
+					*imageData++ = depth;
+				}
+		}
+		else
+		{
+			for (uint32_t j = 0; j < h; j++)
+				for(uint32_t i = 0; i < w; i ++)
+				{
+					uint32_t color = pixel[j * w + i];
+
+					// Extract 24 depth bits
+					float depth = static_cast<float>(color & 0x00FFFFFF); 
+					depth /= 16777216.0f; // divide bei 2^24
+
+					*imageData++ = depth;
+				}
+		}
+
+		WritePfm(filename.c_str(), w, h, 1, &temp[0]);
 	}
 }
 

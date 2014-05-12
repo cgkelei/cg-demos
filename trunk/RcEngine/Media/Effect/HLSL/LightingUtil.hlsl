@@ -4,7 +4,7 @@
 float SpotLighting(const float3 L, const float3 lightDir, const float2 cosCone)
 {
 	// calc the cos angle between lightdir and litpoint dir
-	float cosAlpha =  dot(L, lightDir);
+	float cosAlpha =  dot(-L, lightDir);
 	return saturate( (cosAlpha - cosCone.y) / (cosCone.x - cosCone.y) );
 }
 

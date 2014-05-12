@@ -1,10 +1,17 @@
 
 #define saturate(x) clamp(x, 0.0, 1.0)	
 	
-float SpotLighting(const vec3 lightPos, const vec3 lightDir, const vec2 cosCone, const vec3 litPoint)
+//float SpotLighting(const vec3 lightPos, const vec3 lightDir, const vec2 cosCone, const vec3 litPoint)
+//{
+//	// calc the cos angle between lightdir and litpoint dir
+//	float cosAlpha =  dot(normalize(litPoint - lightPos), lightDir);
+//	return saturate( (cosAlpha - cosCone.y) / (cosCone.x - cosCone.y) );
+//}
+
+float SpotLighting(const vec3 L, const vec3 lightDir, const vec2 cosCone)
 {
 	// calc the cos angle between lightdir and litpoint dir
-	float cosAlpha =  dot(normalize(litPoint - lightPos), lightDir);
+	float cosAlpha =  dot(-L, lightDir);
 	return saturate( (cosAlpha - cosCone.y) / (cosCone.x - cosCone.y) );
 }
 

@@ -66,12 +66,6 @@ protected:
 		ResourceManager& resMan = ResourceManager::GetSingleton();
 		SceneManager* sceneMan = Environment::GetSingleton().GetSceneManager();
 
-		Light* mDirLight = sceneMan->CreateLight("Sun", LT_DirectionalLight);
-		mDirLight->SetDirection(float3(0, -8, -1));
-		mDirLight->SetLightColor(float3(1, 1, 1));
-		mDirLight->SetCastShadow(false);
-		sceneMan->GetRootSceneNode()->AttachObject(mDirLight);
-
 		Entity* entity;
 		SceneNode* sceneNode;
 
@@ -145,29 +139,30 @@ protected:
 	{
 		SceneManager& sceneMan = *Environment::GetSingleton().GetSceneManager();
 
-		Light* mDirLight = sceneMan.CreateLight("Sun", LT_DirectionalLight);
+		/*Light* mDirLight = sceneMan.CreateLight("Sun", LT_DirectionalLight);
 		mDirLight->SetDirection(float3(0, -8, -1));
 		mDirLight->SetLightColor(float3(1, 1, 1));
 		mDirLight->SetCastShadow(false);
-		sceneMan.GetRootSceneNode()->AttachObject(mDirLight);
+		sceneMan.GetRootSceneNode()->AttachObject(mDirLight);*/
 
-		//Light* spotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
-		//spotLight->SetDirection(float3(0, -1.5, -1));
-		//spotLight->SetLightColor(float3(1, 0, 1));
-		//spotLight->SetRange(300.0);
-		//spotLight->SetPosition(float3(0.0f, 150.0f, 100.0f));
-		//spotLight->SetAttenuation(1.0f, 0.0f);
-		//spotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(60));
-		//spotLight->SetCastShadow(false);
-		//spotLight->SetSpotlightNearClip(10);
-		//sceneMan.GetRootSceneNode()->AttachObject(spotLight);
+		Light* spotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
+		spotLight->SetDirection(float3(0, -1.5, -1));
+		spotLight->SetLightColor(float3(1, 0, 1));
+		spotLight->SetRange(300.0);
+		spotLight->SetPosition(float3(0.0f, 150.0f, 100.0f));
+		spotLight->SetAttenuation(1.0f, 0.0f);
+		spotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(60));
+		spotLight->SetCastShadow(false);
+		spotLight->SetSpotlightNearClip(10);
+		sceneMan.GetRootSceneNode()->AttachObject(spotLight);
 
-		//mPointLight = sceneMan.CreateLight("Point", LT_PointLight);
-		//mPointLight->SetLightColor(float3(1, 1, 0));
-		//mPointLight->SetRange(80.0f);
-		//mPointLight->SetAttenuation(1.0f, 0.0f);
-		//mPointLight->SetPosition(float3(550, 81, -18));
-		//sceneMan.GetRootSceneNode()->AttachObject(mPointLight);
+		/*Light* mPointLight = sceneMan.CreateLight("Point", LT_PointLight);
+		mPointLight->SetLightColor(float3(1, 1, 0));
+		mPointLight->SetRange(80.0f);
+		mPointLight->SetAttenuation(1.0f, 0.0f);
+		mPointLight->SetCastShadow(false);
+		mPointLight->SetPosition(float3(0, 0, 0));
+		sceneMan.GetRootSceneNode()->AttachObject(mPointLight);*/
 
 		//mSpotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
 		//mSpotLight->SetLightColor(float3(0, 1, 0));

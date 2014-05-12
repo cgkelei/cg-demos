@@ -1,9 +1,6 @@
 
 uniform sampler2D HDRBuffer;
 
-// Varying
-layout (location = 0) in vec2 iTex;
-
 // Output
 layout (location = 0) out vec4 oFragColor;
 
