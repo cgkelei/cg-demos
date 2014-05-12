@@ -14,7 +14,7 @@ void main()
 	vec2 grid = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2);
 	vec2 ndcXY = grid * vec2(2.0, -2.0) + vec2(-1.0, 1.0);
 
-	gl_Position = vec4(ndcXY, 1.0, 1.0);
+	gl_Position = vec4(ndcXY, 0.0, 1.0);
 	oViewRay = vec3(vec4(ndcXY, 1.0, 0.0) * InvViewProj);
 }
 
@@ -42,7 +42,7 @@ void main()
 #include "/DeferredUtil.glsl"
 #include "/LightingUtil.glsl"
 	
-out vec3 oViewRay;
+in vec3 oViewRay;
 
 // Output
 layout(location = 0) out vec4 oFragColor;
@@ -76,7 +76,7 @@ void main()
 		
 		// Frensel in moved to calculate in shading pass
 		vec3 specular = CalculateSpecular(N, H, shininess) * LightColor * nDotl;
-		
+
 		oFragColor = vec4(diffuse, Luminance(specular));
 	}
 }	
@@ -208,5 +208,7 @@ void main()
 	final =  diffueLight * diffuseAlbedo + ((shininess + 2.0) / 8.0) * fresnelTerm * specularLight;
 	final += vec3(0.1, 0.1, 0.1) * diffuseAlbedo;
 
-	oFragColor = vec4(final, 1.0);
+	vec3 normTerm = vec3((shininess + 2.0) / 8.0);
+	oFragColor = vec4(normTerm, final.r);
+	//oFragColor = vec4(final, 1.0);
 }

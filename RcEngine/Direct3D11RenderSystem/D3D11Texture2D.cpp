@@ -22,9 +22,6 @@ D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t
 	texDesc.SampleDesc.Count = sampleCount;
 	texDesc.BindFlags = 0;
 	texDesc.MiscFlags = 0;
-
-	texDesc.Usage = D3D11_USAGE_DEFAULT;
-	texDesc.CPUAccessFlags = 0;
 	D3D11Mapping::Mapping(accessHint, texDesc.Usage, texDesc.CPUAccessFlags);
 
 	if (mCreateFlags & TexCreate_DepthStencilTarget)

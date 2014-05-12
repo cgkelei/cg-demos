@@ -12,9 +12,6 @@ class Resource;
 class _ApiExport ResourceManager : public Singleton<ResourceManager>
 {
 public:
-	SINGLETON_DECL_HEADER(ResourceManager);
-
-public:
 	typedef void (*ResTypeInitializationFunc)();
 	typedef void (*ResTypeReleaseFunc)();
 	typedef shared_ptr<Resource> (*ResTypeFactoryFunc)( ResourceManager*, ResourceHandle, const String&, const String&);

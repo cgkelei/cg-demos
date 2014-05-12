@@ -31,6 +31,6 @@ void main()
 	
 	normal = normal * 0.5 + 0.5;
 	
-	oFragColor0 = vec4(normal, material.Shininess / 255.0);
+	oFragColor0 = vec4(normal, material.Shininess);
 	oFragColor1 = vec4(material.DiffuseAlbedo,  dot(material.SpecularAlbedo, vec3(0.2126, 0.7152, 0.0722)));	 // Specular luminance
 }

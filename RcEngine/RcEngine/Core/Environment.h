@@ -13,9 +13,6 @@ class RenderFactory;
 class _ApiExport Environment : public Singleton<Environment>
 {
 public:
-	SINGLETON_DECL_HEADER(Environment)
-
-public:
 	Environment();
 	~Environment();
 	

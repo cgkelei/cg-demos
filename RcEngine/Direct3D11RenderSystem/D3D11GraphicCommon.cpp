@@ -6,13 +6,11 @@ namespace RcEngine {
 void D3D11Mapping::Mapping( uint32_t accessHint, D3D11_USAGE& usage, UINT& CPUAccessFlags )
 {
 	CPUAccessFlags = 0;
-	if (accessHint & EAH_CPU_Read)
-		CPUAccessFlags |= D3D11_CPU_ACCESS_READ;
+	usage = D3D11_USAGE_DEFAULT;
+
 	if (accessHint & EAH_CPU_Write)
 		CPUAccessFlags |= D3D11_CPU_ACCESS_WRITE;
 			
-	usage = D3D11_USAGE_DEFAULT;
-
 	if (accessHint & EAH_GPU_Write)
 	{
 		usage = D3D11_USAGE_DEFAULT;

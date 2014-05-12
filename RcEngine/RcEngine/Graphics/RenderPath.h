@@ -80,16 +80,14 @@ protected:
 	void ComputeSSAO();
 	void DeferredLighting(); // Lighting pass
 	void DeferredShading();  // Shading pass
-	void EnvironmentLighting();
-	void DrawBackground();
+	void PostProcess();
 
-	void DrawDirectionalLightShape(Light* light, const String& tech);
-	void DrawSpotLightShape(Light* light, const String& tech);
-	void DrawPointLightShape(Light* light, const String& tech);
+
+	void DrawDirectionalLightShape(Light* light);
+	void DrawSpotLightShape(Light* light);
+	void DrawPointLightShape(Light* light);
 
 protected:
-
-	shared_ptr<Effect> mDeferredEffect;
 
 	CascadedShadowMap* mShadowMan;
 
@@ -112,6 +110,15 @@ protected:
 	shared_ptr<FrameBuffer> mGBufferFB;
 	shared_ptr<FrameBuffer> mLightAccumulateFB;
 	shared_ptr<FrameBuffer> mHDRFB;
+
+	shared_ptr<Effect> mDeferredEffect;
+	shared_ptr<Effect> mToneMapEffect;
+
+	EffectTechnique* mDirLightTech;
+	EffectTechnique* mPointLightTech;
+	EffectTechnique* mSpotLightTech;
+	EffectTechnique* mShadingTech;
+
 
 	RenderOperation mSpotLightShape;
 	RenderOperation mPointLightShape;

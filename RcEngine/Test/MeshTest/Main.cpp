@@ -55,8 +55,8 @@ protected:
 
 		mCamera = std::make_shared<Camera>();
 
-		//mRenderPath = std::make_shared<DeferredPath>();
-		mRenderPath = std::make_shared<ForwardPath>();
+		mRenderPath = std::make_shared<DeferredPath>();
+		//mRenderPath = std::make_shared<ForwardPath>();
 		mRenderPath->OnGraphicsInit(mCamera);
 	}
 
@@ -151,16 +151,16 @@ protected:
 		mDirLight->SetCastShadow(false);
 		sceneMan.GetRootSceneNode()->AttachObject(mDirLight);
 
-		Light* spotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
-		spotLight->SetDirection(float3(0, -1.5, -1));
-		spotLight->SetLightColor(float3(1, 0, 1));
-		spotLight->SetRange(300.0);
-		spotLight->SetPosition(float3(0.0f, 150.0f, 100.0f));
-		spotLight->SetAttenuation(1.0f, 0.0f);
-		spotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(60));
-		spotLight->SetCastShadow(false);
-		spotLight->SetSpotlightNearClip(10);
-		sceneMan.GetRootSceneNode()->AttachObject(spotLight);
+		//Light* spotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
+		//spotLight->SetDirection(float3(0, -1.5, -1));
+		//spotLight->SetLightColor(float3(1, 0, 1));
+		//spotLight->SetRange(300.0);
+		//spotLight->SetPosition(float3(0.0f, 150.0f, 100.0f));
+		//spotLight->SetAttenuation(1.0f, 0.0f);
+		//spotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(60));
+		//spotLight->SetCastShadow(false);
+		//spotLight->SetSpotlightNearClip(10);
+		//sceneMan.GetRootSceneNode()->AttachObject(spotLight);
 
 		//mPointLight = sceneMan.CreateLight("Point", LT_PointLight);
 		//mPointLight->SetLightColor(float3(1, 1, 0));

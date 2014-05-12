@@ -11,8 +11,6 @@
 
 namespace RcEngine {
 
-SINGLETON_DECL(FileSystem)
-
 FileSystem::FileSystem()
 {
 

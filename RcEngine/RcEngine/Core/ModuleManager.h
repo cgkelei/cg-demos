@@ -51,9 +51,6 @@ private:
 class _ApiExport ModuleManager : public Singleton<ModuleManager>
 {
 public:
-	SINGLETON_DECL_HEADER(ModuleManager)
-
-public:
 	ModuleManager(void);
 	~ModuleManager(void);
 

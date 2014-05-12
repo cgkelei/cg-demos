@@ -4,8 +4,6 @@
 
 namespace RcEngine {
 
-SINGLETON_DECL(ResourceManager)
-
 ResourceManager::ResourceManager()
 : mNextHandle(1)
 {

@@ -2,14 +2,12 @@
 #define Profiler_h__
 
 #include <Core/Prerequisites.h>
+#include <Core/Singleton.h>
 
 namespace RcEngine {
 
 #define INVALID_TIME	((uint64_t)(-1))
 #define MAX_PROFILERS   (200)
-
-class ProfilerManager;
- _ApiExport extern ProfilerManager gProfilerManager;
 
 struct _ApiExport ProfilerSample
 {
@@ -25,19 +23,16 @@ struct _ApiExport ProfilerSample
 	uint32_t CallCount;
 	uint32_t CallStackDepth;
 
-	ProfilerSample()
-		: TotalTime(0), CallCount(0)
-	{
-
-	}
+	ProfilerSample() : TotalTime(0), CallCount(0) {}
 };
 
-class _ApiExport ProfilerManager
+class _ApiExport ProfilerManager : public Singleton<ProfilerManager>
 {
 public:
 	ProfilerManager();
 	~ProfilerManager();
 
+public:
 	void ProfilerStart(const char* name);
 	void ProfilerEnd();
 
@@ -69,10 +64,10 @@ struct _ApiExport CpuAutoProfiler
 	~CpuAutoProfiler();
 };
 
-#define ENGINE_CPU_AUTO_PROFIER(name) CpuAutoProfiler _cpu_profiler(name)
-#define ENGINE_PUSH_CPU_PROFIER(name) gProfilerManager.ProfilerStart(name)
-#define ENGINE_POP_CPU_PROFIER(name)  gProfilerManager.ProfilerEnd()
-#define ENGINE_DUMP_PROFILERS()		  gProfilerManager.Output()
+#define ENGINE_CPU_AUTO_PROFIER(name) CpuAutoProfiler _cpu_profiler(name);
+#define ENGINE_PUSH_CPU_PROFIER(name) ProfilerManager::GetSingleton().ProfilerStart(name)
+#define ENGINE_POP_CPU_PROFIER(name)  ProfilerManager::GetSingleton().ProfilerEnd()
+#define ENGINE_DUMP_PROFILERS()		  ProfilerManager::GetSingleton().Output()
 }
 
 

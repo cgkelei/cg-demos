@@ -182,9 +182,6 @@ enum MouseCode
 class _ApiExport InputSystem : public Singleton<InputSystem>
 {
 public:
-	SINGLETON_DECL_HEADER(InputSystem);
-
-public:
 	InputSystem();
 	~InputSystem();
 
