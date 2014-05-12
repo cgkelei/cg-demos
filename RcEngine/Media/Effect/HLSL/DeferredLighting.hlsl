@@ -14,6 +14,8 @@ Texture2D GBuffer1;
 Texture2D<float> DepthBuffer;	
 Texture2D LightAccumulateBuffer;
 
+//-------------------------------------------------------------------------------------
+// Help function
 void GetNormalAndShininess(in int3 texelPos, out float3 oNormal, out float oShininess)
 {
 	float4 tap = GBuffer0.Load(texelPos);
@@ -37,6 +39,7 @@ float3 ReconstructWorldPosition(in int3 texelPos, in float4 clipPos)
 
 
 //---------------------------------------------------------------
+// Directional light
 void DirectionalVSMain(uint iVertexID        : SV_VertexID,
 					   out float3 oViewRay   : TEXCOORD0,
 					   out float4 oPosCS	 : SV_Position)
@@ -44,11 +47,12 @@ void DirectionalVSMain(uint iVertexID        : SV_VertexID,
 	float2 grid = float2((iVertexID << 1) & 2, iVertexID & 2);
 	float2 ndcXY = grid * float2(2.0, -2.0) + float2(-1.0, 1.0);
 
-	oPosCS = float4(ndcXY, 1.0, 1.0);
+	oPosCS = float4(ndcXY, 0.0, 1.0);
 	oViewRay = mul( float4(ndcXY, 1.0, 0.0), InvViewProj ).xyz;
 }
 
 //-----------------------------------------------------------------
+// Spot or Point light
 float4 LightVolumeVSMain(in float3 iPos		   : POSITION,
 					     out float4 oPosCS     : TEXCOORD0 ) : SV_Position
 {
@@ -64,7 +68,6 @@ void DirectionalPSMain(
 	in float4 iFragCoord  : SV_Position,
 	out float4 oFragColor : SV_Target0 )
 {
-	float4 final = 0.0f;
 	int3 sampleIndex = int3(iFragCoord.xy, 0);
 
 	float3 viewRay = normalize(iViewRay);
@@ -100,7 +103,6 @@ void PointLightingPSMain(
 	in float4 iFragCoord  : SV_Position,
 	out float4 oFragColor : SV_Target0 )
 {
-	float4 final = 0.0f;
 	int3 sampleIndex = int3(iFragCoord.xy, 0);
 
 	float3 worldPosition = ReconstructWorldPosition(sampleIndex, iPosCS);
@@ -138,15 +140,13 @@ void SpotLightingPSMain(
 	in float4 iFragCoord  : SV_Position,
 	out float4 oFragColor : SV_Target0 )
 {
-	float4 final = 0.0f;
+	// Light accumulate in HDR Buffer
+	oFragColor = 0;
+
 	int3 sampleIndex = int3(iFragCoord.xy, 0);
 
 	float3 worldPosition = ReconstructWorldPosition(sampleIndex, iPosCS);
-
 	float3 L = normalize(LightPos.xyz - worldPosition);
-
-	// Light accumulate in HDR Buffer
-	oFragColor = 0;
 
 	float spot = SpotLighting(L, LightDir.xyz, float2(LightPos.w, LightDir.w));
 	if(spot > 0.0)
@@ -182,7 +182,6 @@ void DeferredShadingPSMain(
 	in float4 iFragCoord  : SV_Position,
 	out float4 oFragColor : SV_Target0 )
 {
-	float3 final = 0.0f;
 	int3 sampleIndex = int3(iFragCoord.xy, 0);
 
 	float3 V = normalize(-iViewRay);
@@ -201,8 +200,17 @@ void DeferredShadingPSMain(
 	// Approximate fresnel by N and V
 	float3 fresnelTerm = CalculateAmbiemtFresnel(specularAlbedo, N, V);
 	
+	float3 final = 0;
+
 	final =  diffueLight * diffuseAlbedo + ((shininess + 2.0) / 8.0) * fresnelTerm * specularLight;
 	final += float3(0.1, 0.1, 0.1) * diffuseAlbedo;
 
 	oFragColor = float4(final, 1.0);
+}
+
+//-------------------------------------------------------------------------------------------
+// Copy Depth Buffer
+float CopyDepthPSMain(in float4 iFragCoord  : SV_Position) : SV_Depth
+{
+	return DepthBuffer.Load(int3(iFragCoord.xy, 0));
 }

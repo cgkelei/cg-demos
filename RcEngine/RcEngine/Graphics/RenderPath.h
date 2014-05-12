@@ -114,6 +114,9 @@ protected:
 	shared_ptr<Effect> mDeferredEffect;
 	shared_ptr<Effect> mToneMapEffect;
 
+	// Todo: Move to DebugRender
+	shared_ptr<Effect> mDebugEffect;
+
 	EffectTechnique* mDirLightTech;
 	EffectTechnique* mPointLightTech;
 	EffectTechnique* mSpotLightTech;

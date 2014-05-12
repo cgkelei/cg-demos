@@ -134,18 +134,17 @@ layout(location = 0) out vec4 oFragColor;
 
 void main()
 {
-	ivec2 sampleIndex = ivec2(gl_FragCoord.xy);
-
-	vec3 worldPosition = ReconstructWorldPosition(sampleIndex, oPosCS);
-
 	// Light accumulate in HDR Buffer
 	oFragColor = vec4(0);
 
-	float spot = SpotLighting(LightPos.xyz, LightDir.xyz, vec2(LightPos.w, LightDir.w), worldPosition);
+	ivec2 sampleIndex = ivec2(gl_FragCoord.xy);
+
+	vec3 worldPosition = ReconstructWorldPosition(sampleIndex, oPosCS);
+	vec3 L = normalize(LightPos.xyz - worldPosition);
+
+	float spot = SpotLighting(L, LightDir.xyz, vec2(LightPos.w, LightDir.w));
 	if(spot > 0.0)
 	{
-		vec3 L = normalize(LightPos.xyz - worldPosition);
-	
 		// Decode normal and shininess from GBuffer
 		vec3 N;
 		float shininess;
@@ -208,7 +207,14 @@ void main()
 	final =  diffueLight * diffuseAlbedo + ((shininess + 2.0) / 8.0) * fresnelTerm * specularLight;
 	final += vec3(0.1, 0.1, 0.1) * diffuseAlbedo;
 
-	vec3 normTerm = vec3((shininess + 2.0) / 8.0);
-	oFragColor = vec4(normTerm, final.r);
-	//oFragColor = vec4(final, 1.0);
+	oFragColor = vec4(final, 1.0);
+}
+
+[[Fragment=CopyDepthPSMain]]
+
+uniform sampler2D DepthBuffer;
+
+void main()
+{
+	gl_FragDepth = texelFetch(DepthBuffer, ivec2(gl_FragCoord.xy), 0).r;
 }
