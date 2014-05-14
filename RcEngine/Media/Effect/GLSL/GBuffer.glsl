@@ -29,8 +29,10 @@ void main()
 	vec3 normal = normalize(oNormalWS);
 #endif	
 	
-	normal = normal * 0.5 + 0.5;
-	
+	// Use RGBA16F
+	//normal = normal * 0.5 + 0.5;
+	//CompressUnsignedNormalToNormalsBuffer(normal);	
+
 	oFragColor0 = vec4(normal, material.Shininess);
 	oFragColor1 = vec4(material.DiffuseAlbedo,  dot(material.SpecularAlbedo, vec3(0.2126, 0.7152, 0.0722)));	 // Specular luminance
 }

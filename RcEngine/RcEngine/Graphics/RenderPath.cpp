@@ -438,7 +438,7 @@ void DeferredPath::RenderScene()
 	{
 		EffectTechnique* debugTech = mDebugEffect->GetTechniqueByName("DebugShape");
 
-		//mDebugEffect->GetParameterByName("ViewProj")->SetValue(mCamera->GetEngineViewProjMatrix());
+		mDebugEffect->GetParameterByName("ViewProj")->SetValue(mCamera->GetEngineViewProjMatrix());
 
 		for (Light* light : mSceneMan->GetSceneLights())
 		{
@@ -470,10 +470,7 @@ void DeferredPath::RenderScene()
 				float4x4 world = CreateScaling(scaleBase, scaleHeight, scaleBase) * rotation *
 								 CreateTranslation(worldPos);
 				
-				float4x4 worldViewProj = world * mCamera->GetEngineViewProjMatrix();
-
-				mDebugEffect->GetParameterByName("WorldViewProj")->SetValue(worldViewProj);
-
+				mDebugEffect->GetParameterByName("World")->SetValue(world);
 				mDevice->Draw(debugTech, mSpotLightShape);
 			}
 		}
@@ -562,7 +559,7 @@ void DeferredPath::DeferredLighting()
 		}
 	}
 
-	mDevice->GetRenderFactory()->SaveLinearDepthTextureToFile("E:/depth.pfm", mDepthStencilBufferLight, proj.M33, proj.M43);
+	//mDevice->GetRenderFactory()->SaveLinearDepthTextureToFile("E:/depth.pfm", mDepthStencilBufferLight, proj.M33, proj.M43);
 }
 
 void DeferredPath::DeferredShading()

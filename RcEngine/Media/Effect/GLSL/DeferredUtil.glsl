@@ -32,7 +32,9 @@ void GetNormalAndShininess(in ivec2 texelPos, out vec3 oNormal, out float oShini
 {
 	vec4 tap = texelFetch(GBuffer0, texelPos, 0);
 	
-	oNormal = normalize(tap.xyz * 2.0 - 1.0);	 // World Space Normal
+	// RGBA16F 
+	//oNormal = normalize(tap.xyz * 2.0 - 1.0);	 // World Space Normal
+	oNormal = normalize(tap.xyz);
 	oShininess = tap.a /** 255.0*/;  			 // Specular power
 }
 

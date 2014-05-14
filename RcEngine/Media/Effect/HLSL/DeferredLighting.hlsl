@@ -24,7 +24,10 @@ Texture2D LightAccumulateBuffer;
 void GetNormalAndShininess(in int3 texelPos, out float3 oNormal, out float oShininess)
 {
 	float4 tap = GBuffer0.Load(texelPos);
-    oNormal = tap.xyz;
+
+	// RGBA16F 
+	//oNormal = normalize(tap.xyz * 2.0 - 1.0);	 // World Space Normal
+	oNormal = normalize(tap.xyz);
 	oShininess = tap.w;
 }
 
@@ -58,11 +61,11 @@ void DirectionalVSMain(uint iVertexID        : SV_VertexID,
 
 //-----------------------------------------------------------------
 // Spot or Point light
-float4 LightVolumeVSMain(in float3 iPos		   : POSITION,
-					     out float4 oPosCS     : TEXCOORD0 ) : SV_POSITION
+void LightVolumeVSMain(in float3 iPos       : POSITION,
+					   out float4 oPosCS    : TEXCOORD0,
+					   out float4 oPosCSD3D : SV_POSITION) 
 {
-	oPosCS = mul( float4(iPos, 1.0), WorldViewProj );
-	return oPosCS;
+	oPosCSD3D = oPosCS = mul( float4(iPos, 1.0), WorldViewProj );
 }
 
 
@@ -153,14 +156,14 @@ void SpotLightingPSMain(
 	float3 worldPosition = ReconstructWorldPosition(sampleIndex, iPosCS);
 	float3 L = normalize(LightPos.xyz - worldPosition);
 
+	// Decode normal and shininess from GBuffer
+	float3 N;
+	float shininess;
+	GetNormalAndShininess(sampleIndex, N, shininess);
+
 	float spot = SpotLighting(L, LightDir.xyz, float2(LightPos.w, LightDir.w));
 	if(spot > 0.0)
 	{
-		// Decode normal and shininess from GBuffer
-		float3 N;
-		float shininess;
-		GetNormalAndShininess(sampleIndex, N, shininess);
-
 		float NdotL = dot(L, N);
 		if (NdotL > 0.0)
 		{

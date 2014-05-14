@@ -2,8 +2,7 @@
 
   <Technique name="DebugShape">
     <Pass name="p0">
-      <!-- <VertexShader file="DebugView" entry="VSMain"/>-->
-    <VertexShader file="DeferredLighting" entry="LightVolumeVSMain"/>
+      <VertexShader file="DebugView" entry="VSMain"/>
       <PixelShader file="DebugView" entry="PSMain"/>
       <State name="DepthEnable" value="true"/>
       <State name="DepthWriteMask" value="false"/>
