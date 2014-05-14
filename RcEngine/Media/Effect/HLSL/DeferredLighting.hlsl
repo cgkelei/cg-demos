@@ -3,10 +3,15 @@
 float4x4 WorldViewProj;
 float4x4 InvViewProj;
 
+cbuffer PerLight{
+
 float4 LightPos;		// w dimension is spot light inner cone cos angle
 float4 LightDir;		// w dimension is spot light outer cone cos angle
 float3 LightColor;
 float3 LightFalloff; 
+
+};
+
 float3 CameraOrigin;
 
 Texture2D GBuffer0;	
@@ -42,7 +47,7 @@ float3 ReconstructWorldPosition(in int3 texelPos, in float4 clipPos)
 // Directional light
 void DirectionalVSMain(uint iVertexID        : SV_VertexID,
 					   out float3 oViewRay   : TEXCOORD0,
-					   out float4 oPosCS	 : SV_Position)
+					   out float4 oPosCS	 : SV_POSITION)
 {
 	float2 grid = float2((iVertexID << 1) & 2, iVertexID & 2);
 	float2 ndcXY = grid * float2(2.0, -2.0) + float2(-1.0, 1.0);
@@ -54,7 +59,7 @@ void DirectionalVSMain(uint iVertexID        : SV_VertexID,
 //-----------------------------------------------------------------
 // Spot or Point light
 float4 LightVolumeVSMain(in float3 iPos		   : POSITION,
-					     out float4 oPosCS     : TEXCOORD0 ) : SV_Position
+					     out float4 oPosCS     : TEXCOORD0 ) : SV_POSITION
 {
 	oPosCS = mul( float4(iPos, 1.0), WorldViewProj );
 	return oPosCS;
@@ -64,8 +69,8 @@ float4 LightVolumeVSMain(in float3 iPos		   : POSITION,
 //---------------------------------------------------------------------
 // Deferred Directional Light
 void DirectionalPSMain(
-	in float3 iViewRay	  : TEXCOORD1,
-	in float4 iFragCoord  : SV_Position,
+	in float3 iViewRay	  : TEXCOORD0,
+	in float4 iFragCoord  : SV_POSITION,
 	out float4 oFragColor : SV_Target0 )
 {
 	int3 sampleIndex = int3(iFragCoord.xy, 0);
@@ -99,8 +104,8 @@ void DirectionalPSMain(
 //---------------------------------------------------------------------
 // Deferred Point Light
 void PointLightingPSMain(
-	in float4 iPosCS	  : TEXCOORD1,
-	in float4 iFragCoord  : SV_Position,
+	in float4 iPosCS	  : TEXCOORD0,
+	in float4 iFragCoord  : SV_POSITION,
 	out float4 oFragColor : SV_Target0 )
 {
 	int3 sampleIndex = int3(iFragCoord.xy, 0);
@@ -136,8 +141,8 @@ void PointLightingPSMain(
 //---------------------------------------------------------------------
 // Deferred Spot Light
 void SpotLightingPSMain(
-	in float4 iPosCS	  : TEXCOORD1,
-	in float4 iFragCoord  : SV_Position,
+	in float4 iPosCS	  : TEXCOORD0,
+	in float4 iFragCoord  : SV_POSITION,
 	out float4 oFragColor : SV_Target0 )
 {
 	// Light accumulate in HDR Buffer
@@ -178,8 +183,8 @@ void SpotLightingPSMain(
 //--------------------------------------------------------
 // Final Shading Pass
 void DeferredShadingPSMain(
-	in float3 iViewRay	  : TEXCOORD1,
-	in float4 iFragCoord  : SV_Position,
+	in float3 iViewRay	  : TEXCOORD0,
+	in float4 iFragCoord  : SV_POSITION,
 	out float4 oFragColor : SV_Target0 )
 {
 	int3 sampleIndex = int3(iFragCoord.xy, 0);
@@ -210,7 +215,7 @@ void DeferredShadingPSMain(
 
 //-------------------------------------------------------------------------------------------
 // Copy Depth Buffer
-float CopyDepthPSMain(in float4 iFragCoord  : SV_Position) : SV_Depth
+float CopyDepthPSMain(in float4 iFragCoord  : SV_POSITION) : SV_Depth
 {
 	return DepthBuffer.Load(int3(iFragCoord.xy, 0));
 }

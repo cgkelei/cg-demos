@@ -417,7 +417,9 @@ void Image::SaveImageToFile( const String& filename )
 
 					// Extract 24 depth bits
 					float depth = static_cast<float>(color & 0x00FFFFFF); 
-					depth /= 16777216.0f; // divide bei 2^24
+					depth /= 16777216.0f; // divide bY 2^24
+
+					uint32_t stencil = color >> 24;
 
 					*imageData++ = depth;
 				}
@@ -429,15 +431,78 @@ void Image::SaveImageToFile( const String& filename )
 				{
 					uint32_t color = pixel[j * w + i];
 
+					/**
+					 * Unlike D3D11, OpenGL use LBS 8 bit as stencil.
+					 * Need more check
+					 */
+					uint32_t stencil = (color & 255);
+
 					// Extract 24 depth bits
-					float depth = static_cast<float>(color & 0x00FFFFFF); 
-					depth /= 16777216.0f; // divide bei 2^24
+					float depth = static_cast<float>(color >> 8); 
+					depth /= 16777216.0f; // divide bY 2^24
 
 					*imageData++ = depth;
 				}
 		}
 
 		WritePfm(filename.c_str(), w, h, 1, &temp[0]);
+	}
+}
+
+void Image::SaveLinearDepthToFile( const String& filename, float projM33, float projM43 )
+{
+	if (mFormat == PF_D24S8)
+	{
+		uint32_t* pixel = (uint32_t*)mSurfaces.front().pData;
+
+		uint32_t w = mWidth, h = mHeight;
+
+		vector<float> temp;
+		temp.resize(w * h * 2); // for depth and stencil
+		float* pDepth = &temp[0];
+		float* pStencil = &temp[w*h];
+
+		if (Application::msApp->GetAppSettings().RHDeviceType == RD_Direct3D11)
+		{
+			for (uint32_t j = 0; j < h; j++)
+				for(uint32_t i = 0; i < w; i ++)
+				{
+					uint32_t color = pixel[(h-j-1) * w + i];
+
+					// Extract 24 depth bits
+					float depth = static_cast<float>(color & 0x00FFFFFF); 
+					depth /= 16777216.0f; // divide bY 2^24
+
+					uint32_t stencil = color >> 24;
+
+					*pDepth++ = (1.0f - projM33) / (depth - projM33);
+					*pStencil++ = float(stencil);
+				}
+		}
+		else
+		{
+			for (uint32_t j = 0; j < h; j++)
+				for(uint32_t i = 0; i < w; i ++)
+				{
+					uint32_t color = pixel[j * w + i];
+
+					/**
+					 * Unlike D3D11, OpenGL use LBS 8 bit as stencil.
+					 * Need more check
+					 */
+					uint32_t stencil = (color & 255);
+
+					// Extract 24 depth bits
+					float depth = static_cast<float>(color >> 8); 
+					depth /= 16777216.0f; // divide bY 2^24
+
+					*pDepth++ = (1.0f - projM33) / (depth - projM33);
+					*pStencil++ = float(stencil);
+				}
+		}
+
+		WritePfm(filename.c_str(), w, h, 1, &temp[0]);
+		WritePfm("E:/Stencil.pfm", w, h, 1, &temp[w*h]);
 	}
 }
 

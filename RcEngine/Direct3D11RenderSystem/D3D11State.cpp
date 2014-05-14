@@ -8,15 +8,16 @@ D3D11DepthStencilState::D3D11DepthStencilState( const DepthStencilStateDesc& des
 	: DepthStencilState(desc),
 	  StateD3D11(nullptr)
 {
-	CD3D11_DEPTH_STENCIL_DESC depthStencilDesc(D3D11_DEFAULT);
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 
 	depthStencilDesc.DepthEnable = mDesc.DepthEnable;
-	depthStencilDesc.StencilEnable = mDesc.StencilEnable;
 	depthStencilDesc.DepthWriteMask = mDesc.DepthWriteMask ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
-	depthStencilDesc.StencilReadMask =  static_cast<UINT8>(mDesc.StencilReadMask);
-	depthStencilDesc.StencilWriteMask = static_cast<UINT8>(mDesc.StencilWriteMask);
 	depthStencilDesc.DepthFunc = D3D11Mapping::Mapping(mDesc.DepthFunc);
 
+	depthStencilDesc.StencilEnable = mDesc.StencilEnable;
+	depthStencilDesc.StencilReadMask =  static_cast<UINT8>(mDesc.StencilReadMask);
+	depthStencilDesc.StencilWriteMask = static_cast<UINT8>(mDesc.StencilWriteMask);
+	
 	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11Mapping::Mapping(mDesc.FrontStencilDepthFailOp);
 	depthStencilDesc.FrontFace.StencilFailOp = D3D11Mapping::Mapping(mDesc.FrontStencilFailOp);
 	depthStencilDesc.FrontFace.StencilPassOp = D3D11Mapping::Mapping(mDesc.FrontStencilPassOp);
@@ -27,14 +28,13 @@ D3D11DepthStencilState::D3D11DepthStencilState( const DepthStencilStateDesc& des
 	depthStencilDesc.BackFace.StencilPassOp = D3D11Mapping::Mapping(mDesc.BackStencilPassOp);
 	depthStencilDesc.BackFace.StencilFunc = D3D11Mapping::Mapping(mDesc.BackStencilFunc);
 
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateDepthStencilState(&depthStencilDesc, &StateD3D11);
-	//D3D11_VERRY(hr);
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;	
+	D3D11_VERRY( deviceD3D11->CreateDepthStencilState(&depthStencilDesc, &StateD3D11) );
 }
 D3D11DepthStencilState::~D3D11DepthStencilState()
 {
 	SAFE_RELEASE(StateD3D11);
 }
-
 
 D3D11BlendState::D3D11BlendState( const BlendStateDesc& desc )
 	: BlendState(desc),
@@ -56,8 +56,8 @@ D3D11BlendState::D3D11BlendState( const BlendStateDesc& desc )
 		blendDesc.RenderTarget[i].SrcBlendAlpha = D3D11Mapping::Mapping(mDesc.RenderTarget[i].SrcBlendAlpha);
 	}
 
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateBlendState(&blendDesc, &StateD3D11);
-	//D3D11_VERRY(hr);
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;	
+	D3D11_VERRY( deviceD3D11->CreateBlendState(&blendDesc, &StateD3D11) );
 }
 
 D3D11BlendState::~D3D11BlendState()
@@ -72,24 +72,25 @@ D3D11RasterizerState::D3D11RasterizerState( const RasterizerStateDesc& desc )
 {
 	CD3D11_RASTERIZER_DESC rasDesc(D3D11_DEFAULT);
 
-	rasDesc.DepthBias = mDesc.DepthBias;
-	rasDesc.SlopeScaledDepthBias  = mDesc.SlopeScaledDepthBias;
-	rasDesc.DepthClipEnable = mDesc.DepthClipEnable;
+	rasDesc.FillMode = D3D11Mapping::Mapping(mDesc.PolygonFillMode);
+	rasDesc.CullMode = D3D11Mapping::Mapping(mDesc.PolygonCullMode);
 	rasDesc.FrontCounterClockwise = mDesc.FrontCounterClockwise;
+	rasDesc.DepthBias = INT(mDesc.DepthBias);
+	//rasDesc.DepthBiasClamp = 
+	rasDesc.DepthClipEnable = mDesc.DepthClipEnable;
 	rasDesc.ScissorEnable = mDesc.ScissorEnable;
 	rasDesc.MultisampleEnable = mDesc.MultisampleEnable;
-	rasDesc.CullMode = D3D11Mapping::Mapping(mDesc.PolygonCullMode);
-	rasDesc.FillMode = D3D11Mapping::Mapping(mDesc.PolygonFillMode);
+	rasDesc.SlopeScaledDepthBias  = mDesc.SlopeScaledDepthBias;
+	//rasDesc.AntialiasedLineEnable;
 	
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateRasterizerState(&rasDesc, &StateD3D11);
-	//D3D11_VERRY(hr);
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;	
+	D3D11_VERRY(deviceD3D11->CreateRasterizerState(&rasDesc, &StateD3D11));
 }
 
 D3D11RasterizerState::~D3D11RasterizerState()
 {
 	SAFE_RELEASE(StateD3D11);
 }
-
 
 D3D11SamplerState::D3D11SamplerState( const SamplerStateDesc& desc )
 	: SamplerState(desc),
@@ -113,8 +114,8 @@ D3D11SamplerState::D3D11SamplerState( const SamplerStateDesc& desc )
 	samplerDesc.MaxLOD = mDesc.MaxLOD;
 	samplerDesc.MaxAnisotropy = mDesc.MaxAnisotropy;
 	
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateSamplerState(&samplerDesc, &StateD3D11);
-	//D3D11_VERRY(hr);
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;	
+	D3D11_VERRY( deviceD3D11->CreateSamplerState(&samplerDesc, &StateD3D11) );
 }
 
 D3D11SamplerState::~D3D11SamplerState()

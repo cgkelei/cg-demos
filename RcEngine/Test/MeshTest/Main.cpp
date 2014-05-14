@@ -78,7 +78,8 @@ protected:
 		//sponzaNode->SetScale(0.45f);
 		//sponzaNode->AttachObject(sponzaEntity);
 
-		mCamera->CreateLookAt(float3(-137.0, 97.3, 82.0), float3(-136.5, 96.8, 81.3), float3(0.3, 0.9, -0.4));
+		//mCamera->CreateLookAt(float3(-137.0, 97.3, 82.0), float3(-136.5, 96.8, 81.3), float3(0.3, 0.9, -0.4));
+		mCamera->CreateLookAt(float3(-322.203735, 217.687668, 206.708405), float3(-321.512451, 217.287216, 206.106934), float3(0.302103, 0.916318, -0.262859));
 		mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 1000.0f );
 
 
@@ -211,6 +212,20 @@ protected:
 	void Update(float deltaTime)
 	{
 		mCameraControler->Update(deltaTime);
+
+		/*if ( InputSystem::GetSingleton().KeyPress(KC_W) )
+		{
+			auto target = mCamera->GetLookAt();
+			auto eye = mCamera->GetPosition();
+			auto up = mCamera->GetUp();
+			
+			FILE* f = fopen("E:camera.txt", "w");
+			fprintf(f, "float3(%f, %f, %f), float3(%f, %f, %f), float3(%f, %f, %f)",
+				eye[0], eye[1], eye[2], 
+				target[0], target[1], target[2],
+				up[0], up[1], up[2]);
+			fclose(f);
+		}*/
 	}
 
 	void Render()

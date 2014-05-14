@@ -99,7 +99,7 @@ public:
 	virtual shared_ptr<UnorderedAccessView> CreateTextureCubeUAV(const shared_ptr<Texture>& texture);
 
 	// Render target view
-	virtual shared_ptr<RenderView> CreateDepthStencilView(const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level);
+	virtual shared_ptr<RenderView> CreateDepthStencilView(const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level, uint32_t flags = 0);
 	virtual shared_ptr<RenderView> CreateRenderTargetView2D(const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level);
 	virtual shared_ptr<RenderView> CreateRenderTargetViewArray(const shared_ptr<Texture>& texture, uint32_t level);
 

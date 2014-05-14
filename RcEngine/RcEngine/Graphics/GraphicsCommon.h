@@ -32,6 +32,12 @@ enum TexCreateFlag
 	TexCreate_ResolveTarget				= 1UL << 6,
 };
 
+enum DepthStencilViewCreateFlag
+{
+	DSVCreate_ReadOnly_Depth			= 1UL << 0,
+	DSVCreate_ReadOnly_Stencil			= 1UL << 1
+};
+
 enum TextureType
 {
 	TT_Texture1D,

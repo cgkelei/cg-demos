@@ -152,9 +152,9 @@ shared_ptr<UnorderedAccessView> D3D11Factory::CreateTextureCubeUAV( const shared
 	ENGINE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, "CubeMap UAV not implemented!", "D3D11Factory::CreateTextureCubeUAV");
 }
 
-shared_ptr<RenderView> D3D11Factory::CreateDepthStencilView( const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level )
+shared_ptr<RenderView> D3D11Factory::CreateDepthStencilView( const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level, uint32_t flags )
 {
-	return shared_ptr<RenderView>( new D3D11DepthStencilView(texture, arrayIndex, level) );
+	return shared_ptr<RenderView>( new D3D11DepthStencilView(texture, arrayIndex, level, flags) );
 }
 
 shared_ptr<RenderView> D3D11Factory::CreateRenderTargetView2D( const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level )

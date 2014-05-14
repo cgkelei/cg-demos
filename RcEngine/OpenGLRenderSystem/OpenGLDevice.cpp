@@ -334,6 +334,19 @@ void OpenGLDevice::SetRasterizerState( const shared_ptr<RasterizerState>& state 
 				glDisable(GL_MULTISAMPLE);
 		}
 
+		if (currDesc.DepthClipEnable != stateDesc.DepthClipEnable)
+		{
+			/**
+			 *  If enabled, the -wc¡Üzc¡Üwc plane equation is ignored by view volume clipping
+			 * (effectively, there is no near or far plane clipping). 
+			 */
+			if (stateDesc.DepthClipEnable)
+				glDisable(GL_DEPTH_CLAMP);
+			else
+				glEnable(GL_DEPTH_CLAMP);
+		}
+
+
 		//Set Current
 		mCurrentRasterizerState = state;
 	}

@@ -24,7 +24,7 @@ protected:
 class _D3D11Export D3D11DepthStencilView : public RenderView
 {
 public:
-	D3D11DepthStencilView(const shared_ptr<Texture>& texture, uint32_t arrIndex, uint32_t level);
+	D3D11DepthStencilView(const shared_ptr<Texture>& texture, uint32_t arrIndex, uint32_t level, uint32_t flags);
 	virtual ~D3D11DepthStencilView();
 
 	virtual void ClearColor(const ColorRGBA& clr);

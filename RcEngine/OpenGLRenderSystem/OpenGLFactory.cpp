@@ -115,7 +115,7 @@ shared_ptr<RenderView> OpenGLFactory::CreateRenderTargetView2D( const shared_ptr
 	return shared_ptr<RenderView>( new OpenGLRenderTargetView2D(texture, arrayIndex, level) );
 }
 
-shared_ptr<RenderView> OpenGLFactory::CreateDepthStencilView( const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level )
+shared_ptr<RenderView> OpenGLFactory::CreateDepthStencilView( const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level, uint32_t flags /*= 0*/ )
 {
 	return shared_ptr<RenderView>( new OpenGLDepthStencilView(texture, arrayIndex, level) );
 }

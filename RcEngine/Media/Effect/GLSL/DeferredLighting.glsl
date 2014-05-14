@@ -195,7 +195,6 @@ void main()
 	GetDiffuseAndSpecular(sampleIndex, diffuseAlbedo, specularAlbedo);
 	
 	vec4 lightColor = texelFetch( LightAccumulateBuffer, sampleIndex, 0 );
-	   
 	                    
 	vec3 diffueLight = lightColor.rgb;
 	vec3 specularLight = lightColor.a / (Luminance(diffueLight) + 1e-6) * diffueLight;
