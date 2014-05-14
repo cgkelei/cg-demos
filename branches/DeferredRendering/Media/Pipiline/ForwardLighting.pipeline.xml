@@ -1,1 +1,0 @@
-<Pipeline name="ForwardLighting">	<CommandQueue>				<Stage name="Final">			<SwitchFrameBuffer name="Screen"/>			<ClearTarget attach="Depth" depth="1.0"/>				<DrawGeometry technique="DirectionalLighting"/>			</Stage>		</Pipeline>
