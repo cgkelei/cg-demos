@@ -15,6 +15,7 @@ public:
 
 	bool LoadImageFromDDS(const String& filename);
 	void SaveImageToFile(const String& filename);
+	void SaveLinearDepthToFile(const String& filename, float projM33, float projM43);
 
 	inline uint32_t GetWidth() const		{ assert(mValid); return mWidth; }
 	inline uint32_t GetHeight() const		{ assert(mValid); return mHeight; }

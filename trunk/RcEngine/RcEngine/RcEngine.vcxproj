@@ -32,7 +32,6 @@
     <ClInclude Include="Graphics\Camera.h" />
     <ClInclude Include="Graphics\CameraController1.h" />
     <ClInclude Include="Graphics\CascadedShadowMap.h" />
-    <ClInclude Include="Graphics\DebugRenderer.h" />
     <ClInclude Include="Graphics\Effect.h" />
     <ClInclude Include="Graphics\EffectParameter.h" />
     <ClInclude Include="Graphics\GraphicsCommon.h" />
@@ -106,7 +105,6 @@
     <ClCompile Include="Graphics\CameraController1.cpp" />
     <ClCompile Include="Graphics\CascadedShadowMap.cpp" />
     <ClCompile Include="Graphics\DDSImage.cpp" />
-    <ClCompile Include="Graphics\DebugRenderer.cpp" />
     <ClCompile Include="Graphics\Effect.cpp" />
     <ClCompile Include="Graphics\EffectParameter.cpp" />
     <ClCompile Include="Graphics\FrameBuffer.cpp" />
@@ -239,7 +237,9 @@
   <ItemGroup>
     <Xml Include="..\Media\Effect\AlphaTest.effect.xml" />
     <Xml Include="..\Media\Effect\DebugView.effect.xml" />
-    <Xml Include="..\Media\Effect\DeferredLighting.effect.xml" />
+    <Xml Include="..\Media\Effect\DeferredLighting.effect.xml">
+      <SubType>Designer</SubType>
+    </Xml>
     <Xml Include="..\Media\Effect\FSQuad.effect.xml" />
     <Xml Include="..\Media\Effect\HDRToneMap.effect.xml" />
     <Xml Include="..\Media\Effect\Model.effect.xml" />

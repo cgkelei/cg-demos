@@ -376,23 +376,14 @@ GLenum OpenGLMapping::Mapping( StencilOperation sop )
 {				
 	switch(sop)
 	{
-	case SOP_Keep:
-		return GL_KEEP;
-	case SOP_Zero:
-		return GL_ZERO;
-	case SOP_Replace:
-		return GL_REPLACE;
-	case SOP_Incr:
-		return GL_INCR;
-	case SOP_Decr:
-		return GL_DECR;
-	case SOP_Invert:
-		return GL_INVERT;
-	case SOP_Incr_Wrap:
-		return GL_INCR_WRAP;
-	case SOP_Decr_Wrap:
-		return GL_DECR_WRAP;
-
+	case SOP_Keep:		return GL_KEEP;
+	case SOP_Zero:		return GL_ZERO;
+	case SOP_Replace:	return GL_REPLACE;
+	case SOP_Incr:		return GL_INCR;
+	case SOP_Decr:		return GL_DECR;
+	case SOP_Invert:	return GL_INVERT;
+	case SOP_Incr_Wrap: return GL_INCR_WRAP;
+	case SOP_Decr_Wrap: return GL_DECR_WRAP;
 	default:
 		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unsupported StencilOperation!", 
 			"OpenGLMapping::Mapping( StencilOperation )");

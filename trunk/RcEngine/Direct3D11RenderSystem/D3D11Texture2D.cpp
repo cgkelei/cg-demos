@@ -199,9 +199,23 @@ void* D3D11Texture2D::Map2D( uint32_t arrayIndex, uint32_t level, ResourceMapAcc
 			ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
 			D3D11_VERRY( deviceD3D11->CreateTexture2D( &texDesc, NULL, (ID3D11Texture2D**)&mStagingTextureD3D11) );
 		}
+		
+		if (PixelFormatUtils::IsDepth(mFormat))
+		{
+			/**
+			 * Note If you use CopySubresourceRegion with a depth-stencil buffer 
+			  * or a multisampled resource, you must copy the whole subresource.
+			  * In this situation, you must pass 0 to the DstX, DstY, and DstZ parameters 
+			 *  and NULL to the pSrcBox parameter.
+			 */
+			deviceContextD3D11->CopySubresourceRegion(mStagingTextureD3D11, subResource, 0, 0, 0, TextureD3D11, subResource, nullptr);
+		}
+		else
+		{
+			CD3D11_BOX sourceRegion(0, 0, 0, CalculateLevelSize(mWidth, level), CalculateLevelSize(mHeight, level), 1);
+			deviceContextD3D11->CopySubresourceRegion(mStagingTextureD3D11, subResource, 0, 0, 0, TextureD3D11, subResource, &sourceRegion);
+		}
 
-		CD3D11_BOX sourceRegion(0, 0, 0, CalculateLevelSize(mWidth, level), CalculateLevelSize(mHeight, level), 1);
-		deviceContextD3D11->CopySubresourceRegion(mStagingTextureD3D11, subResource, 0, 0, 0, TextureD3D11, subResource, &sourceRegion);
 		resourceMapD3D11 = mStagingTextureD3D11;
 	}
 	else
@@ -210,7 +224,7 @@ void* D3D11Texture2D::Map2D( uint32_t arrayIndex, uint32_t level, ResourceMapAcc
 	}
 
 	D3D11_MAPPED_SUBRESOURCE mapped;
-	deviceContextD3D11->Map(resourceMapD3D11, subResource, D3D11Mapping::Mapping(mapType), 0, &mapped);
+	D3D11_VERRY( deviceContextD3D11->Map(resourceMapD3D11, subResource, D3D11Mapping::Mapping(mapType), 0, &mapped) );
 
 	// Keep map type
 	mTextureMapAccess = mapType;
@@ -230,7 +244,16 @@ void D3D11Texture2D::Unmap2D( uint32_t arrayIndex, uint32_t level )
 		deviceContextD3D11->Unmap(mStagingTextureD3D11, subResource);
 
 		CD3D11_BOX sourceRegion(0, 0, 0, CalculateLevelSize(mWidth, level), CalculateLevelSize(mHeight, level), 1);
-		deviceContextD3D11->CopySubresourceRegion(TextureD3D11, subResource, 0, 0, 0, mStagingTextureD3D11, subResource, &sourceRegion);
+		
+		if (PixelFormatUtils::IsDepth(mFormat))
+		{
+			deviceContextD3D11->CopySubresourceRegion(TextureD3D11, subResource, 0, 0, 0, mStagingTextureD3D11, subResource, nullptr);
+		}
+		else
+		{
+			CD3D11_BOX sourceRegion(0, 0, 0, CalculateLevelSize(mWidth, level), CalculateLevelSize(mHeight, level), 1);
+			deviceContextD3D11->CopySubresourceRegion(TextureD3D11, subResource, 0, 0, 0, mStagingTextureD3D11, subResource, &sourceRegion);
+		}
 	}
 	else
 	{

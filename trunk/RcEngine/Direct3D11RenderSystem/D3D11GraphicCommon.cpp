@@ -224,22 +224,14 @@ D3D11_STENCIL_OP D3D11Mapping::Mapping( StencilOperation sop )
 {
 	switch(sop)
 	{
-	case SOP_Zero:
-		return D3D11_STENCIL_OP_ZERO;
-	case SOP_Keep:
-		return D3D11_STENCIL_OP_KEEP;
-	case SOP_Replace:
-		return D3D11_STENCIL_OP_REPLACE;
-	case SOP_Incr:
-		return D3D11_STENCIL_OP_INCR;
-	case SOP_Invert:
-		return D3D11_STENCIL_OP_INVERT;
-	case SOP_Decr:
-		return D3D11_STENCIL_OP_DECR;
-	case SOP_Incr_Wrap:
-		return D3D11_STENCIL_OP_INCR_SAT;
-	case SOP_Decr_Wrap:
-		return D3D11_STENCIL_OP_DECR_SAT;
+	case SOP_Zero:		return D3D11_STENCIL_OP_ZERO;
+	case SOP_Keep:		return D3D11_STENCIL_OP_KEEP;
+	case SOP_Replace:	return D3D11_STENCIL_OP_REPLACE;
+	case SOP_Incr:      return D3D11_STENCIL_OP_INCR_SAT;
+	case SOP_Invert:	return D3D11_STENCIL_OP_INVERT;
+	case SOP_Decr:		return D3D11_STENCIL_OP_DECR_SAT;
+	case SOP_Incr_Wrap:	return D3D11_STENCIL_OP_INCR;
+	case SOP_Decr_Wrap: return D3D11_STENCIL_OP_DECR;
 	default:
 		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid StencilOperation", "D3D11Mapping::Mapping");
 	}
@@ -249,16 +241,11 @@ D3D11_BLEND_OP D3D11Mapping::Mapping( BlendOperation bop )
 {
 	switch (bop)
 	{
-	case BOP_Add:
-		return D3D11_BLEND_OP_ADD;
-	case BOP_Sub:
-		return D3D11_BLEND_OP_SUBTRACT;
-	case BOP_Rev_Sub:
-		return D3D11_BLEND_OP_REV_SUBTRACT;
-	case BOP_Min:
-		return D3D11_BLEND_OP_MIN;
-	case BOP_Max:
-		return D3D11_BLEND_OP_MAX;
+	case BOP_Add:		return D3D11_BLEND_OP_ADD;
+	case BOP_Sub:		return D3D11_BLEND_OP_SUBTRACT;
+	case BOP_Rev_Sub:	return D3D11_BLEND_OP_REV_SUBTRACT;
+	case BOP_Min:		return D3D11_BLEND_OP_MIN;
+	case BOP_Max:		return D3D11_BLEND_OP_MAX;
 	default:
 		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid BlendOperation", "D3D11Mapping::Mapping");
 	}
@@ -268,32 +255,19 @@ D3D11_BLEND D3D11Mapping::Mapping( AlphaBlendFactor blend )
 {
 	switch (blend)
 	{
-	case ABF_Zero:
-		return D3D11_BLEND_ZERO;
-	case ABF_One:
-		return D3D11_BLEND_ONE;
-	case ABF_Src_Alpha:
-		return D3D11_BLEND_SRC_ALPHA;
-	case ABF_Dst_Alpha:
-		return D3D11_BLEND_DEST_ALPHA;
-	case ABF_Inv_Src_Alpha:
-		return D3D11_BLEND_INV_SRC_ALPHA;
-	case ABF_Inv_Dst_Alpha:
-		return D3D11_BLEND_INV_DEST_ALPHA;
-	case ABF_Src_Color:
-		return D3D11_BLEND_SRC_COLOR;
-	case ABF_Dst_Color:
-		return D3D11_BLEND_DEST_COLOR;
-	case ABF_Inv_Src_Color:
-		return D3D11_BLEND_INV_SRC_COLOR;
-	case ABF_Inv_Dst_Color:
-		return D3D11_BLEND_INV_DEST_COLOR;
-	case ABF_Src_Alpha_Sat:
-		return D3D11_BLEND_SRC_ALPHA_SAT;
-	case ABF_Blend_Factor:
-		return D3D11_BLEND_BLEND_FACTOR;
-	case ABF_Inv_Blend_Factor:
-		return D3D11_BLEND_INV_BLEND_FACTOR;
+	case ABF_Zero:					return D3D11_BLEND_ZERO;
+	case ABF_One:					return D3D11_BLEND_ONE;
+	case ABF_Src_Alpha:				return D3D11_BLEND_SRC_ALPHA;
+	case ABF_Dst_Alpha:				return D3D11_BLEND_DEST_ALPHA;
+	case ABF_Inv_Src_Alpha:			return D3D11_BLEND_INV_SRC_ALPHA;
+	case ABF_Inv_Dst_Alpha:			return D3D11_BLEND_INV_DEST_ALPHA;
+	case ABF_Src_Color:				return D3D11_BLEND_SRC_COLOR;
+	case ABF_Dst_Color:				return D3D11_BLEND_DEST_COLOR;
+	case ABF_Inv_Src_Color:			return D3D11_BLEND_INV_SRC_COLOR;
+	case ABF_Inv_Dst_Color:			return D3D11_BLEND_INV_DEST_COLOR;
+	case ABF_Src_Alpha_Sat:			return D3D11_BLEND_SRC_ALPHA_SAT;
+	case ABF_Blend_Factor:			return D3D11_BLEND_BLEND_FACTOR;
+	case ABF_Inv_Blend_Factor:		return D3D11_BLEND_INV_BLEND_FACTOR;
 	default:
 		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid Blend", "D3D11Mapping::Mapping");
 	}
@@ -303,12 +277,9 @@ D3D11_CULL_MODE D3D11Mapping::Mapping( CullMode mode )
 {
 	switch (mode)
 	{
-	case CM_None:
-		return D3D11_CULL_NONE;
-	case CM_Front:
-		return D3D11_CULL_FRONT;
-	case CM_Back:
-		return D3D11_CULL_BACK;
+	case CM_None: return D3D11_CULL_NONE;
+	case CM_Front: return D3D11_CULL_FRONT;
+	case CM_Back: return D3D11_CULL_BACK;
 	default:
 		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid CullMode", "D3D11Mapping::Mapping");
 	}
@@ -539,6 +510,5 @@ DXGI_FORMAT D3D11Mapping::GetDepthShaderResourceFormat( PixelFormat inPixelForma
 
 	return DXGI_FORMAT_UNKNOWN;
 }
-
 
 }

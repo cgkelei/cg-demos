@@ -6,7 +6,8 @@
 
 namespace RcEngine {
 
-D3D11DepthStencilView::D3D11DepthStencilView( const shared_ptr<Texture>& texture, uint32_t arrIndex, uint32_t level )
+
+D3D11DepthStencilView::D3D11DepthStencilView( const shared_ptr<Texture>& texture, uint32_t arrIndex, uint32_t level, uint32_t flags )
 	: RenderView(texture),
 	  DepthStencilViewD3D11(nullptr)
 {
@@ -15,7 +16,13 @@ D3D11DepthStencilView::D3D11DepthStencilView( const shared_ptr<Texture>& texture
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
 	ZeroMemory( &descDSV, sizeof(descDSV) );
+
 	descDSV.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
+
+	if (createFlags & DSVCreate_ReadOnly_Depth)
+		descDSV.Flags |=  D3D11_DSV_READ_ONLY_DEPTH;
+	if (createFlags & DSVCreate_ReadOnly_Stencil)
+		descDSV.Flags |=  D3D11_DSV_READ_ONLY_STENCIL;
 
 	uint32_t textureArraySize = texture->GetTextureArraySize();
 	if (textureArraySize <= 1)

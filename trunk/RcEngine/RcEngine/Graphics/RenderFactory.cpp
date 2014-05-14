@@ -255,5 +255,12 @@ void RenderFactory::SaveTextureToFile( const String& filename, const shared_ptr<
 	img.SaveImageToFile(filename);
 }
 
+void RenderFactory::SaveLinearDepthTextureToFile( const String& filename, const shared_ptr<Texture>& texture, float projM33, float projM43 )
+{
+	Image img;
+	img.CopyImageFromTexture(texture);
+	img.SaveLinearDepthToFile(filename, projM33, projM43);
+}
+
 
 }

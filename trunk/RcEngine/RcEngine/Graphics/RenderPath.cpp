@@ -111,7 +111,7 @@ void BuildSpotLightShape(RenderOperation& oOperation)
 	uint16_t indicesCount = (nCapSegments+nCapSegments-2)*3;
 
 	uint32_t vbSize = 3 * vertexCount * sizeof(float);
-	shared_ptr<GraphicsBuffer> vertexBuffer= factory->CreateVertexBuffer(vbSize, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Index, nullptr);
+	shared_ptr<GraphicsBuffer> vertexBuffer= factory->CreateVertexBuffer(vbSize, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Vertex, nullptr);
 
 	uint32_t ibSize = indicesCount * sizeof(uint16_t);
 	shared_ptr<GraphicsBuffer> indexBuffer = factory->CreateIndexBuffer(ibSize, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Index,nullptr);
@@ -347,7 +347,8 @@ void DeferredPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 	mHDRBufferRTV = factory->CreateRenderTargetView2D(mHDRBuffer, 0, 0);
 	mHDRFB->AttachRTV(ATT_Color0, mHDRBufferRTV);
 
-	mDepthStencilViewReadOnly = factory->CreateDepthStencilView(mDepthStencilBuffer, 0, 0);
+	uint32_t dsvReadOnly = DSVCreate_ReadOnly_Stencil | DSVCreate_ReadOnly_Depth;
+	mDepthStencilViewReadOnly = factory->CreateDepthStencilView(mDepthStencilBuffer, 0, 0, dsvReadOnly);
 	mHDRFB->AttachRTV(ATT_DepthStencil, mDepthStencilViewReadOnly);
 
 	// Init shadow manager
@@ -432,12 +433,12 @@ void DeferredPath::RenderScene()
 	DeferredShading();
 
 	// Draw Light
-	//mVisualLightsWireframe = true;
+	mVisualLightsWireframe = true;
 	if (mVisualLightsWireframe)
 	{
 		EffectTechnique* debugTech = mDebugEffect->GetTechniqueByName("DebugShape");
 
-		mDebugEffect->GetParameterByName("ViewProj")->SetValue(mCamera->GetEngineViewProjMatrix());
+		//mDebugEffect->GetParameterByName("ViewProj")->SetValue(mCamera->GetEngineViewProjMatrix());
 
 		for (Light* light : mSceneMan->GetSceneLights())
 		{
@@ -468,7 +469,10 @@ void DeferredPath::RenderScene()
 
 				float4x4 world = CreateScaling(scaleBase, scaleHeight, scaleBase) * rotation *
 								 CreateTranslation(worldPos);
-				mDebugEffect->GetParameterByName("World")->SetValue(world);
+				
+				float4x4 worldViewProj = world * mCamera->GetEngineViewProjMatrix();
+
+				mDebugEffect->GetParameterByName("WorldViewProj")->SetValue(worldViewProj);
 
 				mDevice->Draw(debugTech, mSpotLightShape);
 			}
@@ -481,7 +485,7 @@ void DeferredPath::RenderScene()
 void DeferredPath::GenereateGBuffer()
 {
 	mDevice->BindFrameBuffer(mGBufferFB);
-	mGBufferFB->Clear(CF_Color | CF_Depth | CF_Stencil, ColorRGBA(0, 0, 0, 0), 1.0, 0);
+	mGBufferFB->Clear(CF_Color | CF_Depth | CF_Stencil, ColorRGBA(0, 0, 0, 0), 1.0f, 0);
 
 	// Todo: update render queue with render bucket filter
 	shared_ptr<Camera> camera = mGBufferFB->GetCamera();
@@ -494,13 +498,11 @@ void DeferredPath::GenereateGBuffer()
 		renderItem.Renderable->Render();
 	}
 
-	if ( InputSystem::GetSingleton().MouseButtonPress(MS_MiddleButton) )
-	{
-		mDevice->GetRenderFactory()->SaveTextureToFile("E:/GBuffer0.pfm", mGBuffer[0]);
-		mDevice->GetRenderFactory()->SaveTextureToFile("E:/GBuffer1.tga", mGBuffer[1]);
-	}
-
-	mDevice->GetRenderFactory()->SaveTextureToFile("E:/depth.pfm", mDepthStencilBuffer);
+	//if ( InputSystem::GetSingleton().MouseButtonPress(MS_MiddleButton) )
+	//{
+	//	mDevice->GetRenderFactory()->SaveTextureToFile("E:/GBuffer0.pfm", mGBuffer[0]);
+	//	mDevice->GetRenderFactory()->SaveTextureToFile("E:/GBuffer1.tga", mGBuffer[1]);
+	//}
 }
 
 void DeferredPath::ComputeSSAO()
@@ -528,9 +530,9 @@ void DeferredPath::DeferredLighting()
 	mLightAccumulateRTV->ClearColor(ColorRGBA(0, 0, 0, 0));
 
 	// Copy depth and stencil
-	//mDepthStencilBuffer->CopyToTexture(*mDepthStencilBufferLight);
-	EffectTechnique* copyDepthTech = mDeferredEffect->GetTechniqueByName("CopyDepth");
-	mDevice->Draw(copyDepthTech, mFullscreenTrangle);
+	mDepthStencilBuffer->CopyToTexture(*mDepthStencilBufferLight);
+	//EffectTechnique* copyDepthTech = mDeferredEffect->GetTechniqueByName("CopyDepth");
+	//mDevice->Draw(copyDepthTech, mFullscreenTrangle);
 
 	// Set all common effect parameters
 	mDeferredEffect->GetParameterByName("InvViewProj")->SetValue(mInvViewProj);
@@ -559,6 +561,8 @@ void DeferredPath::DeferredLighting()
 				DrawPointLightShape(light);
 		}
 	}
+
+	mDevice->GetRenderFactory()->SaveLinearDepthTextureToFile("E:/depth.pfm", mDepthStencilBufferLight, proj.M33, proj.M43);
 }
 
 void DeferredPath::DeferredShading()

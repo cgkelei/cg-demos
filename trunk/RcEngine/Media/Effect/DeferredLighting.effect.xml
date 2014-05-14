@@ -5,9 +5,6 @@
   <AutoBinding name="LightColor" semantic="LightColor" type="float3"/>
   <AutoBinding name="LightFalloff" semantic="LightFalloff" type="float3"/>
   <AutoBinding name="LightFalloff" semantic="LightFalloff" type="float3"/>      
-  
-  <AutoBinding name="WorldView" semantic="WorldViewProjectionMatrix" type="float4x4"/>
-  <AutoBinding name="InvViewProj" semantic="ProjectionMatrix" type="float4x4"/>
 
   <Technique name="CopyDepth">
     <Pass name="p0">

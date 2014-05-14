@@ -83,7 +83,7 @@ OpenGLRenderWindow::OpenGLRenderWindow( uint32_t width, uint32_t height )
 	uint32_t sampleCount = appSettings.SampleCount;
 	if(sampleCount > 1)
 	{
-
+		
 	}
 
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);

@@ -29,7 +29,6 @@ public:
 	static DXGI_FORMAT GetDepthTextureFormat(PixelFormat inPixelFormat);
 	static DXGI_FORMAT GetDepthShaderResourceFormat(PixelFormat inPixelFormat);
 
-
 	static void UnMapping(D3D10_SRV_DIMENSION dimension, EffectParameterType& oTexType);
 };
 

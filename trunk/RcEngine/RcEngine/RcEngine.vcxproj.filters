@@ -264,9 +264,6 @@
     <ClInclude Include="Core\Profiler.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\DebugRenderer.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Exception.cpp">
@@ -451,9 +448,6 @@
     </ClCompile>
     <ClCompile Include="Core\Profiler.cpp">
       <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\DebugRenderer.cpp">
-      <Filter>Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

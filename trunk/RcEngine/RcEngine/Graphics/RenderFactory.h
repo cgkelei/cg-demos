@@ -90,7 +90,9 @@ public:
 	
 	// Utility function
 	shared_ptr<Texture> LoadTextureFromFile(const String& filename);
+
 	void SaveTextureToFile(const String& filename, const shared_ptr<Texture>& texture);
+	void SaveLinearDepthTextureToFile(const String& filename, const shared_ptr<Texture>& texture, float projM33, float projM43);
 
 	shared_ptr<Shader> LoadShaderFromFile(
 		ShaderType shaderType, 
@@ -132,7 +134,7 @@ public:
 	virtual shared_ptr<UnorderedAccessView> CreateTextureCubeUAV(const shared_ptr<Texture>& texture) = 0;
 
 	// Render target view
-	virtual shared_ptr<RenderView> CreateDepthStencilView(const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level) = 0;
+	virtual shared_ptr<RenderView> CreateDepthStencilView(const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level, uint32_t flags = 0) = 0;
 	virtual shared_ptr<RenderView> CreateRenderTargetView2D(const shared_ptr<Texture>& texture, uint32_t arrayIndex, uint32_t level) = 0;
 	virtual shared_ptr<RenderView> CreateRenderTargetViewArray(const shared_ptr<Texture>& texture, uint32_t level) = 0;
 
