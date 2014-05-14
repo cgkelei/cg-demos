@@ -142,14 +142,14 @@ void main()
 	vec3 worldPosition = ReconstructWorldPosition(sampleIndex, oPosCS);
 	vec3 L = normalize(LightPos.xyz - worldPosition);
 
+	// Decode normal and shininess from GBuffer
+	vec3 N;
+	float shininess;
+	GetNormalAndShininess(sampleIndex, N, shininess);
+
 	float spot = SpotLighting(L, LightDir.xyz, vec2(LightPos.w, LightDir.w));
 	if(spot > 0.0)
 	{
-		// Decode normal and shininess from GBuffer
-		vec3 N;
-		float shininess;
-		GetNormalAndShininess(sampleIndex, N, shininess);
-
 		float NdotL = dot(L, N);
 		if (NdotL > 0.0)
 		{

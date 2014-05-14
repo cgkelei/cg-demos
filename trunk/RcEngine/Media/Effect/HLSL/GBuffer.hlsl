@@ -16,7 +16,8 @@ void GBufferPS(in VSOutput input,
 	float3 normal = normalize(input.NormalWS);
 #endif	
 	
-	normal = normal * 0.5 + 0.5;
+	// Use RGBA16F
+	//normal = normal * 0.5 + 0.5;
 	//CompressUnsignedNormalToNormalsBuffer(normal);	
 	
 	oFragColor0 = float4(normal, material.Shininess / 255.0);

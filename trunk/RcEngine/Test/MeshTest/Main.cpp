@@ -79,8 +79,9 @@ protected:
 		//sponzaNode->AttachObject(sponzaEntity);
 
 		//mCamera->CreateLookAt(float3(-137.0, 97.3, 82.0), float3(-136.5, 96.8, 81.3), float3(0.3, 0.9, -0.4));
-		mCamera->CreateLookAt(float3(-322.203735, 217.687668, 206.708405), float3(-321.512451, 217.287216, 206.106934), float3(0.302103, 0.916318, -0.262859));
-		mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 1000.0f );
+		//mCamera->CreateLookAt(float3(-322.203735, 217.687668, 206.708405), float3(-321.512451, 217.287216, 206.106934), float3(0.302103, 0.916318, -0.262859));
+		mCamera->CreateLookAt(float3(-511.802338, 363.893677, 402.886078), float3(-511.026764, 363.578156, 402.339325), float3(0.257883, 0.948919, -0.181794));
+		mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 3000.0f );
 
 
 		std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
@@ -213,7 +214,7 @@ protected:
 	{
 		mCameraControler->Update(deltaTime);
 
-		/*if ( InputSystem::GetSingleton().KeyPress(KC_W) )
+		if ( InputSystem::GetSingleton().KeyPress(KC_Q) )
 		{
 			auto target = mCamera->GetLookAt();
 			auto eye = mCamera->GetPosition();
@@ -225,7 +226,7 @@ protected:
 				target[0], target[1], target[2],
 				up[0], up[1], up[2]);
 			fclose(f);
-		}*/
+		}
 	}
 
 	void Render()
