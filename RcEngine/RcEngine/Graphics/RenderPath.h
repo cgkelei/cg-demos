@@ -135,12 +135,55 @@ public:
 	bool mVisualLightsWireframe;
 };
 
-class _ApiExport TileBasedDeferredPath
+/**
+ * Tile based deferred shading
+ *
+ * Todo: refactor a base class for both non-tiled and tiled deferred path 
+ */
+class _ApiExport TiledDeferredPath : public RenderPath
 {
+public:
+	TiledDeferredPath();
+	virtual ~TiledDeferredPath();
 
+	virtual void OnGraphicsInit(const shared_ptr<Camera>& camera);
+	virtual void OnWindowResize(uint32_t width, uint32_t height);
+	virtual void RenderScene();
+
+private:
+	void GenereateGBuffer();
+	void TiledLighting();
+
+private:
+
+	enum { TileGroupSize = 32 };
+
+	// Normal + Specular Shininess,  Albedo + Specular Intensity
+	shared_ptr<Texture> mGBuffer[2];
+	shared_ptr<RenderView> mGBufferRTV[2];
+
+	shared_ptr<Texture> mDepthStencilBuffer;
+	shared_ptr<RenderView> mDepthStencilView;
+	shared_ptr<RenderView> mDepthStencilViewReadOnly;
+
+	shared_ptr<Texture> mLightAccumulateBuffer;
+	shared_ptr<UnorderedAccessView> mLightAccumulateUAV;
+
+	shared_ptr<Texture> mHDRBuffer;
+	shared_ptr<RenderView> mHDRBufferRTV;
+
+	shared_ptr<FrameBuffer> mGBufferFB;
+	shared_ptr<FrameBuffer> mLightAccumulateFB;
+	shared_ptr<FrameBuffer> mHDRFB;
+
+	shared_ptr<Effect> mTiledDeferredEffect;
+	shared_ptr<Effect> mToneMapEffect;
+
+	EffectTechnique* mTileTech;
+	EffectTechnique* mShadingTech;
 };
 
-class _ApiExport TileBasedForwardPath
+class _ApiExport TiledForwardPath
 {
 
 };

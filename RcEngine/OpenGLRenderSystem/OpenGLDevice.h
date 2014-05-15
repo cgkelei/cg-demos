@@ -35,6 +35,8 @@ public:
 	void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0);
 	void SetSamplerState(ShaderType stage, uint32_t unit, const shared_ptr<SamplerState>& state);
 	void SetViewports(const std::vector<Viewport>& viewports);
+	void DispatchCompute(const EffectTechnique* technique, uint32_t threadGroupCountX, uint32_t threadGroupCountY, uint32_t threadGroupCounZ);
+
 
 protected:
 

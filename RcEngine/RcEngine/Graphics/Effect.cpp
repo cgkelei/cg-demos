@@ -559,9 +559,9 @@ void EffectPass::BeginPass()
 {
 	RenderDevice* device = Environment::GetSingleton().GetRenderDevice();
 
-	device->SetDepthStencilState(mDepthStencilState, mFrontStencilRef, mBackStencilRef);
-	device->SetRasterizerState(mRasterizerState);
-	device->SetBlendState(mBlendState, mBlendColor, mSampleMask);
+	if (mDepthStencilState) device->SetDepthStencilState(mDepthStencilState, mFrontStencilRef, mBackStencilRef);
+	if (mRasterizerState) device->SetRasterizerState(mRasterizerState);
+	if (mBlendState) device->SetBlendState(mBlendState, mBlendColor, mSampleMask);
 	device->BindShaderPipeline(mShaderPipeline);
 }
 

@@ -700,4 +700,138 @@ void DeferredPath::DrawPointLightShape(Light* light )
 	mDevice->Draw(mPointLightTech, mPointLightShape);
 }
 
+//----------------------------------------------------------------------------------------------
+TiledDeferredPath::TiledDeferredPath()
+{
+
+}
+
+TiledDeferredPath::~TiledDeferredPath()
+{
+
+}
+
+void TiledDeferredPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
+{
+	RenderPath::OnGraphicsInit(camera);
+
+	Window* appWindow = Application::msApp->GetMainWindow();
+	const uint32_t windowWidth = appWindow->GetWidth();
+	const uint32_t windowHeight = appWindow->GetHeight();
+
+	RenderFactory* factory = mDevice->GetRenderFactory();
+	ResourceManager& resMan = ResourceManager::GetSingleton();
+
+	// Load deferred lighting effect
+	mTiledDeferredEffect = resMan.GetResourceByName<Effect>(RT_Effect, "TiledDeferredShading.effect.xml", "General");
+	mToneMapEffect = resMan.GetResourceByName<Effect>(RT_Effect, "HDRToneMap.effect.xml", "General");
+
+	mTileTech = mTiledDeferredEffect->GetTechniqueByName("Tile");
+	mShadingTech = mTiledDeferredEffect->GetTechniqueByName("Shading");
+
+	// Init GBuffer
+	mGBufferFB = factory->CreateFrameBuffer(windowWidth, windowHeight);
+	mGBufferFB->SetViewport(Viewport(0.0f, 0.f, float(windowWidth), float(windowHeight)));
+
+#ifdef _DEBUG
+	uint32_t acessHint = EAH_GPU_Write | EAH_GPU_Read;
+#else
+	uint32_t acessHint = EAH_GPU_Write | EAH_GPU_Read;
+#endif
+
+	uint32_t rtCreateFlag = TexCreate_ShaderResource | TexCreate_RenderTarget;
+	uint32_t dsCreateFlag = TexCreate_ShaderResource | TexCreate_DepthStencilTarget;
+
+	mGBuffer[0] = factory->CreateTexture2D(windowWidth, windowHeight, PF_RGBA16F, 1, 1, 1, 0, acessHint, rtCreateFlag, NULL);
+	mGBuffer[1] = factory->CreateTexture2D(windowWidth, windowHeight, PF_RGBA8_UNORM, 1, 1, 1, 0, acessHint, rtCreateFlag, NULL);
+	mDepthStencilBuffer = factory->CreateTexture2D(windowWidth, windowHeight, PF_D24S8, 1, 1, 1, 0, acessHint, dsCreateFlag, NULL);
+
+	mGBufferRTV[0] = factory->CreateRenderTargetView2D(mGBuffer[0], 0, 0);
+	mGBufferRTV[1] = factory->CreateRenderTargetView2D(mGBuffer[1], 0, 0);
+	mDepthStencilView = factory->CreateDepthStencilView(mDepthStencilBuffer, 0, 0);
+
+	mGBufferFB->AttachRTV(ATT_DepthStencil, mDepthStencilView);
+	mGBufferFB->AttachRTV(ATT_Color0, mGBufferRTV[0]);
+	mGBufferFB->AttachRTV(ATT_Color1, mGBufferRTV[1]);
+	mGBufferFB->SetCamera(camera);
+
+	// Init light buffer
+	mLightAccumulateBuffer = factory->CreateTexture2D(windowWidth, windowHeight, PF_RGBA32F, 1, 1, 1, 0, acessHint, rtCreateFlag, NULL);
+	mLightAccumulateUAV = factory->CreateTexture2DUAV(mLightAccumulateBuffer, 0, 0, 1);
+
+	// HDR buffer
+	mHDRFB = factory->CreateFrameBuffer(windowWidth, windowHeight);
+	mHDRFB->SetViewport(Viewport(0.0f, 0.f, float(windowWidth), float(windowHeight)));
+
+	mHDRBuffer = factory->CreateTexture2D(windowWidth, windowHeight, PF_RGBA32F, 1, 1, 1, 0, acessHint, rtCreateFlag, NULL);
+	mHDRBufferRTV = factory->CreateRenderTargetView2D(mHDRBuffer, 0, 0);
+	mHDRFB->AttachRTV(ATT_Color0, mHDRBufferRTV);
+
+	uint32_t dsvReadOnly = DSVCreate_ReadOnly_Stencil | DSVCreate_ReadOnly_Depth;
+	mDepthStencilViewReadOnly = factory->CreateDepthStencilView(mDepthStencilBuffer, 0, 0, dsvReadOnly);
+	mHDRFB->AttachRTV(ATT_DepthStencil, mDepthStencilViewReadOnly);
+
+	// Init shadow manager
+	//mShadowMan = new CascadedShadowMap(mDevice);
+
+	// bind shader input
+	mTiledDeferredEffect->GetParameterByName("GBuffer0")->SetValue(mGBuffer[0]->GetShaderResourceView());
+	mTiledDeferredEffect->GetParameterByName("GBuffer1")->SetValue(mGBuffer[1]->GetShaderResourceView());
+	mTiledDeferredEffect->GetParameterByName("DepthBuffer")->SetValue(mDepthStencilBuffer->GetShaderResourceView());
+	mTiledDeferredEffect->GetParameterByName("LightAccumulateBuffer")->SetValue(mLightAccumulateBuffer->GetShaderResourceView());	
+
+	mToneMapEffect->GetParameterByName("HDRBuffer")->SetValue(mHDRBuffer->GetShaderResourceView());	
+}
+
+void TiledDeferredPath::OnWindowResize( uint32_t width, uint32_t height )
+{
+
+}
+
+void TiledDeferredPath::RenderScene()
+{
+	// Stage 0, generate GBuffer
+	GenereateGBuffer();
+
+	// Stage 1, tiled lighting 
+	TiledLighting();
+
+	// Stage 2, deferred shading
+
+}
+
+void TiledDeferredPath::GenereateGBuffer()
+{
+	mDevice->BindFrameBuffer(mGBufferFB);
+	mGBufferFB->Clear(CF_Color | CF_Depth | CF_Stencil, ColorRGBA(0, 0, 0, 0), 1.0f, 0);
+
+	// Todo: update render queue with render bucket filter
+	shared_ptr<Camera> camera = mGBufferFB->GetCamera();
+	mSceneMan->UpdateRenderQueue(*camera, RO_None);   
+
+	RenderBucket& opaqueBucket = mSceneMan->GetRenderQueue().GetRenderBucket(RenderQueue::BucketOpaque);	
+	for (const RenderQueueItem& renderItem : opaqueBucket) 
+	{
+		renderItem.Renderable->GetMaterial()->SetCurrentTechnique("GBuffer");
+		renderItem.Renderable->Render();
+	}
+
+	//if ( InputSystem::GetSingleton().MouseButtonPress(MS_MiddleButton) )
+	//{
+	//	mDevice->GetRenderFactory()->SaveTextureToFile("E:/GBuffer0.pfm", mGBuffer[0]);
+	//	mDevice->GetRenderFactory()->SaveTextureToFile("E:/GBuffer1.tga", mGBuffer[1]);
+	//}
+}
+
+void TiledDeferredPath::TiledLighting()
+{
+	uint32_t windowWidth = mLightAccumulateBuffer->GetWidth();
+	uint32_t windowHeight = mLightAccumulateBuffer->GetHeight();
+
+	uint32_t numGroupX = (windowWidth + TileGroupSize - 1) / TileGroupSize;
+	uint32_t numGroupY = (windowHeight + TileGroupSize - 1) / TileGroupSize;
+	mDevice->DispatchCompute(mTileTech, numGroupX, numGroupY, 0);
+}
+
+
 }

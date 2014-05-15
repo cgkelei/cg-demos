@@ -37,7 +37,7 @@ layout (binding = 2) uniform sampler2D GBuffer1; // Albedo + Specular Intensity
 layout (binding = 0, rgba32f) uniform writeonly image2D oLightAccumulateBuffer;
 
 // Structure Buffer
-layout (std430, binding = 4) buffer LightBuffer 
+layout (std430, binding = 4) buffer LightBufferUAV
 {
     Light Lights[];
 };
@@ -136,8 +136,8 @@ void main()
 	
 	if(maxZSample >= minZSample)
 	{
-		atomicMin(TileMinZ, floatBitsToUInt(minZSample));
-		atomicMax(TileMaxZ, floatBitsToUInt(maxZSample));
+		atomicMin(TileMinZ, floatBitsToUint(minZSample));
+		atomicMax(TileMaxZ, floatBitsToUint(maxZSample));
     }	
 	barrier();
 		
