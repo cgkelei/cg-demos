@@ -213,7 +213,8 @@ private:
 };
 
 void CollectRenderStates(XMLNodePtr passNode, DepthStencilStateDesc& dsDesc, BlendStateDesc& blendDesc, RasterizerStateDesc& rasDesc,
-						 ColorRGBA& blendFactor, uint32_t& sampleMask, uint16_t& frontStencilRef, uint16_t& backStencilRef);
+								ColorRGBA& blendFactor, uint32_t& sampleMask, uint16_t& frontStencilRef, uint16_t& backStencilRef);
+
 
 void CollectShaderMacro(const XMLNodePtr& node, std::vector<ShaderMacro>& shaderMacros);
 

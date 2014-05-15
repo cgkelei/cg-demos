@@ -599,5 +599,8 @@
     <Xml Include="..\Media\Effect\DebugView.effect.xml">
       <Filter>Asset\Effect</Filter>
     </Xml>
+    <Xml Include="..\Media\Effect\TiledDeferredShading.effect.xml">
+      <Filter>Asset\Effect</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

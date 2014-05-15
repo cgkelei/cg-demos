@@ -562,4 +562,14 @@ void OpenGLDevice::DoDraw( const EffectTechnique* technique, const RenderOperati
 	}
 }
 
+void OpenGLDevice::DispatchCompute( const EffectTechnique* technique, uint32_t threadGroupCountX, uint32_t threadGroupCountY, uint32_t threadGroupCounZ )
+{
+	for (EffectPass* pass : technique->GetPasses())
+	{
+		pass->BeginPass();
+		glDispatchCompute(threadGroupCountX, threadGroupCountY, threadGroupCounZ);
+		pass->EndPass();
+	}
+}
+
 }

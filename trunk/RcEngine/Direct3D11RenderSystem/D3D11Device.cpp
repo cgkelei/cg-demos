@@ -347,6 +347,16 @@ void D3D11Device::DoDraw( const EffectTechnique* technique, const RenderOperatio
 	}
 }
 
+void D3D11Device::DispatchCompute( const EffectTechnique* technique, uint32_t threadGroupCountX, uint32_t threadGroupCountY, uint32_t threadGroupCounZ )
+{
+	for (EffectPass* pass : technique->GetPasses())
+	{
+		pass->BeginPass();
+		DeviceContextD3D11->Dispatch(threadGroupCountX, threadGroupCountY, threadGroupCounZ);
+		pass->EndPass();
+	}
+}
+
 
 
 }

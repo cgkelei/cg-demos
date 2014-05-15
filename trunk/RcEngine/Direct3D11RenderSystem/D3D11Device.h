@@ -23,6 +23,7 @@ public:
 	void SetRasterizerState(const shared_ptr<RasterizerState>& state);
 	void SetDepthStencilState(const shared_ptr<DepthStencilState>& state, uint16_t frontStencilRef = 0, uint16_t backStencilRef = 0);
 	void SetViewports(const std::vector<Viewport>& vp);
+	void DispatchCompute(const EffectTechnique* technique, uint32_t threadGroupCountX, uint32_t threadGroupCountY, uint32_t threadGroupCounZ);
 
 protected:
 	void DoBindShaderPipeline(const shared_ptr<ShaderPipeline>& pipeline);

@@ -483,7 +483,7 @@ private:
 		glGetProgramiv(mShaderProgramID, GL_ACTIVE_UNIFORM_BLOCKS, &numUniformBlocks);
 		for (GLuint i = 0; i < GLuint(numUniformBlocks); ++i)
 		{
-			glGetActiveUniformBlockName(mShaderProgramID, i, 256, NULL, name);
+			glGetActiveUniformBlockName(mShaderProgramID, i, MaxNameLen, NULL, name);
 			glGetActiveUniformBlockiv(mShaderProgramID, i, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
 			
 			// binding point
@@ -502,7 +502,7 @@ private:
 
 			for (int k = 0; k < numUniformInBlock; ++k) 
 			{
-				glGetActiveUniform(mShaderProgramID, i, MaxNameLen, &actualNameLen, &arraySize, &type, name);	
+				glGetActiveUniform(mShaderProgramID, indices[k], MaxNameLen, &actualNameLen, &arraySize, &type, name);	
 				glGetActiveUniformsiv(mShaderProgramID, 1, &indices[k], GL_UNIFORM_OFFSET, &unifomOffset);
 				glGetActiveUniformsiv(mShaderProgramID, 1, &indices[k], GL_UNIFORM_ARRAY_STRIDE, &arrayStride);
 				glGetActiveUniformsiv(mShaderProgramID, 1, &indices[k], GL_UNIFORM_MATRIX_STRIDE, &matrixStride);

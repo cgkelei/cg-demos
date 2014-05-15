@@ -249,6 +249,7 @@
     <Xml Include="..\Media\Effect\FSQuad.effect.xml" />
     <Xml Include="..\Media\Effect\HDRToneMap.effect.xml" />
     <Xml Include="..\Media\Effect\Model.effect.xml" />
+    <Xml Include="..\Media\Effect\TiledDeferredShading.effect.xml" />
     <Xml Include="..\Media\Material\Model.material.xml" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

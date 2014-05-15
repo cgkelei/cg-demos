@@ -54,12 +54,10 @@ protected:
 		RenderFactory* factory = Environment::GetSingleton().GetRenderFactory();
 		SceneManager* sceneMan = Environment::GetSingleton().GetSceneManager();
 
-		factory->LoadShaderFromFile(ST_Compute, "TiledDeferredShading", NULL, 0, "TiledDeferredCSMain");
-
-
 		mCamera = std::make_shared<Camera>();
-
-		mRenderPath = std::make_shared<DeferredPath>();
+		
+		mRenderPath = std::make_shared<TiledDeferredPath>();
+		//mRenderPath = std::make_shared<DeferredPath>();
 		//mRenderPath = std::make_shared<ForwardPath>();
 		mRenderPath->OnGraphicsInit(mCamera);
 	}
@@ -168,43 +166,42 @@ protected:
 		mPointLight->SetPosition(float3(0, 0, 0));
 		sceneMan.GetRootSceneNode()->AttachObject(mPointLight);
 
-		Light* mSpotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
+	/*	Light* mSpotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
 		mSpotLight->SetLightColor(float3(0, 1, 0));
 		mSpotLight->SetRange(250.0f);
 		mSpotLight->SetPosition(float3(-442, 80, -16));
 		mSpotLight->SetDirection(float3(-1, 0, 0));
 		mSpotLight->SetAttenuation(1.0f, 0.0f);
 		mSpotLight->SetSpotAngle(Mathf::ToRadian(30), Mathf::ToRadian(40));
-		sceneMan.GetRootSceneNode()->AttachObject(mSpotLight);
+		sceneMan.GetRootSceneNode()->AttachObject(mSpotLight);*/
 
+		//{
+		//	float3 direction = Normalize(float3(-111.5f, 398.1f, 3.6f) - float3(-111.1, 380.1, 73.4));
+		//	for (int i = 0; i < 4; ++i)
+		//	{
+		//		Light* spotLight = sceneMan.CreateLight("Spot" + std::to_string(i), LT_SpotLight);
+		//		spotLight->SetLightColor(float3(1, 1, 0));
+		//		spotLight->SetRange(150);
+		//		spotLight->SetPosition(float3(-278.2f + i * 166.5f, 398.1f, 3.6f));
+		//		spotLight->SetDirection(direction);
+		//		spotLight->SetAttenuation(1.0f, 0.0f);
+		//		spotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(40));
+		//		sceneMan.GetRootSceneNode()->AttachObject(spotLight);
+		//	}
 
-		{
-		float3 direction = Normalize(float3(-111.5f, 398.1f, 3.6f) - float3(-111.1, 380.1, 73.4));
-		for (int i = 0; i < 4; ++i)
-		{
-		Light* spotLight = sceneMan.CreateLight("Spot" + std::to_string(i), LT_SpotLight);
-		spotLight->SetLightColor(float3(1, 1, 0));
-		spotLight->SetRange(150);
-		spotLight->SetPosition(float3(-278.2f + i * 166.5f, 398.1f, 3.6f));
-		spotLight->SetDirection(direction);
-		spotLight->SetAttenuation(1.0f, 0.0f);
-		spotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(40));
-		sceneMan.GetRootSceneNode()->AttachObject(spotLight);
-		}
-
-		direction = Normalize(float3(-111.5f, 398.1f, 35.7f) - float3(-111.1, 380.1, -111.3));
-		for (int i = 0; i < 4; ++i)
-		{
-		Light* spotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
-		spotLight->SetLightColor(float3(0, 1, 1));
-		spotLight->SetRange(150);
-		spotLight->SetPosition(float3(-278.2f + i * 166.5f, 398.1f, -35.7f));
-		spotLight->SetDirection(direction);
-		spotLight->SetAttenuation(1.0f, 0.0f);
-		spotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(40));
-		sceneMan.GetRootSceneNode()->AttachObject(spotLight);
-		}
-		}
+		//	direction = Normalize(float3(-111.5f, 398.1f, 35.7f) - float3(-111.1, 380.1, -111.3));
+		//	for (int i = 0; i < 4; ++i)
+		//	{
+		//		Light* spotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
+		//		spotLight->SetLightColor(float3(0, 1, 1));
+		//		spotLight->SetRange(150);
+		//		spotLight->SetPosition(float3(-278.2f + i * 166.5f, 398.1f, -35.7f));
+		//		spotLight->SetDirection(direction);
+		//		spotLight->SetAttenuation(1.0f, 0.0f);
+		//		spotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(40));
+		//		sceneMan.GetRootSceneNode()->AttachObject(spotLight);
+		//	}
+		//}
 	}
 
 	void UnloadContent()
@@ -231,10 +228,10 @@ protected:
 			fclose(f);
 		}
 
-		if ( InputSystem::GetSingleton().KeyPress(KC_Space) )
+		/*if ( InputSystem::GetSingleton().KeyPress(KC_Space) )
 		{
 			mRenderPath->mVisualLightsWireframe = !mRenderPath->mVisualLightsWireframe;
-		}
+		}*/
 
 		char buffer[255];
 		std::sprintf(buffer, "FPS: %d", mFramePerSecond);
@@ -277,7 +274,7 @@ protected:
 	RenderOperation mFSQuad;
 	shared_ptr<Camera> mCamera;
 	
-	shared_ptr<DeferredPath> mRenderPath;
+	shared_ptr<TiledDeferredPath> mRenderPath;
 
 	Test::FPSCameraControler* mCameraControler;
 };
