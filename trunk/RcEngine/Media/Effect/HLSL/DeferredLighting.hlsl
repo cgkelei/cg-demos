@@ -162,6 +162,7 @@ void SpotLightingPSMain(
 	GetNormalAndShininess(sampleIndex, N, shininess);
 
 	float spot = SpotLighting(L, LightDir.xyz, float2(LightPos.w, LightDir.w));
+
 	if(spot > 0.0)
 	{
 		float NdotL = dot(L, N);

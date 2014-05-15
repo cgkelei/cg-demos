@@ -147,10 +147,10 @@ struct SRVBindHelper
 			case ST_Vertex:
 				deviceContext->VSSetShaderResources(Binding, 1, &srvD3D11);
 				break;
-			case ST_Hull:
+			case ST_TessControl:
 				deviceContext->HSSetShaderResources(Binding, 1, &srvD3D11);
 				break;
-			case ST_Domain:
+			case ST_TessEval:
 				deviceContext->DSSetShaderResources(Binding, 1, &srvD3D11);
 				break;
 			case ST_Geomerty:
@@ -219,10 +219,10 @@ struct SamplerBindHelper
 			case ST_Vertex:
 				deviceContext->VSSetSamplers(Binding, 1, &samplerStateD3D11);
 				break;
-			case ST_Hull:
+			case ST_TessControl:
 				deviceContext->HSSetSamplers(Binding, 1, &samplerStateD3D11);
 				break;
-			case ST_Domain:
+			case ST_TessEval:
 				deviceContext->DSSetSamplers(Binding, 1, &samplerStateD3D11);
 				break;
 			case ST_Geomerty:
@@ -264,10 +264,10 @@ struct UniformBindHelper
 		case ST_Vertex:
 			deviceContext->VSSetConstantBuffers(Binding, 1, &bufferD3D11);
 			break;
-		case ST_Hull:
+		case ST_TessControl:
 			deviceContext->HSSetConstantBuffers(Binding, 1, &bufferD3D11);
 			break;
-		case ST_Domain:
+		case ST_TessEval:
 			deviceContext->DSSetConstantBuffers(Binding, 1, &bufferD3D11);
 			break;
 		case ST_Geomerty:
@@ -403,12 +403,12 @@ void D3D11ShaderPipeline::OnUnbind()
 {
 	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
 
-	if (mShaderStages[ST_Vertex])   deviceContextD3D11->VSSetShader(nullptr, nullptr, 0);
-	if (mShaderStages[ST_Hull])     deviceContextD3D11->HSSetShader(nullptr, nullptr, 0);
-	if (mShaderStages[ST_Domain])   deviceContextD3D11->DSSetShader(nullptr, nullptr, 0);
-	if (mShaderStages[ST_Geomerty]) deviceContextD3D11->GSSetShader(nullptr, nullptr, 0);
-	if (mShaderStages[ST_Pixel])    deviceContextD3D11->PSSetShader(nullptr, nullptr, 0);
-	if (mShaderStages[ST_Compute])  deviceContextD3D11->CSSetShader(nullptr, nullptr, 0);
+	if (mShaderStages[ST_Vertex])			deviceContextD3D11->VSSetShader(nullptr, nullptr, 0);
+	if (mShaderStages[ST_TessControl])      deviceContextD3D11->HSSetShader(nullptr, nullptr, 0);
+	if (mShaderStages[ST_TessEval])			deviceContextD3D11->DSSetShader(nullptr, nullptr, 0);
+	if (mShaderStages[ST_Geomerty])			deviceContextD3D11->GSSetShader(nullptr, nullptr, 0);
+	if (mShaderStages[ST_Pixel])			deviceContextD3D11->PSSetShader(nullptr, nullptr, 0);
+	if (mShaderStages[ST_Compute])			deviceContextD3D11->CSSetShader(nullptr, nullptr, 0);
 }
 
 void D3D11ShaderPipeline::AddGlobalUniformBind( EffectConstantBuffer* cbuffer, EffectParameter* effectParam, uint32_t offset, uint32_t arrSize )

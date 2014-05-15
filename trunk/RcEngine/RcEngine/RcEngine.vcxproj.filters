@@ -523,6 +523,9 @@
     <None Include="..\Media\Effect\GLSL\DebugView.glsl">
       <Filter>Asset\GLSL</Filter>
     </None>
+    <None Include="..\Media\Effect\GLSL\TiledDeferredShading.glsl">
+      <Filter>Asset\GLSL</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Media\Effect\HLSL\Model.hlsl">
@@ -568,6 +571,9 @@
       <Filter>Asset\HLSL</Filter>
     </FxCompile>
     <FxCompile Include="..\Media\Effect\HLSL\DebugView.hlsl">
+      <Filter>Asset\HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Media\Effect\HLSL\TiledDeferredShading.hlsl">
       <Filter>Asset\HLSL</Filter>
     </FxCompile>
   </ItemGroup>

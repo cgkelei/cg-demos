@@ -479,9 +479,9 @@ GLenum OpenGLMapping::Mapping( ShaderType type )
 	{
 	case ST_Vertex:
 		return GL_VERTEX_SHADER;
-	case ST_Hull:
+	case ST_TessControl:
 		return GL_TESS_CONTROL_SHADER;
-	case ST_Domain:
+	case ST_TessEval:
 		return GL_TESS_EVALUATION_SHADER;
 	case ST_Pixel:
 		return GL_FRAGMENT_SHADER;

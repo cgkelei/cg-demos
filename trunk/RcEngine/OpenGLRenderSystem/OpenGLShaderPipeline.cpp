@@ -630,15 +630,15 @@ bool OpenGLShaderPipeline::LinkPipeline()
 		glUseProgramStages(mPipelineOGL, GL_VERTEX_SHADER_BIT, shaderOGL);
 	}
 
-	if (mShaderStages[ST_Hull])
+	if (mShaderStages[ST_TessControl])
 	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Hull].get()))->mShaderOGL;
+		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_TessControl].get()))->mShaderOGL;
 		glUseProgramStages(mPipelineOGL, GL_TESS_CONTROL_SHADER_BIT, shaderOGL);
 	}
 
-	if (mShaderStages[ST_Domain])
+	if (mShaderStages[ST_TessEval])
 	{
-		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_Domain].get()))->mShaderOGL;
+		GLuint shaderOGL = (static_cast<OpenGLShader*>(mShaderStages[ST_TessEval].get()))->mShaderOGL;
 		glUseProgramStages(mPipelineOGL, GL_TESS_EVALUATION_SHADER_BIT, shaderOGL);
 	}
 

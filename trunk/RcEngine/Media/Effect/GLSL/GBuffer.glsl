@@ -24,7 +24,8 @@ void main()
 	// normal map
 #ifdef _NormalMap
 	vec3 normal = texture2D( NormalMap, oTex ).rgb * 2.0 - 1.0;
-	normal = normalize(normal * oTangentToWorld);
+	//normal = normalize(normal * oTangentToWorld);
+	normal = normalize(oTangentToWorld[2]);
 #else
 	vec3 normal = normalize(oNormalWS);
 #endif	

@@ -433,7 +433,6 @@ void DeferredPath::RenderScene()
 	DeferredShading();
 
 	// Draw Light
-	mVisualLightsWireframe = true;
 	if (mVisualLightsWireframe)
 	{
 		EffectTechnique* debugTech = mDebugEffect->GetTechniqueByName("DebugShape");
@@ -575,11 +574,11 @@ void DeferredPath::DeferredShading()
 
 	mDevice->Draw(mShadingTech, mFullscreenTrangle);
 
-	if ( InputSystem::GetSingleton().MouseButtonPress(MS_MiddleButton) )
+	/*if ( InputSystem::GetSingleton().MouseButtonPress(MS_MiddleButton) )
 	{
 		mDevice->GetRenderFactory()->SaveTextureToFile("E:/Light.pfm", mLightAccumulateBuffer);
 		mDevice->GetRenderFactory()->SaveTextureToFile("E:/HDRBuffer.pfm", mHDRBuffer);
-	}
+	}*/
 }
 
 void DeferredPath::PostProcess()

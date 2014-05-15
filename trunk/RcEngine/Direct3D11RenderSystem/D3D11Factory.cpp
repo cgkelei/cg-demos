@@ -76,12 +76,12 @@ shared_ptr<Shader> D3D11Factory::CreateShader( ShaderType type )
 {
 	switch (type)
 	{
-	case ST_Vertex:		return shared_ptr<Shader>( new D3D11VertexShader() );
-	case ST_Hull:		return shared_ptr<Shader>( new D3D11HullShader() );
-	case ST_Domain:     return shared_ptr<Shader>( new D3D11DomainShader() );
-	case ST_Geomerty:   return shared_ptr<Shader>( new D3D11GeometryShader() );
-	case ST_Pixel:		return shared_ptr<Shader>( new D3D11PixelShader() );
-	case ST_Compute:	return shared_ptr<Shader>( new D3D11ComputeShader() );
+	case ST_Vertex:				return shared_ptr<Shader>( new D3D11VertexShader() );
+	case ST_TessControl:		return shared_ptr<Shader>( new D3D11HullShader() );
+	case ST_TessEval:			return shared_ptr<Shader>( new D3D11DomainShader() );
+	case ST_Geomerty:			return shared_ptr<Shader>( new D3D11GeometryShader() );
+	case ST_Pixel:				return shared_ptr<Shader>( new D3D11PixelShader() );
+	case ST_Compute:			return shared_ptr<Shader>( new D3D11ComputeShader() );
 	default:
 		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Undefined shader type", "D3D11Factory::CreateShader");
 	}

@@ -202,13 +202,13 @@ void D3D11Device::DoBindShaderPipeline( const shared_ptr<ShaderPipeline>& pipeli
 		DeviceContextD3D11->VSSetShader(shaderD3D11, nullptr, 0);
 	}
 
-	if ( shaderStage = pipelineD3D11->GetShader(ST_Hull) )
+	if ( shaderStage = pipelineD3D11->GetShader(ST_TessControl) )
 	{
 		ID3D11HullShader* shaderD3D11 = (static_cast<D3D11HullShader*>(shaderStage.get()))->ShaderD3D11;
 		DeviceContextD3D11->HSSetShader(shaderD3D11, nullptr, 0);
 	}
 
-	if ( shaderStage = pipelineD3D11->GetShader(ST_Domain) )
+	if ( shaderStage = pipelineD3D11->GetShader(ST_TessEval) )
 	{
 		ID3D11DomainShader* shaderD3D11 = (static_cast<D3D11DomainShader*>(shaderStage.get()))->ShaderD3D11;
 		DeviceContextD3D11->DSSetShader(shaderD3D11, nullptr, 0);

@@ -1,4 +1,5 @@
 #include <MainApp/Application.h>
+#include <MainApp/Window.h>
 #include <Graphics/FrameBuffer.h>
 #include <Graphics/RenderDevice.h>
 #include <Graphics/RenderFactory.h>
@@ -53,6 +54,9 @@ protected:
 		RenderFactory* factory = Environment::GetSingleton().GetRenderFactory();
 		SceneManager* sceneMan = Environment::GetSingleton().GetSceneManager();
 
+		factory->LoadShaderFromFile(ST_Compute, "TiledDeferredShading", NULL, 0, "TiledDeferredCSMain");
+
+
 		mCamera = std::make_shared<Camera>();
 
 		mRenderPath = std::make_shared<DeferredPath>();
@@ -69,22 +73,20 @@ protected:
 		Entity* entity;
 		SceneNode* sceneNode;
 
-		//mCamera->CreateLookAt(float3(213.4, 405.5, -30.5),  float3(214.3, 405.1, -30.6), float3(0.4, 0.9, -0.0));
-		//mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 3000.0f );
-
-		//Entity* sponzaEntity = sceneMan->CreateEntity("Sponza", "Sponza.mesh",  "Custom");
-		//SceneNode* sponzaNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Sponza");
-		//sponzaNode->SetPosition(float3(0, 0, 0));
-		//sponzaNode->SetScale(0.45f);
-		//sponzaNode->AttachObject(sponzaEntity);
-
-		//mCamera->CreateLookAt(float3(-137.0, 97.3, 82.0), float3(-136.5, 96.8, 81.3), float3(0.3, 0.9, -0.4));
-		//mCamera->CreateLookAt(float3(-322.203735, 217.687668, 206.708405), float3(-321.512451, 217.287216, 206.106934), float3(0.302103, 0.916318, -0.262859));
-		mCamera->CreateLookAt(float3(-511.802338, 363.893677, 402.886078), float3(-511.026764, 363.578156, 402.339325), float3(0.257883, 0.948919, -0.181794));
+		mCamera->CreateLookAt(float3(-307.441010, 141.725555, -15.163310), float3(-308.427032, 141.578644, -15.241874), float3(-0.146448, 0.989150, -0.011668));
 		mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 3000.0f );
 
+		Entity* sponzaEntity = sceneMan->CreateEntity("Sponza", "Sponza.mesh",  "Custom");
+		SceneNode* sponzaNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Sponza");
+		sponzaNode->SetPosition(float3(0, 0, 0));
+		sponzaNode->SetScale(0.45f);
+		sponzaNode->AttachObject(sponzaEntity);
 
-		std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
+		//mCamera->CreateLookAt(float3(-137.0, 97.3, 82.0), float3(-136.5, 96.8, 81.3), float3(0.3, 0.9, -0.4));
+		//mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 3000.0f );
+
+
+		/*std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
 		start = std::chrono::high_resolution_clock::now();
 
 		ENGINE_PUSH_CPU_PROFIER("Load Texture");
@@ -108,7 +110,7 @@ protected:
 		std::time_t end_time = std::chrono::high_resolution_clock::to_time_t(end);
 		std::cout << "finished computation at " << std::ctime(&end_time) << "elapsed time: " << elapsed_seconds.count() << "s\n";
 
-		ENGINE_DUMP_PROFILERS();
+		ENGINE_DUMP_PROFILERS();*/
 
 		//ENGINE_PUSH_CPU_PROFIER("test");
 		//ENGINE_DUMP_PROFILERS();
@@ -141,13 +143,13 @@ protected:
 	{
 		SceneManager& sceneMan = *Environment::GetSingleton().GetSceneManager();
 
-		/*Light* mDirLight = sceneMan.CreateLight("Sun", LT_DirectionalLight);
-		mDirLight->SetDirection(float3(0, -8, -1));
+		Light* mDirLight = sceneMan.CreateLight("Sun", LT_DirectionalLight);
+		mDirLight->SetDirection(float3(00, -1, 0.5));
 		mDirLight->SetLightColor(float3(1, 1, 1));
 		mDirLight->SetCastShadow(false);
-		sceneMan.GetRootSceneNode()->AttachObject(mDirLight);*/
+		sceneMan.GetRootSceneNode()->AttachObject(mDirLight);
 
-		Light* spotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
+		/*Light* spotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
 		spotLight->SetDirection(float3(0, -1.5, -1));
 		spotLight->SetLightColor(float3(1, 0, 1));
 		spotLight->SetRange(300.0);
@@ -156,53 +158,53 @@ protected:
 		spotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(60));
 		spotLight->SetCastShadow(false);
 		spotLight->SetSpotlightNearClip(10);
-		sceneMan.GetRootSceneNode()->AttachObject(spotLight);
+		sceneMan.GetRootSceneNode()->AttachObject(spotLight);*/
 
-		/*Light* mPointLight = sceneMan.CreateLight("Point", LT_PointLight);
+		Light* mPointLight = sceneMan.CreateLight("Point", LT_PointLight);
 		mPointLight->SetLightColor(float3(1, 1, 0));
 		mPointLight->SetRange(80.0f);
 		mPointLight->SetAttenuation(1.0f, 0.0f);
 		mPointLight->SetCastShadow(false);
 		mPointLight->SetPosition(float3(0, 0, 0));
-		sceneMan.GetRootSceneNode()->AttachObject(mPointLight);*/
+		sceneMan.GetRootSceneNode()->AttachObject(mPointLight);
 
-		//mSpotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
-		//mSpotLight->SetLightColor(float3(0, 1, 0));
-		//mSpotLight->SetRange(250.0f);
-		//mSpotLight->SetPosition(float3(-442, 80, -16));
-		//mSpotLight->SetDirection(float3(-1, 0, 0));
-		//mSpotLight->SetAttenuation(1.0f, 0.0f);
-		//mSpotLight->SetSpotAngle(Mathf::ToRadian(30), Mathf::ToRadian(40));
-		//sceneMan.GetRootSceneNode()->AttachObject(mSpotLight);
+		Light* mSpotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
+		mSpotLight->SetLightColor(float3(0, 1, 0));
+		mSpotLight->SetRange(250.0f);
+		mSpotLight->SetPosition(float3(-442, 80, -16));
+		mSpotLight->SetDirection(float3(-1, 0, 0));
+		mSpotLight->SetAttenuation(1.0f, 0.0f);
+		mSpotLight->SetSpotAngle(Mathf::ToRadian(30), Mathf::ToRadian(40));
+		sceneMan.GetRootSceneNode()->AttachObject(mSpotLight);
 
 
-		//{
-		//	float3 direction = Normalize(float3(-111.5f, 398.1f, 3.6f) - float3(-111.1, 380.1, 73.4));
-		//	for (int i = 0; i < 4; ++i)
-		//	{
-		//		Light* spotLight = sceneMan.CreateLight("Spot" + std::to_string(i), LT_SpotLight);
-		//		spotLight->SetLightColor(float3(1, 1, 0));
-		//		spotLight->SetRange(150);
-		//		spotLight->SetPosition(float3(-278.2f + i * 166.5f, 398.1f, 3.6f));
-		//		spotLight->SetDirection(direction);
-		//		spotLight->SetAttenuation(1.0f, 0.0f);
-		//		spotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(40));
-		//		sceneMan.GetRootSceneNode()->AttachObject(spotLight);
-		//	}
+		{
+		float3 direction = Normalize(float3(-111.5f, 398.1f, 3.6f) - float3(-111.1, 380.1, 73.4));
+		for (int i = 0; i < 4; ++i)
+		{
+		Light* spotLight = sceneMan.CreateLight("Spot" + std::to_string(i), LT_SpotLight);
+		spotLight->SetLightColor(float3(1, 1, 0));
+		spotLight->SetRange(150);
+		spotLight->SetPosition(float3(-278.2f + i * 166.5f, 398.1f, 3.6f));
+		spotLight->SetDirection(direction);
+		spotLight->SetAttenuation(1.0f, 0.0f);
+		spotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(40));
+		sceneMan.GetRootSceneNode()->AttachObject(spotLight);
+		}
 
-		//	direction = Normalize(float3(-111.5f, 398.1f, 35.7f) - float3(-111.1, 380.1, -111.3));
-		//	for (int i = 0; i < 4; ++i)
-		//	{
-		//		Light* spotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
-		//		spotLight->SetLightColor(float3(0, 1, 1));
-		//		spotLight->SetRange(150);
-		//		spotLight->SetPosition(float3(-278.2f + i * 166.5f, 398.1f, -35.7f));
-		//		spotLight->SetDirection(direction);
-		//		spotLight->SetAttenuation(1.0f, 0.0f);
-		//		spotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(40));
-		//		sceneMan.GetRootSceneNode()->AttachObject(spotLight);
-		//	}
-		//}
+		direction = Normalize(float3(-111.5f, 398.1f, 35.7f) - float3(-111.1, 380.1, -111.3));
+		for (int i = 0; i < 4; ++i)
+		{
+		Light* spotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
+		spotLight->SetLightColor(float3(0, 1, 1));
+		spotLight->SetRange(150);
+		spotLight->SetPosition(float3(-278.2f + i * 166.5f, 398.1f, -35.7f));
+		spotLight->SetDirection(direction);
+		spotLight->SetAttenuation(1.0f, 0.0f);
+		spotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(40));
+		sceneMan.GetRootSceneNode()->AttachObject(spotLight);
+		}
+		}
 	}
 
 	void UnloadContent()
@@ -212,6 +214,7 @@ protected:
 
 	void Update(float deltaTime)
 	{
+		CalculateFrameRate();
 		mCameraControler->Update(deltaTime);
 
 		if ( InputSystem::GetSingleton().KeyPress(KC_Q) )
@@ -220,13 +223,22 @@ protected:
 			auto eye = mCamera->GetPosition();
 			auto up = mCamera->GetUp();
 			
-			FILE* f = fopen("E:camera.txt", "w");
+			FILE* f = fopen("E:/camera.txt", "w");
 			fprintf(f, "float3(%f, %f, %f), float3(%f, %f, %f), float3(%f, %f, %f)",
 				eye[0], eye[1], eye[2], 
 				target[0], target[1], target[2],
 				up[0], up[1], up[2]);
 			fclose(f);
 		}
+
+		if ( InputSystem::GetSingleton().KeyPress(KC_Space) )
+		{
+			mRenderPath->mVisualLightsWireframe = !mRenderPath->mVisualLightsWireframe;
+		}
+
+		char buffer[255];
+		std::sprintf(buffer, "FPS: %d", mFramePerSecond);
+		mMainWindow->SetTitle(buffer);
 	}
 
 	void Render()
@@ -239,7 +251,17 @@ protected:
 
 	void CalculateFrameRate()
 	{
+		static int frameCount = 0;
+		static float baseTime = 0;
 
+		frameCount++;
+
+		if (mTimer.GetGameTime()-baseTime >= 1.0f)
+		{
+			mFramePerSecond = frameCount;
+			frameCount = 0;
+			baseTime += 1.0f;
+		}
 	}
 
 	void WindowResize(uint32_t width, uint32_t height)
@@ -255,7 +277,7 @@ protected:
 	RenderOperation mFSQuad;
 	shared_ptr<Camera> mCamera;
 	
-	shared_ptr<RenderPath> mRenderPath;
+	shared_ptr<DeferredPath> mRenderPath;
 
 	Test::FPSCameraControler* mCameraControler;
 };
