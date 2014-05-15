@@ -1,17 +1,17 @@
 #extension GL_ARB_compute_shader : enable
-#extension GL_ARB_shader_bit_encoding : enable
 
 #include "/LightingUtil.glsl"
 
-#define WORK_GROUP_SIZE  16
+#define WORK_GROUP_SIZE  32
 #define NumGroupThreads (WORK_GROUP_SIZE  * WORK_GROUP_SIZE ) // Toal threads per Group
-#define MAX_LIGHTS 1024   // Max lights per tile
+#define MAX_LIGHTS 256   // Max lights per tile
 
 struct Light
 {
-	vec3 Position;
-	float Range;
 	vec3 Color;
+	vec3 Position;
+	vec3 Falloff;
+	float Range;
 };
 
 // Uniforms
@@ -37,7 +37,7 @@ layout (binding = 2) uniform sampler2D GBuffer1; // Albedo + Specular Intensity
 layout (binding = 0, rgba32f) uniform writeonly image2D oLightAccumulateBuffer;
 
 // Structure Buffer
-layout (std430, binding = 4) buffer LightBufferUAV
+layout (std430, binding = 4) buffer LightBufferSRV
 {
     Light Lights[];
 };
@@ -88,7 +88,7 @@ void EvalulateAndAccumilateLight(Light light, vec3 litPos, vec3 N, vec3 V, float
 	vec3 H = normalize(V + L);
 		
 	// calculate attenuation
-	float attenuation = 1.0; // = CalcAttenuation(light.Position, litPos, LightFalloff);
+	float attenuation = CalcAttenuation(light.Position, litPos, light.Falloff);
 	
 	float NdotL = dot(L, N); 
 	if (NdotL > 0.0)
@@ -202,6 +202,6 @@ void main()
 			EvalulateAndAccumilateLight(light, worldPosition, normalShininess.xyz, V, normalShininess.w, diffuseLight, specularLight);
 		}
 		
-		imageStore(oLightAccumulateBuffer, sampleIndex, vec4(diffuseLight, Luminance(specularLight)));
+		imageStore(oLightAccumulateBuffer, sampleIndex, vec4(normalShininess.xyz, Luminance(specularLight)));
 	}
 }

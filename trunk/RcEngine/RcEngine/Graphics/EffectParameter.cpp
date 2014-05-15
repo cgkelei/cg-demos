@@ -46,7 +46,7 @@ void EffectParameter::GetValue( float& value ) const
 void EffectParameter::GetValue( float*& value ) const
 { ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::GetValue"); }
 
-void EffectParameter::GetValue( int& value ) const
+void EffectParameter::GetValue( int32_t& value ) const
 { ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::GetValue"); }
 
 void EffectParameter::GetValue( int32_t*& value ) const
@@ -77,19 +77,19 @@ void EffectParameter::GetValue( float4*& value ) const
 { ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::GetValue"); }
 
 void EffectParameter::GetValue( weak_ptr<ShaderResourceView>& value ) const
-{
-
-}
+{ ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::GetValue"); }
 
 void EffectParameter::GetValue( weak_ptr<UnorderedAccessView>& value ) const
-{
-
-}
+{ ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::GetValue"); }
 
 void EffectParameter::GetValue( weak_ptr<SamplerState>& value ) const
-{
+{ ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::GetValue"); }
 
-}
+void EffectParameter::GetValue( uint32_t& value ) const
+{ ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::GetValue"); }
+
+void EffectParameter::GetValue( uint32_t*& value ) const
+{ ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::GetValue"); }
 
 void EffectParameter::SetValue( const bool& value )
 { ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::SetValue"); }
@@ -103,7 +103,7 @@ void EffectParameter::SetValue( const float& value )
 void EffectParameter::SetValue( const float* value, uint32_t count )
 { ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::SetValue"); }
 
-void EffectParameter::SetValue( const int& value )
+void EffectParameter::SetValue( const int32_t& value )
 { ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::SetValue"); }
 
 void EffectParameter::SetValue( const int32_t* value, uint32_t count )
@@ -134,19 +134,19 @@ void EffectParameter::SetValue( const float4* value, uint32_t count )
 { ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::SetValue"); }
 
 void EffectParameter::SetValue( const shared_ptr<UnorderedAccessView>& value )
-{
-
-}
+{ ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::SetValue");  }
 
 void EffectParameter::SetValue( const shared_ptr<ShaderResourceView>& value )
-{
-
-}
+{ ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::SetValue");  }
 
 void EffectParameter::SetValue( const shared_ptr<SamplerState>& value )
-{
+{ ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::SetValue");  }
 
-}
+void EffectParameter::SetValue( const uint32_t& value )
+{ ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::SetValue");  }
+
+void EffectParameter::SetValue( const uint32_t* value, uint32_t count )
+{ ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::SetValue");  }
 
 void EffectParameter::SetArrayStride( uint32_t stride )
 { ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Shoudn't call this£¡", "EffectParameter::SetArrayStride"); }

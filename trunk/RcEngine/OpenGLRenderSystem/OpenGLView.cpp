@@ -2,24 +2,11 @@
 #include "OpenGLTexture.h"
 #include "OpenGLBuffer.h"
 #include "OpenGLGraphicCommon.h"
+#include "OpenGLDevice.h"
+#include <Core/Exception.h>
 
 namespace RcEngine {
 
-void OpenGLShaderResourceView::BindSRV( GLuint unitOrBindingPoint )
-{
-	if (mTargetOGL == GL_SHADER_STORAGE_BUFFER)
-	{
-		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, unitOrBindingPoint, mResourceOGL, 
-			static_cast<GLintptr>(mExtraParams[0]), static_cast<GLsizeiptr>(mExtraParams[1]));
-	}
-	else 
-	{
-		glActiveTexture(GL_TEXTURE0 + unitOrBindingPoint);
-		glBindTexture(mTargetOGL, mResourceOGL);
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////
 OpenGLTextureBufferSRV::OpenGLTextureBufferSRV( const shared_ptr<GraphicsBuffer>& buffer, uint32_t elementOffset, uint32_t elementWidth, PixelFormat format )
 {
 	OpenGLBuffer* pTBO = static_cast<OpenGLBuffer*>(buffer.get());
@@ -32,18 +19,23 @@ OpenGLTextureBufferSRV::OpenGLTextureBufferSRV( const shared_ptr<GraphicsBuffer>
 
 	// offset and size
 	uint32_t elementStride = PixelFormatUtils::GetNumElemBytes(format);
-	mExtraParams[0] = elementStride * elementOffset;
-	mExtraParams[1] = elementStride * elementWidth ;
+	GLintptr bufferOffset = elementStride * elementOffset;
+	GLsizeiptr bufferSize = elementStride * elementWidth ;
 
 	glGenTextures(1, &mResourceOGL);
 	glBindTexture(GL_TEXTURE_BUFFER, mResourceOGL);
-	glTexBufferRange(GL_TEXTURE_BUFFER, internalFormat, pTBO->GetBufferOGL(), 
-		static_cast<GLintptr>(mExtraParams[0]), static_cast<GLsizeiptr>(mExtraParams[1]));
+	glTexBufferRange(GL_TEXTURE_BUFFER, internalFormat, pTBO->GetBufferOGL(), bufferOffset, bufferSize);
 }
 
 OpenGLTextureBufferSRV::~OpenGLTextureBufferSRV()
 {
 	glDeleteTextures(1, &mResourceOGL);
+}
+
+void OpenGLTextureBufferSRV::BindSRV( GLuint textureUnit )
+{
+	glActiveTexture(GL_TEXTURE0 + textureUnit);
+	glBindTexture(mTargetOGL, mResourceOGL);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -55,9 +47,13 @@ OpenGLStructuredBufferSRV::OpenGLStructuredBufferSRV( const shared_ptr<GraphicsB
 	mTargetOGL = GL_SHADER_STORAGE_BUFFER;
 	mResourceOGL = pSSBO->GetBufferOGL();
 	
-	// offset and size
-	mExtraParams[0] = elementOffset * strutureStride;
-	mExtraParams[1] = elementWidth * strutureStride;
+	mBufferOffset = elementOffset * strutureStride;
+	mBufferSize = elementWidth * strutureStride;
+}
+
+void OpenGLStructuredBufferSRV::BindSRV( GLuint bindingPoint )
+{
+	glBindBufferRange(GL_SHADER_STORAGE_BUFFER, bindingPoint, mResourceOGL, mBufferOffset, mBufferSize);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -162,24 +158,22 @@ OpenGLTextureSRV::~OpenGLTextureSRV()
 		glDeleteTextures(1, &mResourceOGL);
 }
 
+void OpenGLTextureSRV::BindSRV( GLuint textureUnit )
+{
+	glActiveTexture(GL_TEXTURE0 + textureUnit);
+	glBindTexture(mTargetOGL, mResourceOGL);
+}
+
 // UAV
 //////////////////////////////////////////////////////////////////////////
-void OpenGLUnorderedAccessView::BindUAV( GLuint unitOrBindingPoint )
+void OpenGLUnorderedAccessView::Clear( const float4& clearData )
 {
-	if (mTargetOGL == GL_TEXTURE_BUFFER)
-	{
-		glBindImageTexture(unitOrBindingPoint, mResourceOGL, 0, GL_FALSE, 0, GL_READ_WRITE, mExtraParams[0]);
-	}	
-	else if (mTargetOGL == GL_SHADER_STORAGE_BUFFER)
-	{
-		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, unitOrBindingPoint, mResourceOGL, 
-			static_cast<GLintptr>(mExtraParams[0]), static_cast<GLsizeiptr>(mExtraParams[1]));
-	}
-	else
-	{
-		GLboolean layered = (mExtraParams[2] == 1) ? GL_FALSE : GL_TRUE;
-		glBindImageTexture(unitOrBindingPoint, mResourceOGL, mExtraParams[0], layered, mExtraParams[1], GL_READ_WRITE, mExtraParams[3]);
-	}
+	ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Shoudn't Call this", "OpenGLUnorderedAccessView::Clear");
+}
+
+void OpenGLUnorderedAccessView::Clear( const uint4& clearData )
+{
+	ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Shoudn't Call this", "OpenGLUnorderedAccessView::Clear");
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -188,25 +182,27 @@ OpenGLTextureBufferUAV::OpenGLTextureBufferUAV( const shared_ptr<GraphicsBuffer>
 	OpenGLBuffer* pTBO = static_cast<OpenGLBuffer*>(buffer.get());
 	assert(pTBO->GetBufferTarget() == GL_TEXTURE_BUFFER);
 
-	GLenum internalFormat, externFormat, type;
-	OpenGLMapping::Mapping(internalFormat, externFormat, type, format);
-
-	mExtraParams[0] = internalFormat;
+	GLenum externFormat, type;
+	OpenGLMapping::Mapping(mInternalFormat, externFormat, type, format);
 
 	// offset and size
 	uint32_t elementStride = PixelFormatUtils::GetNumElemBytes(format);
-	mExtraParams[1] = elementStride * elementOffset;
-	mExtraParams[2] = elementStride * elementWidth ;
+	GLintptr bufferOffset = elementStride * elementOffset;
+	GLsizeiptr bufferSize = elementStride * elementWidth ;
 
 	glGenTextures(1, &mResourceOGL);
 	glBindTexture(GL_TEXTURE_BUFFER, mResourceOGL);
-	glTexBufferRange(GL_TEXTURE_BUFFER, internalFormat, pTBO->GetBufferOGL(), 
-		static_cast<GLintptr>(mExtraParams[1]), static_cast<GLsizeiptr>(mExtraParams[2]));
+	glTexBufferRange(GL_TEXTURE_BUFFER, mInternalFormat, pTBO->GetBufferOGL(), bufferOffset, bufferSize);
 }
 
 OpenGLTextureBufferUAV::~OpenGLTextureBufferUAV()
 {
 	glDeleteTextures(1, &mResourceOGL);
+}
+
+void OpenGLTextureBufferUAV::BindUAV( GLuint imageUnit )
+{
+	glBindImageTexture(imageUnit, mResourceOGL, 0, GL_FALSE, 0, GL_READ_WRITE, mInternalFormat);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -219,20 +215,23 @@ OpenGLStructuredBufferUAV::OpenGLStructuredBufferUAV( const shared_ptr<GraphicsB
 	mResourceOGL = pSSBO->GetBufferOGL();
 
 	// offset and size
-	mExtraParams[0] = elementOffset * strutureStride;
-	mExtraParams[1] = elementWidth * strutureStride;
+	mBufferOffset = elementOffset * strutureStride;
+	mBufferSize = elementWidth * strutureStride;
+}
+
+void OpenGLStructuredBufferUAV::BindUAV( GLuint bindingPoint )
+{
+	glBindBufferRange(GL_SHADER_STORAGE_BUFFER, bindingPoint, mResourceOGL, mBufferOffset, mBufferSize);
 }
 
 ////////////////////////////////////////////////////////////////////////
 OpenGLTextureUAV::OpenGLTextureUAV( const shared_ptr<Texture>& texture, uint32_t mipSlice, uint32_t firstArraySlice, uint32_t arraySize )
 {
-	mExtraParams[0] = mipSlice;
-	mExtraParams[1] = firstArraySlice;
-	mExtraParams[2] = arraySize;
+	mLevel = (GLint)mipSlice;
+	mFirstLayer = (GLint)firstArraySlice;
+	mNumLayers = (GLint)arraySize;
 
-	GLenum internalFormat, externFormat, type;
-	OpenGLMapping::Mapping(internalFormat, externFormat, type, texture->GetTextureFormat());
-	mExtraParams[3] = internalFormat;
+	OpenGLMapping::Mapping(mInternalFormat, mExternalFormat, mFormatType, texture->GetTextureFormat());
 
 	uint32_t numLayers = texture->GetTextureArraySize();
 	OpenGLTexture* pTextureOGL = static_cast_checked<OpenGLTexture*>(texture.get());
@@ -247,21 +246,25 @@ OpenGLTextureUAV::OpenGLTextureUAV( const shared_ptr<Texture>& texture, uint32_t
 		{
 		case GL_TEXTURE_1D_ARRAY:
 			{
-				glTextureView(mResourceOGL, GL_TEXTURE_1D_ARRAY, pTextureOGL->GetTextureOGL(), internalFormat, mipSlice, 1, firstArraySlice, arraySize);
+				glTextureView(mResourceOGL, GL_TEXTURE_1D_ARRAY, pTextureOGL->GetTextureOGL(), mInternalFormat, mipSlice, 1, firstArraySlice, arraySize);
 			}
 			break;
 		case GL_TEXTURE_2D_ARRAY:
 			{
-				glTextureView(mResourceOGL, GL_TEXTURE_2D_ARRAY, pTextureOGL->GetTextureOGL(), internalFormat, mipSlice, 1, firstArraySlice, arraySize);
+				glTextureView(mResourceOGL, GL_TEXTURE_2D_ARRAY, pTextureOGL->GetTextureOGL(), mInternalFormat, mipSlice, 1, firstArraySlice, arraySize);
 			}
 			break;
 		default:
 			assert(false);
 			break;
 		}
+
+		// layer 0 of the new created texture view
+		mFirstLayer = 0;
 	}
 	else
 	{
+		mResourceOGL = pTextureOGL->GetTextureOGL();
 		mNeedDelete = false;
 	}
 }
@@ -270,6 +273,56 @@ OpenGLTextureUAV::~OpenGLTextureUAV()
 {
 	if (mNeedDelete)
 		glDeleteTextures(1, &mResourceOGL);
+}
+
+void OpenGLTextureUAV::BindUAV( GLuint imageUnit )
+{
+	GLboolean layered = (mNumLayers > 1) ? GL_TRUE : GL_FALSE;
+	glBindImageTexture(imageUnit, mResourceOGL, mLevel, layered, mFirstLayer, GL_READ_WRITE, mInternalFormat);
+}
+
+void OpenGLTextureUAV::Clear( const float4& clearData )
+{
+	if (GLEW_ARB_clear_texture)
+	{
+		glClearTexImage(mResourceOGL, mLevel, mExternalFormat, mFormatType, &clearData);
+	}
+	else 
+	{
+		GLuint oldFBO = gOpenGLDevice->GetCurrentFBO();
+		{
+			GLuint fbo, dummy;
+			gOpenGLDevice->GetBlitFBO(fbo, dummy);
+
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mResourceOGL, 0); //Only need to do this once.
+			glDrawBuffer(GL_COLOR_ATTACHMENT0); //Only need to do this once.
+			glClearBufferfv(GL_COLOR, 0, (GLfloat*)&clearData);
+		}
+		gOpenGLDevice->BindFBO(oldFBO);
+	}
+}
+
+void OpenGLTextureUAV::Clear( const uint4& clearData )
+{
+	if (GLEW_ARB_clear_texture)
+	{
+		glClearTexImage(mResourceOGL, mLevel, mExternalFormat, mFormatType, &clearData);
+	}
+	else 
+	{
+		GLuint oldFBO = gOpenGLDevice->GetCurrentFBO();
+		{
+			GLuint fbo, dummy;
+			gOpenGLDevice->GetBlitFBO(fbo, dummy);
+
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+			glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mResourceOGL, 0); //Only need to do this once.
+			glDrawBuffer(GL_COLOR_ATTACHMENT0); //Only need to do this once.
+			glClearBufferuiv(GL_COLOR, 0, (GLuint*)&clearData);
+		}
+		gOpenGLDevice->BindFBO(oldFBO);
+	}
 }
 
 }

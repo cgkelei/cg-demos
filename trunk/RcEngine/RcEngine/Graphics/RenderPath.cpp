@@ -757,7 +757,7 @@ void TiledDeferredPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 
 	// Init light buffer
 	mLightAccumulateBuffer = factory->CreateTexture2D(windowWidth, windowHeight, PF_RGBA32F, 1, 1, 1, 0, acessHint, rtCreateFlag, NULL);
-	mLightAccumulateUAV = factory->CreateTexture2DUAV(mLightAccumulateBuffer, 0, 0, 1);
+	mLightAccumulateBufferUAV = factory->CreateTexture2DUAV(mLightAccumulateBuffer, 0, 0, 1);
 
 	// HDR buffer
 	mHDRFB = factory->CreateFrameBuffer(windowWidth, windowHeight);
@@ -771,6 +771,10 @@ void TiledDeferredPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 	mDepthStencilViewReadOnly = factory->CreateDepthStencilView(mDepthStencilBuffer, 0, 0, dsvReadOnly);
 	mHDRFB->AttachRTV(ATT_DepthStencil, mDepthStencilViewReadOnly);
 
+	// Create structure buffer for lights
+	mLightBuffer = factory->CreateStructuredBuffer(sizeof(PointLight), MaxNumLights, EAH_GPU_Read | EAH_GPU_Write, BufferCreate_Structured, nullptr);
+	mLightBufferSRV = factory->CreateStructuredBufferSRV(mLightBuffer, 0, MaxNumLights, sizeof(PointLight));
+
 	// Init shadow manager
 	//mShadowMan = new CascadedShadowMap(mDevice);
 
@@ -778,7 +782,9 @@ void TiledDeferredPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 	mTiledDeferredEffect->GetParameterByName("GBuffer0")->SetValue(mGBuffer[0]->GetShaderResourceView());
 	mTiledDeferredEffect->GetParameterByName("GBuffer1")->SetValue(mGBuffer[1]->GetShaderResourceView());
 	mTiledDeferredEffect->GetParameterByName("DepthBuffer")->SetValue(mDepthStencilBuffer->GetShaderResourceView());
+	mTiledDeferredEffect->GetParameterByName("oLightAccumulateBuffer")->SetValue(mLightAccumulateBufferUAV); // UAV
 	mTiledDeferredEffect->GetParameterByName("LightAccumulateBuffer")->SetValue(mLightAccumulateBuffer->GetShaderResourceView());	
+	mTiledDeferredEffect->GetParameterByName("LightBuffer")->SetValue(mLightBufferSRV);
 
 	mToneMapEffect->GetParameterByName("HDRBuffer")->SetValue(mHDRBuffer->GetShaderResourceView());	
 }
@@ -827,10 +833,60 @@ void TiledDeferredPath::TiledLighting()
 {
 	uint32_t windowWidth = mLightAccumulateBuffer->GetWidth();
 	uint32_t windowHeight = mLightAccumulateBuffer->GetHeight();
+	
+	// Fill light data
+	float* pLightData = static_cast<float*>( mLightBuffer->Map(0, sizeof(PointLight) * 5, RMA_Write_Discard) );
+
+	uint32_t numTotalCount = 0;
+	for (Light* light : mSceneMan->GetSceneLights())
+	{
+		if (light->GetLightType() == LT_PointLight)
+		{
+			float3 lightColor = light->GetLightColor() * light->GetLightIntensity();
+			const float3& lightPosition = light->GetPosition();
+			const float3& lightFalloff = light->GetAttenuation();
+
+			*pLightData++ = lightColor[0];
+			*pLightData++ = lightColor[1];
+			*pLightData++ = lightColor[2];
+
+			*pLightData++ = lightPosition[0];
+			*pLightData++ = lightPosition[1];
+			*pLightData++ = lightPosition[2];
+
+			*pLightData++ = lightFalloff[0];
+			*pLightData++ = lightFalloff[1];
+			*pLightData++ = lightFalloff[2];
+
+			*pLightData++ = light->GetRange();
+
+			numTotalCount++;
+		}
+	}
+	mLightBuffer->UnMap();
+
+	const float4x4& view = mCamera->GetViewMatrix();
+	const float4x4& proj = mCamera->GetProjMatrix();
+	const float4x4 invViewProj = MatrixInverse(view * proj);
+	const float4x4 invProj = MatrixInverse(proj);
+	float4 viewDim = float4((float)windowWidth, (float)windowHeight, 1.0f / windowWidth, 1.0f / windowHeight);
+
+	mTiledDeferredEffect->GetParameterByName("View")->SetValue(view);
+	mTiledDeferredEffect->GetParameterByName("InvProj")->SetValue(invProj);
+	mTiledDeferredEffect->GetParameterByName("InvViewProj")->SetValue(invViewProj);
+	mTiledDeferredEffect->GetParameterByName("ViewportDim")->SetValue(viewDim);
+	mTiledDeferredEffect->GetParameterByName("CameraNearFar")->SetValue(float2(mCamera->GetNearPlane(), mCamera->GetFarPlane()));
+	mTiledDeferredEffect->GetParameterByName("ProjRatio")->SetValue(float2(proj.M33, proj.M43));
+	mTiledDeferredEffect->GetParameterByName("CameraOrigin")->SetValue(mCamera->GetPosition());
+	mTiledDeferredEffect->GetParameterByName("LightCount")->SetValue(numTotalCount);
 
 	uint32_t numGroupX = (windowWidth + TileGroupSize - 1) / TileGroupSize;
 	uint32_t numGroupY = (windowHeight + TileGroupSize - 1) / TileGroupSize;
-	mDevice->DispatchCompute(mTileTech, numGroupX, numGroupY, 0);
+
+	mLightAccumulateBufferUAV->Clear(float4(0, 0, 0, 0));
+	mDevice->DispatchCompute(mTileTech, numGroupX, numGroupY, 1);
+
+	mDevice->GetRenderFactory()->SaveTextureToFile("E:/Light.pfm", mLightAccumulateBuffer);
 }
 
 

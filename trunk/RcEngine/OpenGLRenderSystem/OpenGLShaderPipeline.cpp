@@ -1,6 +1,7 @@
 #include "OpenGLShader.h"
 #include "OpenGLDevice.h"
 #include "OpenGLView.h"
+#include "OpenGLBuffer.h"
 #include <Graphics/EffectParameter.h>
 #include <Graphics/Effect.h>
 #include <Core/Exception.h>
@@ -340,7 +341,6 @@ private:
 	EffectParameter* Param;
 };
 
-
 template <>
 struct ShaderParameterSetHelper<float4x4>
 {
@@ -392,6 +392,27 @@ private:
 	GLsizei Count;
 	TimeStamp UpdateTimeStamp;
 	EffectParameter* Param;
+};
+
+template<>
+struct ShaderParameterSetHelper< EffectConstantBuffer >
+{
+public:
+	ShaderParameterSetHelper(EffectConstantBuffer* param, GLuint bindingSlot)
+		: BindingSlot(bindingSlot), UniformBlock(param) { }
+
+	void operator() ()
+	{
+		// Update uniform buffer if changed
+		UniformBlock->UpdateBuffer();
+
+		GLuint bufferOGL = (static_cast_checked<OpenGLBuffer*>(UniformBlock->GetBuffer().get()))->GetBufferOGL();
+		glBindBufferBase(GL_UNIFORM_BUFFER, BindingSlot, bufferOGL);
+	}
+
+private:
+	GLuint BindingSlot;
+	EffectConstantBuffer* UniformBlock;
 };
 
 template<>
@@ -470,37 +491,70 @@ private:
 	EffectParameter* Param;
 };
 
-struct ShaderTextureBinding
+// Commit for set binding slot to shader program
+struct ShaderResourceBinding
 {
-	ShaderTextureBinding(GLuint shaderID, GLint location, GLuint binding)
-		: ShaderOGL(shaderID), Location(location), Binding(binding) {}
+	enum BindType { UniformBlock, ShaderStorage, General };
+
+	ShaderResourceBinding(BindType type, GLuint shaderID, GLint location, GLuint binding)
+		: Type(type), ShaderOGL(shaderID), Location(location), Binding(binding) {}
 
 	void operator() ()
 	{
-		glProgramUniform1i(ShaderOGL, Location, Binding);
+		switch (Type)
+		{
+		case UniformBlock:
+			glUniformBlockBinding(ShaderOGL, Location, Binding);
+			break;
+		case ShaderStorage:
+			glShaderStorageBlockBinding(ShaderOGL, Location, Binding);
+			break;
+		case General:
+		default:
+			glProgramUniform1i(ShaderOGL, Location, Binding);
+			break;
+		}
 	}
 
 private:
+	BindType Type;
+
 	GLuint ShaderOGL;
 	GLuint Binding;
 	GLuint Location;
 };
 
-struct ShaderStorageBinding
-{
-	ShaderStorageBinding(GLuint shaderID, GLint location, GLuint binding)
-		: ShaderOGL(shaderID), Location(location), Binding(binding) {}
-
-	void operator() ()
-	{
-		glShaderStorageBlockBinding(ShaderOGL, Location, Binding);
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLuint Binding;
-	GLuint Location;
-};
+//struct ShaderTextureBinding
+//{
+//	ShaderTextureBinding(GLuint shaderID, GLint location, GLuint binding)
+//		: ShaderOGL(shaderID), Location(location), Binding(binding) {}
+//
+//	void operator() ()
+//	{
+//		glProgramUniform1i(ShaderOGL, Location, Binding);
+//	}
+//
+//private:
+//	GLuint ShaderOGL;
+//	GLuint Binding;
+//	GLuint Location;
+//};
+//
+//struct ShaderStorageBinding
+//{
+//	ShaderStorageBinding(GLuint shaderID, GLint location, GLuint binding)
+//		: ShaderOGL(shaderID), Location(location), Binding(binding) {}
+//
+//	void operator() ()
+//	{
+//		
+//	}
+//
+//private:
+//	GLuint ShaderOGL;
+//	GLuint Binding;
+//	GLuint Location;
+//};
 
 //////////////////////////////////////////////////////////////////////////
 OpenGLShaderPipeline::OpenGLShaderPipeline(Effect& effect)
@@ -530,6 +584,7 @@ bool OpenGLShaderPipeline::LinkPipeline()
 {
 	GLuint srvBinding = 0;
 	GLuint uavBinding = 0;
+	GLuint uniformBlockBinding = 0;
 	std::map<String, GLuint> mBindingCache;
 
 	for (int i = 0; i < ST_Count; ++i)
@@ -574,12 +629,22 @@ bool OpenGLShaderPipeline::LinkPipeline()
 						for (const auto& bufferVariable : uniformBlock.BufferVariables)
 						{
 							EffectParameter* variable = mEffect.FetchUniformParameter(bufferVariable.Name, bufferVariable.Type, bufferVariable.ArraySize);
-							uniformBuffer->AddVariable(variable, bufferVariable.Location);
+							uniformBuffer->AddVariable(variable, bufferVariable.Offset);
 
 							if (bufferVariable.ArraySize > 1)
 								variable->SetArrayStride(bufferVariable.ArrayStride);
 						}
 					}
+
+					// Commit for binding uniform buffer to UBO binding slot 
+					if (mBindingCache.find(uniformBlock.Name) == mBindingCache.end())
+					{
+						mBindingCache[uniformBlock.Name] = uniformBlockBinding++;
+						AddUnitformBlockBind(uniformBuffer, mBindingCache[uniformBlock.Name]);
+					}
+					
+					// Commit for set binding slot to shader context
+					AddShaderResourceBind(shaderOGL->mShaderOGL, uniformBlock.Location, mBindingCache[uniformBlock.Name], ShaderResourceBinding::UniformBlock);
 				}
 			}
 
@@ -588,30 +653,28 @@ bool OpenGLShaderPipeline::LinkPipeline()
 			{
 				if (mBindingCache.find(viewParam.Name) == mBindingCache.end())
 				{		
-					mBindingCache[viewParam.Name] = srvBinding++;
-
 					// Bind resource to OpenGL binding slot, Texture/Image unit or SSBO
 					if (viewParam.ViewClass == Shader_Param_SRV)
 					{
+						mBindingCache[viewParam.Name] = srvBinding++;
+
 						EffectParameter* srvParam = mEffect.FetchSRVParameter(viewParam.Name, viewParam.Type);
 						AddSRVResouceBind(srvParam, mBindingCache[viewParam.Name]);
 					}
 					else
 					{
+						mBindingCache[viewParam.Name] = uavBinding++;
+
 						EffectParameter* uavParam = mEffect.FetchUAVParameter(viewParam.Name, viewParam.Type);
 						AddUAVResourceBind(uavParam, mBindingCache[viewParam.Name]);
 					}
 				}
 
 				// Set binding point to shader uniform
-				if (viewParam.ViewClass == Shader_Param_SRV)
-				{		
-					AddShaderResourceBind(shaderOGL->mShaderOGL, viewParam.Location, mBindingCache[viewParam.Name], viewParam.Type == EPT_StructureBuffer);
-				}
+				if (viewParam.Type == EPT_StructureBuffer)
+					AddShaderResourceBind(shaderOGL->mShaderOGL, viewParam.Location, mBindingCache[viewParam.Name], ShaderResourceBinding::ShaderStorage);
 				else
-				{
-					AddShaderResourceBind(shaderOGL->mShaderOGL, viewParam.Location, mBindingCache[viewParam.Name], viewParam.Type == EPT_StructureBuffer);
-				}
+					AddShaderResourceBind(shaderOGL->mShaderOGL, viewParam.Location, mBindingCache[viewParam.Name], ShaderResourceBinding::General);
 			}
 
 			// SamplerState
@@ -728,6 +791,11 @@ void OpenGLShaderPipeline::AddUniformParamBind( GLuint shader, GLint location, E
 	}
 }
 
+void OpenGLShaderPipeline::AddUnitformBlockBind( EffectConstantBuffer* effectCBuffer, GLuint binding )
+{
+	mParameterBinds.push_back(ShaderParameterSetHelper<EffectConstantBuffer>(effectCBuffer, binding));
+}
+
 void OpenGLShaderPipeline::AddSRVResouceBind( EffectParameter* effectParam, GLuint binding )
 {
 	mParameterBinds.push_back( ShaderParameterSetHelper<ShaderResourceView>(effectParam, binding) );
@@ -738,16 +806,10 @@ void OpenGLShaderPipeline::AddUAVResourceBind( EffectParameter* effectParam, GLu
 	mParameterBinds.push_back( ShaderParameterSetHelper<UnorderedAccessView>(effectParam, binding) );
 }
 
-void OpenGLShaderPipeline::AddShaderResourceBind( GLuint shader, GLint location, GLuint binding, bool shaderStorage )
+void OpenGLShaderPipeline::AddShaderResourceBind( GLuint shader, GLint location, GLuint binding, GLuint bindType )
 {
-	if (shaderStorage)
-	{
-		mParameterBinds.push_back( ShaderStorageBinding(shader, location, binding) );
-	}
-	else
-	{
-		mParameterBinds.push_back( ShaderTextureBinding(shader, location, binding) );
-	}
+	mParameterBinds.push_back( ShaderResourceBinding(ShaderResourceBinding::BindType(bindType), shader, location, binding) );
 }
+
 
 }

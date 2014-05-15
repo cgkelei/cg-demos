@@ -10,6 +10,7 @@ namespace RcEngine {
 
 class OpenGLShader;
 class OpenGLBuffer;
+class OpenGLDevice;
 
 // Global OpenGL deice
 extern OpenGLDevice* gOpenGLDevice;

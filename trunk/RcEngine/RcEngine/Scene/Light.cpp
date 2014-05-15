@@ -11,7 +11,7 @@ Light::Light( const String& name, LightType type)
 	  mLightPosition(float3::Zero()),
 	  mLightDirection(float3(0, 1, 0)),
 	  mLightColor(1, 1, 1),
-	  mAttenuation(1.0f, 25.0f, 0.0f),
+	  mAttenuation(1.0f, 0.0f, 1.0f),
 	  mSpotInnerAngle(Mathf::ToRadian(30.0f)), 
 	  mSpotOuterAngle(Mathf::ToRadian(60.0f)), 
 	  mSpotFalloff(1.0f),

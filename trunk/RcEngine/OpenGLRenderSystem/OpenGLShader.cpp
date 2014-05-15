@@ -397,7 +397,8 @@ private:
 			}
 		}
 
-		std::sort(mShaderOGL->mInputSignatures.begin(), mShaderOGL->mInputSignatures.end(), [&](const InputSignature& lhs, const InputSignature& rhs) {
+		std::sort(mShaderOGL->mInputSignatures.begin(), mShaderOGL->mInputSignatures.end(), 
+			[&](const InputSignature& lhs, const InputSignature& rhs) {
 					return lhs.AttributeSlot < rhs.AttributeSlot;	
 				});
 	}
@@ -472,6 +473,10 @@ private:
 					viewParam.Type = paramType;
 					viewParam.ViewClass = paramClass;
 					viewParam.Location = glGetProgramResourceLocation(mShaderProgramID, GL_UNIFORM, actualName.c_str());
+					
+					// retrieve explicit location in GLSL
+					GLint bindingSlot = -1;
+					glGetUniformiv(mShaderProgramID, viewParam.Location, &bindingSlot);
 
 					mShaderOGL->mBoundResources.push_back(viewParam);
 				}
@@ -498,7 +503,10 @@ private:
 
 			UniformBuffer uniformBufferParam;
 			uniformBufferParam.Name = String(name, actualNameLen);
-			uniformBufferParam.Location = i;
+			uniformBufferParam.BufferSize = blockSize;
+			uniformBufferParam.Location = glGetProgramResourceIndex(mShaderProgramID, GL_UNIFORM_BLOCK, name);
+			assert(uniformBufferParam.Location != GL_INVALID_INDEX);
+			//uniformBufferParam.Location = glGetUniformBlockIndex(mShaderProgramID, name);
 
 			for (int k = 0; k < numUniformInBlock; ++k) 
 			{
@@ -520,6 +528,7 @@ private:
 				UniformParam bufferVariable;
 				bufferVariable.Name = String(name, actualNameLen);
 				bufferVariable.ArraySize = (arraySize <= 1) ? 0 : arraySize;
+				bufferVariable.Offset = unifomOffset;
 
 				ShaderParameterClass paramClass;
 				OpenGLMapping::UnMapping(type, bufferVariable.Type, paramClass);
@@ -545,7 +554,8 @@ private:
 				srvParam.Name = actualName.substr(0, actualName.find("SRV"));
 				srvParam.Type = EPT_StructureBuffer;
 				srvParam.ViewClass = Shader_Param_SRV;
-				srvParam.Location = i;
+				srvParam.Location = glGetProgramResourceIndex(mShaderProgramID, GL_SHADER_STORAGE_BLOCK, name);
+				assert(srvParam.Location != GL_INVALID_INDEX);
 
 				mShaderOGL->mBoundResources.push_back(srvParam);
 			}
@@ -555,7 +565,8 @@ private:
 				uavParam.Name = actualName.substr(0, actualName.find("UAV"));
 				uavParam.Type = EPT_StructureBuffer;
 				uavParam.ViewClass = Shader_Param_UAV;
-				uavParam.Location = i;
+				uavParam.Location = glGetProgramResourceIndex(mShaderProgramID, GL_SHADER_STORAGE_BLOCK, name);
+				assert(uavParam.Location != GL_INVALID_INDEX);
 
 				mShaderOGL->mBoundResources.push_back(uavParam);
 			}
@@ -632,6 +643,8 @@ bool OpenGLShader::LoadFromFile( const String& filename, const ShaderMacro* macr
 	
 	return true;
 }
+
+
 
 
 }
