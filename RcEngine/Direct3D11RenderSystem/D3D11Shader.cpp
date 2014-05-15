@@ -396,7 +396,7 @@ bool D3D11VertexShader::LoadFromFile( const String& filename, const ShaderMacro*
 
 //////////////////////////////////////////////////////////////////////////
 D3D11HullShader::D3D11HullShader()
-	: D3D11Shader(ST_Hull),
+	: D3D11Shader(ST_TessControl),
 	  ShaderD3D11(nullptr)
 {
 
@@ -451,7 +451,7 @@ bool D3D11HullShader::LoadFromFile( const String& filename, const ShaderMacro* m
 
 //////////////////////////////////////////////////////////////////////////
 D3D11DomainShader::D3D11DomainShader()
-	: D3D11Shader(ST_Domain),
+	: D3D11Shader(ST_TessEval),
 	  ShaderD3D11(nullptr)
 {
 

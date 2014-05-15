@@ -252,7 +252,7 @@ public:
 		// Add #line
 #ifdef _DEBUG
 		size_t lineNum0 = std::count(glslScript.begin(), glslScript.begin() + shaderSectionBegin, '\n');
-		lineNum += lineNum0 + 1;
+		lineNum = lineNum0 + 1;
 		
 		static char lineBuffer[100];
 		std::sprintf(lineBuffer, "#line %d\n", lineNum);
@@ -285,8 +285,7 @@ public:
 			ofs << shaderSource;
 			ofs.close();
 		}
-
-
+		
 		return (success == GL_TRUE);
 	} 
 

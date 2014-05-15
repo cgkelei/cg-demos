@@ -51,7 +51,7 @@ void main()
 	oTangentToWorld = mat3( tangent, binormal, normal);
 
 	// transpose to get tangent to world matrix
-	oTangentToWorld = transpose(oTangentToWorld);
+	//oTangentToWorld = transpose(oTangentToWorld);
 #else
 	oNormalWS = normal;
 #endif

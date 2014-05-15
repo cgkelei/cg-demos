@@ -15,8 +15,8 @@
 #include <Graphics/FrameBuffer.h>
 #include <Graphics/AnimationState.h>
 #include <Graphics/Animation.h>
-#include <Graphics/SamplerState.h>
 #include <IO/FileSystem.h>
+#include <Core/Environment.h>
 #include <Math/MathUtil.h>
 #include <GUI/UIManager.h>
 #include <GUI/Label.h>
@@ -24,8 +24,6 @@
 #include <GUI/Button.h>
 #include <GUI/UIWindow.h>
 #include <Graphics/RenderOperation.h>
-#include <Graphics/GraphicBuffer.h>
-#include <Graphics/Texture.h>
 #include <Graphics/CascadedShadowMap.h>
 
 App::App( const String& config )
@@ -42,7 +40,7 @@ App::~App(void)
 
 void App::Initialize()
 {
-	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
+	RenderDevice& device = En::GetSingleton().GetRenderDevice();
 	RenderFactory& factory =  Context::GetSingleton().GetRenderFactory();
 
 	mDeferredPath = new DeferredPath;
