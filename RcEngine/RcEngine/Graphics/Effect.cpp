@@ -254,6 +254,38 @@ EffectParameter* Effect::FetchUniformParameter( const String& name, EffectParame
 				uniformParam = new EffectParameterInt4(name, type);
 		}
 		break;
+	case EPT_UInt:
+		{
+			if (elementSize > 1)
+				uniformParam = new EffectParameterUIntArray(name, type, elementSize);
+			else
+				uniformParam = new EffectParameterUInt(name, type);
+		}
+		break;
+	case EPT_UInt2:
+		{
+			if (elementSize > 1)
+				uniformParam = new EffectParameterUInt2Array(name, type, elementSize);
+			else
+				uniformParam = new EffectParameterUInt2(name, type);
+		}
+		break;
+	case EPT_UInt3:
+		{
+			if (elementSize > 1)
+				uniformParam = new EffectParameterUInt3Array(name, type, elementSize);
+			else
+				uniformParam = new EffectParameterUInt3(name, type);
+		}
+		break;
+	case EPT_UInt4:
+		{
+			if (elementSize > 1)
+				uniformParam = new EffectParameterUInt4Array(name, type, elementSize);
+			else
+				uniformParam = new EffectParameterUInt4(name, type);
+		}
+		break;
 	case EPT_Matrix4x4:
 		{
 			if (elementSize > 1)
@@ -350,18 +382,11 @@ void Effect::LoadImpl()
 		{
 			EffectPass* pass = new EffectPass;
 			pass->mName = passNode->AttributeString("name", "");
-	
-			DepthStencilStateDesc dsDesc;
-			BlendStateDesc blendDesc;
-			RasterizerStateDesc rasDesc;
-	
-			Internal::CollectRenderStates(passNode, dsDesc, blendDesc, rasDesc, pass->mBlendColor, pass->mSampleMask, pass->mFrontStencilRef, pass->mBackStencilRef);
-	
-			pass->mDepthStencilState = factory->CreateDepthStencilState(dsDesc);
-			pass->mBlendState = factory->CreateBlendState(blendDesc);
-			pass->mRasterizerState = factory->CreateRasterizerState(rasDesc);
 			pass->mShaderPipeline = factory->CreateShaderPipeline(*this);
 
+			bool hasComputeShader = false;
+
+			// Load shader 
 			static const String ShaderNodeNames[] = {"VertexShader", "HullShader", "DomainShader", "GeometryShader", "PixelShader", "ComputeShader"};
 			for (uint32_t i = 0; i < ST_Count; ++i)
 			{
@@ -386,6 +411,10 @@ void Effect::LoadImpl()
 						shaderMacros.empty() ? nullptr : &shaderMacros[0],
 						shaderMacros.size(),
 						entryPoint) );
+
+					// Compute pass
+					if (i == ST_Compute)
+						hasComputeShader = true;
 				}
 			}
 
@@ -393,7 +422,21 @@ void Effect::LoadImpl()
 			{
 				ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Effect error!", "Effect::LoadForm");
 			}
-			
+
+			// Compute shader pass has no render state
+			if (!hasComputeShader)
+			{
+				DepthStencilStateDesc dsDesc;
+				BlendStateDesc blendDesc;
+				RasterizerStateDesc rasDesc;
+
+				Internal::CollectRenderStates(passNode, dsDesc, blendDesc, rasDesc, pass->mBlendColor, pass->mSampleMask, pass->mFrontStencilRef, pass->mBackStencilRef);
+
+				pass->mDepthStencilState = factory->CreateDepthStencilState(dsDesc);
+				pass->mBlendState = factory->CreateBlendState(blendDesc);
+				pass->mRasterizerState = factory->CreateRasterizerState(rasDesc);
+			}
+
 			technique->mPasses.push_back(pass);	
 		}
 

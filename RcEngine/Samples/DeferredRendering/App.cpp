@@ -40,8 +40,8 @@ App::~App(void)
 
 void App::Initialize()
 {
-	RenderDevice& device = En::GetSingleton().GetRenderDevice();
-	RenderFactory& factory =  Context::GetSingleton().GetRenderFactory();
+	RenderDevice* device = Environment::GetSingleton().GetRenderDevice();
+	RenderFactory* factory = Environment::GetSingleton().GetRenderFactory();
 
 	mDeferredPath = new DeferredPath;
 	mDeferredPath->OnGraphicsInit();
@@ -157,51 +157,6 @@ void App::Render()
 
 	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
 
-	//device.BindFrameBuffer(device.GetScreenFrameBuffer());
-	//device.GetScreenFrameBuffer()->Clear(CF_Depth, ColorRGBA::Black, 1.0f, 0);
-
-	//{
-	//	float3 orgPos(18, 29, -12);
-
-	//	float scaleHeight = 50;
-	//	float scaleBase = scaleHeight * tanf(Mathf::ToRadian(10.0f) * 0.5f);
-
-	//	float3 rotAxis = Cross(float3(0, 1, 0), float3(1, 0, 0));
-	//	float rotAngle = acosf(Dot(float3(0, 1, 0), float3(1, 0, 0)));
-	//	float4x4 rotation = CreateRotationAxis(rotAxis, rotAngle);
-
-	//	float4x4 world = CreateScaling(scaleBase, scaleHeight, scaleBase) * rotation *
-	//		CreateTranslation(orgPos);
-
-	//	// X
-	//	mMaterial->SetDiffuseColor(ColorRGBA(1, 0, 0, 1));
-	//	mMaterial->ApplyMaterial(world);
-	//	mMaterial->SetCurrentTechnique("LightShape");
-	//	device.Render(*mMaterial->GetCurrentTechnique(), *mCone);
-
-	//	// Y
-	//	world = CreateScaling(scaleBase, scaleHeight, scaleBase) * CreateTranslation(orgPos);
-	//	mMaterial->SetDiffuseColor(ColorRGBA(0, 1, 0, 1));
-	//	mMaterial->ApplyMaterial(world);
-	//	device.Render(*mMaterial->GetCurrentTechnique(), *mCone);
-
-	//	rotAxis = Cross(float3(0, 1, 0), float3(0, 0, 1));
-	//	rotAngle = acosf(Dot(float3(0, 1, 0), float3(0, 0, 1)));
-	//	rotation = CreateRotationAxis(rotAxis, rotAngle);
-
-	//	// Z
-	//	world = CreateScaling(scaleBase, scaleHeight, scaleBase) * rotation * CreateTranslation(orgPos);
-	//	mMaterial->SetDiffuseColor(ColorRGBA(0, 0, 1, 1));
-	//	mMaterial->ApplyMaterial(world);
-	//	device.Render(*mMaterial->GetCurrentTechnique(), *mCone);
-
-	//}
-
-
-	//gSceneDepth.resize(mMainWindow->GetWidth() * mMainWindow->GetHeight());
-	//glReadPixels(0, 0, mMainWindow->GetWidth(), mMainWindow->GetHeight(), GL_DEPTH_COMPONENT, GL_FLOAT, &gSceneDepth[0]);
-	//
-	
 	device.GetScreenFrameBuffer()->SwapBuffers();
 }
 

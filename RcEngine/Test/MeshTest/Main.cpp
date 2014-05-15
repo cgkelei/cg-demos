@@ -68,10 +68,7 @@ protected:
 		ResourceManager& resMan = ResourceManager::GetSingleton();
 		SceneManager* sceneMan = Environment::GetSingleton().GetSceneManager();
 
-		Entity* entity;
-		SceneNode* sceneNode;
-
-		mCamera->CreateLookAt(float3(-307.441010, 141.725555, -15.163310), float3(-308.427032, 141.578644, -15.241874), float3(-0.146448, 0.989150, -0.011668));
+		mCamera->CreateLookAt(float3(276.089172, 98.567436, -19.411501), float3(277.086884, 98.505020, -19.385706), float3(0.062396, 0.998050, 0.001613));
 		mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 3000.0f );
 
 		Entity* sponzaEntity = sceneMan->CreateEntity("Sponza", "Sponza.mesh",  "Custom");
@@ -163,17 +160,17 @@ protected:
 		mPointLight->SetRange(80.0f);
 		mPointLight->SetAttenuation(1.0f, 0.0f);
 		mPointLight->SetCastShadow(false);
-		mPointLight->SetPosition(float3(0, 0, 0));
+		mPointLight->SetPosition(float3(550, 81, -18));
 		sceneMan.GetRootSceneNode()->AttachObject(mPointLight);
 
-	/*	Light* mSpotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
-		mSpotLight->SetLightColor(float3(0, 1, 0));
-		mSpotLight->SetRange(250.0f);
-		mSpotLight->SetPosition(float3(-442, 80, -16));
-		mSpotLight->SetDirection(float3(-1, 0, 0));
-		mSpotLight->SetAttenuation(1.0f, 0.0f);
-		mSpotLight->SetSpotAngle(Mathf::ToRadian(30), Mathf::ToRadian(40));
-		sceneMan.GetRootSceneNode()->AttachObject(mSpotLight);*/
+		//Light* mSpotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
+		//mSpotLight->SetLightColor(float3(0, 1, 0));
+		//mSpotLight->SetRange(250.0f);
+		//mSpotLight->SetPosition(float3(-442, 80, -16));
+		//mSpotLight->SetDirection(float3(-1, 0, 0));
+		//mSpotLight->SetAttenuation(1.0f, 0.0f);
+		//mSpotLight->SetSpotAngle(Mathf::ToRadian(30), Mathf::ToRadian(40));
+		//sceneMan.GetRootSceneNode()->AttachObject(mSpotLight);
 
 		//{
 		//	float3 direction = Normalize(float3(-111.5f, 398.1f, 3.6f) - float3(-111.1, 380.1, 73.4));
@@ -274,7 +271,7 @@ protected:
 	RenderOperation mFSQuad;
 	shared_ptr<Camera> mCamera;
 	
-	shared_ptr<TiledDeferredPath> mRenderPath;
+	shared_ptr<RenderPath> mRenderPath;
 
 	Test::FPSCameraControler* mCameraControler;
 };

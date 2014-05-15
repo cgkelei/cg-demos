@@ -21,6 +21,7 @@ struct UniformParam
 {
 	String Name;
 	GLint Location;
+	GLint Offset;
 	GLuint ArraySize;
 	GLuint ArrayStride;
 	EffectParameterType Type;
@@ -68,6 +69,8 @@ private:
 	std::map<String, String> mSamplerStates;
 };
 
+class EffectConstantBuffer;
+
 class _OpenGLExport OpenGLShaderPipeline : public ShaderPipeline
 {
 public:
@@ -82,10 +85,14 @@ public:
 
 private:
 	void AddUniformParamBind(GLuint shader, GLint location, EffectParameter* effectParam, GLsizei arrSize);
+	
+	// Bind resource to OpenGL binding unit. (Texture/Image/UBO/SSBO)
+	void AddUnitformBlockBind(EffectConstantBuffer* effectCBuffer, GLuint binding);
 	void AddSRVResouceBind(EffectParameter* effectParam, GLuint binding);
 	void AddUAVResourceBind(EffectParameter* effectParam, GLuint binding);
 
-	void AddShaderResourceBind(GLuint shader, GLint location, GLuint binding, bool shaderStorage);
+	// Set binding slot to shader context
+	void AddShaderResourceBind(GLuint shader, GLint location, GLuint binding, GLuint resourceType);
 
 private:
 	GLuint mPipelineOGL;

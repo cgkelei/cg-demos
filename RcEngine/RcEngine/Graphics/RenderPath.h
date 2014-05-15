@@ -157,6 +157,7 @@ private:
 private:
 
 	enum { TileGroupSize = 32 };
+	enum { MaxNumLights = 512 };
 
 	// Normal + Specular Shininess,  Albedo + Specular Intensity
 	shared_ptr<Texture> mGBuffer[2];
@@ -167,7 +168,7 @@ private:
 	shared_ptr<RenderView> mDepthStencilViewReadOnly;
 
 	shared_ptr<Texture> mLightAccumulateBuffer;
-	shared_ptr<UnorderedAccessView> mLightAccumulateUAV;
+	shared_ptr<UnorderedAccessView> mLightAccumulateBufferUAV;
 
 	shared_ptr<Texture> mHDRBuffer;
 	shared_ptr<RenderView> mHDRBufferRTV;
@@ -178,6 +179,16 @@ private:
 
 	shared_ptr<Effect> mTiledDeferredEffect;
 	shared_ptr<Effect> mToneMapEffect;
+
+	struct PointLight
+	{
+		float3 Color;
+		float3 Position;
+		float3 Falloff;
+		float Range;
+	};
+	shared_ptr<GraphicsBuffer> mLightBuffer;
+	shared_ptr<ShaderResourceView> mLightBufferSRV; 
 
 	EffectTechnique* mTileTech;
 	EffectTechnique* mShadingTech;

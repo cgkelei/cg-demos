@@ -63,8 +63,10 @@ public:
 	virtual void GetValue(bool*& value) const;
 	virtual void GetValue(float& value) const;
 	virtual void GetValue(float*& value) const;
-	virtual void GetValue(int& value) const;
+	virtual void GetValue(int32_t& value) const;
 	virtual void GetValue(int32_t*& value) const;
+	virtual void GetValue(uint32_t& value) const;
+	virtual void GetValue(uint32_t*& value) const;
 	virtual void GetValue(float4x4& value) const;
 	virtual void GetValue(float4x4*& value) const;
 	virtual void GetValue(float2& value) const;
@@ -81,8 +83,10 @@ public:
 	virtual void SetValue(const bool* value, uint32_t count);
 	virtual void SetValue(const float& value);
 	virtual void SetValue(const float* value, uint32_t count);
-	virtual void SetValue(const int& value);
+	virtual void SetValue(const int32_t& value);
 	virtual void SetValue(const int32_t* value, uint32_t count);
+	virtual void SetValue(const uint32_t& value);
+	virtual void SetValue(const uint32_t* value, uint32_t count);
 	virtual void SetValue(const float4x4& value);
 	virtual void SetValue(const float4x4* value, uint32_t count);
 	virtual void SetValue(const float2& value);

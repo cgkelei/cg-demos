@@ -6,9 +6,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{8A1135A4-739E-4894-9089-D82A77F59F4F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGLRenderSystem", "OpenGLRenderSystem\OpenGLRenderSystem.vcxproj", "{7F1B1907-F2D6-48C4-A58C-5F6FF66F6B4D}"
-	ProjectSection(ProjectDependencies) = postProject
-		{8C5FC295-3DCE-4113-83C6-884D4F46DEF2} = {8C5FC295-3DCE-4113-83C6-884D4F46DEF2}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestApp", "TestApp\TestApp.vcxproj", "{AEC53C96-38E7-4A85-96A0-5A6DC364BB88}"
 EndProject
@@ -33,9 +30,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EffectSystemTest", "Samples\EffectSystemTest\EffectSystemTest.vcxproj", "{0E8E4A2E-C546-4521-8DC0-E5E34762AF09}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Direct3D11RenderSystem", "Direct3D11RenderSystem\Direct3D11RenderSystem.vcxproj", "{9D87FBBF-A444-4AB6-BCF8-C40F83974286}"
-	ProjectSection(ProjectDependencies) = postProject
-		{8C5FC295-3DCE-4113-83C6-884D4F46DEF2} = {8C5FC295-3DCE-4113-83C6-884D4F46DEF2}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FrameworkTest", "Samples\FrameworkTest\FrameworkTest.vcxproj", "{3B177D83-7D91-4EFD-9C59-201D58A4B56D}"
 EndProject

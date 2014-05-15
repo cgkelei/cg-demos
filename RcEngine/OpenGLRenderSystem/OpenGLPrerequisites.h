@@ -37,23 +37,5 @@ inline void CheckOpenGLError(const char* func, const char* fname, int line)
 	#define OGL_ERROR_CHECK() 
 #endif 
 
-namespace RcEngine
-{
-
-class OpenGLDevice;
-class OpenGLTexture;
-class OpenGLTexture1D;
-class OpenGLTexture2D;
-class OpenGLTexture3D;
-class OpenGLTextureCube;
-class OpenGLEffect;
-class OpenGLEffectParameter;
-class OpenGLEffectTechnique;
-class OpenGLEffectPass;
-class OpenGLGraphicsBuffer;
-class OpenGLFrameBuffer;
-
-}
-
 
 #endif // OpenGLPrerequisites_h__

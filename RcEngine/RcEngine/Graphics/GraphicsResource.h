@@ -4,6 +4,7 @@
 #include <Core/Prerequisites.h>
 #include <Graphics/GraphicsCommon.h>
 #include <Graphics/PixelFormat.h>
+#include <Math/Vector.h>
 
 namespace RcEngine {
 
@@ -48,6 +49,9 @@ class _ApiExport UnorderedAccessView
 {
 public:
 	virtual ~UnorderedAccessView() {}
+
+	virtual void Clear(const float4& clearData) = 0;
+	virtual void Clear(const uint4& clearData) = 0;
 };
 
 //////////////////////////////////////////////////////////////////////////
