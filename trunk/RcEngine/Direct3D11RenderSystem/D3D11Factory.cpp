@@ -139,7 +139,7 @@ shared_ptr<UnorderedAccessView> D3D11Factory::CreateTexture1DUAV( const shared_p
 
 shared_ptr<UnorderedAccessView> D3D11Factory::CreateTexture2DUAV( const shared_ptr<Texture>& texture, uint32_t level, uint32_t firstArraySlice, uint32_t arraySize )
 {
-	return shared_ptr<UnorderedAccessView>( new D3D11Texture1DUAV(texture, level, firstArraySlice, arraySize) );
+	return shared_ptr<UnorderedAccessView>( new D3D11Texture2DUAV(texture, level, firstArraySlice, arraySize) );
 }
 
 shared_ptr<UnorderedAccessView> D3D11Factory::CreateTexture3DUAV( const shared_ptr<Texture>& texture )

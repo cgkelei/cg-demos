@@ -32,6 +32,8 @@ protected:
 	RenderDevice* mDevice;
 	SceneManager* mSceneMan;
 	shared_ptr<Camera> mCamera;
+
+	RenderOperation mFullscreenTrangle;
 };
 
 /**
@@ -125,8 +127,7 @@ protected:
 
 	RenderOperation mSpotLightShape;
 	RenderOperation mPointLightShape;
-	RenderOperation mFullscreenTrangle;
-
+	
 	float4x4 mInvViewProj;
 	float4x4 mViewProj;
 
@@ -152,7 +153,8 @@ public:
 
 private:
 	void GenereateGBuffer();
-	void TiledLighting();
+	void TiledDeferredLighting();
+	void DeferredShading();  // Shading pass
 
 private:
 
@@ -167,8 +169,8 @@ private:
 	shared_ptr<RenderView> mDepthStencilView;
 	shared_ptr<RenderView> mDepthStencilViewReadOnly;
 
-	shared_ptr<Texture> mLightAccumulateBuffer;
-	shared_ptr<UnorderedAccessView> mLightAccumulateBufferUAV;
+	shared_ptr<Texture> mLightAccumulation;
+	shared_ptr<UnorderedAccessView> mLightAccumulationUAV;
 
 	shared_ptr<Texture> mHDRBuffer;
 	shared_ptr<RenderView> mHDRBufferRTV;
@@ -183,9 +185,13 @@ private:
 	struct PointLight
 	{
 		float3 Color;
-		float3 Position;
-		float3 Falloff;
 		float Range;
+
+		float3 Position;
+		//float padding1;
+
+		float3 Falloff;
+		//float padding2;
 	};
 	shared_ptr<GraphicsBuffer> mLightBuffer;
 	shared_ptr<ShaderResourceView> mLightBufferSRV; 

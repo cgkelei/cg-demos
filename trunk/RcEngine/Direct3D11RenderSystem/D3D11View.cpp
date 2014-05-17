@@ -342,6 +342,22 @@ D3D11UnorderedAccessView::~D3D11UnorderedAccessView()
 	SAFE_RELEASE(UnorderedAccessViewD3D11);
 }
 
+void D3D11UnorderedAccessView::Clear( const float4& clearData )
+{
+	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
+
+	float clrData[4] = { clearData[0], clearData[1], clearData[2], clearData[3] };
+	deviceContextD3D11->ClearUnorderedAccessViewFloat(UnorderedAccessViewD3D11, clrData);
+}
+
+void D3D11UnorderedAccessView::Clear( const uint4& clearData )
+{
+	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
+
+	uint32_t clrData[4] = { clearData[0], clearData[1], clearData[2], clearData[3] };
+	deviceContextD3D11->ClearUnorderedAccessViewUint(UnorderedAccessViewD3D11, clrData);
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 D3D11TextureBufferUAV::D3D11TextureBufferUAV( const shared_ptr<GraphicsBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, PixelFormat format )

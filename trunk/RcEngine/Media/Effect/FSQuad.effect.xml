@@ -10,7 +10,7 @@
   <Technique name="CopyDepth">
     <Pass name="p0">
       <VertexShader file="FullscreenTriangle" entry="FullscreenTriangleVS"/>
-      <PixelShader file="FSQuad" entry="CopyDepthPSMain"/>
+      <PixelShader file="FSQuad" entry="PSMain"/>
     </Pass>
   </Technique>
 

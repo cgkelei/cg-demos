@@ -349,10 +349,27 @@ void D3D11Device::DoDraw( const EffectTechnique* technique, const RenderOperatio
 
 void D3D11Device::DispatchCompute( const EffectTechnique* technique, uint32_t threadGroupCountX, uint32_t threadGroupCountY, uint32_t threadGroupCounZ )
 {
+   /**
+    * No need frame buffer need for Compute Shader.
+    *
+    * From MSDN
+    * If an overlapping resource view is already bound to an output slot,
+    * such as a render target, then the method will fill the destination 
+    * shader resource slot with NULL.
+    */
+	BindFrameBuffer(nullptr);
+
+	static ID3D11UnorderedAccessView* NullUAVs[D3D11_PS_CS_UAV_REGISTER_COUNT] = { nullptr };
+
 	for (EffectPass* pass : technique->GetPasses())
 	{
 		pass->BeginPass();
+		
 		DeviceContextD3D11->Dispatch(threadGroupCountX, threadGroupCountY, threadGroupCounZ);
+		
+		// Hack: bind all Compute UAVs to null, because it may use as SRV in next pass.
+		DeviceContextD3D11->CSSetUnorderedAccessViews(0, D3D11_PS_CS_UAV_REGISTER_COUNT, NullUAVs, nullptr);
+	
 		pass->EndPass();
 	}
 }

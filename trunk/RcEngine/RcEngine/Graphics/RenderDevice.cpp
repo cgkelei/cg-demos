@@ -34,7 +34,8 @@ void RenderDevice::BindFrameBuffer( const shared_ptr<FrameBuffer>& fb )
 		mCurrentFrameBuffer = fb;
 	}
 	
-	mCurrentFrameBuffer->OnBind();
+	if (mCurrentFrameBuffer)
+		mCurrentFrameBuffer->OnBind();
 }
 
 void RenderDevice::BindShaderPipeline( const shared_ptr<ShaderPipeline>& pipeline )

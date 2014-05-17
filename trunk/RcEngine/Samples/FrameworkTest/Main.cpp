@@ -1,4 +1,5 @@
 #include <MainApp/Application.h>
+#include <MainApp/Window.h>
 #include <Graphics/FrameBuffer.h>
 #include <Graphics/RenderDevice.h>
 #include <Graphics/RenderFactory.h>
@@ -19,8 +20,6 @@
 #include <IO/FileSystem.h>
 #include <Core/Environment.h>
 #include <nvImage/include/nvImage.h>
-
-#pragma comment(lib, "nvImaged.lib")
 
 using namespace RcEngine;
 
@@ -50,6 +49,21 @@ protected:
 
 		mFSQuadEffect = static_pointer_cast_checked<Effect>(
 			resMan.GetResourceByName(RT_Effect, "FSQuad.effect.xml", "General") );
+
+		mComputeEffect = static_pointer_cast_checked<Effect>(
+			resMan.GetResourceByName(RT_Effect, "Compute.effect.xml", "General") );
+
+		mOutput = factory->CreateTexture2D(
+			mMainWindow->GetWidth(), 
+			mMainWindow->GetHeight(), 
+			PF_RGBA32F, 
+			1, 1, 
+			1, 0, 
+			EAH_GPU_Read | EAH_GPU_Write, 
+			TexCreate_UAV | TexCreate_ShaderResource,
+			NULL);
+
+		mOutputUAV = factory->CreateTexture2DUAV(mOutput, 0, 0, 1);
 	}
 
 
@@ -59,16 +73,8 @@ protected:
 		mFSQuad.SetVertexRange(0, 3);
 
 		ResourceManager& resMan = ResourceManager::GetSingleton();
-		auto textureRes = resMan.GetResourceByName<TextureResource>(RT_Texture, "sponza_thorn_diff.dds", "Custom");
+		auto textureRes = resMan.GetResourceByName<TextureResource>(RT_Texture, "GBuffer1.dds", "General");
 		mTexture = textureRes->GetTexture();
-
-		FileSystem& fileSys = FileSystem::GetSingleton();
-		auto path = fileSys.Locate("background.dds", "Custom");
-
-		nv::Image img;
-		bool b = img.loadImageFromFile(path.c_str());
-		auto v = img.getInternalFormat();
-		v = 1;
 	}
 
 	void UnloadContent()
@@ -90,10 +96,21 @@ protected:
 		device->BindFrameBuffer(screenFrameBuffer);
 		screenFrameBuffer->Clear(CF_Color | CF_Depth, ColorRGBA(1, 0, 0, 1), 1.0f, 0);
 
-		auto effectParam = mFSQuadEffect->GetParameterByName("ColorMap");
-		effectParam->SetValue(mTexture->GetShaderResourceView());
-		device->Draw(mFSQuadEffect->GetCurrentTechnique(), mFSQuad);
+		mComputeEffect->GetParameterByName("Input")->SetValue(mTexture->GetShaderResourceView());
+		mComputeEffect->GetParameterByName("Output")->SetValue(mOutputUAV);
+		
+		enum { GroupSize = 32 };
+		uint32_t numGroupX = (mMainWindow->GetWidth() + GroupSize - 1) / GroupSize;
+		uint32_t numGroupY = (mMainWindow->GetHeight() + GroupSize - 1) / GroupSize;
+		
+		EffectTechnique* computeTech = mComputeEffect->GetCurrentTechnique();
+		device->DispatchCompute(computeTech, numGroupX, numGroupY, 1);
 
+		//device->GetRenderFactory()->SaveTextureToFile("E:/text.pfm", mOutput);
+
+		auto effectParam = mFSQuadEffect->GetParameterByName("ColorMap");
+		effectParam->SetValue(mOutput->GetShaderResourceView());
+		device->Draw(mFSQuadEffect->GetCurrentTechnique(), mFSQuad);
 
 		screenFrameBuffer->SwapBuffers();
 	}
@@ -112,6 +129,10 @@ protected:
 	int mFramePerSecond;
 
 	shared_ptr<Effect> mFSQuadEffect;
+	shared_ptr<Effect> mComputeEffect;
+	
+	shared_ptr<Texture> mOutput;
+	shared_ptr<UnorderedAccessView> mOutputUAV;
 	shared_ptr<Texture> mTexture;
 	RenderOperation mFSQuad;
 };

@@ -2,7 +2,7 @@
 
   <Technique name="Tile">
     <Pass name="p0">
-      <ComputeShader file="TiledDeferredShading" entry="TileCSMain"/>
+      <ComputeShader file="TiledDeferredShading" entry="TiledDeferrdCSMain"/>
     </Pass>
   </Technique>
 

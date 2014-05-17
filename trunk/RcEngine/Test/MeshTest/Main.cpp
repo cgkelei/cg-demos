@@ -27,6 +27,7 @@
 #include <Math/MathUtil.h>
 #include <Graphics/Image.h>
 #include <Core/Profiler.h>
+#include "pfm.h"
 
 using namespace RcEngine;
 
@@ -36,7 +37,7 @@ public:
 	MeshTestApp(const String& config)
 		: Application(config)
 	{
-
+		//ValidateDepth();
 	}
 
 	virtual ~MeshTestApp(void)
@@ -56,8 +57,8 @@ protected:
 
 		mCamera = std::make_shared<Camera>();
 		
-		mRenderPath = std::make_shared<TiledDeferredPath>();
-		//mRenderPath = std::make_shared<DeferredPath>();
+		//mRenderPath = std::make_shared<TiledDeferredPath>();
+		mRenderPath = std::make_shared<DeferredPath>();
 		//mRenderPath = std::make_shared<ForwardPath>();
 		mRenderPath->OnGraphicsInit(mCamera);
 	}
@@ -68,35 +69,35 @@ protected:
 		ResourceManager& resMan = ResourceManager::GetSingleton();
 		SceneManager* sceneMan = Environment::GetSingleton().GetSceneManager();
 
-		mCamera->CreateLookAt(float3(276.089172, 98.567436, -19.411501), float3(277.086884, 98.505020, -19.385706), float3(0.062396, 0.998050, 0.001613));
-		mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 3000.0f );
+		/*	mCamera->CreateLookAt(float3(276.089172, 98.567436, -19.411501), float3(277.086884, 98.505020, -19.385706), float3(0.062396, 0.998050, 0.001613));
+		mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 1000.0f );
 
 		Entity* sponzaEntity = sceneMan->CreateEntity("Sponza", "Sponza.mesh",  "Custom");
 		SceneNode* sponzaNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Sponza");
 		sponzaNode->SetPosition(float3(0, 0, 0));
 		sponzaNode->SetScale(0.45f);
-		sponzaNode->AttachObject(sponzaEntity);
+		sponzaNode->AttachObject(sponzaEntity);*/
 
-		//mCamera->CreateLookAt(float3(-137.0, 97.3, 82.0), float3(-136.5, 96.8, 81.3), float3(0.3, 0.9, -0.4));
-		//mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 3000.0f );
+		//mCamera->CreateLookAt(float3(9.772805, 230.538498, 287.610077), float3(9.744802, 229.937454, 286.811340), float3(-0.021059, 0.799220, -0.600669));
+		mCamera->CreateLookAt(float3(-162.300583, 239.233307, 206.451996), float3(-161.861069, 238.546051, 205.873627), float3(0.415819, 0.726417, -0.547186));
+		mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 3000.0f );
 
-
-		/*std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
-		start = std::chrono::high_resolution_clock::now();
-
-		ENGINE_PUSH_CPU_PROFIER("Load Texture");
-
-		entity = sceneMan->CreateEntity("Ground", "./Geo/Ground.mesh",  "Custom");
-		sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Ground");
+		auto entity = sceneMan->CreateEntity("Ground", "./Geo/Ground.mesh",  "Custom");
+		auto sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Ground");
 		sceneNode->SetScale(float3(2.5,2.5,2.5));
 		sceneNode->SetPosition(float3(0, 0, 0));
 		sceneNode->AttachObject(entity);
 
 		entity = sceneMan->CreateEntity("Nanosuit", "./Nanosuit/Nanosuit.mesh",  "Custom");
 		sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Nanosuit");
-		sceneNode->SetScale(float3(2,2,2));
-		sceneNode->SetPosition(float3(-50,0,0));
+		sceneNode->SetScale(float3(5,5,5));
+		sceneNode->SetPosition(float3(0,0,0));
 		sceneNode->AttachObject(entity);
+
+		/*std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
+		start = std::chrono::high_resolution_clock::now();
+
+		ENGINE_PUSH_CPU_PROFIER("Load Texture");
 
 		ENGINE_POP_CPU_PROFIER("Load Texture");
 		end = std::chrono::high_resolution_clock::now();
@@ -138,11 +139,19 @@ protected:
 	{
 		SceneManager& sceneMan = *Environment::GetSingleton().GetSceneManager();
 
-		Light* mDirLight = sceneMan.CreateLight("Sun", LT_DirectionalLight);
-		mDirLight->SetDirection(float3(00, -1, 0.5));
-		mDirLight->SetLightColor(float3(1, 1, 1));
-		mDirLight->SetCastShadow(false);
-		sceneMan.GetRootSceneNode()->AttachObject(mDirLight);
+		//Light* mDirLight = sceneMan.CreateLight("Sun", LT_DirectionalLight);
+		//mDirLight->SetDirection(float3(00, -1, 0.5));
+		//mDirLight->SetLightColor(float3(1, 1, 1));
+		//mDirLight->SetCastShadow(false);
+		//sceneMan.GetRootSceneNode()->AttachObject(mDirLight);
+
+		Light* mPointLight = sceneMan.CreateLight("Point", LT_PointLight);
+		mPointLight->SetLightColor(float3(0, 1, 0));
+		mPointLight->SetRange(100.0f);
+		mPointLight->SetAttenuation(1.0f, 0.0f);
+		mPointLight->SetCastShadow(false);
+		mPointLight->SetPosition(float3(0, 50, 35));
+		sceneMan.GetRootSceneNode()->AttachObject(mPointLight);
 
 		/*Light* spotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
 		spotLight->SetDirection(float3(0, -1.5, -1));
@@ -155,13 +164,23 @@ protected:
 		spotLight->SetSpotlightNearClip(10);
 		sceneMan.GetRootSceneNode()->AttachObject(spotLight);*/
 
-		Light* mPointLight = sceneMan.CreateLight("Point", LT_PointLight);
-		mPointLight->SetLightColor(float3(1, 1, 0));
-		mPointLight->SetRange(80.0f);
-		mPointLight->SetAttenuation(1.0f, 0.0f);
-		mPointLight->SetCastShadow(false);
-		mPointLight->SetPosition(float3(550, 81, -18));
-		sceneMan.GetRootSceneNode()->AttachObject(mPointLight);
+//////////////////////////////////////////////////////////////////////////
+		//Light* mPointLight = sceneMan.CreateLight("Point", LT_PointLight);
+		//mPointLight->SetLightColor(float3(1, 1, 0));
+		//mPointLight->SetRange(80.0f);
+		//mPointLight->SetAttenuation(1.0f, 0.0f);
+		////mPointLight->SetAttenuation(7.0f, 3.0f, 4.0f);
+		//mPointLight->SetCastShadow(false);
+		//mPointLight->SetPosition(float3(550, 81, -18));
+		//sceneMan.GetRootSceneNode()->AttachObject(mPointLight);
+
+		//mPointLight = sceneMan.CreateLight("Point", LT_PointLight);
+		//mPointLight->SetLightColor(float3(0.85, 1, 0.67));
+		//mPointLight->SetRange(90.0f);
+		//mPointLight->SetAttenuation(9.0f, 3.0f, 8.0f);
+		//mPointLight->SetCastShadow(false);
+		//mPointLight->SetPosition(float3(105, 59, -48));
+		//sceneMan.GetRootSceneNode()->AttachObject(mPointLight);
 
 		//Light* mSpotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
 		//mSpotLight->SetLightColor(float3(0, 1, 0));
@@ -261,6 +280,43 @@ protected:
 	void WindowResize(uint32_t width, uint32_t height)
 	{
 		mRenderPath->OnWindowResize(width, height);
+	}
+
+	void ValidateDepth()
+	{
+		int w, h;
+		float* pData = nullptr;
+		int r = ReadPfm("E:/Depth1.pfm", w, h, pData);
+
+		int numGroupX = 32;
+		int numGroupY = 24;
+
+		vector<float> oData(w*h*3);
+
+		for (int iGroupY = 0; iGroupY < numGroupY; ++iGroupY)
+		{
+			for (int iGroupX = 0; iGroupX < numGroupX; ++iGroupX)
+			{
+				float maxZ = 0;
+				float minZ = Mathf::MAX_REAL;
+
+				for (int iY = iGroupY * 32; iY < (iGroupY+1) * 32; ++iY)
+				{
+					for (int iX = iGroupX * 32; iX < (iGroupX+1) * 32; ++iX)
+					{
+						float z = pData[iY * w * 3 + iX * 3];
+						minZ = std::min(minZ, z);
+						maxZ = std::max(maxZ, z);
+
+						oData[iY * w * 3 + iX * 3 + 0] = minZ;
+						oData[iY * w * 3 + iX * 3 + 1] = maxZ;
+						oData[iY * w * 3 + iX * 3 + 2] = 0;
+					}
+				}
+			}
+		}
+
+		WritePfm("E:/MinMaxCPU.pfm", w, h, 3, &oData[0]);
 	}
 
 protected:
