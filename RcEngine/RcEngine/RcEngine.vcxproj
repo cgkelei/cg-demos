@@ -242,6 +242,7 @@
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\Media\Effect\AlphaTest.effect.xml" />
+    <Xml Include="..\Media\Effect\Compute.effect.xml" />
     <Xml Include="..\Media\Effect\DebugView.effect.xml" />
     <Xml Include="..\Media\Effect\DeferredLighting.effect.xml">
       <SubType>Designer</SubType>

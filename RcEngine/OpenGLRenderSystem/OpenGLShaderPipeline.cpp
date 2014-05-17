@@ -585,6 +585,7 @@ bool OpenGLShaderPipeline::LinkPipeline()
 	GLuint srvBinding = 0;
 	GLuint uavBinding = 0;
 	GLuint uniformBlockBinding = 0;
+	//GLuint shaderStorageBinidng = 0;
 	std::map<String, GLuint> mBindingCache;
 
 	for (int i = 0; i < ST_Count; ++i)

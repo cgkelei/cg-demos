@@ -58,6 +58,27 @@ void D3D11FrameBuffer::OnBind()
 
 void D3D11FrameBuffer::OnUnbind()
 {
+	ID3D11DeviceContext* deviceContextD3D11 = gD3D11Device->DeviceContextD3D11;
+	
+	static ID3D11RenderTargetView* NullRTVs[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT] = { nullptr };
+
+	if (mUnorderedAccessViews.size())
+	{
+		static ID3D11UnorderedAccessView* NullUAVs[D3D11_PS_CS_UAV_REGISTER_COUNT] = { nullptr };
+		 
+		deviceContextD3D11->OMSetRenderTargetsAndUnorderedAccessViews(
+			mColorViews.size(), 
+			nullptr,
+			nullptr,
+			0,
+			mUnorderedAccessViews.size(),
+			NullUAVs,
+			nullptr);
+	}
+	else
+	{
+		deviceContextD3D11->OMSetRenderTargets(mColorViews.size(), NullRTVs, nullptr);
+	}
 }
 
 

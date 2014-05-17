@@ -98,6 +98,9 @@ public:
 	D3D11UnorderedAccessView();
 	virtual ~D3D11UnorderedAccessView();
 
+	void Clear(const float4& clearData);
+	void Clear(const uint4& clearData);
+
 public:
 	ID3D11UnorderedAccessView* UnorderedAccessViewD3D11;
 };

@@ -174,9 +174,9 @@ private:
 	ShaderType ShaderStage;
 };
 
-struct UAVSRVBindHelper
+struct UAVBindHelper
 {
-	UAVSRVBindHelper(EffectParameter* param, uint32_t binding)
+	UAVBindHelper(EffectParameter* param, uint32_t binding)
 		: Param(param), Binding(binding) {}
 
 	void operator() ()
@@ -371,8 +371,8 @@ bool D3D11ShaderPipeline::LinkPipeline()
 						// Only Compute has UAV
 						if (mShaderStages[i]->GetShaderType() == ST_Compute)
 						{
-							EffectParameter* effectParam = mEffect.FetchSRVParameter(param.Name, param.Type);
-							mParameterBinds.push_back( UAVSRVBindHelper(effectParam, param.Binding) );
+							EffectParameter* effectParam = mEffect.FetchUAVParameter(param.Name, param.Type);
+							mParameterBinds.push_back( UAVBindHelper(effectParam, param.Binding) );
 						}
 					}
 					break;

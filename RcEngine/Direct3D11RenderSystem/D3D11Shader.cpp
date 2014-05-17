@@ -61,15 +61,19 @@ public:
 
 	void ReflectConstantBuffers()
 	{
-		mShaderD3D11->ConstantBufferParams.resize(mShaderDescD3D11.ConstantBuffers);
 		for ( UINT i = 0; i < mShaderDescD3D11.ConstantBuffers; i++ ) 
 		{
 			ID3D11ShaderReflectionConstantBuffer* bufferD3D11 = mReflectorD3D11->GetConstantBufferByIndex( i ); 
 
 			D3D11_SHADER_BUFFER_DESC bufferDesc;
 			bufferD3D11->GetDesc(&bufferDesc);
+
+			if (bufferDesc.Type != D3D11_CT_CBUFFER)
+				continue; // Only collect constant buffer
 			
-			ConstantBuffer& cbufferParam = mShaderD3D11->ConstantBufferParams[i];
+			// Add new cbuffer
+			mShaderD3D11->ConstantBufferParams.resize(mShaderD3D11->ConstantBufferParams.size() + 1);
+			ConstantBuffer& cbufferParam = mShaderD3D11->ConstantBufferParams.back();
 
 			cbufferParam.Name = bufferDesc.Name;
 			cbufferParam.BufferSize = bufferDesc.Size; 
@@ -139,7 +143,7 @@ public:
 					break;
 				case D3D10_SVC_STRUCT:
 					{
-						assert(false);
+						//assert(false);
 					}
 					break;
 				default:
@@ -198,7 +202,21 @@ public:
 					ResourceInputParam param;
 					param.Name = resBindDesc.Name;
 					param.Binding = resBindDesc.BindPoint;
-					param.Type = EPT_TextureBuffer;
+
+					switch (resBindDesc.Dimension)
+					{
+					case D3D10_SRV_DIMENSION_BUFFER: param.Type = EPT_TextureBuffer; break;
+					case D3D10_SRV_DIMENSION_TEXTURE1D : param.Type = EPT_Texture1D; break;
+					case  D3D10_SRV_DIMENSION_TEXTURE1DARRAY: param.Type = EPT_Texture1DArray; break;
+					case  D3D10_SRV_DIMENSION_TEXTURE2D : param.Type = EPT_Texture2D; break;
+					case D3D10_SRV_DIMENSION_TEXTURE2DARRAY: param.Type = EPT_Texture2DArray; break;
+					case D3D10_SRV_DIMENSION_TEXTURE2DMS: param.Type = EPT_Texture2D; break;
+					case D3D10_SRV_DIMENSION_TEXTURE2DMSARRAY: param.Type = EPT_Texture2DArray; break;
+					case D3D10_SRV_DIMENSION_TEXTURE3D: param.Type = EPT_Texture3D; break;
+					case D3D10_SRV_DIMENSION_TEXTURECUBE: param.Type = EPT_TextureCube; break;
+					default:
+						break;
+					}
 					param.Class = Shader_Param_UAV;
 					mShaderD3D11->ResourceInputParams.push_back(param);
 				}

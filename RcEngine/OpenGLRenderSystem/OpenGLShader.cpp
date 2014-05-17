@@ -19,9 +19,9 @@ enum GLSLVersion
 };
 
 static String GLSLVersion[] = {
-	"#version 420",
-	"#version 430",
-	"#version 440",
+	"#version 420 core",
+	"#version 430 core",
+	"#version 440 core",
 };
 
 const String& GetSupportedGLSLVersion() 
@@ -514,7 +514,7 @@ private:
 				glGetActiveUniformsiv(mShaderProgramID, 1, &indices[k], GL_UNIFORM_OFFSET, &unifomOffset);
 				glGetActiveUniformsiv(mShaderProgramID, 1, &indices[k], GL_UNIFORM_ARRAY_STRIDE, &arrayStride);
 				glGetActiveUniformsiv(mShaderProgramID, 1, &indices[k], GL_UNIFORM_MATRIX_STRIDE, &matrixStride);
-
+		
 				if (matrixStride > 0)
 					assert(matrixStride == sizeof(float) * 4); // Only support float4x4 matrix
 

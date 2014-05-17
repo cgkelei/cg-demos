@@ -187,6 +187,7 @@ RenderPath::RenderPath()
 void RenderPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 {
 	mCamera = camera;
+	BuildFullscreenTrangle(mFullscreenTrangle);
 }
 
 void RenderPath::DrawOverlays()
@@ -357,7 +358,6 @@ void DeferredPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 	mGBufferFB->SetCamera(camera);
 
 	// Build light volume
-	BuildFullscreenTrangle(mFullscreenTrangle);
 	BuildSpotLightShape(mSpotLightShape);
 	BuildPointLightShape(mPointLightShape);
 	
@@ -433,6 +433,7 @@ void DeferredPath::RenderScene()
 	DeferredShading();
 
 	// Draw Light
+	mVisualLightsWireframe = true;
 	if (mVisualLightsWireframe)
 	{
 		EffectTechnique* debugTech = mDebugEffect->GetTechniqueByName("DebugShape");
@@ -756,8 +757,8 @@ void TiledDeferredPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 	mGBufferFB->SetCamera(camera);
 
 	// Init light buffer
-	mLightAccumulateBuffer = factory->CreateTexture2D(windowWidth, windowHeight, PF_RGBA32F, 1, 1, 1, 0, acessHint, rtCreateFlag, NULL);
-	mLightAccumulateBufferUAV = factory->CreateTexture2DUAV(mLightAccumulateBuffer, 0, 0, 1);
+	mLightAccumulation = factory->CreateTexture2D(windowWidth, windowHeight, PF_RGBA32F, 1, 1, 1, 0, acessHint, rtCreateFlag | TexCreate_UAV, NULL);
+	mLightAccumulationUAV = factory->CreateTexture2DUAV(mLightAccumulation, 0, 0, 1);
 
 	// HDR buffer
 	mHDRFB = factory->CreateFrameBuffer(windowWidth, windowHeight);
@@ -772,21 +773,42 @@ void TiledDeferredPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 	mHDRFB->AttachRTV(ATT_DepthStencil, mDepthStencilViewReadOnly);
 
 	// Create structure buffer for lights
-	mLightBuffer = factory->CreateStructuredBuffer(sizeof(PointLight), MaxNumLights, EAH_GPU_Read | EAH_GPU_Write, BufferCreate_Structured, nullptr);
+	mLightBuffer = factory->CreateStructuredBuffer(sizeof(PointLight), MaxNumLights, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Structured, nullptr);
 	mLightBufferSRV = factory->CreateStructuredBufferSRV(mLightBuffer, 0, MaxNumLights, sizeof(PointLight));
 
 	// Init shadow manager
 	//mShadowMan = new CascadedShadowMap(mDevice);
 
 	// bind shader input
-	mTiledDeferredEffect->GetParameterByName("GBuffer0")->SetValue(mGBuffer[0]->GetShaderResourceView());
-	mTiledDeferredEffect->GetParameterByName("GBuffer1")->SetValue(mGBuffer[1]->GetShaderResourceView());
-	mTiledDeferredEffect->GetParameterByName("DepthBuffer")->SetValue(mDepthStencilBuffer->GetShaderResourceView());
-	mTiledDeferredEffect->GetParameterByName("oLightAccumulateBuffer")->SetValue(mLightAccumulateBufferUAV); // UAV
-	mTiledDeferredEffect->GetParameterByName("LightAccumulateBuffer")->SetValue(mLightAccumulateBuffer->GetShaderResourceView());	
-	mTiledDeferredEffect->GetParameterByName("LightBuffer")->SetValue(mLightBufferSRV);
+	EffectParameter* effectParam;
+	
+	effectParam = mTiledDeferredEffect->GetParameterByName("GBuffer0");
+	if (effectParam)
+		effectParam->SetValue(mGBuffer[0]->GetShaderResourceView());
 
-	mToneMapEffect->GetParameterByName("HDRBuffer")->SetValue(mHDRBuffer->GetShaderResourceView());	
+	effectParam = mTiledDeferredEffect->GetParameterByName("GBuffer1");
+	if (effectParam)
+		effectParam->SetValue(mGBuffer[1]->GetShaderResourceView());
+
+	effectParam = mTiledDeferredEffect->GetParameterByName("DepthBuffer");
+	if (effectParam) 
+		effectParam->SetValue(mDepthStencilBuffer->GetShaderResourceView());
+
+	effectParam = mTiledDeferredEffect->GetParameterByName("RWLightAccumulation"); // UAV
+	if (effectParam) 
+		effectParam->SetValue(mLightAccumulationUAV);
+
+	effectParam = mTiledDeferredEffect->GetParameterByName("LightAccumulateBuffer");
+	if (effectParam) 
+		effectParam->SetValue(mLightAccumulation->GetShaderResourceView());
+
+	effectParam = mTiledDeferredEffect->GetParameterByName("Lights");
+	if (effectParam) 
+		effectParam->SetValue(mLightBufferSRV);
+
+	effectParam = mToneMapEffect->GetParameterByName("HDRBuffer");
+	if (effectParam) 
+		effectParam->SetValue(mHDRBuffer->GetShaderResourceView());	
 }
 
 void TiledDeferredPath::OnWindowResize( uint32_t width, uint32_t height )
@@ -800,10 +822,20 @@ void TiledDeferredPath::RenderScene()
 	GenereateGBuffer();
 
 	// Stage 1, tiled lighting 
-	TiledLighting();
+	TiledDeferredLighting();
 
 	// Stage 2, deferred shading
+	DeferredShading();
 
+
+	shared_ptr<FrameBuffer> screenFB = mDevice->GetScreenFrameBuffer();
+	mDevice->BindFrameBuffer(screenFB);
+	screenFB->Clear(CF_Color | CF_Depth, ColorRGBA(1, 0, 1, 1), 1.0, 0);
+
+	EffectTechnique* toneMapTech = mToneMapEffect->GetTechniqueByName("ToneMap");
+	mDevice->Draw(toneMapTech, mFullscreenTrangle);
+
+	screenFB->SwapBuffers();
 }
 
 void TiledDeferredPath::GenereateGBuffer()
@@ -829,10 +861,10 @@ void TiledDeferredPath::GenereateGBuffer()
 	//}
 }
 
-void TiledDeferredPath::TiledLighting()
+void TiledDeferredPath::TiledDeferredLighting()
 {
-	uint32_t windowWidth = mLightAccumulateBuffer->GetWidth();
-	uint32_t windowHeight = mLightAccumulateBuffer->GetHeight();
+	uint32_t windowWidth = mLightAccumulation->GetWidth();
+	uint32_t windowHeight = mLightAccumulation->GetHeight();
 	
 	// Fill light data
 	float* pLightData = static_cast<float*>( mLightBuffer->Map(0, sizeof(PointLight) * 5, RMA_Write_Discard) );
@@ -849,16 +881,19 @@ void TiledDeferredPath::TiledLighting()
 			*pLightData++ = lightColor[0];
 			*pLightData++ = lightColor[1];
 			*pLightData++ = lightColor[2];
+			*pLightData++ = light->GetRange();
 
 			*pLightData++ = lightPosition[0];
 			*pLightData++ = lightPosition[1];
 			*pLightData++ = lightPosition[2];
 
+			//*pLightData++;
+
 			*pLightData++ = lightFalloff[0];
 			*pLightData++ = lightFalloff[1];
 			*pLightData++ = lightFalloff[2];
 
-			*pLightData++ = light->GetRange();
+			//*pLightData++;
 
 			numTotalCount++;
 		}
@@ -872,6 +907,7 @@ void TiledDeferredPath::TiledLighting()
 	float4 viewDim = float4((float)windowWidth, (float)windowHeight, 1.0f / windowWidth, 1.0f / windowHeight);
 
 	mTiledDeferredEffect->GetParameterByName("View")->SetValue(view);
+	mTiledDeferredEffect->GetParameterByName("Projection")->SetValue(proj);
 	mTiledDeferredEffect->GetParameterByName("InvProj")->SetValue(invProj);
 	mTiledDeferredEffect->GetParameterByName("InvViewProj")->SetValue(invViewProj);
 	mTiledDeferredEffect->GetParameterByName("ViewportDim")->SetValue(viewDim);
@@ -883,11 +919,28 @@ void TiledDeferredPath::TiledLighting()
 	uint32_t numGroupX = (windowWidth + TileGroupSize - 1) / TileGroupSize;
 	uint32_t numGroupY = (windowHeight + TileGroupSize - 1) / TileGroupSize;
 
-	mLightAccumulateBufferUAV->Clear(float4(0, 0, 0, 0));
+	mLightAccumulationUAV->Clear(float4(0, 0, 0, 0));
 	mDevice->DispatchCompute(mTileTech, numGroupX, numGroupY, 1);
 
-	mDevice->GetRenderFactory()->SaveTextureToFile("E:/Light.pfm", mLightAccumulateBuffer);
+	//mDevice->GetRenderFactory()->SaveLinearDepthTextureToFile("E:/depth.pfm", mDepthStencilBuffer, proj.M33, proj.M43);
+	//mDevice->GetRenderFactory()->SaveTextureToFile("E:/Light.pfm", mLightAccumulation);
 }
 
+void TiledDeferredPath::DeferredShading()
+{
+	mDevice->BindFrameBuffer(mHDRFB);
+	mHDRBufferRTV->ClearColor(ColorRGBA(0, 0, 0, 0));
+	
+	// Draw Sky box first
+	mSceneMan->UpdateBackgroundQueue(*(mGBufferFB->GetCamera()));
+	RenderBucket& bkgBucket = mSceneMan->GetRenderQueue().GetRenderBucket(RenderQueue::BucketBackground, false);
+	for (RenderQueueItem& item : bkgBucket)
+		item.Renderable->Render();
+
+	mDevice->Draw(mShadingTech, mFullscreenTrangle);
+
+	//mDevice->GetRenderFactory()->SaveTextureToFile("E:/Light.pfm", mLightAccumulation);
+	//mDevice->GetRenderFactory()->SaveTextureToFile("E:/HDRBuffer.pfm", mHDRBuffer);
+}
 
 }

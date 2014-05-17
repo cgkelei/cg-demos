@@ -144,7 +144,7 @@ bool Image::CopyImageFromTexture( const shared_ptr<Texture>& texture )
 		break;
 	}
 
-	
+	mValid = true;
 	return true;
 }
 
