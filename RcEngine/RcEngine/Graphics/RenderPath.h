@@ -182,16 +182,21 @@ private:
 	shared_ptr<Effect> mTiledDeferredEffect;
 	shared_ptr<Effect> mToneMapEffect;
 
+	/**
+	 * Unlike HLSL StructureBuffer, GLSL SSBO is not tightly packed. 
+	 * In order to make the C++ structure can both used in HLSL and GLSL, 
+	 * It has to add some padding in HLSL structure.
+	 */
 	struct PointLight
 	{
 		float3 Color;
 		float Range;
 
 		float3 Position;
-		//float padding1;
+		uint32_t : 32;  // Padding
 
 		float3 Falloff;
-		//float padding2;
+		uint32_t : 32;  // Padding
 	};
 	shared_ptr<GraphicsBuffer> mLightBuffer;
 	shared_ptr<ShaderResourceView> mLightBufferSRV; 

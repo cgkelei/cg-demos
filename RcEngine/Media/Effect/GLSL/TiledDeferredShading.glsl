@@ -11,18 +11,15 @@ struct Light
 {
 	vec3 Color;
 	float Range;
-
 	vec3 Position;
-	float padding1;
-
 	vec3 Falloff;
-	float padding2;
 };
 
 // Uniforms
 layout (std140) uniform CSConstants
 {
 	mat4 View;
+	mat4 Projection;
 	mat4 InvProj;
 	mat4 InvViewProj;
 	vec4 ViewportDim; // zw for invDim
@@ -182,7 +179,7 @@ void main()
 		bool inFrustum = true;
 		for (int i = 0; i < 4; ++i)
 		{
-			float d = dot(frustumPlanes[i].xyz, lightPosVS.xyz) + frustumPlanes[i].z;
+			float d = dot(frustumPlanes[i], vec4(lightPosVS.xyz, 1.0));
 			inFrustum = inFrustum && (d >= -Lights[lightIndex].Range);
 		}
 
@@ -236,6 +233,7 @@ void main()
 			//EvalulateAndAccumilateLight(light, worldPosition, normalShininess.xyz, V, normalShininess.w, diffuseLight, specularLight);
 		}
 
+		diffuseLight = vec3(Lights[1].Position);
 		imageStore(RWLightAccumulation, fragCoord, vec4(diffuseLight, Luminance(specularLight)));
 	}
 }

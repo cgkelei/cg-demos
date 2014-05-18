@@ -57,8 +57,8 @@ protected:
 
 		mCamera = std::make_shared<Camera>();
 		
-		//mRenderPath = std::make_shared<TiledDeferredPath>();
-		mRenderPath = std::make_shared<DeferredPath>();
+		mRenderPath = std::make_shared<TiledDeferredPath>();
+		//mRenderPath = std::make_shared<DeferredPath>();
 		//mRenderPath = std::make_shared<ForwardPath>();
 		mRenderPath->OnGraphicsInit(mCamera);
 	}
@@ -165,8 +165,8 @@ protected:
 		sceneMan.GetRootSceneNode()->AttachObject(spotLight);*/
 
 //////////////////////////////////////////////////////////////////////////
-		//Light* mPointLight = sceneMan.CreateLight("Point", LT_PointLight);
-		//mPointLight->SetLightColor(float3(1, 1, 0));
+		///Light* mPointLight = sceneMan.CreateLight("Point", LT_PointLight);
+		//mPointLight->SetLightColor(float3(1.69, 1, 0));
 		//mPointLight->SetRange(80.0f);
 		//mPointLight->SetAttenuation(1.0f, 0.0f);
 		////mPointLight->SetAttenuation(7.0f, 3.0f, 4.0f);

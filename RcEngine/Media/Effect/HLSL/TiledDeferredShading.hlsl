@@ -9,9 +9,12 @@ struct Light
 {
 	float3 Color;
 	float Range;
-
+	
 	float3 Position;
+	float Paddding1;
+	
 	float3 Falloff;
+	float Paddding2;
 };
 
 cbuffer CSConstants
@@ -244,8 +247,7 @@ void TiledDeferrdCSMain(
 		}
 
 
-		float4 lightPosVS = mul( float4(Lights[0].Position, 1.0), View);
-
+		diffuseLight = Lights[1].Position;
 		/*RWLightAccumulation[DispatchThreadID.xy] = float4((float3)NumTileLights, Luminance(specularLight +diffuseLight));*/
 		RWLightAccumulation[DispatchThreadID.xy] = float4(diffuseLight, Luminance(specularLight));
 	}
