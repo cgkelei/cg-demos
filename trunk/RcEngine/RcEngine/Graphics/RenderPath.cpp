@@ -867,33 +867,17 @@ void TiledDeferredPath::TiledDeferredLighting()
 	uint32_t windowHeight = mLightAccumulation->GetHeight();
 	
 	// Fill light data
-	float* pLightData = static_cast<float*>( mLightBuffer->Map(0, sizeof(PointLight) * 5, RMA_Write_Discard) );
+	PointLight* pLights = reinterpret_cast<PointLight*>( mLightBuffer->Map(0, sizeof(PointLight) * 5, RMA_Write_Discard) );
 
 	uint32_t numTotalCount = 0;
 	for (Light* light : mSceneMan->GetSceneLights())
 	{
 		if (light->GetLightType() == LT_PointLight)
 		{
-			float3 lightColor = light->GetLightColor() * light->GetLightIntensity();
-			const float3& lightPosition = light->GetPosition();
-			const float3& lightFalloff = light->GetAttenuation();
-
-			*pLightData++ = lightColor[0];
-			*pLightData++ = lightColor[1];
-			*pLightData++ = lightColor[2];
-			*pLightData++ = light->GetRange();
-
-			*pLightData++ = lightPosition[0];
-			*pLightData++ = lightPosition[1];
-			*pLightData++ = lightPosition[2];
-
-			//*pLightData++;
-
-			*pLightData++ = lightFalloff[0];
-			*pLightData++ = lightFalloff[1];
-			*pLightData++ = lightFalloff[2];
-
-			//*pLightData++;
+			pLights[numTotalCount].Color = light->GetLightColor() * light->GetLightIntensity();
+			pLights[numTotalCount].Position = light->GetPosition();
+			pLights[numTotalCount].Range = light->GetRange();
+			pLights[numTotalCount].Falloff = light->GetAttenuation();
 
 			numTotalCount++;
 		}
@@ -923,7 +907,7 @@ void TiledDeferredPath::TiledDeferredLighting()
 	mDevice->DispatchCompute(mTileTech, numGroupX, numGroupY, 1);
 
 	//mDevice->GetRenderFactory()->SaveLinearDepthTextureToFile("E:/depth.pfm", mDepthStencilBuffer, proj.M33, proj.M43);
-	//mDevice->GetRenderFactory()->SaveTextureToFile("E:/Light.pfm", mLightAccumulation);
+	mDevice->GetRenderFactory()->SaveTextureToFile("E:/Light.pfm", mLightAccumulation);
 }
 
 void TiledDeferredPath::DeferredShading()
