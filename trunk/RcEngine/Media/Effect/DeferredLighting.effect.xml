@@ -60,7 +60,7 @@
       <State name="BackStencilPassOp" value="Keep"/>
       <State name="CullMode" value="None"/>
     </Pass>
-    <Pass name="p1">
+     <Pass name="p1">
       <VertexShader file="DeferredLighting" entry="LightVolumeVSMain"/>
       <PixelShader file="DeferredLighting" entry="PointLightingPSMain"/>
       <State name="DepthEnable" value="false"/>
@@ -80,7 +80,7 @@
       <State name="SrcBlendAlpha" value="One"/>
       <State name="DestBlendAlpha" value="One"/>
       <State name="BlendOpAlpha" value="Add"/>
-    </Pass>
+    </Pass> 
   </Technique>
 
   <Technique name="SpotLighting">

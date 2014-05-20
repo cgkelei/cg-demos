@@ -433,7 +433,6 @@ void DeferredPath::RenderScene()
 	DeferredShading();
 
 	// Draw Light
-	mVisualLightsWireframe = true;
 	if (mVisualLightsWireframe)
 	{
 		EffectTechnique* debugTech = mDebugEffect->GetTechniqueByName("DebugShape");
@@ -533,7 +532,8 @@ void DeferredPath::DeferredLighting()
 
 	// Set all common effect parameters
 	mDeferredEffect->GetParameterByName("InvViewProj")->SetValue(mInvViewProj);
-	mDeferredEffect->GetParameterByName("CameraOrigin")->SetValue(mCamera->GetPosition());
+	if (mDeferredEffect->GetParameterByName("CameraOrigin"))
+		mDeferredEffect->GetParameterByName("CameraOrigin")->SetValue(mCamera->GetPosition());
 
  	bool stencilZFail = false;
 	for (Light* light : mSceneMan->GetSceneLights())
@@ -643,10 +643,14 @@ void DeferredPath::DrawSpotLightShape( Light* light )
 	lightPos[3] = cosf(spotInnerAngle);
 	lightDir[3] = cosf(spotOuterAngle);
 
-	mDeferredEffect->GetParameterByUsage(EPU_Light_Color)->SetValue(lightColor);
-	mDeferredEffect->GetParameterByUsage(EPU_Light_Position)->SetValue(lightPos);
-	mDeferredEffect->GetParameterByUsage(EPU_Light_Dir)->SetValue(lightDir);
-	mDeferredEffect->GetParameterByUsage(EPU_Light_Attenuation)->SetValue(light->GetAttenuation());
+	if (mDeferredEffect->GetParameterByUsage(EPU_Light_Color))
+	{
+		mDeferredEffect->GetParameterByUsage(EPU_Light_Color)->SetValue(lightColor);
+		mDeferredEffect->GetParameterByUsage(EPU_Light_Position)->SetValue(lightPos);
+		mDeferredEffect->GetParameterByUsage(EPU_Light_Dir)->SetValue(lightDir);
+		mDeferredEffect->GetParameterByUsage(EPU_Light_Attenuation)->SetValue(light->GetAttenuation());
+	}
+
 
 	float scaleHeight = light->GetRange();
 	float scaleBase = scaleHeight * tanf(spotOuterAngle * 0.5f);
@@ -678,14 +682,12 @@ void DeferredPath::DrawPointLightShape(Light* light )
 	const Camera& currCamera = *(mDevice->GetCurrentFrameBuffer()->GetCamera());
 	const float4x4& View = currCamera.GetViewMatrix();
 
+	const float3& worldPos = light->GetDerivedPosition();
+	float4 lightPos = float4(worldPos[0], worldPos[1], worldPos[2], 1.0f) ;
 	float lightRadius = light->GetRange();
 
 	float3 lightColor = light->GetLightColor() * light->GetLightIntensity();
 	mDeferredEffect->GetParameterByUsage(EPU_Light_Color)->SetValue(lightColor);
-
-
-	const float3& worldPos = light->GetDerivedPosition();
-	float4 lightPos = float4(worldPos[0], worldPos[1], worldPos[2], 1.0f) ;
 
 	mDeferredEffect->GetParameterByUsage(EPU_Light_Position)->SetValue(lightPos);
 	mDeferredEffect->GetParameterByUsage(EPU_Light_Attenuation)->SetValue(light->GetAttenuation());
@@ -866,11 +868,14 @@ void TiledDeferredPath::TiledDeferredLighting()
 	uint32_t windowWidth = mLightAccumulation->GetWidth();
 	uint32_t windowHeight = mLightAccumulation->GetHeight();
 	
+	mSceneMan->UpdateLightQueue(*mCamera);
+	const LightQueue& sceneLights = mSceneMan->GetLightQueue();
+
 	// Fill light data
-	PointLight* pLights = reinterpret_cast<PointLight*>( mLightBuffer->Map(0, sizeof(PointLight) * 5, RMA_Write_Discard) );
+	PointLight* pLights = reinterpret_cast<PointLight*>( mLightBuffer->Map(0, sizeof(PointLight) * sceneLights.size(), RMA_Write_Discard) );
 
 	uint32_t numTotalCount = 0;
-	for (Light* light : mSceneMan->GetSceneLights())
+	for (Light* light : sceneLights)
 	{
 		if (light->GetLightType() == LT_PointLight)
 		{
@@ -904,10 +909,11 @@ void TiledDeferredPath::TiledDeferredLighting()
 	uint32_t numGroupY = (windowHeight + TileGroupSize - 1) / TileGroupSize;
 
 	mLightAccumulationUAV->Clear(float4(0, 0, 0, 0));
+	
 	mDevice->DispatchCompute(mTileTech, numGroupX, numGroupY, 1);
 
 	//mDevice->GetRenderFactory()->SaveLinearDepthTextureToFile("E:/depth.pfm", mDepthStencilBuffer, proj.M33, proj.M43);
-	mDevice->GetRenderFactory()->SaveTextureToFile("E:/Light.pfm", mLightAccumulation);
+	//mDevice->GetRenderFactory()->SaveTextureToFile("E:/Light.pfm", mLightAccumulation);
 }
 
 void TiledDeferredPath::DeferredShading()
