@@ -1,6 +1,4 @@
 #extension GL_ARB_compute_shader : enable
-#pragma optimize(off)
-#pragma debug(off)
 #include "/LightingUtil.glsl"
 
 #define WORK_GROUP_SIZE  32
@@ -22,8 +20,7 @@ layout (std140) uniform CSConstants
 	mat4 Projection;
 	mat4 InvProj;
 	mat4 InvViewProj;
-	vec4 ViewportDim; // zw for invDim
-	//vec4 CameraNearFarAndProjRatio;
+	vec4 ViewportDim;	 // zw for invDim
 	vec2 CameraNearFar;
 	vec2 ProjRatio;
 	vec3 CameraOrigin;
@@ -71,42 +68,43 @@ vec3 ReconstructViewPosition(float zBuffer, uvec2 fragCoord)
     return viewPositionH.xyz / viewPositionH.w; 
 }
 
-vec4 CreatePlane(vec3 p1, vec3 p2, vec3 p3)
+
+// p1 is always camera origin in view space, float3(0, 0, 0)
+vec4 CreatePlaneEquation(/*float3 p1,*/ vec3 p2, vec3 p3)
 {
-	vec3 edge1 = p2 - p1;
-	vec3 edge2 = p3 - p1;
-	
 	vec4 plane;
-	plane.xyz = normalize(cross(edge1, edge2));
-	plane.w = -dot(plane.xyz, p1);
+
+	plane.xyz = normalize(cross(p2, p3));
+	plane.w = 0;
 
 	return plane;
 }
 
-void EvalulateAndAccumilateLight(Light light, vec3 litPos, vec3 N, vec3 V, float shininess,
-                                 inout vec3 diffuseLight, inout vec3 specularLight)
-{
-	vec3 L = light.Position - litPos;
-	float dist = length(L);
-	if (dist > light.Range)
-		return;
 
-	L /= dist;
-	//vec3 L = normalize(light.Position - litPos);
-	vec3 H = normalize(V + L);
+//void EvalulateAndAccumilateLight(Light light, vec3 litPos, vec3 N, vec3 V, float shininess,
+//                                 inout vec3 diffuseLight, inout vec3 specularLight)
+//{
+//	vec3 L = light.Position - litPos;
+//	float dist = length(L);
+//	if (dist > light.Range)
+//		return;
+
+//	L /= dist;
+//	//vec3 L = normalize(light.Position - litPos);
+//	vec3 H = normalize(V + L);
 		
-	// calculate attenuation
-	float attenuation = CalcAttenuation(light.Position, litPos, light.Falloff);
+//	// calculate attenuation
+//	float attenuation = CalcAttenuation(light.Position, litPos, light.Falloff);
 	
-	float NdotL = dot(L, N); 
-	if (NdotL > 0.0)
-	{
-		vec3 lightRes = light.Color * NdotL * attenuation;
+//	float NdotL = dot(L, N); 
+//	if (NdotL > 0.0)
+//	{
+//		vec3 lightRes = light.Color * NdotL * attenuation;
 
-		diffuseLight += lightRes;
-		specularLight += CalculateSpecular(N, H, shininess) * lightRes; // Frensel in moved to calculate in shading pass
-	}
-}
+//		diffuseLight += lightRes;
+//		specularLight += CalculateSpecular(N, H, shininess) * lightRes; // Frensel in moved to calculate in shading pass
+//	}
+//}
 
 //--------------------------------------------------------------------------------
 // CSMain 
@@ -115,25 +113,11 @@ void main()
 {
 	ivec2 fragCoord = ivec2(gl_GlobalInvocationID.xy);
 
-	float zBuffer = texelFetch(DepthBuffer, fragCoord, 0).r;
-	vec3 worldPosition = ReconstructWorldPosition(zBuffer, fragCoord);
-	
 	// Compute view space z
-	float viewSpaceZ = ProjRatio.y / (zBuffer - ProjRatio.x);
+	float zw = texelFetch(DepthBuffer, fragCoord, 0).r;
+	float viewSpaceZ = ProjRatio.y / (zw - ProjRatio.x);
 	
-	// Work out Z bounds for our samples
-	float minZSample = CameraNearFar.y; // Far
-    float maxZSample = CameraNearFar.x; // Near
-	
-	// Avoid shading skybox/background or otherwise invalid pixels
-	bool validPixel = (viewSpaceZ >= CameraNearFar.x && viewSpaceZ <  CameraNearFar.y);
-	if (validPixel)
-	{
-		minZSample = min(minZSample, viewSpaceZ);
-		maxZSample = max(maxZSample, viewSpaceZ);
-	}	
-	
-	// Calculate tile Z bound
+	// Initialize shared memory light list and Z bounds
 	if (gl_LocalInvocationIndex == 0)
 	{
 		NumTileLights = 0;
@@ -141,34 +125,56 @@ void main()
         TileMaxZ = 0;
 	}
 	barrier();
+
+	// Work out Z bounds for our samples
 	
-	if(maxZSample >= minZSample)
+	// Avoid shading skybox/background or otherwise invalid pixels
+	//bool validPixel = (viewSpaceZ >= CameraNearFar.x && viewSpaceZ <  CameraNearFar.y);
+    //if (validPixel) 
 	{
-		atomicMin(TileMinZ, floatBitsToUint(minZSample));
-		atomicMax(TileMaxZ, floatBitsToUint(maxZSample));
-    }	
+		atomicMin(TileMinZ, floatBitsToUint(viewSpaceZ));
+		atomicMax(TileMaxZ, floatBitsToUint(viewSpaceZ));
+	}
 	barrier();
-		
+	
 	float minTileZ = uintBitsToFloat(TileMinZ);
 	float maxTileZ = uintBitsToFloat(TileMaxZ);
-	
-	vec3 frutumCornerPosVS[4];
-			
+		
 	// Construct frustum planes
 	vec4 frustumPlanes[6];
+	//{
+	//	vec3 frustumCorner[4];
 
-	// View frustum far plane corners
-	frutumCornerPosVS[0] = ReconstructViewPosition(1.0, uvec2(gl_WorkGroupID.x * gl_WorkGroupSize.x, gl_WorkGroupID.y * gl_WorkGroupSize.y));
-	frutumCornerPosVS[1] = ReconstructViewPosition(1.0, uvec2((gl_WorkGroupID.x+1) * gl_WorkGroupSize.x, gl_WorkGroupID.y * gl_WorkGroupSize.y));
-	frutumCornerPosVS[2] = ReconstructViewPosition(1.0, uvec2((gl_WorkGroupID.x+1) * gl_WorkGroupSize.x, (gl_WorkGroupID.y+1) * gl_WorkGroupSize.y));
-	frutumCornerPosVS[3] = ReconstructViewPosition(1.0, uvec2(gl_WorkGroupID.x * gl_WorkGroupSize.x, (gl_WorkGroupID.y+1) * gl_WorkGroupSize.y));
+	//	// View frustum far plane corners
+	//	frustumCorner[0] = ReconstructViewPosition(1.0, uvec2(gl_WorkGroupID.x * gl_WorkGroupSize.x, gl_WorkGroupID.y * gl_WorkGroupSize.y));
+	//	frustumCorner[1] = ReconstructViewPosition(1.0, uvec2((gl_WorkGroupID.x+1) * gl_WorkGroupSize.x, gl_WorkGroupID.y * gl_WorkGroupSize.y));
+	//	frustumCorner[2] = ReconstructViewPosition(1.0, uvec2((gl_WorkGroupID.x+1) * gl_WorkGroupSize.x, (gl_WorkGroupID.y+1) * gl_WorkGroupSize.y));
+	//	frustumCorner[3] = ReconstructViewPosition(1.0, uvec2(gl_WorkGroupID.x * gl_WorkGroupSize.x, (gl_WorkGroupID.y+1) * gl_WorkGroupSize.y));
 
-	for(int i=0; i <4; i++)
-		frustumPlanes[i] = CreatePlane(vec3(0.0), frutumCornerPosVS[i], frutumCornerPosVS[(i+1)&3]);		
+	//	for(int i=0; i <4; i++)
+	//		frustumPlanes[i] = CreatePlaneEquation(frustumCorner[i], frustumCorner[(i+1)&3]);		
 				
-	// Near/Far
-	frustumPlanes[4] = vec4(0, 0, 1, -minTileZ);
-	frustumPlanes[5] = vec4(0, 0, -1, maxTileZ);
+	//	// Near/Far
+	//	frustumPlanes[4] = vec4(0, 0, 1, -minTileZ);
+	//	frustumPlanes[5] = vec4(0, 0, -1, maxTileZ);
+	//}
+	
+	{
+		vec2 tileScale = vec2(ViewportDim.xy) / (2.0f * vec2(WORK_GROUP_SIZE, WORK_GROUP_SIZE));
+		vec2 tileBias = tileScale - vec2(gl_WorkGroupID.xy);
+
+		frustumPlanes[0] = vec4(Projection[0][0] * tileScale.x, 0, tileBias.x, 0);
+		frustumPlanes[1] = vec4(-Projection[0][0] * tileScale.x, 0, 1 - tileBias.x, 0);
+		frustumPlanes[2] = vec4(0, Projection[1][1] * tileScale.y, tileBias.y, 0);
+		frustumPlanes[3] = vec4(0, -Projection[1][1] * tileScale.y, 1 - tileBias.y, 0);
+
+		for (uint i = 0; i < 4; ++i)
+			frustumPlanes[i] /= length(frustumPlanes[i].xyz);
+
+		// Near/Far
+		frustumPlanes[4] = vec4(0, 0, 1, -minTileZ);
+		frustumPlanes[5] = vec4(0, 0, -1, maxTileZ);
+	}		
 
 	// Cull lights for this tile	
 	for (uint lightIndex = gl_LocalInvocationIndex; lightIndex < LightCount; lightIndex += NumGroupThreads)
@@ -194,10 +200,12 @@ void main()
 	// Only process onscreen pixels (tiles can span screen edges)
 	if (all(lessThan(gl_GlobalInvocationID.xy, ViewportDim.xy)))
 	{
+		vec3 worldPosition = ReconstructWorldPosition(zw, fragCoord);
 		vec3 V = normalize(CameraOrigin - worldPosition);
 		
-		vec4 normalShininess = texelFetch(GBuffer0, fragCoord, 0);
-		normalShininess.xyz = normalize(normalShininess.xyz); // Normal
+		vec4 tap = texelFetch(GBuffer0, fragCoord, 0);
+		vec3 N = normalize(tap.rgb); // Normal
+		float shininess = tap.a;
 
 		vec3 diffuseLight = vec3(0);
 		vec3 specularLight = vec3(0);
@@ -212,28 +220,22 @@ void main()
 				continue;
 
 			L /= dist;
-			//vec3 L = normalize(light.Position - litPos);
 			vec3 H = normalize(V + L);
 		
 			// calculate attenuation
 			float attenuation = CalcAttenuation(light.Position, worldPosition, light.Falloff);
 	
-			float NdotL = dot(L, normalShininess.xyz); 
+			float NdotL = dot(L, N); 
 			if (NdotL > 0.0)
 			{
-				vec3 lightRes = light.Color * NdotL * attenuation;
+				vec3 lightCombined = light.Color * NdotL * attenuation;
 
-				diffuseLight += lightRes;
-
-				attenuation *= dot(light.Color, V);
-				specularLight += light.Color* attenuation;
-				//specularLight += CalculateSpecular(normalShininess.xyz, H, normalShininess.w) * lightRes; // Frensel in moved to calculate in shading pass
+				diffuseLight += lightCombined;
+				specularLight += CalculateSpecular(N, H, shininess) * lightCombined; // Frensel in moved to calculate in shading pass
 			}
-
-			//EvalulateAndAccumilateLight(light, worldPosition, normalShininess.xyz, V, normalShininess.w, diffuseLight, specularLight);
 		}
-
-		diffuseLight = vec3(Lights[1].Position);
+		
+		//diffuseLight = frustumPlanes[3].rgb;
 		imageStore(RWLightAccumulation, fragCoord, vec4(diffuseLight, Luminance(specularLight)));
 	}
 }

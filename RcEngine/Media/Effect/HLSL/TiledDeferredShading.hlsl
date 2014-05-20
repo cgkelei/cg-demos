@@ -70,14 +70,13 @@ float3 ReconstructViewPosition(float zBuffer, uint2 fragCoord)
     return viewPositionH.xyz / viewPositionH.w; 
 }
 
-float4 CreatePlane(float3 p1, float3 p2, float3 p3)
+// p1 is always camera origin in view space, float3(0, 0, 0)
+float4 CreatePlaneEquation(/*float3 p1,*/ float3 p2, float3 p3)
 {
-	float3 edge1 = p2 - p1;
-	float3 edge2 = p3 - p1;
-	
 	float4 plane;
-	plane.xyz = normalize(cross(edge1, edge2));
-	plane.w = -dot(plane.xyz, p1);
+
+	plane.xyz = normalize(cross(p2, p3));
+	plane.w = 0;
 
 	return plane;
 }
@@ -139,52 +138,56 @@ void TiledDeferrdCSMain(
 	float maxTileZ = asfloat(TileMaxZ);
 	
 	// Construct frustum planes
-	//float4 frustumPlanes[6];
+	float4 frustumPlanes[6];
+	{
+		float3 frustumCorner[4];
+
+		// View frustum far plane corners
+		frustumCorner[0] = ReconstructViewPosition(1.0, uint2(GroupID.x * WORK_GROUP_SIZE, GroupID.y *WORK_GROUP_SIZE));
+		frustumCorner[1] = ReconstructViewPosition(1.0, uint2(GroupID.x * WORK_GROUP_SIZE, (GroupID.y+1) * WORK_GROUP_SIZE));
+		frustumCorner[2] = ReconstructViewPosition(1.0, uint2((GroupID.x+1) * WORK_GROUP_SIZE, (GroupID.y+1) * WORK_GROUP_SIZE));
+		frustumCorner[3] = ReconstructViewPosition(1.0, uint2((GroupID.x+1) * WORK_GROUP_SIZE, GroupID.y * WORK_GROUP_SIZE));
+
+		for(int i=0; i <4; i++)
+			frustumPlanes[i] = CreatePlaneEquation(frustumCorner[i], frustumCorner[(i+1)&3]);		
+				
+		// Near/far
+		frustumPlanes[4] = float4(0.0f, 0.0f,  1.0f, -minTileZ);
+		frustumPlanes[5] = float4(0.0f, 0.0f, -1.0f,  maxTileZ);
+	}
+
 	//{
-	//	float3 frutumCornerPosVS[4];
+	//	// Work out scale/bias from [0, 1]
+	//	float2 tileScale = float2(ViewportDim.xy) * rcp(2.0f * float2(WORK_GROUP_SIZE, WORK_GROUP_SIZE));
+	//	float2 tileBias = tileScale - float2(GroupID.xy);
 
-	//	// View frustum far plane corners
-	//	frutumCornerPosVS[0] = ReconstructViewPosition(1.0, uint2(GroupID.x * WORK_GROUP_SIZE, GroupID.y *WORK_GROUP_SIZE));
-	//	frutumCornerPosVS[1] = ReconstructViewPosition(1.0, uint2((GroupID.x+1) * WORK_GROUP_SIZE, GroupID.y * WORK_GROUP_SIZE));
-	//	frutumCornerPosVS[2] = ReconstructViewPosition(1.0, uint2((GroupID.x+1) * WORK_GROUP_SIZE, (GroupID.y+1) * WORK_GROUP_SIZE));
-	//	frutumCornerPosVS[3] = ReconstructViewPosition(1.0, uint2(GroupID.x * WORK_GROUP_SIZE, (GroupID.y+1) * WORK_GROUP_SIZE));
+	//	frustumPlanes[0] = float4(Projection._11 * tileScale.x, 0, tileBias.x, 0);
+	//	frustumPlanes[1] = float4(-Projection._11 * tileScale.x, 0, 1 - tileBias.x, 0);
+	//	frustumPlanes[2] = float4(0, Projection._22 * tileScale.y, 1 - tileBias.y, 0);
+	//	frustumPlanes[3] = float4(0, -Projection._22 * tileScale.y, tileBias.y, 0);
 
-	//	for(int i=0; i <4; i++)
-	//		frustumPlanes[i] = CreatePlane((float3)0.0, frutumCornerPosVS[i], frutumCornerPosVS[(i+1)&3]);		
-	//			
+	//	// Now work out composite projection matrix
+	//	// Relevant matrix columns for this tile frusta
+	//	//float4 c1 = float4(Projection._11 * tileScale.x, 0.0f, tileBias.x, 0.0f);
+	//	//float4 c2 = float4(0.0f, -Projection._22 * tileScale.y, tileBias.y, 0.0f);
+	//	//float4 c4 = float4(0.0f, 0.0f, 1.0f, 0.0f);
+
+	//	//// Sides
+	//	//frustumPlanes[0] = c4 - c1;
+	//	//frustumPlanes[1] = c4 + c1;
+	//	//frustumPlanes[2] = c4 - c2;
+	//	//frustumPlanes[3] = c4 + c2;
+
 	//	// Near/far
 	//	frustumPlanes[4] = float4(0.0f, 0.0f,  1.0f, -minTileZ);
 	//	frustumPlanes[5] = float4(0.0f, 0.0f, -1.0f,  maxTileZ);
+
+	//	// Normalize frustum planes (near/far already normalized)
+	//	[unroll]
+	//	for (uint i = 0; i < 4; ++i)
+	//		frustumPlanes[i] *= rcp(length(frustumPlanes[i].xyz));
 	//}
 
-	 // Work out scale/bias from [0, 1]
-    float2 tileScale = float2(ViewportDim.xy) * rcp(2.0f * float2(WORK_GROUP_SIZE, WORK_GROUP_SIZE));
-    float2 tileBias = tileScale - float2(GroupID.xy);
-
-    // Now work out composite projection matrix
-    // Relevant matrix columns for this tile frusta
-    float4 c1 = float4(Projection._11 * tileScale.x, 0.0f, tileBias.x, 0.0f);
-    float4 c2 = float4(0.0f, -Projection._22 * tileScale.y, tileBias.y, 0.0f);
-    float4 c4 = float4(0.0f, 0.0f, 1.0f, 0.0f);
-
-    // Derive frustum planes
-    float4 frustumPlanes[6];
-
-    // Sides
-    frustumPlanes[0] = c4 - c1;
-    frustumPlanes[1] = c4 + c1;
-    frustumPlanes[2] = c4 - c2;
-    frustumPlanes[3] = c4 + c2;
-
-    // Near/far
-    frustumPlanes[4] = float4(0.0f, 0.0f,  1.0f, -minTileZ);
-    frustumPlanes[5] = float4(0.0f, 0.0f, -1.0f,  maxTileZ);
-
-    // Normalize frustum planes (near/far already normalized)
-    [unroll]
-	for (uint i = 0; i < 4; ++i)
-        frustumPlanes[i] *= rcp(length(frustumPlanes[i].xyz));
-	
 	// Cull lights for this tile	
 	for (uint lightIndex = GroupIndex; lightIndex < LightCount; lightIndex += NumGroupThreads)
 	{
@@ -247,8 +250,7 @@ void TiledDeferrdCSMain(
 		}
 
 
-		diffuseLight = Lights[1].Position;
-		/*RWLightAccumulation[DispatchThreadID.xy] = float4((float3)NumTileLights, Luminance(specularLight +diffuseLight));*/
+		//diffuseLight = frustumPlanes[3].rgb;
 		RWLightAccumulation[DispatchThreadID.xy] = float4(diffuseLight, Luminance(specularLight));
 	}
 }
