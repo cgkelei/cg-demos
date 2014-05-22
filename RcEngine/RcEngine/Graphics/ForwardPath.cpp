@@ -32,6 +32,7 @@ void ForwardPlusPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 	RenderFactory* factory = mDevice->GetRenderFactory();
 	ResourceManager& resMan = ResourceManager::GetSingleton();
 
+	mToneMapEffect = resMan.GetResourceByName<Effect>(RT_Effect, "HDRToneMap.effect.xml", "General");
 	mTiledLightCullEfffect = resMan.GetResourceByName<Effect>(RT_Effect, "TiledLightCull.effect.xml", "General");
 	mTileLightCullTech = mTiledLightCullEfffect->GetTechniqueByName("TiledLightCull");
 
@@ -79,8 +80,8 @@ void ForwardPlusPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 	
 	mPointLightsIndexCounterUAV = factory->CreateTextureBufferUAV(mPointLightsIndexCounter, 0, 1, PF_R32U);
 	
-	mTilePointLightsRangeSRV = factory->CreateTextureBufferSRV(mTilePointLightsRange, 0, numTotalTiles, PF_R32U);
-	mTilePointLightsRangeUAV = factory->CreateTextureBufferUAV(mTilePointLightsRange, 0, numTotalTiles, PF_R32U);
+	mTilePointLightsRangeSRV = factory->CreateTextureBufferSRV(mTilePointLightsRange, 0, numTotalTiles, PF_RG32U);
+	mTilePointLightsRangeUAV = factory->CreateTextureBufferUAV(mTilePointLightsRange, 0, numTotalTiles, PF_RG32U);
 
 	mTilePointLightsIndexListSRV = factory->CreateTextureBufferSRV(mTilePointLightsIndexList, 0, numTotalTiles*MaxNumLightsPerTile, PF_R32U);
 	mTilePointLightsIndexListUAV = factory->CreateTextureBufferUAV(mTilePointLightsIndexList, 0, numTotalTiles*MaxNumLightsPerTile, PF_R32U);
@@ -90,6 +91,8 @@ void ForwardPlusPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 	mTiledLightCullEfffect->GetParameterByName("RWLightIndexCounter")->SetValue(mPointLightsIndexCounterUAV);
 	mTiledLightCullEfffect->GetParameterByName("RWLightIndexList")->SetValue(mTilePointLightsIndexListUAV);
 	mTiledLightCullEfffect->GetParameterByName("RWLightListRange")->SetValue(mTilePointLightsRangeUAV);
+
+	mToneMapEffect->GetParameterByName("HDRBuffer")->SetValue(mHDRBuffer->GetShaderResourceView());	
 }
 
 
@@ -103,12 +106,21 @@ void ForwardPlusPath::RenderScene()
 	DepthPrePass();
 	TiledLightCulling();
 	ForwardShading();
+
+	shared_ptr<FrameBuffer> screenFB = mDevice->GetScreenFrameBuffer();
+	mDevice->BindFrameBuffer(screenFB);
+	screenFB->Clear(CF_Color | CF_Depth, ColorRGBA(1, 0, 1, 1), 1.0, 0);
+
+	EffectTechnique* toneMapTech = mToneMapEffect->GetTechniqueByName("ToneMap");
+	mDevice->Draw(toneMapTech, mFullscreenTrangle);
+
+	screenFB->SwapBuffers();
 }
 
 void ForwardPlusPath::DepthPrePass()
 {
 	mDevice->BindFrameBuffer(mForwardFB);
-	mDepthStencilView->ClearDepthStencil(0.0f, 0);
+	mDepthStencilView->ClearDepthStencil(1.0f, 0);
 
 	// Todo: update render queue with render bucket filter
 	mSceneMan->UpdateRenderQueue(*mCamera, RO_None);   
@@ -131,26 +143,29 @@ void ForwardPlusPath::TiledLightCulling()
 
 	mSceneMan->UpdateLightQueue(*mCamera);
 	const LightQueue& sceneLights = mSceneMan->GetLightQueue();
-
-	float4* pLightsPosRange = reinterpret_cast<float4*>( mPointLightsPosRange->Map(0, sizeof(float4) * sceneLights.size(), RMA_Write_Discard) );
-	float3* pLightsColor = reinterpret_cast<float3*>( mPointLightsColorFalloff->Map(0, MAP_ALL_BUFFER, RMA_Write_Discard) );
-	float3* pLightsFalloff = pLightsColor + sizeof(float3) * MaxNumLights;
-
+	
 	uint32_t numTotalCount = 0;
-	for (Light* light : sceneLights)
+	if (sceneLights.size())
 	{
-		if (light->GetLightType() == LT_PointLight)
-		{
-			const float3 lightPos = light->GetPosition();
-			pLightsPosRange[numTotalCount] = float4(lightPos[0], lightPos[1], lightPos[2], light->GetRange());
-			pLightsColor[numTotalCount] = light->GetLightColor() * light->GetLightIntensity();
-			pLightsFalloff[numTotalCount] = light->GetAttenuation();
+		float4* pLightsPosRange = reinterpret_cast<float4*>( mPointLightsPosRange->Map(0, sizeof(float4) * sceneLights.size(), RMA_Write_Discard) );
+		float3* pLightsColor = reinterpret_cast<float3*>( mPointLightsColorFalloff->Map(0, MAP_ALL_BUFFER, RMA_Write_Discard) );
+		float3* pLightsFalloff = pLightsColor + MaxNumLights;
 
-			numTotalCount++;
+		for (Light* light : sceneLights)
+		{
+			if (light->GetLightType() == LT_PointLight)
+			{
+				const float3 lightPos = light->GetPosition();
+				pLightsPosRange[numTotalCount] = float4(lightPos[0], lightPos[1], lightPos[2], light->GetRange());
+				pLightsColor[numTotalCount] = light->GetLightColor() * light->GetLightIntensity();
+				pLightsFalloff[numTotalCount] = light->GetAttenuation();
+
+				numTotalCount++;
+			}
 		}
+		mPointLightsPosRange->UnMap();
+		mPointLightsColorFalloff->UnMap();
 	}
-	mPointLightsPosRange->UnMap();
-	mPointLightsColorFalloff->UnMap();
 
 	const float4x4& view = mCamera->GetViewMatrix();
 	const float4x4& proj = mCamera->GetProjMatrix();
@@ -173,24 +188,44 @@ void ForwardPlusPath::TiledLightCulling()
 
 	mDevice->DispatchCompute(mTileLightCullTech, mNumTileX, mNumTileY, 1);
 
-	uint2* pRange = reinterpret_cast<uint2*>( mTilePointLightsRange->Map(0, MAP_ALL_BUFFER, RMA_Read_Only) );
-	
-	FILE* pFile = fopen("E:/TileLightRange.txt", "w");
-	
-	for (int32_t iY = mNumTileY-1; iY >= 0; iY--)
-	{
-		for (int32_t iX = 0; iX < mNumTileX; iX++)
-		{
-			int32_t index = iY * mNumTileX + iX;
-			fprintf(pFile, "(%d, %d) ", pRange[index].X(), pRange[index].Y());
-		}
+	//FILE* pFile = fopen("E:/TileLightRange.txt", "w");
 
-		fprintf(pFile, "\n");
-	}
+	//uint2* pRange = reinterpret_cast<uint2*>( mTilePointLightsRange->Map(0, MAP_ALL_BUFFER, RMA_Read_Only) );
 
-	fclose(pFile);
+	//uint32_t total = 0;
+	//uint32_t maxOffset = 0;
+	//uint32_t maxOffsetIndex = 0;
+	//for (int32_t iY = mNumTileY-1; iY >= 0; iY--)
+	//{
+	//	for (int32_t iX = 0; iX < mNumTileX; iX++)
+	//	{
+	//		int32_t index = iY * mNumTileX + iX;
+	//		fprintf(pFile, "(%d, %d) ", pRange[index].X(), pRange[index].Y());
 
-	mTilePointLightsRange->UnMap();
+	//		total += pRange[index].X();
+	//		if (pRange[index].Y() > maxOffset)
+	//		{
+	//			maxOffset = pRange[index].Y();
+	//			maxOffsetIndex = pRange[index].X();
+	//		}
+	//	}
+	//	fprintf(pFile, "\n");
+	//}
+	//
+	//fprintf(pFile, "\n\nTotal=%d, MaxOffset=(%d, %d)\n\n", total, maxOffset, maxOffsetIndex);
+	//
+	//uint32_t* pIndex = reinterpret_cast<uint32_t*>( mTilePointLightsIndexList->Map(0, MAP_ALL_BUFFER, RMA_Read_Only) );
+	//for (uint32_t i = 0; i < total; ++i)
+	//{
+	//	if (i % 20 == 0)
+	//		fprintf(pFile, "\n");
+	//	fprintf(pFile, "%d ", pIndex[i]);
+	//}
+
+	//mTilePointLightsRange->UnMap();
+	//mTilePointLightsIndexList->UnMap();
+
+	//fclose(pFile);
 }
 
 void ForwardPlusPath::ForwardShading()
@@ -213,7 +248,7 @@ void ForwardPlusPath::ForwardShading()
 		renderItem.Renderable->Render();
 	}
 
-	mDevice->GetRenderFactory()->SaveTextureToFile("E:/HDR.pfm", mHDRBuffer);
+	//mDevice->GetRenderFactory()->SaveTextureToFile("E:/HDR.pfm", mHDRBuffer);
 }
 
 

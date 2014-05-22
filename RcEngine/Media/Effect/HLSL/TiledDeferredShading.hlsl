@@ -111,7 +111,6 @@ float4 CreatePlaneEquation(/*float3 p1,*/ float3 p2, float3 p3)
 void TiledDeferrdCSMain(
 	uint3 DispatchThreadID	: SV_DispatchThreadID,
 	uint3 GroupID			: SV_GroupID,
-	uint3 GroupThreadID		: SV_GroupThreadID,
 	uint  GroupIndex		: SV_GroupIndex)
 {
 	int3 pixelIndex = int3(DispatchThreadID.xy, 0);
@@ -156,6 +155,7 @@ void TiledDeferrdCSMain(
 		frustumPlanes[5] = float4(0.0f, 0.0f, -1.0f,  maxTileZ);
 	}
 
+	// Compute tile frustum using PerspectiveOffCenter. Intel's Code may be wrong, I deduce myself, need verify.
 	//{
 	//	// Work out scale/bias from [0, 1]
 	//	float2 tileScale = float2(ViewportDim.xy) * rcp(2.0f * float2(WORK_GROUP_SIZE, WORK_GROUP_SIZE));
@@ -165,18 +165,6 @@ void TiledDeferrdCSMain(
 	//	frustumPlanes[1] = float4(-Projection._11 * tileScale.x, 0, 1 - tileBias.x, 0);
 	//	frustumPlanes[2] = float4(0, Projection._22 * tileScale.y, 1 - tileBias.y, 0);
 	//	frustumPlanes[3] = float4(0, -Projection._22 * tileScale.y, tileBias.y, 0);
-
-	//	// Now work out composite projection matrix
-	//	// Relevant matrix columns for this tile frusta
-	//	//float4 c1 = float4(Projection._11 * tileScale.x, 0.0f, tileBias.x, 0.0f);
-	//	//float4 c2 = float4(0.0f, -Projection._22 * tileScale.y, tileBias.y, 0.0f);
-	//	//float4 c4 = float4(0.0f, 0.0f, 1.0f, 0.0f);
-
-	//	//// Sides
-	//	//frustumPlanes[0] = c4 - c1;
-	//	//frustumPlanes[1] = c4 + c1;
-	//	//frustumPlanes[2] = c4 - c2;
-	//	//frustumPlanes[3] = c4 + c2;
 
 	//	// Near/far
 	//	frustumPlanes[4] = float4(0.0f, 0.0f,  1.0f, -minTileZ);

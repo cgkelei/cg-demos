@@ -808,9 +808,7 @@ void TiledDeferredPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 	if (effectParam) 
 		effectParam->SetValue(mLightBufferSRV);
 
-	effectParam = mToneMapEffect->GetParameterByName("HDRBuffer");
-	if (effectParam) 
-		effectParam->SetValue(mHDRBuffer->GetShaderResourceView());	
+	mToneMapEffect->GetParameterByName("HDRBuffer")->SetValue(mHDRBuffer->GetShaderResourceView());	
 }
 
 void TiledDeferredPath::OnWindowResize( uint32_t width, uint32_t height )
