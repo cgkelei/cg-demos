@@ -36,15 +36,6 @@ shared uint NumTileLights;
 shared uint LightIndexStart;
 
 //----------------------------------------------------------------------------
-vec3 ReconstructWorldPosition(float zBuffer, uvec2 fragCoord)
-{
-	vec2 clipPos = (vec2(fragCoord) + 0.5) * ViewportDim.zw; // InvViewDim
-    clipPos = clipPos * 2.0 - 1.0;
-	
-    vec4 worldPositionH = vec4(clipPos, zBuffer, 1.0) * InvViewProj;
-    return worldPositionH.xyz / worldPositionH.w;
-}
-
 vec3 ReconstructViewPosition(float zBuffer, uvec2 fragCoord)
 {
 	vec2 clipPos = (vec2(fragCoord) + 0.5) * ViewportDim.zw; // InvViewDim
@@ -108,17 +99,17 @@ void main()
 		for(int i=0; i <4; i++)
 			frustumPlanes[i] = CreatePlaneEquation(frustumCorner[i], frustumCorner[(i+1)&3]);		
 		
-		vec2 tileScale = vec2(ViewportDim.xy) / (2.0f * vec2(WORK_GROUP_SIZE, WORK_GROUP_SIZE));
-		vec2 tileBias = tileScale - vec2(gl_WorkGroupID.xy);
+		//vec2 tileScale = vec2(ViewportDim.xy) / (2.0f * vec2(WORK_GROUP_SIZE, WORK_GROUP_SIZE));
+		//vec2 tileBias = tileScale - vec2(gl_WorkGroupID.xy);
 
-		// Left/Right/Bottom/Top
-		frustumPlanes[0] = vec4(Projection[0][0] * tileScale.x, 0, tileBias.x, 0);
-		frustumPlanes[1] = vec4(-Projection[0][0] * tileScale.x, 0, 1 - tileBias.x, 0);
-		frustumPlanes[2] = vec4(0, Projection[1][1] * tileScale.y, tileBias.y, 0);
-		frustumPlanes[3] = vec4(0, -Projection[1][1] * tileScale.y, 1 - tileBias.y, 0);
+		//// Left/Right/Bottom/Top
+		//frustumPlanes[0] = vec4(Projection[0][0] * tileScale.x, 0, tileBias.x, 0);
+		//frustumPlanes[1] = vec4(-Projection[0][0] * tileScale.x, 0, 1 - tileBias.x, 0);
+		//frustumPlanes[2] = vec4(0, Projection[1][1] * tileScale.y, tileBias.y, 0);
+		//frustumPlanes[3] = vec4(0, -Projection[1][1] * tileScale.y, 1 - tileBias.y, 0);
 
-		for (uint i = 0; i < 4; ++i)
-			frustumPlanes[i] /= length(frustumPlanes[i].xyz);
+		//for (uint i = 0; i < 4; ++i)
+		//	frustumPlanes[i] /= length(frustumPlanes[i].xyz);
 
 		// Near/Far
 		frustumPlanes[4] = vec4(0, 0, 1, -minTileZ);
@@ -177,6 +168,10 @@ void main()
 #include "/ModelMaterialFactory.glsl"
 #include "/LightingUtil.glsl"
 
+// Turn on early fragment testing
+layout (early_fragment_tests) in;
+
+// Uniform
 uniform vec3 CameraOrigin;
 
 uniform samplerBuffer PointLightsPosRange;
@@ -187,8 +182,10 @@ uniform usamplerBuffer LightIndexList;
 uniform usamplerBuffer LightListRange;
 
 // Varyings
-layout (location = 0) in vec4 oPosWS;
-layout (location = 1) in vec2 oTex;
+//layout (location = 0) in vec4 oPosWS;
+//layout (location = 1) in vec2 oTex;
+in vec4 oPosWS;
+in vec2 oTex;
 
 #ifdef _NormalMap
 	in mat3 oTangentToWorld;
@@ -224,10 +221,16 @@ void main()
 		int lightIndex = int(tileLightRange.y) + i;
 		int globalLightIndex = int(texelFetch(LightIndexList, lightIndex).x);
 
-		vec3 lightPos = texelFetch(PointLightsPosRange, globalLightIndex).xyz;
+		vec4 lightPosRange = texelFetch(PointLightsPosRange, globalLightIndex);
+		vec3 lightPos = lightPosRange.xyz;
+		float lightRange = lightPosRange.w;
+
 		vec3 lightColor = texelFetch(PointLightsColor, globalLightIndex).xyz;
 		vec3 lightFalloff = texelFetch(PointLightsFalloff, globalLightIndex).xyz;
 		
+		if (distance(lightPos, oPosWS.xyz) > lightRange)
+			continue;
+
 		vec3 L = normalize(lightPos - oPosWS.xyz);
 		vec3 H = normalize(V + L);
 		
@@ -244,6 +247,5 @@ void main()
 
 	// Ambient
 	final += material.DiffuseAlbedo * 0.1;
-
 	oFragColor = vec4(final, 1.0);  	         
 }

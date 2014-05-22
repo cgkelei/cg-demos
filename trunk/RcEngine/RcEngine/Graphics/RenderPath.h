@@ -228,6 +228,7 @@ private:
 
 	uint32_t mNumTileX, mNumTileY;
 
+	shared_ptr<Effect> mToneMapEffect;
 	shared_ptr<Effect> mTiledLightCullEfffect;
 	EffectTechnique* mTileLightCullTech;
 

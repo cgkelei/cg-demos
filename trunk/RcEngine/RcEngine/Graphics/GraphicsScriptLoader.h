@@ -96,13 +96,11 @@ public:
 
 	uint32_t GetState(const String& str)
 	{
-		auto iter = mDefs.find(str);
-		if (iter != mDefs.end())
-		{
-			return iter->second;
-		}
+		unordered_map<String, uint32_t>::const_iterator iter = mDefs.find(str);
+		if (iter == mDefs.end())
+			ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "State parameter " + str + "error!", "StateDescDefs::GetState");
 
-		return CF_Always;
+		return iter->second;
 	}
 
 private:

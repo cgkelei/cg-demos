@@ -71,6 +71,9 @@
     <Pass name="p0">
       <VertexShader file="Model" entry="ModelVS"/>
       <PixelShader file="ForwardPlus" entry="ForwardShadingPSMain"/>
+      <State name="DepthEnable" value="true"/>
+      <State name="DepthFunc" value="LessEqual"/>
+     <State name="DepthWriteMask" value="false"/>
     </Pass>
   </Technique>
   
