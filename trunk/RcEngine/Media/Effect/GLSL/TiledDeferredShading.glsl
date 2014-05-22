@@ -80,32 +80,6 @@ vec4 CreatePlaneEquation(/*float3 p1,*/ vec3 p2, vec3 p3)
 	return plane;
 }
 
-
-//void EvalulateAndAccumilateLight(Light light, vec3 litPos, vec3 N, vec3 V, float shininess,
-//                                 inout vec3 diffuseLight, inout vec3 specularLight)
-//{
-//	vec3 L = light.Position - litPos;
-//	float dist = length(L);
-//	if (dist > light.Range)
-//		return;
-
-//	L /= dist;
-//	//vec3 L = normalize(light.Position - litPos);
-//	vec3 H = normalize(V + L);
-		
-//	// calculate attenuation
-//	float attenuation = CalcAttenuation(light.Position, litPos, light.Falloff);
-	
-//	float NdotL = dot(L, N); 
-//	if (NdotL > 0.0)
-//	{
-//		vec3 lightRes = light.Color * NdotL * attenuation;
-
-//		diffuseLight += lightRes;
-//		specularLight += CalculateSpecular(N, H, shininess) * lightRes; // Frensel in moved to calculate in shading pass
-//	}
-//}
-
 //--------------------------------------------------------------------------------
 // CSMain 
 layout (local_size_x = WORK_GROUP_SIZE , local_size_y = WORK_GROUP_SIZE , local_size_z = 1) in;
@@ -125,12 +99,9 @@ void main()
         TileMaxZ = 0;
 	}
 	barrier();
-
-	// Work out Z bounds for our samples
 	
-	// Avoid shading skybox/background or otherwise invalid pixels
-	//bool validPixel = (viewSpaceZ >= CameraNearFar.x && viewSpaceZ <  CameraNearFar.y);
-    //if (validPixel) 
+	// Avoid shading skybox/background
+    if (zw != 1.0)
 	{
 		atomicMin(TileMinZ, floatBitsToUint(viewSpaceZ));
 		atomicMax(TileMaxZ, floatBitsToUint(viewSpaceZ));
@@ -142,27 +113,21 @@ void main()
 		
 	// Construct frustum planes
 	vec4 frustumPlanes[6];
-	//{
-	//	vec3 frustumCorner[4];
-
-	//	// View frustum far plane corners
-	//	frustumCorner[0] = ReconstructViewPosition(1.0, uvec2(gl_WorkGroupID.x * gl_WorkGroupSize.x, gl_WorkGroupID.y * gl_WorkGroupSize.y));
-	//	frustumCorner[1] = ReconstructViewPosition(1.0, uvec2((gl_WorkGroupID.x+1) * gl_WorkGroupSize.x, gl_WorkGroupID.y * gl_WorkGroupSize.y));
-	//	frustumCorner[2] = ReconstructViewPosition(1.0, uvec2((gl_WorkGroupID.x+1) * gl_WorkGroupSize.x, (gl_WorkGroupID.y+1) * gl_WorkGroupSize.y));
-	//	frustumCorner[3] = ReconstructViewPosition(1.0, uvec2(gl_WorkGroupID.x * gl_WorkGroupSize.x, (gl_WorkGroupID.y+1) * gl_WorkGroupSize.y));
-
-	//	for(int i=0; i <4; i++)
-	//		frustumPlanes[i] = CreatePlaneEquation(frustumCorner[i], frustumCorner[(i+1)&3]);		
-				
-	//	// Near/Far
-	//	frustumPlanes[4] = vec4(0, 0, 1, -minTileZ);
-	//	frustumPlanes[5] = vec4(0, 0, -1, maxTileZ);
-	//}
-	
 	{
+		//vec3 frustumCorner[4];
+
+		//frustumCorner[0] = ReconstructViewPosition(1.0, uvec2(gl_WorkGroupID.x * gl_WorkGroupSize.x, gl_WorkGroupID.y * gl_WorkGroupSize.y));
+		//frustumCorner[1] = ReconstructViewPosition(1.0, uvec2((gl_WorkGroupID.x+1) * gl_WorkGroupSize.x, gl_WorkGroupID.y * gl_WorkGroupSize.y));
+		//frustumCorner[2] = ReconstructViewPosition(1.0, uvec2((gl_WorkGroupID.x+1) * gl_WorkGroupSize.x, (gl_WorkGroupID.y+1) * gl_WorkGroupSize.y));
+		//frustumCorner[3] = ReconstructViewPosition(1.0, uvec2(gl_WorkGroupID.x * gl_WorkGroupSize.x, (gl_WorkGroupID.y+1) * gl_WorkGroupSize.y));
+
+		//for(int i=0; i <4; i++)
+		//	frustumPlanes[i] = CreatePlaneEquation(frustumCorner[i], frustumCorner[(i+1)&3]);		
+		
 		vec2 tileScale = vec2(ViewportDim.xy) / (2.0f * vec2(WORK_GROUP_SIZE, WORK_GROUP_SIZE));
 		vec2 tileBias = tileScale - vec2(gl_WorkGroupID.xy);
 
+		// Left/Right/Bottom/Top
 		frustumPlanes[0] = vec4(Projection[0][0] * tileScale.x, 0, tileBias.x, 0);
 		frustumPlanes[1] = vec4(-Projection[0][0] * tileScale.x, 0, 1 - tileBias.x, 0);
 		frustumPlanes[2] = vec4(0, Projection[1][1] * tileScale.y, tileBias.y, 0);
@@ -174,8 +139,8 @@ void main()
 		// Near/Far
 		frustumPlanes[4] = vec4(0, 0, 1, -minTileZ);
 		frustumPlanes[5] = vec4(0, 0, -1, maxTileZ);
-	}		
-
+	}
+	
 	// Cull lights for this tile	
 	for (uint lightIndex = gl_LocalInvocationIndex; lightIndex < LightCount; lightIndex += NumGroupThreads)
 	{
@@ -191,8 +156,9 @@ void main()
 
 		if (inFrustum)
 		{
-			uint listIndex = atomicAdd(NumTileLights, 1);		
-            TileLightList[listIndex] = lightIndex;		
+			uint listIndex = atomicAdd(NumTileLights, 1);
+			if (listIndex < MAX_LIGHTS)		
+				TileLightList[listIndex] = lightIndex;		
 		}
 	}
 	barrier();

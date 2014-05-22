@@ -107,6 +107,7 @@
     <ClCompile Include="Graphics\DDSImage.cpp" />
     <ClCompile Include="Graphics\Effect.cpp" />
     <ClCompile Include="Graphics\EffectParameter.cpp" />
+    <ClCompile Include="Graphics\ForwardPath.cpp" />
     <ClCompile Include="Graphics\FrameBuffer.cpp" />
     <ClCompile Include="Graphics\GraphicsResource.cpp" />
     <ClCompile Include="Graphics\GraphicsScriptLoader.cpp" />
@@ -153,6 +154,7 @@
     <None Include="..\Media\Effect\GLSL\DeferredLighting.glsl" />
     <None Include="..\Media\Effect\GLSL\DeferredUtil.glsl" />
     <None Include="..\Media\Effect\GLSL\ForwardLighting.glsl" />
+    <None Include="..\Media\Effect\GLSL\ForwardPlus.glsl" />
     <None Include="..\Media\Effect\GLSL\FSQuad.glsl" />
     <None Include="..\Media\Effect\GLSL\FullscreenTriangle.glsl" />
     <None Include="..\Media\Effect\GLSL\GBuffer.glsl" />
@@ -248,6 +250,7 @@
     <Xml Include="..\Media\Effect\DeferredLighting.effect.xml">
       <SubType>Designer</SubType>
     </Xml>
+    <Xml Include="..\Media\Effect\TiledLightCull.effect.xml" />
     <Xml Include="..\Media\Effect\FSQuad.effect.xml" />
     <Xml Include="..\Media\Effect\HDRToneMap.effect.xml" />
     <Xml Include="..\Media\Effect\Model.effect.xml" />
