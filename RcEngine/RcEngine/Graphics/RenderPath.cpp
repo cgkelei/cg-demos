@@ -933,4 +933,9 @@ void TiledDeferredPath::DeferredShading()
 	//mDevice->GetRenderFactory()->SaveTextureToFile("E:/HDRBuffer.pfm", mHDRBuffer);
 }
 
+
+
+
+
+
 }

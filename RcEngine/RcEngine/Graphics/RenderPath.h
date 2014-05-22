@@ -205,9 +205,57 @@ private:
 	EffectTechnique* mShadingTech;
 };
 
-class _ApiExport TiledForwardPath
+class _ApiExport ForwardPlusPath : public RenderPath
 {
+public:
+	ForwardPlusPath();
+	~ForwardPlusPath();
 
+	virtual void OnGraphicsInit(const shared_ptr<Camera>& camera);
+	virtual void OnWindowResize(uint32_t width, uint32_t height);
+	virtual void RenderScene();
+
+private:
+	void DepthPrePass();
+	void TiledLightCulling();
+	void ForwardShading();
+
+private:
+	
+	enum { TileGroupSize = 32 };
+	enum { MaxNumLights = 512 };
+	enum { MaxNumLightsPerTile = 256 };
+
+	uint32_t mNumTileX, mNumTileY;
+
+	shared_ptr<Effect> mTiledLightCullEfffect;
+	EffectTechnique* mTileLightCullTech;
+
+	shared_ptr<FrameBuffer> mForwardFB;
+
+	shared_ptr<Texture> mDepthStencilBuffer;
+	shared_ptr<RenderView> mDepthStencilView;
+
+	shared_ptr<Texture> mHDRBuffer;
+	shared_ptr<RenderView> mHDRBufferRTV;
+
+	shared_ptr<GraphicsBuffer> mPointLightsPosRange;
+	shared_ptr<GraphicsBuffer> mPointLightsColorFalloff;
+	shared_ptr<GraphicsBuffer> mTilePointLightsRange;
+	shared_ptr<GraphicsBuffer> mTilePointLightsIndexList;
+	shared_ptr<GraphicsBuffer> mPointLightsIndexCounter;
+
+	shared_ptr<ShaderResourceView> mPointLightsPosRangeSRV;
+	shared_ptr<ShaderResourceView> mPointLightsColorSRV;
+	shared_ptr<ShaderResourceView> mPointLightsFalloffSRV;
+
+	shared_ptr<UnorderedAccessView> mPointLightsIndexCounterUAV;
+
+	shared_ptr<ShaderResourceView> mTilePointLightsRangeSRV;
+	shared_ptr<UnorderedAccessView> mTilePointLightsRangeUAV;
+
+	shared_ptr<ShaderResourceView> mTilePointLightsIndexListSRV;
+	shared_ptr<UnorderedAccessView> mTilePointLightsIndexListUAV;
 };
 
 }

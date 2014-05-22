@@ -28,7 +28,7 @@
 		  <PixelShader file="ShadowMapGen" entry="ShadowMapVSM">
 		    <Macro name="VSM"/>
 		  </PixelShader>
-		  <state name="CullMode" value="None"/>
+      <State name="CullMode" value="None"/>
 	  </Pass>
   </Technique>
 
@@ -36,21 +36,29 @@
   <Technique name="PCF">
 	  <Pass name="p0">
       <VertexShader file="ShadowMapGen" entry="ShadowMapVS"/>
-	  <state name="CullMode" value="None"/>
+      <State name="CullMode" value="None"/>
 	  </Pass>
   </Technique>
 
+  <Technique name="DepthPre">
+    <Pass name="p0">
+      <VertexShader file="Model" entry="ModelVS"/>
+      <State name="ColorWriteMask" index="0" r="false" g="false" b="false" a="false"/>
+      <State name="CullMode" value="None"/>
+    </Pass>
+  </Technique>
+  
   <Technique name="GBuffer">
 	  <Pass name="p0">
 		  <VertexShader file="Model" entry="ModelVS"/>
 		  <PixelShader file="GBuffer" entry="GBufferPS"/>
-		  <state name="CullMode" value="None"/>
-		  <State name="StencilEnable" value="true"/>
-		  <State name="FrontStencilRef" value="1"/>
-		  <State name="FrontStencilFunc" value="Always"/>
-		  <State name="FrontStencilFailOp" value="Keep"/>
-		  <State name="FrontStencilDepthFailOp" value="Keep"/>
-		  <State name="FrontStencilPassOp" value="Replace"/>
+      <State name="CullMode" value="None"/>
+      <State name="StencilEnable" value="true"/>
+      <State name="FrontStencilRef" value="1"/>
+      <State name="FrontStencilFunc" value="Always"/>
+      <State name="FrontStencilFailOp" value="Keep"/>
+      <State name="FrontStencilDepthFailOp" value="Keep"/>
+      <State name="FrontStencilPassOp" value="Replace"/>
 	  </Pass>
   </Technique>
 
@@ -58,7 +66,15 @@
     <Pass name="p0">
       <VertexShader file="Model" entry="ModelVS"/>
       <PixelShader file="ForwardLighting" entry="DirectionalLightingPS"/>
-	  <state name="CullMode" value="None"/>
+	  <State name="CullMode" value="None"/>
+    </Pass>
+  </Technique>
+
+  <Technique name="ForwardShading">
+    <Pass name="p0">
+      <VertexShader file="Model" entry="ModelVS"/>
+      <PixelShader file="ForwardPlus" entry="ForwardShadingPSMain"/>
+      <State name="CullMode" value="None"/>
     </Pass>
   </Technique>
   

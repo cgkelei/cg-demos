@@ -449,6 +449,9 @@
     <ClCompile Include="Core\Profiler.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\ForwardPath.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Math\BoundingBox.inl">
@@ -524,6 +527,9 @@
       <Filter>Asset\GLSL</Filter>
     </None>
     <None Include="..\Media\Effect\GLSL\TiledDeferredShading.glsl">
+      <Filter>Asset\GLSL</Filter>
+    </None>
+    <None Include="..\Media\Effect\GLSL\ForwardPlus.glsl">
       <Filter>Asset\GLSL</Filter>
     </None>
   </ItemGroup>
@@ -603,6 +609,9 @@
       <Filter>Asset\Effect</Filter>
     </Xml>
     <Xml Include="..\Media\Effect\Compute.effect.xml">
+      <Filter>Asset\Effect</Filter>
+    </Xml>
+    <Xml Include="..\Media\Effect\TiledLightCull.effect.xml">
       <Filter>Asset\Effect</Filter>
     </Xml>
   </ItemGroup>

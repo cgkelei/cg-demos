@@ -16,7 +16,6 @@
 
   <AutoBinding name="CameraOrigin" semantic="CameraPosition" type="float3"/>
 
-  
   <!-- SamplerState will used in this Effect -->
   <Sampler name="MaterialSampler">
       <State name="Filter" value="Min_Mag_Mip_Linear"/>
@@ -40,6 +39,13 @@
       <VertexShader file="ShadowMapGen" entry="ShadowMapVS"/>
 	  </Pass>
   </Technique>
+  
+  <Technique name="DepthPre">
+    <Pass name="p0">
+      <VertexShader file="Model" entry="ModelVS"/>
+      <State name="ColorWriteMask" index="0" r="false" g="false" b="false" a="false"/>
+    </Pass>
+  </Technique>
 
   <Technique name="GBuffer">
 	  <Pass name="p0">
@@ -58,6 +64,13 @@
     <Pass name="p0">
       <VertexShader file="Model" entry="ModelVS"/>
       <PixelShader file="ForwardLighting" entry="DirectionalLightingPS"/>
+    </Pass>
+  </Technique>
+
+  <Technique name="ForwardShading">
+    <Pass name="p0">
+      <VertexShader file="Model" entry="ModelVS"/>
+      <PixelShader file="ForwardPlus" entry="ForwardShadingPSMain"/>
     </Pass>
   </Technique>
   

@@ -92,7 +92,7 @@ shared_ptr<Texture> OpenGLFactory::CreateTextureCube( uint32_t width, uint32_t h
 
 shared_ptr<ShaderResourceView> OpenGLFactory::CreateTextureBufferSRV( const shared_ptr<GraphicsBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, PixelFormat format )
 {
-	return shared_ptr<ShaderResourceView>( new OpenGLStructuredBufferSRV(buffer, elementOffset, elementCount, format) );
+	return shared_ptr<ShaderResourceView>( new OpenGLTextureBufferSRV(buffer, elementOffset, elementCount, format) );
 }
 
 shared_ptr<ShaderResourceView> OpenGLFactory::CreateStructuredBufferSRV( const shared_ptr<GraphicsBuffer>& buffer, uint32_t elementOffset, uint32_t elementCount, uint32_t strutureStride )

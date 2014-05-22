@@ -58,7 +58,9 @@ protected:
 
 		mCamera = std::make_shared<Camera>();
 		
-		mRenderPath = std::make_shared<TiledDeferredPath>();
+		mRenderPath = std::make_shared<ForwardPlusPath>();
+
+		//mRenderPath = std::make_shared<TiledDeferredPath>();
 		//mRenderPath = std::make_shared<DeferredPath>();
 		//mRenderPath = std::make_shared<ForwardPath>();
 		mRenderPath->OnGraphicsInit(mCamera);
@@ -141,11 +143,11 @@ protected:
 	{
 		SceneManager& sceneMan = *Environment::GetSingleton().GetSceneManager();
 
-		Light* mDirLight = sceneMan.CreateLight("Sun", LT_DirectionalLight);
+		/*Light* mDirLight = sceneMan.CreateLight("Sun", LT_DirectionalLight);
 		mDirLight->SetDirection(float3(00, -1, 0.5));
 		mDirLight->SetLightColor(float3(1, 1, 1));
 		mDirLight->SetCastShadow(false);
-		sceneMan.GetRootSceneNode()->AttachObject(mDirLight);
+		sceneMan.GetRootSceneNode()->AttachObject(mDirLight);*/
 
 		/*Light* mPointLight = sceneMan.CreateLight("Point", LT_PointLight);
 		mPointLight->SetLightColor(float3(0, 1, 0));
@@ -223,7 +225,7 @@ protected:
 			}
 		}*/
 
-		//mLightAnimation.LoadLights("E:/lights.txt");
+		mLightAnimation.LoadLights("E:/lights.txt");
 	}
 
 	void UnloadContent()
