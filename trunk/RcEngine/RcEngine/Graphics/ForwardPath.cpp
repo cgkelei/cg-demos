@@ -63,8 +63,9 @@ void ForwardPlusPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 	mForwardFB->AttachRTV(ATT_DepthStencil, mDepthStencilView);
 
 	// Light Buffer
-	mPointLightsPosRange = factory->CreateTextureBuffer(PF_RGBA32F, MaxNumLights, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Texture, NULL);
-	mPointLightsColorFalloff = factory->CreateTextureBuffer(PF_RGB32F, MaxNumLights*2, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Texture, NULL);
+	uint32_t bufferCreateFlag = BufferCreate_Texture | BufferCreate_ShaderResource;
+	mPointLightsPosRange = factory->CreateTextureBuffer(PF_RGBA32F, MaxNumLights, EAH_CPU_Write, bufferCreateFlag, NULL);
+	mPointLightsColorFalloff = factory->CreateTextureBuffer(PF_RGB32F, MaxNumLights*2, EAH_CPU_Write, bufferCreateFlag, NULL);
 
 	mPointLightsPosRangeSRV = factory->CreateTextureBufferSRV(mPointLightsPosRange, 0, MaxNumLights,  PF_RGBA32F);
 	mPointLightsColorSRV = factory->CreateTextureBufferSRV(mPointLightsColorFalloff, 0, MaxNumLights,  PF_RGB32F);
@@ -74,9 +75,9 @@ void ForwardPlusPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 	mNumTileY = (windowHeight + TileGroupSize - 1) / TileGroupSize;
 	uint32_t numTotalTiles = mNumTileX * mNumTileY;
 
-	mPointLightsIndexCounter = factory->CreateTextureBuffer(PF_R32U, 1, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Texture, NULL);
-	mTilePointLightsIndexList = factory->CreateTextureBuffer(PF_R32U, numTotalTiles*MaxNumLightsPerTile, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Texture, NULL);
-	mTilePointLightsRange = factory->CreateTextureBuffer(PF_RG32U, numTotalTiles, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Texture, NULL);
+	mPointLightsIndexCounter = factory->CreateTextureBuffer(PF_R32U, 1, EAH_GPU_Write, BufferCreate_Texture | BufferCreate_UAV, NULL);
+	mTilePointLightsIndexList = factory->CreateTextureBuffer(PF_R32U, numTotalTiles*MaxNumLightsPerTile, EAH_GPU_Write, bufferCreateFlag | BufferCreate_UAV, NULL);
+	mTilePointLightsRange = factory->CreateTextureBuffer(PF_RG32U, numTotalTiles, EAH_GPU_Write, bufferCreateFlag | BufferCreate_UAV, NULL);
 	
 	mPointLightsIndexCounterUAV = factory->CreateTextureBufferUAV(mPointLightsIndexCounter, 0, 1, PF_R32U);
 	
@@ -182,7 +183,7 @@ void ForwardPlusPath::TiledLightCulling()
 	mTiledLightCullEfffect->GetParameterByName("LightCount")->SetValue(numTotalCount);
 
 	// Reset Counter
-	uint32_t* pCounter = reinterpret_cast<uint32_t*>( mPointLightsIndexCounter->Map(0, MAP_ALL_BUFFER, RMA_Write_Discard) );
+	uint32_t* pCounter = reinterpret_cast<uint32_t*>( mPointLightsIndexCounter->Map(0, MAP_ALL_BUFFER, RMA_Write_Only) );
 	*pCounter = 0;
 	mPointLightsIndexCounter->UnMap();
 
@@ -211,9 +212,9 @@ void ForwardPlusPath::TiledLightCulling()
 	//	}
 	//	fprintf(pFile, "\n");
 	//}
-	//
+
 	//fprintf(pFile, "\n\nTotal=%d, MaxOffset=(%d, %d)\n\n", total, maxOffset, maxOffsetIndex);
-	//
+
 	//uint32_t* pIndex = reinterpret_cast<uint32_t*>( mTilePointLightsIndexList->Map(0, MAP_ALL_BUFFER, RMA_Read_Only) );
 	//for (uint32_t i = 0; i < total; ++i)
 	//{
@@ -250,7 +251,5 @@ void ForwardPlusPath::ForwardShading()
 
 	//mDevice->GetRenderFactory()->SaveTextureToFile("E:/HDR.pfm", mHDRBuffer);
 }
-
-
 
 }

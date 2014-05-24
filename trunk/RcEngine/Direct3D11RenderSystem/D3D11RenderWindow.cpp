@@ -4,6 +4,7 @@
 #include "D3D11Factory.h"
 #include <MainApp/Application.h>
 #include <MainApp/Window.h>
+#include <Core/Exception.h>
 
 namespace RcEngine {
 
@@ -51,8 +52,7 @@ D3D11RenderWindow::D3D11RenderWindow( uint32_t width, uint32_t height )
 	
 	if( FAILED( hr ) )
 	{
-		// ERROR
-		assert(false);
+		ENGINE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, "Unable to create d3d11 Device and SwapChain", "D3D11RenderWindow::D3D11RenderWindow");
 	}
 }
 

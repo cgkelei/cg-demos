@@ -775,38 +775,19 @@ void TiledDeferredPath::OnGraphicsInit( const shared_ptr<Camera>& camera )
 	mHDRFB->AttachRTV(ATT_DepthStencil, mDepthStencilViewReadOnly);
 
 	// Create structure buffer for lights
-	mLightBuffer = factory->CreateStructuredBuffer(sizeof(PointLight), MaxNumLights, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Structured, nullptr);
+	mLightBuffer = factory->CreateStructuredBuffer(sizeof(PointLight), MaxNumLights, EAH_GPU_Read | EAH_CPU_Write, BufferCreate_Structured | BufferCreate_ShaderResource, nullptr);
 	mLightBufferSRV = factory->CreateStructuredBufferSRV(mLightBuffer, 0, MaxNumLights, sizeof(PointLight));
 
 	// Init shadow manager
 	//mShadowMan = new CascadedShadowMap(mDevice);
 
 	// bind shader input
-	EffectParameter* effectParam;
-	
-	effectParam = mTiledDeferredEffect->GetParameterByName("GBuffer0");
-	if (effectParam)
-		effectParam->SetValue(mGBuffer[0]->GetShaderResourceView());
-
-	effectParam = mTiledDeferredEffect->GetParameterByName("GBuffer1");
-	if (effectParam)
-		effectParam->SetValue(mGBuffer[1]->GetShaderResourceView());
-
-	effectParam = mTiledDeferredEffect->GetParameterByName("DepthBuffer");
-	if (effectParam) 
-		effectParam->SetValue(mDepthStencilBuffer->GetShaderResourceView());
-
-	effectParam = mTiledDeferredEffect->GetParameterByName("RWLightAccumulation"); // UAV
-	if (effectParam) 
-		effectParam->SetValue(mLightAccumulationUAV);
-
-	effectParam = mTiledDeferredEffect->GetParameterByName("LightAccumulateBuffer");
-	if (effectParam) 
-		effectParam->SetValue(mLightAccumulation->GetShaderResourceView());
-
-	effectParam = mTiledDeferredEffect->GetParameterByName("Lights");
-	if (effectParam) 
-		effectParam->SetValue(mLightBufferSRV);
+	mTiledDeferredEffect->GetParameterByName("GBuffer0")->SetValue(mGBuffer[0]->GetShaderResourceView());
+	mTiledDeferredEffect->GetParameterByName("GBuffer1")->SetValue(mGBuffer[1]->GetShaderResourceView());
+	mTiledDeferredEffect->GetParameterByName("DepthBuffer")->SetValue(mDepthStencilBuffer->GetShaderResourceView());
+	mTiledDeferredEffect->GetParameterByName("RWLightAccumulation")->SetValue(mLightAccumulationUAV);
+	mTiledDeferredEffect->GetParameterByName("LightAccumulateBuffer")->SetValue(mLightAccumulation->GetShaderResourceView());
+	mTiledDeferredEffect->GetParameterByName("Lights")->SetValue(mLightBufferSRV);
 
 	mToneMapEffect->GetParameterByName("HDRBuffer")->SetValue(mHDRBuffer->GetShaderResourceView());	
 }
@@ -898,7 +879,6 @@ void TiledDeferredPath::TiledDeferredLighting()
 	mTiledDeferredEffect->GetParameterByName("InvProj")->SetValue(invProj);
 	mTiledDeferredEffect->GetParameterByName("InvViewProj")->SetValue(invViewProj);
 	mTiledDeferredEffect->GetParameterByName("ViewportDim")->SetValue(viewDim);
-	mTiledDeferredEffect->GetParameterByName("CameraNearFar")->SetValue(float2(mCamera->GetNearPlane(), mCamera->GetFarPlane()));
 	mTiledDeferredEffect->GetParameterByName("ProjRatio")->SetValue(float2(proj.M33, proj.M43));
 	mTiledDeferredEffect->GetParameterByName("CameraOrigin")->SetValue(mCamera->GetPosition());
 	mTiledDeferredEffect->GetParameterByName("LightCount")->SetValue(numTotalCount);

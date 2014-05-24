@@ -19,6 +19,8 @@ enum BufferCreateFlag
 	BufferCreate_StreamOutput			= 1UL << 3,
 	BufferCreate_Texture                = 1UL << 4,
 	BufferCreate_Structured				= 1UL << 5,
+	BufferCreate_ShaderResource		    = 1UL << 6,
+	BufferCreate_UAV					= 1UL << 7,
 };
 
 enum TexCreateFlag

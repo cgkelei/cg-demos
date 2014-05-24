@@ -150,16 +150,14 @@ void D3D11Device::CreateRenderWindow()
 	// Create a render target view
 	ID3D11Texture2D* pBackBuffer = NULL;
 	hr = d3d11RenderWindow->SwapChainD3D11->GetBuffer( 0, __uuidof( ID3D11Texture2D ), ( LPVOID* )&pBackBuffer );
-	if( FAILED( hr ) )
-	{
-		// ERROR
-	}
+	assert( SUCCEEDED(hr) );
 
 	ID3D11RenderTargetView* pRenderTargetView = NULL;
 	hr = gD3D11Device->DeviceD3D11->CreateRenderTargetView( pBackBuffer, NULL, &pRenderTargetView );
 	pBackBuffer->Release();
 	if( FAILED( hr ) )
 	{
+		assert(false);
 		// ERROR
 	}
 
