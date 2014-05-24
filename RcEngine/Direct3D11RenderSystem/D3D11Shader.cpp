@@ -182,13 +182,14 @@ public:
 					ResourceInputParam param;
 					param.Name = resBindDesc.Name;
 					param.Binding = resBindDesc.BindPoint;
+					param.Type = UnmapTextureType(resBindDesc.Dimension);
 					param.Class = Shader_Param_SRV;
-					D3D11Mapping::UnMapping(resBindDesc.Dimension, param.Type);
 					mShaderD3D11->ResourceInputParams.push_back(param);
 				}
 				break;
 			case D3D10_SIT_TBUFFER:
 				{
+					assert(false);
 					ResourceInputParam param;
 					param.Name = resBindDesc.Name;
 					param.Binding = resBindDesc.BindPoint;
@@ -202,21 +203,7 @@ public:
 					ResourceInputParam param;
 					param.Name = resBindDesc.Name;
 					param.Binding = resBindDesc.BindPoint;
-
-					switch (resBindDesc.Dimension)
-					{
-					case D3D10_SRV_DIMENSION_BUFFER: param.Type = EPT_TextureBuffer; break;
-					case D3D10_SRV_DIMENSION_TEXTURE1D : param.Type = EPT_Texture1D; break;
-					case  D3D10_SRV_DIMENSION_TEXTURE1DARRAY: param.Type = EPT_Texture1DArray; break;
-					case  D3D10_SRV_DIMENSION_TEXTURE2D : param.Type = EPT_Texture2D; break;
-					case D3D10_SRV_DIMENSION_TEXTURE2DARRAY: param.Type = EPT_Texture2DArray; break;
-					case D3D10_SRV_DIMENSION_TEXTURE2DMS: param.Type = EPT_Texture2D; break;
-					case D3D10_SRV_DIMENSION_TEXTURE2DMSARRAY: param.Type = EPT_Texture2DArray; break;
-					case D3D10_SRV_DIMENSION_TEXTURE3D: param.Type = EPT_Texture3D; break;
-					case D3D10_SRV_DIMENSION_TEXTURECUBE: param.Type = EPT_TextureCube; break;
-					default:
-						break;
-					}
+					param.Type = UnmapTextureType(resBindDesc.Dimension);
 					param.Class = Shader_Param_UAV;
 					mShaderD3D11->ResourceInputParams.push_back(param);
 				}
@@ -258,6 +245,26 @@ public:
 			}
 
 		}
+	}
+
+	EffectParameterType UnmapTextureType(D3D10_SRV_DIMENSION Dimension)
+	{
+		switch (Dimension)
+		{
+		case D3D10_SRV_DIMENSION_BUFFER: return EPT_TextureBuffer; 
+		case D3D10_SRV_DIMENSION_TEXTURE1D : return EPT_Texture1D; 
+		case  D3D10_SRV_DIMENSION_TEXTURE1DARRAY: return EPT_Texture1DArray;
+		case  D3D10_SRV_DIMENSION_TEXTURE2D : return EPT_Texture2D; 
+		case D3D10_SRV_DIMENSION_TEXTURE2DARRAY: return EPT_Texture2DArray; 
+		case D3D10_SRV_DIMENSION_TEXTURE2DMS: return EPT_Texture2D; 
+		case D3D10_SRV_DIMENSION_TEXTURE2DMSARRAY: return EPT_Texture2DArray; 
+		case D3D10_SRV_DIMENSION_TEXTURE3D: return EPT_Texture3D;
+		case D3D10_SRV_DIMENSION_TEXTURECUBE: return EPT_TextureCube;
+		default:
+			break;
+		}
+		assert (false);
+		return EPT_Texture2D;
 	}
 
 protected:

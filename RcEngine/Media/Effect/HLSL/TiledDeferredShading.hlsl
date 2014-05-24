@@ -24,7 +24,6 @@ cbuffer CSConstants
 	matrix InvProj;
 	matrix InvViewProj;
 	float4 ViewportDim; // zw for invDim
-	float2 CameraNearFar;
 	float2 ProjRatio;
 	float3 CameraOrigin;
 	uint LightCount;
@@ -81,30 +80,25 @@ float4 CreatePlaneEquation(/*float3 p1,*/ float3 p2, float3 p3)
 	return plane;
 }
 
-//void EvalulateAndAccumilateLight(Light light, float3 litPos, float3 N, float3 V, float shininess,
-//                                 inout float3 diffuseLight, inout float3 specularLight)
-//{
-//	float3 L = light.Position - litPos;
-//	float dist = length(L);
-//	if (dist > light.Range)
-//		return;
-//
-//	L /= dist;
-//	//vec3 L = normalize(light.Position - litPos);
-//	float3 H = normalize(V + L);
-//		
-//	// calculate attenuation
-//	float attenuation = CalcAttenuation(light.Position, litPos, light.Falloff);
-//	
-//	float NdotL = dot(L, N); 
-//	if (NdotL > 0.0)
-//	{
-//		float3 lightRes = light.Color * NdotL * attenuation;
-//
-//		diffuseLight += lightRes;
-//		specularLight += CalculateSpecular(N, H, shininess) * lightRes; // Frensel in moved to calculate in shading pass
-//	}
-//}
+void EvalulateAndAccumilateLight(in Light light, in float3 litPos, in float3 N, in float3 V,
+							     in float shininess, inout float3 diffuseLight, inout float3 specularLight)
+{
+	float3 L = light.Position - litPos;
+	float dist = length(L);
+	if (dist < light.Range)
+	{
+		L = normalize(L);
+		
+		float3 lightCombined = light.Color * saturate(dot(N,L)) * CalcAttenuation(dist, light.Falloff);
+
+		diffuseLight += lightCombined;
+
+		// Frensel in moved to calculate in shading pass
+		float3 H = normalize(V + L);
+		specularLight += CalculateSpecular(N, H, shininess) * lightCombined; 
+	}
+}
+
 
 //----------------------------------------------------------------------------------
 [numthreads(WORK_GROUP_SIZE, WORK_GROUP_SIZE, 1)]
@@ -115,10 +109,10 @@ void TiledDeferrdCSMain(
 {
 	int3 pixelIndex = int3(DispatchThreadID.xy, 0);
 
-	float zBuffer = DepthBuffer.Load(pixelIndex);
+	float zw = DepthBuffer.Load(pixelIndex);
 	
 	// Compute view space z
-	float viewSpaceZ = ProjRatio.y / (zBuffer - ProjRatio.x);	
+	float viewSpaceZ = ProjRatio.y / (zw - ProjRatio.x);	
 
 	// Initialize per-tile variables
     if (GroupIndex == 0) 
@@ -129,8 +123,11 @@ void TiledDeferrdCSMain(
     }
     GroupMemoryBarrierWithGroupSync();
 	
-	InterlockedMin(TileMinZ, asuint(viewSpaceZ));
-    InterlockedMax(TileMaxZ, asuint(viewSpaceZ));
+	if (zw < 1.0) // Avoid shading skybox/background pixel
+	{	
+		InterlockedMin(TileMinZ, asuint(viewSpaceZ));
+	    InterlockedMax(TileMaxZ, asuint(viewSpaceZ));
+	}
 	GroupMemoryBarrierWithGroupSync();
 		
 	float minTileZ = asfloat(TileMinZ);
@@ -139,42 +136,32 @@ void TiledDeferrdCSMain(
 	// Construct frustum planes
 	float4 frustumPlanes[6];
 	{
-		float3 frustumCorner[4];
+		//float3 frustumCorner[4];
 
-		// View frustum far plane corners
-		frustumCorner[0] = ReconstructViewPosition(1.0, uint2(GroupID.x * WORK_GROUP_SIZE, GroupID.y *WORK_GROUP_SIZE));
-		frustumCorner[1] = ReconstructViewPosition(1.0, uint2(GroupID.x * WORK_GROUP_SIZE, (GroupID.y+1) * WORK_GROUP_SIZE));
-		frustumCorner[2] = ReconstructViewPosition(1.0, uint2((GroupID.x+1) * WORK_GROUP_SIZE, (GroupID.y+1) * WORK_GROUP_SIZE));
-		frustumCorner[3] = ReconstructViewPosition(1.0, uint2((GroupID.x+1) * WORK_GROUP_SIZE, GroupID.y * WORK_GROUP_SIZE));
+		//frustumCorner[0] = ReconstructViewPosition(1.0, uint2(GroupID.x * WORK_GROUP_SIZE, GroupID.y *WORK_GROUP_SIZE));
+		//frustumCorner[1] = ReconstructViewPosition(1.0, uint2(GroupID.x * WORK_GROUP_SIZE, (GroupID.y+1) * WORK_GROUP_SIZE));
+		//frustumCorner[2] = ReconstructViewPosition(1.0, uint2((GroupID.x+1) * WORK_GROUP_SIZE, (GroupID.y+1) * WORK_GROUP_SIZE));
+		//frustumCorner[3] = ReconstructViewPosition(1.0, uint2((GroupID.x+1) * WORK_GROUP_SIZE, GroupID.y * WORK_GROUP_SIZE));
 
-		for(int i=0; i <4; i++)
-			frustumPlanes[i] = CreatePlaneEquation(frustumCorner[i], frustumCorner[(i+1)&3]);		
-				
+		//for(int i=0; i <4; i++)
+		//	frustumPlanes[i] = CreatePlaneEquation(frustumCorner[i], frustumCorner[(i+1)&3]);		
+		
+		float2 tileScale = float2(ViewportDim.xy) * rcp(2.0f * float2(WORK_GROUP_SIZE, WORK_GROUP_SIZE));
+		float2 tileBias = tileScale - float2(GroupID.xy);
+
+		frustumPlanes[0] = float4(Projection._11 * tileScale.x, 0, tileBias.x, 0);
+		frustumPlanes[1] = float4(-Projection._11 * tileScale.x, 0, 1 - tileBias.x, 0);
+		frustumPlanes[2] = float4(0, Projection._22 * tileScale.y, 1 - tileBias.y, 0);
+		frustumPlanes[3] = float4(0, -Projection._22 * tileScale.y, tileBias.y, 0);
+
+		[unroll]
+		for (uint i = 0; i < 4; ++i)
+			frustumPlanes[i] *= rcp(length(frustumPlanes[i].xyz));
+
 		// Near/far
 		frustumPlanes[4] = float4(0.0f, 0.0f,  1.0f, -minTileZ);
 		frustumPlanes[5] = float4(0.0f, 0.0f, -1.0f,  maxTileZ);
 	}
-
-	// Compute tile frustum using PerspectiveOffCenter. Intel's Code may be wrong, I deduce myself, need verify.
-	//{
-	//	// Work out scale/bias from [0, 1]
-	//	float2 tileScale = float2(ViewportDim.xy) * rcp(2.0f * float2(WORK_GROUP_SIZE, WORK_GROUP_SIZE));
-	//	float2 tileBias = tileScale - float2(GroupID.xy);
-
-	//	frustumPlanes[0] = float4(Projection._11 * tileScale.x, 0, tileBias.x, 0);
-	//	frustumPlanes[1] = float4(-Projection._11 * tileScale.x, 0, 1 - tileBias.x, 0);
-	//	frustumPlanes[2] = float4(0, Projection._22 * tileScale.y, 1 - tileBias.y, 0);
-	//	frustumPlanes[3] = float4(0, -Projection._22 * tileScale.y, tileBias.y, 0);
-
-	//	// Near/far
-	//	frustumPlanes[4] = float4(0.0f, 0.0f,  1.0f, -minTileZ);
-	//	frustumPlanes[5] = float4(0.0f, 0.0f, -1.0f,  maxTileZ);
-
-	//	// Normalize frustum planes (near/far already normalized)
-	//	[unroll]
-	//	for (uint i = 0; i < 4; ++i)
-	//		frustumPlanes[i] *= rcp(length(frustumPlanes[i].xyz));
-	//}
 
 	// Cull lights for this tile	
 	for (uint lightIndex = GroupIndex; lightIndex < LightCount; lightIndex += NumGroupThreads)
@@ -201,44 +188,21 @@ void TiledDeferrdCSMain(
 
 	if (all(float2(DispatchThreadID.xy) < ViewportDim.xy))
 	{
-		float3 worldPosition = ReconstructWorldPosition(zBuffer, DispatchThreadID.xy);
+		float3 worldPosition = ReconstructWorldPosition(zw, DispatchThreadID.xy);
 		float3 V = normalize(CameraOrigin - worldPosition);
 		
-		float4 normalShininess = GBuffer0.Load(int3(DispatchThreadID.xy, 0));
-		normalShininess.xyz = normalize(normalShininess.xyz); // Normal
+		float4 tap = GBuffer0.Load(int3(DispatchThreadID.xy, 0));
+		float3 N = normalize(tap.rgb); // Normal
+		float shininess = tap.a;
 
 		float3 diffuseLight = 0;
 		float3 specularLight = 0;
 		for (uint i = 0; i < NumTileLights; ++i)
 		{
 			uint lightIndex = TileLightList[i];
-            Light light = Lights[lightIndex];
-			
-			float3 L = light.Position - worldPosition;
-			float dist = length(L);
-			if (dist > light.Range)
-				continue;
-
-			L /= dist;
-			float3 H = normalize(V + L);
-		
-			// calculate attenuation
-			float attenuation = CalcAttenuation(light.Position, worldPosition, light.Falloff);
-	
-			float NdotL = dot(L, normalShininess.xyz); 
-			if (NdotL > 0.0)
-			{
-				float3 lightRes = light.Color * NdotL * attenuation;
-
-				diffuseLight += lightRes;
-				specularLight += CalculateSpecular(normalShininess.xyz, H, normalShininess.w) * lightRes; // Frensel in moved to calculate in shading pass
-			}
-
-			//EvalulateAndAccumilateLight(light, worldPosition, normalShininess.xyz, V, normalShininess.w, diffuseLight, specularLight);
+			EvalulateAndAccumilateLight(Lights[lightIndex], worldPosition, N, V, shininess, diffuseLight, specularLight);
 		}
 
-
-		//diffuseLight = frustumPlanes[3].rgb;
 		RWLightAccumulation[DispatchThreadID.xy] = float4(diffuseLight, Luminance(specularLight));
 	}
 }

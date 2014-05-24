@@ -374,9 +374,8 @@ void Effect::LoadImpl()
 	for (technqueNode = root->FirstNode("Technique");  technqueNode; technqueNode = technqueNode->NextSibling("Technique"))
 	{
 		EffectTechnique* technique = new EffectTechnique(*this);
-	
 		technique->mName = technqueNode->AttributeString("name", "");
-	
+		
 		String filename, entryPoint;
 		for (passNode = technqueNode->FirstNode("Pass");  passNode; passNode = passNode->NextSibling("Pass"))
 		{
@@ -442,7 +441,7 @@ void Effect::LoadImpl()
 
 		mTechniques.push_back(technique);
 	}
-	
+
 	// Parse sampler states
 	for (XMLNodePtr samplerNode = root->FirstNode("Sampler"); samplerNode; samplerNode = samplerNode->NextSibling("Sampler"))
 	{

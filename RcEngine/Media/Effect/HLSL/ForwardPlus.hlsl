@@ -55,7 +55,7 @@ float4 CreatePlaneEquation(/*float3 p1,*/ float3 p2, float3 p3)
 
 //----------------------------------------------------------------------------------
 [numthreads(WORK_GROUP_SIZE, WORK_GROUP_SIZE, 1)]
-void TiledDeferrdCSMain(
+void LightCullCSMain(
 	uint3 DispatchThreadID	: SV_DispatchThreadID,
 	uint3 GroupID			: SV_GroupID,
 	uint  GroupIndex		: SV_GroupIndex)
@@ -74,11 +74,13 @@ void TiledDeferrdCSMain(
     }
     GroupMemoryBarrierWithGroupSync();
 	
-	if (zw < 1.0)
+	/*if (zw < 1.0)
 	{
 		InterlockedMin(TileMinZ, asuint(viewSpaceZ));
 		InterlockedMax(TileMaxZ, asuint(viewSpaceZ));
-	}
+	}*/
+	InterlockedMin(TileMinZ, asuint(viewSpaceZ));
+	InterlockedMax(TileMaxZ, asuint(viewSpaceZ));
 	GroupMemoryBarrierWithGroupSync();
 
 	float minTileZ = asfloat(TileMinZ);
@@ -87,18 +89,16 @@ void TiledDeferrdCSMain(
 	// Construct frustum planes
 	float4 frustumPlanes[6];
 	{
-		//float3 frustumCorner[4];
+		/*float3 frustumCorner[4];
 
-		//// View frustum far plane corners
-		//frustumCorner[0] = ReconstructViewPosition(1.0, uint2(GroupID.x * WORK_GROUP_SIZE, GroupID.y *WORK_GROUP_SIZE));
-		//frustumCorner[1] = ReconstructViewPosition(1.0, uint2(GroupID.x * WORK_GROUP_SIZE, (GroupID.y+1) * WORK_GROUP_SIZE));
-		//frustumCorner[2] = ReconstructViewPosition(1.0, uint2((GroupID.x+1) * WORK_GROUP_SIZE, (GroupID.y+1) * WORK_GROUP_SIZE));
-		//frustumCorner[3] = ReconstructViewPosition(1.0, uint2((GroupID.x+1) * WORK_GROUP_SIZE, GroupID.y * WORK_GROUP_SIZE));
+		frustumCorner[0] = ReconstructViewPosition(1.0, uint2(GroupID.x * WORK_GROUP_SIZE, GroupID.y *WORK_GROUP_SIZE));
+		frustumCorner[1] = ReconstructViewPosition(1.0, uint2(GroupID.x * WORK_GROUP_SIZE, (GroupID.y+1) * WORK_GROUP_SIZE));
+		frustumCorner[2] = ReconstructViewPosition(1.0, uint2((GroupID.x+1) * WORK_GROUP_SIZE, (GroupID.y+1) * WORK_GROUP_SIZE));
+		frustumCorner[3] = ReconstructViewPosition(1.0, uint2((GroupID.x+1) * WORK_GROUP_SIZE, GroupID.y * WORK_GROUP_SIZE));
 
-		//for(int i=0; i <4; i++)
-		//	frustumPlanes[i] = CreatePlaneEquation(frustumCorner[i], frustumCorner[(i+1)&3]);		
+		for(int i=0; i <4; i++)
+			frustumPlanes[i] = CreatePlaneEquation(frustumCorner[i], frustumCorner[(i+1)&3]);		*/
 		
-		// Work out scale/bias from [0, 1]
 		float2 tileScale = float2(ViewportDim.xy) * rcp(2.0f * float2(WORK_GROUP_SIZE, WORK_GROUP_SIZE));
 		float2 tileBias = tileScale - float2(GroupID.xy);
 
@@ -121,7 +121,7 @@ void TiledDeferrdCSMain(
 	{
 		float4 lightPosAndRange = PointLightsPosRange[lightIndex];
 		
-		float4 lightPosVS = mul( float4(lightPosAndRange.xyz, 0), View);
+		float4 lightPosVS = mul( float4(lightPosAndRange.xyz, 1.0), View);
 		float lightRange = lightPosAndRange.w;
 
 		// Intersect with each frustun plane
@@ -175,6 +175,32 @@ Buffer<float3> PointLightsFalloff; // Position and Range
 Buffer<uint> LightIndexList;
 Buffer<uint2> LightListRange;
 
+void EvalulateAndAccumilateLight(in int lightIndex, in float3 litPos, in float3 N, in float3 V, in float3 specularAlbedo,
+								 in float shininess, inout float3 diffuseLight, inout float3 specularLight)
+{
+	float4 lightPosRange = PointLightsPosRange[lightIndex];
+	
+	float3 L = lightPosRange.xyz - litPos;
+	float dist = length(L);
+	if (dist < lightPosRange.w)
+	{
+		L = normalize(L);
+		
+		float3 lightColor = PointLightsColor[lightIndex];
+		float3 lightFalloff = PointLightsFalloff[lightIndex]; 
+
+		float3 lightCombined = lightColor * saturate(dot(N,L)) * CalcAttenuation(dist, lightFalloff);
+
+		diffuseLight += lightCombined;
+
+		// Frensel in moved to calculate in shading pass
+		float3 H = normalize(V + L);
+		float3 fresnel = CalculateFresnel(specularAlbedo, L, H);
+		specularLight += CalculateSpecular(N, H, shininess) * lightCombined * fresnel;
+	}
+}
+
+
 void ForwardShadingPSMain(in VSOutput input,
 						  out float4 oFragColor : SV_Target0 ) 
 {
@@ -189,11 +215,11 @@ void ForwardShadingPSMain(in VSOutput input,
 	float3 N = normalize(input.NormalWS);
 #endif	      
         
-	float3 final = 0;
     float3 V = normalize(CameraOrigin - input.PosWS.xyz);
-                          
-	float specularNormTerm = (material.Shininess + 2.0) / 8.0;
-	  
+    
+	float3 diffuseLight = (float3)0;
+	float3 specularLight = (float3)0;
+
 	uint2 tileXY = uint2(input.PosCS.xy) / uint2(WORK_GROUP_SIZE, WORK_GROUP_SIZE);
 	uint tileIdx = tileXY.y * WORK_GROUP_SIZE + tileXY.x;
 
@@ -203,33 +229,18 @@ void ForwardShadingPSMain(in VSOutput input,
 		uint lightIndex = tileLightRange.y + i;
 		uint globalLightIndex = LightIndexList[lightIndex];
 
-		float4 lightPosRange = PointLightsPosRange[globalLightIndex];
-		float3 lightPos = lightPosRange.xyz;
-		float lightRange = lightPosRange.w;
-
-		float3 lightColor = PointLightsColor[globalLightIndex];
-		float3 lightFalloff = PointLightsFalloff[globalLightIndex]; 
-		
-		if (distance(lightPos, input.PosWS.xyz) > lightRange)
-			continue;
-
-		float3 L = normalize(lightPos - input.PosWS.xyz);
-		float3 H = normalize(V + L);
-		
-		float NdotL = dot(L, N);
-		if (NdotL > 0.0)
-		{	
-			float attenuation = CalcAttenuation(lightPos, input.PosWS.xyz, lightFalloff);
-			float fresnel = CalculateFresnel(material.SpecularAlbedo, L, H);
-
-			// Diffuse + Specular
-			final += (material.DiffuseAlbedo + specularNormTerm * CalculateSpecular(N, H, material.Shininess) * fresnel) * lightColor * NdotL * attenuation;
-		}
+		EvalulateAndAccumilateLight(globalLightIndex, input.PosWS.xyz, N, V, material.SpecularAlbedo,
+		                            material.Shininess, diffuseLight, specularLight);
 	}
 
-	// Ambient
-	final += material.DiffuseAlbedo * 0.1;
-	oFragColor = float4(final, 1.0);  	         
+	float3 final = diffuseLight * material.DiffuseAlbedo;
+	
+	float specularNormTerm = (material.Shininess + 2.0) / 8.0;
+	final += specularNormTerm * specularLight;
+
+	final += material.DiffuseAlbedo * 0.1; // Ambient
+
+	oFragColor = float4(final, 1.0);  	               
 }
 
 

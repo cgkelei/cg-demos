@@ -21,7 +21,6 @@ layout (std140) uniform CSConstants
 	mat4 InvProj;
 	mat4 InvViewProj;
 	vec4 ViewportDim;	 // zw for invDim
-	vec2 CameraNearFar;
 	vec2 ProjRatio;
 	vec3 CameraOrigin;
 	uint LightCount;
@@ -80,6 +79,25 @@ vec4 CreatePlaneEquation(/*float3 p1,*/ vec3 p2, vec3 p3)
 	return plane;
 }
 
+void EvalulateAndAccumilateLight(in Light light, in vec3 litPos, in vec3 N, in vec3 V,
+							     in float shininess, inout vec3 diffuseLight, inout vec3 specularLight)
+{
+	vec3 L = light.Position - litPos;
+	float dist = length(L);
+	if (dist < light.Range)
+	{
+		L = normalize(L);
+		
+		vec3 lightCombined = light.Color * saturate(dot(N,L)) * CalcAttenuation(dist, light.Falloff);
+
+		diffuseLight += lightCombined;
+
+		// Frensel in moved to calculate in shading pass
+		vec3 H = normalize(V + L);
+		specularLight += CalculateSpecular(N, H, shininess) * lightCombined; 
+	}
+}
+
 //--------------------------------------------------------------------------------
 // CSMain 
 layout (local_size_x = WORK_GROUP_SIZE , local_size_y = WORK_GROUP_SIZE , local_size_z = 1) in;
@@ -94,14 +112,13 @@ void main()
 	// Initialize shared memory light list and Z bounds
 	if (gl_LocalInvocationIndex == 0)
 	{
-		NumTileLights = 0;
-        TileMinZ = 0x7F7FFFFF;      // Max float;
+		TileMinZ = 0x7F7FFFFF;     
         TileMaxZ = 0;
+		NumTileLights = 0;
 	}
 	barrier();
 	
-	// Avoid shading skybox/background
-    if (zw != 1.0)
+	if (zw < 1.0) // Avoid shading skybox/background pixel
 	{
 		atomicMin(TileMinZ, floatBitsToUint(viewSpaceZ));
 		atomicMax(TileMaxZ, floatBitsToUint(viewSpaceZ));
@@ -148,7 +165,7 @@ void main()
 
 		// Intersect with each frustun plane
 		bool inFrustum = true;
-		for (int i = 0; i < 4; ++i)
+		for (int i = 0; i < 6; ++i)
 		{
 			float d = dot(frustumPlanes[i], vec4(lightPosVS.xyz, 1.0));
 			inFrustum = inFrustum && (d >= -Lights[lightIndex].Range);
@@ -178,30 +195,9 @@ void main()
 		for (uint i = 0; i < NumTileLights; ++i)
 		{
 			uint lightIndex = TileLightList[i];
-            Light light = Lights[lightIndex];
-			
-			vec3 L = light.Position - worldPosition;
-			float dist = length(L);
-			if (dist > light.Range)
-				continue;
-
-			L /= dist;
-			vec3 H = normalize(V + L);
-		
-			// calculate attenuation
-			float attenuation = CalcAttenuation(light.Position, worldPosition, light.Falloff);
-	
-			float NdotL = dot(L, N); 
-			if (NdotL > 0.0)
-			{
-				vec3 lightCombined = light.Color * NdotL * attenuation;
-
-				diffuseLight += lightCombined;
-				specularLight += CalculateSpecular(N, H, shininess) * lightCombined; // Frensel in moved to calculate in shading pass
-			}
+			EvalulateAndAccumilateLight(Lights[lightIndex], worldPosition, N, V, shininess, diffuseLight, specularLight);
 		}
 		
-		//diffuseLight = frustumPlanes[3].rgb;
 		imageStore(RWLightAccumulation, fragCoord, vec4(diffuseLight, Luminance(specularLight)));
 	}
 }

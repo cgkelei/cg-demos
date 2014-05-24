@@ -21,6 +21,11 @@ float CalcAttenuation(const vec3 lightPos, const vec3 point, const vec3 atten)
 	return 1.0 / (atten.x + d * atten.y + d * d * atten.z);
 }
 
+float CalcAttenuation(float dist, vec3 atten)
+{
+	return 1.0 / (atten.x + dist * atten.y + dist * dist * atten.z);
+}
+
 
 /**
  * @brief Computes the specular contribution of a light

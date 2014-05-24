@@ -5,28 +5,18 @@ namespace RcEngine {
 
 void D3D11Mapping::Mapping( uint32_t accessHint, D3D11_USAGE& usage, UINT& CPUAccessFlags )
 {
-	CPUAccessFlags = 0;
-	usage = D3D11_USAGE_DEFAULT;
+	usage = D3D11_USAGE_IMMUTABLE;
 
 	if (accessHint & EAH_CPU_Write)
-		CPUAccessFlags |= D3D11_CPU_ACCESS_WRITE;
-			
-	if (accessHint & EAH_GPU_Write)
 	{
-		usage = D3D11_USAGE_DEFAULT;
-	}
-	else if (accessHint & EAH_CPU_Write)
-	{
+		CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		usage = D3D11_USAGE_DYNAMIC;
 	}
-	else if (accessHint == EAH_GPU_Read)
+	
+	if (accessHint & EAH_GPU_Write)
 	{
-		// Only sample by GPU
-		usage = D3D11_USAGE_IMMUTABLE;
-	}
-	else
-	{
-		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Invalid access hint", "D3D11Mapping::MapUsage");
+		CPUAccessFlags = 0;
+		usage = D3D11_USAGE_DEFAULT;
 	}
 }
 
@@ -509,6 +499,16 @@ DXGI_FORMAT D3D11Mapping::GetDepthShaderResourceFormat( PixelFormat inPixelForma
 	} 
 
 	return DXGI_FORMAT_UNKNOWN;
+}
+
+UINT D3D11Mapping::GetCPUAccessFlags( ResourceMapAccess mapType )
+{
+	if (mapType == RMA_Read_Only) 
+		return D3D11_CPU_ACCESS_READ;
+	else if (mapType == RMA_Read_Write) 
+		return D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
+	else 
+		return D3D11_CPU_ACCESS_WRITE;	
 }
 
 }

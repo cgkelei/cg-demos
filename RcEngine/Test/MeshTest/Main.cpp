@@ -58,10 +58,9 @@ protected:
 
 		mCamera = std::make_shared<Camera>();
 		
-		mRenderPath = std::make_shared<ForwardPlusPath>();
-
+		//mRenderPath = std::make_shared<ForwardPlusPath>();
 		//mRenderPath = std::make_shared<TiledDeferredPath>();
-		//mRenderPath = std::make_shared<DeferredPath>();
+		mRenderPath = std::make_shared<DeferredPath>();
 		//mRenderPath = std::make_shared<ForwardPath>();
 		mRenderPath->OnGraphicsInit(mCamera);
 	}
@@ -313,7 +312,7 @@ int main()
 	//img.LoadFromDDS("E:/Engines/RcEngine/Media/Mesh/Geo/sand_diffuse.dds");
 
 
-	MeshTestApp app("Config.xml");
+	MeshTestApp app("../Config.xml");
 	app.Create();
 	app.RunGame();
 	app.Release();

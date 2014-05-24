@@ -15,13 +15,12 @@ D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t
 	mHeight = height;
 	
 	D3D11_TEXTURE2D_DESC texDesc;
+	ZeroMemory(&texDesc, sizeof(texDesc));
 	texDesc.Width = mWidth;
 	texDesc.Height = mHeight;
 	texDesc.ArraySize = arraySize;
 	texDesc.SampleDesc.Quality = sampleQuality;
 	texDesc.SampleDesc.Count = sampleCount;
-	texDesc.BindFlags = 0;
-	texDesc.MiscFlags = 0;
 	D3D11Mapping::Mapping(accessHint, texDesc.Usage, texDesc.CPUAccessFlags);
 
 	if (mCreateFlags & TexCreate_DepthStencilTarget)
@@ -47,14 +46,9 @@ D3D11Texture2D::D3D11Texture2D( PixelFormat format, uint32_t arraySize, uint32_t
 		texDesc.MipLevels = mMipLevels;
 	}
 
-	if (mCreateFlags & TexCreate_UAV)
-		texDesc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
-
-	if (mCreateFlags & TexCreate_ShaderResource)
-		texDesc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
-
-	if (mCreateFlags & TexCreate_RenderTarget)
-		texDesc.BindFlags |= D3D11_BIND_RENDER_TARGET;
+	if (mCreateFlags & TexCreate_UAV)				texDesc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
+	if (mCreateFlags & TexCreate_ShaderResource)	texDesc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+	if (mCreateFlags & TexCreate_RenderTarget)		texDesc.BindFlags |= D3D11_BIND_RENDER_TARGET;
 
 	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
 

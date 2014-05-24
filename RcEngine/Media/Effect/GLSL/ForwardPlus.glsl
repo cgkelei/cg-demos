@@ -75,8 +75,7 @@ void main()
 	}
 	barrier();
 	
-	// Avoid shading skybox/background
-    if (zw != 1.0)
+    if (zw < 1.0) // Avoid shading skybox/background pixel
 	{
 		atomicMin(TileMinZ, floatBitsToUint(viewSpaceZ));
 		atomicMax(TileMaxZ, floatBitsToUint(viewSpaceZ));
@@ -89,27 +88,27 @@ void main()
 	// Construct frustum planes
 	vec4 frustumPlanes[6];
 	{
-		vec3 frustumCorner[4];
+		//vec3 frustumCorner[4];
 
-		frustumCorner[0] = ReconstructViewPosition(1.0, uvec2(gl_WorkGroupID.x * gl_WorkGroupSize.x, gl_WorkGroupID.y * gl_WorkGroupSize.y));
-		frustumCorner[1] = ReconstructViewPosition(1.0, uvec2((gl_WorkGroupID.x+1) * gl_WorkGroupSize.x, gl_WorkGroupID.y * gl_WorkGroupSize.y));
-		frustumCorner[2] = ReconstructViewPosition(1.0, uvec2((gl_WorkGroupID.x+1) * gl_WorkGroupSize.x, (gl_WorkGroupID.y+1) * gl_WorkGroupSize.y));
-		frustumCorner[3] = ReconstructViewPosition(1.0, uvec2(gl_WorkGroupID.x * gl_WorkGroupSize.x, (gl_WorkGroupID.y+1) * gl_WorkGroupSize.y));
+		//frustumCorner[0] = ReconstructViewPosition(1.0, uvec2(gl_WorkGroupID.x * gl_WorkGroupSize.x, gl_WorkGroupID.y * gl_WorkGroupSize.y));
+		//frustumCorner[1] = ReconstructViewPosition(1.0, uvec2((gl_WorkGroupID.x+1) * gl_WorkGroupSize.x, gl_WorkGroupID.y * gl_WorkGroupSize.y));
+		//frustumCorner[2] = ReconstructViewPosition(1.0, uvec2((gl_WorkGroupID.x+1) * gl_WorkGroupSize.x, (gl_WorkGroupID.y+1) * gl_WorkGroupSize.y));
+		//frustumCorner[3] = ReconstructViewPosition(1.0, uvec2(gl_WorkGroupID.x * gl_WorkGroupSize.x, (gl_WorkGroupID.y+1) * gl_WorkGroupSize.y));
 
-		for(int i=0; i <4; i++)
-			frustumPlanes[i] = CreatePlaneEquation(frustumCorner[i], frustumCorner[(i+1)&3]);		
+		//for(int i=0; i <4; i++)
+		//	frustumPlanes[i] = CreatePlaneEquation(frustumCorner[i], frustumCorner[(i+1)&3]);		
 		
-		//vec2 tileScale = vec2(ViewportDim.xy) / (2.0f * vec2(WORK_GROUP_SIZE, WORK_GROUP_SIZE));
-		//vec2 tileBias = tileScale - vec2(gl_WorkGroupID.xy);
+		vec2 tileScale = vec2(ViewportDim.xy) / (2.0f * vec2(WORK_GROUP_SIZE, WORK_GROUP_SIZE));
+		vec2 tileBias = tileScale - vec2(gl_WorkGroupID.xy);
 
-		//// Left/Right/Bottom/Top
-		//frustumPlanes[0] = vec4(Projection[0][0] * tileScale.x, 0, tileBias.x, 0);
-		//frustumPlanes[1] = vec4(-Projection[0][0] * tileScale.x, 0, 1 - tileBias.x, 0);
-		//frustumPlanes[2] = vec4(0, Projection[1][1] * tileScale.y, tileBias.y, 0);
-		//frustumPlanes[3] = vec4(0, -Projection[1][1] * tileScale.y, 1 - tileBias.y, 0);
+		// Left/Right/Bottom/Top
+		frustumPlanes[0] = vec4(Projection[0][0] * tileScale.x, 0, tileBias.x, 0);
+		frustumPlanes[1] = vec4(-Projection[0][0] * tileScale.x, 0, 1 - tileBias.x, 0);
+		frustumPlanes[2] = vec4(0, Projection[1][1] * tileScale.y, tileBias.y, 0);
+		frustumPlanes[3] = vec4(0, -Projection[1][1] * tileScale.y, 1 - tileBias.y, 0);
 
-		//for (uint i = 0; i < 4; ++i)
-		//	frustumPlanes[i] /= length(frustumPlanes[i].xyz);
+		for (uint i = 0; i < 4; ++i)
+			frustumPlanes[i] /= length(frustumPlanes[i].xyz);
 
 		// Near/Far
 		frustumPlanes[4] = vec4(0, 0, 1, -minTileZ);
@@ -126,7 +125,7 @@ void main()
 
 		// Intersect with each frustun plane
 		bool inFrustum = true;
-		for (int i = 0; i < 4; ++i)
+		for (int i = 0; i < 6; ++i)
 		{
 			float d = dot(frustumPlanes[i], vec4(lightPosVS.xyz, 1.0));
 			inFrustum = inFrustum && (d >= -lightRange);
@@ -195,6 +194,32 @@ in vec2 oTex;
 
 layout(location = 0) out vec4 oFragColor;
 
+//--------------------------------------------------------------------------------------------
+void EvalulateAndAccumilateLight(in int lightIndex, in vec3 litPos, in vec3 N, in vec3 V, in vec3 specularAlbedo,
+								 in float shininess, inout vec3 diffuseLight, inout vec3 specularLight)
+{
+	vec4 lightPosRange = texelFetch(PointLightsPosRange, lightIndex);
+	
+	vec3 L = lightPosRange.xyz - litPos;
+	float dist = length(L);
+	if (dist < lightPosRange.w)
+	{
+		L = normalize(L);
+		
+		vec3 lightColor = texelFetch(PointLightsColor, lightIndex).xyz;
+		vec3 lightFalloff = texelFetch(PointLightsFalloff, lightIndex).xyz;
+
+		vec3 lightCombined = lightColor * saturate(dot(N,L)) * CalcAttenuation(dist, lightFalloff);
+
+		diffuseLight += lightCombined;
+
+		// Frensel in moved to calculate in shading pass
+		vec3 H = normalize(V + L);
+		vec3 fresnel = CalculateFresnel(specularAlbedo, L, H);
+		specularLight += CalculateSpecular(N, H, shininess) * fresnel * lightCombined; 
+	}
+}
+
 void main()
 {
 	Material material;
@@ -208,10 +233,11 @@ void main()
     vec3 N = normalize(oNormalWS);
 #endif          
      
-	vec3 final = vec3(0);    
-    vec3 V = normalize(CameraOrigin - oPosWS.xyz);
-	float specularNormTerm = (material.Shininess + 2.0) / 8.0;
-	  
+	vec3 V = normalize(CameraOrigin - oPosWS.xyz);
+
+	vec3 diffuseLight = vec3(0);
+	vec3 specularLight = vec3(0);
+	 
 	ivec2 tileXY = ivec2(gl_FragCoord.xy) / ivec2(WORK_GROUP_SIZE, WORK_GROUP_SIZE);
 	int tileIdx = tileXY.y * WORK_GROUP_SIZE + tileXY.x;
 
@@ -221,31 +247,15 @@ void main()
 		int lightIndex = int(tileLightRange.y) + i;
 		int globalLightIndex = int(texelFetch(LightIndexList, lightIndex).x);
 
-		vec4 lightPosRange = texelFetch(PointLightsPosRange, globalLightIndex);
-		vec3 lightPos = lightPosRange.xyz;
-		float lightRange = lightPosRange.w;
-
-		vec3 lightColor = texelFetch(PointLightsColor, globalLightIndex).xyz;
-		vec3 lightFalloff = texelFetch(PointLightsFalloff, globalLightIndex).xyz;
-		
-		if (distance(lightPos, oPosWS.xyz) > lightRange)
-			continue;
-
-		vec3 L = normalize(lightPos - oPosWS.xyz);
-		vec3 H = normalize(V + L);
-		
-		float NdotL = dot(L, N);
-		if (NdotL > 0.0)
-		{	
-			float attenuation = CalcAttenuation(lightPos, oPosWS.xyz, lightFalloff);
-			float fresnel = CalculateFresnel(material.SpecularAlbedo, L, H);
-
-			// Diffuse + Specular
-			final += (material.DiffuseAlbedo + specularNormTerm * CalculateSpecular(N, H, material.Shininess) * fresnel) * lightColor * NdotL * attenuation;
-		}
+		EvalulateAndAccumilateLight(globalLightIndex, oPosWS.xyz, N, V, material.SpecularAlbedo,
+		                            material.Shininess, diffuseLight, specularLight);
 	}
+	 
+	vec3 final = diffuseLight * material.DiffuseAlbedo;
+	
+	float specularNormTerm = (material.Shininess + 2.0) / 8.0;
+	final += specularNormTerm * specularLight;
+	final += material.DiffuseAlbedo * 0.1; // Ambient
 
-	// Ambient
-	final += material.DiffuseAlbedo * 0.1;
 	oFragColor = vec4(final, 1.0);  	         
 }

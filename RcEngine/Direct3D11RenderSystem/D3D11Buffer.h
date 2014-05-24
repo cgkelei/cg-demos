@@ -19,6 +19,11 @@ public:
 
 public:
 	ID3D11Buffer* BufferD3D11;
+
+private:
+	ID3D11Buffer* mStagingBufferD3D11;
+	ResourceMapAccess mBufferMapAccess;
+	D3D11_USAGE mBufferUsage;
 };
 
 }

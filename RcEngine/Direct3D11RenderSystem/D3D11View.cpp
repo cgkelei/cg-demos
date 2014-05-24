@@ -29,8 +29,9 @@ D3D11StructuredBufferSRV::D3D11StructuredBufferSRV( const shared_ptr<GraphicsBuf
 	desc.Buffer.ElementOffset = elementOffset;
 	desc.Buffer.ElementWidth = elementWidth;
 
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
 	ID3D11Buffer* bufferD3D11 = (static_cast<D3D11Buffer*>(buffer.get()))->BufferD3D11;
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(bufferD3D11, &desc, &ShaderResourceViewD3D11);
+	D3D11_VERRY(deviceD3D11->CreateShaderResourceView(bufferD3D11, &desc, &ShaderResourceViewD3D11) );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -45,9 +46,13 @@ D3D11TextureBufferSRV::D3D11TextureBufferSRV( const shared_ptr<GraphicsBuffer>& 
 	desc.Buffer.ElementWidth = elementWidth;
 	
 	//assert(PixelFormatUtils::GetNumElemBytes(format) * elementCount == buffer->GetBufferSize());
-
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
 	ID3D11Buffer* bufferD3D11 = (static_cast<D3D11Buffer*>(buffer.get()))->BufferD3D11;
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(bufferD3D11, &desc, &ShaderResourceViewD3D11);
+
+	D3D11_BUFFER_DESC bdesc;
+	bufferD3D11->GetDesc(&bdesc);
+
+	D3D11_VERRY(deviceD3D11->CreateShaderResourceView(bufferD3D11, &desc, &ShaderResourceViewD3D11));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -80,7 +85,8 @@ D3D11Texture1DSRV::D3D11Texture1DSRV( const shared_ptr<Texture>& texture, uint32
 		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1DARRAY;
 	}
 
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
+	D3D11_VERRY( deviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11) );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -129,7 +135,8 @@ D3D11Texture2DSRV::D3D11Texture2DSRV( const shared_ptr<Texture>& texture, uint32
 		}
 	}
 
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
+	D3D11_VERRY( deviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11) );
 }
 
 D3D11Texture2DSRV::D3D11Texture2DSRV( ID3D11ShaderResourceView* srvD3D11 )
@@ -151,8 +158,9 @@ D3D11Texture3DSRV::D3D11Texture3DSRV( const shared_ptr<Texture>& texture, uint32
 	viewDesc.Texture3D.MipLevels = mipLevels;
 	viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
 
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
 	D3D11Texture3D* textureD3D11 = static_cast_checked<D3D11Texture3D*>(texture.get());
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
+	D3D11_VERRY( deviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11) );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -185,11 +193,8 @@ D3D11TextureCubeSRV::D3D11TextureCubeSRV( const shared_ptr<Texture>& texture, ui
 		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBEARRAY;
 	}
 	
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11);
-	if (FAILED(hr))
-	{
-		// Error
-	}
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
+	D3D11_VERRY( deviceD3D11->CreateShaderResourceView(textureD3D11->TextureD3D11, &viewDesc, &ShaderResourceViewD3D11) );
 }
 
 D3D11TextureCubeSRV::D3D11TextureCubeSRV( ID3D11ShaderResourceView* srvD3D11 )
@@ -376,8 +381,9 @@ D3D11TextureBufferUAV::D3D11TextureBufferUAV( const shared_ptr<GraphicsBuffer>& 
 	//desc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_RAW ;
 	//desc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_APPEND;
 
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
 	ID3D11Buffer* bufferD3D11 = (static_cast<D3D11Buffer*>(buffer.get()))->BufferD3D11;
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateUnorderedAccessView(bufferD3D11, &desc, &UnorderedAccessViewD3D11);
+	D3D11_VERRY( deviceD3D11->CreateUnorderedAccessView(bufferD3D11, &desc, &UnorderedAccessViewD3D11) );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -397,8 +403,9 @@ D3D11StructuredBufferUAV::D3D11StructuredBufferUAV( const shared_ptr<GraphicsBuf
 	//desc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_RAW ;
 	//desc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_APPEND;
 
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
 	ID3D11Buffer* bufferD3D11 = (static_cast<D3D11Buffer*>(buffer.get()))->BufferD3D11;
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateUnorderedAccessView(bufferD3D11, &desc, &UnorderedAccessViewD3D11);
+	D3D11_VERRY( deviceD3D11->CreateUnorderedAccessView(bufferD3D11, &desc, &UnorderedAccessViewD3D11) );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -446,7 +453,8 @@ D3D11Texture1DUAV::D3D11Texture1DUAV( const shared_ptr<Texture>& texture, uint32
 		viewDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE1DARRAY;
 	}
 
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateUnorderedAccessView(textureD3D11->TextureD3D11, &viewDesc, &UnorderedAccessViewD3D11);
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
+	D3D11_VERRY( deviceD3D11->CreateUnorderedAccessView(textureD3D11->TextureD3D11, &viewDesc, &UnorderedAccessViewD3D11) );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -476,7 +484,8 @@ D3D11Texture2DUAV::D3D11Texture2DUAV( const shared_ptr<Texture>& texture, uint32
 		viewDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
 	}
 
-	HRESULT hr = gD3D11Device->DeviceD3D11->CreateUnorderedAccessView(textureD3D11->TextureD3D11, &viewDesc, &UnorderedAccessViewD3D11);
+	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
+	D3D11_VERRY( deviceD3D11->CreateUnorderedAccessView(textureD3D11->TextureD3D11, &viewDesc, &UnorderedAccessViewD3D11) );
 }
 
 //////////////////////////////////////////////////////////////////////////

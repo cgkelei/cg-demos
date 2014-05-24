@@ -7,6 +7,7 @@
 #include <Core/Exception.h>
 #include <Core/Profiler.h>
 #include <Graphics/Image.h>
+#include <IO/PathUtil.h>
 
 namespace RcEngine {
 
@@ -250,16 +251,38 @@ shared_ptr<Texture> RenderFactory::LoadTextureFromFile( const String& filename )
 
 void RenderFactory::SaveTextureToFile( const String& filename, const shared_ptr<Texture>& texture )
 {
+	String path, name, ext;
+	PathUtil::SplitPath(filename, path, name, ext);
+	if (Application::msApp->GetAppSettings().RHDeviceType == RD_Direct3D11)
+	{
+		name = path + name + "D3D" + ext;
+	}
+	else
+	{
+		name = path + name + "OGL" + ext;
+	}
+
 	Image img;
 	img.CopyImageFromTexture(texture);
-	img.SaveImageToFile(filename);
+	img.SaveImageToFile(name);
 }
 
 void RenderFactory::SaveLinearDepthTextureToFile( const String& filename, const shared_ptr<Texture>& texture, float projM33, float projM43 )
 {
+	String path, name, ext;
+	PathUtil::SplitPath(filename, path, name, ext);
+	if (Application::msApp->GetAppSettings().RHDeviceType == RD_Direct3D11)
+	{
+		name = path + name + "D3D" + ext;
+	}
+	else
+	{
+		name = path + name + "OGL" + ext;
+	}
+
 	Image img;
 	img.CopyImageFromTexture(texture);
-	img.SaveLinearDepthToFile(filename, projM33, projM43);
+	img.SaveLinearDepthToFile(name, projM33, projM43);
 }
 
 
