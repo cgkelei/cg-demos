@@ -386,7 +386,7 @@ void Effect::LoadImpl()
 			bool hasComputeShader = false;
 
 			// Load shader 
-			static const String ShaderNodeNames[] = {"VertexShader", "HullShader", "DomainShader", "GeometryShader", "PixelShader", "ComputeShader"};
+			static const String ShaderNodeNames[] = {"VertexShader", "TessControlShader", "TessEvalShader", "GeometryShader", "PixelShader", "ComputeShader"};
 			for (uint32_t i = 0; i < ST_Count; ++i)
 			{
 				if (shaderNode = passNode->FirstNode(ShaderNodeNames[i]))

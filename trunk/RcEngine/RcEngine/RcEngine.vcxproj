@@ -163,6 +163,7 @@
     <None Include="..\Media\Effect\GLSL\ModelVertexFactory.glsl" />
     <None Include="..\Media\Effect\GLSL\Model.glsl" />
     <None Include="..\Media\Effect\GLSL\ShadowMapGen.glsl" />
+    <None Include="..\Media\Effect\GLSL\Tessellation.glsl" />
     <None Include="..\Media\Effect\GLSL\TiledDeferredShading.glsl" />
     <None Include="..\Media\Effect\GLSL\ToneMap.glsl" />
     <None Include="Math\BoundingBox.inl" />
@@ -254,6 +255,7 @@
     <Xml Include="..\Media\Effect\DeferredLighting.effect.xml">
       <SubType>Designer</SubType>
     </Xml>
+    <Xml Include="..\Media\Effect\Tessellation.effect.xml" />
     <Xml Include="..\Media\Effect\TiledLightCull.effect.xml" />
     <Xml Include="..\Media\Effect\FSQuad.effect.xml" />
     <Xml Include="..\Media\Effect\HDRToneMap.effect.xml" />
