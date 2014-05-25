@@ -532,6 +532,9 @@
     <None Include="..\Media\Effect\GLSL\ForwardPlus.glsl">
       <Filter>Asset\GLSL</Filter>
     </None>
+    <None Include="..\Media\Effect\GLSL\Tessellation.glsl">
+      <Filter>Asset\GLSL</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Media\Effect\HLSL\Model.hlsl">
@@ -615,6 +618,9 @@
       <Filter>Asset\Effect</Filter>
     </Xml>
     <Xml Include="..\Media\Effect\TiledLightCull.effect.xml">
+      <Filter>Asset\Effect</Filter>
+    </Xml>
+    <Xml Include="..\Media\Effect\Tessellation.effect.xml">
       <Filter>Asset\Effect</Filter>
     </Xml>
   </ItemGroup>

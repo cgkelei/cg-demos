@@ -1,0 +1,11 @@
+<Effect name="Tessellation">
+
+  <Technique name="SphereTess">
+    <Pass name="p0">
+      <VertexShader file="Tessellation" entry="VSMain"/>
+      <TessControlShader file="Tessellation" entry="TCMain"/>
+      <TessEvalShader file="Tessellation" entry="TEMain"/>
+    </Pass>
+  </Technique>
+
+</Effect>
