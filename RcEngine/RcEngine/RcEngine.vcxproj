@@ -166,6 +166,7 @@
     <None Include="..\Media\Effect\GLSL\ShadowMapGen.glsl" />
     <None Include="..\Media\Effect\GLSL\Tessellation.glsl" />
     <None Include="..\Media\Effect\GLSL\TessQuad.glsl" />
+    <None Include="..\Media\Effect\GLSL\TessTeapot.glsl" />
     <None Include="..\Media\Effect\GLSL\TiledDeferredShading.glsl" />
     <None Include="..\Media\Effect\GLSL\ToneMap.glsl" />
     <None Include="Math\BoundingBox.inl" />

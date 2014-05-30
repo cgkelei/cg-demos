@@ -19,4 +19,15 @@
     </Pass>
   </Technique>
 
+  <Technique name="TessTeapot">
+    <Pass name="p0">
+      <VertexShader file="TessTeapot" entry="PassThroughVS"/>
+      <TessControlShader file="TessTeapot" entry="TCSTeapot"/>
+      <TessEvalShader file="TessTeapot" entry="TESTeapot"/>
+      <PixelShader file="TessTeapot" entry="PSTeapot"/>
+      <State name="FillMode" value="WireFrame"/>
+	  <State name="CullMode" value="None"/>
+    </Pass>
+  </Technique>
+
 </Effect>
