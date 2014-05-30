@@ -1,5 +1,7 @@
 [[Vertex=PassThroughVS]]
 
+uniform mat4 World;
+
 layout (location = 0) in vec3 iControlPoint;
 
 out gl_PerVertex { 
@@ -8,7 +10,7 @@ out gl_PerVertex {
 
 void main()
 {
-	gl_Position = vec4(iControlPoint, 1.0);
+	gl_Position = vec4(iControlPoint, 1.0) * World;
 }
 
 [[TessControl=TCSTeapot]]
@@ -44,15 +46,14 @@ void main()
 
 layout( quads, equal_spacing, cw ) in;
 
-uniform mat4 World;
-uniform mat3 ViewProj;
+uniform mat4 ViewProj;
 
 in gl_PerVertex { 
 	vec4 gl_Position; 
 } gl_in[];
 
 // Output
-layout (location = 0) out vec3 oPosWS;
+layout (location = 0) out vec4 oPosWS;
 layout (location = 1) out vec2 oTex;
 layout (location = 2) out vec3 oNormalWS;
 
@@ -79,32 +80,45 @@ void Bernstein(out float[4] b, out float[4] db, float t)
 	db[3] = 3.0 * t * t;
 }
 
-#define CP(i, j) gl_in[i*4+j].gl_Position
-
 void main()
 {
 	float bu[4], bv[4], dbu[4], dbv[4];
 	Bernstein(bu, dbu, gl_TessCoord.x);
 	Bernstein(bv, dbv, gl_TessCoord.y);
 
-	vec4 p = vec4(0);
+	oPosWS = vec4(0);
 	vec4 du = vec4(0);
 	vec4 dv = vec4(0);
 
 	for (int i = 0; i < 4; ++i)
 		for (int j = 0; j < 4; ++j)
 		{
-			p += bu[i]*bv[j]*gl_in[i*4+j].gl_Position;
-			du += bu[i]*bv[j]*gl_in[i*4+j].gl_Position;
-			dv += bu[i]*bv[j]*gl_in[i*4+j].gl_Position;
+			oPosWS += bu[i]*bv[j]*gl_in[i*4+j].gl_Position;
+
+			du += dbu[i]*bv[j]*gl_in[i*4+j].gl_Position;
+			dv += bu[i]*dbv[j]*gl_in[i*4+j].gl_Position;
 		}
-    vec4 du = CP(0,0)*dbu[0]*bv[0] + CP(01*dbu[0]*bv[1] + CP(02*dbu[0]*bv[2] + CP(03*dbu[0]*bv[3] +
-			  CP(1,0)*dbu[1]*bv[0] + CP(11*dbu[1]*bv[1] + CP(12*dbu[1]*bv[2] + CP(13*dbu[1]*bv[3] +
-			  CP(2,0)*dbu[2]*bv[0] + CP(21*dbu[2]*bv[1] + CP(22*dbu[2]*bv[2] + CP(23*dbu[2]*bv[3] +
-			  CP(3,0)*dbu[3]*bv[0] + CP(31*dbu[3]*bv[1] + CP(32*dbu[3]*bv[2] + CP(33*dbu[3]*bv[3];
-	
-	vec4 dv = CP(0,0)*bu[0]*dbv[0] + CP(01*bu[0]*dbv[1] + CP(02*bu[0]*dbv[2] + CP(03*bu[0]*dbv[3] +
-			  CP(1,0)*bu[1]*dbv[0] + CP(11*bu[1]*dbv[1] + CP(12*bu[1]*dbv[2] + CP(13*bu[1]*dbv[3] +
-			  CP(2,0)*bu[2]*dbv[0] + CP(21*bu[2]*dbv[1] + CP(22*bu[2]*dbv[2] + CP(23*bu[2]*dbv[3] +
-			  CP(3,0)*bu[3]*dbv[0] + CP(31*bu[3]*dbv[1] + CP(32*bu[3]*dbv[2] + CP(33*bu[3]*dbv[3];
+
+	gl_Position = oPosWS * ViewProj;
+	oNormalWS  = cross(du.xyz, dv.xyz);
+}
+
+[[Fragment=PSTeapot]]
+
+layout (location = 0) in vec3 iPosWS;
+layout (location = 1) in vec2 iTex;
+layout (location = 2) in vec3 iNormalWS;
+
+const vec3 LightPos = vec3(100, 100, 100);
+
+layout (location = 2) out vec4 oFragColor;
+
+void main()
+{
+	vec3 L = normalize(LightPos - iPosWS);
+	vec3 N = normalize(iNormalWS);
+
+	oFragColor = vec4(1.0, 0, 0, 1.0);
+
+	//oFragColor = vec4(1.0, 0, 0, 1.0) * max(dot(N, L), 0.0);
 }
