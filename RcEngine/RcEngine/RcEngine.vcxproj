@@ -150,6 +150,7 @@
     <ClCompile Include="Scene\SubEntity.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Media\Effect\GLSL\BezierCurve.glsl" />
     <None Include="..\Media\Effect\GLSL\DebugView.glsl" />
     <None Include="..\Media\Effect\GLSL\DeferredLighting.glsl" />
     <None Include="..\Media\Effect\GLSL\DeferredUtil.glsl" />
@@ -164,6 +165,7 @@
     <None Include="..\Media\Effect\GLSL\Model.glsl" />
     <None Include="..\Media\Effect\GLSL\ShadowMapGen.glsl" />
     <None Include="..\Media\Effect\GLSL\Tessellation.glsl" />
+    <None Include="..\Media\Effect\GLSL\TessQuad.glsl" />
     <None Include="..\Media\Effect\GLSL\TiledDeferredShading.glsl" />
     <None Include="..\Media\Effect\GLSL\ToneMap.glsl" />
     <None Include="Math\BoundingBox.inl" />

@@ -419,15 +419,20 @@ void D3D11ShaderPipeline::AddGlobalUniformBind( EffectConstantBuffer* cbuffer, E
 
 	switch(effectParam->GetParameterType())
 	{
-	case EPT_Boolean:	{ Add_ShaderParam_Commit(bool, cbuffer, effectParam, offset) } break;
+	case EPT_Boolean:	
+		{
+			assert(arrSize <= 1);
+			mParameterBinds.push_back( ShaderParameterCommit<bool>(cbuffer, effectParam, offset) ); 
+		}
+		break;
 	case EPT_Int:		{ Add_ShaderParam_Commit(int, cbuffer, effectParam, offset) } break;
-		//case EPT_Int2:		{ Add_ShaderParam_Commit(int2, shader, effectParam, offset) } break;
-		//case EPT_Int3:		{ Add_ShaderParam_Commit(int3, shader, effectParam, offset) } break;
-		//case EPT_Int4:		{ Add_ShaderParam_Commit(int4, shader, effectParam, offset) } break;
-		//case EPT_UInt:		{ Add_ShaderParam_Commit(uint32_t, shader, effectParam, offset) } break;
-		//case EPT_UInt2:		{ Add_ShaderParam_Commit(uint2, shader, effectParam, offset) } break;
-		//case EPT_UInt3:		{ Add_ShaderParam_Commit(uint3, shader, effectParam, offset) } break;
-		//case EPT_UInt4:		{ Add_ShaderParam_Commit(uint4, shader, effectParam, offset) } break;
+	case EPT_Int2:		{ Add_ShaderParam_Commit(int2, cbuffer, effectParam, offset) } break;
+	case EPT_Int3:		{ Add_ShaderParam_Commit(int3, cbuffer, effectParam, offset) } break;
+	case EPT_Int4:		{ Add_ShaderParam_Commit(int4, cbuffer, effectParam, offset) } break;
+	case EPT_UInt:		{ Add_ShaderParam_Commit(uint32_t, cbuffer, effectParam, offset) } break;
+	case EPT_UInt2:		{ Add_ShaderParam_Commit(uint2, cbuffer, effectParam, offset) } break;
+	case EPT_UInt3:		{ Add_ShaderParam_Commit(uint3, cbuffer, effectParam, offset) } break;
+	case EPT_UInt4:		{ Add_ShaderParam_Commit(uint4, cbuffer, effectParam, offset) } break;
 	case EPT_Float:		{ Add_ShaderParam_Commit(float, cbuffer, effectParam, offset) } break;
 	case EPT_Float2:	{ Add_ShaderParam_Commit(float2, cbuffer, effectParam, offset) } break;
 	case EPT_Float3:	{ Add_ShaderParam_Commit(float3, cbuffer, effectParam, offset) } break;

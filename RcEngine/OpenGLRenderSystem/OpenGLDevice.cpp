@@ -491,7 +491,7 @@ void OpenGLDevice::DoDraw( const EffectTechnique* technique, const RenderOperati
 	if (primitiveTypeOGL == GL_PATCHES)
 	{
 		assert(PT_Patch_Control_Point_1 <= operation.PrimitiveType && operation.PrimitiveType <= PT_Patch_Control_Point_32);
-		GLint numControlPoints = operation.PrimitiveType - PT_Patch_Control_Point_1;
+		GLint numControlPoints = operation.PrimitiveType - PT_Patch_Control_Point_1 + 1;
 		glPatchParameteri(GL_PATCH_VERTICES, numControlPoints);
 	}
 

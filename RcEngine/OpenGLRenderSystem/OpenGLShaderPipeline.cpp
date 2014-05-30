@@ -9,14 +9,49 @@
 
 namespace RcEngine {
 
-template <typename T>
-struct ShaderParameterSetHelper {};
-
-template<>
-struct ShaderParameterSetHelper<bool>
+struct glProgramUniform
 {
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param)
+	inline static void Commit(GLuint shader, GLint loc, bool v)				{ glProgramUniform1i(shader, loc, v); }
+					   
+	inline static void Commit(GLuint shader, GLint loc,     int32_t v)		{ glProgramUniform1i(shader, loc, v); }
+	inline static void Commit(GLuint shader, GLint loc, const int2& v)		{ glProgramUniform2iv(shader, loc, 1, v()); }
+	inline static void Commit(GLuint shader, GLint loc, const int3& v)		{ glProgramUniform3iv(shader, loc, 1, v()); }
+	inline static void Commit(GLuint shader, GLint loc, const int4& v)		{ glProgramUniform4iv(shader, loc, 1, v()); }
+	 				   
+	inline static void Commit(GLuint shader, GLint loc, uint32_t v)			{ glProgramUniform1ui(shader, loc, v); }
+	inline static void Commit(GLuint shader, GLint loc, const uint2& v)		{ glProgramUniform2uiv(shader, loc, 1, v()); }
+	inline static void Commit(GLuint shader, GLint loc, const uint3& v)		{ glProgramUniform3uiv(shader, loc, 1, v()); }
+	inline static void Commit(GLuint shader, GLint loc, const uint4& v)		{ glProgramUniform4uiv(shader, loc, 1, v()); }
+	 				   
+	inline static void Commit(GLuint shader, GLint loc, float v)			{ glProgramUniform1f(shader, loc, v); }
+	inline static void Commit(GLuint shader, GLint loc, const float2& v)	{ glProgramUniform2fv(shader, loc, 1, v()); }
+	inline static void Commit(GLuint shader, GLint loc, const float3& v)	{ glProgramUniform3fv(shader, loc, 1, v()); }
+	inline static void Commit(GLuint shader, GLint loc, const float4& v)	{ glProgramUniform4fv(shader, loc, 1, v()); }
+
+	inline static void Commit(GLuint shader, GLint loc, const float4x4& v)	{ glProgramUniformMatrix4fv(shader, loc, 1, true, v()); }
+
+	// Array
+	inline static void Commit(GLuint shader, GLint loc, GLsizei count, int32_t* v)		  { glProgramUniform1iv(shader, loc, count, v); }
+	inline static void Commit(GLuint shader, GLint loc, GLsizei count, const int2* v)	  { glProgramUniform2iv(shader, loc, count, (const int32_t*)v); }
+	inline static void Commit(GLuint shader, GLint loc, GLsizei count, const int3* v)	  { glProgramUniform3iv(shader, loc, count, (const int32_t*)v); }
+	inline static void Commit(GLuint shader, GLint loc, GLsizei count, const int4* v)	  { glProgramUniform4iv(shader, loc, count, (const int32_t*)v); }
+
+	inline static void Commit(GLuint shader, GLint loc, GLsizei count, uint32_t* v)		  { glProgramUniform1uiv(shader, loc, count, v); }
+	inline static void Commit(GLuint shader, GLint loc, GLsizei count, const uint2* v)	  { glProgramUniform2uiv(shader, loc, count, (const uint32_t*)v); }
+	inline static void Commit(GLuint shader, GLint loc, GLsizei count, const uint3* v)	  { glProgramUniform3uiv(shader, loc, count, (const uint32_t*)v); }
+	inline static void Commit(GLuint shader, GLint loc, GLsizei count, const uint4* v)	  { glProgramUniform4uiv(shader, loc, count, (const uint32_t*)v); }
+												 		
+	inline static void Commit(GLuint shader, GLint loc, GLsizei count, float* v)		  { glProgramUniform1fv(shader, loc, count, v); }
+	inline static void Commit(GLuint shader, GLint loc, GLsizei count, const float2* v)	  { glProgramUniform2fv(shader, loc, count, (const float*)v); }
+	inline static void Commit(GLuint shader, GLint loc, GLsizei count, const float3* v)	  { glProgramUniform3fv(shader, loc, count, (const float*)v); }
+	inline static void Commit(GLuint shader, GLint loc, GLsizei count, const float4* v)	  { glProgramUniform4fv(shader, loc, count, (const float*)v); }
+	inline static void Commit(GLuint shader, GLint loc, GLsizei count, const float4x4* v) { glProgramUniformMatrix4fv(shader, loc, count, true, (const float*)(v)); }
+};
+
+template <typename T>
+struct ShaderParameterCommit
+{
+	ShaderParameterCommit(GLuint shaderID, GLint location, EffectParameter* param)
 		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0) {}
 
 	void operator() ()
@@ -25,67 +60,8 @@ public:
 		{
 			UpdateTimeStamp = Param->GetTimeStamp();
 
-			bool value;  Param->GetValue(value);
-			glProgramUniform1i(ShaderOGL, Location, value);
-		} 
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template<>
-struct ShaderParameterSetHelper<bool*>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param, GLsizei count)
-		: ShaderOGL(shaderID), Location(Location), Param(param), UpdateTimeStamp(0), Count(count) {}
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			UpdateTimeStamp = Param->GetTimeStamp();
-
-			assert(Param->GetElementSize() == Count);
-
-			bool* pValue;
-			Param->GetValue(pValue);
-
-			vector<GLint> temp(Count);
-			for (GLsizei i = 0; i < Count; ++i)
-				temp[i] = pValue[i];
-
-			glProgramUniform1iv(ShaderOGL, Location, Count, &temp[0]);
-		} 
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	GLsizei Count;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<int32_t>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0)  { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			UpdateTimeStamp = Param->GetTimeStamp();
-
-			int32_t value;  Param->GetValue(value);
-			glProgramUniform1i(ShaderOGL, Location, value);
+			T value;  Param->GetValue(value);
+			glProgramUniform::Commit(ShaderOGL, Location, value);
 		}
 	}
 
@@ -96,293 +72,24 @@ private:
 	EffectParameter* Param;
 };
 
-template <>
-struct ShaderParameterSetHelper<int32_t*>
+template <typename T>
+struct ShaderParameterArrayCommit
 {
 public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param, GLsizei count)
+	ShaderParameterArrayCommit(GLuint shaderID, GLint location, EffectParameter* param, GLsizei count)
 		: ShaderOGL(shaderID), Location(location), Param(param), Count(count), UpdateTimeStamp(0) { }
 
 	void operator() ()
 	{
 		if (Param->GetTimeStamp() != UpdateTimeStamp)
 		{
-			int32_t* pValue;
+			T pValue;
 			Param->GetValue(pValue);
 
 			assert(Count == Param->GetElementSize());
-			glProgramUniform1iv(ShaderOGL, Location, Count, pValue);
+			glProgramUniform::Commit(ShaderOGL, Location, Count, pValue);
 
 			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	GLsizei Count;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float value; Param->GetValue(value);
-			glProgramUniform1f(ShaderOGL, Location, value);
-
-			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float*>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param, GLsizei count)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0), Count(count) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float* pValue;
-			Param->GetValue(pValue);
-
-			assert(Count == Param->GetElementSize());
-			glProgramUniform1fv(ShaderOGL, Location, Count, pValue);
-
-			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	GLsizei Count;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float2>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float2 value; Param->GetValue(value);
-			glProgramUniform2f(ShaderOGL, Location, value.X(), value.Y());
-
-			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float2*>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param, GLsizei count)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0), Count(count) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float2* pValue;
-			Param->GetValue(pValue);
-
-			assert(Count == Param->GetElementSize());
-			glProgramUniform2fv(ShaderOGL, Location, Count,  reinterpret_cast<float*>(pValue));
-
-			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	GLsizei Count;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float3>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float3 value; Param->GetValue(value);
-			glProgramUniform3f(ShaderOGL, Location, value[0], value[1], value[2]);
-
-			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float3*>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param, GLsizei count)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0), Count(count) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float3* pValue;
-			Param->GetValue(pValue);
-
-			assert(Count == Param->GetElementSize());
-			glProgramUniform3fv(ShaderOGL, Location, Count,  reinterpret_cast<float*>(pValue));
-
-			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	GLsizei Count;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float4>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float4 value; Param->GetValue(value);
-			glProgramUniform4f(ShaderOGL, Location, value[0], value[1], value[2], value[3]);
-
-			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float4*>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param, GLsizei count)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0), Count(count) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float4* pValue;
-			Param->GetValue(pValue);
-
-			assert(Count == Param->GetElementSize());
-			glProgramUniform4fv(ShaderOGL, Location, Count,  reinterpret_cast<float*>(pValue));
-
-			UpdateTimeStamp = Param->GetTimeStamp();
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	GLsizei Count;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float4x4>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float4x4 value; 
-			Param->GetValue(value);
-
-			// we know that glsl matrix is column major, so we need transpose out matrix.
-			glProgramUniformMatrix4fv(ShaderOGL, Location, 1, true, &value[0]);
-		}
-	}
-
-private:
-	GLuint ShaderOGL;
-	GLint Location;
-	TimeStamp UpdateTimeStamp;
-	EffectParameter* Param;
-};
-
-template <>
-struct ShaderParameterSetHelper<float4x4*>
-{
-public:
-	ShaderParameterSetHelper(GLuint shaderID, GLint location, EffectParameter* param, GLsizei count)
-		: ShaderOGL(shaderID), Location(location), Param(param), UpdateTimeStamp(0), Count(count) { }
-
-	void operator() ()
-	{
-		if (Param->GetTimeStamp() != UpdateTimeStamp)
-		{
-			float4x4* pValue;
-			Param->GetValue(pValue);
-
-			assert(Count == Param->GetElementSize());
-			glProgramUniformMatrix4fv(ShaderOGL, Location, Count, true, reinterpret_cast<float*>(pValue));
 		}
 	}
 
@@ -395,10 +102,10 @@ private:
 };
 
 template<>
-struct ShaderParameterSetHelper< EffectConstantBuffer >
+struct ShaderParameterCommit< EffectConstantBuffer >
 {
 public:
-	ShaderParameterSetHelper(EffectConstantBuffer* param, GLuint bindingSlot)
+	ShaderParameterCommit(EffectConstantBuffer* param, GLuint bindingSlot)
 		: BindingSlot(bindingSlot), UniformBlock(param) { }
 
 	void operator() ()
@@ -416,9 +123,9 @@ private:
 };
 
 template<>
-struct ShaderParameterSetHelper<ShaderResourceView>
+struct ShaderParameterCommit<ShaderResourceView>
 {
-	ShaderParameterSetHelper(EffectParameter* param, GLuint binding)
+	ShaderParameterCommit(EffectParameter* param, GLuint binding)
 		: Param(param), Binding(binding) {}
 
 	void operator() ()
@@ -443,9 +150,9 @@ private:
 };
 
 template<>
-struct ShaderParameterSetHelper<UnorderedAccessView>
+struct ShaderParameterCommit<UnorderedAccessView>
 {
-	ShaderParameterSetHelper(EffectParameter* param, GLuint binding)
+	ShaderParameterCommit(EffectParameter* param, GLuint binding)
 		: Param(param), Binding(binding) {}
 
 	void operator() ()
@@ -470,9 +177,9 @@ private:
 };
 
 template<>
-struct ShaderParameterSetHelper<SamplerState>
+struct ShaderParameterCommit<SamplerState>
 {
-	ShaderParameterSetHelper(EffectParameter* param, GLuint binding)
+	ShaderParameterCommit(EffectParameter* param, GLuint binding)
 		: Param(param), Binding(binding) {}
 
 	void operator() ()
@@ -523,38 +230,6 @@ private:
 	GLuint Binding;
 	GLuint Location;
 };
-
-//struct ShaderTextureBinding
-//{
-//	ShaderTextureBinding(GLuint shaderID, GLint location, GLuint binding)
-//		: ShaderOGL(shaderID), Location(location), Binding(binding) {}
-//
-//	void operator() ()
-//	{
-//		glProgramUniform1i(ShaderOGL, Location, Binding);
-//	}
-//
-//private:
-//	GLuint ShaderOGL;
-//	GLuint Binding;
-//	GLuint Location;
-//};
-//
-//struct ShaderStorageBinding
-//{
-//	ShaderStorageBinding(GLuint shaderID, GLint location, GLuint binding)
-//		: ShaderOGL(shaderID), Location(location), Binding(binding) {}
-//
-//	void operator() ()
-//	{
-//		
-//	}
-//
-//private:
-//	GLuint ShaderOGL;
-//	GLuint Binding;
-//	GLuint Location;
-//};
 
 //////////////////////////////////////////////////////////////////////////
 OpenGLShaderPipeline::OpenGLShaderPipeline(Effect& effect)
@@ -682,7 +357,7 @@ bool OpenGLShaderPipeline::LinkPipeline()
 			for (auto& kv : shaderOGL->mSamplerStates)
 			{
 				EffectParameter* effectParam = mEffect.FetchSamplerParameter(kv.second);
-				mParameterBinds.push_back( ShaderParameterSetHelper<SamplerState>(effectParam, mBindingCache[kv.first]) );
+				mParameterBinds.push_back( ShaderParameterCommit<SamplerState>(effectParam, mBindingCache[kv.first]) );
 			}
 		}
 	}
@@ -733,58 +408,112 @@ void OpenGLShaderPipeline::AddUniformParamBind( GLuint shader, GLint location, E
 	{
 	case EPT_Boolean:
 		{
-			if (arrSize > 1)
-				mParameterBinds.push_back( ShaderParameterSetHelper<bool*>(shader, location, effectParam, arrSize) );
-			else 
-				mParameterBinds.push_back( ShaderParameterSetHelper<bool>(shader, location, effectParam) );
+			assert(arrSize <= 1);
+			mParameterBinds.push_back( ShaderParameterCommit<bool>(shader, location, effectParam) );
 		}
 		break;
 	case EPT_Int:
 		{
 			if (arrSize > 1)
-				mParameterBinds.push_back( ShaderParameterSetHelper<int32_t*>(shader, location, effectParam, arrSize) );
+				mParameterBinds.push_back( ShaderParameterArrayCommit<int32_t*>(shader, location, effectParam, arrSize) );
 			else 
-				mParameterBinds.push_back( ShaderParameterSetHelper<int32_t>(shader, location, effectParam) );
+				mParameterBinds.push_back( ShaderParameterCommit<int32_t>(shader, location, effectParam) );
+		}
+		break;
+	case EPT_Int2:
+		{
+			if (arrSize > 1)
+				mParameterBinds.push_back( ShaderParameterArrayCommit<int2*>(shader, location, effectParam, arrSize) );
+			else 
+				mParameterBinds.push_back( ShaderParameterCommit<int2>(shader, location, effectParam) );
+		}
+		break;
+	case EPT_Int3:
+		{
+			if (arrSize > 1)
+				mParameterBinds.push_back( ShaderParameterArrayCommit<int3*>(shader, location, effectParam, arrSize) );
+			else 
+				mParameterBinds.push_back( ShaderParameterCommit<int3>(shader, location, effectParam) );
+		}
+		break;
+	case EPT_Int4:
+		{
+			if (arrSize > 1)
+				mParameterBinds.push_back( ShaderParameterArrayCommit<int4*>(shader, location, effectParam, arrSize) );
+			else 
+				mParameterBinds.push_back( ShaderParameterCommit<int4>(shader, location, effectParam) );
+		}
+		break;
+	case EPT_UInt:
+		{
+			if (arrSize > 1)
+				mParameterBinds.push_back( ShaderParameterArrayCommit<uint32_t*>(shader, location, effectParam, arrSize) );
+			else 
+				mParameterBinds.push_back( ShaderParameterCommit<uint32_t>(shader, location, effectParam) );
+		}
+		break;
+	case EPT_UInt2:
+		{
+			if (arrSize > 1)
+				mParameterBinds.push_back( ShaderParameterArrayCommit<uint2*>(shader, location, effectParam, arrSize) );
+			else 
+				mParameterBinds.push_back( ShaderParameterCommit<uint2>(shader, location, effectParam) );
+		}
+		break;
+	case EPT_UInt3:
+		{
+			if (arrSize > 1)
+				mParameterBinds.push_back( ShaderParameterArrayCommit<uint3*>(shader, location, effectParam, arrSize) );
+			else 
+				mParameterBinds.push_back( ShaderParameterCommit<uint3>(shader, location, effectParam) );
+		}
+		break;
+	case EPT_UInt4:
+		{
+			if (arrSize > 1)
+				mParameterBinds.push_back( ShaderParameterArrayCommit<uint4*>(shader, location, effectParam, arrSize) );
+			else 
+				mParameterBinds.push_back( ShaderParameterCommit<uint4>(shader, location, effectParam) );
 		}
 		break;
 	case EPT_Float:
 		{
 			if (arrSize > 1)
-				mParameterBinds.push_back( ShaderParameterSetHelper<float*>(shader, location, effectParam, arrSize) );
+				mParameterBinds.push_back( ShaderParameterArrayCommit<float*>(shader, location, effectParam, arrSize) );
 			else 
-				mParameterBinds.push_back( ShaderParameterSetHelper<float>(shader, location, effectParam) );
+				mParameterBinds.push_back( ShaderParameterCommit<float>(shader, location, effectParam) );
 		}
 		break;
 	case EPT_Float2:
 		{
 			if (arrSize > 1)
-				mParameterBinds.push_back( ShaderParameterSetHelper<float2*>(shader, location, effectParam, arrSize) );
+				mParameterBinds.push_back( ShaderParameterArrayCommit<float2*>(shader, location, effectParam, arrSize) );
 			else 
-				mParameterBinds.push_back( ShaderParameterSetHelper<float2>(shader, location, effectParam) );	
+				mParameterBinds.push_back( ShaderParameterCommit<float2>(shader, location, effectParam) );	
 		}
 		break;
 	case EPT_Float3:
 		{
 			if (arrSize > 1)
-				mParameterBinds.push_back( ShaderParameterSetHelper<float3*>(shader, location, effectParam, arrSize) );
+				mParameterBinds.push_back( ShaderParameterArrayCommit<float3*>(shader, location, effectParam, arrSize) );
 			else 
-				mParameterBinds.push_back( ShaderParameterSetHelper<float3>(shader, location, effectParam) );	
+				mParameterBinds.push_back( ShaderParameterCommit<float3>(shader, location, effectParam) );	
 		}
 		break;
 	case EPT_Float4:
 		{
 			if (arrSize > 1)
-				mParameterBinds.push_back( ShaderParameterSetHelper<float4*>(shader, location, effectParam, arrSize) );
+				mParameterBinds.push_back( ShaderParameterArrayCommit<float4*>(shader, location, effectParam, arrSize) );
 			else 
-				mParameterBinds.push_back( ShaderParameterSetHelper<float4>(shader, location, effectParam) );		
+				mParameterBinds.push_back( ShaderParameterCommit<float4>(shader, location, effectParam) );		
 		}
 		break;
 	case EPT_Matrix4x4:
 		{
 			if (arrSize > 1)
-				mParameterBinds.push_back( ShaderParameterSetHelper<float4x4*>(shader, location, effectParam, arrSize) );
+				mParameterBinds.push_back( ShaderParameterArrayCommit<float4x4*>(shader, location, effectParam, arrSize) );
 			else 
-				mParameterBinds.push_back( ShaderParameterSetHelper<float4x4>(shader, location, effectParam) );		
+				mParameterBinds.push_back( ShaderParameterCommit<float4x4>(shader, location, effectParam) );		
 		}
 		break;
 	default:
@@ -794,17 +523,17 @@ void OpenGLShaderPipeline::AddUniformParamBind( GLuint shader, GLint location, E
 
 void OpenGLShaderPipeline::AddUnitformBlockBind( EffectConstantBuffer* effectCBuffer, GLuint binding )
 {
-	mParameterBinds.push_back(ShaderParameterSetHelper<EffectConstantBuffer>(effectCBuffer, binding));
+	mParameterBinds.push_back(ShaderParameterCommit<EffectConstantBuffer>(effectCBuffer, binding));
 }
 
 void OpenGLShaderPipeline::AddSRVResouceBind( EffectParameter* effectParam, GLuint binding )
 {
-	mParameterBinds.push_back( ShaderParameterSetHelper<ShaderResourceView>(effectParam, binding) );
+	mParameterBinds.push_back( ShaderParameterCommit<ShaderResourceView>(effectParam, binding) );
 }
 
 void OpenGLShaderPipeline::AddUAVResourceBind( EffectParameter* effectParam, GLuint binding )
 {
-	mParameterBinds.push_back( ShaderParameterSetHelper<UnorderedAccessView>(effectParam, binding) );
+	mParameterBinds.push_back( ShaderParameterCommit<UnorderedAccessView>(effectParam, binding) );
 }
 
 void OpenGLShaderPipeline::AddShaderResourceBind( GLuint shader, GLint location, GLuint binding, GLuint bindType )
