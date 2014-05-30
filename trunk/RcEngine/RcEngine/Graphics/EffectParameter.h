@@ -60,41 +60,67 @@ public:
 
 	// Set and Get method, call the matched parameter type version, or will cause exception
 	virtual void GetValue(bool& value) const;
-	virtual void GetValue(bool*& value) const;
-	virtual void GetValue(float& value) const;
-	virtual void GetValue(float*& value) const;
 	virtual void GetValue(int32_t& value) const;
-	virtual void GetValue(int32_t*& value) const;
+	virtual void GetValue(int2& value) const;
+	virtual void GetValue(int3& value) const;
+	virtual void GetValue(int4& value) const;
 	virtual void GetValue(uint32_t& value) const;
-	virtual void GetValue(uint32_t*& value) const;
-	virtual void GetValue(float4x4& value) const;
-	virtual void GetValue(float4x4*& value) const;
+	virtual void GetValue(uint2& value) const;
+	virtual void GetValue(uint3& value) const;
+	virtual void GetValue(uint4& value) const;
+	virtual void GetValue(float& value) const;
 	virtual void GetValue(float2& value) const;
-	virtual void GetValue(float2*& value) const;
 	virtual void GetValue(float3& value) const;
-	virtual void GetValue(float3*& value) const;
 	virtual void GetValue(float4& value) const;
+	virtual void GetValue(float4x4& value) const;
+
+	virtual void GetValue(int32_t*& value) const;
+	virtual void GetValue(int2*& value) const;
+	virtual void GetValue(int3*& value) const;
+	virtual void GetValue(int4*& value) const;
+	virtual void GetValue(uint32_t*& value) const;
+	virtual void GetValue(uint2*& value) const;
+	virtual void GetValue(uint3*& value) const;
+	virtual void GetValue(uint4*& value) const;
+	virtual void GetValue(float*& value) const;
+	virtual void GetValue(float2*& value) const;
+	virtual void GetValue(float3*& value) const;
 	virtual void GetValue(float4*& value) const;
+	virtual void GetValue(float4x4*& value) const;
+
 	virtual void GetValue(weak_ptr<ShaderResourceView>& value) const;
 	virtual void GetValue(weak_ptr<UnorderedAccessView>& value) const;
 	virtual	void GetValue(weak_ptr<SamplerState>& value) const;
 
 	virtual void SetValue(const bool& value);
-	virtual void SetValue(const bool* value, uint32_t count);
-	virtual void SetValue(const float& value);
-	virtual void SetValue(const float* value, uint32_t count);
 	virtual void SetValue(const int32_t& value);
-	virtual void SetValue(const int32_t* value, uint32_t count);
-	virtual void SetValue(const uint32_t& value);
-	virtual void SetValue(const uint32_t* value, uint32_t count);
-	virtual void SetValue(const float4x4& value);
-	virtual void SetValue(const float4x4* value, uint32_t count);
+	virtual void SetValue(const int2& value);
+	virtual void SetValue(const int3& value);
+	virtual void SetValue(const int4& value);
+	virtual void SetValue(const uint32_t& value);	
+	virtual void SetValue(const uint2& value);
+	virtual void SetValue(const uint3& value);
+	virtual void SetValue(const uint4& value);
+	virtual void SetValue(const float& value);
 	virtual void SetValue(const float2& value);
-	virtual void SetValue(const float2* value, uint32_t count);
 	virtual void SetValue(const float3& value);
-	virtual void SetValue(const float3* value, uint32_t count);
 	virtual void SetValue(const float4& value);
+	virtual void SetValue(const float4x4& value);
+
+	virtual void SetValue(const int32_t* value, uint32_t count);
+	virtual void SetValue(const int2* value, uint32_t count);
+	virtual void SetValue(const int3* value, uint32_t count);
+	virtual void SetValue(const int4* value, uint32_t count);
+	virtual void SetValue(const uint32_t* value, uint32_t count);
+	virtual void SetValue(const uint2* value, uint32_t count);
+	virtual void SetValue(const uint3* value, uint32_t count);
+	virtual void SetValue(const uint4* value, uint32_t count);
+	virtual void SetValue(const float* value, uint32_t count);
+	virtual void SetValue(const float2* value, uint32_t count);
+	virtual void SetValue(const float3* value, uint32_t count);
 	virtual void SetValue(const float4* value, uint32_t count);
+	virtual void SetValue(const float4x4* value, uint32_t count);
+	
 	virtual void SetValue(const shared_ptr<ShaderResourceView>& value);
 	virtual void SetValue(const shared_ptr<UnorderedAccessView>& value);  // Need to consider D3D11 Atomic Counter 
 	virtual void SetValue(const shared_ptr<SamplerState>& value);
@@ -320,7 +346,6 @@ typedef EffectParameterNumberic< float3 >							EffectParameterVector3;
 typedef EffectParameterNumberic< float4 >							EffectParameterVector4;
 typedef EffectParameterNumberic< float4x4 >							EffectParameterMatrix;
 
-typedef EffectParameterNumbericArray< bool >						EffectParameterBoolArray;
 typedef EffectParameterNumbericArray< uint32_t >					EffectParameterUIntArray;
 typedef EffectParameterNumbericArray< int32_t>						EffectParameterIntArray;
 typedef EffectParameterNumbericArray< uint2 >						EffectParameterUInt2Array;

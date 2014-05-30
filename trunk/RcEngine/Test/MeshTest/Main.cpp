@@ -59,8 +59,8 @@ protected:
 		mCamera = std::make_shared<Camera>();
 
 
-		auto effect = resMan.GetResourceByName<Effect>(RT_Effect, "Tessellation.effect.xml", "General");
-		auto params = effect->GetParameters();
+		//auto effect = resMan.GetResourceByName<Effect>(RT_Effect, "Tessellation.effect.xml", "General");
+		//auto params = effect->GetParameters();
 		
 		//mRenderPath = std::make_shared<ForwardPlusPath>();
 		//mRenderPath = std::make_shared<TiledDeferredPath>();

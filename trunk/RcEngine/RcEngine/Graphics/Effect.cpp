@@ -184,10 +184,8 @@ EffectParameter* Effect::FetchUniformParameter( const String& name, EffectParame
 	{
 	case EPT_Boolean:
 		{
-			if (elementSize > 1)
-				uniformParam = new EffectParameterBoolArray(name, type, elementSize);
-			else 
-				uniformParam = new EffectParameterBool(name, type);
+			assert(elementSize <= 1);
+			uniformParam = new EffectParameterBool(name, type);
 		}
 		break;
 	case EPT_Float:
