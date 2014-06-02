@@ -63,8 +63,8 @@ protected:
 		//auto params = effect->GetParameters();
 		
 		//mRenderPath = std::make_shared<ForwardPlusPath>();
-		//mRenderPath = std::make_shared<TiledDeferredPath>();
-		mRenderPath = std::make_shared<DeferredPath>();
+		mRenderPath = std::make_shared<TiledDeferredPath>();
+		//mRenderPath = std::make_shared<DeferredPath>();
 		//mRenderPath = std::make_shared<ForwardPath>();
 		mRenderPath->OnGraphicsInit(mCamera);
 	}

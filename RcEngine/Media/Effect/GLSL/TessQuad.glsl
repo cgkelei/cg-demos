@@ -44,7 +44,7 @@ void main ()
 
 [[TessEval=TESQuad]]
 
-layout( quads, equal_spacing, cw ) in;
+layout( quads, equal_spacing, ccw ) in;
 
 uniform vec2 ViewportDim;
 
@@ -72,4 +72,13 @@ void main ()
 				  p3 * v * (1-u);
 
 	gl_Position.xy  = gl_Position.xy / ViewportDim * 2.0;
+}
+
+[[Fragment=PSQuad]]
+
+layout (location=0) out vec4 oFragColor;
+
+void main()
+{
+	oFragColor = vec4(1, 0, 0, 1);
 }

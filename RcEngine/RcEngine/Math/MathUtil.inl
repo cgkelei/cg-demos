@@ -122,13 +122,13 @@ template<typename Real>
 inline Matrix4<Real> 
 CreateRotationX(Real angle)
 {
-	Real cos = cos(angle);
-	Real sin = sin(angle);
+	const Real cosAngle = cos(angle);
+	const Real sinAngle = sin(angle);
 	
-	return Matrix4<Real>((Real)1, (Real)0, (Real)0, (Real)0, 
-						 (Real)0,  cos,     sin,    (Real)0, 
-						 (Real)0,  -sin,    cos,    (Real)0,
-						 (Real)0, (Real)0, (Real)0, (Real)1 );
+	return Matrix4<Real>((Real)1,   (Real)0,    (Real)0,    (Real)0, 
+						 (Real)0,  cosAngle,    sinAngle,   (Real)0, 
+						 (Real)0,  -sinAngle,   cosAngle,   (Real)0,
+						 (Real)0,   (Real)0,    (Real)0,    (Real)1 );
 }
 
 //----------------------------------------------------------------------------
@@ -136,13 +136,13 @@ template<typename Real>
 inline Matrix4<Real> 
 CreateRotationY(Real angle)
 {
-	Real cos = cos(angle);
-	Real sin = sin(angle);
+	const Real cosAngle = cosAngle(angle);
+	const Real sinAngle = sinAngle(angle);
 
-	return Matrix4<Real>( cos,   (Real)0,  -sin,   (Real)0, 
-		                (Real)0, (Real)1, (Real)0, (Real)0, 
-		                  sin,   (Real)0,  cos,    (Real)0,
-		                (Real)0, (Real)0, (Real)0, (Real)1 );
+	return Matrix4<Real>( cosAngle,   (Real)0,  -sinAngle,  (Real)0, 
+		                  (Real)0,	  (Real)1,  (Real)0,    (Real)0, 
+		                  sinAngle,   (Real)0,  cosAngle,   (Real)0,
+		                  (Real)0,	  (Real)0,  (Real)0,	(Real)1 );
 }
 
 //----------------------------------------------------------------------------
@@ -150,13 +150,13 @@ template<typename Real>
 inline Matrix4<Real> 
 CreateRotationZ(Real angle)
 {
-	Real cos = cos(angle);
-	Real sin = sin(angle);
+	const Real cosAngle = cosAngle(angle);
+	const Real sinAngle = sinAngle(angle);
 
-	return Matrix4<Real>( cos,   sin,    (Real)0,  (Real)0, 
-					     -sin,   cos,    (Real)0,  (Real)0, 
-					   (Real)0, (Real)0, (Real)1,  (Real)0,
-					   (Real)0, (Real)0, (Real)0,  (Real)1 );
+	return Matrix4<Real>( cosAngle,   sinAngle,    (Real)0,  (Real)0, 
+					     -sinAngle,   cosAngle,    (Real)0,  (Real)0, 
+						 (Real)0,	  (Real)0,	   (Real)1,  (Real)0,
+					     (Real)0,	  (Real)0,	   (Real)0,  (Real)1 );
 }
 
 
