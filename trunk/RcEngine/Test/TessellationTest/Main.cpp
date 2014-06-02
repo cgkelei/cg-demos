@@ -37,7 +37,12 @@ public:
 	TesselationApp(const String& config)
 		: Application(config)
 	{
-
+		/*FILE* f = fopen("E:/teapot", "w");
+		for (int i = 0; i < ARRAY_SIZE(TeapotVertices); ++i)
+		{
+			fprintf(f, "{ %ff, %ff, %ff },\n", TeapotVertices[i][0], TeapotVertices[i][2], TeapotVertices[i][1]);
+		}
+		fclose(f);*/
 	}
 
 	virtual ~TesselationApp(void)
@@ -49,7 +54,7 @@ protected:
 	void Initialize()
 	{
 		mCamera = std::make_shared<Camera>();
-		mCamera->CreateLookAt(float3(0, 30, 0), float3(0, 30, 100), float3(0, 1, 0));
+		mCamera->CreateLookAt(float3(0, 5, 0), float3(0, 5, 100), float3(0, 1, 0));
 		mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 1000.0f);
 
 		mCameraControler = new RcEngine::Test::FPSCameraControler;
@@ -81,11 +86,11 @@ protected:
 		mBezierCurveROP.PrimitiveType = PT_Patch_Control_Point_4;
 		mBezierCurveROP.SetVertexRange(0, 4);
 
-		mTessEffect->GetParameterByName("NumSegments")->SetValue(50);
-		mTessEffect->GetParameterByName("NumStrips")->SetValue(1);
+		/*mTessEffect->GetParameterByName("NumSegments")->SetValue(50);
+		mTessEffect->GetParameterByName("NumStrips")->SetValue(1);*/
 
 		//////////////////////////////////////////////////////////////////////////
-		float2 quad[] = { float2(-200, -200),  float2(200, -200),  float2(200, 200),  float2(-200, 200) };
+		float2 quad[] = { float2(-200, -200), float2(-200, 200), float2(200, 200), float2(200, -200) };
 		initData.pData = quad;
 		initData.rowPitch = sizeof(quad);
 
@@ -124,7 +129,14 @@ protected:
 		mTessTeapotROP.VertexDecl = factory->CreateVertexDeclaration(vertexElement, ARRAY_SIZE(vertexElement));
 
 		mTessTeapotROP.PrimitiveType = PT_Patch_Control_Point_16;
-		mTessTeapotROP.SetIndexRange(33, 48);
+		mTessTeapotROP.SetIndexRange(0, NumTeapotIndices);
+
+
+		//mTeapotPointsROP.BindVertexStream(0, mTessTeapotROP.VertexStreams.front());
+		//mTeapotPointsROP.BindIndexStream(mTessTeapotROP.IndexBuffer, IBT_Bit16);
+		//mTeapotPointsROP.PrimitiveType = PT_Point_List;
+		//mTeapotPointsROP.SetVertexRange(0, 290);
+		//mTeapotPointsROP.VertexDecl = factory->CreateVertexDeclaration(vertexElement, ARRAY_SIZE(vertexElement));
 	}
 
 	void UnloadContent()
@@ -144,19 +156,19 @@ protected:
 
 		device->GetScreenFrameBuffer()->Clear(CF_Color | CF_Depth, ColorRGBA::White, 1, 0);
 
-		//float w = static_cast<float>( mMainWindow->GetWidth() );
-		//float h = static_cast<float>( mMainWindow->GetHeight() );
-		//mTessEffect->GetParameterByName("ViewportDim")->SetValue(float2(w, h));
+		float w = static_cast<float>( mMainWindow->GetWidth() );
+		float h = static_cast<float>( mMainWindow->GetHeight() );
+		mTessEffect->GetParameterByName("ViewportDim")->SetValue(float2(w, h));
 
 		//device->Draw(mBezierCurveEffect->GetTechniqueByName("BezierCurve"), mBezierCurveROP);
-		//device->Draw(mTessEffect->GetTechniqueByName("TessQuad"), mTessQuadROP);
+		device->Draw(mTessEffect->GetTechniqueByName("TessQuad"), mTessQuadROP);
 
-		float4x4 world = CreateScaling(10, 10, 10) * CreateTranslation(0, 0, 60);
+		/*float4x4 world = CreateScaling(5, 5, 5) * CreateTranslation(0, 0, 60);
 
-		mTessEffect->GetParameterByName("TessLevel")->SetValue(16);
+		mTessEffect->GetParameterByName("TessLevel")->SetValue(100);
 		mTessEffect->GetParameterByName("World")->SetValue(world);
 		mTessEffect->GetParameterByName("ViewProj")->SetValue(mCamera->GetEngineViewProjMatrix());
-		device->Draw(mTessEffect->GetTechniqueByName("TessTeapot"), mTessTeapotROP);
+		device->Draw(mTessEffect->GetTechniqueByName("TessTeapot"), mTessTeapotROP);*/
 
 		device->GetScreenFrameBuffer()->SwapBuffers();
 	}
@@ -172,6 +184,8 @@ protected:
 	RenderOperation mBezierCurveROP;
 	RenderOperation mTessQuadROP;
 	RenderOperation mTessTeapotROP;
+
+	RenderOperation mTeapotPointsROP;
 
 	shared_ptr<Camera> mCamera;
 	Test::FPSCameraControler* mCameraControler;

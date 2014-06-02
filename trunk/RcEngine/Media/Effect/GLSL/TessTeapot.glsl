@@ -1,3 +1,34 @@
+[[Vertex=PassThroughVSPoint]]
+
+uniform mat4 World;
+uniform mat4 ViewProj;
+
+
+layout (location = 0) in vec3 iControlPoint;
+
+out gl_PerVertex { 
+	vec4 gl_Position; // Bezier Patch Control Point
+	float gl_PointSize;
+};
+
+void main()
+{
+	gl_Position = vec4(iControlPoint, 1.0) * World * ViewProj;
+	gl_PointSize = 5.0;
+}
+
+[[Fragment=PSTeapotPoint]]
+
+uniform vec3 Color;
+
+layout (location = 0) out vec4 oFragColor;
+
+void main()
+{
+	oFragColor = vec4(Color, 1);
+}
+
+
 [[Vertex=PassThroughVS]]
 
 uniform mat4 World;
@@ -44,7 +75,7 @@ void main()
 
 [[TessEval=TESTeapot]]
 
-layout( quads, equal_spacing, cw ) in;
+layout( quads, equal_spacing, ccw ) in;
 
 uniform mat4 ViewProj;
 
@@ -105,20 +136,17 @@ void main()
 
 [[Fragment=PSTeapot]]
 
-layout (location = 0) in vec3 iPosWS;
+layout (location = 0) in vec4 iPosWS;
 layout (location = 1) in vec2 iTex;
 layout (location = 2) in vec3 iNormalWS;
 
 const vec3 LightPos = vec3(100, 100, 100);
 
-layout (location = 2) out vec4 oFragColor;
+layout (location = 0) out vec4 oFragColor;
 
 void main()
 {
-	vec3 L = normalize(LightPos - iPosWS);
+	vec3 L = normalize(LightPos - iPosWS.xyz);
 	vec3 N = normalize(iNormalWS);
-
-	oFragColor = vec4(1.0, 0, 0, 1.0);
-
-	//oFragColor = vec4(1.0, 0, 0, 1.0) * max(dot(N, L), 0.0);
+	oFragColor = vec4(1.0, 0, 0, 1.0) * max(dot(N, L), 0.0);
 }

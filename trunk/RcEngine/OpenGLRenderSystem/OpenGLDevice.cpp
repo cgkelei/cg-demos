@@ -81,6 +81,7 @@ void OpenGLDevice::CreateRenderWindow()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CW);
+	glEnable(GL_PROGRAM_POINT_SIZE);
 
 	// do little hard code
 	glEnable(GL_TEXTURE_1D);
