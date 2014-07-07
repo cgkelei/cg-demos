@@ -292,9 +292,9 @@ bool OpenGLShaderPipeline::LinkPipeline()
 						{
 							EffectParameter* variable = uniformBuffer->GetVariable(i);
 							if (variable->GetName() != uniformBlock.BufferVariables[i].Name				||
-								variable->GetParameterType() != uniformBlock.BufferVariables[i].Type		||
+								variable->GetParameterType() != uniformBlock.BufferVariables[i].Type	||
 								variable->GetElementSize() != uniformBlock.BufferVariables[i].ArraySize ||
-								variable->GetOffset() != uniformBlock.BufferVariables[i].Location)
+								variable->GetOffset() != uniformBlock.BufferVariables[i].Offset)
 							{
 								ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Error: Same uniform buffer with different variables!", "D3D11ShaderPipeline::LinkPipeline");
 							}
@@ -309,6 +309,9 @@ bool OpenGLShaderPipeline::LinkPipeline()
 
 							if (bufferVariable.ArraySize > 1)
 								variable->SetArrayStride(bufferVariable.ArrayStride);
+
+							if (bufferVariable.Type >= EPT_Matrix2x2 && bufferVariable.Type <= EPT_Matrix4x4)
+								variable->SetMatrixStride(sizeof(float4));  // always float4
 						}
 					}
 

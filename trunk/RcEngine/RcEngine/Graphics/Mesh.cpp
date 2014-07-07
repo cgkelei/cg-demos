@@ -91,17 +91,7 @@ void Mesh::LoadImpl()
 	}
 	
 	// read bones
-	if (mSkeleton = Skeleton::LoadFrom(source))
-	{
-		// read animation clips
-		uint32_t animClipCount = source.ReadUInt();
-		mAninationClips.resize(animClipCount);
-		for (uint32_t i = 0; i < animClipCount; i++)
-		{
-			mAninationClips[i] = source.ReadString();
-			//resMan.AddResource(RT_Animation, mAninationClips[i], mGroup);
-		}
-	}
+	mSkeleton = Skeleton::LoadFrom(source);
 }
 
 void Mesh::UnloadImpl()
@@ -121,7 +111,6 @@ shared_ptr<Resource> Mesh::Clone()
 
 	retVal->mBoundingBox = mBoundingBox;
 	retVal->mPrimitiveCount = mPrimitiveCount;
-	retVal->mAninationClips = mAninationClips;
 	retVal->mBoundingBox = mBoundingBox;
 	retVal->mMeshParts = mMeshParts;
 	mSkeleton = mSkeleton->Clone();

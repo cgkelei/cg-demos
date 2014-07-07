@@ -296,28 +296,50 @@ public:
 	{
 		assert(count <= mElementSize);
 
-		//if (memcmp(value, mValue, sizeof(float4x4) * count) != 0)
+		if (mUniformBuffer)
+		{
+			assert(mMatrixStride == sizeof(float4));
+			assert(count <= mElementSize);
+			/**
+			 * Both GLSL and HLSL matrix use column-major as default pack ordering. So there has
+			 * two choice. Transpose every matrix before sending to ConstantBuffer, or use row_major 
+			 * qualifier in shader language.
+			 */
+			float4x4* pMatrix = reinterpret_cast<float4x4*>( mUniformBuffer->GetRawData(mOffset) );
+			for (uint32_t i = 0; i < count; ++i)
+				pMatrix[i] = value[i].Transpose();		
+		}
+		else
 		{
 			// OpenGL global uniform, OpenGLAPI will handle it
 			memcpy(mValue, value, sizeof(float4x4) * count);
-
-			// Update data in constant buffer
-			if (mUniformBuffer)
-			{
-				assert(mMatrixStride == sizeof(float4));
-				assert(count <= mElementSize);
-				/**
-				 * Both GLSL and HLSL matrix use column-major as default pack ordering. So there has
-				 * two choice. Transpose every matrix before sending to ConstantBuffer, or use row_major 
-				 * qualifier in shader language.
-				 */
-				float4x4* pMatrix = reinterpret_cast<float4x4*>( mUniformBuffer->GetRawData(mOffset) );
-				for (uint32_t i = 0; i < count; ++i)
-					pMatrix[i] = mValue[i].Transpose();		
-			}
-
-			MakeDirty();
 		}
+
+		MakeDirty();
+
+
+		//if (memcmp(value, mValue, sizeof(float4x4) * count) != 0)
+		//{
+		//	// OpenGL global uniform, OpenGLAPI will handle it
+		//	memcpy(mValue, value, sizeof(float4x4) * count);
+
+		//	// Update data in constant buffer
+		//	if (mUniformBuffer)
+		//	{
+		//		assert(mMatrixStride == sizeof(float4));
+		//		assert(count <= mElementSize);
+		//		/**
+		//		 * Both GLSL and HLSL matrix use column-major as default pack ordering. So there has
+		//		 * two choice. Transpose every matrix before sending to ConstantBuffer, or use row_major 
+		//		 * qualifier in shader language.
+		//		 */
+		//		float4x4* pMatrix = reinterpret_cast<float4x4*>( mUniformBuffer->GetRawData(mOffset) );
+		//		for (uint32_t i = 0; i < count; ++i)
+		//			pMatrix[i] = mValue[i].Transpose();		
+		//	}
+
+		//	MakeDirty();
+		//}
 	}
 
 protected:

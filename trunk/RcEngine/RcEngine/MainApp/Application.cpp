@@ -61,15 +61,7 @@ Application::Application( const String& config )
 
 Application::~Application( void )
 {
-	// todo, move to dll unload
-	//delete Context::GetSingleton().GetSceneManagerPtr();
-
-	//ResourceManager::Finalize();
-	//ModuleManager::Finalize();
-	//FileSystem::Finalize();
-	//InputSystem::Finalize();
-	//UIManager::Finalize();
-	//Context::Finalize();
+	
 }
 
 void Application::RunGame()
@@ -237,6 +229,7 @@ void Application::Create()
 	// UI Graphics initailize
 	//UIManager::GetSingleton().OnGraphicsInitialize();
 
+
 	// Show main window
 	mMainWindow->ShowWindow();
 }
@@ -247,14 +240,14 @@ void Application::Release()
 	//SceneManager* pSceneMan = Environment::GetSingleton().GetSceneManagerPtr();
 	//delete pSceneMan;
 
-	/*UIManager::Finalize();
-	InputSystem::Finalize();
+	/*DebugDrawManager::Finalize();
+	ResourceManager::Finalize();
+	ModuleManager::Finalize();
 	FileSystem::Finalize();
-	ResourceManager::Finalize();*/
-	
-	Environment::Finalize();
+	InputSystem::Finalize();
+	Environment::Finalize();*/
 
-	//ModuleManager::Finalize();	
+	//UIManager::Finalize();
 }
 
 void Application::LoadConfiguration()

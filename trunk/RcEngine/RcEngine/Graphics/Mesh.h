@@ -35,9 +35,6 @@ public:
 	
 	shared_ptr<Skeleton> GetSkeleton() const					{ return mSkeleton; }
 
-	bool HasAnimation() const									{ return !mAninationClips.empty(); }
-	const vector<String>& GetAnimations() const					{ return mAninationClips; }
-
 	uint32_t GetPrimitiveCount() const							{ return mPrimitiveCount; }
 	uint32_t GetVertexCount() const								{ return mVertexCount; }
 
@@ -61,9 +58,6 @@ private:
 	vector<shared_ptr<MeshPart> > mMeshParts;  
 
 	shared_ptr<Skeleton> mSkeleton;
-
-	vector<String> mAninationClips;
-
 };
 
 

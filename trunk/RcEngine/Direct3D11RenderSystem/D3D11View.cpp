@@ -101,7 +101,14 @@ D3D11Texture2DSRV::D3D11Texture2DSRV( const shared_ptr<Texture>& texture, uint32
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
 	ZeroMemory( &viewDesc, sizeof(viewDesc) );
-	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
+
+	if (createFlags & TexCreate_DepthStencilTarget)
+	{
+		// Use depth shader resource format
+		viewDesc.Format = D3D11Mapping::GetDepthShaderResourceFormat(texture->GetTextureFormat());
+	}
+	else
+		viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
 
 	if (textureD3D11->GetTextureArraySize() <= 1)
 	{

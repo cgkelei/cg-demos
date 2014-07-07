@@ -41,7 +41,7 @@ public:
 	shared_ptr<Skeleton> GetSkeleton();
 
 	bool HasSkeletonAnimation() const;
-	AnimationPlayer* GetAnimationPlayer() const;
+	AnimationPlayer* GetAnimationPlayer();
 
 	void OnAttach( Node* node );
 	void OnDetach( Node* node );

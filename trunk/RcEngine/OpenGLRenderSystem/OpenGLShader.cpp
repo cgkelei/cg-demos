@@ -488,7 +488,7 @@ private:
 		glGetProgramiv(mShaderProgramID, GL_ACTIVE_UNIFORM_BLOCKS, &numUniformBlocks);
 		for (GLuint i = 0; i < GLuint(numUniformBlocks); ++i)
 		{
-			glGetActiveUniformBlockName(mShaderProgramID, i, MaxNameLen, NULL, name);
+			glGetActiveUniformBlockName(mShaderProgramID, i, MaxNameLen, &actualNameLen, name);
 			glGetActiveUniformBlockiv(mShaderProgramID, i, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
 			
 			// binding point
@@ -529,6 +529,7 @@ private:
 				bufferVariable.Name = String(name, actualNameLen);
 				bufferVariable.ArraySize = (arraySize <= 1) ? 0 : arraySize;
 				bufferVariable.Offset = unifomOffset;
+				bufferVariable.ArrayStride = arrayStride;
 
 				ShaderParameterClass paramClass;
 				OpenGLMapping::UnMapping(type, bufferVariable.Type, paramClass);

@@ -149,8 +149,12 @@ public:
 	/**
 	 * Get a child node with specify name.
 	 */
-
 	Node* GetChild( const String& name ) const;
+
+	/**
+	 * Get all children.
+	 */
+	const std::vector<Node*>& GetChildren( ) const { return mChildren; }
 
 	/**
 	 * Creates an named new Node as a child of this node.
