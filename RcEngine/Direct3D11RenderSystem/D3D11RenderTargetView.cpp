@@ -52,8 +52,6 @@ D3D11RenderTargetView2D::D3D11RenderTargetView2D( const shared_ptr<Texture>& tex
 {
 	assert(texture->GetCreateFlags() & TexCreate_RenderTarget);
 
-	ID3D11Device*           g_pd3dDevice = NULL;
-
 	D3D11_RENDER_TARGET_VIEW_DESC  viewDesc;
 	ZeroMemory( &viewDesc, sizeof(viewDesc) );
 	viewDesc.Format = D3D11Mapping::Mapping(texture->GetTextureFormat());
@@ -121,12 +119,5 @@ D3D11RenderTargetViewArray::D3D11RenderTargetViewArray( const shared_ptr<Texture
 	ID3D11Texture2D* textureD3D11 = (static_cast_checked<D3D11Texture2D*>(texture.get()))->TextureD3D11;
 	D3D11_VERRY( deviceD3D11->CreateRenderTargetView(textureD3D11, &viewDesc, &RenderTargetViewD3D11) );
 }
-
-
-
-
-
-
-
 
 }

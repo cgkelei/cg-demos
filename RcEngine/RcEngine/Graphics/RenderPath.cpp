@@ -11,6 +11,7 @@
 #include <Graphics/RenderFactory.h>
 #include <Graphics/RenderOperation.h>
 #include <Graphics/CascadedShadowMap.h>
+#include <Graphics/DebugDrawManager.h>
 #include <MainApp/Application.h>
 #include <MainApp/Window.h>
 #include <Scene/SceneManager.h>
@@ -22,6 +23,7 @@
 #include <Resource/ResourceManager.h>
 #include <MainApp/Application.h>
 #include <Input/InputSystem.h>
+
 
 namespace {
 
@@ -222,13 +224,8 @@ void ForwardPath::OnWindowResize( uint32_t width, uint32_t height )
 
 void ForwardPath::RenderScene()
 {
-	shared_ptr<FrameBuffer> screenFB = mDevice->GetScreenFrameBuffer();
-	mDevice->BindFrameBuffer(screenFB);
-	screenFB->Clear(CF_Color | CF_Depth, ColorRGBA::White, 1.0, 0);
-
-	auto viewCamera = screenFB->GetCamera();
-
-	auto v = Normalize(Transform(float3(0, 0, 0), viewCamera->GetViewMatrix()));
+	shared_ptr<FrameBuffer> screenFB = mDevice->GetCurrentFrameBuffer();
+	shared_ptr<Camera> viewCamera = screenFB->GetCamera();
 
 	// Draw Sky box first
 	mSceneMan->UpdateBackgroundQueue(*viewCamera);
@@ -268,8 +265,6 @@ void ForwardPath::RenderScene()
 			}
 		}
 	}
-
-	screenFB->SwapBuffers();
 }
 
 //--------------------------------------------------------------------------------------------

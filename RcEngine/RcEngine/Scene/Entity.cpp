@@ -70,21 +70,6 @@ void Entity::Initialize()
 		mSkinMatrices.resize(mNumSkinMatrices);
 	}
 
-	if (mMesh->HasAnimation())
-	{
-		mAnimationPlayer = new SkinnedAnimationPlayer(mSkeleton);
-
-		for (const String& animClipResName : mMesh->GetAnimations())
-		{
-			String clipName = meshDirectory + animClipResName;		 
-			shared_ptr<AnimationClip> clip = std::static_pointer_cast<AnimationClip>(
-				ResourceManager::GetSingleton().GetResourceByName(RT_Animation, clipName, meshGroup));
-			clip->Load();
-
-			mAnimationPlayer->AddClip(clip);
-		}	
-	}
-
 	if (mParentNode)
 	{
 		mParentNode->NeedUpdate();
@@ -143,11 +128,16 @@ shared_ptr<Skeleton> Entity::GetSkeleton()
 
 bool Entity::HasSkeletonAnimation() const
 {
-	return mMesh->HasAnimation();
+	return (mMesh->GetSkeleton() != nullptr);
 }
 
-AnimationPlayer* Entity::GetAnimationPlayer() const
+AnimationPlayer* Entity::GetAnimationPlayer()
 {
+	if (!mAnimationPlayer && mMesh->GetSkeleton())
+	{
+		mAnimationPlayer = new SkinnedAnimationPlayer(mSkeleton);
+	}
+
 	return mAnimationPlayer;
 }
 

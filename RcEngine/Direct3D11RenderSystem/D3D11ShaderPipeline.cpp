@@ -9,7 +9,8 @@
 
 namespace RcEngine {
 
-#define HLSL_ARRAY_STRIDE (sizeof(float) * 16)
+#define HLSL_ARRAY_STRIDE (sizeof(float4))
+#define HLSL_MATRIX_STRIDE (sizeof(float4))
 
 template<typename T>
 struct ShaderParameterCommit
@@ -316,6 +317,13 @@ bool D3D11ShaderPipeline::LinkPipeline()
 					for (const auto& bufferVariable : cbufferParam.BufferVariables)
 					{
 						EffectParameter* variable = mEffect.FetchUniformParameter(bufferVariable.Name, bufferVariable.Type, bufferVariable.ArraySize);				
+						
+						if (bufferVariable.ArraySize > 1)
+							variable->SetArrayStride(HLSL_ARRAY_STRIDE); // always float4
+
+						if (bufferVariable.Type >= EPT_Matrix2x2 && bufferVariable.Type <= EPT_Matrix4x4)
+							variable->SetMatrixStride(HLSL_MATRIX_STRIDE);  // always float4
+
 						AddGlobalUniformBind(shaderD3D11->GlobalCBuffer, variable, bufferVariable.Offset, bufferVariable.ArraySize);
 					}
 
@@ -348,6 +356,9 @@ bool D3D11ShaderPipeline::LinkPipeline()
 
 							if (bufferVariable.ArraySize > 1)
 								variable->SetArrayStride(HLSL_ARRAY_STRIDE); // always float4
+
+							if (bufferVariable.Type >= EPT_Matrix2x2 && bufferVariable.Type <= EPT_Matrix4x4)
+								variable->SetMatrixStride(HLSL_MATRIX_STRIDE);  // always float4
 						}
 					}
 				}

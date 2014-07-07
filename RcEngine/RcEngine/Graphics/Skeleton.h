@@ -30,8 +30,7 @@ public:
 	const vector<Bone*>& GetBones() const { return mBones; }
 	vector<Bone*>& GetBonesModified() { return mBones; }
 
-	BoneFollower* CreateFollowerOnBone(Bone* bone, const Quaternionf &offsetOrientation = Quaternionf::Identity(), 
-		const float3 &offsetPosition = float3::Zero());
+	BoneFollower* CreateFollowerOnBone(Bone* bone, const Quaternionf &offsetOrientation, const float3 &offsetPosition);
 
 	void FreeFollower(BoneFollower* follower);
 

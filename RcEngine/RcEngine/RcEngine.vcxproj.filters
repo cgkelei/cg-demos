@@ -264,8 +264,11 @@
     <ClInclude Include="Core\Profiler.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\InstancedEntity.h">
-      <Filter>Scene</Filter>
+    <ClInclude Include="Graphics\DebugDrawManager.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Geometry.h">
+      <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -455,8 +458,11 @@
     <ClCompile Include="Graphics\ForwardPath.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Scene\InstancedEntity.cpp">
-      <Filter>Scene</Filter>
+    <ClCompile Include="Graphics\DebugDrawManager.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Geometry.cpp">
+      <Filter>Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -550,9 +556,6 @@
     <None Include="..\Media\Effect\GLSL\TessTeapot.glsl">
       <Filter>Asset\GLSL</Filter>
     </None>
-    <None Include="..\Media\Effect\GLSL\Instancing.glsl">
-      <Filter>Asset\GLSL</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Media\Effect\HLSL\Model.hlsl">
@@ -604,12 +607,6 @@
       <Filter>Asset\HLSL</Filter>
     </FxCompile>
     <FxCompile Include="..\Media\Effect\HLSL\ForwardPlus.hlsl">
-      <Filter>Asset\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Media\Effect\HLSL\TessQuad.hlsl">
-      <Filter>Asset\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Media\Effect\HLSL\TessTeapot.hlsl">
       <Filter>Asset\HLSL</Filter>
     </FxCompile>
   </ItemGroup>

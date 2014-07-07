@@ -44,7 +44,7 @@ void D3D11VertexDeclaration::CreateInputLayout( const RenderOperation& operation
 
 	// Todo: cache InputLayoutD3D11
 	ID3D11Device* deviceD3D11 = gD3D11Device->DeviceD3D11;
-	HRESULT hr = deviceD3D11->CreateInputLayout( layoutD3D11, mVertexElemets.size(), &vertexShaderD3D11->ShaderCode[0], vertexShaderD3D11->ShaderCode.size(), &InputLayoutD3D11 );
+	HRESULT hr = deviceD3D11->CreateInputLayout( layoutD3D11, vertexShaderD3D11->InputSignatures.size(), &vertexShaderD3D11->ShaderCode[0], vertexShaderD3D11->ShaderCode.size(), &InputLayoutD3D11 );
 
 	if (FAILED(hr))
 	{
