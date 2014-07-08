@@ -118,17 +118,16 @@ protected:
 		//ENGINE_PUSH_CPU_PROFIER("test");
 		//ENGINE_DUMP_PROFILERS();
 
-		//entity = sceneMan->CreateEntity("Dude", "./Dude/dude.mesh",  "Custom");
-		//sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Dude");
-		//sceneNode->SetScale(float3(0.5, 0.5, 0.5));
-		//sceneNode->SetPosition(float3(50,0,0));
-		//sceneNode->SetWorldRotation(QuaternionFromRotationAxis(float3(0, 1, 0), Mathf::PI));
-		//sceneNode->AttachObject(entity);
+		auto entity = sceneMan->CreateEntity("Dude", "./Dude/dude.mesh",  "Custom");
+		auto sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Dude");
+		sceneNode->SetScale(float3(0.5, 0.5, 0.5));
+		sceneNode->SetPosition(float3(50,0,0));
+		sceneNode->AttachObject(entity);
 
-		//AnimationPlayer* animPlayer = entity->GetAnimationPlayer();
-		//AnimationState* takeClip = animPlayer->GetClip("Take 001");
-		//takeClip->SetAnimationWrapMode(AnimationState::Wrap_Loop);
-		//animPlayer->PlayClip("Take 001");
+		AnimationPlayer* animPlayer = entity->GetAnimationPlayer();
+		AnimationState* takeClip = animPlayer->GetClip("Take 001");
+		takeClip->SetAnimationWrapMode(AnimationState::Wrap_Loop);
+		animPlayer->PlayClip("Take 001");
 
 		mCameraControler = new RcEngine::Test::FPSCameraControler;
 		mCameraControler->AttachCamera(*mCamera);
@@ -146,11 +145,11 @@ protected:
 	{
 		SceneManager& sceneMan = *Environment::GetSingleton().GetSceneManager();
 
-		/*Light* mDirLight = sceneMan.CreateLight("Sun", LT_DirectionalLight);
+		Light* mDirLight = sceneMan.CreateLight("Sun", LT_DirectionalLight);
 		mDirLight->SetDirection(float3(00, -1, 0.5));
 		mDirLight->SetLightColor(float3(1, 1, 1));
 		mDirLight->SetCastShadow(false);
-		sceneMan.GetRootSceneNode()->AttachObject(mDirLight);*/
+		sceneMan.GetRootSceneNode()->AttachObject(mDirLight);
 
 		/*Light* mPointLight = sceneMan.CreateLight("Point", LT_PointLight);
 		mPointLight->SetLightColor(float3(0, 1, 0));

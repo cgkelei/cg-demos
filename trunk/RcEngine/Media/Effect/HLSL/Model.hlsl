@@ -12,7 +12,7 @@ VSOutput ModelVS(VSInput input)
 	// calculate position in view space:
 #ifdef _Skinning
 	float4x4 Skin = CalculateSkinMatrix(input.BlendWeights, input.BlendIndices);
-	float4x4 SkinWorld = Skin * World;
+	float4x4 SkinWorld = mul(Skin, World);
 	output.PosWS = mul( float4(input.Pos, 1.0), SkinWorld );
 #else
 	output.PosWS = mul( float4(input.Pos, 1.0), World );
@@ -44,7 +44,12 @@ VSOutput ModelVS(VSInput input)
 	output.NormalWS = normal;
 #endif
 	
+#ifndef _DiffuseMap
+	output.Tex = float2(0, 0); // Todo: Not output tex if no texture
+#else 
 	output.Tex = input.Tex;
+#endif
+
 	output.PosCS = mul(output.PosWS, ViewProj);
 
 	return output;
