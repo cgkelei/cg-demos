@@ -1,273 +1,294 @@
-#include "App.h"
 #include <MainApp/Application.h>
-#include <Graphics/CameraController1.h>
 #include <MainApp/Window.h>
-#include <Resource/ResourceManager.h>
-#include <Scene/SceneManager.h>
-#include <Scene/SceneNode.h>
-#include <Scene/Entity.h>
+#include <Graphics/FrameBuffer.h>
 #include <Graphics/RenderDevice.h>
 #include <Graphics/RenderFactory.h>
-#include <Graphics/Material.h>
-#include <Graphics/RenderQueue.h>
-#include <Graphics/Effect.h>
-#include <Graphics/Camera.h>
-#include <Graphics/CameraControler.h>
-#include <Graphics/FrameBuffer.h>
-#include <Graphics/AnimationState.h>
-#include <Graphics/Animation.h>
-#include <Graphics/SamplerState.h>
-#include <Graphics/Pipeline.h>
-#include <Graphics/Renderer.h>
-#include <Graphics/FrameBuffer.h>
-#include <GUI/Label.h>
-#include <GUI/Slider.h>
-#include <GUI/UIWindow.h>
-#include <GUI/UIManager.h>
-#include <GUI/CheckBox.h>
-#include <IO/FileSystem.h>
-#include <Math/MathUtil.h>
-#include <Graphics/CascadedShadowMap.h>
-#include <Scene/Light.h>
+#include <Graphics/VertexDeclaration.h>
+#include <Graphics/TextureResource.h>
+#include <Graphics/GraphicsResource.h>
 #include <Graphics/RenderOperation.h>
-#include <Graphics/GraphicBuffer.h>
+#include <Graphics/Material.h>
+#include <Graphics/Effect.h>
+#include <Graphics/Effect.h>
+#include <Graphics/EffectParameter.h>
+#include <Graphics/Camera.h>
+#include <Graphics/RenderPath.h>
+#include <Graphics/CameraController1.h>
+#include <Graphics/AnimationState.h>
+#include <Graphics/AnimationClip.h>
+#include <Graphics/Animation.h>
+#include <Graphics/DebugDrawManager.h>
+#include <Resource/ResourceManager.h>
+#include <Scene/SceneManager.h>
+#include <Scene/Entity.h>
+#include <Scene/SceneNode.h>
+#include <IO/FileSystem.h>
+#include <Core/Environment.h>
+#include <Scene/Light.h>
+#include <Math/MathUtil.h>
+#include <Core/Profiler.h>
+#include <Core/XMLDom.h>
+#include <fstream>
 
 using namespace RcEngine;
 
-FBXApp::FBXApp( const String& config ) 
-	:Application(config), mCameraControler(0), mFramePerSecond(0)
+class TesselationApp : public Application
 {
-
-}
-
-FBXApp::~FBXApp( void )
-{
-
-}
-
-void FBXApp::Initialize()
-{
-	mSceneRender = new Renderer;
-	mSceneRender->Init();
-
-	InitGUI();
-}
-
-void FBXApp::InitGUI()
-{
-	UIElement* rootElem = UIManager::GetSingleton().GetRoot();
-
-	mLabel = new Label();
-	mLabel->InitGuiStyle(nullptr);
-	mLabel->SetName("FPSLabel");
-	mLabel->SetPosition(int2(10, 700));
-	mLabel->SetTextColor(ColorRGBA(1, 0, 0, 1));
-	mLabel->SetSize(int2(900, 100));
-	//mFPSLabel->SetFont(UIManager::GetSingleton().GetDefaultFont(), 20.0f);
-	rootElem->AddChild( mLabel );	
-
-	mWindow = new UIWindow;
-	mWindow->InitGuiStyle(nullptr);
-	mWindow->SetName("Panel");
-	mWindow->SetTitle(L"Window Title");
-	mWindow->SetPosition(int2(650, 430));
-	mWindow->SetSize(int2(350, 300));
-	rootElem->AddChild( mWindow );
-
-	int uiY = 50;
-
-	mCastShadowCheckBox = new CheckBox();
-	mCastShadowCheckBox->InitGuiStyle(nullptr);
-	mCastShadowCheckBox->SetName("CastShadowCheckBox");
-	mCastShadowCheckBox->SetPosition(int2(20, uiY));
-	mCastShadowCheckBox->SetSize(int2(150, mCastShadowCheckBox->GetSize().Y()));
-	mCastShadowCheckBox->SetText(L"Cast ShadowCheck");
-	mCastShadowCheckBox->SetChecked(true);
-	mCastShadowCheckBox->EventStateChanged.bind(this, &FBXApp::CastShadow);
-	mWindow->AddChild( mCastShadowCheckBox );	
-	
-	uiY += mCastShadowCheckBox->GetSize().Y() + 18;
-
-	mVisualizeCascadesCheckBox = new CheckBox();
-	mVisualizeCascadesCheckBox->InitGuiStyle(nullptr);
-	mVisualizeCascadesCheckBox->SetName("CheckBox");
-	mVisualizeCascadesCheckBox->SetPosition(int2(20, uiY));
-	mVisualizeCascadesCheckBox->SetSize(int2(150, mVisualizeCascadesCheckBox->GetSize().Y()));
-	mVisualizeCascadesCheckBox->SetText(L"Visualize Cascades");
-	mVisualizeCascadesCheckBox->SetChecked(false);
-	mVisualizeCascadesCheckBox->EventStateChanged.bind(this, &FBXApp::VisualizeCascades);
-	mWindow->AddChild( mVisualizeCascadesCheckBox );	
-
-	uiY += mVisualizeCascadesCheckBox->GetSize().Y() + 18;
-
-	mBlendAreaLabel = new Label();
-	mBlendAreaLabel->InitGuiStyle(nullptr);
-	mBlendAreaLabel->SetName("BlendArea");
-	mBlendAreaLabel->SetPosition(int2(20, uiY));
-	mBlendAreaLabel->SetTextColor(ColorRGBA(1, 0, 0, 1));
-	mBlendAreaLabel->SetTextAlignment(AlignLeft);
-	mBlendAreaLabel->SetSize(int2(150, 30));
-	mBlendAreaLabel->SetText(L"BlendArea: 0.01");
-	mBlendAreaLabel->SetFontSize(20.0f);
-	//mBlendAreaLabel->SetFont(UIManager::GetSingleton().GetDefaultFont(), 20.0f);
-	mWindow->AddChild( mBlendAreaLabel );	
-
-	//uiY += mBlendAreaLabel->GetSize().Y() + 18;
-
-	mBlendAreaSlider = new Slider(UI_Horizontal);
-	mBlendAreaSlider->InitGuiStyle(nullptr);
-	mBlendAreaSlider->SetName("Slider");	
-	mBlendAreaSlider->SetPosition(int2(20 + mBlendAreaLabel->GetSize().X(), uiY + 5));
-	mBlendAreaSlider->SetTrackLength(120);
-	mBlendAreaSlider->SetValue(50);
-	mBlendAreaSlider->EventValueChanged.bind(this, &FBXApp::BlendAreaSliderValueChange);
-	mWindow->AddChild( mBlendAreaSlider );	
-}
-
-void FBXApp::LoadContent()
-{
-	RenderFactory* factory = Context::GetSingleton().GetRenderFactoryPtr();
-	SceneManager& sceneMan = Context::GetSingleton().GetSceneManager();
-	ResourceManager& resMan = ResourceManager::GetSingleton();
-	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
-
-	FileSystem::GetSingleton().RegisterPath("../Media/Mesh/Tree", "Custom");
-
-	std::cout << "load Fbx.pipeline.xml\n";
-	mPipeline = std::static_pointer_cast<Pipeline>( 
-		resMan.GetResourceByName(RT_Pipeline, "DeferredLighting.pipeline.xml", "General"));
-
-	mCamera = device.GetScreenFrameBuffer()->GetCamera();
-	mCamera->CreateLookAt(float3(-395.7, 839.9, 2061.9), float3(-395.4, 839.6, 2061.0), float3(0.1, 0.9, -0.4));
-	mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mSettings.Width / (float)mSettings.Height, 1.0f, 8000.0f );
-
-	mCameraControler = new RcEngine::Test::FPSCameraControler;
-	mCameraControler->AttachCamera(*mCamera);
-
-	std::cout << std::endl << std::endl;
-	// Load Scene
-	Entity* sponzaEntity = sceneMan.CreateEntity("Tree", "Tree.mesh",  "Custom");
-	SceneNode* sponzaNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("Tree");
-	sponzaNode->SetPosition(float3(0, 0, 0));
-	sponzaNode->AttachObject(sponzaEntity);
-
-	//Entity* dudeEntity = sceneMan.CreateEntity("dude", "him.mesh",  "Custom");
-	//SceneNode* dudeNode = sceneMan.GetRootSceneNode()->CreateChildSceneNode("dude");
-	//dudeNode->SetPosition(float3(0, 0, 0));
-	//dudeNode->SetScale(float3(100, 100, 100));
-	//dudeNode->AttachObject(dudeEntity);
-
-	//SkinnedAnimationPlayer* mAnimationPlayer = (SkinnedAnimationPlayer*)dudeEntity->GetAnimationPlayer();
-	//mAnimationPlayer->GetClip("Take 001")->Play();
-
-	mCameraControler->SetMoveSpeed(400.0f);
-	mCameraControler->SetMoveInertia(true);
-
-	mSceneRender->SetRenderPipeline(mPipeline);
-
-	mDirLight = sceneMan.CreateLight("Sun", LT_DirectionalLight);
-	mDirLight->SetDirection(float3(0, -1, -1));
-	mDirLight->SetLightColor(float3(1, 1, 1));
-	mDirLight->SetCastShadow(true);
-	mDirLight->SetShadowCascades(4);
-	sceneMan.GetRootSceneNode()->AttachObject(mDirLight);
-
-
-	mSpotLight = sceneMan.CreateLight("Spot", LT_SpotLight);
-	mSpotLight->SetDirection(float3(0, -1.5, -1));
-	mSpotLight->SetLightColor(float3(1, 1, 0));
-	mSpotLight->SetRange(1500.0);
-	mSpotLight->SetPosition(float3(0.0f, 800.0f, 0.0f));
-	mSpotLight->SetAttenuation(1.0f, 0.0f);
-	mSpotLight->SetSpotAngle(Mathf::ToRadian(10), Mathf::ToRadian(40));
-	sceneMan.GetRootSceneNode()->AttachObject(mSpotLight);
-
-	mMaterial = std::static_pointer_cast<Material>(resMan.GetResourceByName(RT_Material, "LightShape.material.xml", "General"));
-	mMaterial->Load();
-
-	shared_ptr<Effect> shadowEffect = mPipeline->GetMaterial(0)->GetEffect();
-	shadowEffect->GetParameterByName("ShadowEnabled")->SetValue(true);
-	shadowEffect->GetParameterByName("VisiualizeCascades")->SetValue(false);
-}
-
-void FBXApp::Update( float deltaTime )
-{
-	CalculateFrameRate();
-
-	mCameraControler->Update(deltaTime);
-
-	float3 camera = mCamera->GetPosition();
-	float3 target = mCamera->GetLookAt();
-	float3 up = mCamera->GetUp();
-
-	wchar_t buffer[255];
-	int cx = swprintf (buffer, 255, L"FPS: %d, Camera(%.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f)", mFramePerSecond,
-		camera.X(), camera.Y(), camera.Z(), target.X(), target.Y(), target.Z(),
-		up.X(), up.Y(), up.Z());
-	mLabel->SetText(buffer);
-
-	
-}
-
-void FBXApp::Render()
-{
-	mSceneRender->RenderScene();
-
-	RenderDevice& device = Context::GetSingleton().GetRenderDevice();
-	device.GetScreenFrameBuffer()->SwapBuffers();
-}
-
-void FBXApp::CalculateFrameRate()
-{
-	static int frameCount = 0;
-	static float baseTime = 0;
-
-	frameCount++;
-
-	if (mTimer.GetGameTime()-baseTime >= 1.0f)
+public:
+	TesselationApp(const String& config)
+		: Application(config), mFramePerSecond(60)
 	{
-		mFramePerSecond = frameCount;
-		frameCount = 0;
-		baseTime += 1.0f;
+
 	}
-}
 
-void FBXApp::VisualizeCascades( bool checked )
-{
-	EffectParameter* effectParam = mPipeline->GetMaterial(0)->GetEffect()->GetParameterByName("VisiualizeCascades");
-	bool enable;
-	effectParam->GetValue(enable);
-	effectParam->SetValue(!enable);
-}
+	virtual ~TesselationApp(void)
+	{
 
-void FBXApp::CastShadow( bool checked )
-{
-	bool enable = mDirLight->GetCastShadow();
-	mDirLight->SetCastShadow(!enable);
-}
+	}
 
+protected:
+	void Initialize()
+	{
+		mCamera = std::make_shared<Camera>();
+		mCamera->CreateLookAt(float3(-7.404108, 39.924358, -153.436646), float3(-7.288536, 39.863396, -152.445221), float3(0.007056, 0.998140, 0.060553));
+		mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 3000.0f );
 
-void FBXApp::BlendAreaSliderValueChange( int32_t value )
-{
-	float area = value / float(100.0) * 0.5f;
-	mSceneRender->GetShadowManager()->mCascadeBlendArea = area;
-	wchar_t text[255];
-	std::swprintf(text, 255, L"BlendArea: %.3f", area);
-	mBlendAreaLabel->SetText(text);
-	mSceneRender->GetShadowManager()->mCascadeBlendArea = area;
-}
+		auto view = mCamera->GetViewMatrix();
+		auto proj = mCamera->GetProjMatrix();
 
-int main(int argc, char* argv[])
-{
-	//wchar_t text1[255];
-	//std::swprintf(text1, 255, L"BlendArea: %f", 1.1111);
-	//wsprintf(text1, L"BlendArea: %.3f", 1.1111);
-	//std::wcout << L"Test " << text1;
+		mCameraControler = new RcEngine::Test::FPSCameraControler;
+		mCameraControler->AttachCamera(*mCamera);
+		mCameraControler->SetMoveSpeed(100.0f);
+		mCameraControler->SetMoveInertia(true);
+
+		mRenderPath = std::make_shared<ForwardPath>();
+		mRenderPath->OnGraphicsInit(mCamera);
+
+		DebugDrawManager::Initialize();
+		DebugDrawManager::GetSingleton().OnGraphicsInitialize();
+	}
+
+	void LoadContent()
+	{
+		FileSystem& fileSys = FileSystem::GetSingleton();
+		ResourceManager& resMan = ResourceManager::GetSingleton();
+		SceneManager* sceneMan = Environment::GetSingleton().GetSceneManager();
+		RenderFactory* factory = Environment::GetSingleton().GetRenderFactory();
+		
+		LoadDudeEntity();
+
+		// Set as default camera
+		auto screenFB = Environment::GetSingleton().GetRenderDevice()->GetScreenFrameBuffer();
+		screenFB->SetCamera(mCamera);
+
+		Light* mDirLight = sceneMan->CreateLight("Sun", LT_DirectionalLight);
+		mDirLight->SetDirection(float3(0, -1, 0.5));
+		mDirLight->SetLightColor(float3(1, 1, 1));
+		mDirLight->SetCastShadow(false);
+		sceneMan->GetRootSceneNode()->AttachObject(mDirLight);
+	}
+
+	void LoadDudeEntity()
+	{
+		SceneManager* sceneMan = Environment::GetSingleton().GetSceneManager();
+		ResourceManager& resMan = ResourceManager::GetSingleton();
+
+		//SceneNode* sirisSceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Siris");
+		//{
+		//	Entity* dudeEntity = sceneMan->CreateEntity("dude", "./InfinityBlade/Siris.mesh",  "Custom");
+
+		//	AnimationPlayer* animPlayer = dudeEntity->GetAnimationPlayer();
+
+		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./InfinityBlade/attack_big_down.anim", "Custom"));
+		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./InfinityBlade/attack_big_left.anim", "Custom"));
+		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./InfinityBlade/attack_big_center.anim", "Custom"));
+		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./InfinityBlade/attack_big_right.anim", "Custom"));
+		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./InfinityBlade/attack_small_down.anim", "Custom"));
+		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./InfinityBlade/attack_small_left.anim", "Custom"));
+		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./InfinityBlade/attack_small_right.anim", "Custom"));
+
+		//	AnimationState* takeClip = animPlayer->GetClip("attack_big_down");
+		//	takeClip->SetAnimationWrapMode(AnimationState::Wrap_Loop);
+		//	//takeClip->Play();
+
+		//	sirisSceneNode->AttachObject(dudeEntity);
+
+		//	mDudeEntity = dudeEntity;
+		//	mDudeSceneNode = sirisSceneNode;
+		//}
+
+		//SceneNode* dudeSceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Dude");
+		//{
+		//	Entity* dudeEntity = sceneMan->CreateEntity("dude", "./Dude/dude_gpu.mesh",  "Custom");
+
+		//	AnimationPlayer* animPlayer = dudeEntity->GetAnimationPlayer();
+		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./Dude/Walk.anim", "Custom"));
+
+		//	AnimationState* takeClip = animPlayer->GetClip("Walk");
+		//	takeClip->SetAnimationWrapMode(AnimationState::Wrap_Loop);
+		//	takeClip->Play();
+
+		//	dudeSceneNode->SetRotation(QuaternionFromRotationAxis(float3(0, 1, 0), Mathf::PI));
+		//	dudeSceneNode->SetPosition(float3(100, 0, 0));
+		//	dudeSceneNode->AttachObject(dudeEntity);
+
+		//	mDudeEntity = dudeEntity;
+		//	mDudeSceneNode = dudeSceneNode;
+		//}
+
+		//SceneNode* arthasSceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Arthas");
+		//{
+		//	Entity* arthasEntity = sceneMan->CreateEntity("dude", "./Arthas/Arthas_Random.mesh",  "Custom");
+		//	Entity* swoardEntity = sceneMan->CreateEntity("swoard", "./Arthas/Swoard.mesh",  "Custom");
+		//	arthasEntity->AttachObjectToBone("wepson", swoardEntity, Quaternionf::Identity(), float3(4.2, -7.8, 0));
+
+		//	AnimationPlayer* animPlayer = arthasEntity->GetAnimationPlayer();
+
+		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./Arthas/Walk.anim", "Custom"));
+		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./Arthas/Random.anim", "Custom"));
+		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./Arthas/Standby.anim", "Custom"));
+		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./Arthas/Casting.anim", "Custom"));
+		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./Arthas/FightingStandby.anim", "Custom"));
+
+		//	AnimationState* takeClip = animPlayer->GetClip("Random");
+		//	takeClip->SetAnimationWrapMode(AnimationState::Wrap_Loop);
+		//	takeClip->Play();
+
+		//	arthasSceneNode->SetScale(float3(4, 4, 4));
+		//	arthasSceneNode->SetPosition(float3(-100, 0, 0));
+		//	arthasSceneNode->AttachObject(arthasEntity);
+		//}
+
+		SceneNode* citySceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("AncientCity");
+		{
+			Entity* arthasEntity = sceneMan->CreateEntity("dude", "./AncientCity/AncientCity.mesh",  "Custom");	
+			citySceneNode->SetScale(float3(4, 4, 4));
+			citySceneNode->AttachObject(arthasEntity);
+		}
+	}
 	
-	FBXApp app("Config.xml");
+
+	void UnloadContent()
+	{
+
+	}
+
+	void CalculateFrameRate()
+	{
+		static int frameCount = 0;
+		static float baseTime = 0;
+
+		frameCount++;
+
+		if (mTimer.GetGameTime()-baseTime >= 1.0f)
+		{
+			mFramePerSecond = frameCount;
+			frameCount = 0;
+			baseTime += 1.0f;
+		}
+	}
+
+	void Update(float deltaTime)
+	{
+		CalculateFrameRate();
+		mCameraControler->Update(deltaTime);
+
+		if ( InputSystem::GetSingleton().KeyPress(KC_Q) )
+		{
+			auto target = mCamera->GetLookAt();
+			auto eye = mCamera->GetPosition();
+			auto up = mCamera->GetUp();
+
+			FILE* f = fopen("E:/camera.txt", "w");
+			fprintf(f, "float3(%f, %f, %f), float3(%f, %f, %f), float3(%f, %f, %f)",
+				eye[0], eye[1], eye[2], 
+				target[0], target[1], target[2],
+				up[0], up[1], up[2]);
+			fclose(f);
+		}
+
+		char buffer[255];
+		std::sprintf(buffer, "FPS: %d", mFramePerSecond);
+		mMainWindow->SetTitle(buffer);
+	}
+
+	void Render()
+	{
+		RenderDevice* device = Environment::GetSingleton().GetRenderDevice();
+		SceneManager* sceneMan = Environment::GetSingleton().GetSceneManager();
+
+		shared_ptr<FrameBuffer> screenFB = device->GetScreenFrameBuffer();
+		device->BindFrameBuffer(screenFB);
+		screenFB->Clear(CF_Color | CF_Depth, ColorRGBA::White, 1.0, 0);
+
+		mRenderPath->RenderScene();
+
+		//auto bbox = mDudeSceneNode->GetWorldBoundingBox();
+		//DebugDrawManager::GetSingleton().DrawBoundingBox(bbox, ColorRGBA::Red);
+
+		//shared_ptr<Skeleton> skeleton = mDudeEntity->GetSkeleton();
+		//DebugDrawManager::GetSingleton().DrawSkeleton(mDudeEntity->GetWorldTransform(), skeleton, ColorRGBA::Red);
+
+		/*	static bool sb = false;
+		for (size_t i = 0; i < skeleton->GetBoneCount(); ++i)
+		{
+		Bone* bone = skeleton->GetBone(i);
+
+		float3 center = bone->GetWorldPosition();
+		center = Transform(center, mDudeEntity->GetWorldTransform());
+		DebugDrawManager::GetSingleton().DrawSphere(center, 0.5, ColorRGBA::Red, true);
+		}*/
+
+
+		//for (size_t i = 0; i < mDudeCollisionSpheres.size(); ++i)
+		//{
+		//	Bone* bone = skeleton->GetBone(mDudeCollisionSpheres[i].BoneName);
+
+		//	float3 center(mDudeCollisionSpheres[i].Offset, 0, 0);
+		//	center = Transform(center, bone->GetWorldTransform());
+		//	center = bone->GetWorldPosition();
+
+		//	DebugDrawManager::GetSingleton().DrawSphere(center, mDudeCollisionSpheres[i].Radius * 0.5, ColorRGBA::Red);
+		//}
+
+
+	/*	Bone* bone = skeleton->GetBone("L_Index1");
+		DebugDrawManager::GetSingleton().DrawSphere(bone->GetWorldPosition(), 4 * 0.5, ColorRGBA::Red);*/
+
+		screenFB->SwapBuffers();
+	}
+
+	void WindowResize(uint32_t width, uint32_t height)
+	{
+		mRenderPath->OnWindowResize(width, height);
+	}
+
+protected:
+
+	shared_ptr<RenderPath> mRenderPath;
+	shared_ptr<Camera> mCamera;
+	Test::FPSCameraControler* mCameraControler;
+
+	Entity* mDudeEntity;
+	SceneNode* mDudeSceneNode;
+
+	int mFramePerSecond;
+
+	struct SkinnedSphere
+	{
+		String BoneName;
+		float Radius;
+		float Offset;
+	};
+	std::vector<SkinnedSphere> mDudeCollisionSpheres;
+};
+
+
+int main()
+{
+	TesselationApp app("../Config.xml");
 	app.Create();
 	app.RunGame();
 	app.Release();
-
 	return 0;
 }

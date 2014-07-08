@@ -64,6 +64,7 @@
     <Pass name="p0">
       <VertexShader file="Model" entry="ModelVS"/>
       <PixelShader file="ForwardLighting" entry="DirectionalLightingPS"/>
+	  <!--<State name="FillMode" value="WireFrame"/>-->
     </Pass>
   </Technique>
 
@@ -73,7 +74,7 @@
       <PixelShader file="ForwardPlus" entry="ForwardShadingPSMain"/>
       <State name="DepthEnable" value="true"/>
       <State name="DepthFunc" value="LessEqual"/>
-     <State name="DepthWriteMask" value="false"/>
+      <State name="DepthWriteMask" value="false"/>
     </Pass>
   </Technique>
   

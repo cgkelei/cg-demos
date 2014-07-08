@@ -34,7 +34,12 @@ layout (location = TEXCOORD) in vec2 iTex;
 #ifdef _Skinning
 
 	#define MaxNumBone 92
-	uniform mat4 SkinMatrices[MaxNumBone];
+	//uniform mat4 SkinMatrices[MaxNumBone];
+
+	layout(std140) uniform SkinCB
+	{
+		mat4 SkinMatrices[MaxNumBone];
+	};
 
 	mat4 CalculateSkinMatrix()
 	{

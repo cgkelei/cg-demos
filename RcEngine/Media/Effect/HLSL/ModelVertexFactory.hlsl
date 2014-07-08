@@ -8,7 +8,10 @@ struct VSInput
 #endif
 
 	float3 Normal		 : NORMAL;
+
+#if defined(_DiffuseMap)
 	float2 Tex			 : TEXCOORD0;
+#endif
 
 #ifdef _NormalMap
 	float3 Tangent		 : TANGENT;

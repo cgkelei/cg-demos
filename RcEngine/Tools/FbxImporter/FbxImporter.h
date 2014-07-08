@@ -10,76 +10,49 @@
 
 using namespace RcEngine;
 
-enum AxisSystem 
-{
-	Axis_OpenGL,
-	Axis_DirectX,
-};
-
 struct ExportSettings
 {
 	bool ExportSkeleton;
 	bool ExportAnimation; 
 	bool MergeScene;
 	bool MergeWithSameMaterial; // Merge sub mesh with same material
-	AxisSystem AxisSystem;
+	bool SwapWindOrder;
 
 	ExportSettings()
-		: ExportSkeleton(true),
+		: SwapWindOrder(true),
+		  ExportSkeleton(true),
 		  ExportAnimation(true),
 		  MergeScene(false),
-		  MergeWithSameMaterial(true),
-		  AxisSystem(Axis_DirectX)
+		  MergeWithSameMaterial(false)
 	{}
 };
 
-//class FBXTransformer
-//{
-//public:
-//	FBXTransformer()
-//		: mUnitScale( 1.0f )
-//	{ }
-//
-//	void Initialize( FbxScene* pScene );
-//
-//	void TransformMatrix( float4x4* pDestMatrix, const float4x4* pSrcMatrix ) const;
-//	void TransformPosition( float3* pDestPosition, const float3* pSrcPosition ) const;
-//	void TransformDirection( float3* pDestDirection, const float3* pSrcDirection ) const;
-//	float TransformLength( float inputLength ) const;
-//
-//	// Sets unit scale for exporting all geometry - works with characters too.
-//	void SetUnitScale( const float fScale )	{ mUnitScale = fScale; }
-//
-//protected:
-//	float mUnitScale;
-//	bool  m3dMaxConversion;
-//};
+class FBXTransformer
+{
+public:
+	FBXTransformer() {}
+
+	void Initialize( FbxScene* pScene );
+
+	void TransformMatrix( float4x4* pDestMatrix, const float4x4* pSrcMatrix ) const;
+	void TransformPosition( float3* pDestPosition, const float3* pSrcPosition ) const;
+	void TransformDirection( float3* pDestDirection, const float3* pSrcDirection ) const;
+
+protected:
+	bool  mMaxConversion; // Convert Z-Up to Y-Up
+};
 
 class FbxProcesser
 {
 public:
 	struct MaterialData
 	{
-		enum
-		{
-			MAT_AMBIENT_COLOR = 0x1,
-			MAT_DIFFUSE_COLOR = 0x2, 
-			MAT_SPECULAR_COLOR = 0x4, 
-			MAT_EMISSIVE_COLOR = 0x8, 
-			MAT_POWER_COLOR = 0x10,
-		};
-
-		MaterialData() 
-			: MaterialFlags(0) { }
-
 		String Name;
 		float3 Ambient;
 		float3 Diffuse;
 		float3 Specular;
 		float3 Emissive;
 		float Power;
-
-		uint32_t MaterialFlags;
 
 		unordered_map<String, String> Textures;
 	};
@@ -101,7 +74,6 @@ public:
 		std::vector<std::pair<int, float>> mBoneWeights;
 	};
 
-	#pragma pack(push, 1)
 	struct Vertex
 	{
 		enum Flags
@@ -129,6 +101,8 @@ public:
 			CMP(Tex0, 2);
 			CMP(Tex1, 2);
 
+			#undef CMP
+
 			return false;
 		}
 
@@ -145,7 +119,6 @@ public:
 		uint32_t Flag;
 		size_t Index;	// keep track index in vertices
 	};
-	#pragma pack(pop)
 
 	struct AnimationClipData
 	{
@@ -215,6 +188,7 @@ public:
 	void ProcessSubDiv(FbxNode* pNode);
 
 	shared_ptr<Skeleton> ProcessBoneWeights(FbxMesh* pMesh, std::vector<BoneWeights>& meshBoneWeights);
+	void CalculateBindPose(Bone* bone, std::map<Bone*, FbxAMatrix>& bindPoseMap);
 	
 	void ProcessAnimation(FbxAnimStack* pStack, FbxNode* pNode, double fFrameRate, double fStart, double fStop);
 
@@ -229,24 +203,28 @@ public:
 
 	void BuildAndSaveXML();
 	void BuildAndSaveBinary();	
+	void BuildAndSaveMaterial();
 
 	void ExportMaterial();
 
-private:
+public:
 	FbxManager* mFBXSdkManager;
 	FbxScene* mFBXScene;
 	bool mQuietMode;
 	bool mMergeScene;
 	String mSceneName;
 	String mOutputPath;
-
+	String mAnimationName;
+	
 	unordered_map<String, shared_ptr<Skeleton>> mSkeletons;
 	unordered_map<String, AnimationData> mAnimations;
+
+	unordered_map<String, FbxNode*> mBoneMap;
 
 	vector<MaterialData> mMaterials;
 	vector<shared_ptr<MeshData> > mSceneMeshes;
 
-	//FBXTransformer mFBXTransformer;
+	FBXTransformer mFBXTransformer;
 };
 
 
