@@ -161,7 +161,11 @@ class RadioButtonGroup;
 class Menu;
 class UIManager;
 
+class GameObject;
+class Component;
 
+typedef uint32_t GameObjectID;
+typedef uint32_t ComponentID;
 
 } // Namespace RcEngine
 

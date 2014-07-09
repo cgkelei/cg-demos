@@ -2,7 +2,7 @@
 #define Variant_h__
 
 #include <Core/Prerequisites.h>
-#include <Core/StringHash.h>
+#include <Core/HashedString.h>
 
 namespace RcEngine {
 
@@ -105,7 +105,7 @@ private:
 	} mValue;
 };
 
-typedef std::unordered_map<StringHash, Variant> VariantMap;
+typedef std::unordered_map<HashedString, Variant> VariantMap;
 
 }
 

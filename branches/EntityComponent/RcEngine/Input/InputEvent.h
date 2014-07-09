@@ -2,7 +2,7 @@
 #define InputEvent_h__
 
 #include <Core/Prerequisites.h>
-#include <Core/StringHash.h>
+#include <Core/HashedString.h>
 
 namespace RcEngine {
 
