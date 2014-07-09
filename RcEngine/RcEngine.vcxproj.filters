@@ -43,6 +43,9 @@
     <Filter Include="Asset\Material">
       <UniqueIdentifier>{2f127fa8-5ee8-4f16-9313-c41678db02ea}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GamePlay">
+      <UniqueIdentifier>{79dcd984-1260-4602-be8c-c15901767b30}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\CompileConfig.h">
@@ -112,9 +115,6 @@
       <Filter>Math</Filter>
     </ClInclude>
     <ClInclude Include="Core\Variant.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\StringHash.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\Loger.h">
@@ -270,6 +270,15 @@
     <ClInclude Include="Graphics\Geometry.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="GamePlay\Component.h">
+      <Filter>GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePlay\GameObject.h">
+      <Filter>GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\HashedString.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Exception.cpp">
@@ -294,9 +303,6 @@
       <Filter>Math</Filter>
     </ClCompile>
     <ClCompile Include="Core\Variant.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\StringHash.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\Loger.cpp">
@@ -463,6 +469,15 @@
     </ClCompile>
     <ClCompile Include="Graphics\Geometry.cpp">
       <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="GamePlay\Component.cpp">
+      <Filter>GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="GamePlay\GameObject.cpp">
+      <Filter>GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\HashedString.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
