@@ -41,6 +41,9 @@ public:
 	BoneSceneNode* CreateBoneSceneNode(const String& nodeName, const String& boneName);
 
 protected:
+	void OnAttach( SceneNode* node );
+	void OnDetach( SceneNode* node );
+
 	void UpdateAnimation();
 
 public:
@@ -50,9 +53,10 @@ protected:
 	shared_ptr<Mesh> mMesh;
 	shared_ptr<Skeleton> mSkeleton;
 
-	std::vector<VisualPart*> mVisualParts;
-
 	mutable BoundingBoxf mWorldBoundingBox;
+	
+	std::vector<VisualPart*> mVisualParts;
+	std::vector<BoneSceneNode*> mBoneSceneNodes;
 
 	// Matrix palette for skeleton animation
 	uint32_t mNumSkinMatrices;

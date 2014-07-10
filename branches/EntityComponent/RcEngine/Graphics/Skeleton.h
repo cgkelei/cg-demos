@@ -8,9 +8,6 @@
 namespace RcEngine {
 
 class Bone;
-class BoneSceneNode;
-class SceneObject;
-class Visual;
 
 class _ApiExport Skeleton
 {
@@ -28,11 +25,6 @@ public:
 
 	Bone* AddBone(const String& name, Bone* parent);
 	
-	inline uint32_t GetNumBoneSceneNodes() const { return mBoneSceneNodes.size(); }
-	inline BoneSceneNode* GetBoneSceneNode(uint32_t i) const { return mBoneSceneNodes[i]; }
-
-	BoneSceneNode* CreateBoneSceneNode(const String& nodeName, const String& boneName, SceneNode* worldSceneNode);
-
 	shared_ptr<Skeleton> Clone();
 
 public:
@@ -40,7 +32,6 @@ public:
 
 private:
 	std::vector<Bone*> mBones;
-	std::vector<BoneSceneNode*> mBoneSceneNodes;
 };
 
 class _ApiExport Bone : public Node
@@ -61,18 +52,23 @@ protected:
 
 protected:
 	uint32_t mBoneIndex;
-	float4x4 mOffsetMatrix;
+	float4x4 mOffsetMatrix; // InvBind Pose Matrix
 };
 
-/**
- * A follower point on a skeleton, which can be used to attach 
- * SceneObjects to on specific other entities.
- */
 
+/**
+ * Specular SceneNode which can be attached on Bone node.
+ */
 class _ApiExport BoneSceneNode : public SceneNode
 {
 public:
-	BoneSceneNode(const String& name, SceneNode* worldSceneNode);
+	/**
+	 * @Param worldSceneNode, if exits take worldSceneNode's transform into consideration .
+	 */
+	BoneSceneNode(SceneManager* scene, const String& name, SceneNode* worldSceneNode = nullptr);
+
+	void SetWorldSceneNode(SceneNode* worldSceneNode);
+	inline SceneNode* GetWorldSceneNode() const { return mWorldSceneNode; }
 
 protected:
 	// need to consider entity's transform

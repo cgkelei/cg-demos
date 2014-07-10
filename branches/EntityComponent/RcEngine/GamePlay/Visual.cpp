@@ -55,6 +55,12 @@ Visual::~Visual()
 		delete[] mMatrixPalette;
 		mMatrixPalette = nullptr;
 	}
+
+	mSkeleton = nullptr;
+
+	// Detach all bone scene nodes
+	for (BoneSceneNode* boenSceneNode : mBoneSceneNodes)
+		delete boenSceneNode;
 }
 
 void Visual::DestroyComponent()
@@ -62,9 +68,7 @@ void Visual::DestroyComponent()
 	Component::DestroyComponent();
 	if (mParentNode)
 		mParentNode->DetachOject(this);
-
 }
-
 
 const BoundingBoxf& Visual::GetWorldBoundingBox() const
 {
@@ -88,7 +92,7 @@ void Visual::OnUpdateRenderQueue( RenderQueue* renderQueue, const Camera& camera
 	{
 		BoundingBoxf subWorldBoud = Transform(visualPart->GetBoundingBox(), mParentNode->GetWorldTransform());
 
-		// tode  mesh part world bounding has some bugs.
+		// Todo:  mesh part world bounding has some bugs.
 		if(camera.Visible(subWorldBoud))
 		{
 			float sortKey = 0;
@@ -122,9 +126,8 @@ void Visual::OnUpdateRenderQueue( RenderQueue* renderQueue, const Camera& camera
 	{
 		UpdateAnimation();
 
-		for (uint32_t i = 0; i < mSkeleton->GetNumBoneSceneNodes(); ++i)
+		for (BoneSceneNode* boneSceneNode : mBoneSceneNodes)
 		{
-			SceneNode* boneSceneNode = mSkeleton->GetBoneSceneNode(i);
 			boneSceneNode->OnUpdateRenderQueues(camera, order);
 		}
 	}
@@ -165,7 +168,36 @@ BoneSceneNode* Visual::CreateBoneSceneNode( const String& nodeName, const String
 			"Entity::attachObjectToBone");
 	}
 
-	return mSkeleton->CreateBoneSceneNode(nodeName, boneName, mParentNode);
+	BoneSceneNode* newNode;
+	if (mParentNode)
+		newNode = new BoneSceneNode(nullptr, nodeName, nullptr);
+	else
+		newNode = new BoneSceneNode(mParentNode->GetScene(), nodeName, mParentNode);
+
+	pBone->AttachChild(newNode);
+
+	mBoneSceneNodes.push_back(newNode);
+	return newNode;
+}
+
+void Visual::OnAttach( SceneNode* node )
+{
+	SceneObject::OnAttach(node);
+
+	for (BoneSceneNode* boneSceneNode : mBoneSceneNodes)
+	{
+		boneSceneNode->SetWorldSceneNode(mParentNode);
+	}
+}
+
+void Visual::OnDetach( SceneNode* node )
+{
+	SceneObject::OnDetach(node);
+
+	for (BoneSceneNode* boneSceneNode : mBoneSceneNodes)
+	{
+		boneSceneNode->SetWorldSceneNode(nullptr);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
