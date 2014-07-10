@@ -9,7 +9,6 @@
 
 namespace RcEngine {
 
-
 Renderable::Renderable()
 {
 
@@ -17,7 +16,7 @@ Renderable::Renderable()
 
 Renderable::~Renderable()
 {
-			
+
 }
 
 EffectTechnique* Renderable::GetTechnique() const
@@ -39,33 +38,20 @@ void Renderable::OnRenderBegin()
 	// Get material 
 	shared_ptr<Material> material = GetMaterial();
 
-	// Get world transforms
-	float4x4 worldMatrix;
-	uint32_t matCounts = GetWorldTransformsCount();
+	float4x4 xWorld;
+	float4x4* xPalettes = nullptr;
+	uint32_t numPalette = 0;
+	GetWorldTransforms(&xWorld, numPalette, xPalettes);
 
-	if (matCounts > 0)
+	if (numPalette > 0)
 	{
-		vector<float4x4> matWorlds(matCounts);
-		GetWorldTransforms(&matWorlds[0]);
-
-		//Last matrix is world transform matrix, previous is skin matrices.
-		worldMatrix = matWorlds.back();
-
-		// Skin matrix
-		if (matCounts > 1)
-		{	
-			EffectParameter* skinMatricesParam = material->GetEffect()->GetParameterByName("SkinMatrices");
-			if (skinMatricesParam)
-			{
-				// delete last world matrix first
-				matWorlds.pop_back();
-				skinMatricesParam->SetValue(&matWorlds[0], matWorlds.size());
-			}
-		}
+		EffectParameter* skinMatricesParam = material->GetEffect()->GetParameterByName("SkinMatrices");
+		if (skinMatricesParam)
+			skinMatricesParam->SetValue(xPalettes, numPalette);
 	}
-			
+
 	// Setup other material parameter
-	material->ApplyMaterial(worldMatrix);
+	material->ApplyMaterial(xWorld);
 }
 
 void Renderable::OnRenderEnd()

@@ -1,13 +1,11 @@
 #include <Scene/SceneManager.h>
 #include <Scene/SceneNode.h>
 #include <Scene/SceneObject.h>
-#include <Scene/Entity.h>
 #include <Graphics/RenderDevice.h>
 #include <Graphics/RenderFactory.h>
 #include <Graphics/Material.h>
 #include <Graphics/Mesh.h>
 #include <Graphics/Camera.h>
-#include <Graphics/Sky.h>
 #include <Graphics/SpriteBatch.h>
 #include <Graphics/RenderQueue.h>
 #include <Graphics/GraphicsResource.h>
@@ -17,22 +15,19 @@
 #include <IO/FileStream.h>
 #include <IO/FileSystem.h>
 #include <Resource/ResourceManager.h>
-#include <Scene/SubEntity.h>
 #include <Scene/Light.h>
 #include <Graphics/Effect.h>
 
 namespace RcEngine {
 
 SceneManager::SceneManager()
-	: mSkyBox(nullptr) 
+	//: mSkyBox(nullptr) 
 {
 	Environment::GetSingleton().mSceneManager = this;
 
 	// Register all known scene object types
-	RegisterType(SOT_Entity, "Entity Type", nullptr, nullptr, Entity::FactoryFunc);
+	//RegisterType(SOT_Entity, "Entity Type", nullptr, nullptr, Entity::FactoryFunc);
 	RegisterType(SOT_Light, "Light Type", nullptr, nullptr, Light::FactoryFunc);
-
-	mAnimationController = new AnimationController;
 }
 
 SceneManager::~SceneManager()
@@ -48,11 +43,6 @@ void SceneManager::ClearScene()
 		delete node;
 
 	mAllSceneNodes.clear();
-
-	// clear all sprite
-	for (Sprite* sprite : mSprites)
-		delete sprite;
-	mSprites.clear();
 
 	// clear all scene object
 	for (auto& kv : mSceneObjectCollections)
@@ -108,11 +98,6 @@ SceneNode* SceneManager::GetRootSceneNode()
 	return root;
 }
 
-AnimationController* SceneManager::GetAnimationController() const
-{
-	return mAnimationController;
-}
-
 void SceneManager::DestroySceneNode( SceneNode* node )
 {
 	auto found = std::find(mAllSceneNodes.begin(), mAllSceneNodes.end(), node);
@@ -123,7 +108,6 @@ void SceneManager::DestroySceneNode( SceneNode* node )
 			"SceneManager::DestroySceneNode");
 	}
 
-	// detach from parent (don't do this in destructor since bulk destruction behaves differently)
 	Node* parentNode = (*found)->GetParent();
 	if (parentNode)
 	{
@@ -153,23 +137,23 @@ Light* SceneManager::CreateLight( const String& name, uint32_t type )
 	return light;
 }
 
-Entity* SceneManager::CreateEntity( const String& entityName, const String& meshName, const String& groupName )
-{
-	auto entityFactoryIter = mRegistry.find(SOT_Entity);
-	if (entityFactoryIter == mRegistry.end())
-	{
-		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Entity type haven't Registed", "SceneManager::CreateEntity");
-	}
-
-	NameValuePairList params;
-	params["ResourceGroup"] = groupName;
-	params["Mesh"] = meshName;
-
-	Entity* entity = static_cast<Entity*>((entityFactoryIter->second.factoryFunc)(entityName, &params));
-	mSceneObjectCollections[SOT_Entity].push_back(entity);
-	
-	return entity;
-}
+//Entity* SceneManager::CreateEntity( const String& entityName, const String& meshName, const String& groupName )
+//{
+//	auto entityFactoryIter = mRegistry.find(SOT_Entity);
+//	if (entityFactoryIter == mRegistry.end())
+//	{
+//		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Entity type haven't Registed", "SceneManager::CreateEntity");
+//	}
+//
+//	NameValuePairList params;
+//	params["ResourceGroup"] = groupName;
+//	params["Mesh"] = meshName;
+//
+//	Entity* entity = static_cast<Entity*>((entityFactoryIter->second.factoryFunc)(entityName, &params));
+//	mSceneObjectCollections[SOT_Entity].push_back(entity);
+//	
+//	return entity;
+//}
 
 SceneNode* SceneManager::FindSceneNode( const String& name ) const
 {
@@ -182,39 +166,36 @@ SceneNode* SceneManager::FindSceneNode( const String& name ) const
 	return nullptr;
 }
 
-Sprite* SceneManager::CreateSprite( const shared_ptr<Texture>& tex, const shared_ptr<Material>& mat )
-{
-	Sprite* sprite = new Sprite();
-	sprite->SetSpriteContent(tex, mat);
-	mSprites.push_back(sprite);
+//Sprite* SceneManager::CreateSprite( const shared_ptr<Texture>& tex, const shared_ptr<Material>& mat )
+//{
+//	Sprite* sprite = new Sprite();
+//	sprite->SetSpriteContent(tex, mat);
+//	mSprites.push_back(sprite);
+//
+//	return sprite;
+//}
 
-	return sprite;
-}
+//void SceneManager::DestroySprite( Sprite* sprite )
+//{
+//	if (sprite)
+//	{
+//		std::list<Sprite*>::iterator it = std::find(mSprites.begin(), mSprites.end(), sprite);
+//		if (it != mSprites.end())
+//			mSprites.erase(it);
+//
+//		delete sprite;
+//	}
+//}
 
-void SceneManager::DestroySprite( Sprite* sprite )
-{
-	if (sprite)
-	{
-		std::list<Sprite*>::iterator it = std::find(mSprites.begin(), mSprites.end(), sprite);
-		if (it != mSprites.end())
-			mSprites.erase(it);
-
-		delete sprite;
-	}
-}
-
-void SceneManager::CreateSkyBox( const shared_ptr<Texture>& texture )
-{
-	SAFE_DELETE(mSkyBox);
-	mSkyBox = new SkyBox;
-	mSkyBox->GetMaterial()->SetTexture("EnvTex", texture->GetShaderResourceView());
-}
+//void SceneManager::CreateSkyBox( const shared_ptr<Texture>& texture )
+//{
+//	SAFE_DELETE(mSkyBox);
+//	mSkyBox = new SkyBox;
+//	mSkyBox->GetMaterial()->SetTexture("EnvTex", texture->GetShaderResourceView());
+//}
 
 void SceneManager::UpdateSceneGraph( float delta )
 {
-	// update anination controller first 
-	mAnimationController->Update(delta);
-
 	// update scene node transform
 	GetRootSceneNode()->Update();
 }
@@ -233,11 +214,11 @@ void SceneManager::UpdateBackgroundQueue( const Camera& cam )
 	mRenderQueue.ClearQueue(RenderQueue::BucketBackground); 
 
 	// Update skynode same with camera positon, add sky box to render queue
-	if (mSkyBox)
+	/*if (mSkyBox)
 	{
 		mSkyBox->SetPosition( cam.GetPosition() );
 		mRenderQueue.AddToQueue( RenderQueueItem(mSkyBox, 0), RenderQueue::BucketBackground);
-	}
+	}*/
 }
 
 void SceneManager::UpdateLightQueue( const Camera& cam )
@@ -270,20 +251,20 @@ void SceneManager::UpdateLightQueue( const Camera& cam )
 
 void SceneManager::UpdateOverlayQueue()
 {
-	mRenderQueue.ClearQueue(RenderQueue::BucketOverlay);
+	//mRenderQueue.ClearQueue(RenderQueue::BucketOverlay);
 
-	for (Sprite* sprite : mSprites)
-	{
-		if (sprite->Empty() == false)
-		{
-			RenderQueueItem item;
-			item.Renderable = sprite;
+	//for (Sprite* sprite : mSprites)
+	//{
+	//	if (sprite->Empty() == false)
+	//	{
+	//		RenderQueueItem item;
+	//		item.Renderable = sprite;
 
-			// ignore render order, only handle state change order
-			item.SortKey = (float)sprite->GetMaterial()->GetEffect()->GetResourceHandle();
-			mRenderQueue.AddToQueue(item, RenderQueue::BucketOverlay);
-		}
-	}
+	//		// ignore render order, only handle state change order
+	//		item.SortKey = (float)sprite->GetMaterial()->GetEffect()->GetResourceHandle();
+	//		mRenderQueue.AddToQueue(item, RenderQueue::BucketOverlay);
+	//	}
+	//}
 }
 
 

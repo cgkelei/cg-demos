@@ -59,10 +59,10 @@ void AnimationState::Apply()
 		if (animTrack.KeyFrames.empty())
 			continue;
 
-		unordered_map<String, Bone*>::const_iterator found = mAnimation.mAnimateTargets.find(animTrack.Name);
+		unordered_map<String, Node*>::const_iterator found = mAnimation.mAnimateTargets.find(animTrack.Name);
 
 		assert( found != mAnimation.mAnimateTargets.end() );
-		Bone* bone = found->second;
+		Node* bone = found->second;
 
 		int32_t frame = animTrack.GetKeyFrameIndex(mTime);
 		int32_t nextFrame = frame + 1;
@@ -311,7 +311,7 @@ void AnimationState::Play()
 		mTime = 0;
 
 		// add to controller
-		mAnimation.mController->Schedule(this);
+		AnimationController::GetSingleton().Schedule(this);
 	}
 }
 

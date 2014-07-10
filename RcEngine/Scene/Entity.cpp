@@ -3,7 +3,6 @@
 #include <Scene/SceneNode.h>
 #include <Scene/SceneManager.h>
 #include <Graphics/Mesh.h>
-#include <Graphics/MeshPart.h>
 #include <Graphics/Effect.h>
 #include <Graphics/RenderOperation.h>
 #include <Graphics/Camera.h>
@@ -282,7 +281,7 @@ BoneFollower* Entity::AttachObjectToBone( const String &boneName, SceneObject* s
 	}
 
 	BoneFollower* pBoneFollower = mSkeleton->CreateFollowerOnBone(pBone, offsetOrientation, offsetPosition);	
-	pBoneFollower->SetParentEntity(this);
+	pBoneFollower->SetParentVisual(this);
 	pBoneFollower->SetFollower(sceneObj);
 	
 	mChildAttachedObjects.insert( std::make_pair(sceneObj->GetName(), sceneObj) );

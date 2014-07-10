@@ -34,17 +34,16 @@ const float4x4& SceneObject::GetWorldTransform() const
 		return float4x4::Identity();
 }
 
-void SceneObject::OnAttach( Node* node )
+void SceneObject::OnAttach( SceneNode* node )
 {
 	assert(!mParentNode || !node);
 	mParentNode = node;
 }
 
-void SceneObject::OnDetach( Node* node )
+void SceneObject::OnDetach( SceneNode* node )
 {
-
+	mParentNode = nullptr;
 }
-
 
 void SceneObject::OnUpdateRenderQueue( RenderQueue* renderQueue, const Camera& cam, RenderOrder order )
 {

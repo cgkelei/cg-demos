@@ -10,9 +10,8 @@
 
 namespace RcEngine {
 
-class SkyBox;
+//class SkyBox;
 class SceneObject;
-class Sprite;
 
 typedef std::vector<Light*> LightQueue;
 
@@ -58,12 +57,12 @@ public:
 
 	SceneNode* FindSceneNode( const String& name ) const;
 
-	Entity* CreateEntity( const String& entityName, const String& meshName, const String& groupName );
+	//Entity* CreateEntity( const String& entityName, const String& meshName, const String& groupName );
 	
 	Light* CreateLight( const String& name, uint32_t lightType);
 	const std::vector<Light*>& GetSceneLights() const  { return mAllSceneLights; }
 
-	void CreateSkyBox( const shared_ptr<Texture>& texture );
+	//void CreateSkyBox( const shared_ptr<Texture>& texture );
 
 	/**
 	 * Update all scene graph node and transform.
@@ -83,12 +82,6 @@ public:
 	// Return lights affect current view frustum
 	LightQueue& GetLightQueue()							{ return mLightQueue; }
 	
-	AnimationController* GetAnimationController() const;
-
-public_internal:
-	Sprite* CreateSprite( const shared_ptr<Texture>& tex, const shared_ptr<Material>& mat);
-	void DestroySprite(Sprite* sprite);
-
 protected:
 	void ClearScene();
 	virtual SceneNode* CreateSceneNodeImpl( const String& name );
@@ -107,10 +100,7 @@ protected:
 	std::vector<Light*> mAllSceneLights;
 
 	// For sky box
-	SkyBox* mSkyBox;
-
-	// Todo: Add GUI Manager
-	std::list<Sprite*> mSprites;
+	//SkyBox* mSkyBox;
 
 	AnimationController* mAnimationController;
 

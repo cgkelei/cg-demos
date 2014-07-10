@@ -46,7 +46,6 @@ public:
 	 */
 	const String& GetName() const { return mName; }
 
-
 	/**
 	 * Moves the node along the Cartesian axes.
 	 * TS_Local: Translate node from current position in local coordinate system along current rotated axes.
@@ -159,6 +158,7 @@ public:
 	/**
 	 * Creates an named new Node as a child of this node.
 	 */
+	Node* CreateChild( const String& name );
 	Node* CreateChild( const String& name, const float3& translate,  const Quaternionf& rotate );
 
 	/**

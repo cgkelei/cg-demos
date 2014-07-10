@@ -177,9 +177,6 @@
     <ClInclude Include="Graphics\Mesh.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\MeshPart.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\AnimationClip.h">
       <Filter>Graphics</Filter>
     </ClInclude>
@@ -198,9 +195,6 @@
     <ClInclude Include="Graphics\Renderable.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\Entity.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
     <ClInclude Include="Scene\Light.h">
       <Filter>Scene</Filter>
     </ClInclude>
@@ -216,12 +210,6 @@
     <ClInclude Include="Scene\SceneObject.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\SubEntity.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\SpriteBatch.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\VertexDeclaration.h">
       <Filter>Graphics</Filter>
     </ClInclude>
@@ -232,9 +220,6 @@
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\RenderState.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\Sky.h">
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\RenderQueue.h">
@@ -278,6 +263,12 @@
     </ClInclude>
     <ClInclude Include="Core\HashedString.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePlay\Visual.h">
+      <Filter>GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePlay\Transform.h">
+      <Filter>GamePlay</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -365,9 +356,6 @@
     <ClCompile Include="Graphics\Material.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\MeshPart.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\Mesh.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
@@ -386,9 +374,6 @@
     <ClCompile Include="Graphics\Skeleton.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Scene\Entity.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
     <ClCompile Include="Scene\Light.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
@@ -403,12 +388,6 @@
     </ClCompile>
     <ClCompile Include="Scene\SceneObject.cpp">
       <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene\SubEntity.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\SpriteBatch.cpp">
-      <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\FrameBuffer.cpp">
       <Filter>Graphics</Filter>
@@ -426,9 +405,6 @@
       <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\RenderOperation.cpp">
-      <Filter>Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\Sky.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\RenderQueue.cpp">
@@ -478,6 +454,12 @@
     </ClCompile>
     <ClCompile Include="Core\HashedString.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="GamePlay\Visual.cpp">
+      <Filter>GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="GamePlay\Transform.cpp">
+      <Filter>GamePlay</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

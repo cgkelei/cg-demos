@@ -1,6 +1,6 @@
 #include <Scene/Light.h>
 #include <Core/Exception.h>
-#include <Scene/Node.h>
+#include <Scene/SceneNode.h>
 #include <Math/MathUtil.h>
 
 namespace RcEngine {
