@@ -1,14 +1,14 @@
 #include <Graphics/Skeleton.h>
 #include <IO/FileStream.h>
 #include <Core/XMLDom.h>
-#include <Scene/Entity.h>
 #include <Math/MathUtil.h>
 #include <Core/Exception.h>
 
 namespace RcEngine {
 
 Bone::Bone( const String& name, uint32_t boneID, Bone* parent )
-	: Node(name, parent), mBoneIndex(boneID)
+	: Node(name, parent),
+	  mBoneIndex(boneID)
 {
 
 }
@@ -34,9 +34,6 @@ Skeleton::~Skeleton()
 	// Delete all bones
 	for (Bone* bone : mBones)
 		delete bone;
-	
-	for (BoneFollower* follower : mFollowers)
-		delete follower;
 }
 
 Bone* Skeleton::GetRootBone()
@@ -125,73 +122,36 @@ Bone* Skeleton::AddBone( const String& name, Bone* parent )
 	return bone;
 }
 
-BoneFollower* Skeleton::CreateFollowerOnBone( Bone* bone, const Quaternionf &offsetOrientation /*= Quaternionf::Identity()*/, const float3 &offsetPosition /*= float3::Zero()*/ )
+//////////////////////////////////////////////////////////////////////////
+BoneSceneNode::BoneSceneNode( SceneManager* scene, const String& name, SceneNode* worldSceneNode /*= nullptr*/ )
+	: SceneNode(scene, name),
+	  mWorldSceneNode(worldSceneNode)
 {
-	BoneFollower* follower = new BoneFollower(bone);
 
-	follower->SetPosition(offsetPosition);
-	follower->SetRotation(offsetOrientation);
-	follower->SetScale(float3(1, 1, 1));
-	
-	return follower;
 }
 
-void Skeleton::FreeFollower( BoneFollower* follower )
+void BoneSceneNode::UpdateWorldTransform() const
 {
-	assert(follower != nullptr);
+	// Update bone transform
+	SceneNode::UpdateWorldTransform();
 
-	for (auto it = mFollowers.begin(); it != mFollowers.end(); ++it)
+	if (mWorldSceneNode)
 	{
-		if ( (*it) == follower )
-		{
-			if (follower->GetParent())
-			{
-				follower->GetParent()->DetachChild(follower);
-			}
-
-			mFollowers.erase(it);
-			break;
-		}
+		mWorldTransform = mWorldTransform * mWorldSceneNode->GetWorldTransform();
 	}
-
-	delete follower;
 }
 
-//------------------------------------------------------------------------------
-BoneFollower::BoneFollower(Bone* bone)
-	: Bone(bone->GetName(), -1, bone),
-	  mParentEntity(nullptr),
-	  mFollower(nullptr)
+Node* BoneSceneNode::CreateChildImpl( const String& name )
 {
-
+	return new BoneSceneNode(mScene, name);
 }
 
-BoneFollower::~BoneFollower()
+void BoneSceneNode::SetWorldSceneNode( SceneNode* worldSceneNode )
 {
-
-}
-
-void BoneFollower::SetParentEntity( Entity* entity )
-{
-	mParentEntity = entity;
-}
-
-void BoneFollower::SetFollower( SceneObject* follower )
-{
-	mFollower = follower;
-	mFollower->OnAttach(this);
-}
-
-void BoneFollower::UpdateWorldTransform() const
-{
-	Bone::UpdateWorldTransform();
-
-	if (mParentEntity)
-	{
-		Node* entityParentNode = mParentEntity->GetParentNode();
-		if (entityParentNode)
-			mWorldTransform = mWorldTransform * entityParentNode->GetWorldTransform();
-	}
+	mWorldSceneNode = worldSceneNode;
+	if (mWorldSceneNode)
+		mScene = mWorldSceneNode->GetScene();
+	PropagateDirtyDown(NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS);
 }
 
 } // Namespace RcEngine

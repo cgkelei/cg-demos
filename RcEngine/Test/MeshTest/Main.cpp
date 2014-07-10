@@ -63,8 +63,8 @@ protected:
 		//auto params = effect->GetParameters();
 		
 		//mRenderPath = std::make_shared<ForwardPlusPath>();
-		mRenderPath = std::make_shared<TiledDeferredPath>();
-		//mRenderPath = std::make_shared<DeferredPath>();
+		//mRenderPath = std::make_shared<TiledDeferredPath>();
+		mRenderPath = std::make_shared<DeferredPath>();
 		//mRenderPath = std::make_shared<ForwardPath>();
 		mRenderPath->OnGraphicsInit(mCamera);
 	}
@@ -75,8 +75,8 @@ protected:
 		ResourceManager& resMan = ResourceManager::GetSingleton();
 		SceneManager* sceneMan = Environment::GetSingleton().GetSceneManager();
 
-		//mCamera->CreateLookAt(float3(276.089172, 98.567436, -19.411501), float3(277.086884, 98.505020, -19.385706), float3(0.062396, 0.998050, 0.001613));
-		mCamera->CreateLookAt(float3(336.220490, 102.889084, -36.352245), float3(335.260254, 102.820068, -36.081718), float3(-0.066430, 0.997616, 0.018715));
+		mCamera->CreateLookAt(float3(390.786041, 937.110046, -29.037870), float3(390.414764, 936.181519, -29.036587), float3(-0.928517, 0.371277, 0.003209));
+		//mCamera->CreateLookAt(float3(336.220490, 102.889084, -36.352245), float3(335.260254, 102.820068, -36.081718), float3(-0.066430, 0.997616, 0.018715));
 		mCamera->CreatePerspectiveFov(Mathf::PI/4, (float)mAppSettings.Width / (float)mAppSettings.Height, 1.0f, 3000.0f );
 
 		Entity* sponzaEntity = sceneMan->CreateEntity("Sponza", "Sponza.mesh",  "Custom");
@@ -228,6 +228,8 @@ protected:
 		}*/
 
 		mLightAnimation.LoadLights("E:/lights.txt");
+
+		std::cout << sceneMan.GetSceneLights().size() << std::endl;
 	}
 
 	void UnloadContent()

@@ -1555,7 +1555,7 @@ void FbxProcesser::BuildAndSaveXML( )
 		if (mesh.MeshSkeleton)
 		{
 			XMLNodePtr meshSkeletonNode = meshxml.AllocateNode(XML_Node_Element, "skeleton");
-			meshSkeletonNode->AppendAttribute(meshxml.AllocateAttributeUInt("boneCount", mesh.MeshSkeleton->GetBoneCount()));
+			meshSkeletonNode->AppendAttribute(meshxml.AllocateAttributeUInt("boneCount", mesh.MeshSkeleton->GetNumBones()));
 			vector<Bone*>& bones = mesh.MeshSkeleton->GetBonesModified();
 			for (size_t iBone = 0; iBone < bones.size(); ++iBone)
 			{
@@ -1952,7 +1952,7 @@ void FbxProcesser::BuildAndSaveBinary( )
 			}
 		}
 
-		if (g_ExportSettings.ExportSkeleton && mesh.MeshSkeleton && mesh.MeshSkeleton->GetBoneCount())
+		if (g_ExportSettings.ExportSkeleton && mesh.MeshSkeleton && mesh.MeshSkeleton->GetNumBones())
 		{
 			// write bone count
 			auto& bones = mesh.MeshSkeleton->GetBones();

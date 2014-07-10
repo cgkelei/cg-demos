@@ -95,10 +95,9 @@ SkinnedAnimationPlayer::SkinnedAnimationPlayer( const shared_ptr<Skeleton>& skel
 {
 	assert(skeleton != nullptr);
 
-	vector<Bone*> bones = skeleton->GetBones();
-	for (auto iter = bones.begin(); iter != bones.end(); ++iter)
+	for (uint32_t i = 0; i < skeleton->GetNumBones(); ++i)
 	{
-		Bone* bone = *iter;
+		Bone* bone = skeleton->GetBone(i);
 		mAnimateTargets.insert( std::make_pair(bone->GetName(), bone));
 	}
 }
