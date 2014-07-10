@@ -34,9 +34,6 @@ Skeleton::~Skeleton()
 	// Delete all bones
 	for (Bone* bone : mBones)
 		delete bone;	
-
-	for (BoneSceneNode* boneSceneNode : mBoneSceneNodes)
-		delete boneSceneNode;
 }
 
 Bone* Skeleton::GetRootBone()
@@ -125,23 +122,10 @@ Bone* Skeleton::AddBone( const String& name, Bone* parent )
 	return bone;
 }
 
-BoneSceneNode* Skeleton::CreateBoneSceneNode( const String& nodeName, const String& boneName, SceneNode* worldSceneNode )
-{
-	Bone* bone = GetBone(boneName);
-	if (!bone)
-	{
-		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "Bone " + boneName + "Not exits£¡", "Skeleton::CreateBoneSceneNode");
-	}
-	
-	BoneSceneNode* newNode = new BoneSceneNode(nodeName, worldSceneNode);
-	bone->AttachChild(newNode);
-
-	return newNode;
-}
-
 //////////////////////////////////////////////////////////////////////////
-BoneSceneNode::BoneSceneNode( const String& name, SceneNode* worldSceneNode )
-	: SceneNode( worldSceneNode->GetScene(), name)
+BoneSceneNode::BoneSceneNode( SceneManager* scene, const String& name, SceneNode* worldSceneNode /*= nullptr*/ )
+	: SceneNode(scene, name),
+	  mWorldSceneNode(worldSceneNode)
 {
 
 }
@@ -149,7 +133,7 @@ BoneSceneNode::BoneSceneNode( const String& name, SceneNode* worldSceneNode )
 void BoneSceneNode::UpdateWorldTransform() const
 {
 	// Update bone transform
-	Node::UpdateWorldTransform();
+	SceneNode::UpdateWorldTransform();
 
 	if (mWorldSceneNode)
 	{
@@ -159,7 +143,15 @@ void BoneSceneNode::UpdateWorldTransform() const
 
 Node* BoneSceneNode::CreateChildImpl( const String& name )
 {
-	ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Shoundn't Call this", "BoneSceneNode::CreateChildImpl");
+	return new BoneSceneNode(mScene, name);
+}
+
+void BoneSceneNode::SetWorldSceneNode( SceneNode* worldSceneNode )
+{
+	mWorldSceneNode = worldSceneNode;
+	if (mWorldSceneNode)
+		mScene = mWorldSceneNode->GetScene();
+	PropagateDirtyDown(NODE_DIRTY_WORLD | NODE_DIRTY_BOUNDS);
 }
 
 

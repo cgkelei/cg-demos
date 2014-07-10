@@ -7,7 +7,6 @@
 #include <Math/BoundingBox.h>
 #include <Math/Matrix.h>
 
-
 namespace RcEngine {
 
 enum SceneObejctType
@@ -30,6 +29,8 @@ enum SceneObejctType
  */
 class _ApiExport SceneObject
 {
+	friend class SceneNode;
+
 public:
 	SceneObject( const String& name, SceneObejctType type, bool renderable = false );
 	virtual ~SceneObject();
@@ -62,6 +63,7 @@ public:
 
 	bool IsAttached() const  { return mParentNode != nullptr; }
 
+protected:
 	virtual void OnAttach( SceneNode* node );
 	virtual void OnDetach( SceneNode* node );
 
