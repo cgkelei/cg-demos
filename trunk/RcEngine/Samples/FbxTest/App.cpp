@@ -136,35 +136,38 @@ protected:
 		//	mDudeSceneNode = dudeSceneNode;
 		//}
 
-		//SceneNode* arthasSceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Arthas");
-		//{
-		//	Entity* arthasEntity = sceneMan->CreateEntity("dude", "./Arthas/Arthas_Random.mesh",  "Custom");
-		//	Entity* swoardEntity = sceneMan->CreateEntity("swoard", "./Arthas/Swoard.mesh",  "Custom");
-		//	arthasEntity->AttachObjectToBone("wepson", swoardEntity, Quaternionf::Identity(), float3(4.2, -7.8, 0));
-
-		//	AnimationPlayer* animPlayer = arthasEntity->GetAnimationPlayer();
-
-		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./Arthas/Walk.anim", "Custom"));
-		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./Arthas/Random.anim", "Custom"));
-		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./Arthas/Standby.anim", "Custom"));
-		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./Arthas/Casting.anim", "Custom"));
-		//	animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./Arthas/FightingStandby.anim", "Custom"));
-
-		//	AnimationState* takeClip = animPlayer->GetClip("Random");
-		//	takeClip->SetAnimationWrapMode(AnimationState::Wrap_Loop);
-		//	takeClip->Play();
-
-		//	arthasSceneNode->SetScale(float3(4, 4, 4));
-		//	arthasSceneNode->SetPosition(float3(-100, 0, 0));
-		//	arthasSceneNode->AttachObject(arthasEntity);
-		//}
-
-		SceneNode* citySceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("AncientCity");
+		SceneNode* arthasSceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Arthas");
 		{
-			Entity* arthasEntity = sceneMan->CreateEntity("dude", "./AncientCity/AncientCity.mesh",  "Custom");	
-			citySceneNode->SetScale(float3(4, 4, 4));
-			citySceneNode->AttachObject(arthasEntity);
+			Entity* arthasEntity = sceneMan->CreateEntity("dude", "./Arthas/Arthas_Random.mesh",  "Custom");
+			Entity* swoardEntity = sceneMan->CreateEntity("swoard", "./Arthas/Swoard.mesh",  "Custom");
+
+			BoneSceneNode* swoardSceneNode = arthasEntity->CreateBoneSceneNode("wepsonNode", "wepson");
+			swoardSceneNode->SetPosition(float3(4.2, -7.8, 0));
+			swoardSceneNode->AttachObject(swoardEntity);
+
+			AnimationPlayer* animPlayer = arthasEntity->GetAnimationPlayer();
+
+			//animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./Arthas/Walk.anim", "Custom"));
+			animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./Arthas/Random.anim", "Custom"));
+			//animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./Arthas/Standby.anim", "Custom"));
+			//animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./Arthas/Casting.anim", "Custom"));
+			//animPlayer->AddClip(resMan.GetResourceByName<AnimationClip>(RT_Animation, "./Arthas/FightingStandby.anim", "Custom"));
+
+			AnimationState* takeClip = animPlayer->GetClip("Random");
+			takeClip->SetAnimationWrapMode(AnimationState::Wrap_Loop);
+			takeClip->Play();
+
+			arthasSceneNode->SetScale(float3(4, 4, 4));
+			arthasSceneNode->SetPosition(float3(-100, 0, 0));
+			arthasSceneNode->AttachObject(arthasEntity);
 		}
+
+		//SceneNode* citySceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("AncientCity");
+		//{
+		//	Entity* arthasEntity = sceneMan->CreateEntity("dude", "./AncientCity/AncientCity.mesh",  "Custom");	
+		//	citySceneNode->SetScale(float3(4, 4, 4));
+		//	citySceneNode->AttachObject(arthasEntity);
+		//}
 	}
 	
 

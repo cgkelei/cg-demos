@@ -33,27 +33,23 @@ public:
 
 	SubEntity* GetSubEntity( uint32_t index ) const					{ return mSubEntityList[index]; }
 
-	void SetDisplaySkeleton(bool display)							{ mDisplaySkeleton = display; }
-
-	bool GetDisplaySkeleton(void) const								{ return mDisplaySkeleton; }
-
 	bool HasSkeleton() const;
 	shared_ptr<Skeleton> GetSkeleton();
 
 	bool HasSkeletonAnimation() const;
 	AnimationPlayer* GetAnimationPlayer();
 
-	void OnAttach( Node* node );
-	void OnDetach( Node* node );
-
 	void OnUpdateRenderQueue(RenderQueue* renderQueue, const Camera& cam, RenderOrder order);
 
-	BoneFollower* AttachObjectToBone(const String &boneName, SceneObject* sceneObj, const Quaternionf& offsetOrientation= Quaternionf::Identity(), const float3 & offsetPosition = float3::Zero());
+	// Create a SceneNode take bone as parent
+	BoneSceneNode* CreateBoneSceneNode(const String& nodeName, const String& boneName);
 
 protected:
 	void Initialize();
 	void UpdateAnimation();
 
+	void OnAttach( SceneNode* node );
+	void OnDetach( SceneNode* node );
 
 public:
 	static SceneObject* FactoryFunc(const String& name, const NameValuePairList* params = 0);
@@ -62,15 +58,12 @@ protected:
 	shared_ptr<Mesh> mMesh;
 	shared_ptr<Skeleton> mSkeleton;
 	
-	vector<SubEntity*> mSubEntityList;
-
-	unordered_map<String, SceneObject*> mChildAttachedObjects;
-	
-	bool mDisplaySkeleton;
-
 	mutable BoundingBoxf mWorldBoundingBox;
 
-	vector<float4x4> mBoneWorldMatrices;
+	vector<SubEntity*> mSubEntityList;
+	
+	vector<BoneSceneNode*> mBoneSceneNodes;
+
 	vector<float4x4> mSkinMatrices;
 	uint32_t mNumSkinMatrices;
 

@@ -2,14 +2,11 @@
 #define Skeleton_h__
 
 #include <Core/Prerequisites.h>
-#include <Scene/Node.h>
+#include <Scene/SceneNode.h>
 
 namespace RcEngine {
 
 class Bone;
-class BoneFollower;
-class SceneObject;
-class Entity;
 
 class _ApiExport Skeleton
 {
@@ -19,20 +16,13 @@ public:
 
 	void Update( float delta );
 
-	uint32_t GetBoneCount() const { return mBones.size(); }
+	uint32_t GetNumBones() const { return mBones.size(); }
 
 	Bone* GetRootBone();
 	Bone* GetBone( const String& name );
 	Bone* GetBone( uint32_t index );
 
 	Bone* AddBone(const String& name, Bone* parent);
-
-	const vector<Bone*>& GetBones() const { return mBones; }
-	vector<Bone*>& GetBonesModified() { return mBones; }
-
-	BoneFollower* CreateFollowerOnBone(Bone* bone, const Quaternionf &offsetOrientation, const float3 &offsetPosition);
-
-	void FreeFollower(BoneFollower* follower);
 
 	shared_ptr<Skeleton> Clone();
 
@@ -41,7 +31,6 @@ public:
 
 private:
 	std::vector<Bone*> mBones;
-	std::list<BoneFollower*> mFollowers;
 };
 
 class _ApiExport Bone : public Node
@@ -66,30 +55,27 @@ protected:
 };
 
 /**
- * A follower point on a skeleton, which can be used to attach 
- * SceneObjects to on specific other entities.
+ * Specular SceneNode which can be attached on Bone node.
  */
-class _ApiExport BoneFollower : public Bone 
+class _ApiExport BoneSceneNode : public SceneNode
 {
 public:
-	BoneFollower(Bone* bone);
-	virtual ~BoneFollower();
+	/**
+	 * @Param worldSceneNode, if exits take worldSceneNode's transform into consideration .
+	 */
+	BoneSceneNode(SceneManager* scene, const String& name, SceneNode* worldSceneNode = nullptr);
 
-	Entity* GetParentEntity() const  { return mParentEntity; }
-	SceneObject* GetFollower() const { return mFollower; }
-	
-	void SetParentEntity(Entity* entity);
-	void SetFollower(SceneObject* follower);
+	void SetWorldSceneNode(SceneNode* worldSceneNode);
+	inline SceneNode* GetWorldSceneNode() const { return mWorldSceneNode; }
 
 protected:
 	// need to consider entity's transform
 	virtual void UpdateWorldTransform() const;
 
+	virtual Node* CreateChildImpl(const String& name);
+
 protected:
-	Entity* mParentEntity;
-	SceneObject* mFollower;
-
-
+	SceneNode* mWorldSceneNode;
 };
 
 

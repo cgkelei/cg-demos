@@ -41,7 +41,11 @@ Entity::~Entity()
 		SAFE_DELETE(subEntiry);
 	mSubEntityList.clear();
 
-	mChildAttachedObjects.clear();
+	mSkeleton = nullptr;
+
+	// Detach all bone scene nodes
+	for (BoneSceneNode* boenSceneNode : mBoneSceneNodes)
+		delete boenSceneNode;
 
 	SAFE_DELETE(mAnimationPlayer);
 }
@@ -66,7 +70,7 @@ void Entity::Initialize()
 
 	if (HasSkeleton())
 	{
-		mNumSkinMatrices = mSkeleton->GetBoneCount();
+		mNumSkinMatrices = mSkeleton->GetNumBones();
 		mSkinMatrices.resize(mNumSkinMatrices);
 	}
 
@@ -74,16 +78,6 @@ void Entity::Initialize()
 	{
 		mParentNode->NeedUpdate();
 	}
-}
-
-void Entity::OnAttach( Node* node )
-{
-	SceneObject::OnAttach(node);
-}
-
-void Entity::OnDetach( Node* node )
-{
-	SceneObject::OnDetach(node);
 }
 
 const BoundingBoxf& Entity::GetWorldBoundingBox() const
@@ -182,55 +176,9 @@ void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, const Camera& camera,
 	{
 		UpdateAnimation();
 
-		for (auto& kv : mChildAttachedObjects)
+		for (BoneSceneNode* boneSceneNode : mBoneSceneNodes)
 		{
-			SceneObject* child = kv.second;
-
-			bool renderable = child->Renderable();
-			bool visible = camera.Visible(child->GetWorldBoundingBox());
-			
-			/*bool visible = true;*/
-			if (visible)
-			{
-				//Check if the bone exists in the current LOD
-				//The child is connected to a joint
-				Bone* bone = static_cast<Bone*>(child->GetParentNode());
-
-				if (bone && !GetSkeleton()->GetBone( bone->GetName()) )
-				{
-					//Current LOD entity does not have the bone that the
-					//child is connected to. Do not display.
-					visible = false;
-				}
-			}
-
-			if (visible && renderable)
-			{
-				child->OnUpdateRenderQueue(renderQueue, camera, order);
-			}   
-		}
-	}
-
-	if (mDisplaySkeleton && HasSkeleton())
-	{
-		
-		uint32_t numBones = mSkeleton->GetBoneCount();
-		for (uint32_t b = 0; b < numBones; ++b)
-		{
-			Bone* bone = mSkeleton->GetBone(b);
-			/*if (mRenderQueuePrioritySet)
-			{
-				assert(mRenderQueueIDSet == true);
-				queue->addRenderable(bone->getDebugRenderable(1), mRenderQueueID, mRenderQueuePriority);
-			}
-			else if(mRenderQueueIDSet)
-			{
-				queue->addRenderable(bone->getDebugRenderable(1), mRenderQueueID);
-			} 
-			else 
-			{
-				queue->addRenderable(bone->getDebugRenderable(1));
-			}*/
+			boneSceneNode->OnUpdateRenderQueues(camera, order);
 		}
 	}
 }
@@ -244,32 +192,18 @@ void Entity::UpdateAnimation()
 	}
 	
 	// Note: the model's world transform will be baked in the skin matrices
-	const vector<Bone*>& bones = mSkeleton->GetBones();
-	for (size_t i = 0; i < bones.size(); ++i)
+	for (uint32_t i = 0; i < mSkeleton->GetNumBones(); ++i)
 	{
-		Bone* bone = bones[i];
+		Bone* bone = mSkeleton->GetBone(i);
 		mSkinMatrices[i] = bone->GetOffsetMatrix() * bone->GetWorldTransform();
 	}
 }
 
-BoneFollower* Entity::AttachObjectToBone( const String &boneName, SceneObject* sceneObj, const Quaternionf& offsetOrientation/*= Quaternionf::Identity()*/, const float3 & offsetPosition /*= float3::Zero()*/ )
+BoneSceneNode* Entity::CreateBoneSceneNode( const String& nodeName, const String& boneName )
 {
 	if (!HasSkeleton())
 	{
 		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "This entity's mesh has no skeleton to attach object to.",
-			"Entity::attachObjectToBone");
-	}
-
-	if (mChildAttachedObjects.find(sceneObj->GetName()) != mChildAttachedObjects.end())
-	{
-		ENGINE_EXCEPT(Exception::ERR_DUPLICATE_ITEM,
-			"An object with the name " + sceneObj->GetName() + " already attached",
-			"Entity::AttachObjectToBone");
-	}
-
-	if(sceneObj->IsAttached())
-	{
-		ENGINE_EXCEPT(Exception::ERR_INVALID_PARAMS, "Object already attached to a sceneNode or a Bone",
 			"Entity::attachObjectToBone");
 	}
 
@@ -281,19 +215,18 @@ BoneFollower* Entity::AttachObjectToBone( const String &boneName, SceneObject* s
 			"Entity::attachObjectToBone");
 	}
 
-	BoneFollower* pBoneFollower = mSkeleton->CreateFollowerOnBone(pBone, offsetOrientation, offsetPosition);	
-	pBoneFollower->SetParentEntity(this);
-	pBoneFollower->SetFollower(sceneObj);
-	
-	mChildAttachedObjects.insert( std::make_pair(sceneObj->GetName(), sceneObj) );
+	BoneSceneNode* newNode;
 
-	// Trigger update of bounding box if necessary
 	if (mParentNode)
-		mParentNode->NeedUpdate();
+		newNode = new BoneSceneNode(mParentNode->GetScene(), nodeName, mParentNode);
+	else
+		newNode = new BoneSceneNode(nullptr, nodeName, nullptr);
+	
+	pBone->AttachChild(newNode);
 
-	return pBoneFollower;
+	mBoneSceneNodes.push_back(newNode);
+	return newNode;
 }
-
 
 SceneObject* Entity::FactoryFunc( const String& name, const NameValuePairList* params)
 {
@@ -322,8 +255,23 @@ SceneObject* Entity::FactoryFunc( const String& name, const NameValuePairList* p
 	return new Entity(name, pMesh);
 }
 
+void Entity::OnAttach( SceneNode* node )
+{
+	SceneObject::OnAttach(node);
 
+	for (BoneSceneNode* boneSceneNode : mBoneSceneNodes)
+	{
+		boneSceneNode->SetWorldSceneNode(mParentNode);
+	}
+}
 
-
+void Entity::OnDetach( SceneNode* node )
+{
+	SceneObject::OnDetach(node);
+	for (BoneSceneNode* boneSceneNode : mBoneSceneNodes)
+	{
+		boneSceneNode->SetWorldSceneNode(nullptr);
+	}
+}
 
 }
