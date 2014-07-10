@@ -27,6 +27,8 @@
     <ClInclude Include="Core\XMLDom.h" />
     <ClInclude Include="GamePlay\Component.h" />
     <ClInclude Include="GamePlay\GameObject.h" />
+    <ClInclude Include="GamePlay\Transform.h" />
+    <ClInclude Include="GamePlay\Visual.h" />
     <ClInclude Include="Graphics\Animation.h" />
     <ClInclude Include="Graphics\AnimationClip.h" />
     <ClInclude Include="Graphics\AnimationController.h" />
@@ -44,7 +46,6 @@
     <ClInclude Include="Graphics\Image.h" />
     <ClInclude Include="Graphics\Material.h" />
     <ClInclude Include="Graphics\Mesh.h" />
-    <ClInclude Include="Graphics\MeshPart.h" />
     <ClInclude Include="Graphics\PixelFormat.h" />
     <ClInclude Include="Graphics\Renderable.h" />
     <ClInclude Include="Graphics\RenderFactory.h" />
@@ -53,8 +54,6 @@
     <ClInclude Include="Graphics\RenderQueue.h" />
     <ClInclude Include="Graphics\RenderState.h" />
     <ClInclude Include="Graphics\Skeleton.h" />
-    <ClInclude Include="Graphics\Sky.h" />
-    <ClInclude Include="Graphics\SpriteBatch.h" />
     <ClInclude Include="Graphics\TextureResource.h" />
     <ClInclude Include="Graphics\VertexDeclaration.h" />
     <ClInclude Include="Input\InputEvent.h" />
@@ -81,13 +80,11 @@
     <ClInclude Include="Math\Vector.h" />
     <ClInclude Include="Resource\Resource.h" />
     <ClInclude Include="Resource\ResourceManager.h" />
-    <ClInclude Include="Scene\Entity.h" />
     <ClInclude Include="Scene\Light.h" />
     <ClInclude Include="Scene\Node.h" />
     <ClInclude Include="Scene\SceneManager.h" />
     <ClInclude Include="Scene\SceneNode.h" />
     <ClInclude Include="Scene\SceneObject.h" />
-    <ClInclude Include="Scene\SubEntity.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\Environment.cpp" />
@@ -103,6 +100,8 @@
     <ClCompile Include="Core\XMLDom.cpp" />
     <ClCompile Include="GamePlay\Component.cpp" />
     <ClCompile Include="GamePlay\GameObject.cpp" />
+    <ClCompile Include="GamePlay\Transform.cpp" />
+    <ClCompile Include="GamePlay\Visual.cpp" />
     <ClCompile Include="Graphics\Animation.cpp" />
     <ClCompile Include="Graphics\AnimationClip.cpp" />
     <ClCompile Include="Graphics\AnimationController.cpp" />
@@ -122,7 +121,6 @@
     <ClCompile Include="Graphics\Image.cpp" />
     <ClCompile Include="Graphics\Material.cpp" />
     <ClCompile Include="Graphics\Mesh.cpp" />
-    <ClCompile Include="Graphics\MeshPart.cpp" />
     <ClCompile Include="Graphics\PixelFormat.cpp" />
     <ClCompile Include="Graphics\Renderable.cpp" />
     <ClCompile Include="Graphics\RenderDevice.cpp" />
@@ -132,8 +130,6 @@
     <ClCompile Include="Graphics\RenderQueue.cpp" />
     <ClCompile Include="Graphics\RenderState.cpp" />
     <ClCompile Include="Graphics\Skeleton.cpp" />
-    <ClCompile Include="Graphics\Sky.cpp" />
-    <ClCompile Include="Graphics\SpriteBatch.cpp" />
     <ClCompile Include="Graphics\TextureResource.cpp" />
     <ClCompile Include="Graphics\VertexDeclaration.cpp" />
     <ClCompile Include="Input\InputSystem.cpp" />
@@ -149,13 +145,11 @@
     <ClCompile Include="Math\ColorRGBA.cpp" />
     <ClCompile Include="Resource\Resource.cpp" />
     <ClCompile Include="Resource\ResourceManage.cpp" />
-    <ClCompile Include="Scene\Entity.cpp" />
     <ClCompile Include="Scene\Light.cpp" />
     <ClCompile Include="Scene\Node.cpp" />
     <ClCompile Include="Scene\SceneManager.cpp" />
     <ClCompile Include="Scene\SceneNode.cpp" />
     <ClCompile Include="Scene\SceneObject.cpp" />
-    <ClCompile Include="Scene\SubEntity.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Media\Effect\GLSL\BezierCurve.glsl" />

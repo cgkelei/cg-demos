@@ -17,18 +17,13 @@ public:
 	virtual const std::string& GetComponentName() const = 0;
 	virtual ComponentID GetComponentID() const { return GetIDFromName(GetComponentName()); }
 
-	virtual void Init() {}
-	virtual void Update(float deltaTime) {}
-	virtual void Cleanup() {}
+	virtual void DestroyComponent();
 
 public:
 	static ComponentID GetIDFromName(const String& componentName) 
 	{
 		return HashedString::CalculateHash(componentName);
 	}
-
-
-
 
 protected:
 	GameObject* mOwner;

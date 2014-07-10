@@ -3,13 +3,14 @@
 
 #include <Core/Prerequisites.h>
 #include <Scene/Node.h>
+#include <Scene/SceneNode.h>
 
 namespace RcEngine {
 
 class Bone;
-class BoneFollower;
+class BoneSceneNode;
 class SceneObject;
-class Entity;
+class Visual;
 
 class _ApiExport Skeleton
 {
@@ -19,20 +20,18 @@ public:
 
 	void Update( float delta );
 
-	uint32_t GetBoneCount() const { return mBones.size(); }
+	uint32_t GetNumBones() const { return mBones.size(); }
 
 	Bone* GetRootBone();
 	Bone* GetBone( const String& name );
 	Bone* GetBone( uint32_t index );
 
 	Bone* AddBone(const String& name, Bone* parent);
+	
+	inline uint32_t GetNumBoneSceneNodes() const { return mBoneSceneNodes.size(); }
+	inline BoneSceneNode* GetBoneSceneNode(uint32_t i) const { return mBoneSceneNodes[i]; }
 
-	const vector<Bone*>& GetBones() const { return mBones; }
-	vector<Bone*>& GetBonesModified() { return mBones; }
-
-	BoneFollower* CreateFollowerOnBone(Bone* bone, const Quaternionf &offsetOrientation, const float3 &offsetPosition);
-
-	void FreeFollower(BoneFollower* follower);
+	BoneSceneNode* CreateBoneSceneNode(const String& nodeName, const String& boneName, SceneNode* worldSceneNode);
 
 	shared_ptr<Skeleton> Clone();
 
@@ -41,7 +40,7 @@ public:
 
 private:
 	std::vector<Bone*> mBones;
-	std::list<BoneFollower*> mFollowers;
+	std::vector<BoneSceneNode*> mBoneSceneNodes;
 };
 
 class _ApiExport Bone : public Node
@@ -69,30 +68,21 @@ protected:
  * A follower point on a skeleton, which can be used to attach 
  * SceneObjects to on specific other entities.
  */
-class _ApiExport BoneFollower : public Bone 
+
+class _ApiExport BoneSceneNode : public SceneNode
 {
 public:
-	BoneFollower(Bone* bone);
-	virtual ~BoneFollower();
-
-	Entity* GetParentEntity() const  { return mParentEntity; }
-	SceneObject* GetFollower() const { return mFollower; }
-	
-	void SetParentEntity(Entity* entity);
-	void SetFollower(SceneObject* follower);
+	BoneSceneNode(const String& name, SceneNode* worldSceneNode);
 
 protected:
 	// need to consider entity's transform
 	virtual void UpdateWorldTransform() const;
 
+	virtual Node* CreateChildImpl(const String& name);
+
 protected:
-	Entity* mParentEntity;
-	SceneObject* mFollower;
-
-
+	SceneNode* mWorldSceneNode;
 };
-
-
 
 } // Namespace RcEngine
 

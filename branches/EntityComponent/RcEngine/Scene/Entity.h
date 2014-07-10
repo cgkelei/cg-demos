@@ -70,7 +70,6 @@ protected:
 
 	mutable BoundingBoxf mWorldBoundingBox;
 
-	vector<float4x4> mBoneWorldMatrices;
 	vector<float4x4> mSkinMatrices;
 	uint32_t mNumSkinMatrices;
 

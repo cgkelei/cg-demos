@@ -54,7 +54,7 @@ public:
 	 */
 	virtual void OnUpdateRenderQueue( RenderQueue* renderQueue, const Camera& cam, RenderOrder order );
 	
-	Node* GetParentNode() const { return mParentNode; }
+	SceneNode* GetParentNode() const { return mParentNode; }
 
 	bool IsVisible() const { return mVisible; }
 
@@ -62,8 +62,8 @@ public:
 
 	bool IsAttached() const  { return mParentNode != nullptr; }
 
-	virtual void OnAttach( Node* node ) ;
-	virtual void OnDetach( Node* node ) ;
+	virtual void OnAttach( SceneNode* node );
+	virtual void OnDetach( SceneNode* node );
 
 protected:
 	
@@ -75,7 +75,7 @@ protected:
 
 	BoundingBoxf mBoundingBox;
 
-	Node* mParentNode;
+	SceneNode* mParentNode;
 
 	uint32_t mFlag;
 

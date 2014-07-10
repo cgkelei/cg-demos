@@ -21,7 +21,6 @@ public:
 	 * Get the world bounding box of this scene node, camera can cull if box out view frustum.
 	 */
 	const BoundingBoxf& GetWorldBoundingBox() const;
-
 	
 	void AttachObject( SceneObject* obj );
 	void DetachOject( SceneObject* obj );
@@ -37,7 +36,7 @@ public:
 	/**
 	 * Creates an named new SceneNode as a child of this node.
 	 */
-	SceneNode* CreateChildSceneNode( const String& name, const float3& translate = float3::Zero(),  const Quaternionf& rotate = Quaternionf::Identity());
+	SceneNode* CreateChildSceneNode( const String& name, const float3& translate,  const Quaternionf& rotate);
 
 	/** 
 	 * Return the scene to which a node belongs.

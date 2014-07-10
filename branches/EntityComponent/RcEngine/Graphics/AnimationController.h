@@ -2,11 +2,11 @@
 #define AnimationController_h__
 
 #include <Core/Prerequisites.h>
+#include <Core/Singleton.h>
 
 namespace RcEngine {
 
-
-class _ApiExport AnimationController
+class _ApiExport AnimationController : public Singleton<AnimationController>
 {
 	friend class AnimationPlayer;
 

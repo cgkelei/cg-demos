@@ -104,7 +104,7 @@ void DebugDrawManager::DrawSkeleton( const float4x4& transform, shared_ptr<Skele
 		shared_ptr<GraphicsBuffer> vb = mSkeletonRopMap[skeleton].VertexStreams[0];
 		float3* pVertices = static_cast<float3*>(vb->Map(0, MAP_ALL_BUFFER, RMA_Write_Discard));
 		
-		for (uint32_t i = 0; i < skeleton->GetBoneCount(); ++i)
+		for (uint32_t i = 0; i < skeleton->GetNumBones(); ++i)
 		{
 			Bone* bone = skeleton->GetBone(i);
 			if (bone->GetParent())
@@ -119,7 +119,7 @@ void DebugDrawManager::DrawSkeleton( const float4x4& transform, shared_ptr<Skele
 	else
 	{
 		std::vector<float3> vertices;
-		for (uint32_t i = 0; i < skeleton->GetBoneCount(); ++i)
+		for (uint32_t i = 0; i < skeleton->GetNumBones(); ++i)
 		{
 			Bone* bone = skeleton->GetBone(i);
 			if (bone->GetParent())

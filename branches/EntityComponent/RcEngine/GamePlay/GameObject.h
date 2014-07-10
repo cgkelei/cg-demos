@@ -24,7 +24,7 @@ public:
 		auto it = mComponents.find(id);
 		if (it != mComponents.end())
 		{
-			return static_cast<T*>(it->second);
+			return static_cast_checked<T*>(it->second);
 		}
 
 		return nullptr;
@@ -33,7 +33,7 @@ public:
 	template <typename T>
 	T* GetComponent(const String& name) const 
 	{
-		return GetComponent(Component::GetIDFromName(name))
+		return GetComponent<T>(Component::GetIDFromName(name));
 	}
 
 	void AddComponent(Component* component);

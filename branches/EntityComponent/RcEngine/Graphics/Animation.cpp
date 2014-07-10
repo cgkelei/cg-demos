@@ -14,7 +14,7 @@ namespace RcEngine {
 AnimationPlayer::AnimationPlayer( )
 	: mCurrentClipState(nullptr)
 {
-	mController = Environment::GetSingleton().GetSceneManager()->GetAnimationController();
+	
 }
 
 AnimationPlayer::~AnimationPlayer()
@@ -91,14 +91,16 @@ void AnimationPlayer::StopClip( const String& clipName )
 		mAnimationStates[clipName]->Stop();
 }
 
+//////////////////////////////////////////////////////////////////////////
+const String SkinnedAnimationPlayer::ComponentName("SkinnedAnimationPlayer");
+
 SkinnedAnimationPlayer::SkinnedAnimationPlayer( const shared_ptr<Skeleton>& skeleton )
 {
 	assert(skeleton != nullptr);
 
-	vector<Bone*> bones = skeleton->GetBones();
-	for (auto iter = bones.begin(); iter != bones.end(); ++iter)
+	for (uint32_t i = 0; i < skeleton->GetNumBones(); ++i)
 	{
-		Bone* bone = *iter;
+		Bone* bone = skeleton->GetBone(i);
 		mAnimateTargets.insert( std::make_pair(bone->GetName(), bone));
 	}
 }

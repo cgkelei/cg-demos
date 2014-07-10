@@ -34,16 +34,7 @@ public:
 	 */
 	virtual const shared_ptr<RenderOperation>& GetRenderOperation() const = 0;
 
-	/**
-	 * Get world transform matrix, note that it may more than one matrix 
-	 * if it is a bone mesh.
-	 */
-	virtual void GetWorldTransforms(float4x4* xform) const = 0;
-
-	/**
-	 * Get world transform matrix count.
-	 */
-	virtual uint32_t GetWorldTransformsCount() const = 0;
+	virtual void GetWorldTransforms(float4x4* xWorld, uint32_t& numPalette, float4x4*& xPalette) = 0;
 
 	virtual void Render();
 

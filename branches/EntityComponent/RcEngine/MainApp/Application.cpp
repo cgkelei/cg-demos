@@ -1,10 +1,11 @@
 #include <MainApp/Application.h>
 #include <MainApp/Window.h>
 #include <Graphics/Effect.h>
+#include <Graphics/Mesh.h>
 #include <Graphics/Material.h>
 #include <Graphics/TextureResource.h>
 #include <Graphics/AnimationClip.h>
-#include <Graphics/Mesh.h>
+#include <Graphics/AnimationController.h>
 #include <Resource/ResourceManager.h>
 #include <Core/Environment.h>
 #include <Core/ModuleManager.h>
@@ -35,6 +36,7 @@ Application::Application( const String& config )
 	ModuleManager::Initialize();
 	FileSystem::Initialize();
 	ResourceManager::Initialize();
+	AnimationController::Initialize();
 	ProfilerManager::Initialize();
 	
 	// Init System Clock
@@ -109,6 +111,9 @@ void Application::Tick()
 
 	// update
 	Update(deltaTime);
+	
+	// Update animation system first
+	AnimationController::GetSingleton().Update(deltaTime);
 	
 	// update scene graph
 	sceneMan->UpdateSceneGraph(deltaTime);

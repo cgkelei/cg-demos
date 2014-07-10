@@ -37,7 +37,6 @@ void Node::SetParent( Node* parent )
 	mParent = parent;
 }
 
-
 void Node::SetPosition( const float3& position )
 {
 	mPosition = position;
@@ -257,6 +256,13 @@ Node* Node::CreateChild( const String& name, const float3& translate, const Quat
 	child->SetRotation(rotate);
 
 	// Attach this child
+	AttachChild(child);
+	return child;
+}
+
+Node* Node::CreateChild( const String& name )
+{
+	Node* child = CreateChildImpl(name);
 	AttachChild(child);
 	return child;
 }
