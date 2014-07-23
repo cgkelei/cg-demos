@@ -36,7 +36,7 @@ D3D11Buffer::D3D11Buffer( uint32_t bufferSize, uint32_t accessHint, uint32_t fla
 	{
 		D3D11_SUBRESOURCE_DATA subData;
 		subData.pSysMem = initData->pData;
-		subData.SysMemPitch = initData->rowPitch;
+		//subData.SysMemPitch = initData->rowPitch;
 		D3D11_VERRY( deviceD3D11->CreateBuffer( &desc, &subData, &BufferD3D11 ) );
 	}
 	else 

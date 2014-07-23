@@ -3,7 +3,6 @@
 #include <Scene/SceneNode.h>
 #include <Scene/SceneManager.h>
 #include <Graphics/Mesh.h>
-#include <Graphics/MeshPart.h>
 #include <Graphics/Effect.h>
 #include <Graphics/RenderOperation.h>
 #include <Graphics/Camera.h>
@@ -142,7 +141,7 @@ void Entity::OnUpdateRenderQueue(RenderQueue* renderQueue, const Camera& camera,
 	{
 		BoundingBoxf subWorldBoud = Transform(subEntity->GetBoundingBox(), mParentNode->GetWorldTransform());
 
-		// tode  mesh part world bounding has some bugs.
+		// Todo  mesh part world bounding has some bugs.
 		if(camera.Visible(subWorldBoud))
 		{
 			float sortKey = 0;
