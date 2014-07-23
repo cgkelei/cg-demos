@@ -118,7 +118,7 @@ protected:
 		//ENGINE_PUSH_CPU_PROFIER("test");
 		//ENGINE_DUMP_PROFILERS();
 
-		auto entity = sceneMan->CreateEntity("Dude", "./Dude/dude.mesh",  "Custom");
+		/*auto entity = sceneMan->CreateEntity("Dude", "./Dude/dude.mesh",  "Custom");
 		auto sceneNode = sceneMan->GetRootSceneNode()->CreateChildSceneNode("Dude");
 		sceneNode->SetScale(float3(0.5, 0.5, 0.5));
 		sceneNode->SetPosition(float3(50,0,0));
@@ -127,7 +127,7 @@ protected:
 		AnimationPlayer* animPlayer = entity->GetAnimationPlayer();
 		AnimationState* takeClip = animPlayer->GetClip("Take 001");
 		takeClip->SetAnimationWrapMode(AnimationState::Wrap_Loop);
-		animPlayer->PlayClip("Take 001");
+		animPlayer->PlayClip("Take 001");*/
 
 		mCameraControler = new RcEngine::Test::FPSCameraControler;
 		mCameraControler->AttachCamera(*mCamera);

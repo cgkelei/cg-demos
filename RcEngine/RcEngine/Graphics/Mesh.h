@@ -7,7 +7,6 @@
 #include <Math/Matrix.h>
 #include <Resource/Resource.h>
 
-
 namespace RcEngine {
 
 class Skeleton;
@@ -23,6 +22,8 @@ class MeshPart;
 
 class _ApiExport Mesh : public Resource
 {
+	friend class MeshPart;
+
 public:
 	Mesh(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group );
 	virtual ~Mesh();
@@ -47,9 +48,7 @@ protected:
 public:
 	static shared_ptr<Resource> FactoryFunc(ResourceManager* creator, ResourceHandle handle, const String& name, const String& group);
 
-
-private:
-			
+private:		
 	BoundingBoxf mBoundingBox;
 
 	uint32_t mPrimitiveCount;
@@ -57,9 +56,69 @@ private:
 
 	vector<shared_ptr<MeshPart> > mMeshParts;  
 
+	// Vertex buffer referenced by mesh parts
+	struct VertexBuffer
+	{
+		shared_ptr<VertexDeclaration> VertexDecl;
+		shared_ptr<GraphicsBuffer> Buffer;
+	};
+	vector<VertexBuffer> mVertexBuffers;
+
+	// Index buffer referenced by mesh parts
+	struct IndexBuffer
+	{
+		IndexBufferType			   IndexFormat;
+		shared_ptr<GraphicsBuffer> Buffer;
+	};
+	vector<IndexBuffer> mIndexBuffers;
+
+	// Skeleton for skinned mesh, empty for static mesh
 	shared_ptr<Skeleton> mSkeleton;
 };
 
+class _ApiExport MeshPart
+{
+	friend class Mesh;
+
+public:
+	MeshPart(Mesh& mesh);
+	~MeshPart();
+
+	inline const String& GetName() const						{ return mName; }
+	inline const BoundingBoxf& GetBoundingBox() const			{ return mBoundingBox; }
+
+	inline uint32_t GetVertexCount() const						{ return mVertexCount; }
+	inline uint32_t GetPrimitiveCount() const					{ return mPrimitiveCount; }
+	inline uint32_t GetIndexCount() const						{ return mIndexCount; }
+	inline uint32_t GetStartIndex() const						{ return mIndexStart; }
+	inline uint32_t GetStartVertex() const						{ return mVertexStart;}
+
+	inline const String& GetMaterialName() const				{ return mMaterialName; }
+
+	void GetRenderOperation( RenderOperation& op, uint32_t lodIndex );
+
+	void Load(Stream& source);
+	void Save(Stream& source);
+
+private:
+	Mesh& mParentMesh;
+
+	String mName;
+	String mMaterialName;
+
+	BoundingBoxf mBoundingBox;
+
+	int32_t mVertexBufferIndex;  // index in parent's vertex buffers
+	int32_t mIndexBufferIndex;
+
+	uint32_t mIndexStart;
+	uint32_t mIndexCount;
+
+	uint32_t mVertexStart;
+	uint32_t mVertexCount;
+	
+	uint32_t mPrimitiveCount; // Only support triangle
+};
 
 } // Namespace RcEngine
 

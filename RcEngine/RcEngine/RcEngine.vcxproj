@@ -42,7 +42,6 @@
     <ClInclude Include="Graphics\Image.h" />
     <ClInclude Include="Graphics\Material.h" />
     <ClInclude Include="Graphics\Mesh.h" />
-    <ClInclude Include="Graphics\MeshPart.h" />
     <ClInclude Include="Graphics\PixelFormat.h" />
     <ClInclude Include="Graphics\Renderable.h" />
     <ClInclude Include="Graphics\RenderFactory.h" />
@@ -118,7 +117,6 @@
     <ClCompile Include="Graphics\Image.cpp" />
     <ClCompile Include="Graphics\Material.cpp" />
     <ClCompile Include="Graphics\Mesh.cpp" />
-    <ClCompile Include="Graphics\MeshPart.cpp" />
     <ClCompile Include="Graphics\PixelFormat.cpp" />
     <ClCompile Include="Graphics\Renderable.cpp" />
     <ClCompile Include="Graphics\RenderDevice.cpp" />
@@ -268,7 +266,9 @@
     <Xml Include="..\Media\Effect\TiledLightCull.effect.xml">
       <SubType>Designer</SubType>
     </Xml>
-    <Xml Include="..\Media\Effect\FSQuad.effect.xml" />
+    <Xml Include="..\Media\Effect\FSQuad.effect.xml">
+      <SubType>Designer</SubType>
+    </Xml>
     <Xml Include="..\Media\Effect\HDRToneMap.effect.xml" />
     <Xml Include="..\Media\Effect\Model.effect.xml" />
     <Xml Include="..\Media\Effect\TiledDeferredShading.effect.xml" />

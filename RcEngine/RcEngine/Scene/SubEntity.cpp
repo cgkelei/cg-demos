@@ -3,7 +3,6 @@
 #include <Scene/SceneNode.h>
 #include <Scene/SceneManager.h>
 #include <Graphics/Mesh.h>
-#include <Graphics/MeshPart.h>
 #include <Graphics/RenderOperation.h>
 #include <Graphics/Material.h>
 #include <Core/Exception.h>
