@@ -117,13 +117,12 @@ void Mesh::LoadImpl()
 		// Read vertex declaration
 		uint32_t veCount = source.ReadUInt();
 		vector<VertexElement> elements(veCount);
-
-		for (uint32_t i = 0; i < veCount; ++i)
+		for (VertexElement& vertexElement : elements)
 		{
-			elements[i].Offset = source.ReadUInt();
-			elements[i].Type =  static_cast<VertexElementFormat>(source.ReadUInt());
-			elements[i].Usage =  static_cast<VertexElementUsage>(source.ReadUInt());
-			elements[i].UsageIndex = source.ReadUShort();
+			vertexElement.Offset = source.ReadUInt();
+			vertexElement.Type =  static_cast<VertexElementFormat>(source.ReadUInt());
+			vertexElement.Usage =  static_cast<VertexElementUsage>(source.ReadUInt());
+			vertexElement.UsageIndex = source.ReadUShort();
 		}
 
 		mVertexBuffers[i].VertexDecl = factory->CreateVertexDeclaration(&elements[0], elements.size());

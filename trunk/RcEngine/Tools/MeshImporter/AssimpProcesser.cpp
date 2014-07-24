@@ -203,63 +203,63 @@ aiMatrix4x4 GetOffsetMatrix(const OutModel& model, const String& boneName)
 	return aiMatrix4x4();
 }
 
-shared_ptr<VertexDeclaration> GetVertexDeclaration(aiMesh* mesh)
-{
-	vector<VertexElement> vertexElements;
-	unsigned int offset = 0;
-	if (mesh->HasPositions())
-	{
-		vertexElements.push_back(VertexElement(offset, VEF_Float3, VEU_Position, 0));
-		offset += VertexElement::GetTypeSize(VEF_Float3);
-	}
-
-	if (mesh->HasNormals())
-	{
-		vertexElements.push_back(VertexElement(offset, VEF_Float3, VEU_Normal, 0));
-		offset += VertexElement::GetTypeSize(VEF_Float3);
-	}
-
-	if (mesh->HasTangentsAndBitangents())
-	{
-		vertexElements.push_back(VertexElement(offset, VEF_Float3, VEU_Tangent, 0));
-		offset += VertexElement::GetTypeSize(VEF_Float3);
-
-		vertexElements.push_back(VertexElement(offset, VEF_Float3, VEU_Binormal, 0));
-		offset += VertexElement::GetTypeSize(VEF_Float3);
-	}
-
-	for (unsigned int i = 0; i < mesh->GetNumUVChannels(); ++i)
-	{
-		switch (mesh->mNumUVComponents[i])
-		{
-		case 1:
-			vertexElements.push_back(VertexElement(offset, VEF_Float, VEU_TextureCoordinate, i));
-			offset += VertexElement::GetTypeSize(VEF_Float);
-			break;
-		case 2:
-			vertexElements.push_back(VertexElement(offset, VEF_Float2, VEU_TextureCoordinate, i));
-			offset += VertexElement::GetTypeSize(VEF_Float2);
-			break;
-		case 3:
-			vertexElements.push_back(VertexElement(offset, VEF_Float3, VEU_TextureCoordinate, i));
-			offset += VertexElement::GetTypeSize(VEF_Float3);
-			break;
-		}
-	}
-
-	if (mesh->HasBones())
-	{
-		vertexElements.push_back(VertexElement(offset, VEF_Float4, VEU_BlendWeight, 0));
-		offset += VertexElement::GetTypeSize(VEF_Float4);
-
-		vertexElements.push_back(VertexElement(offset, VEF_UInt4, VEU_BlendIndices, 0));
-		offset += VertexElement::GetTypeSize(VEF_UInt4);
-	}
-
-	shared_ptr<VertexDeclaration> vd ( new VertexDeclaration(vertexElements) );
-	assert(vd->GetVertexSize() == offset );
-	return vd;
-}
+//shared_ptr<VertexDeclaration> GetVertexDeclaration(aiMesh* mesh)
+//{
+//	vector<VertexElement> vertexElements;
+//	unsigned int offset = 0;
+//	if (mesh->HasPositions())
+//	{
+//		vertexElements.push_back(VertexElement(offset, VEF_Float3, VEU_Position, 0));
+//		//offset += VertexElement::GetTypeSize(VEF_Float3);
+//	}
+//
+//	if (mesh->HasNormals())
+//	{
+//		vertexElements.push_back(VertexElement(offset, VEF_Float3, VEU_Normal, 0));
+//		//offset += VertexElement::GetTypeSize(VEF_Float3);
+//	}
+//
+//	if (mesh->HasTangentsAndBitangents())
+//	{
+//		vertexElements.push_back(VertexElement(offset, VEF_Float3, VEU_Tangent, 0));
+//		//offset += VertexElement::GetTypeSize(VEF_Float3);
+//
+//		vertexElements.push_back(VertexElement(offset, VEF_Float3, VEU_Binormal, 0));
+//		//offset += VertexElement::GetTypeSize(VEF_Float3);
+//	}
+//
+//	for (unsigned int i = 0; i < mesh->GetNumUVChannels(); ++i)
+//	{
+//		switch (mesh->mNumUVComponents[i])
+//		{
+//		case 1:
+//			vertexElements.push_back(VertexElement(offset, VEF_Float, VEU_TextureCoordinate, i));
+//			//offset += VertexElement::GetTypeSize(VEF_Float);
+//			break;
+//		case 2:
+//			vertexElements.push_back(VertexElement(offset, VEF_Float2, VEU_TextureCoordinate, i));
+//			//offset += VertexElement::GetTypeSize(VEF_Float2);
+//			break;
+//		case 3:
+//			vertexElements.push_back(VertexElement(offset, VEF_Float3, VEU_TextureCoordinate, i));
+//			//offset += VertexElement::GetTypeSize(VEF_Float3);
+//			break;
+//		}
+//	}
+//
+//	if (mesh->HasBones())
+//	{
+//		vertexElements.push_back(VertexElement(offset, VEF_Float4, VEU_BlendWeight, 0));
+//		//offset += VertexElement::GetTypeSize(VEF_Float4);
+//
+//		vertexElements.push_back(VertexElement(offset, VEF_UInt4, VEU_BlendIndices, 0));
+//		//offset += VertexElement::GetTypeSize(VEF_UInt4);
+//	}
+//
+//	//shared_ptr<VertexDeclaration> vd ( new VertexDeclaration(vertexElements) );
+//	//assert(vd->GetVertexSize() == offset );
+//	return vd;
+//}
 
 void GetBlendData(OutModel& model, aiMesh* mesh, vector<uint32_t>& boneMappings, vector<vector<uint8_t> >&
 	blendIndices, vector<vector<float> >& blendWeights)
@@ -278,7 +278,6 @@ void GetBlendData(OutModel& model, aiMesh* mesh, vector<uint32_t>& boneMappings,
 			ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Bone:" + boneName + " not found!", "GetBlendData");
 		}
 		
-
 		for (size_t j = 0; j < boneAI->mNumWeights; ++j)
 		{
 			uint32_t vertexID = boneAI->mWeights[j].mVertexId;
@@ -538,117 +537,117 @@ void AssimpProcesser::ExportXML(  OutModel& outModel )
 	}*/
 	
 
-	vector<shared_ptr<MeshPartData> >& subMeshes = outModel.MeshParts;
-	for (size_t i = 0; i < subMeshes.size(); ++i)
-	{
-		shared_ptr<MeshPartData> submesh = subMeshes[i];
-		
-		file << "\t<subMesh name=\"" << submesh->Name << "\" material=\"" << submesh->MaterialName << "\">\n";
+	//vector<shared_ptr<MeshPartData> >& subMeshes = outModel.MeshParts;
+	//for (size_t i = 0; i < subMeshes.size(); ++i)
+	//{
+	//	shared_ptr<MeshPartData> submesh = subMeshes[i];
+	//	
+	//	file << "\t<subMesh name=\"" << submesh->Name << "\" material=\"" << submesh->MaterialName << "\">\n";
 
-		// write bounding sphere
-		const float3& center = submesh->BoundingSphere.Center;
-		const float radius = submesh->BoundingSphere.Radius;
-		file << "\t\t<bounding x=\"" << center[0] << "\" y=\"" << center[1] << "\" z=\"" << center[2] << " radius=" << radius << "\"/>\n";
+	//	// write bounding sphere
+	//	const float3& center = submesh->BoundingSphere.Center;
+	//	const float radius = submesh->BoundingSphere.Radius;
+	//	file << "\t\t<bounding x=\"" << center[0] << "\" y=\"" << center[1] << "\" z=\"" << center[2] << " radius=" << radius << "\"/>\n";
 
-		// write each vertex element
-		const std::vector<VertexElement>& elements = submesh->VertexDeclaration->GetElements();
-		file << "\t\t<vertice vertexCount=\"" << submesh->VertexCount << "\" vertexSize=\"" << submesh->VertexDeclaration->GetVertexSize()<<"\"/>\n";
+	//	// write each vertex element
+	//	const std::vector<VertexElement>& elements = submesh->VertexDeclaration->GetElements();
+	//	file << "\t\t<vertice vertexCount=\"" << submesh->VertexCount << "\" vertexSize=\"" << submesh->VertexDeclaration->GetVertexSize()<<"\"/>\n";
 
-		for (size_t i = 0; i < submesh->VertexCount; ++i)
-		{
-			file << "\t\t\t<vertex>\n";
-			int baseOffset = submesh->VertexDeclaration->GetVertexSize() * i;
-			for (auto iter = elements.begin(); iter != elements.end(); ++iter)
-			{
-				const VertexElement& element = *iter;
-				float* vertexPtr = (float*)(&submesh->VertexData[0] + baseOffset + element.Offset);
-				switch(element.Usage)
-				{
-				case VEU_Position:
-					{
-						file << "\t\t\t\t<position x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
-					}	
-					break;
-				case VEU_Normal:
-					{
-						file << "\t\t\t\t<normal x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
-					}
-					break;
-				case VEU_Tangent:
-					{
-						file << "\t\t\t\t<tangent x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
-					}			
-					break;
-				case VEU_Binormal:
-					{
-						file << "\t\t\t\t<binormal x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
-					}			
-					break;
-				case VEU_TextureCoordinate:
-					{
-						switch(VertexElement::GetTypeCount(element.Type))
-						{
-						case 3:
-							file << "\t\t\t\t<texcoord u=\"" << vertexPtr[0] << "\" v=\"" << vertexPtr[1] << "\" r=\"" << vertexPtr[2] << "\"/>\n";
-							break;
-						case 2:
-							file << "\t\t\t\t<texcoord u=\"" << vertexPtr[0] << "\" v=\"" << vertexPtr[1] << "\"/>\n";
-							break;
-						case 1:
-							file << "\t\t\t\t<texcoord u=\"" << vertexPtr[0] << "\"/>\n";
-							break;
-						}
-					}
-					break;
-				case VEU_BlendWeight:
-					{
-						uint32_t* indexPtr = (uint32_t*)(vertexPtr + 4);
-						for (size_t k = 0; k < 4; ++k)
-						{
-							file << "\t\t\t\t<bone weight=\"" << vertexPtr[k] << "\" index=\"" << indexPtr[k] << "\"/>\n";
-						}	
-					}
-					break;	
-				default:
-					break;
-				}
-			}
-			file << "\t\t\t</vertex>\n";
-		}
-		file << "\t\t<vertices/>\n";
+	//	for (size_t i = 0; i < submesh->VertexCount; ++i)
+	//	{
+	//		file << "\t\t\t<vertex>\n";
+	//		int baseOffset = submesh->VertexDeclaration->GetVertexSize() * i;
+	//		for (auto iter = elements.begin(); iter != elements.end(); ++iter)
+	//		{
+	//			const VertexElement& element = *iter;
+	//			float* vertexPtr = (float*)(&submesh->VertexData[0] + baseOffset + element.Offset);
+	//			switch(element.Usage)
+	//			{
+	//			case VEU_Position:
+	//				{
+	//					file << "\t\t\t\t<position x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
+	//				}	
+	//				break;
+	//			case VEU_Normal:
+	//				{
+	//					file << "\t\t\t\t<normal x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
+	//				}
+	//				break;
+	//			case VEU_Tangent:
+	//				{
+	//					file << "\t\t\t\t<tangent x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
+	//				}			
+	//				break;
+	//			case VEU_Binormal:
+	//				{
+	//					file << "\t\t\t\t<binormal x=\"" << vertexPtr[0] << "\" y=\"" << vertexPtr[1] << "\" z=\"" << vertexPtr[2] << "\"/>\n";
+	//				}			
+	//				break;
+	//			case VEU_TextureCoordinate:
+	//				{
+	//					switch(VertexElement::GetTypeCount(element.Type))
+	//					{
+	//					case 3:
+	//						file << "\t\t\t\t<texcoord u=\"" << vertexPtr[0] << "\" v=\"" << vertexPtr[1] << "\" r=\"" << vertexPtr[2] << "\"/>\n";
+	//						break;
+	//					case 2:
+	//						file << "\t\t\t\t<texcoord u=\"" << vertexPtr[0] << "\" v=\"" << vertexPtr[1] << "\"/>\n";
+	//						break;
+	//					case 1:
+	//						file << "\t\t\t\t<texcoord u=\"" << vertexPtr[0] << "\"/>\n";
+	//						break;
+	//					}
+	//				}
+	//				break;
+	//			case VEU_BlendWeight:
+	//				{
+	//					uint32_t* indexPtr = (uint32_t*)(vertexPtr + 4);
+	//					for (size_t k = 0; k < 4; ++k)
+	//					{
+	//						file << "\t\t\t\t<bone weight=\"" << vertexPtr[k] << "\" index=\"" << indexPtr[k] << "\"/>\n";
+	//					}	
+	//				}
+	//				break;	
+	//			default:
+	//				break;
+	//			}
+	//		}
+	//		file << "\t\t\t</vertex>\n";
+	//	}
+	//	file << "\t\t<vertices/>\n";
 
-		file << "\t\t<triangles triangleCount=\""<<submesh->IndexCount/3 << "\">\n";
-		
-		uint32_t offset = 0;
-		for (size_t i = 0; i < submesh->IndexCount / 3; i+=3)
-		{
-			
-			if (submesh->IndexFormat == IBT_Bit32)
-			{
-				uint32_t* idx = (uint32_t*)( &submesh->IndexData[0] + offset);
-				offset += sizeof(uint32_t) * 3;
-				file << "\t\t\t<triangle a=\"" << idx[0] << "\" b=\"" << idx[1] << "\" c=\"" << idx[2] << "\"/>\n";
-			}else
-			{
-				uint16_t* idx = (uint16_t*)( &submesh->IndexData[0] + offset);
-				offset += sizeof(uint16_t) * 3;
-				file << "\t\t\t<triangle a=\"" << idx[0] << "\" b=\"" << idx[1] << "\" c=\"" << idx[2] << "\"/>\n";
-			}
-		}
-		file << "\t\t</triangles>\n";
-		file << "\t</submesh>\n";
-	}
+	//	file << "\t\t<triangles triangleCount=\""<<submesh->IndexCount/3 << "\">\n";
+	//	
+	//	uint32_t offset = 0;
+	//	for (size_t i = 0; i < submesh->IndexCount / 3; i+=3)
+	//	{
+	//		
+	//		if (submesh->IndexFormat == IBT_Bit32)
+	//		{
+	//			uint32_t* idx = (uint32_t*)( &submesh->IndexData[0] + offset);
+	//			offset += sizeof(uint32_t) * 3;
+	//			file << "\t\t\t<triangle a=\"" << idx[0] << "\" b=\"" << idx[1] << "\" c=\"" << idx[2] << "\"/>\n";
+	//		}else
+	//		{
+	//			uint16_t* idx = (uint16_t*)( &submesh->IndexData[0] + offset);
+	//			offset += sizeof(uint16_t) * 3;
+	//			file << "\t\t\t<triangle a=\"" << idx[0] << "\" b=\"" << idx[1] << "\" c=\"" << idx[2] << "\"/>\n";
+	//		}
+	//	}
+	//	file << "\t\t</triangles>\n";
+	//	file << "\t</submesh>\n";
+	//}
 
-	if (mAIScene->HasAnimations())
-	{
-		size_t animSize = mAnimationClips.size();
-		file << "\t\t<animations count=\"" << animSize << "\">\n";
-		for (size_t i = 0; i < animSize; ++i)
-		{
-			file << "\t\t\t<clip name=\"" << mAnimationClips[i] << "\"/>\n";
-		}
-		file << "\t\t</animations>\n";
-	}
+	//if (mAIScene->HasAnimations())
+	//{
+	//	size_t animSize = mAnimationClips.size();
+	//	file << "\t\t<animations count=\"" << animSize << "\">\n";
+	//	for (size_t i = 0; i < animSize; ++i)
+	//	{
+	//		file << "\t\t\t<clip name=\"" << mAnimationClips[i] << "\"/>\n";
+	//	}
+	//	file << "\t\t</animations>\n";
+	//}
 	
 }
 
@@ -693,80 +692,80 @@ void AssimpProcesser::ExportBinary( OutModel& outModel )
 	//}
 
 	// write mesh parts count
-	stream.WriteUInt(outModel.MeshParts.size());
+	//stream.WriteUInt(outModel.MeshParts.size());
 
-	vector<shared_ptr<MeshPartData> >& subMeshes = outModel.MeshParts;
-	for (size_t i = 0; i < subMeshes.size(); ++i)
-	{
-		shared_ptr<MeshPartData> submesh = subMeshes[i];
-		
-		// write sub mesh name
-		stream.WriteString(submesh->Name);	
+	//vector<shared_ptr<MeshPartData> >& subMeshes = outModel.MeshParts;
+	//for (size_t i = 0; i < subMeshes.size(); ++i)
+	//{
+	//	shared_ptr<MeshPartData> submesh = subMeshes[i];
+	//	
+	//	// write sub mesh name
+	//	stream.WriteString(submesh->Name);	
 
-		// write material index
-		stream.WriteString(submesh->MaterialName + ".material.xml");
+	//	// write material index
+	//	stream.WriteString(submesh->MaterialName + ".material.xml");
 
-		// write sub mesh bounding sphere
-		float3 center = submesh->BoundingSphere.Center;
-		float radius = submesh->BoundingSphere.Radius;
-		stream.Write(&center, sizeof(float3));
-		stream.WriteFloat(radius);
+	//	// write sub mesh bounding sphere
+	//	float3 center = submesh->BoundingSphere.Center;
+	//	float radius = submesh->BoundingSphere.Radius;
+	//	stream.Write(&center, sizeof(float3));
+	//	stream.WriteFloat(radius);
 
-		// write vertex count and vertex size
-		stream.WriteUInt(submesh->VertexCount);
-		stream.WriteUInt(submesh->VertexDeclaration->GetVertexSize());
+	//	// write vertex count and vertex size
+	//	stream.WriteUInt(submesh->VertexCount);
+	//	stream.WriteUInt(submesh->VertexDeclaration->GetVertexSize());
 
-		// write vertex declaration, elements count
-		stream.WriteUInt(submesh->VertexDeclaration->GetElementCount());
+	//	// write vertex declaration, elements count
+	//	stream.WriteUInt(submesh->VertexDeclaration->GetElementCount());
 
-		// write each vertex element
-		const std::vector<VertexElement>& elements = submesh->VertexDeclaration->GetElements();
-		for (auto iter = elements.begin(); iter != elements.end(); ++iter)
-		{
-			const VertexElement& ve = *iter;
-			stream.WriteUInt(ve.Offset);
-			stream.WriteUInt(ve.Type);
-			stream.WriteUInt(ve.Usage);
-			stream.WriteUShort(ve.UsageIndex);
-		}
+	//	// write each vertex element
+	//	const std::vector<VertexElement>& elements = submesh->VertexDeclaration->GetElements();
+	//	for (auto iter = elements.begin(); iter != elements.end(); ++iter)
+	//	{
+	//		const VertexElement& ve = *iter;
+	//		stream.WriteUInt(ve.Offset);
+	//		stream.WriteUInt(ve.Type);
+	//		stream.WriteUInt(ve.Usage);
+	//		stream.WriteUShort(ve.UsageIndex);
+	//	}
 
-		// write vertex buffer data
-		uint32_t bufferSize = submesh->VertexCount * submesh->VertexDeclaration->GetVertexSize();
-		stream.Write(&(submesh->VertexData[0]), sizeof(char) * submesh->VertexData.size());
+	//	// write vertex buffer data
+	//	uint32_t bufferSize = submesh->VertexCount * submesh->VertexDeclaration->GetVertexSize();
+	//	stream.Write(&(submesh->VertexData[0]), sizeof(char) * submesh->VertexData.size());
 
-		// write triangles count
-		stream.WriteUInt(submesh->IndexCount);
-		stream.WriteUInt(submesh->IndexFormat);
-		stream.Write(&submesh->IndexData[0], sizeof(char) * submesh->IndexData.size());
-	}
+	//	// write triangles count
+	//	stream.WriteUInt(submesh->IndexCount);
+	//	stream.WriteUInt(submesh->IndexFormat);
+	//	stream.Write(&submesh->IndexData[0], sizeof(char) * submesh->IndexData.size());
+	//}
 
-	if (outModel.Bones.empty())
-	{
-		stream.WriteUInt(0);
-	}
-	else
-	{
-		FileStream skeleton;
-		skeleton.Open(mSkeletonFile);
-		uint32_t size = skeleton.GetSize();
-		vector<char> skeletonData(size);
-		skeleton.Read(&skeletonData[0], size);
-		stream.Write(&skeletonData[0], size);
-		skeleton.Close();
-	}
+	//if (outModel.Bones.empty())
+	//{
+	//	stream.WriteUInt(0);
+	//}
+	//else
+	//{
+	//	FileStream skeleton;
+	//	skeleton.Open(mSkeletonFile);
+	//	uint32_t size = skeleton.GetSize();
+	//	vector<char> skeletonData(size);
+	//	skeleton.Read(&skeletonData[0], size);
+	//	stream.Write(&skeletonData[0], size);
+	//	skeleton.Close();
+	//}
 
-	if (mAIScene->HasAnimations())
-	{
-		size_t animSize = mAnimationClips.size();
-		stream.WriteUInt(animSize);
-		for (size_t i = 0; i < animSize; ++i)
-		{
-			stream.WriteString(mAnimationClips[i]);
-		}
-	}else
-	{
-		stream.WriteUInt(0);
-	}
+	//if (mAIScene->HasAnimations())
+	//{
+	//	size_t animSize = mAnimationClips.size();
+	//	stream.WriteUInt(animSize);
+	//	for (size_t i = 0; i < animSize; ++i)
+	//	{
+	//		stream.WriteString(mAnimationClips[i]);
+	//	}
+	//}else
+	//{
+	//	stream.WriteUInt(0);
+	//}
 
 	//if (outModel.Bones.empty())
 	//{
@@ -961,211 +960,216 @@ void AssimpProcesser::ExportModel( OutModel& outModel, const String& outName )
 
 void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
 {
-	if (!outModel.RootNode)
-	{
-		// Error no model root node
-		return;
-	}
 
-	String rootNodeName = String(outModel.RootNode->mName.C_Str());
-	if (outModel.Meshes.empty())
-	{
-		// Error, no geometry start from this node
-		return;
-	}
-
-	// animated model
-	if (!outModel.Bones.empty())
-	{
-		BuildSkeleton(outModel);
-	}
-
-	for (size_t i = 0; i < outModel.Meshes.size(); ++i)
-	{
-		BoundingSpheref sphere; 
-
-		aiMesh* mesh = outModel.Meshes[i];
-		aiNode* meshNode = outModel.MeshNodes[i];
-
-		// if animated all submeshes must have bone weights
-		if (outModel.Bones.size() && !mesh->HasBones())
-		{
-			continue;
-			//ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Animated all submeshes must have bone weights", "AssimpProcesser::BuildAndSaveModel");
-		}
-
-		// Get the world transform of the mesh for baking into the vertices
-		aiMatrix4x4 vertexTransformAI = GetMeshBakingTransform(meshNode, outModel.RootNode);
-		aiMatrix4x4 normalTransformAI = vertexTransformAI.Inverse().Transpose();
-
-		aiVector3D translationAI, scaleAI;
-		aiQuaternion rotationAI;
-		vertexTransformAI.Decompose(scaleAI, rotationAI, translationAI);
-
-		shared_ptr<MeshPartData> meshPart(new MeshPartData);
-		shared_ptr<VertexDeclaration> vertexDecl = GetVertexDeclaration(mesh);
-
-		meshPart->Name = String(mesh->mName.C_Str());
-		meshPart->MaterialName = outModel.Materials[mesh->mMaterialIndex]->Name;
-
-		// Store index data
-		bool largeIndices = mesh->mNumVertices > 65535;
-		if (!largeIndices)
-		{
-			meshPart->IndexData.resize( sizeof(uint16_t) * mesh->mNumFaces * 3 );
-			uint16_t* dest = (uint16_t*)(&meshPart->IndexData[0]);
-			for (unsigned f = 0; f < mesh->mNumFaces; ++f)
-			{
-				aiFace face = mesh->mFaces[f];
-				assert(face.mNumIndices == 3);
-				*dest++ =  face.mIndices[0];
-				*dest++ =  face.mIndices[1];
-				*dest++ =  face.mIndices[2];
-			}
-			meshPart->IndexFormat = IBT_Bit16;
-			meshPart->IndexCount =  mesh->mNumFaces * 3;
-		}
-		else
-		{
-			meshPart->IndexData.resize( sizeof(uint32_t) * mesh->mNumFaces * 3 );
-			uint32_t* dest = (uint32_t*)(&meshPart->IndexData[0]);
-			for (unsigned f = 0; f < mesh->mNumFaces; ++f)
-			{
-				aiFace face = mesh->mFaces[f];
-				assert(face.mNumIndices == 3);
-				*dest++ =  face.mIndices[0];
-				*dest++ =  face.mIndices[1];
-				*dest++ =  face.mIndices[2];
-			}
-			meshPart->IndexFormat = IBT_Bit32;
-			meshPart->IndexCount =  mesh->mNumFaces * 3;
-		}
-
-		// Store vertex data
-		meshPart->VertexData.resize( vertexDecl->GetVertexSize() * mesh->mNumVertices );
-
-		// assign per vertex bone info
-		vector<vector<uint8_t> > blendIndices;
-		vector<vector<float> > blendWeights;
-		vector<uint32_t> boneMappings;
-		if (outModel.Bones.size())
-		{
-			GetBlendData(outModel, mesh, boneMappings, blendIndices, blendWeights);
-		}
-
-		size_t vs = vertexDecl->GetVertexSize();
-
-		const vector<VertexElement>& vertexElements = vertexDecl->GetElements();
-		for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
-		{
-			int baseOffset = vertexDecl->GetVertexSize() * i;
-			for (size_t ve = 0; ve < vertexElements.size(); ++ve)
-			{
-				const VertexElement& element = vertexElements[ve];
-				float* vertexPtr = (float*)(&meshPart->VertexData[0] + baseOffset + element.Offset);
-				switch(element.Usage)
-				{
-				case VEU_Position:
-					{
-						// Bake the mesh vertex in model space defined by the root node
-						// So even without the skeleton, the mesh can render with unskin mesh.				
-						float3 vertex = FromAIVector( vertexTransformAI *  mesh->mVertices[i] );
-						
-						*(vertexPtr) = vertex.X();
-						*(vertexPtr+1) = vertex.Y();
-						*(vertexPtr+2) = vertex.Z();
-
-						// bouding sphere
-						sphere.Merge(vertex);
-					}	
-					break;
-				case VEU_Normal:
-					{
-						float3 normal = FromAIVector( normalTransformAI * mesh->mNormals[i] );
-						*(vertexPtr) = normal.X();
-						*(vertexPtr+1) = normal.Y();
-						*(vertexPtr+2) = normal.Z();
-					}
-					break;
-				case VEU_Tangent:
-					{
-						float3 tangent = FromAIVector(normalTransformAI * mesh->mTangents[i]);
-						*(vertexPtr) = tangent.X();
-						*(vertexPtr+1) = tangent.Y();
-						*(vertexPtr+2) = tangent.Z();
-					}			
-					break;
-				case VEU_Binormal:
-					{
-						float3 bitangent = FromAIVector(normalTransformAI * mesh->mBitangents[i]);
-						*(vertexPtr) = bitangent.X();
-						*(vertexPtr+1) = bitangent.Y();
-						*(vertexPtr+2) = bitangent.Z();
-					}			
-					break;
-				case VEU_TextureCoordinate:
-					{
-						switch(mesh->mNumUVComponents[element.UsageIndex])
-						{
-						case 3:
-							*(vertexPtr+2) = mesh->mTextureCoords[element.UsageIndex][i].z;
-						case 2:
-							*(vertexPtr+1) = mesh->mTextureCoords[element.UsageIndex][i].y;	
-						case 1:
-							*(vertexPtr) = mesh->mTextureCoords[element.UsageIndex][i].x;
-							break;
-						}
-					}
-					break;
-				case VEU_BlendWeight:
-					{
-						for (uint32_t j = 0; j < 4; ++j)
-						{
-							if (j < blendWeights[i].size())
-							{
-								float weight = blendWeights[i][j];
-								*vertexPtr++ = weight;
-							}
-							else
-								*vertexPtr++ = 0.0f;
-						}
-					}
-					break;
-				case VEU_BlendIndices:
-					{
-						uint32_t* destBytes = (uint32_t*)vertexPtr;
-						for (uint32_t j = 0; j < 4; ++j)
-						{
-							if (j < blendIndices[i].size())
-							{
-								uint32_t index =  blendIndices[i][j];
-								*destBytes++ = blendIndices[i][j];
-							}
-							else
-								*destBytes++ = 0;
-						}
-					}
-					break;
-
-				default:
-					break;
-				}
-			}
-		}
-
-		meshPart->StartVertex = 0;
-		meshPart->VertexCount = mesh->mNumVertices;
-		meshPart->VertexDeclaration = vertexDecl;
-		meshPart->BoundingSphere = sphere;
-		outModel.MeshParts.push_back(meshPart);
-	}
-
-	// Merge all sub mesh's bouding sphere
-	for (size_t i = 0; i < outModel.MeshParts.size(); ++i)
-	{
-		outModel.MeshBoundingSphere.Merge( outModel.MeshParts[i]->BoundingSphere );
-	}
 }
+
+//void AssimpProcesser::BuildAndSaveModel( OutModel& outModel )
+//{
+//	if (!outModel.RootNode)
+//	{
+//		// Error no model root node
+//		return;
+//	}
+//
+//	String rootNodeName = String(outModel.RootNode->mName.C_Str());
+//	if (outModel.Meshes.empty())
+//	{
+//		// Error, no geometry start from this node
+//		return;
+//	}
+//
+//	// animated model
+//	if (!outModel.Bones.empty())
+//	{
+//		BuildSkeleton(outModel);
+//	}
+//
+//	for (size_t i = 0; i < outModel.Meshes.size(); ++i)
+//	{
+//		BoundingSpheref sphere; 
+//
+//		aiMesh* mesh = outModel.Meshes[i];
+//		aiNode* meshNode = outModel.MeshNodes[i];
+//
+//		// if animated all submeshes must have bone weights
+//		if (outModel.Bones.size() && !mesh->HasBones())
+//		{
+//			continue;
+//			//ENGINE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Animated all submeshes must have bone weights", "AssimpProcesser::BuildAndSaveModel");
+//		}
+//
+//		// Get the world transform of the mesh for baking into the vertices
+//		aiMatrix4x4 vertexTransformAI = GetMeshBakingTransform(meshNode, outModel.RootNode);
+//		aiMatrix4x4 normalTransformAI = vertexTransformAI.Inverse().Transpose();
+//
+//		aiVector3D translationAI, scaleAI;
+//		aiQuaternion rotationAI;
+//		vertexTransformAI.Decompose(scaleAI, rotationAI, translationAI);
+//
+//		shared_ptr<MeshPartData> meshPart(new MeshPartData);
+//		//shared_ptr<VertexDeclaration> vertexDecl = GetVertexDeclaration(mesh);
+//
+//		meshPart->Name = String(mesh->mName.C_Str());
+//		meshPart->MaterialName = outModel.Materials[mesh->mMaterialIndex]->Name;
+//
+//		// Store index data
+//		bool largeIndices = mesh->mNumVertices > 65535;
+//		if (!largeIndices)
+//		{
+//			meshPart->IndexData.resize( sizeof(uint16_t) * mesh->mNumFaces * 3 );
+//			uint16_t* dest = (uint16_t*)(&meshPart->IndexData[0]);
+//			for (unsigned f = 0; f < mesh->mNumFaces; ++f)
+//			{
+//				aiFace face = mesh->mFaces[f];
+//				assert(face.mNumIndices == 3);
+//				*dest++ =  face.mIndices[0];
+//				*dest++ =  face.mIndices[1];
+//				*dest++ =  face.mIndices[2];
+//			}
+//			meshPart->IndexFormat = IBT_Bit16;
+//			meshPart->IndexCount =  mesh->mNumFaces * 3;
+//		}
+//		else
+//		{
+//			meshPart->IndexData.resize( sizeof(uint32_t) * mesh->mNumFaces * 3 );
+//			uint32_t* dest = (uint32_t*)(&meshPart->IndexData[0]);
+//			for (unsigned f = 0; f < mesh->mNumFaces; ++f)
+//			{
+//				aiFace face = mesh->mFaces[f];
+//				assert(face.mNumIndices == 3);
+//				*dest++ =  face.mIndices[0];
+//				*dest++ =  face.mIndices[1];
+//				*dest++ =  face.mIndices[2];
+//			}
+//			meshPart->IndexFormat = IBT_Bit32;
+//			meshPart->IndexCount =  mesh->mNumFaces * 3;
+//		}
+//
+//		// Store vertex data
+//		meshPart->VertexData.resize( vertexDecl->GetVertexSize() * mesh->mNumVertices );
+//
+//		// assign per vertex bone info
+//		vector<vector<uint8_t> > blendIndices;
+//		vector<vector<float> > blendWeights;
+//		vector<uint32_t> boneMappings;
+//		if (outModel.Bones.size())
+//		{
+//			GetBlendData(outModel, mesh, boneMappings, blendIndices, blendWeights);
+//		}
+//
+//		size_t vs = vertexDecl->GetVertexSize();
+//
+//		const vector<VertexElement>& vertexElements = vertexDecl->GetElements();
+//		for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
+//		{
+//			int baseOffset = vertexDecl->GetVertexSize() * i;
+//			for (size_t ve = 0; ve < vertexElements.size(); ++ve)
+//			{
+//				const VertexElement& element = vertexElements[ve];
+//				float* vertexPtr = (float*)(&meshPart->VertexData[0] + baseOffset + element.Offset);
+//				switch(element.Usage)
+//				{
+//				case VEU_Position:
+//					{
+//						// Bake the mesh vertex in model space defined by the root node
+//						// So even without the skeleton, the mesh can render with unskin mesh.				
+//						float3 vertex = FromAIVector( vertexTransformAI *  mesh->mVertices[i] );
+//						
+//						*(vertexPtr) = vertex.X();
+//						*(vertexPtr+1) = vertex.Y();
+//						*(vertexPtr+2) = vertex.Z();
+//
+//						// bouding sphere
+//						sphere.Merge(vertex);
+//					}	
+//					break;
+//				case VEU_Normal:
+//					{
+//						float3 normal = FromAIVector( normalTransformAI * mesh->mNormals[i] );
+//						*(vertexPtr) = normal.X();
+//						*(vertexPtr+1) = normal.Y();
+//						*(vertexPtr+2) = normal.Z();
+//					}
+//					break;
+//				case VEU_Tangent:
+//					{
+//						float3 tangent = FromAIVector(normalTransformAI * mesh->mTangents[i]);
+//						*(vertexPtr) = tangent.X();
+//						*(vertexPtr+1) = tangent.Y();
+//						*(vertexPtr+2) = tangent.Z();
+//					}			
+//					break;
+//				case VEU_Binormal:
+//					{
+//						float3 bitangent = FromAIVector(normalTransformAI * mesh->mBitangents[i]);
+//						*(vertexPtr) = bitangent.X();
+//						*(vertexPtr+1) = bitangent.Y();
+//						*(vertexPtr+2) = bitangent.Z();
+//					}			
+//					break;
+//				case VEU_TextureCoordinate:
+//					{
+//						switch(mesh->mNumUVComponents[element.UsageIndex])
+//						{
+//						case 3:
+//							*(vertexPtr+2) = mesh->mTextureCoords[element.UsageIndex][i].z;
+//						case 2:
+//							*(vertexPtr+1) = mesh->mTextureCoords[element.UsageIndex][i].y;	
+//						case 1:
+//							*(vertexPtr) = mesh->mTextureCoords[element.UsageIndex][i].x;
+//							break;
+//						}
+//					}
+//					break;
+//				case VEU_BlendWeight:
+//					{
+//						for (uint32_t j = 0; j < 4; ++j)
+//						{
+//							if (j < blendWeights[i].size())
+//							{
+//								float weight = blendWeights[i][j];
+//								*vertexPtr++ = weight;
+//							}
+//							else
+//								*vertexPtr++ = 0.0f;
+//						}
+//					}
+//					break;
+//				case VEU_BlendIndices:
+//					{
+//						uint32_t* destBytes = (uint32_t*)vertexPtr;
+//						for (uint32_t j = 0; j < 4; ++j)
+//						{
+//							if (j < blendIndices[i].size())
+//							{
+//								uint32_t index =  blendIndices[i][j];
+//								*destBytes++ = blendIndices[i][j];
+//							}
+//							else
+//								*destBytes++ = 0;
+//						}
+//					}
+//					break;
+//
+//				default:
+//					break;
+//				}
+//			}
+//		}
+//
+//		meshPart->StartVertex = 0;
+//		meshPart->VertexCount = mesh->mNumVertices;
+//		meshPart->VertexDeclaration = vertexDecl;
+//		meshPart->BoundingSphere = sphere;
+//		outModel.MeshParts.push_back(meshPart);
+//	}
+//
+//	// Merge all sub mesh's bouding sphere
+//	for (size_t i = 0; i < outModel.MeshParts.size(); ++i)
+//	{
+//		outModel.MeshBoundingSphere.Merge( outModel.MeshParts[i]->BoundingSphere );
+//	}
+//}
 
 aiMatrix4x4 GetBoneOffset(OutModel& model, aiString name)
 {
@@ -1212,7 +1216,7 @@ void AssimpProcesser::BuildSkeleton( OutModel& outModel )
 
 			Quaternionf quat = FromAIQuaternion(rot);
 			float yaw, roll, pitch;
-			QuaternionToRotationYawPitchRoll(yaw, pitch, roll, quat);
+			//QuaternionToRotationYawPitchRoll(yaw, pitch, roll, quat);
 
 			bone->SetPosition( FromAIVector(position) );
 			bone->SetRotation( FromAIQuaternion(rot) );

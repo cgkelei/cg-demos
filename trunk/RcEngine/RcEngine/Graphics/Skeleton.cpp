@@ -36,12 +36,7 @@ Skeleton::~Skeleton()
 		delete bone;
 }
 
-Bone* Skeleton::GetRootBone()
-{
-	return mBones[0];
-}
-
-Bone* Skeleton::GetBone( const String& name )
+Bone* Skeleton::GetBone( const String& name ) const
 {
 	for (Bone* bone : mBones)
 	{
@@ -52,8 +47,9 @@ Bone* Skeleton::GetBone( const String& name )
 	return nullptr;
 }
 
-Bone* Skeleton::GetBone( uint32_t index )
+Bone* Skeleton::GetBone( uint32_t index ) const
 {
+	assert(index < mBones.size());
 	return mBones[index];
 }
 
@@ -120,6 +116,11 @@ Bone* Skeleton::AddBone( const String& name, Bone* parent )
 	Bone* bone = new Bone(name, mBones.size(), parent);
 	mBones.push_back(bone);
 	return bone;
+}
+
+Bone* Skeleton::GetRootBone() const
+{
+	return mBones[0];
 }
 
 //////////////////////////////////////////////////////////////////////////

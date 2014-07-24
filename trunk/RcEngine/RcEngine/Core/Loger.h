@@ -15,7 +15,7 @@ public:
 	virtual void LogMessage( const char* strMessage ) = 0;
 	virtual void LogWarning( const char* strMessage )			 { LogMessage( strMessage ); }
 	virtual void LogError( const char* strMessage )				 { LogMessage( strMessage ); }
-	virtual void LogCommand( uint32_t dwCommand, VOID* pData )   { UNREFERENCED_PARAMETER( dwCommand ); UNREFERENCED_PARAMETER( pData ); }
+	virtual void LogCommand( uint32_t dwCommand, void* pData )   { }
 };
 
 class _ApiExport FileListener : public ILogListener
@@ -39,7 +39,7 @@ public:
 	~ConsoleOutListener();
 
 	virtual void LogMessage( const char* strMessage );
-	virtual void LogWarning( const CHAR* strMessage );
+	virtual void LogWarning( const char* strMessage );
 	virtual void LogError( const char* strMessage );
 
 protected:
@@ -68,10 +68,10 @@ public:
 	static void AddListener( ILogListener* pListener );
 	static void ClearListeners();
 
-	static void GenerateLogReport( bool bEchoWarningsAndErrors = TRUE );
+	static void GenerateLogReport( bool bEchoWarningsAndErrors = true );
 	static void ResetCounters();
 
-	static void LogCommand( uint32_t dwCommand, VOID* pData = NULL );
+	static void LogCommand( uint32_t dwCommand, void* pData = NULL );
 	static void LogError( const char* strFormat, ... );
 	static void LogWarning( const char* strFormat, ... );
 	static void LogMsg( uint32_t uImportance, const char* strFormat, ... );
