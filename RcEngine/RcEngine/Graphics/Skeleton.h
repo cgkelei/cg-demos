@@ -18,9 +18,9 @@ public:
 
 	uint32_t GetNumBones() const { return mBones.size(); }
 
-	Bone* GetRootBone();
-	Bone* GetBone( const String& name );
-	Bone* GetBone( uint32_t index );
+	Bone* GetRootBone() const;
+	Bone* GetBone( uint32_t index ) const;
+	Bone* GetBone( const String& name ) const;
 
 	Bone* AddBone(const String& name, Bone* parent);
 

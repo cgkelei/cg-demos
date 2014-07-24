@@ -11,11 +11,9 @@ LOLExporter::LOLExporter(void)
 {
 }
 
-
 LOLExporter::~LOLExporter(void)
 {
 }
-
 
 void LOLExporter::ImportSkeleton( const char* sklFilename )
 {
@@ -30,37 +28,45 @@ void LOLExporter::ImportSkeleton( const char* sklFilename )
 		exit(1);
 	}
 
+	static const char SkeletonFileType[] = "r3d2sklt";
+
 	Header header;
-	numRead = fread_s(&header, sizeof(header), sizeof(header), 1, pFile);
+	fread_s(&header, sizeof(header), sizeof(header), 1, pFile);
 
-	mBones.resize(header.numElements);
-	for (int i = 0; i < header.numElements; i++) 
+	if (strncmp(header.fileType, SkeletonFileType, 8) == 0)
 	{
-		Bone& bone = mBones[i];
-		numRead = fread_s(&bone, sizeof(bone), sizeof(bone), 1, pFile);
+		mBones.resize(header.numElements);
+		for (int i = 0; i < header.numElements; i++) 
+		{
+			Bone& bone = mBones[i];
+			fread_s(&bone, sizeof(bone), sizeof(bone), 1, pFile);
 
-		/*memset(bone.name, 0, sizeof(bone.name));
+			/*memset(bone.name, 0, sizeof(bone.name));
 		
-		numRead = fread_s(&bone.name, sizeof(bone.name), sizeof(bone.name), 1, pFile);
-		numRead = fread_s(&bone.parent, sizeof(bone.parent), sizeof(bone.parent), 1, pFile);
-		numRead = fread_s(&bone.scale, sizeof(bone.scale), sizeof(bone.scale), 1, pFile);
+			numRead = fread_s(&bone.name, sizeof(bone.name), sizeof(bone.name), 1, pFile);
+			numRead = fread_s(&bone.parent, sizeof(bone.parent), sizeof(bone.parent), 1, pFile);
+			numRead = fread_s(&bone.scale, sizeof(bone.scale), sizeof(bone.scale), 1, pFile);
 
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 4; j++) {
-			fin >> bone.matrix[i][j];
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 4; j++) {
+				fin >> bone.matrix[i][j];
+				}
 			}
+			fout.write((const char*)&bone, sizeof(Bone));*/
+
+			printf("Bone: %s, Parent: %s\n", bone.name, (bone.parent != -1 ) ? mBones[bone.parent].name : "");
 		}
-		fout.write((const char*)&bone, sizeof(Bone));*/
 
-		printf("Bone: %s, Parent: %s\n", bone.name, (bone.parent != -1 ) ? mBones[bone.parent].name : "");
+		/*int boneSize = sizeof(Bone);
+		long int currPos = ftell(pFile);
+		fseek(pFile, 0, SEEK_END);
+		long int left = ftell(pFile) - currPos;*/
 	}
-
-	/*int boneSize = sizeof(Bone);
-
-	long int currPos = ftell(pFile);
-	fseek(pFile, 0, SEEK_END);
-	long int left = ftell(pFile) - currPos;*/
-
+	else
+	{
+		printf("Unsupported skeleton format!\n");
+	}
+	
 	fclose(pFile);
 }
 
@@ -205,422 +211,67 @@ void LOLExporter::ExportObj( const char* objFilename )
 
 void LOLExporter::ImportAnimation( const char* animFilename )
 {
+	errno_t err;
+	size_t numRead;
 
+	FILE* pFile = NULL;
+	err = fopen_s(&pFile, animFilename, "rb");
+	if (err != 0)
+	{
+		printf("ERROR: could not open %s\n", animFilename);
+		exit(1);
+	}
+
+	static const char AninationFileType[] = "r3d2anmd";
+
+	SkinAnimationHeader header;
+	fread_s(&header, sizeof(SkinAnimationHeader), sizeof(SkinAnimationHeader), 1, pFile);
+
+	if (strncmp(header.fileType, AninationFileType, 8) == 0)
+	{
+		mAnimationClipData.mAnimationTracks.resize(header.numBones);
+		for (int32_t i = 0; i < header.numBones; ++i)
+		{
+			AnimationClipData::AnimationTrack& anmTrack = mAnimationClipData.mAnimationTracks[i];
+
+			/**
+			 *  name:           str         name of bone
+			 *  boneType:       int         type of bone (2 = root, 0 = ordinary, )
+			 *	quat:           float[4]    quaternion of bone
+			 *	pos:            float[3]    postion of bone
+			 */
+
+			fread_s(&anmTrack.BoneName, 32, 32, 1, pFile);
+			fread_s(&anmTrack.BoneType, 4, 4, 1, pFile);
+
+			anmTrack.KeyFrames.resize(header.numFrames);
+			for (int32_t i = 0; i < header.numFrames; ++i)
+			{
+				fread_s(&anmTrack.KeyFrames[0], sizeof(AnimationClipData::KeyFrame), sizeof(AnimationClipData::KeyFrame), 1, pFile);
+			}
+		}
+	}
+	else
+	{
+		printf("Unsupported skeleton format!\n");
+	}
+	
+	fclose(pFile);
 }
 
 void LOLExporter::BuildAndSaveBinary()
 {
-	const uint32_t MeshId = ('M' << 24) | ('E' << 16) | ('S' << 8) | ('H');
 
-	String outFile;
-
-	FileStream stream;
-	stream.Open(outFile, FILE_WRITE);
-	//ExportLog::LogMsg(0, "Build mesh: %s\n", mesh.Name.c_str());
-
-	
-	{
-		// Write mesh id
-		stream.WriteUInt(MeshId);
-
-		// write mesh name
-		//stream.WriteString(mesh.Name);
-
-		// write mesh bounding box
-		//stream.Write(&mesh.Bound.Min, sizeof(float3));
-		//stream.Write(&mesh.Bound.Max, sizeof(float3));
-
-		// write mesh part count
-		stream.WriteUInt(mMaterials.size());
-
-		for (uint32_t i = 0; i < mMaterials.size(); ++i)
-		{
-			MeshPartData& meshPart = *(mesh.MeshParts[mpi]);
-			shared_ptr<VertexDeclaration> vertexDecl = GetVertexDeclaration(meshPart.Vertices[0].Flag);
-			uint32_t vertexSize = vertexDecl->GetVertexSize();
-
-			// write sub mesh name
-			stream.WriteString(meshPart.Name);	
-
-			// write material name
-			stream.WriteString(meshPart.MaterialName + ".material.xml");
-
-			// write sub mesh bounding sphere
-			stream.Write(&meshPart.Bound.Min, sizeof(float3));
-			stream.Write(&meshPart.Bound.Max, sizeof(float3));
-
-			// write vertex count and vertex size
-			stream.WriteUInt(meshPart.Vertices.size());
-			stream.WriteUInt(vertexSize);
-
-			const std::vector<VertexElement>& elements = vertexDecl->GetVertexElements();
-
-			// write vertex declaration, elements count
-			stream.WriteUInt(elements.size());
-
-			for (auto iter = elements.begin(); iter != elements.end(); ++iter)
-			{
-				const VertexElement& ve = *iter;
-				stream.WriteUInt(ve.Offset);
-				stream.WriteUInt(ve.Type);
-				stream.WriteUInt(ve.Usage);
-				stream.WriteUShort(ve.UsageIndex);
-			}
-
-			uint32_t bufferSize = meshPart.Vertices.size() * vertexSize;
-			/*	stream.WriteUInt(bufferSize);*/
-
-			size_t checkSize = 0;
-			for (size_t vi = 0; vi < meshPart.Vertices.size(); ++vi)
-			{
-				Vertex& vertex = meshPart.Vertices[vi];
-				uint32_t vertexFlag = vertex.Flag;
-
-				if (vertexFlag & Vertex::ePosition)
-				{
-					stream.Write(&vertex.Position, sizeof(float3));
-					checkSize += sizeof(float3);
-				}
-
-				if (vertexFlag & Vertex::eBlendWeight)
-				{
-					assert(vertex.BlendWeights.size() == 4);
-					stream.Write(&vertex.BlendWeights[0], sizeof(float) * 4);
-					checkSize += sizeof(float) * 4;
-				}
-
-				if (vertexFlag & Vertex::eBlendIndices)
-				{
-					assert(vertex.BlendIndices.size() == 4);
-					stream.WriteUInt(vertex.BlendIndices[0]);
-					stream.WriteUInt(vertex.BlendIndices[1]);
-					stream.WriteUInt(vertex.BlendIndices[2]);
-					stream.WriteUInt(vertex.BlendIndices[3]);
-					checkSize += sizeof(uint32_t) * 4;
-				}
-
-				if (vertexFlag & Vertex::eNormal)
-				{
-					stream.Write(&vertex.Normal, sizeof(float3));
-					checkSize += sizeof(float3);
-				}
-
-				if (vertexFlag & Vertex::eTexcoord0)
-				{
-					stream.Write(&vertex.Tex0, sizeof(float2));
-					checkSize += sizeof(float2);
-				}
-
-				if (vertexFlag & Vertex::eTexcoord1)
-				{
-					stream.Write(&vertex.Tex1, sizeof(float2));
-					checkSize += sizeof(float2);
-				}
-
-				if (vertexFlag & Vertex::eTangent)
-				{
-					stream.Write(&vertex.Tangent, sizeof(float3));
-					checkSize += sizeof(float3);
-				}
-
-				if (vertexFlag & Vertex::eBinormal)
-				{
-					stream.Write(&vertex.Binormal, sizeof(float3));
-					checkSize += sizeof(float3);
-				}				
-			}
-			assert(checkSize == bufferSize);
-
-			// write indices count
-			stream.WriteUInt(meshPart.Indices.size());
-
-			if (meshPart.Indices.size() < (std::numeric_limits<uint32_t>::max)())
-			{
-				stream.WriteUInt(IBT_Bit16);
-				if (g_ExportSettings.SwapWindOrder)
-				{
-					for (size_t i = 0; i < meshPart.Indices.size() / 3; ++i)
-					{
-						stream.WriteUShort(meshPart.Indices[3*i+0]);
-						stream.WriteUShort(meshPart.Indices[3*i+2]);
-						stream.WriteUShort(meshPart.Indices[3*i+1]);
-					}
-				}
-				else
-				{
-					for (size_t i = 0; i < meshPart.Indices.size(); ++i)
-						stream.WriteUShort(meshPart.Indices[i]);
-				}
-			}
-			else
-			{
-				stream.WriteUInt(IBT_Bit32);
-				if (g_ExportSettings.SwapWindOrder)
-				{
-					for (size_t i = 0; i < meshPart.Indices.size() / 3; ++i)
-					{
-						stream.WriteUInt(meshPart.Indices[3*i+0]);
-						stream.WriteUInt(meshPart.Indices[3*i+2]);
-						stream.WriteUInt(meshPart.Indices[3*i+1]);
-					}
-				}
-				else
-				{
-					stream.Write(&(meshPart.Indices[0]), sizeof(char) * meshPart.Indices.size());
-				}
-			}
-		}
-	}
-
-	for (size_t mi = 0; mi < mSceneMeshes.size(); ++mi)
-	{
-		MeshData& mesh  = *(mSceneMeshes[mi]);
-
-		
-
-		// Write mesh id
-		stream.WriteUInt(MeshId);
-
-		// write mesh name
-		stream.WriteString(mesh.Name);
-
-		// write mesh bounding box
-		stream.Write(&mesh.Bound.Min, sizeof(float3));
-		stream.Write(&mesh.Bound.Max, sizeof(float3));
-
-		// write mesh part count
-		stream.WriteUInt(mesh.MeshParts.size());
-
-		for (size_t mpi = 0; mpi < mesh.MeshParts.size(); ++mpi)
-		{
-			MeshPartData& meshPart = *(mesh.MeshParts[mpi]);
-			shared_ptr<VertexDeclaration> vertexDecl = GetVertexDeclaration(meshPart.Vertices[0].Flag);
-			uint32_t vertexSize = vertexDecl->GetVertexSize();
-
-			// write sub mesh name
-			stream.WriteString(meshPart.Name);	
-
-			// write material name
-			stream.WriteString(meshPart.MaterialName + ".material.xml");
-
-			// write sub mesh bounding sphere
-			stream.Write(&meshPart.Bound.Min, sizeof(float3));
-			stream.Write(&meshPart.Bound.Max, sizeof(float3));
-
-			// write vertex count and vertex size
-			stream.WriteUInt(meshPart.Vertices.size());
-			stream.WriteUInt(vertexSize);
-
-			const std::vector<VertexElement>& elements = vertexDecl->GetVertexElements();
-
-			// write vertex declaration, elements count
-			stream.WriteUInt(elements.size());
-
-			for (auto iter = elements.begin(); iter != elements.end(); ++iter)
-			{
-				const VertexElement& ve = *iter;
-				stream.WriteUInt(ve.Offset);
-				stream.WriteUInt(ve.Type);
-				stream.WriteUInt(ve.Usage);
-				stream.WriteUShort(ve.UsageIndex);
-			}
-
-			uint32_t bufferSize = meshPart.Vertices.size() * vertexSize;
-			/*	stream.WriteUInt(bufferSize);*/
-
-			size_t checkSize = 0;
-			for (size_t vi = 0; vi < meshPart.Vertices.size(); ++vi)
-			{
-				Vertex& vertex = meshPart.Vertices[vi];
-				uint32_t vertexFlag = vertex.Flag;
-
-				if (vertexFlag & Vertex::ePosition)
-				{
-					stream.Write(&vertex.Position, sizeof(float3));
-					checkSize += sizeof(float3);
-				}
-
-				if (vertexFlag & Vertex::eBlendWeight)
-				{
-					assert(vertex.BlendWeights.size() == 4);
-					stream.Write(&vertex.BlendWeights[0], sizeof(float) * 4);
-					checkSize += sizeof(float) * 4;
-				}
-
-				if (vertexFlag & Vertex::eBlendIndices)
-				{
-					assert(vertex.BlendIndices.size() == 4);
-					stream.WriteUInt(vertex.BlendIndices[0]);
-					stream.WriteUInt(vertex.BlendIndices[1]);
-					stream.WriteUInt(vertex.BlendIndices[2]);
-					stream.WriteUInt(vertex.BlendIndices[3]);
-					checkSize += sizeof(uint32_t) * 4;
-				}
-
-				if (vertexFlag & Vertex::eNormal)
-				{
-					stream.Write(&vertex.Normal, sizeof(float3));
-					checkSize += sizeof(float3);
-				}
-
-				if (vertexFlag & Vertex::eTexcoord0)
-				{
-					stream.Write(&vertex.Tex0, sizeof(float2));
-					checkSize += sizeof(float2);
-				}
-
-				if (vertexFlag & Vertex::eTexcoord1)
-				{
-					stream.Write(&vertex.Tex1, sizeof(float2));
-					checkSize += sizeof(float2);
-				}
-
-				if (vertexFlag & Vertex::eTangent)
-				{
-					stream.Write(&vertex.Tangent, sizeof(float3));
-					checkSize += sizeof(float3);
-				}
-
-				if (vertexFlag & Vertex::eBinormal)
-				{
-					stream.Write(&vertex.Binormal, sizeof(float3));
-					checkSize += sizeof(float3);
-				}				
-			}
-			assert(checkSize == bufferSize);
-
-			// write indices count
-			stream.WriteUInt(meshPart.Indices.size());
-
-			if (meshPart.Indices.size() < (std::numeric_limits<uint32_t>::max)())
-			{
-				stream.WriteUInt(IBT_Bit16);
-				if (g_ExportSettings.SwapWindOrder)
-				{
-					for (size_t i = 0; i < meshPart.Indices.size() / 3; ++i)
-					{
-						stream.WriteUShort(meshPart.Indices[3*i+0]);
-						stream.WriteUShort(meshPart.Indices[3*i+2]);
-						stream.WriteUShort(meshPart.Indices[3*i+1]);
-					}
-				}
-				else
-				{
-					for (size_t i = 0; i < meshPart.Indices.size(); ++i)
-						stream.WriteUShort(meshPart.Indices[i]);
-				}
-			}
-			else
-			{
-				stream.WriteUInt(IBT_Bit32);
-				if (g_ExportSettings.SwapWindOrder)
-				{
-					for (size_t i = 0; i < meshPart.Indices.size() / 3; ++i)
-					{
-						stream.WriteUInt(meshPart.Indices[3*i+0]);
-						stream.WriteUInt(meshPart.Indices[3*i+2]);
-						stream.WriteUInt(meshPart.Indices[3*i+1]);
-					}
-				}
-				else
-				{
-					stream.Write(&(meshPart.Indices[0]), sizeof(char) * meshPart.Indices.size());
-				}
-			}
-		}
-
-		if (g_ExportSettings.ExportSkeleton && mesh.MeshSkeleton && mesh.MeshSkeleton->GetNumBones())
-		{
-			// write bone count
-			auto& bones = mesh.MeshSkeleton->GetBones();
-			stream.WriteUInt(bones.size());
-			ExportLog::LogMsg(0, "mesh: %d\n has %d bones", mesh.Name.c_str(), bones.size());
-			for (size_t iBone = 0; iBone < bones.size(); ++iBone)
-			{
-				Bone* bone = bones[iBone];
-				Bone* parentBone = static_cast<Bone*>(bones[iBone]->GetParent());
-
-				String parentName = "";
-				if (parentBone)
-					parentName = parentBone->GetName();
-
-				float3 pos = bone->GetPosition();
-				float3 scale = bone->GetScale();
-				Quaternionf rot = bone->GetRotation();
-
-				stream.WriteString(bone->GetName());
-				stream.WriteString(parentName);
-
-				stream.Write(&pos, sizeof(float3));
-				stream.Write(&rot, sizeof(Quaternionf));
-				stream.Write(&scale, sizeof(float3));
-			}
-
-			// write animation clips
-			//const String& boneRootName = mesh.MeshSkeleton->GetRootBone()->GetName();
-			//if (g_ExportSettings.ExportAnimation && mAnimations.count(boneRootName))
-			//{
-			//	AnimationData& animationData = mAnimations[boneRootName];
-
-			//	stream.WriteUInt(animationData.AnimationClips.size());
-
-			//	// animtion clip are write to each animation file
-			//	for (const auto& kv : animationData.AnimationClips)
-			//	{
-			//		String clipName = kv.first + ".anim";
-			//		const AnimationClipData& clip = kv.second;
-
-			//		// write clip file in mesh 
-			//		stream.WriteString(clipName);
-
-			//		FileStream clipStream;
-			//		clipStream.Open(mOutputPath + clipName, FILE_WRITE);
-
-			//		clipStream.WriteString(kv.first);
-			//		clipStream.WriteFloat(clip.Duration);
-			//		clipStream.WriteUInt(clip.mAnimationTracks.size());
-
-			//		for (const AnimationClipData::AnimationTrack& track : clip.mAnimationTracks)
-			//		{
-			//			// write track name
-			//			clipStream.WriteString(track.Name);
-			//			// write track key frame count
-			//			clipStream.WriteUInt(track.KeyFrames.size());
-
-			//			for (const AnimationClipData::KeyFrame& key : track.KeyFrames)
-			//			{
-			//				// write key time
-			//				clipStream.WriteFloat(key.Time);
-			//				clipStream.Write(&key.Translation, sizeof(float3));
-			//				clipStream.Write(&key.Rotation, sizeof(Quaternionf));
-			//				clipStream.Write(&key.Scale, sizeof(float3));
-			//			}
-			//		}
-
-			//		clipStream.Close();
-			//	}
-			//}
-			//else
-			//{
-			//	stream.WriteUInt(0);  // No Animations
-			//}
-		}
-		else
-		{ 
-			stream.WriteUInt(0);	// No Skeleton
-		}
-
-		stream.Close();
-	}
 }
 
 int main()
 {
 	LOLExporter exporter;
 
-	exporter.ImportSkeleton("Lulu_darkcandy.skl");
-	exporter.ImportMesh("Lulu_darkcandy.skn");
-	exporter.ExportObj("Lulu_darkcandy.obj");
+	exporter.ImportSkeleton("blitzcrank.skl");
+	exporter.ImportMesh("blitzcrank.skn");
+	exporter.ImportAnimation("blitzcrank_dance.anm");
+	exporter.ExportObj("blitzcrank_i.obj");
 
 	return 1;
 }

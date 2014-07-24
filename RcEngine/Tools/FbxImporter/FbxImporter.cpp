@@ -30,73 +30,16 @@ uint32_t CalculateVertexSize(uint32_t vertexFlag)
 {
 	uint32_t size = 0;
 
-	size += (vertexFlag & FbxProcesser::Vertex::ePosition) ? 12 : 0;
-	size += (vertexFlag & FbxProcesser::Vertex::eBlendWeight) ? 16 : 0;
-	size += (vertexFlag & FbxProcesser::Vertex::eBlendIndices) ? 16 : 0;
-	size += (vertexFlag & FbxProcesser::Vertex::eNormal) ? 12 : 0;
-	size += (vertexFlag & FbxProcesser::Vertex::eTexcoord0) ? 8 : 0;
-	size += (vertexFlag & FbxProcesser::Vertex::eTexcoord1) ? 8 : 0;
-	size += (vertexFlag & FbxProcesser::Vertex::eTangent) ? 12 : 0;
-	size += (vertexFlag & FbxProcesser::Vertex::eBinormal) ? 12 : 0;
+	size += (vertexFlag & Vertex::ePosition) ? 12 : 0;
+	size += (vertexFlag & Vertex::eBlendWeight) ? 16 : 0;
+	size += (vertexFlag & Vertex::eBlendIndices) ? 16 : 0;
+	size += (vertexFlag & Vertex::eNormal) ? 12 : 0;
+	size += (vertexFlag & Vertex::eTexcoord0) ? 8 : 0;
+	size += (vertexFlag & Vertex::eTexcoord1) ? 8 : 0;
+	size += (vertexFlag & Vertex::eTangent) ? 12 : 0;
+	size += (vertexFlag & Vertex::eBinormal) ? 12 : 0;
 
 	return size;
-}
-
-shared_ptr<VertexDeclaration> GetVertexDeclaration(uint32_t vertexFlag)
-{
-	std::vector<VertexElement> elements;
-
-	size_t offset = 0;
-
-	if (vertexFlag & FbxProcesser::Vertex::ePosition)
-	{
-		elements.push_back(VertexElement(offset, VEF_Float3, VEU_Position, 0));
-		offset += 12;
-	}
-
-	if (vertexFlag & FbxProcesser::Vertex::eBlendWeight)
-	{
-		elements.push_back(VertexElement(offset, VEF_Float4, VEU_BlendWeight, 0));
-		offset += 16;
-	}
-
-	if (vertexFlag & FbxProcesser::Vertex::eBlendIndices)
-	{
-		elements.push_back(VertexElement(offset, VEF_UInt4, VEU_BlendIndices, 0));
-		offset += 16;
-	}
-
-	if (vertexFlag & FbxProcesser::Vertex::eNormal)
-	{
-		elements.push_back(VertexElement(offset, VEF_Float3, VEU_Normal, 0));
-		offset += 12;
-	}
-
-	if (vertexFlag & FbxProcesser::Vertex::eTexcoord0)
-	{
-		elements.push_back(VertexElement(offset, VEF_Float2, VEU_TextureCoordinate, 0));
-		offset += 8;
-	}
-
-	if (vertexFlag & FbxProcesser::Vertex::eTexcoord1)
-	{
-		elements.push_back(VertexElement(offset, VEF_Float2, VEU_TextureCoordinate, 1));
-		offset += 8;
-	}
-
-	if (vertexFlag & FbxProcesser::Vertex::eTangent)
-	{
-		elements.push_back(VertexElement(offset, VEF_Float3, VEU_Tangent, 0));
-		offset += 12;
-	}
-	
-	if (vertexFlag & FbxProcesser::Vertex::eBinormal)
-	{
-		elements.push_back(VertexElement(offset, VEF_Float3, VEU_Binormal, 0));
-		offset += 12;
-	}
-
-	return std::make_shared<VertexDeclaration>(&elements[0], elements.size());
 }
 
 void CorrectName(String& matName)
@@ -451,7 +394,8 @@ void FbxProcesser::Initialize()
 	}
 }
 
-void FbxProcesser::BoneWeights::AddBoneWeight( int nBoneIndex, float fBoneWeight )
+//////////////////////////////////////////////////////////////////////////
+void BoneWeights::AddBoneWeight( int nBoneIndex, float fBoneWeight )
 {
 	if( fBoneWeight <= 0.0f )
 		return;
@@ -473,7 +417,7 @@ void FbxProcesser::BoneWeights::AddBoneWeight( int nBoneIndex, float fBoneWeight
 	}
 }
 
-void FbxProcesser::BoneWeights::Validate()
+void BoneWeights::Validate()
 {
 	// make sure not exceed max bone per vertex
 	int size = mBoneWeights.size();
@@ -483,13 +427,12 @@ void FbxProcesser::BoneWeights::Validate()
 	}
 	else
 	{
-		mBoneWeights.resize(MAXBONES_PER_VERTEX);
-
-		std::fill_n(mBoneWeights.begin() + size, MAXBONES_PER_VERTEX-size, std::make_pair(int(0), float(0)));	
+		std::pair<int, float> dummy(0, 0.0f);
+		mBoneWeights.resize(MAXBONES_PER_VERTEX, dummy);
 	}
 }
 
-void FbxProcesser::BoneWeights::Normalize()
+void BoneWeights::Normalize()
 {
 	Validate();
 
@@ -506,6 +449,7 @@ void FbxProcesser::BoneWeights::Normalize()
 	});
 }
 
+//////////////////////////////////////////////////////////////////////////
 bool FbxProcesser::LoadScene( const String& filename )
 {
 	if (!mFBXSdkManager)
@@ -564,10 +508,10 @@ void FbxProcesser::ProcessScene( )
 	CollectAnimations();
 
 	if (g_ExportSettings.MergeScene)
-		MergeScene();
+		MergeSceneMeshs();
 
 	if (g_ExportSettings.MergeWithSameMaterial)
-		MergeSubMeshWithSameMaterial();
+		MergeMeshParts();
 }
 
 void FbxProcesser::RunCommand( const vector<String>& arguments )
@@ -614,7 +558,6 @@ void FbxProcesser::ProcessSubDiv( FbxNode* pNode )
 void FbxProcesser::ProcessMesh( FbxNode* pNode )
 {
 	FbxMesh* pMesh = pNode->GetMesh();
-
 	if (!pMesh) return;
 
 	ExportLog::LogMsg(0, "Process mesh: %s\n", pNode->GetName());
@@ -706,9 +649,10 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 	std::vector<BoneWeights> meshBoneWeights;
 	if (lHasSkin)
 	{
+		assert(mSkeleton);
 		meshBoneWeights.resize(pMesh->GetControlPointsCount());
 		// Deform the vertex array with the skin deformer.
-		mesh->MeshSkeleton = ProcessBoneWeights(pMesh, meshBoneWeights);
+		ProcessBoneWeights(pMesh, meshBoneWeights);
 	}
  
 	float4x4 totalMatrix = matrixFromFBX( pNode->EvaluateGlobalTransform() * GetGeometry(pNode) );
@@ -717,7 +661,7 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 	
 	for (size_t mi = 0; mi < polysByMaterial.size(); ++mi)
 	{
-		shared_ptr<MeshPartData> meshPart = std::make_shared<MeshPartData>();
+		shared_ptr<MeshPartData> meshPart( new MeshPartData() );
 	
 		// mesh part name
 		meshPart->Name = pNode->GetName();
@@ -875,16 +819,6 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 					vertex.Binormal.Normalize();		
 				}
 
-				// test tangent
-				//if (vertexFlag & Vertex::eTangent)
-				//{
-				//	float dot1 = Dot(vertex.Tangent, vertex.Binormal);
-				//	float dot2 = Dot(vertex.Tangent, vertex.Normal);
-				//	float dot3 = Dot(vertex.Binormal, vertex.Normal);
-				//	printf("dot1=%f, dot2=%f, dot3=%f\n", dot1, dot2, dot3);
-				//}
-
-
 				size_t index;
 
 				std::set<Vertex>::iterator exitingIter = exitingVertices.find(vertex);
@@ -892,7 +826,7 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 				{
 					vertex.Index = meshPart->Vertices.size();
 					index = vertex.Index;
-					vertex.Flag = vertexFlag;
+					vertex.Flags = vertexFlag;
 					exitingVertices.insert(vertex);
 					meshPart->Vertices.push_back(vertex);
 				}
@@ -905,43 +839,117 @@ void FbxProcesser::ProcessMesh( FbxNode* pNode )
 
 		if (meshPart->Vertices.size())
 		{
+			meshPart->VertexFlags = meshPart->Vertices.front().Flags;
+
 			mesh->Bound.Merge(meshPart->Bound);
 			mesh->MeshParts.push_back(meshPart);
 		}
 	}
+
 	mSceneMeshes.push_back(mesh);
 }
 
-void FbxProcesser::ProcessSkeleton( FbxNode* pNode )
+void FbxProcesser::ProcessSkeleton( FbxNode* pNodeFBX )
 {
-	FbxSkeleton* pFBXSkeleton = pNode->GetSkeleton();
+	FbxSkeleton* pFBXSkeleton = pNodeFBX->GetSkeleton();
 
 	if (!pFBXSkeleton) return;
 
-	FbxNode* skeletonRoot = GetBoneRoot(pNode);
+	FbxNode* skeletonRoot = GetBoneRoot(pNodeFBX);
 	if (skeletonRoot)
 	{
-		if( mSkeletons.find(skeletonRoot->GetName()) == mSkeletons.end())
-			mSkeletons[skeletonRoot->GetName()] = std::make_shared<Skeleton>();
+		String name = skeletonRoot->GetName();
+		if (mSkeleton)
+		{
+			/*if (mSkeleton->GetRootBone()->GetName() != skeletonRoot->GetName())
+				ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Multiple Skeleton found!", "FbxProcesser::ProcessSkeleton");*/
+
+			/*FbxNode* currRootFBX = mBoneMap[mSkeleton->GetRootBone()->GetName()];		
+
+			while (currRootFBX->GetParent())
+			currRootFBX = currRootFBX->GetParent();
+
+			FbxNode* nodeFBX = skeletonRoot->GetParent();
+			while (nodeFBX)
+			{
+			if (nodeFBX == currRootFBX)
+			break;
+			nodeFBX = nodeFBX->GetParent();
+			}
+
+			if(nodeFBX)
+			{
+			Bone* parentBone = mSkeleton->GetBone(skeletonRoot->GetName());
+			if (parentBone == NULL)
+			{
+			vector<FbxNode*> parentNodes;
+			while (skeletonRoot && parentBone == NULL)
+			{
+			parentNodes.push_back(skeletonRoot);
+			parentBone = mSkeleton->GetBone(skeletonRoot->GetName());
+			skeletonRoot = skeletonRoot->GetParent();
+			}
+
+			for (auto it = parentNodes.rbegin(); it != parentNodes.rend(); ++it)
+			parentBone = mSkeleton->AddBone((*it)->GetName(), parentBone);
+			}
+			}
+			else
+			{
+			ENGINE_EXCEPT(Exception::ERR_INVALID_STATE, "Multiple Skeleton found!", "FbxProcesser::ProcessSkeleton");
+			}*/
+		}
+		else
+		{
+			mSkeleton = make_shared<Skeleton>();
+
+			/*vector<FbxNode*> parentNodes;
+			while (skeletonRoot->GetParent())
+			{
+			skeletonRoot = skeletonRoot->GetParent();
+			parentNodes.push_back(skeletonRoot);
+			}
+
+			Bone* parentBone = nullptr;
+			for (auto it = parentNodes.rbegin(); it != parentNodes.rend(); ++it)
+			{
+			parentBone = mSkeleton->AddBone((*it)->GetName(), parentBone);
+			}*/
+		}
 	}
 
-	shared_ptr<Skeleton> skeleton = mSkeletons[skeletonRoot->GetName()];
-
 	Bone* parentBone = nullptr;
-	
-	FbxNode* pParentNode = pNode->GetParent();
-	if (pParentNode)
-		parentBone = skeleton->GetBone(pParentNode->GetName());
 
-	mBoneMap[pNode->GetName()] = pNode;
+	FbxNode* parentNodeFBX = pNodeFBX->GetParent();
+	if (parentNodeFBX)
+	{
+		parentBone = mSkeleton->GetBone(parentNodeFBX->GetName());
+	//	//if (parentBone == NULL)
+	//	//{
+	//	//	vector<FbxNode*> parentNodes;
+	//	//	while (parentNodeFBX && parentBone == NULL)
+	//	//	{
+	//	//		parentNodes.push_back(parentNodeFBX);
+	//	//		parentBone = mSkeleton->GetBone(parentNodeFBX->GetName());
+	//	//		parentNodeFBX = parentNodeFBX->GetParent();
+	//	//	}
 
-	printf("Bone: %s\n", pNode->GetName());
-	skeleton->AddBone(pNode->GetName(), parentBone);
+	//	//	for (auto it = parentNodes.rbegin(); it != parentNodes.rend(); ++it)
+	//	//		parentBone = mSkeleton->AddBone((*it)->GetName(), parentBone);
+	//	//}
+	}
+
+	mBoneMap[pNodeFBX->GetName()] = pNodeFBX;
+	printf("Add Bone: %s\n", pNodeFBX->GetName());
+	mSkeleton->AddBone(pNodeFBX->GetName(), parentBone);
 }
 
-shared_ptr<Skeleton>  FbxProcesser::ProcessBoneWeights( FbxMesh* pMesh, std::vector<BoneWeights>& meshBoneWeights )
+void FbxProcesser::ProcessBoneWeights( FbxMesh* pMesh, std::vector<BoneWeights>& meshBoneWeights )
 {
-	shared_ptr<Skeleton> meshSkeleton = nullptr;
+	if (!mSkeleton)
+	{
+		ENGINE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, "No Skeleton Exits!!!", "FbxProcesser::ProcessBoneWeights");
+	}
 
 	FbxAMatrix lReferenceGlobalInitPosition;
 	FbxAMatrix lClusterGlobalInitPosition;
@@ -984,20 +992,8 @@ shared_ptr<Skeleton>  FbxProcesser::ProcessBoneWeights( FbxMesh* pMesh, std::vec
 					continue;
 
 				// find which skeleton this mesh is skin to
-				if (!meshSkeleton)
-				{
-					FbxNode* skeletonRoot = GetBoneRoot(pLinkNode);
-					meshSkeleton = mSkeletons[skeletonRoot->GetName()];
-					
-					if (!meshSkeleton)
-					{
-						FBXSDK_printf("Mesh %s supposed to have a skeleton with root name %s, but not found!", pMesh->GetNode()->GetName(), skeletonRoot->GetName());
-						assert(false);
-					}
-				}
-
-				Bone* skeletonBone = meshSkeleton->GetBone(pLinkNode->GetName());
-				Bone* parentBone = (Bone*)skeletonBone->GetParent();	
+				String name = pLinkNode->GetName();
+				Bone* skeletonBone = mSkeleton->GetBone(pLinkNode->GetName());
 
 				if (!skeletonBone)
 					continue;
@@ -1042,7 +1038,7 @@ shared_ptr<Skeleton>  FbxProcesser::ProcessBoneWeights( FbxMesh* pMesh, std::vec
 		}
 	}
 
-	Bone* rootBone = meshSkeleton->GetRootBone();
+	Bone* rootBone = mSkeleton->GetRootBone();
 	CalculateBindPose(rootBone, boneBindPoseMap);
 
 	// No need: already baked global position in every bone.
@@ -1055,8 +1051,6 @@ shared_ptr<Skeleton>  FbxProcesser::ProcessBoneWeights( FbxMesh* pMesh, std::vec
 
 	//rootBone->Rotate(rotation);
 	//rootBone->Translate(translate);
-
-	return meshSkeleton;
 }
 
 void FbxProcesser::CalculateBindPose( Bone* bone, std::map<Bone*, FbxAMatrix>& bindPoseMap )
@@ -1130,13 +1124,11 @@ void FbxProcesser::ProcessAnimation( FbxAnimStack* pStack, FbxNode* pNode, doubl
 	{
 		FbxNode* skeletonRoot = GetBoneRoot(pNode);
 
-		AnimationClipData& clip = mAnimations[skeletonRoot->GetName()].AnimationClips[mAnimationName];
-		//AnimationClipData& clip = mAnimations[skeletonRoot->GetName()].AnimationClips[pStack->GetName()];
-		shared_ptr<Skeleton> skeleton = mSkeletons[skeletonRoot->GetName()];
+		AnimationClipData& clip = mAnimations[pStack->GetName()];
 
-		if( skeleton )
+		if( mSkeleton )
 		{
-			Bone* pBone = skeleton->GetBone(pNode->GetName());	
+			Bone* pBone = mSkeleton->GetBone(pNode->GetName());	
 
 			if( pBone )
 			{	
@@ -1288,6 +1280,8 @@ void FbxProcesser::CollectSkeletons( )
 	ExportLog::LogMsg(0, "Collect Skeletons.");
 	ProcessNode(mFBXScene->GetRootNode(), FbxNodeAttribute::eSkeleton);
 
+	// Build Skeleton
+
 	/*ofstream stream("E:/Skeleton.txt");
 	for (const auto& kv : mSkeletons)
 	{
@@ -1358,11 +1352,11 @@ void FbxProcesser::CollectAnimations( )
 	}
 }
 
-void FbxProcesser::MergeScene()
+void FbxProcesser::MergeSceneMeshs()
 {
 	if (mSceneMeshes.size() > 1)
 	{
-		if (mSkeletons.size() && g_ExportSettings.ExportSkeleton)
+		if (mSkeleton && g_ExportSettings.ExportSkeleton)
 		{
 			ExportLog::LogWarning("Found mesh with skeleton, can't merge!");
 			return;
@@ -1383,13 +1377,96 @@ void FbxProcesser::MergeScene()
 	}	
 }
 
-void FbxProcesser::MergeSubMeshWithSameMaterial()
+void FbxProcesser::MergeMeshParts()
 {
 	for (size_t mi = 0; mi < mSceneMeshes.size(); ++mi)
 	{
-		MeshData& mesh  = *(mSceneMeshes[mi]);
+		MeshData& mesh  = *mSceneMeshes[mi];
 
-		std::vector<shared_ptr<MeshPartData>> mergedList;
+		if (mesh.MeshParts.empty()) continue;
+
+		// Sort mesh part based on vertex format
+		sort(mesh.MeshParts.begin(), mesh.MeshParts.end(),
+			[&](const shared_ptr<MeshPartData>& part1, const shared_ptr<MeshPartData>& part2) {
+			
+				if (part1->VertexFlags < part2->VertexFlags)
+					return true;
+				else if (part1->VertexFlags > part2->VertexFlags)
+					return false;
+				else
+					return part1->MaterialName < part2->MaterialName;
+		});	
+		
+		auto destMergeIt = mesh.MeshParts.begin();
+		while (destMergeIt != mesh.MeshParts.end())
+		{
+			shared_ptr<MeshPartData> destMergePart = *destMergeIt;
+
+			mesh.Vertices.resize(mesh.Vertices.size() + 1);
+			mesh.Indices.resize(mesh.Indices.size() + 1);
+			
+			mesh.Vertices.back().swap(destMergePart->Vertices);
+			mesh.Indices.back().swap(destMergePart->Indices);
+
+			uint32_t dstVertexBufferIndex = mesh.Vertices.size() - 1;
+			uint32_t dstIndexBufferIndex = mesh.Indices.size() - 1;
+			destMergePart->IndexBufferIndex = dstIndexBufferIndex;
+			destMergePart->VertexBufferIndex = dstVertexBufferIndex;
+
+			destMergePart->IndexCount = mesh.Vertices[dstIndexBufferIndex].size();
+			destMergePart->VertexCount = mesh.Vertices[dstVertexBufferIndex].size();
+
+			auto srcMergeIt = destMergeIt+1;
+			while (srcMergeIt != mesh.MeshParts.end())
+			{
+				shared_ptr<MeshPartData> srcMergePart = *destMergeIt;
+				if (srcMergePart->VertexFlags == destMergePart->VertexFlags)
+				{
+					
+					mesh.Vertices[dstVertexBufferIndex].reserve(dstVertexBufferSize);
+					mesh.Vertices[dstVertexBufferIndex].reserve(dstVertexBufferSize);
+					
+
+					mesh.Vertices[dstVertexBufferIndex].assign(srcMergePart->Vertices.begin(), srcMergePart->Vertices.end());
+
+
+
+					for (Vertex& vertex : srcMergePart->Vertices)
+					{
+						vertex.Index += baseIndex;
+						mesh.Vertices[dstVertexBufferIndex].push_back(vertex);
+					}
+
+
+					for (const uint32_t& index : currMeshPart->Indices)
+					{
+						subMesh->Indices.push_back(baseIndex + index);
+					}
+
+					subMesh->Bound.Merge(currMeshPart->Bound);
+
+					it = mesh.MeshParts.erase(it);
+
+
+
+
+
+					srcMergeIt = mesh.MeshParts.erase(srcMergeIt);
+				}
+				else
+					break;
+			}
+
+			if (srcMergeIt == mesh.MeshParts.end())
+				break;
+
+			destMergeIt = srcMergeIt + 1;
+		}
+		
+		
+
+	
+		std::vector< shared_ptr<MeshPartData> > mergedList;
 
 		shared_ptr<MeshPartData> subMesh;
 
@@ -1406,33 +1483,36 @@ void FbxProcesser::MergeSubMeshWithSameMaterial()
 			auto it = mesh.MeshParts.begin();
 			while (it != mesh.MeshParts.end())
 			{
-				shared_ptr<MeshPartData> testMesh = *it;
+				shared_ptr<MeshPartData> currMeshPart = *it;
 
+				// Only merge with same vertex declaration
 				bool canMerge = false;
+
+
 				
 				// Must have same material
-				canMerge = (subMesh->MaterialName == testMesh->MaterialName); 
-				canMerge &= (subMesh->Indices.size() + testMesh->Indices.size() < UINT_MAX);
-				canMerge &= (subMesh->VertexDecl.size() == testMesh->VertexDecl.size());
+				canMerge = (subMesh->MaterialName == currMeshPart->MaterialName); 
+				canMerge &= (subMesh->Indices.size() + currMeshPart->Indices.size() < UINT_MAX);
+				canMerge &= (subMesh->VertexDecl.size() == currMeshPart->VertexDecl.size());
 
 				if (canMerge)
 				{
 					size_t baseIndex = subMesh->Vertices.size();
 
-					subMesh->Vertices.reserve(subMesh->Vertices.size() + testMesh->Vertices.size());
-					subMesh->Indices.reserve(testMesh->Indices.size() + testMesh->Indices.size());
-					for (Vertex& vertex : testMesh->Vertices)
+					subMesh->Vertices.reserve(subMesh->Vertices.size() + currMeshPart->Vertices.size());
+					subMesh->Indices.reserve(currMeshPart->Indices.size() + currMeshPart->Indices.size());
+					for (Vertex& vertex : currMeshPart->Vertices)
 					{
 						vertex.Index += baseIndex;
 						subMesh->Vertices.push_back(vertex);
 					}
 
-					for (const uint32_t& index : testMesh->Indices)
+					for (const uint32_t& index : currMeshPart->Indices)
 					{
 						subMesh->Indices.push_back(baseIndex + index);
 					}
 
-					subMesh->Bound.Merge(testMesh->Bound);
+					subMesh->Bound.Merge(currMeshPart->Bound);
 
 					it = mesh.MeshParts.erase(it);
 				}
@@ -1597,8 +1677,8 @@ void FbxProcesser::BuildAndSaveXML( )
 			MeshPartData& meshPart = *(mesh.MeshParts[mpi]);
 
 			XMLNodePtr meshPartNode = meshxml.AllocateNode(XML_Node_Element, "meshPart");
-			XMLAttributePtr meshPartNameAttr = meshxml.AllocateAttributeString("name", meshPart.Name);
-			XMLAttributePtr meshPartMatAttr = meshxml.AllocateAttributeString("material", meshPart.MaterialName);
+			XMLAttributePtr meshPartNameAttr = meshxml.AllocateAttributeString("name", meshPart->Name);
+			XMLAttributePtr meshPartMatAttr = meshxml.AllocateAttributeString("material", meshPart->MaterialName);
 			meshPartNode->AppendAttribute(meshPartNameAttr);
 			meshPartNode->AppendAttribute(meshPartMatAttr);
 			// add to mesh
@@ -1608,33 +1688,33 @@ void FbxProcesser::BuildAndSaveXML( )
 			XMLNodePtr boundNode = meshxml.AllocateNode(XML_Node_Element, "bounding");
 
 			XMLNodePtr boundMinNode = meshxml.AllocateNode(XML_Node_Element, "min");
-			boundMinNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", meshPart.Bound.Min.X()));
-			boundMinNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", meshPart.Bound.Min.Y()));
-			boundMinNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", meshPart.Bound.Min.Z()));
+			boundMinNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", meshPart->Bound.Min.X()));
+			boundMinNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", meshPart->Bound.Min.Y()));
+			boundMinNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", meshPart->Bound.Min.Z()));
 			boundNode->AppendNode(boundMinNode);
 
 			XMLNodePtr boundMaxNode = meshxml.AllocateNode(XML_Node_Element, "max");
-			boundMaxNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", meshPart.Bound.Max.X()));
-			boundMaxNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", meshPart.Bound.Max.Y()));
-			boundMaxNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", meshPart.Bound.Max.Z()));
+			boundMaxNode->AppendAttribute(meshxml.AllocateAttributeFloat("x", meshPart->Bound.Max.X()));
+			boundMaxNode->AppendAttribute(meshxml.AllocateAttributeFloat("y", meshPart->Bound.Max.Y()));
+			boundMaxNode->AppendAttribute(meshxml.AllocateAttributeFloat("z", meshPart->Bound.Max.Z()));
 			boundNode->AppendNode(boundMaxNode);
 
 			meshPartNode->AppendNode(boundNode);
 
 			XMLNodePtr verticesNode = meshxml.AllocateNode(XML_Node_Element, "vertices");
-			XMLAttributePtr verticesCountAttr = meshxml.AllocateAttributeUInt("verticesCount", meshPart.Vertices.size());
-			XMLAttributePtr vertexSizeAttr = meshxml.AllocateAttributeUInt("vertexSize", CalculateVertexSize(meshPart.Vertices[0].Flag));
+			XMLAttributePtr verticesCountAttr = meshxml.AllocateAttributeUInt("verticesCount", meshPart->Vertices.size());
+			XMLAttributePtr vertexSizeAttr = meshxml.AllocateAttributeUInt("vertexSize", CalculateVertexSize(meshPart->Vertices[0].Flags));
 			verticesNode->AppendAttribute(verticesCountAttr);
 			verticesNode->AppendAttribute(vertexSizeAttr);		
 			// add to mesh part
 			meshPartNode->AppendNode(verticesNode);
 
-			for(const Vertex& vertex : meshPart.Vertices)
+			for(const Vertex& vertex : meshPart->Vertices)
 			{
 				XMLNodePtr vertexNode = meshxml.AllocateNode(XML_Node_Element, "vertex");
 				verticesNode->AppendNode(vertexNode);
 
-				uint32_t vertexFlag = vertex.Flag;
+				uint32_t vertexFlag = vertex.Flags;
 				if (vertexFlag & Vertex::ePosition)
 				{
 					XMLNodePtr positionNode = meshxml.AllocateNode(XML_Node_Element, "position");
@@ -1700,7 +1780,7 @@ void FbxProcesser::BuildAndSaveXML( )
 			}
 
 
-			size_t triangleCount = meshPart.Indices.size() / 3;
+			size_t triangleCount = meshPart->Indices.size() / 3;
 			XMLNodePtr trianglesNode = meshxml.AllocateNode(XML_Node_Element, "triangles");
 			trianglesNode->AppendAttribute(meshxml.AllocateAttributeUInt("triangleCount", triangleCount));
 
@@ -1710,9 +1790,9 @@ void FbxProcesser::BuildAndSaveXML( )
 			for (size_t tri = 0; tri < triangleCount; ++tri)
 			{
 				XMLNodePtr triangleNode = meshxml.AllocateNode(XML_Node_Element, "triangle");
-				triangleNode->AppendAttribute(meshxml.AllocateAttributeUInt("a", meshPart.Indices[3*tri]));
-				triangleNode->AppendAttribute(meshxml.AllocateAttributeUInt("b", meshPart.Indices[3*tri+1]));
-				triangleNode->AppendAttribute(meshxml.AllocateAttributeUInt("c", meshPart.Indices[3*tri+2]));
+				triangleNode->AppendAttribute(meshxml.AllocateAttributeUInt("a", meshPart->Indices[3*tri]));
+				triangleNode->AppendAttribute(meshxml.AllocateAttributeUInt("b", meshPart->Indices[3*tri+1]));
+				triangleNode->AppendAttribute(meshxml.AllocateAttributeUInt("c", meshPart->Indices[3*tri+2]));
 				trianglesNode->AppendNode(triangleNode);
 			}			
 		}
@@ -1817,21 +1897,21 @@ void FbxProcesser::BuildAndSaveBinary( )
 		for (size_t mpi = 0; mpi < mesh.MeshParts.size(); ++mpi)
 		{
 			MeshPartData& meshPart = *(mesh.MeshParts[mpi]);
-			shared_ptr<VertexDeclaration> vertexDecl = GetVertexDeclaration(meshPart.Vertices[0].Flag);
+			shared_ptr<VertexDeclaration> vertexDecl = GetVertexDeclaration(meshPart->Vertices[0].Flags);
 			uint32_t vertexSize = vertexDecl->GetVertexSize();
 
 			// write sub mesh name
-			stream.WriteString(meshPart.Name);	
+			stream.WriteString(meshPart->Name);	
 
 			// write material name
-			stream.WriteString(meshPart.MaterialName + ".material.xml");
+			stream.WriteString(meshPart->MaterialName + ".material.xml");
 
 			// write sub mesh bounding sphere
-			stream.Write(&meshPart.Bound.Min, sizeof(float3));
-			stream.Write(&meshPart.Bound.Max, sizeof(float3));
+			stream.Write(&meshPart->Bound.Min, sizeof(float3));
+			stream.Write(&meshPart->Bound.Max, sizeof(float3));
 
 			// write vertex count and vertex size
-			stream.WriteUInt(meshPart.Vertices.size());
+			stream.WriteUInt(meshPart->Vertices.size());
 			stream.WriteUInt(vertexSize);
 
 			const std::vector<VertexElement>& elements = vertexDecl->GetVertexElements();
@@ -1848,14 +1928,14 @@ void FbxProcesser::BuildAndSaveBinary( )
 				stream.WriteUShort(ve.UsageIndex);
 			}
 
-			uint32_t bufferSize = meshPart.Vertices.size() * vertexSize;
+			uint32_t bufferSize = meshPart->Vertices.size() * vertexSize;
 			/*	stream.WriteUInt(bufferSize);*/
 
 			size_t checkSize = 0;
-			for (size_t vi = 0; vi < meshPart.Vertices.size(); ++vi)
+			for (size_t vi = 0; vi < meshPart->Vertices.size(); ++vi)
 			{
-				Vertex& vertex = meshPart.Vertices[vi];
-				uint32_t vertexFlag = vertex.Flag;
+				Vertex& vertex = meshPart->Vertices[vi];
+				uint32_t vertexFlag = vertex.Flags;
 
 				if (vertexFlag & Vertex::ePosition)
 				{
@@ -1913,24 +1993,24 @@ void FbxProcesser::BuildAndSaveBinary( )
 			assert(checkSize == bufferSize);
 
 			// write indices count
-			stream.WriteUInt(meshPart.Indices.size());
+			stream.WriteUInt(meshPart->Indices.size());
 
-			if (meshPart.Indices.size() < (std::numeric_limits<uint32_t>::max)())
+			if (meshPart->Indices.size() < (std::numeric_limits<uint32_t>::max)())
 			{
 				stream.WriteUInt(IBT_Bit16);
 				if (g_ExportSettings.SwapWindOrder)
 				{
-					for (size_t i = 0; i < meshPart.Indices.size() / 3; ++i)
+					for (size_t i = 0; i < meshPart->Indices.size() / 3; ++i)
 					{
-						stream.WriteUShort(meshPart.Indices[3*i+0]);
-						stream.WriteUShort(meshPart.Indices[3*i+2]);
-						stream.WriteUShort(meshPart.Indices[3*i+1]);
+						stream.WriteUShort(meshPart->Indices[3*i+0]);
+						stream.WriteUShort(meshPart->Indices[3*i+2]);
+						stream.WriteUShort(meshPart->Indices[3*i+1]);
 					}
 				}
 				else
 				{
-					for (size_t i = 0; i < meshPart.Indices.size(); ++i)
-						stream.WriteUShort(meshPart.Indices[i]);
+					for (size_t i = 0; i < meshPart->Indices.size(); ++i)
+						stream.WriteUShort(meshPart->Indices[i]);
 				}
 			}
 			else
@@ -1938,16 +2018,16 @@ void FbxProcesser::BuildAndSaveBinary( )
 				stream.WriteUInt(IBT_Bit32);
 				if (g_ExportSettings.SwapWindOrder)
 				{
-					for (size_t i = 0; i < meshPart.Indices.size() / 3; ++i)
+					for (size_t i = 0; i < meshPart->Indices.size() / 3; ++i)
 					{
-						stream.WriteUInt(meshPart.Indices[3*i+0]);
-						stream.WriteUInt(meshPart.Indices[3*i+2]);
-						stream.WriteUInt(meshPart.Indices[3*i+1]);
+						stream.WriteUInt(meshPart->Indices[3*i+0]);
+						stream.WriteUInt(meshPart->Indices[3*i+2]);
+						stream.WriteUInt(meshPart->Indices[3*i+1]);
 					}
 				}
 				else
 				{
-					stream.Write(&(meshPart.Indices[0]), sizeof(char) * meshPart.Indices.size());
+					stream.Write(&(meshPart->Indices[0]), sizeof(char) * meshPart->Indices.size());
 				}
 			}
 		}
@@ -2190,6 +2270,13 @@ void FbxProcesser::BuildAndSaveMaterial()
 			effectNode->AppendAttribute(materialXML.AllocateAttributeString("name", "Model.effect.xml"));
 		}
 
+		if (mSkeleton)
+		{
+			XMLNodePtr flagNode = materialXML.AllocateNode(XML_Node_Element, "Flag");
+			flagNode->AppendAttribute(materialXML.AllocateAttributeString("name", "_Skinning"));
+			effectNode->AppendNode(flagNode);
+		}
+
 		rootNode->AppendNode(effectNode);
 
 		renderQueueNode->AppendAttribute(materialXML.AllocateAttributeString("name", "Opaque"));
@@ -2214,22 +2301,22 @@ int main()
 	ExportLog::SetLogLevel( 1 );
 	ExportLog::EnableLogging( TRUE );
 
-	g_ExportSettings.ExportSkeleton = false;
-	g_ExportSettings.MergeScene = true;
+	//g_ExportSettings.ExportSkeleton = false;
+	//g_ExportSettings.MergeScene = true;
 	//g_ExportSettings.MergeWithSameMaterial = true;
 	//g_ExportSettings.SwapWindOrder = false;
 
 	FbxProcesser fbxProcesser;
 	fbxProcesser.Initialize();
 
-	if (fbxProcesser.LoadScene("E:/Engines/RcEngine/Media/Mesh/Audi/Audi.fbx"))
+	if (fbxProcesser.LoadScene("E:/Engines/RcEngine/Media/Mesh/AncientCity/AncientCity.FBX"))
 	{
-		fbxProcesser.mSceneName = "Palace";
-		//fbxProcesser.mAnimationName = "attack_big_center";
+		fbxProcesser.mSceneName = "AncientCity";
+		//fbxProcesser.mAnimationName = "E";
 
 		fbxProcesser.ProcessScene();
 		//fbxProcesser.BuildAndSaveXML();
-		fbxProcesser.BuildAndSaveBinary();
+ 		fbxProcesser.BuildAndSaveBinary();
 		fbxProcesser.BuildAndSaveMaterial();
 		fbxProcesser.ExportMaterial();
 	}

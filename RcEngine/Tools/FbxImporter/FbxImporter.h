@@ -10,6 +10,7 @@
 
 using namespace RcEngine;
 
+// Global Export Settings
 struct ExportSettings
 {
 	bool ExportSkeleton;
@@ -27,6 +28,7 @@ struct ExportSettings
 	{}
 };
 
+// Coordinate System Transformer, Right-Handed -> Left Handed.
 class FBXTransformer
 {
 public:
@@ -42,136 +44,140 @@ protected:
 	bool  mMaxConversion; // Convert Z-Up to Y-Up
 };
 
-class FbxProcesser
+// Material Template
+struct MaterialData
+{
+	String Name;
+	float3 Ambient;
+	float3 Diffuse;
+	float3 Specular;
+	float3 Emissive;
+	float Power;
+
+	unordered_map<String, String> Textures;
+};
+
+class BoneWeights
 {
 public:
-	struct MaterialData
-	{
-		String Name;
-		float3 Ambient;
-		float3 Diffuse;
-		float3 Specular;
-		float3 Emissive;
-		float Power;
 
-		unordered_map<String, String> Textures;
+	void AddBoneWeight(int nBoneIndex, float fBoneWeight);
+	void Validate();
+	void Normalize();
+
+	inline const std::vector<std::pair<int, float>>& GetBoneWeights() const { return mBoneWeights; }
+
+private:
+	std::vector<std::pair<int, float> > mBoneWeights;
+};
+
+// Model Vertex Structure
+struct Vertex
+{
+	enum Flags
+	{
+		ePosition		= 1 << 0,
+		eBlendWeight	= 1 << 1,
+		eBlendIndices	= 1 << 2,
+		eNormal			= 1 << 3,
+		eTexcoord0		= 1 << 4,
+		eTexcoord1		= 1 << 5,
+		eTangent		= 1 << 6,
+		eBinormal		= 1 << 7,	
 	};
 
-	class BoneWeights
+	friend bool operator< (const Vertex& lhs, const Vertex& rhs)
 	{
-	public:
-		BoneWeights() {}
+#define CMP(value, size)							\
+	for (int i = 0; i < 3; ++i) {				    \
+	if (lhs.value[i] < rhs.value[i]) return true;   \
+	if (rhs.value[i] < lhs.value[i]) return false;  \
+	}
 
-		void AddBoneWeight(int nBoneIndex, float fBoneWeight);
+		CMP(Position, 3);
+		CMP(Normal, 3);
+		CMP(Tex0, 2);
+#undef CMP
 
-		void Validate();
+		return false;
+	}
 
-		void Normalize();
+	float3 Position;
+	float3 Normal;
+	float3 Binormal;
+	float3 Tangent;
+	vector<uint32_t> BlendIndices;
+	vector<float> BlendWeights;
+	float2 Tex0;
+	float2 Tex1;
+
+	uint32_t Flags;
+	size_t Index;	// keep track index in vertices
+};
+
+// Mesh Part Structure
+struct MeshPartData
+{
+	String Name;
+	String MaterialName;
+
+	BoundingBoxf Bound;
+
+	// Mesh part vertex and index data read from FBX
+	uint32_t VertexFlags;
+	vector<uint32_t> Indices;
+	vector<Vertex> Vertices;
 	
-		std::vector<std::pair<int, float>>& GetBoneWeights()  { return mBoneWeights; }
+	uint32_t StartVertex;
+	uint32_t VertexCount;
+	
+	uint32_t StartIndex;
+	uint32_t IndexCount;
+	
+	int32_t BaseVertex;
 
-	private:
-		std::vector<std::pair<int, float>> mBoneWeights;
-	};
+	uint32_t VertexBufferIndex;
+	uint32_t IndexBufferIndex;
 
-	struct Vertex
+	MeshPartData() : VertexFlags(0), StartVertex(0), StartIndex(0), BaseVertex(0), VertexCount(0), IndexCount(0) {}
+};
+
+// Mesh Structure
+struct MeshData
+{
+	String Name;
+	BoundingBoxf Bound;
+
+	vector<vector<uint32_t> > Indices;
+	vector<vector<Vertex> > Vertices;
+
+	vector< shared_ptr<MeshPartData> > MeshParts;
+};
+
+struct AnimationClipData
+{
+	struct  KeyFrame
 	{
-		enum Flags
-		{
-			ePosition = 1 << 0,
-			eBlendWeight =  1 << 1,
-			eBlendIndices =  1 << 2,
-			eNormal = 1 << 3,
-			eTexcoord0 = 1 << 4,
-			eTexcoord1 = 1 << 5,
-			eTangent = 1 << 6,
-			eBinormal = 1 << 7,	
-		};
+		// The time offset from the start of the animation to this key frame.
+		float Time;
 
-		friend bool operator< (const FbxProcesser::Vertex& lhs, const FbxProcesser::Vertex& rhs)
-		{
-			#define CMP(value, size)                    \
-				for (int i = 0; i < 3; ++i) {             \
-					if (lhs.value[i] < rhs.value[i]) return true;   \
-					if (rhs.value[i] < lhs.value[i]) return false;  \
-				}
-
-			CMP(Position, 3);
-			CMP(Normal, 3);
-			CMP(Tex0, 2);
-			CMP(Tex1, 2);
-
-			#undef CMP
-
-			return false;
-		}
-
-
-		float3 Position;
-		float3 Normal;
-		float3 Binormal;
-		float3 Tangent;
-		vector<uint32_t> BlendIndices;
-		vector<float> BlendWeights;
-		float2 Tex0;
-		float2 Tex1;
-
-		uint32_t Flag;
-		size_t Index;	// keep track index in vertices
+		float3 Translation;
+		Quaternionf Rotation;
+		float3 Scale;
 	};
 
-	struct AnimationClipData
+	struct  AnimationTrack
 	{
-		struct  KeyFrame
-		{
-			// The time offset from the start of the animation to this keyframe.
-			float Time;
-
-			float3 Translation;
-			Quaternionf Rotation;
-			float3 Scale;
-		};
-
-		struct  AnimationTrack
-		{
-			// Bone name
-			String Name;
-			vector<KeyFrame> KeyFrames;
-		};
-
-		float Duration;
-
-		vector<AnimationTrack> mAnimationTracks;
+		String Name; // Bone name
+		vector<KeyFrame> KeyFrames;
 	};
 
-	struct AnimationData
-	{
-		unordered_map<String, AnimationClipData> AnimationClips;
-	};
+	float Duration;
+	vector<AnimationTrack> mAnimationTracks;
+};
 
-	struct MeshPartData
-	{
-		String Name;
-		String MaterialName;
-
-		BoundingBoxf Bound;
-
-		vector<uint32_t> Indices;
-		vector<Vertex> Vertices;
-
-		vector<VertexElement> VertexDecl;
-	};
-
-	struct MeshData
-	{
-		MeshData() : MeshSkeleton(nullptr) {}
-
-		String Name;
-		BoundingBoxf Bound;
-		vector<shared_ptr<MeshPartData> > MeshParts;
-		shared_ptr<Skeleton> MeshSkeleton;
-	};
-
+class FbxProcesser
+{
 public:
 	FbxProcesser(void);
 	~FbxProcesser(void);
@@ -187,7 +193,7 @@ public:
 	void ProcessMesh(FbxNode* pNode);
 	void ProcessSubDiv(FbxNode* pNode);
 
-	shared_ptr<Skeleton> ProcessBoneWeights(FbxMesh* pMesh, std::vector<BoneWeights>& meshBoneWeights);
+	void ProcessBoneWeights(FbxMesh* pMesh, std::vector<BoneWeights>& meshBoneWeights);
 	void CalculateBindPose(Bone* bone, std::map<Bone*, FbxAMatrix>& bindPoseMap);
 	
 	void ProcessAnimation(FbxAnimStack* pStack, FbxNode* pNode, double fFrameRate, double fStart, double fStop);
@@ -198,8 +204,12 @@ public:
 	void CollectMaterials();
 	void CollectSkeletons();
 
-	void MergeScene();
-	void MergeSubMeshWithSameMaterial();
+	void MergeSceneMeshs();
+
+	/**
+	 * Merge mesh part vertices into one big VertexBuffer if VertexFormat are same.
+	 */
+	void MergeMeshParts();
 
 	void BuildAndSaveXML();
 	void BuildAndSaveBinary();	
@@ -212,17 +222,18 @@ public:
 	FbxScene* mFBXScene;
 	bool mQuietMode;
 	bool mMergeScene;
+	
 	String mSceneName;
 	String mOutputPath;
 	String mAnimationName;
 	
-	unordered_map<String, shared_ptr<Skeleton>> mSkeletons;
-	unordered_map<String, AnimationData> mAnimations;
-
 	unordered_map<String, FbxNode*> mBoneMap;
+
+	shared_ptr<Skeleton> mSkeleton;
 
 	vector<MaterialData> mMaterials;
 	vector<shared_ptr<MeshData> > mSceneMeshes;
+	unordered_map<String, AnimationClipData> mAnimations;
 
 	FBXTransformer mFBXTransformer;
 };

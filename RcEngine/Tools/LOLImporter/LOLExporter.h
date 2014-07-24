@@ -58,6 +58,34 @@ struct SkinModelData
 	std::vector<SkinModelVertex> verteces;
 };
 
+struct SkinAnimationHeader
+{
+	char fileType[8];
+	int32_t three;
+	int32_t magic;
+	int32_t numBones;
+	int32_t numFrames;
+	int32_t fps;
+};
+
+struct AnimationClipData
+{
+	struct KeyFrame
+	{
+		float Rotation[4];		 // Quaternion(W, X, Y, Z)
+		float Translation[3];	
+	};
+
+	struct AnimationTrack
+	{
+		char BoneName[32];
+		int32_t BoneType;
+		std::vector<KeyFrame> KeyFrames;
+	};
+
+	std::vector<AnimationTrack> mAnimationTracks;
+};
+
 class LOLExporter
 {
 public:
@@ -77,6 +105,7 @@ public:
 private:
 
 	SkinModelData mSkinModelData;
+	AnimationClipData mAnimationClipData;
 	std::vector<SkinModelMaterial> mMaterials;
 	std::vector<Bone> mBones;
 };
