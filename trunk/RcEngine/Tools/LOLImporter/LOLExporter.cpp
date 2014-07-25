@@ -3,11 +3,21 @@
 #include <algorithm>
 #include <IO/FileStream.h>
 #include <Core/Loger.h>
+#include <IO/PathUtil.h>
+#include <Graphics/VertexDeclaration.h>
+#include <Math/MathUtil.h>
 
 using namespace std;
 using namespace RcEngine;
 
+
+void CorrectName(String& matName)
+{
+	std::replace(matName.begin(), matName.end(), ':', '_');
+}
+
 LOLExporter::LOLExporter(void)
+	: mDummyRootAdded(false)
 {
 }
 
@@ -38,7 +48,7 @@ void LOLExporter::ImportSkeleton( const char* sklFilename )
 		mBones.resize(header.numElements);
 		for (int i = 0; i < header.numElements; i++) 
 		{
-			Bone& bone = mBones[i];
+			LOLBone& bone = mBones[i];
 			fread_s(&bone, sizeof(bone), sizeof(bone), 1, pFile);
 
 			/*memset(bone.name, 0, sizeof(bone.name));
@@ -53,21 +63,88 @@ void LOLExporter::ImportSkeleton( const char* sklFilename )
 				}
 			}
 			fout.write((const char*)&bone, sizeof(Bone));*/
-
+			//bone.scale = 1.0f;
 			printf("Bone: %s, Parent: %s\n", bone.name, (bone.parent != -1 ) ? mBones[bone.parent].name : "");
 		}
 
-		/*int boneSize = sizeof(Bone);
-		long int currPos = ftell(pFile);
-		fseek(pFile, 0, SEEK_END);
-		long int left = ftell(pFile) - currPos;*/
+		int32_t id;
+		while ( fread_s(&id, 4, 4, 1, pFile) )
+		{
+			printf("boneid: %d\n", id);
+		}
+
+		//int boneSize = sizeof(Bone);
+		//long int currPos = ftell(pFile);
+		//fseek(pFile, 0, SEEK_END);
+		//long int left = ftell(pFile) - currPos;
 	}
 	else
 	{
 		printf("Unsupported skeleton format!\n");
 	}
 	
-	fclose(pFile);
+
+	// if exit multiple bone with no parent, add a dummy root node 
+	uint32_t numRootBones = std::count_if(mBones.begin(), mBones.end(), [&](const LOLBone& bone) { return bone.parent == -1;} );
+	if (numRootBones > 1)
+	{
+		printf("\nAdd dummy root node!\n\n");
+
+		LOLBone dummyRoot;
+		sprintf_s(dummyRoot.name, "dummyRoot");
+		
+		dummyRoot.parent = -1;
+
+		dummyRoot.matrix[0][0] = 1.0f; dummyRoot.matrix[0][1] = 0.0f; dummyRoot.matrix[0][2] = 0.0f; dummyRoot.matrix[0][3] = 0.0f;
+		dummyRoot.matrix[1][0] = 0.0f; dummyRoot.matrix[1][1] = 1.0f; dummyRoot.matrix[1][2] = 0.0f; dummyRoot.matrix[1][3] = 0.0f;
+		dummyRoot.matrix[2][0] = 0.0f; dummyRoot.matrix[2][1] = 0.0f; dummyRoot.matrix[2][2] = 1.0f; dummyRoot.matrix[2][3] = 0.0f;
+	
+		dummyRoot.scale = mBones.front().scale;
+
+		mBones.insert(mBones.begin(), dummyRoot);
+
+		for (size_t i = 1; i < mBones.size(); ++i)
+		{
+			LOLBone& bone = mBones[i];
+			mBones[i].parent += 1;
+			printf("Bone: %s, Parent: %s\n", bone.name, (bone.parent != -1 ) ? mBones[bone.parent].name : "");
+		}
+
+		mDummyRootAdded = true;
+	}
+
+	printf("\nBuild Skeleton \n");
+	mSkeleton = std::make_shared<Skeleton>();
+	mSkeleton->AddBone(mBones[0].name, nullptr);
+	for (size_t i = 1; i < mBones.size(); ++i)
+	{
+		Bone* parent = mSkeleton->GetBone(mBones[mBones[i].parent].name);
+		Bone* newBone = mSkeleton->AddBone(mBones[i].name, parent);
+		
+		printf("Bone: %s, Parent: %s\n", newBone->GetName().c_str(), parent->GetName().c_str());
+	}
+
+	for (size_t i = 0; i < mSkeleton->GetNumBones(); ++i)
+	{
+		const LOLBone& bone = mBones[i];
+		Bone* engineBone = mSkeleton->GetBone(i);
+
+		float4x4 rotation(
+			bone.matrix[0][0], bone.matrix[0][1], bone.matrix[0][2], 0.0f,
+			bone.matrix[1][0], bone.matrix[1][1], bone.matrix[1][2], 0.0f,
+			bone.matrix[2][0], bone.matrix[2][1], bone.matrix[2][2], 0.0f,
+			0.0f,			   0.0f,			  0.0f,			     1.0f);
+
+		rotation = rotation.Transpose();
+		Quaternionf rotQuat = QuaternionFromRotationMatrix(rotation);
+
+		//engineBone->SetScale(float3(bone.scale, bone.scale, bone.scale));
+		engineBone->SetWorldPosition(float3(bone.matrix[0][3], bone.matrix[1][3], bone.matrix[2][3]));
+		engineBone->SetWorldRotation(rotQuat);
+	}
+
+	mOutputPath = sklFilename;
+	PathUtil::SplitPath(mOutputPath, mOutputPath, mMeshName, mAnimationName);
 }
 
 void LOLExporter::ImportMesh( const char* sknFilename )
@@ -133,6 +210,21 @@ void LOLExporter::ImportMesh( const char* sknFilename )
 		if ( vertex.texcoords[0] < 0.0f || vertex.texcoords[0] > 1.0f ||
 			 vertex.texcoords[1] < 0.0f || vertex.texcoords[1] > 1.0f )
 			 printf("Texcoords Index Out of Range!");
+	}
+
+	mMeshPartBounds.resize(mMaterials.size());
+	for ( size_t i = 0; i < mMaterials.size(); ++i )
+	{
+		BoundingBoxf meshPartBound = mMeshPartBounds[i];
+		const SkinModelMaterial& material = mMaterials[i];
+		for (int32_t j = material.startIndex; j < material.startIndex + material.numIndices; ++j)
+		{
+			uint16_t index = mSkinModelData.indices[j];
+			const SkinModelVertex& vertex = mSkinModelData.verteces[index];
+			meshPartBound.Merge(vertex.position);
+		}
+		
+		mMeshBound.Merge(meshPartBound);
 	}
 }
 
@@ -224,13 +316,12 @@ void LOLExporter::ImportAnimation( const char* animFilename )
 
 	static const char AninationFileType[] = "r3d2anmd";
 
-	SkinAnimationHeader header;
-	fread_s(&header, sizeof(SkinAnimationHeader), sizeof(SkinAnimationHeader), 1, pFile);
+	fread_s(&mAnimationHeader, sizeof(SkinAnimationHeader), sizeof(SkinAnimationHeader), 1, pFile);
 
-	if (strncmp(header.fileType, AninationFileType, 8) == 0)
+	if (strncmp(mAnimationHeader.fileType, AninationFileType, 8) == 0)
 	{
-		mAnimationClipData.mAnimationTracks.resize(header.numBones);
-		for (int32_t i = 0; i < header.numBones; ++i)
+		mAnimationClipData.mAnimationTracks.resize(mAnimationHeader.numBones);
+		for (int32_t i = 0; i < mAnimationHeader.numBones; ++i)
 		{
 			AnimationClipData::AnimationTrack& anmTrack = mAnimationClipData.mAnimationTracks[i];
 
@@ -244,10 +335,10 @@ void LOLExporter::ImportAnimation( const char* animFilename )
 			fread_s(&anmTrack.BoneName, 32, 32, 1, pFile);
 			fread_s(&anmTrack.BoneType, 4, 4, 1, pFile);
 
-			anmTrack.KeyFrames.resize(header.numFrames);
-			for (int32_t i = 0; i < header.numFrames; ++i)
+			anmTrack.KeyFrames.resize(mAnimationHeader.numFrames);
+			for (int32_t i = 0; i < mAnimationHeader.numFrames; ++i)
 			{
-				fread_s(&anmTrack.KeyFrames[0], sizeof(AnimationClipData::KeyFrame), sizeof(AnimationClipData::KeyFrame), 1, pFile);
+				fread_s(&anmTrack.KeyFrames[i], sizeof(AnimationClipData::KeyFrame), sizeof(AnimationClipData::KeyFrame), 1, pFile);
 			}
 		}
 	}
@@ -257,21 +348,179 @@ void LOLExporter::ImportAnimation( const char* animFilename )
 	}
 	
 	fclose(pFile);
+
+	String dummy;
+	PathUtil::SplitPath(animFilename, dummy, mAnimationName, dummy);
 }
 
 void LOLExporter::BuildAndSaveBinary()
 {
+	const uint32_t MeshId = ('M' << 24) | ('E' << 16) | ('S' << 8) | ('H');
 
+	FileStream stream;
+	stream.Open(mOutputPath + mMeshName + ".mesh", FILE_WRITE);
+
+	String objFile = mOutputPath + mMeshName + ".obj";
+	ExportObj(objFile.c_str());
+
+	// Write mesh id
+	stream.WriteUInt(MeshId);
+
+	// write mesh name
+	stream.WriteString(mMeshName);
+
+	// write mesh bounding box
+	stream.Write(&mMeshBound.Min, sizeof(float3));
+	stream.Write(&mMeshBound.Max, sizeof(float3));
+
+	// write mesh part count
+	stream.WriteUInt( mMaterials.size() );
+	stream.WriteUInt( mBones.size() );
+	stream.WriteUInt( 1 );
+	stream.WriteUInt( 1 );
+
+	// Write mesh part 
+	for (size_t mpi = 0; mpi < mMaterials.size(); ++mpi)
+	{
+		const SkinModelMaterial& meshPart = mMaterials[mpi];
+
+		// write sub mesh name
+		stream.WriteString("Dummy");	
+
+		String MaterialName = meshPart.name;
+		CorrectName(MaterialName);
+
+		// write material name
+		stream.WriteString(MaterialName + ".material.xml");
+		std::cout << "MaterialName: " << MaterialName << std::endl;
+
+		// write sub mesh bounding sphere
+		stream.Write(&mMeshPartBounds[mpi].Min, sizeof(float3));
+		stream.Write(&mMeshPartBounds[mpi].Max, sizeof(float3));
+
+		stream.WriteUInt(0);
+		stream.WriteUInt(0);
+
+		// write vertex count and vertex size
+		stream.WriteUInt(meshPart.startIndex);
+		stream.WriteUInt(meshPart.numIndices);
+		stream.WriteInt(0);
+	}
+
+	// Write skeleton
+	for (size_t iBone = 0; iBone < mBones.size(); ++iBone)
+	{
+		Bone* bone = mSkeleton->GetBone(iBone);
+		Bone* parentBone = static_cast<Bone*>(bone->GetParent());
+
+		float3 pos = bone->GetPosition();
+		float3 scale = bone->GetScale();
+		Quaternionf rot = bone->GetRotation();
+
+		stream.WriteString(bone->GetName());
+		stream.WriteInt(parentBone ? parentBone->GetBoneIndex() : -1);
+
+		stream.Write(&pos, sizeof(float3));
+		stream.Write(&rot, sizeof(Quaternionf));
+		stream.Write(&scale, sizeof(float3));
+	}
+
+	uint32_t offset = 0;
+	std::vector<VertexElement> vertexElements;
+	vertexElements.push_back( VertexElement(offset, VEF_Float3, VEU_Position, 0) ); offset += 12;
+	vertexElements.push_back( VertexElement(offset, VEF_Float4, VEU_BlendWeight, 0) );  offset += 16;
+	vertexElements.push_back( VertexElement(offset, VEF_UInt4, VEU_BlendIndices, 0) );  offset += 16;
+	vertexElements.push_back( VertexElement(offset, VEF_Float3, VEU_Normal, 0) );  offset += 12;
+	vertexElements.push_back( VertexElement(offset, VEF_Float2, VEU_TextureCoordinate, 0) );  offset += 8;
+
+
+	// Write vertex and index buffer
+	stream.WriteUInt(mSkinModelData.numVertices); // Vertex Count
+	stream.WriteUInt(vertexElements.size());   // Vertex Size
+	for (const VertexElement& ve : vertexElements)
+	{
+		stream.WriteUInt(ve.Offset);
+		stream.WriteUInt(ve.Type);
+		stream.WriteUInt(ve.Usage);
+		stream.WriteUShort(ve.UsageIndex);
+	}
+
+	int dummyRootNode = mDummyRootAdded ? 1 : 0;
+	for (const SkinModelVertex& vertex : mSkinModelData.verteces)
+	{
+		stream.Write(&vertex.position, sizeof(vertex.position));
+		stream.Write(&vertex.weights, sizeof(vertex.weights));
+		stream.WriteUInt(vertex.boneIndex[0] + dummyRootNode);
+		stream.WriteUInt(vertex.boneIndex[1] + dummyRootNode);
+		stream.WriteUInt(vertex.boneIndex[2] + dummyRootNode);
+		stream.WriteUInt(vertex.boneIndex[3] + dummyRootNode);
+		stream.Write(&vertex.normal, sizeof(vertex.normal));
+		stream.Write(&vertex.texcoords, sizeof(vertex.texcoords));
+	}
+
+	stream.WriteUInt(mSkinModelData.numIndices);
+	stream.WriteUInt(IBT_Bit16);
+	stream.Write(&mSkinModelData.indices[0], mSkinModelData.indices.size() * sizeof(uint16_t));
+	//if (0/*SwapWindOrder*/)
+	//{
+	//	for (size_t j = 0; j < mSkinModelData.indices.size() / 3; ++j)
+	//	{
+	//		stream.WriteUShort(mSkinModelData.indices[3*j+0]);
+	//		stream.WriteUShort(mSkinModelData.indices[3*j+2]);
+	//		stream.WriteUShort(mSkinModelData.indices[3*j+1]);
+	//	}
+	//}
+	//else
+	//{
+	//	for (size_t j = 0; j < mSkinModelData.indices.size(); ++j)
+	//		stream.WriteUShort(mSkinModelData.indices[j]);
+	//}
+
+	stream.Close();
+
+	String clipName = mAnimationName  + ".anim";
+
+	FileStream clipStream;
+	clipStream.Open(mOutputPath + clipName, FILE_WRITE);
+
+	double frameRate = 1.0 / mAnimationHeader.fps;
+	double Duration = frameRate * mAnimationClipData.mAnimationTracks.size();
+	clipStream.WriteFloat((float)Duration);
+	clipStream.WriteUInt(mAnimationClipData.mAnimationTracks.size());
+
+	for (const AnimationClipData::AnimationTrack& track : mAnimationClipData.mAnimationTracks)
+	{
+		// write track name
+		String trackName = track.BoneName;
+		clipStream.WriteString(trackName);
+		// write track key frame count
+		clipStream.WriteUInt(track.KeyFrames.size());
+
+		double keyTime = 0.0f;
+		const float3 scale(1, 1, 1);
+		for (const AnimationClipData::KeyFrame& key : track.KeyFrames)
+		{
+			// write key time
+			clipStream.WriteFloat((float)keyTime);
+			clipStream.Write(&key.Translation, sizeof(float3));
+			clipStream.Write(&key.Rotation, sizeof(Quaternionf));
+			clipStream.Write(&scale, sizeof(float3));
+
+			keyTime += frameRate;
+		}
+	}
+	
+	clipStream.Close();
 }
 
 int main()
 {
 	LOLExporter exporter;
 
-	exporter.ImportSkeleton("blitzcrank.skl");
-	exporter.ImportMesh("blitzcrank.skn");
-	exporter.ImportAnimation("blitzcrank_dance.anm");
-	exporter.ExportObj("blitzcrank_i.obj");
+	exporter.ImportSkeleton("blitzcrank_boxer.skl");
+	exporter.ImportMesh("blitzcrank_boxer.skn");
+	exporter.ImportAnimation("blitzcrank_boxer_dance.anm");
+	exporter.BuildAndSaveBinary();
 
 	return 1;
 }

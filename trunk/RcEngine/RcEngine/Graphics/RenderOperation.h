@@ -38,7 +38,7 @@ public:
 	uint32_t IndexStart;
 	uint32_t IndexCount;
 
-	//int32_t BaseVertex; // indices[i] + basevertex
+	int32_t BaseVertex; // indices[i] + basevertex
 
 	// Instance 
 	uint32_t NumInstances;

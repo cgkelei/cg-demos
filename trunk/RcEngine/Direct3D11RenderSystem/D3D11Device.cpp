@@ -304,7 +304,7 @@ void D3D11Device::DoDraw( const EffectTechnique* technique, const RenderOperatio
 				DeviceContextD3D11->DrawIndexed(
 					operation.IndexCount, 
 					operation.IndexStart,
-					0 /*operation.BaseVertex*/);
+					operation.BaseVertex);
 			}
 			else
 			{
@@ -312,7 +312,7 @@ void D3D11Device::DoDraw( const EffectTechnique* technique, const RenderOperatio
 					operation.IndexCount, 
 					operation.NumInstances,
 					operation.IndexStart,
-					0 /*operation.BaseVertex*/,
+					operation.BaseVertex,
 					0);
 			}
 

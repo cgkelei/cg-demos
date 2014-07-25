@@ -53,23 +53,17 @@ Bone* Skeleton::GetBone( uint32_t index ) const
 	return mBones[index];
 }
 
-shared_ptr<Skeleton> Skeleton::LoadFrom( Stream& source )
+shared_ptr<Skeleton> Skeleton::LoadFrom( Stream& source, uint32_t numBones )
 {
-	uint32_t numBones = source.ReadUInt();
-	
-	// no skeleton info
-	if (numBones == 0)
-		return nullptr;
-
 	shared_ptr<Skeleton> skeleton = std::make_shared<Skeleton>();
 	skeleton->mBones.resize(numBones);
 
 	for (uint32_t i = 0; i < numBones; ++i)
 	{
 		String boneName = source.ReadString();
-		String parentName = source.ReadString();
+		int32_t parentBoneIdx = source.ReadInt();
 
-		Bone* parent = parentName.empty() ? nullptr : skeleton->GetBone(parentName);
+		Bone* parent = (parentBoneIdx == -1) ? nullptr : skeleton->mBones[parentBoneIdx];
 		Bone* bone = new Bone(boneName, i, parent);
 
 		float3 bindPos;

@@ -105,7 +105,7 @@ void Mesh::LoadImpl()
 	// Read bones
 	if (numBones > 0)
 	{		
-		mSkeleton = Skeleton::LoadFrom(source);
+		mSkeleton = Skeleton::LoadFrom(source, numBones);
 	}
 	
 	// Read vertex buffers
@@ -224,11 +224,9 @@ void MeshPart::Load(  Stream& source )
 	mVertexBufferIndex = source.ReadInt();
 	mIndexBufferIndex = source.ReadInt();
 
-	mVertexStart = source.ReadUInt();
-	mVertexCount = source.ReadUInt();
-
 	mIndexStart = source.ReadUInt();
 	mIndexCount = source.ReadUInt();
+	mBaseVertex = source.ReadInt();
 	
 	mPrimitiveCount = mIndexCount / 3;
 }
@@ -254,6 +252,7 @@ void MeshPart::GetRenderOperation( RenderOperation& op, uint32_t lodIndex )
 		op.BindIndexStream(indexBuffer.Buffer, indexBuffer.IndexFormat);
 		op.SetIndexRange(mIndexStart, mIndexCount);
 		op.VertexStart = mVertexStart;
+		op.BaseVertex = mBaseVertex;
 	}
 	else
 	{

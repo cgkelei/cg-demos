@@ -4,6 +4,10 @@
 
 #include <vector>
 #include <cstdint>
+#include <Core/Prerequisites.h>
+#include <Math/BoundingBox.h>
+#include <Graphics/Skeleton.h>
+
 
 //Structure for header on skl files
 struct Header 
@@ -15,7 +19,7 @@ struct Header
 };
 
 //Structure for a bone in skl files
-struct Bone 
+struct LOLBone 
 {
 	char name[32];
 	int32_t parent;
@@ -104,10 +108,23 @@ public:
 
 private:
 
+	String mOutputPath;
+	String mAnimationName;
+	String mMeshName;
+
 	SkinModelData mSkinModelData;
-	AnimationClipData mAnimationClipData;
+
 	std::vector<SkinModelMaterial> mMaterials;
-	std::vector<Bone> mBones;
+
+	std::vector<RcEngine::BoundingBoxf> mMeshPartBounds;
+	RcEngine::BoundingBoxf mMeshBound;
+	
+	std::vector<LOLBone> mBones;
+	std::shared_ptr<RcEngine::Skeleton> mSkeleton;
+	bool mDummyRootAdded;
+
+	SkinAnimationHeader mAnimationHeader;
+	AnimationClipData mAnimationClipData;
 };
 
 #endif // LOLExporter_h__
