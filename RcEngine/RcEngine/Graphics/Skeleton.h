@@ -27,7 +27,7 @@ public:
 	shared_ptr<Skeleton> Clone();
 
 public:
-	static shared_ptr<Skeleton> LoadFrom( Stream& source );
+	static shared_ptr<Skeleton> LoadFrom( Stream& source, uint32_t numBones );
 
 private:
 	std::vector<Bone*> mBones;

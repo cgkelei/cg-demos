@@ -5,6 +5,7 @@
 #include <Core/Exception.h>
 #include <IO/FileSystem.h>
 #include <IO/FileStream.h>
+#include <IO/PathUtil.h>
 #include <Resource/ResourceManager.h>
 
 namespace RcEngine {
@@ -39,7 +40,7 @@ void AnimationClip::LoadImpl()
 	shared_ptr<Stream> clipStream = fileSystem.OpenStream(mResourceName, mGroup);
 	Stream& source = *clipStream;	
 
-	mClipName = source.ReadString(); 
+	mClipName = PathUtil::GetFileName(mResourceName);
 	mDuration = source.ReadFloat();
 
 	// read track count

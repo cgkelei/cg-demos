@@ -60,7 +60,6 @@ struct MaterialData
 class BoneWeights
 {
 public:
-
 	void AddBoneWeight(int nBoneIndex, float fBoneWeight);
 	void Validate();
 	void Normalize();
@@ -93,7 +92,6 @@ struct Vertex
 	if (lhs.value[i] < rhs.value[i]) return true;   \
 	if (rhs.value[i] < lhs.value[i]) return false;  \
 	}
-
 		CMP(Position, 3);
 		CMP(Normal, 3);
 		CMP(Tex0, 2);
@@ -128,9 +126,6 @@ struct MeshPartData
 	vector<uint32_t> Indices;
 	vector<Vertex> Vertices;
 	
-	uint32_t StartVertex;
-	uint32_t VertexCount;
-	
 	uint32_t StartIndex;
 	uint32_t IndexCount;
 	
@@ -139,7 +134,7 @@ struct MeshPartData
 	uint32_t VertexBufferIndex;
 	uint32_t IndexBufferIndex;
 
-	MeshPartData() : VertexFlags(0), StartVertex(0), StartIndex(0), BaseVertex(0), VertexCount(0), IndexCount(0) {}
+	MeshPartData() : VertexFlags(0), StartIndex(0), BaseVertex(0), IndexCount(0) {}
 };
 
 // Mesh Structure
@@ -148,6 +143,9 @@ struct MeshData
 	String Name;
 	BoundingBoxf Bound;
 
+	shared_ptr<Skeleton> Skeleton;
+
+	vector<IndexBufferType> IndexTypes; 
 	vector<vector<uint32_t> > Indices;
 	vector<vector<Vertex> > Vertices;
 
@@ -193,10 +191,10 @@ public:
 	void ProcessMesh(FbxNode* pNode);
 	void ProcessSubDiv(FbxNode* pNode);
 
-	void ProcessBoneWeights(FbxMesh* pMesh, std::vector<BoneWeights>& meshBoneWeights);
+	shared_ptr<Skeleton> ProcessBoneWeights(FbxMesh* pMesh, std::vector<BoneWeights>& meshBoneWeights);
 	void CalculateBindPose(Bone* bone, std::map<Bone*, FbxAMatrix>& bindPoseMap);
 	
-	void ProcessAnimation(FbxAnimStack* pStack, FbxNode* pNode, double fFrameRate, double fStart, double fStop);
+	void ProcessAnimation(const String& clipName, FbxNode* pNode, double fFrameRate, double fStart, double fStop);
 
 	void ProcessScene();
 	void CollectAnimations();
@@ -228,13 +226,19 @@ public:
 	String mAnimationName;
 	
 	unordered_map<String, FbxNode*> mBoneMap;
-
-	shared_ptr<Skeleton> mSkeleton;
+	
+	struct SkinAnimation
+	{
+		shared_ptr<Skeleton> Skeleton;
+		unordered_map<String, AnimationClipData> AnimationClips;
+	};
+	unordered_map<String, SkinAnimation > mSkeletonAnimMap;
 
 	vector<MaterialData> mMaterials;
-	vector<shared_ptr<MeshData> > mSceneMeshes;
-	unordered_map<String, AnimationClipData> mAnimations;
 
+	vector<shared_ptr<MeshData> > mSceneMeshes;
+	
+private:
 	FBXTransformer mFBXTransformer;
 };
 

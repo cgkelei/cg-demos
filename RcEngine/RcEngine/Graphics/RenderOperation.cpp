@@ -8,7 +8,8 @@ RenderOperation::RenderOperation()
 	  VertexStart(0),
 	  VertexCount(0),
 	  IndexStart(0),
-	  IndexCount(0)
+	  IndexCount(0),
+	  BaseVertex(0)
 {
 
 }

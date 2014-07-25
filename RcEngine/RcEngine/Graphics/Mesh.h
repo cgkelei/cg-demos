@@ -116,6 +116,8 @@ private:
 
 	uint32_t mVertexStart;
 	uint32_t mVertexCount;
+
+	int32_t mBaseVertex;
 	
 	uint32_t mPrimitiveCount; // Only support triangle
 };

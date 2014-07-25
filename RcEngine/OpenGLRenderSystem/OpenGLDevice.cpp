@@ -523,7 +523,7 @@ void OpenGLDevice::DoDraw( const EffectTechnique* technique, const RenderOperati
 					operation.IndexCount, 
 					indexTypeOGL,
 					BUFFER_OFFSET(indexOffset),
-					0 /*operation.BaseVertex*/);
+					operation.BaseVertex);
 			}
 			else
 			{
@@ -533,7 +533,7 @@ void OpenGLDevice::DoDraw( const EffectTechnique* technique, const RenderOperati
 					indexTypeOGL, 
 					BUFFER_OFFSET(indexOffset),
 					operation.NumInstances,
-					0 /*operation.BaseVertex*/);
+					operation.BaseVertex);
 			}
 
 			pass->EndPass();
